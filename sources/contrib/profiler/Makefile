@@ -64,3 +64,15 @@ scratch:
 
 .mlp.ml:
 	$(CPP) -Dunix $< > $@
+
+depend:
+	mv Makefile Makefile.BAK; \
+	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.BAK; \
+         ../../src/tools/camldep *.mli *.ml) > Makefile
+
+### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
+### DO NOT DELETE THIS LINE
+camlpro.zo: profiler.zi 
+io.zo: io.zi profiler.zi 
+prodump.zo: io.zi 
+profiler.zo: profiler.zi 
