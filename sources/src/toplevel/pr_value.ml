@@ -229,6 +229,6 @@ and print_vect depth obj ty_arg =
 let print_value obj ty =
     printer_steps := !max_printer_steps;
     try print_val 0 !max_printer_depth obj ty
-    with x -> print_newline(); flush std_out; flush std_err; raise x
+    with x -> print_newline(); flush std_err; raise x
 ;;
 
