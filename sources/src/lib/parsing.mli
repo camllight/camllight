@@ -25,6 +25,9 @@ value symbol_start : unit -> int
            programs. *)
 ;;
 
+exception Parse_error;;
+        (* Raised when a parser encounters a syntax error. *)
+
 (*--*)
 
 (* The following definitions are used by the generated parsers only.
@@ -45,8 +48,10 @@ type parse_tables =
     check : string }
 ;;
 
-exception yyexit of obj
-      and Parse_error of (obj -> bool);;
+exception yyexit of obj;;
 
 value yyparse : parse_tables -> int -> (lexbuf -> 'a) -> lexbuf -> 'b
-  and peek_val : int -> 'a;;
+  and peek_val : int -> 'a
+  and is_current_lookahead: 'a -> bool
+;;
+
