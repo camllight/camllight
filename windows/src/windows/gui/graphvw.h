@@ -12,7 +12,7 @@ protected:
 
 // Attributes
 public:
-	CDC			*m_DC, *m_compDC;
+	CClientDC	*m_DC, *m_compDC;
 	CBitmap		*m_bmp;
 	CBrush		*m_brush;
 	CPen		*m_pen;

@@ -80,6 +80,7 @@ BOOL CCAMLWinApp::InitInstance()
 	SetDialogBkColor();        // Set dialog background color to gray
 //	LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 	LoadSettings();
+	SetFont();
 	                                     
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views.
@@ -175,7 +176,6 @@ BOOL CCAMLWinApp::InitInstance()
 	
 	CAMLInput->SetFocus();
 
-	SetFont();
 	CAMLInput->SetFont(m_Font);	
 	CAMLPrinter->SetFont(m_Font);	
 	CAMLHistory->SetFont(m_Font);	
@@ -449,6 +449,9 @@ int CCAMLWinApp::Run()
 #endif
 		return 0;
 	}else{
+		_close(0);
+		_close(1);
+		_close(2);
 		free(m_JmpBuf);
 		return ExitInstance();
 	}
