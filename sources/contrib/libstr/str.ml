@@ -1,7 +1,6 @@
 #open "istr";;
 
-let string_before s n =
-  if n == 0 then s else sub_string s 0 n;;
+let string_before s n = sub_string s 0 n;;
 
 let string_after s n = sub_string s n (string_length s - n);;
 
