@@ -16,6 +16,7 @@
 #include "mlvalues.h"
 #include "signals.h"
 #include "stacks.h"
+#include "sys.h"
 #ifdef HAS_UI
 #include "ui.h"
 #endif
@@ -52,22 +53,24 @@ char * error_message()
 #endif /* HAS_STRERROR */
 
 void sys_error(arg)
-     char * arg;
+     value arg;
 {
   char * err = error_message();
-  int err_len = strlen(err);
-  int arg_len;
   value str;
-
-  if (arg == NULL) {
-    str = alloc_string(err_len);
-    bcopy(err, &Byte(str, 0), err_len);
+  
+  if (arg == SYS_ERROR_NO_ARG) {
+    str = copy_string(err);
   } else {
-    arg_len = strlen(arg);
+    int err_len = strlen(err);
+    int arg_len = string_length(arg);
+    Push_roots(r, 1);
+    r[0] = arg;
     str = alloc_string(arg_len + 2 + err_len);
-    bcopy(arg, &Byte(str, 0), arg_len);
+    arg = r[0];
+    bcopy(String_val(arg), &Byte(str, 0), arg_len);
     bcopy(": ", &Byte(str, arg_len), 2);
     bcopy(err, &Byte(str, arg_len + 2), err_len);
+    Pop_roots();
   }
   raise_with_arg(SYS_ERROR_EXN, str);
 }
@@ -115,14 +118,14 @@ value sys_open(path, flags, perm) /* ML */
   ret = open(String_val(path), convert_flag_list(flags, sys_open_flags),
              Int_val(perm));
 #endif
-  if (ret == -1) sys_error(String_val(path));
+  if (ret == -1) sys_error(path);
   return Val_long(ret);
 }
 
 value sys_close(fd)             /* ML */
      value fd;
 {
-  if (close(Int_val(fd)) != 0) sys_error(NULL);
+  if (close(Int_val(fd)) != 0) sys_error(SYS_ERROR_NO_ARG);
   return Atom(0);
 }
 
@@ -131,7 +134,7 @@ value sys_remove(name)          /* ML */
 {
   int ret;
   ret = unlink(String_val(name));
-  if (ret != 0) sys_error(String_val(name));
+  if (ret != 0) sys_error(name);
   return Atom(0);
 }
 
@@ -140,7 +143,7 @@ value sys_rename(oldname, newname) /* ML */
 {
 #ifdef HAS_RENAME
   if (rename(String_val(oldname), String_val(newname)) != 0) 
-    sys_error(String_val(oldname));
+    sys_error(oldname);
 #else
   invalid_argument("rename: not implemented");
 #endif
@@ -150,7 +153,7 @@ value sys_rename(oldname, newname) /* ML */
 value sys_chdir(dirname)        /* ML */
      value dirname;
 {
-  if (chdir(String_val(dirname)) != 0) sys_error(String_val(dirname));
+  if (chdir(String_val(dirname)) != 0) sys_error(dirname);
   return Atom(0);
 }
 
@@ -176,7 +179,7 @@ value sys_system_command(command)   /* ML */
   return 0;  /* not reached */
 #else
   int retcode = system(String_val(command));
-  if (retcode == -1) sys_error(String_val(command));
+  if (retcode == -1) sys_error(command);
   return Val_int(retcode);
 #endif
 }
