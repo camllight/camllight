@@ -10,7 +10,7 @@ RANLIB = ranlib
 LIB = libbignum.a
 OBJECT = o/KerN.o o/bnInit.o o/bnMult.o o/bnDivide.o o/bnCmp.o o/bzf.o o/bz.o 
 KERNH = h/BigNum.h 
-CFLAGS = -c -I./h -g -DCAML_LIGHT
+CFLAGS = -c -I./h -O -DCAML_LIGHT
 LDFLAGS =
 
 # extra entries:

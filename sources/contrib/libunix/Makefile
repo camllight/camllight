@@ -158,6 +158,7 @@ unlink.o : unlink.c unix.h
 utimes.o : utimes.c unix.h 
 wait.o : wait.c unix.h 
 waitopt.o : waitopt.c unix.h 
+waitpid.o : waitpid.c unix.h 
 write.o : write.c unix.h 
 iunix.zi: unix.zi 
 unix.zo: unix.zi iunix.zi 

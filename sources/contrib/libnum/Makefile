@@ -86,7 +86,6 @@ big_int.zo: big_int.zi int_misc.zi nat.zi
 int_misc.zo: int_misc.zi 
 nat.zo: nat.zi int_misc.zi 
 num.zo: num.zi int_misc.zi nat.zi big_int.zi ratio.zi arith_flags.zi 
-num_equal.zo: num_equal.zi num.zi inum_equal.zi 
 ratio.zo: ratio.zi string_misc.zi int_misc.zi nat.zi big_int.zi \
     arith_flags.zi 
 string_misc.zo: string_misc.zi 
