@@ -4,9 +4,9 @@
    
 type big_int;;
 
-value create_big_int : int -> fnat__nat -> big_int
+value create_big_int : int -> nat__nat -> big_int
   and sign_big_int : big_int -> int
-  and abs_value_big_int : big_int -> fnat__nat
+  and abs_value_big_int : big_int -> nat__nat
   and zero_big_int : big_int
   and unit_big_int : big_int
   and num_digits_big_int : big_int -> int
@@ -34,8 +34,8 @@ value create_big_int : int -> fnat__nat -> big_int
   and gcd_big_int : big_int -> big_int -> big_int
   and int_of_big_int : big_int -> int
   and is_int_big_int : big_int -> bool
-  and nat_of_big_int : big_int -> fnat__nat
-  and big_int_of_nat : fnat__nat -> big_int
+  and nat_of_big_int : big_int -> nat__nat
+  and big_int_of_nat : nat__nat -> big_int
   and string_of_big_int : big_int -> string
   and big_int_of_string : string -> big_int
   and float_of_big_int : big_int -> float

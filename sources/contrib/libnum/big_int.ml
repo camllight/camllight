@@ -14,7 +14,7 @@
 
 type big_int = 
     { Sign : int; 
-      Abs_Value : fnat__nat }
+      Abs_Value : nat__nat }
 ;;
 
 (* Accessing Sign and Absolute value fields of a big_int *)

@@ -102,8 +102,8 @@ value prefix +/ : num -> num -> num
 
   and int_of_num : num -> int
   and num_of_int : int -> num
-  and nat_of_num : num -> fnat__nat
-  and num_of_nat : fnat__nat -> num
+  and nat_of_num : num -> nat__nat
+  and num_of_nat : nat__nat -> num
   and num_of_big_int : big_int -> num
   and big_int_of_num : num -> big_int
   and ratio_of_num : num -> ratio
