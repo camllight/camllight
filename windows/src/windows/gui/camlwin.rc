@@ -449,9 +449,9 @@ CAPTION "About CAML for Windows"
 FONT 8, "MS Sans Serif"
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,13,37,18,20
-    LTEXT           "The Caml Light system, release 0.72, for Windows",
+    LTEXT           "The Caml Light system, release 0.73, for Windows",
                     IDC_STATIC,51,11,173,8
-    LTEXT           "Copyright © 1996",IDC_STATIC,99,46,110,8
+    LTEXT           "Copyright © 1997",IDC_STATIC,99,46,110,8
     DEFPUSHBUTTON   "OK",IDOK,106,78,32,14,WS_GROUP
     LTEXT           "Windows interface: 1.2",IDC_STATIC,91,24,122,8
     LTEXT           "Institut National de Recherche en Informatique et Automatique",
