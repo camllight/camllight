@@ -80,7 +80,7 @@ let access_stream (* env *) =
   translate_access "%stream" (* env *)
 ;;
 
-let translate_parser translate_expr loc init_env case_list =
+let translate_parser translate_expr loc init_env case_list stream_type =
 
   let rec transl_inner env (patl, act) =
     match patl with
@@ -104,7 +104,7 @@ let translate_parser translate_expr loc init_env case_list =
                  [[pat], add_lets(transl_inner new_env (rest,act))])
     | Zstreampat id :: rest ->
         Llet([access_stream env],
-             transl_inner (Tenv([id, Path_root], env)) (rest,act)) in
+             transl_inner (Tenv([var_root id stream_type], env)) (rest,act)) in
 
   let rec transl_top env parsing =
     match parsing with
@@ -153,7 +153,8 @@ let translate_parser translate_expr loc init_env case_list =
             transl_top (Treserved env) rest)
     | (Zstreampat id :: spatl, act) :: _ ->
         Llet([access_stream env],
-             transl_inner (Tenv([id, Path_root], env)) (spatl, act)) in
-
-  Lfunction(transl_top (Tenv(["%stream", Path_root], init_env)) case_list)
+             transl_inner (Tenv([var_root id stream_type], env)) (spatl, act))
+  in
+    Lfunction(transl_top (Tenv([var_root "%stream" stream_type], init_env))
+                         case_list)
 ;;

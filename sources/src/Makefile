@@ -1,17 +1,18 @@
 ### Configuration section
 
 # Which C compiler to use.
-# Performance is generally improved if you use gcc 2.x instead of cc.
-# gcc 1.x also gives better results than cc on 680x0 or 80386 based machines.
-CC=gcc
+# Performance is often improved if you use gcc 2.x instead of cc.
+# Known exceptions: cc is better for the MIPS and Alpha processors.
+CC=cc
 
 # Additional options to $(CC).
-# Add -DANSI if your compiler is ANSI C compliant (e.g. gcc)
-OPTS=-DANSI
+# If you are using gcc, add -fno-defer-pop.
+# This option circumvents a gcc bug on some platforms (680x0, 80386).
+OPTS=#-fno-defer-pop
 
 # How to call the C preprocessor on a file that does not have the .c extension.
 # That's /lib/cpp on most machines, sometimes /usr/bin/cpp,
-# /usr/ccs/lib/cpp under Solaris.
+# and /usr/ccs/lib/cpp under Solaris.
 # The -P option suppresses the generation of "# linenum" directives,
 # which are not understood by Caml Light.
 CPP=/lib/cpp -P
@@ -49,10 +50,10 @@ world:
 	cp yacc/camlyacc .
 	cd lib; make CPP="$(CPP)" all
 	cd compiler; make CPP="$(CPP)" all
-	cd linker; make all
-	cd librar; make all
-	cd lex; make all
-	cd toplevel; make all
+	cd linker; make CPP="$(CPP)" all
+	cd librar; make CPP="$(CPP)" all
+	cd lex; make CPP="$(CPP)" all
+	cd toplevel; make CPP="$(CPP)" all
 	cd launch; make LIBDIR=$(LIBDIR) BINDIR=$(BINDIR) \
                            CC="$(CC)" OPTS="$(OPTS)" all
 	@ echo "Let's test quickly the toplevel system..."
@@ -72,16 +73,15 @@ backup:
 # Make the newly compiled compiler the current compiler
 promote:
 	cp compiler/camlcomp linker/camllink librar/camllibr lex/camllex .
-	- cp toplevel/camltop .
 
 # Recompile all Caml code from scratch
 again:
 	cd lib; make CPP="$(CPP)" clean all
 	cd compiler; make CPP="$(CPP)" clean all
-	cd linker; make clean all
-	cd librar; make clean all
-	cd lex; make clean all
-	cd toplevel; make clean all
+	cd linker; make CPP="$(CPP)" clean all
+	cd librar; make CPP="$(CPP)" clean all
+	cd lex; make CPP="$(CPP)" clean all
+	cd toplevel; make CPP="$(CPP)" clean all
 
 # Compare the current compiler with the newly compiled one
 compare:
@@ -89,7 +89,6 @@ compare:
         if cmp camlcomp compiler/camlcomp \
         && cmp camllink linker/camllink \
         && cmp camllibr librar/camllibr \
-        && cmp camltop toplevel/camltop \
         && cmp camllex lex/camllex; \
         then echo "The Caml Light system has successfully recompiled itself.";\
         else echo "Hmph. Better do one more bootstrapping cycle."; \

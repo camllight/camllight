@@ -3,7 +3,6 @@
 #open "misc";;
 #open "const";;
 #open "globals";;
-#open "errors";;
 
 (* Informations associated with module names *)
 
@@ -50,9 +49,7 @@ let new_module nm =
 
 (* To load an interface from a file *)
 
-let use_extended_zi = ref false;;
-
-let read_module filename =
+let read_module basename filename =
   let ic = open_in_bin filename in
   try
     let md = (input_value ic : module) in
@@ -61,17 +58,24 @@ let read_module filename =
     md
   with End_of_file | Failure _ ->
     close_in ic;
-    prerr_begline " Corrupted compiled interface file ";
-    prerr_endline filename;
+    printf__eprintf "Corrupted compiled interface file %s.\n\
+                     Please recompile %s.mli or %s.ml first.\n"
+      filename basename basename;
     raise Toplevel
 ;;
 
+let use_extended_interfaces = ref false;;
+
 let load_module name =
-  let fullname = find_in_path (name ^ ".zi") in
-  let filename =
-    if !use_extended_zi & file_exists (fullname ^ "x")
-    then fullname ^ "x" else fullname in
-  read_module filename
+  try
+    let fullname = find_in_path (name ^ ".zi") in
+    let extname = fullname ^ "x" in
+    read_module name
+      (if !use_extended_interfaces & file_exists extname
+       then extname else fullname)
+  with Cannot_find_file _ ->
+    printf__eprintf "Cannot find the compiled interface file %s.zi.\n" name;
+    raise Toplevel
 ;;
 
 (* To find an interface by its name *)

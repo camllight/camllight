@@ -5,7 +5,7 @@
 #open "globals";;
 #open "modules";;
 #open "types";;
-#open "ty_error";;
+#open "error";;
 #open "hashtbl";;
 #open "ty_decl";;
 

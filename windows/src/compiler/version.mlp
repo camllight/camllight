@@ -1,0 +1,5 @@
+#include "../version.h"
+
+let print_banner() =
+  printf__eprintf "The Caml Light compiler, version %d.%d\n" MAJOR MINOR
+;;

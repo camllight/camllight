@@ -1,9 +1,16 @@
 #open "parser";;
 
-exception Lexical_error of string * int * int
-;;
+type lexical_error =
+    Illegal_character
+  | Unterminated_comment
+  | Bad_char_constant
+  | No_comment_start_in_string
+  | No_comment_end_in_string
+  | Unterminated_string;;
 
-value Main: lexing__lexbuf -> token
+exception Lexical_error of lexical_error * int * int;;
+
+value main: lexing__lexbuf -> token
   and add_infix: string -> unit
   and remove_infix: string -> unit
 ;;

@@ -121,9 +121,9 @@ let saved_string_start = ref 0;;
 #define ACCENTED `\128`-`\154` `\160`-`\165`
 #endif
 
-rule Main = parse
-    [` ` `\010` `\013` `\009` `\026` `\012`] +
-      { Main lexbuf }
+rule main = parse
+    [` ` `\010` `\013` `\009` `\012`] +
+      { main lexbuf }
   | [`A`-`Z` `a`-`z` ACCENTED ]
     ( `_` ? [`A`-`Z` `a`-`z` ACCENTED `'` (*'*) `0`-`9` ] ) *
       { let s = get_lexeme lexbuf in
@@ -142,22 +142,24 @@ rule Main = parse
       { reset_string_buffer();
         (* Start of token is start of string. *)
         saved_string_start := lexbuf.lex_start_pos;
-        String lexbuf;
+        string lexbuf;
         lexbuf.lex_start_pos <- !saved_string_start;
         STRING (get_stored_string()) }
   | "`"
-      { CHAR (Char lexbuf) }
+      { CHAR (char lexbuf) }
   | "(*"
-      { comment_depth := 1; Comment lexbuf; Main lexbuf }
+      { comment_depth := 1; comment lexbuf; main lexbuf }
   | "#" { SHARP }
   | "!" { BANG }
   | "!=" { COMPARISON "!=" }
   | "&" { AMPERSAND }
+  | "&&" { AMPERAMPER }
   | "'" { QUOTE }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "*" { STAR }
   | "*." { MULTIPLICATIVE "*." }
+  | "**" { EXPONENTIATION "**" }
   | "+" { ADDITIVE "+" }
   | "+." { ADDITIVE "+." }
   | "," { COMMA }
@@ -167,6 +169,7 @@ rule Main = parse
   | "." { DOT }
   | ".." { DOTDOT }
   | ".(" { DOTLPAREN }
+  | ".[" { DOTLBRACKET }
   | "/" { MULTIPLICATIVE "/" }
   | "/." { MULTIPLICATIVE "/." }
   | ":" { COLON }
@@ -199,36 +202,26 @@ rule Main = parse
   | "__" { UNDERUNDER }
   | "{" { LBRACE }
   | "|" { BAR }
+  | "||" { BARBAR }
   | "|]" { BARRBRACKET }
   | "}" { RBRACE }
   | eof { EOF }
   | _
-      { raise (Lexical_error("illegal character",
+      { raise (Lexical_error(Illegal_character,
                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
 
-and Comment = parse
+and comment = parse
     "(*"
-      { comment_depth := succ !comment_depth; Comment lexbuf }
+      { comment_depth := succ !comment_depth; comment lexbuf }
   | "*)"
       { comment_depth := pred !comment_depth;
-        if !comment_depth > 0 then Comment lexbuf }
-  | "\""
-      { reset_string_buffer();
-        String lexbuf;
-        reset_string_buffer();
-        Comment lexbuf }
-  | "`" [^ `\\` `\``] "`"
-      { Comment lexbuf }
-  | "`" `\\` [`\\` `\`` `n` `t` `b` `r`] "`"
-      { Comment lexbuf }
-  | "`" `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`] "`"
-      { Comment lexbuf }
+        if !comment_depth > 0 then comment lexbuf }
   | eof
-      { raise (Lexical_error("comment not terminated", -1, -1)) }
+      { raise (Lexical_error(Unterminated_comment, -1, -1)) }
   | _
-      { Comment lexbuf }
+      { comment lexbuf }
 
-and Char = parse
+and char = parse
     [^ `\\` `\``] "`"
       { get_lexeme_char lexbuf 0 }
   | `\\` [`\\` `\`` `n` `t` `b` `r`] "`"
@@ -236,23 +229,29 @@ and Char = parse
   | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`] "`"
       { char_for_decimal_code lexbuf 1 }
   | _
-      { raise (Lexical_error("bad character constant",
+      { raise (Lexical_error(Bad_char_constant,
                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
 
-and String = parse
+and string = parse
     `"`
       { () }
   | `\\` [` ` `\010` `\013` `\009` `\026` `\012`] +
-      { String lexbuf }
-  | `\\` [`\\` `"` `n` `t` `b` `r`]
+      { string lexbuf }
+  | `\\` [`\\` `"` `*` `)` `n` `t` `b` `r`]
       { store_string_char(char_for_backslash(get_lexeme_char lexbuf 1));
-        String lexbuf }
+        string lexbuf }
   | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`]
       { store_string_char(char_for_decimal_code lexbuf 1);
-         String lexbuf }
+         string lexbuf }
+  | "(*"
+      { raise (Lexical_error(No_comment_start_in_string,
+                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
+  | "*)"
+      { raise (Lexical_error(No_comment_end_in_string,
+                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
   | eof
-      { raise (Lexical_error("string not terminated", -1, -1)) }
+      { raise (Lexical_error(Unterminated_string, -1, -1)) }
   | _
       { store_string_char(get_lexeme_char lexbuf 0);
-        String lexbuf }
+        string lexbuf }
 ;;
