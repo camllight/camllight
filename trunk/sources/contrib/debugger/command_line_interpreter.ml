@@ -858,9 +858,9 @@ It can be either :
 "name of the socket used by communications debugger-runtime.";
      "history", integer_variable false history__history_size,
 "history size.";
-     "print_depth", integer_variable false printer_depth,
+     "print_depth", integer_variable false max_printer_depth,
 "maximal depth for printing of values.";
-     "print_length", integer_variable false printer_steps,
+     "print_length", integer_variable false max_printer_steps,
 "maximal number of value nodes printed."];
   info_list :=
     (* info name, function, help *)
