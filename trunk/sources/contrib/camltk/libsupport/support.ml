@@ -142,11 +142,46 @@ let register_callback f =
 
 (* Other builtin types and utilities *)
 (* The CAMLtoTKstring converter *)
-let quote_string x =
-  "\"" ^ x ^ "\""
+(* cannot use "" in Tcl, since []/$ are still substituted inside *) 
+
+let cindex p s start = find start
+  where rec find i =
+    if i >= string_length s 
+    then raise Not_found
+    else if p (nth_char s i) then i 
+    else find (i+1) 
 ;;
 
-(* strings assumed to be atomic (no space) *)
+(* If somebody can tell me what i should do with \, I'll appreciate *)
+let must_quote c = 
+    c == `[` or c == `]` or c == `$`
+;;
+
+let tcl_string_for_read s =
+  let s = string_for_read s in
+  let rec sfr cur res =
+      try
+      	let n = cindex must_quote s cur in
+	let repl = match nth_char s n with
+	            `[` -> "\["
+		  | `]` -> "\]"
+		  | `$` -> "\$" in
+	let res' = res ^ (sub_string s cur (n-cur)) ^ repl in
+	  sfr (succ n) res'
+      with Not_found ->
+      	res ^ (sub_string s cur (string_length s - cur)) in
+  sfr 0 ""
+;;
+
+let quote_string x =
+  "\"" ^ (tcl_string_for_read x) ^ "\""
+;;
+
+
+
+
+
+(* strings assumed to be atomic (no space, no special char) *)
 type symbol == string
 ;;
 
