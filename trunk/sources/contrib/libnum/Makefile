@@ -69,7 +69,6 @@ nums.zo: $(ZOFILES)
 	@chmod a-w $@
 
 int_misc.ml: int_misc.mlp
-nat.ml: nat.mlp
 nat.o: nat.h
 
 depend: nat.ml int_misc.ml

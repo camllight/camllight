@@ -595,11 +595,11 @@ let round_futur_last_digit s off_set length =
    par le facteur de conversion correspondant: 32 * log 2 / log 10
    (environ 9.63295986125, qu'on obtient par division de 963295986 par
    100000000).
-   On augmente la portabilité en introduisant word_size.
+   On augmente la portabilité en introduisant length_of_digit.
  *)
 
 let exp_cv_factor_den, exp_cv_factor_num =
-  let exp_cv_factor = float_of_int word_size *. log 2.0 /. log 10.0 in
+  let exp_cv_factor = float_of_int length_of_digit *. log 2.0 /. log 10.0 in
   let denominator = 100000000.0 in
   let numerator =
    big_int_of_string
