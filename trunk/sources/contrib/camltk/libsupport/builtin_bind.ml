@@ -131,8 +131,8 @@ type EventInfo = {
   mutable Ev_State : string;
   mutable Ev_ValueMask : int;
   mutable Ev_Width : int;
-  mutable Ev_X : int;
-  mutable Ev_Y : int;
+  mutable Ev_MouseX : int;
+  mutable Ev_MouseY : int;
   mutable Ev_WidgetName : string;
   mutable Ev_Time : string;
   mutable Ev_OverrideRedirect : string;
@@ -146,8 +146,8 @@ type EventInfo = {
   mutable Ev_RootWindow : int;
   mutable Ev_SubWindow : int;
   mutable Ev_Type : int;
-  mutable Ev_XRoot : int;
-  mutable Ev_YRoot : int };;
+  mutable Ev_RootX : int;
+  mutable Ev_RootY : int };;
 
 
 type EventField =
@@ -194,8 +194,8 @@ let FillEventInfo ev = function
   | State 	-> ev.Ev_State 		<- GetTkToken !PipeTkCallB
   | ValueMask	-> ev.Ev_ValueMask 	<- int_of_string (GetTkToken !PipeTkCallB)
   | Width 	-> ev.Ev_Width 		<- int_of_string (GetTkToken !PipeTkCallB)
-  | MouseX 	-> ev.Ev_X 		<- int_of_string (GetTkToken !PipeTkCallB)
-  | MouseY 	-> ev.Ev_Y 		<- int_of_string (GetTkToken !PipeTkCallB)
+  | MouseX 	-> ev.Ev_MouseX 	<- int_of_string (GetTkToken !PipeTkCallB)
+  | MouseY 	-> ev.Ev_MouseY 	<- int_of_string (GetTkToken !PipeTkCallB)
   | WidgetName 	-> ev.Ev_WidgetName 	<- GetTkToken !PipeTkCallB
   | Time 	-> ev.Ev_Time  		<- GetTkToken !PipeTkCallB
   | OverrideRedirect -> ev.Ev_OverrideRedirect <- GetTkToken !PipeTkCallB
@@ -209,8 +209,8 @@ let FillEventInfo ev = function
   | RootWindow 	-> ev.Ev_RootWindow 	<- int_of_string (GetTkToken !PipeTkCallB)
   | SubWindow 	-> ev.Ev_SubWindow 	<- int_of_string (GetTkToken !PipeTkCallB)
   | Type 	-> ev.Ev_Type 		<- int_of_string (GetTkToken !PipeTkCallB)
-  | RootX 	-> ev.Ev_XRoot 		<- int_of_string (GetTkToken !PipeTkCallB)
-  | RootY 	-> ev.Ev_YRoot 		<- int_of_string (GetTkToken !PipeTkCallB);;
+  | RootX 	-> ev.Ev_RootX 		<- int_of_string (GetTkToken !PipeTkCallB)
+  | RootY 	-> ev.Ev_RootY 		<- int_of_string (GetTkToken !PipeTkCallB);;
 
 
 let WrapEventInfo f what =
@@ -226,8 +226,8 @@ let WrapEventInfo f what =
     Ev_State = "";
     Ev_ValueMask = 0;
     Ev_Width = 0;
-    Ev_X = 0;
-    Ev_Y = 0;
+    Ev_MouseX = 0;
+    Ev_MouseY = 0;
     Ev_WidgetName = "";
     Ev_Time = "";
     Ev_OverrideRedirect = "";
@@ -241,8 +241,8 @@ let WrapEventInfo f what =
     Ev_RootWindow = 0;
     Ev_SubWindow = 0;
     Ev_Type = 0;
-    Ev_XRoot = 0;
-    Ev_YRoot = 0 } in
+    Ev_RootX = 0;
+    Ev_RootY = 0 } in
      function () ->
        do_list (FillEventInfo ev) what;
        f ev
