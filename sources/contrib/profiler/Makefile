@@ -8,7 +8,7 @@ COMPFLAGS=-g -I ../../src/compiler
 LINKFLAGS=-g -I ../../src/compiler
 
 # Pieces of the compiler required for parsing
-COMPILEROBJS=misc.zo globals.zo location.zo syntax.zo modules.zo \
+COMPILEROBJS=misc.zo interntl.zo globals.zo location.zo syntax.zo modules.zo \
   builtins.zo types.zo pr_type.zo error.zo typing.zo par_aux.zo primdecl.zo \
   ty_decl.zo config.zo parser.zo lexer.zo ty_intf.zo
 
