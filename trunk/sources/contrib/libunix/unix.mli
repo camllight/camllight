@@ -528,6 +528,8 @@ type tm =
 value time : unit -> int = 1 "unix_time"
         (* Return the current time since 00:00:00 GMT, Jan. 1, 1970,
            in seconds. *)
+  and gettimeofday : unit -> float = 1 "unix_gettimeofday"
+        (* Same as [time], but with resolution better than 1 second. *)
   and gmtime : int -> tm = 1 "unix_gmtime"
         (* Convert a time in seconds, as returned by [time], into a date and
            a time. Assumes Greenwich meridian time zone. *)
