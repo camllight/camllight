@@ -8,6 +8,7 @@
 #open "lambda";;
 #open "prim";;
 #open "instruct";;
+#open "clauses";;
 
 (*  See Peyton-Jones, The Implementation of functional programming
     languages, chapter 5. *)
@@ -29,11 +30,13 @@ type pattern_matching =
 
 (* Simple pattern manipulations *)
 
-let make_path n (path::pathl) =
-  let rec make i =
-    if i >= n then pathl else Lprim(Pfield i, [path]) :: make (i+1)
-  in
-    make 0
+let make_path = fun
+  n (path::pathl) ->
+    let rec make i =
+      if i >= n then pathl else Lprim(Pfield i, [path]) :: make (i+1)
+    in
+      make 0
+| _ _ -> fatal_error "make_path"
 ;;
 
 let add_to_match (Matching(casel,pathl)) cas =
@@ -46,14 +49,16 @@ and make_constant_match = fun
 and make_tuple_match arity pathl =
   Matching([], make_path arity pathl)
 
-and make_construct_match cstr (path :: pathl as pathl0) cas =
-  match cstr.info.cs_kind with
+and make_construct_match = fun
+  cstr (path :: pathl as pathl0) cas ->
+  (match cstr.info.cs_kind with
     Constr_constant ->
       Matching([cas], pathl)
   | Constr_superfluous n ->
       Matching([cas], pathl0)
   | _ ->
-      Matching([cas], Lprim(Pfield 0, [path]) :: pathl)
+      Matching([cas], Lprim(Pfield 0, [path]) :: pathl))
+| _ _ _ -> fatal_error "make_construct_match"
 ;;
 
 (* Auxiliaries for factoring common tests *)
@@ -134,15 +139,18 @@ let divide_construct_matching (Matching(casel, pathl)) =
         [], Matching(casel, pathl)
 ;;
 
-let divide_var_matching (Matching(casel, (_ :: endpathl as pathl))) =
-  divide_rec casel where rec divide_rec casel =
-    match simpl_casel casel with
-      ({p_desc = (Zwildpat | Zvarpat _)} :: patl, action) :: rest ->
-        let vars, others = divide_rec rest in
-          add_to_match vars (patl, action),
-          others
-    | casel ->
-        Matching([], endpathl), Matching(casel, pathl)
+let divide_var_matching = function
+  Matching(casel, (_ :: endpathl as pathl)) ->
+    let rec divide_rec casel =
+      match simpl_casel casel with
+        ({p_desc = (Zwildpat | Zvarpat _)} :: patl, action) :: rest ->
+          let vars, others = divide_rec rest in
+            add_to_match vars (patl, action),
+            others
+      | casel ->
+          Matching([], endpathl), Matching(casel, pathl)
+    in divide_rec casel
+| _ -> fatal_error "divide_var_matching"
 ;;
 
 let divide_record_matching (Matching(casel, pathl)) =
@@ -231,53 +239,49 @@ let tristate_or = function
 let rec conquer_matching =
   let rec conquer_divided_matching = function
     [] ->
-      [], False, []
+      [], False
   | (key, matchref) :: rest ->
-      let lambda1, partial1, used1 = conquer_matching !matchref
-      and list2,   partial2, used2 = conquer_divided_matching rest in
+      let lambda1, partial1 = conquer_matching !matchref
+      and list2,   partial2 = conquer_divided_matching rest in
         (key, lambda1) :: list2,
-        tristate_or(partial1,partial2),
-        used1 @ used2
+        tristate_or(partial1,partial2)
   in function
     Matching([], _) ->
-      Lstaticfail, True, []
+      Lstaticfail, True
   | Matching(([], action) :: rest, _) ->
-      action, False, [action]
+      action, False
   | Matching(_, (path :: _)) as matching ->
       begin match upper_left_pattern matching with
         {p_desc = (Zwildpat | Zvarpat _)} ->
           let vars, rest = divide_var_matching matching in
-          let lambda1, partial1, used1 = conquer_matching vars
-          and lambda2, partial2, used2 = conquer_matching rest in
+          let lambda1, partial1 = conquer_matching vars
+          and lambda2, partial2 = conquer_matching rest in
             if partial1 == False then
-              lambda1, False, used1
+              lambda1, False
             else
 	      Lstatichandle(lambda1, lambda2),
-              (if partial2 == False then False else Maybe),
-              used1 @ used2
+              (if partial2 == False then False else Maybe)
       | {p_desc = Ztuplepat patl} ->
           conquer_matching (divide_tuple_matching (list_length patl) matching)
       | {p_desc = (Zconstruct0pat(_) | Zconstruct1pat(_,_))} ->
           let constrs, vars = divide_construct_matching matching in
-          let switchlst, partial1, used1 = conquer_divided_matching constrs
-          and lambda,    partial2, used2 = conquer_matching vars in
+          let switchlst, partial1 = conquer_divided_matching constrs
+          and lambda,    partial2 = conquer_matching vars in
           let span = get_span_of_matching matching
           and num_cstr = list_length constrs in
             if num_cstr == span & partial1 == False then
-              Lswitch(span, path, switchlst), False, used1
+              Lswitch(span, path, switchlst), False
             else
               Lstatichandle(Lswitch(span, path, switchlst), lambda),
               (if partial2 == False then False
                else if num_cstr < span & partial2 == True then True
-               else Maybe),
-              used1 @ used2
+               else Maybe)
       | {p_desc = Zconstantpat _} ->
           let constants, vars = divide_constant_matching matching in
-            let condlist1, _, used1 = conquer_divided_matching constants
-            and lambda2, partial2, used2 = conquer_matching vars in
+            let condlist1, _ = conquer_divided_matching constants
+            and lambda2, partial2 = conquer_matching vars in
               Lstatichandle(Lcond(path, condlist1), lambda2),
-              partial2,
-              used1 @ used2
+              partial2
       | {p_desc = Zrecordpat _} ->
           conquer_matching (divide_record_matching matching)
       | _ ->
@@ -298,15 +302,24 @@ let make_initial_matching = function
 
 (* The entry point *)
 
-let translate_matching failure_code loc casel =
+let translate_matching_hidden check_partial_match failure_code loc casel =
   let casel' =
-    map (fun (patl,l) -> (patl, share_lambda l)) casel in
-  let (lambda, partial, used) =
+    map (fun (patl,l) -> (patl, share_lambda l)) (check_unused casel) in
+  let (lambda, partial) =
     conquer_matching (make_initial_matching casel') in
-  if not for_all (fun (_, act) -> memq act used) casel' then
-    printf__eprintf "%lWarning: some cases are unused in this matching.\n"
-                    loc;
-  match partial with
+  if check_partial_match & partial_match casel then
+    Lstatichandle(lambda, failure_code true)
+  else
+    match partial with
       False -> lambda
-    |   _   -> Lstatichandle(lambda, failure_code partial)
+    | _     -> Lstatichandle (lambda, failure_code false)
+        (* produces dead code *)
+;;
+
+let translate_matching_check_failure failure_code loc casel =
+  translate_matching_hidden true failure_code loc casel
+;;
+
+let translate_matching failure_code loc casel =
+  translate_matching_hidden false failure_code loc casel
 ;;

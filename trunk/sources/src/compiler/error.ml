@@ -172,7 +172,7 @@ let partial_apply_warning loc =
 ;;
 
 let unused_cases_warning loc =
-  eprintf "%lWarning: some cases are unused in this matching.\n" loc;
+  eprintf "%lWarning: this matching case is unused.\n" loc;
   flush stderr
 ;;
 
