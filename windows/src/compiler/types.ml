@@ -105,7 +105,7 @@ and gen_type_list = function
 ;;
 
 let generalize_type ty =
-  gen_type ty; ()
+  let _ = gen_type ty in ()
 ;;
 
 (* To lower the level of all generalizable variables of a type,

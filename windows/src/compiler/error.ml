@@ -96,9 +96,17 @@ let expr_wrong_type_err exp actual_ty expected_ty =
   raise Toplevel
 ;;
 
+let not_unit_type_warning exp actual_ty =
+  eprintf "%aWarning: this expression has type %a,\n\
+           but is used with type unit.\n"
+    output_location exp.e_loc
+    output_one_type actual_ty;
+  flush stderr
+;;
+
 let application_of_non_function_err exp ty =
   begin try
-    filter_arrow ty;
+    let _ = filter_arrow ty in
     eprintf "%aThis function is applied to too many arguments.\n"
       output_location exp.e_loc
   with Unify ->

@@ -65,7 +65,7 @@ and action = parse
       reset_string_buffer();
       action lexbuf }
   | "`" 
-    { char lexbuf;
+    { let _ = char lexbuf in
       action lexbuf }
   | "(*" 
     { comment_depth := 1;
@@ -115,7 +115,7 @@ and comment = parse
       reset_string_buffer();
       comment lexbuf }
   | "`" 
-    { char lexbuf;
+    { let _ = char lexbuf in
       comment lexbuf }
   | eof 
     { raise(Lexical_error "unterminated comment") }

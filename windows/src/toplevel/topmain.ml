@@ -2,8 +2,6 @@
 
 #open "config";;
 #open "misc";;
-#open "modules";;
-#open "symtable";;
 #open "location";;
 #open "do_phr";;
 #open "compiler";;

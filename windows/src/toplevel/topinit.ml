@@ -4,9 +4,6 @@
 #open "misc";;
 #open "modules";;
 #open "symtable";;
-#open "location";;
-#open "do_phr";;
-#open "compiler";;
 #open "format";;
 
 let anonymous s =

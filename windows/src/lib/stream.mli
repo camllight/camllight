@@ -31,7 +31,7 @@ value stream_of_channel : in_channel -> char stream;;
   (* [stream_of_channel ic] returns the stream of characters read on
      channel [ic]. *)
 
-value do_stream : ('a -> 'b) -> 'a stream -> unit;;
+value do_stream : ('a -> unit) -> 'a stream -> unit;;
   (* [do_stream f s] scans the whole stream [s], applying the function [f]
      in turn to each terminal encountered *)
 

@@ -510,6 +510,7 @@ and type_let_decl env rec_flag pat_expr_list =
 and type_statement env expr =
   let ty = type_expr env expr in
   match (type_repr ty).typ_desc with
-    Tarrow(_,_) -> partial_apply_warning expr.e_loc
-  | _ -> ()
+  | Tarrow(_,_) -> partial_apply_warning expr.e_loc
+  | _ ->
+      if not (same_base_type ty type_unit) then not_unit_type_warning expr ty
 ;;

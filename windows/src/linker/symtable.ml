@@ -31,6 +31,9 @@ and remove_from_numtable nt key =
   hashtbl__remove nt.num_tbl key
 ;;
 
+let reserve_in_numtable nt key =
+  let _ = enter_in_numtable nt key in ();;
+
 (* Global variables *)
 
 let global_table =
@@ -57,10 +60,18 @@ let get_slot_for_variable qualid =
     raise Toplevel
 ;;
 
+let reserve_slot_for_variable qualid =
+ let _ = get_slot_for_variable qualid in ()
+;;
+
 let get_slot_for_defined_variable qualid =
   if !toplevel then
     add_rollback (fun () -> remove_from_numtable !global_table qualid);
   enter_in_numtable !global_table qualid
+;;
+
+let reserve_slot_for_defined_variable qualid =
+ let _ = get_slot_for_defined_variable qualid in ()
 ;;
 
 let get_slot_for_literal cst =
@@ -96,6 +107,10 @@ let get_num_of_exn (name, stamp) =
     c
 ;;
 
+let reserve_num_of_exn (name, stamp) =
+ let _ = get_num_of_exn (name, stamp) in ()
+;;
+
 let get_exn_of_num tag =
   if tag >= vect_length !tag_exn_table
   then unknown_exn_name
@@ -115,7 +130,7 @@ let c_prim_table = ref (new_numtable 1 : string numtable);;
 
 let set_c_primitives prim_vect =
   c_prim_table := new_numtable 31;
-  do_vect (enter_in_numtable !c_prim_table) prim_vect
+  do_vect (reserve_in_numtable !c_prim_table) prim_vect
 ;;
 
 let get_num_of_prim name =
@@ -157,10 +172,10 @@ let output_primitives oc =
 let reset_linker_tables () =
   global_table := new_numtable 263;
   literal_table := [];
-  do_list get_slot_for_defined_variable predef_variables;
+  do_list reserve_slot_for_defined_variable predef_variables;
   exn_tag_table := new_numtable 31;
   tag_exn_table := make_vect 50 unknown_exn_name;
-  do_list get_num_of_exn predef_exn;
+  do_list reserve_num_of_exn predef_exn;
   set_c_primitives prim_c__primitives_table
 ;;
 
