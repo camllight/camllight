@@ -445,7 +445,8 @@ widget canvas {
    function () move "move" (TagOrId,Units,Units)
    function (string) postscript "postscript" (option (postscript) list)
    function () postscript_file "postscript -file" (string,option(postscript) list)
-   function () raise "raise" (TagOrId, TagOrId)
+   # do not use raise !
+   function () raiseabove "raise" (TagOrId, TagOrId)
    function () raisetop "raise" (TagOrId)
    function () scale "scale" (TagOrId, Units, Units, float, float)
    function () scan_mark "scan mark" (int, int)
@@ -911,7 +912,7 @@ module pack {
 
 type BorderMode {
   BorderInside "inside"
-  BorderOutside "outide"
+  BorderOutside "outside"
   BorderIgnore "ignore"
 }
 
