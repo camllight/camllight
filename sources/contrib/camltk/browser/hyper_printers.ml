@@ -215,15 +215,18 @@ let print_exc_desc
 ;;
 
 (* Constructors *)
+(* print also result to nagivate to other constructors *)
 let print_constr_desc 
        {qualid = {qual=modname; id=sym};
-        info   = {cs_arg = ty; cs_mut=mut}}  =
+        info   = {cs_arg = ty; cs_res = ty'; cs_mut=mut}}  =
   reset_type_var_name ();
   begin match mut with
     Mutable -> print_string ("constructor "^sym^" of mutable ")
   | Notmutable -> print_string ("constructor "^sym^" of ")
   end;
   print_typ 0 ty;
+  print_string " : ";
+  print_typ 0 ty';
   print_string "\n;;\n"
 ;;
 
