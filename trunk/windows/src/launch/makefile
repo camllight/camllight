@@ -1,6 +1,7 @@
 CC=gcc
 CFLAGS=-O -DUSE_GCC
-SMALLCC=wcl /ms
+#SMALLCC=wcl /ms /Fe=
+SMALLCC=tcc -ms -e
 
 CAMLC=camlc.o driver.o
 CAML=caml.o driver.o
@@ -9,7 +10,7 @@ CAMLMKTOP=camlmkto.o driver.o
 all: header camlc.exe caml.exe camlmkto.exe
 
 header: camlexec.c
-	$(SMALLCC) /Fe=header. camlexec.c
+	$(SMALLCC)header. camlexec.c
 
 install:
 	copy header $(LIBDIR)
