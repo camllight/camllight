@@ -31,24 +31,6 @@ let rec gcd_int i1 i2 =
   if i2 == 0 then abs i1 else gcd_int i2 (i1 mod i2)
 ;;
 
-(* Computes the exponent of the biggest power of base in biggest_int *)
-let biggest_power base = 
- let rec bp p = function
- | 0 -> p - 1
- | n -> bp (p + 1) (n quo base) in
- bp 0 biggest_int;;
-
-(* Optimisation pour ne pas recalculer sans arrêt
-   les valeurs de cette fonction. *)
-let biggest_pow_map = make_vect 17 0;;
-
-let biggest_pow base =
- let v = biggest_pow_map.(base) in
- if v != 0 then v else begin
-  let v = biggest_power base in
-  biggest_pow_map.(base) <- v; v
- end;;
-
 (* 
    int_to_string place la représentation de l' 'entier int en base base 
    dans la chaine s en le rangeant de la fin indiquée par pos vers le 
@@ -91,28 +73,28 @@ let catenate before s off len after =
   ok_s end
 ;;
 
+let i_size = length_of_int + 2;;
+let i_string = create_string i_size;;
+
 let sys_string_of_int base before i after =
+  if base = 10 then 
+   let i_string = string_of_int i in
+  catenate before i_string 0 (string_length i_string) after else begin
   check_base base;
   (* Écriture de la valeur absolue de i dans une chaîne *)
   let n = abs i in
-  (* Taille approximative de la chaîne nécessaire *)
-  let size =
-   (if i < 0 then 1 else 0) +
-   (if n < base then 1 else biggest_pow base) in
-  let i_string = create_string size in
   (* Écriture dans cette chaîne à partir de la fin *)
   let rec write n p =
    i_string.[p] <- digits.[n mod base];
    let m = n quo base in
    if m = 0 then p else write (n quo base) (p - 1) in
-  let lim = write n (size - 1) in
+  let lim = write n (i_size - 1) in
   let off =
    if i < 0 then (i_string.[lim - 1] <- `-`; lim - 1) else lim in
   (* Nombre de caractères réellement écrits *)
-  let written = size - off in
-
+  let written = i_size - off in
   (* Calcul du résultat final comprenant before et after *)
-  catenate before i_string off written after;;
+  catenate before i_string off written after end;;
 
 (* Calcul la valeur d' 'un caractère en base base *)
 let base_digit_of_char base c =

@@ -1,6 +1,7 @@
 #open "test";;
 #open "nat";;
 #open "big_int";;
+#open "int_misc";;
 
 let ignore _ = ();;
 
@@ -11,10 +12,10 @@ let equal_nat n1 n2 =
 
 testing_function "num_digits_nat";;
 
-test (-1) eq (false,not true);;
-test 0 eq (true,not false);;
+test 0 eq (false,not true);;
+test 1 eq (true,not false);;
 
-test 1
+test 2
 eq_int
 (let r = make_nat 2 in
   set_digit_nat r 1 1;
@@ -87,11 +88,17 @@ test 3 eq (is_zero_nat (make_nat 2) 0 2, true) &&
 
 testing_function "sys_string_of_nat";;
 
-let n = make_nat 4;;
+let l =
+ match length_of_int with
+ | 30 -> 4
+ | 62 -> 2
+ | _ -> failwith "bad int length";;
 
-test 1 eq_string (sys_string_of_nat 10 "" n 0 4 "","0");;
+let n = make_nat l;;
 
-complement_nat n 0 4;;
+test 1 eq_string (sys_string_of_nat 10 "" n 0 l "","0");;
+
+complement_nat n 0 l;;
 
 let s = function
 | 2 -> "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
@@ -112,7 +119,7 @@ let s = function
 | _ -> invalid_arg "Wrong base"
 in 
 for i = 2 to 16 do 
-  let s' = sys_string_of_nat i "" n 0 4 "" in
+  let s' = sys_string_of_nat i "" n 0 l "" in
    let _ = test i eq_string (s', s i) in ()
 done;;
 
@@ -198,22 +205,25 @@ equal_nat (nat_of_string "+1.0e+2", nat_of_int 100);;
 testing_function "sqrt_nat";;
 
 test 1 equal_nat (sqrt_nat (nat_of_int 1) 0 1, nat_of_int 1);;
-test 2 equal_nat (sqrt_nat (nat_of_string "8589934592") 0 2,
+let nat = nat_of_string "8589934592" in
+test 2 equal_nat (sqrt_nat nat 0 (length_nat nat),
                   nat_of_string "92681");;
-test 3 equal_nat (sqrt_nat (nat_of_string "4294967295") 0 1,
+let nat = nat_of_string "4294967295" in
+test 3 equal_nat (sqrt_nat nat 0 (length_nat nat),
                   nat_of_string "65535");;
-test 4 equal_nat (sqrt_nat (nat_of_string "18446744065119617025") 0 2,
+let nat = nat_of_string "18446744065119617025" in
+test 4 equal_nat (sqrt_nat nat 0 (length_nat nat),
                   nat_of_string "4294967295");;
 test 5 equal_nat (sqrt_nat (nat_of_int 15) 0 1,
                   nat_of_int 3);;
 
 testing_function "string_of_nat";;
 
-let n = make_nat 4;;
+let n = make_nat l;;
 
 test 1 eq_string (string_of_nat n, "0");;
 
-complement_nat n 0 4;;
+complement_nat n 0 l;;
 
 test 2 eq_string (string_of_nat n, "340282366920938463463374607431768211455");;
 
