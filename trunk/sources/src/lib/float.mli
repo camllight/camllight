@@ -77,7 +77,7 @@ value ceil : float -> float = 1 "ceil_float"
   and abs_float : float -> float = 1 "fabs_float"
           (* Return the absolute value of the argument. *)
   and mod_float : float -> float -> float = 2 "fmod_float"
-          (* [fmod a b] returns the remainder of [a] with respect to
+          (* [mod_float a b] returns the remainder of [a] with respect to
              [b]. *)
   and frexp : float -> float * int = 1 "frexp_float"
           (* [frexp f] returns the pair of the significant
