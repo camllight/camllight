@@ -18,7 +18,9 @@ and ('a, 'b) bucketlist =
 ;;
 
 let new initial_size =
-  { max_len = 3; data = make_vect initial_size Empty }
+let n = max 1 initial_size in
+ if initial_size <= 0 then invalid_arg "hashtbl__new" else
+ { max_len = 3; data = make_vect n Empty }
 ;;
 
 let clear h =
