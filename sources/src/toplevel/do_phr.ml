@@ -62,11 +62,13 @@ let do_toplevel_phrase phr =
         (rev env)
   | Ztypedef decl ->
       let _ = type_typedecl phr.im_loc decl in
+      reset_rollback ();
       do_list
         (fun (name, _, _) -> printf "Type %s defined.\n" name)
         decl
   | Zexcdef decl ->
       let _ = type_excdecl phr.im_loc decl in
+      reset_rollback ();
       do_list
         (fun decl ->
             printf "Exception %s defined.\n"
