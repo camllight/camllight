@@ -28,7 +28,6 @@ type BaseTextIndex =
  | TI_Mark of string
  | TI_End 
  | TI_At of int * int
- | TI_Absolute of int
  | TI_TagFirst of string
  | TI_TagLast of string
 ;;
@@ -38,7 +37,6 @@ let CAMLtoTKBaseTextIndex = function
  | TI_Mark s -> s
  | TI_End -> "end"
  | TI_At(x,y) -> "@" ^ (string_of_int x) ^ "," ^ (string_of_int y)
- | TI_Absolute n -> string_of_int n
  | TI_TagFirst s -> s ^ ".first"
  | TI_TagLast s -> s ^ ".last"
 ;;
