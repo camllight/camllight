@@ -7,22 +7,22 @@ type symbol external
 type Color external   # because required by Cursor, external
 
 type Relief { 
-   Raised "raised"
-   Sunken "sunken"
-   Flat "flat"
-   Ridge "ridge"
-   Groove "groove"
+   Raised ["raised"]
+   Sunken ["sunken"]
+   Flat   ["flat"]
+   Ridge  ["ridge"]
+   Groove ["groove"]
 }
 
 type Anchor { 
-    NW "nw"       N "n"           NE "ne"
-    W  "w"   Center "center"      E  "e"
-    SW "sw"       S "s"           SE "se"
+    NW ["nw"]       N ["n"]           NE ["ne"]
+    W  ["w"]   Center ["center"]      E  ["e"]
+    SW ["sw"]       S ["s"]           SE ["se"]
 }
 
 type Orientation { 
-    Vertical "vertical"
-    Horizontal "horizontal" 
+    Vertical ["vertical"]
+    Horizontal ["horizontal"] 
 }
 
 # builtins types 
@@ -34,54 +34,55 @@ type Cursor external    # builtina_GetCursor
 ### options(n)
 # define the standard options, so they can be used implicitly further on
 subtype option(standard) {
-   ActiveBackground "-activebackground" (Color)
-   ActiveBorderWidth "-activeborderwidth" (Units)
-   ActiveForeground "-activeforeground" (Color)
-   Anchor "-anchor" (Anchor)
-   Background "-background" (Color)
-   Bitmap "-bitmap" (Bitmap)
-   Borderwidth "-borderwidth" (Units)
-   Cursor "-cursor" (Cursor)
+   ActiveBackground		["-activebackground"; Color]
+   ActiveBorderWidth		["-activeborderwidth"; Units]
+   ActiveForeground		["-activeforeground"; Color]
+   Anchor			["-anchor"; Anchor]
+   Background			["-background"; Color]
+   Bitmap			["-bitmap"; Bitmap]
+   Borderwidth			["-borderwidth"; Units]
+   Cursor			["-cursor";  Cursor]
    # those are getting obsolete
-   CursorBackground "-cursorbackground" (Color)
-   CursorBorderWidth "-cursorborderwidth" (Units)
-   CursorOffTime "-cursorofftime" (int)  # positive only
-   CursorOnTime "-cursorontime" (int)    # idem
-   CursorWidth "-cursorwidth" (Units)
-   DisabledForeground "-disabledforeground" (Color) # cheat with NamedColor ""
-   ExportSelection "-exportselection" (bool)
-   Font "-font" (string)
-   Foreground "-foreground" (Color)
-   Geometry "-geometry" (string)   # too variable to encode
-   InsertBackground "-insertbackground" (Color)
-   InsertBorderWidth "-insertborderwidth" (Units)
-   InsertOffTime "-insertofftime" (int)  # positive only
-   InsertOnTime "-insertontime" (int)    # idem
-   InsertWidth "-insertwidth" (Units)
-   Orientation "-orient" (Orientation)
-   PadX "-padx" (Units)
-   PadY "-pady" (Units)
-   Relief "-relief" (Relief)
-   RepeatDelay "-repeatdelay" (int)
-   RepeatInterval "-repeatinterval" (int)
-   ScrollCommand "-scrollcommand" function (int, int, int, int)
-   SelectBackground "-selectbackground" (Color)
-   SelectBorderWidth "-selectborderwidth" (Units)
-   SelectForeground "-selectforeground" (Color)
-   SetGrid "-setgrid" (bool)
-   Text "-text" (string)
-   TextVariable "-textvariable" (TextVariable)
-   UnderlinedChar "-underline" (int)
-   XScrollCommand "-xscrollcommand" function (int, int, int, int)
-   YScrollCommand "-yscrollcommand" function (int, int, int, int)
+   CursorBackground		["-cursorbackground"; Color]
+   CursorBorderWidth		["-cursorborderwidth"; Units]
+   CursorOffTime		["-cursorofftime"; int]    # positive only
+   CursorOnTime			["-cursorontime" ; int]    # idem
+   CursorWidth			["-cursorwidth"; Units]
+   # cheat with NamedColor ""
+   DisabledForeground		["-disabledforeground"; Color]
+   ExportSelection		["-exportselection"; bool]
+   Font				["-font"; string]
+   Foreground			["-foreground"; Color]
+   Geometry			["-geometry"; string]  # too variable to encode
+   InsertBackground		["-insertbackground"; Color]
+   InsertBorderWidth		["-insertborderwidth"; Units]
+   InsertOffTime		["-insertofftime"; int]  # positive only
+   InsertOnTime			["-insertontime"; int]    # idem
+   InsertWidth			["-insertwidth"; Units]
+   Orientation			["-orient"; Orientation]
+   PadX				["-padx"; Units]
+   PadY				["-pady"; Units]
+   Relief			["-relief"; Relief]
+   RepeatDelay			["-repeatdelay"; int]
+   RepeatInterval		["-repeatinterval"; int]
+   ScrollCommand		["-scrollcommand"; function(int,int,int,int)]
+   SelectBackground		["-selectbackground"; Color]
+   SelectBorderWidth		["-selectborderwidth"; Units]
+   SelectForeground		["-selectforeground"; Color]
+   SetGrid			["-setgrid"; bool]
+   Text				["-text"; string]
+   TextVariable			["-textvariable"; TextVariable]
+   UnderlinedChar		["-underline"; int]
+   XScrollCommand		["-xscrollcommand"; function(int,int,int,int)]
+   YScrollCommand		["-yscrollcommand"; function(int,int,int,int)]
 }
 
 
 # for messages dans canvas text
 type Justification { 
-   Justify_Left "left"
-   Justify_Center "center"
-   Justify_Right "right"
+   Justify_Left   ["left"]
+   Justify_Center ["center"]
+   Justify_Right  ["right"]
 }
 
 widget frame {
@@ -91,19 +92,19 @@ widget frame {
    option Geometry
    option Relief
 
-   option Height "-height" (Units)
-   option Width "-width" (Units)
-   option Class "-class" (string)
+   option Height ["-height"; Units]
+   option Width  ["-width"; Units]
+   option Class  ["-class"; string]
 
    # -class not checked  
-   function () configure "configure" (option(frame) list)
-   function (string) configure_get "configure" ()
+   function () configure [widget(frame); "configure"; option(frame) list]
+   function (string) configure_get [widget(frame); "configure"]
    }
 
 type State { 
-   Normal "normal"
-   Active "active"
-   Disabled "disabled"
+   Normal ["normal"]
+   Active ["active"]
+   Disabled ["disabled"]
 }
 
 widget button {
@@ -123,17 +124,17 @@ widget button {
    option Text
    option TextVariable
 
-   option Command "-command" function ()
-   option Height "-height" (Units)
-   option State "-state" (State)
-   option Width "-width" (Units)
+   option Command ["-command"; function ()]
+   option Height ["-height"; Units]
+   option State ["-state"; State]
+   option Width ["-width"; Units]
 
-   function () activate "activate" ()
-   function () deactivate "deactivate" ()
-   function () flash "flash" ()
-   function () invoke "invoke" ()
-   function () configure "configure" (option(button) list)
-   function (string) configure_get "configure" ()
+   function () activate	  [widget(button); "activate"]
+   function () deactivate [widget(button); "deactivate"]
+   function () flash      [widget(button); "flash"]
+   function () invoke     [widget(button); "invoke"]
+   function () configure  [widget(button); "configure"; option(button) list]
+   function (string) configure_get [widget(button); "configure"]
    }
 
 
@@ -156,25 +157,26 @@ widget checkbutton {
    option Text
    option TextVariable
 
-   option Command "-command" function ()
-   option Height "-height" (Units)
-   option OffValue "-offvalue" (string)
-   option OnValue "-onvalue" (string)
-   option Selector "-selector" (Color)
-   option State "-state" (State)
-   option Width "-width" (Units)
-   option Variable "-variable" (TextVariable)
+   option Command  ["-command"; function ()]
+   option Height   ["-height"; Units]
+   option OffValue ["-offvalue"; string]
+   option OnValue  ["-onvalue"; string]
+   option Selector ["-selector"; Color]
+   option State    ["-state"; State]
+   option Width    ["-width"; Units]
+   option Variable ["-variable"; TextVariable]
   
 
-   function () activate "activate" ()
-   function () configure "configure" (option(checkbutton) list)
-   function (string) configure_get "configure" ()
-   function () deactivate "deactivate" ()
-   function () deselect "deselect" ()
-   function () flash "flash" ()
-   function () invoke "invoke" ()
-   function () select "select" ()
-   function () toggle "toggle" ()   
+   function () activate [widget(checkbutton); "activate"]
+   function () configure 
+        [widget(checkbutton); "configure"; option(checkbutton) list]
+   function (string) configure_get [widget(checkbutton); "configure"]
+   function () deactivate [widget(checkbutton); "deactivate"]
+   function () deselect [widget(checkbutton);  "deselect"]
+   function () flash [widget(checkbutton); "flash"]
+   function () invoke [widget(checkbutton); "invoke"]
+   function () select [widget(checkbutton); "select"]
+   function () toggle [widget(checkbutton); "toggle"]
    }
 
 widget radiobutton {
@@ -194,22 +196,23 @@ widget radiobutton {
    option Text
    option TextVariable
 
-   option Command "-command" function ()
-   option Height "-height" (Units)
+   option Command ["-command"; function()]
+   option Height  ["-height"; Units]
    option Selector
    option State
-   option Value "-value" (string)
+   option Value   ["-value"; string]
    option Variable
-   option Width "-width" (Units)
+   option Width   ["-width"; Units]
 
-   function () activate "activate" ()
-   function () configure "configure" (option(radiobutton) list)
-   function (string) configure_get "configure" ()
-   function () deactivate "deactivate" ()
-   function () deselect "deselect" ()
-   function () flash "flash" ()
-   function () invoke "invoke" ()
-   function () select "select" ()
+   function () activate [widget(radiobutton); "activate"]
+   function () configure 
+       [widget(radiobutton); "configure"; option(radiobutton) list]
+   function (string) configure_get [widget(radiobutton); "configure"]
+   function () deactivate [widget(radiobutton); "deactivate"]
+   function () deselect [widget(radiobutton); "deselect"]
+   function () flash [widget(radiobutton); "flash"]
+   function () invoke [widget(radiobutton); "invoke"]
+   function () select [widget(radiobutton); "select"]
    }
 
 type Index external   # builtin_index
@@ -246,37 +249,49 @@ widget entry {
    option SelectForeground
    option TextVariable
 
-   option State "-state" (State)
-   option TextWidth "-width" (int)
+   option State     ["-state"; State]
+   option TextWidth ["-width"; int]
 
-   function () configure "configure" (option(entry) list)
-   function (string) configure_get "configure" ()
-   function () delete "delete" (Index(entry), Index(entry))
-   function (string) get "get" ()
-   function () icursor "icursor" (Index(entry))
-   function (int) index "index" (Index(entry))
-   function () insert "insert" (Index(entry), string)
-   function () scan_mark "scanmark" (int)
-   function () scan_dragto "scandragto" (int)
-   function () select_adjust "selectadjust" (Index(entry))
-   function () select_clear "selectclear" ()
-   function () select_from "selectfrom" (Index(entry))
-   function () select_to "selectto" (Index(entry))
-   function () view "view" (Index(entry))
+   function () configure [widget(entry); "configure"; option(entry) list]
+   function (string) configure_get [widget(entry); "configure"]
+   function () delete [widget(entry); "delete"; Index(entry); Index(entry)]
+   function (string) get [widget(entry); "get"]
+   function () icursor [widget(entry); "icursor"; Index(entry)]
+   function (int) index [widget(entry); "index"; Index(entry)]
+   function () insert [widget(entry); "insert"; Index(entry); string]
+   function () scan_mark [widget(entry); "scan"; "mark"; int]
+   function () scan_dragto [widget(entry); "scan"; "dragto"; int]
+   function () select_adjust [widget(entry); "select"; "adjust"; Index(entry)]
+   function () select_clear [widget(entry); "select"; "clear" ]
+   function () select_from [widget(entry); "select"; "from"; Index(entry)]
+   function () select_to [widget(entry); "select"; "to"; Index(entry)]
+   function () view [widget(entry); "view"; Index(entry)]
    # this one is a tcl program in the standard tk library 3.6
+   function () see_caret ["tk_entrySeeCaret"; widget(entry)]
    }
 
-function () entry_see_caret "tk_entrySeeCaret" (widget(entry))
+# Keep it for backward compatibility <= beta4
+function () entry_see_caret ["tk_entrySeeCaret"; widget(entry)]
 
 
 ######################### Canvases
-type TagOrId external # because of builtins
-# type TagOrId {
-#   Tag (string)
-#   Id  (int)
-#   }
+# type TagOrId external # because of builtins
+type TagOrId {
+  Tag [string]
+  Id  [int]
+}
 
-type SearchSpec external	# builtin_canvas
+# type SearchSpec external	# builtin_canvas
+type SearchSpec {
+  Above ["above"; TagOrId]
+  All	["all"]
+  Below ["below"; TagOrId]
+  Closest ["closest"; int; int]
+  Enclosed ["enclosed"; int;int;int;int]
+  Overlapping ["overlapping"; int;int;int;int]
+  Withtag ["withtag"; TagOrId]
+}
+
 
 # defined internally
 # subtype Index(canvas) {
@@ -285,19 +300,19 @@ type SearchSpec external	# builtin_canvas
 
 
 type ArcStyle {
-    Pieslice "pieslice"
-    Chord "chord"
-    Arc "arc"
+    Pieslice ["pieslice"]
+    Chord ["chord"]
+    Arc ["arc"]
 }
 
 subtype option (arc) {
-   Extent "-extent" (float)
-   FillColor "-fill" (Color)
-   Outline "-outline" (Color)
-   Start "-start" (float)
-   Stipple "-stipple" (Bitmap)
-   ArcStyle "-style" (ArcStyle)
-   Tags "-tags" (TagOrId list)
+   Extent ["-extent"; float]
+   FillColor ["-fill"; Color]
+   Outline ["-outline"; Color]
+   Start ["-start"; float]
+   Stipple ["-stipple"; Bitmap]
+   ArcStyle ["-style"; ArcStyle]
+   Tags ["-tags"; TagOrId list]
    Width
   }
 
@@ -310,33 +325,33 @@ subtype option (bitmap) {
 }
 
 type ArrowStyle { 
-   Arrow_None "none"
-   Arrow_First "first"
-   Arrow_Last "last"
-   Arrow_Both "both" 
+   Arrow_None ["none"]
+   Arrow_First ["first"]
+   Arrow_Last ["last"]
+   Arrow_Both ["both"]
 }
 
 type CapStyle { 
-   CS_Butt "butt"
-   CS_Projecting "projecting"
-   CS_Round "round" 
+   CS_Butt ["butt"]
+   CS_Projecting ["projecting"]
+   CS_Round ["round"]
 }
 
 type JoinStyle { 
-   JS_Bevel "bevel"
-   JS_Miter "miter"
-   JS_Round "round" 
+   JS_Bevel ["bevel"]
+   JS_Miter ["miter"]
+   JS_Round ["round"]
 }
 
 subtype option(line) {
-   ArrowStyle "-arrow" (ArrowStyle)
-   ArrowShape "-arrowshape" (Units, Units, Units)
-   CapStyle "-capstyle" (CapStyle)
+   ArrowStyle ["-arrow"; ArrowStyle]
+   ArrowShape ["-arrowshape"; [Units; Units; Units]]
+   CapStyle ["-capstyle"; CapStyle]
    FillColor
-   JoinStyle "-joinstyle" (JoinStyle)
-   Smooth "-smooth" (bool)
-   SplineSteps "-splinesteps" (int)
-   Stipple "-stipple" (Bitmap)
+   JoinStyle ["-joinstyle"; JoinStyle]
+   Smooth ["-smooth"; bool]
+   SplineSteps ["-splinesteps"; int]
+   Stipple ["-stipple"; Bitmap]
    Tags
    Width
    }
@@ -357,7 +372,7 @@ subtype option(canvastext) {
    Anchor
    FillColor
    Font
-   Justify "-justify" (Justification)
+   Justify ["-justify"; Justification]
    Stipple
    Tags
    Text
@@ -369,40 +384,40 @@ subtype option(window) {
    Height
    Tags
    Width
-   Window "-window" (widget)
+   Window ["-window"; widget]
    }
 
 type ColorMode { 
-   Colormode "color"
-   Gray "gray"
-   Mono "mono"
+   Colormode ["color"]
+   Gray ["gray"]
+   Mono ["mono"]
 }
 subtype option(postscript) {
-   Colormap "-colormap" (string)
-   Colormode "-colormode" (ColorMode)
+   Colormap ["-colormap"; string]
+   Colormode ["-colormode"; ColorMode]
    # File: not used
-   Fontmap "-fontmap" (string)
+   Fontmap ["-fontmap"; string]
    Height
-   PageAnchor "-pageanchor" (Anchor)
-   PageHeight "-pageheight" (Units)
-   PageWidth "-pagewidth" (Units)
-   PageX "-pagex" (Units)
-   PageY "-pagey" (Units)
-   Rotate "-rotate" (bool)
+   PageAnchor ["-pageanchor"; Anchor]
+   PageHeight ["-pageheight"; Units]
+   PageWidth ["-pagewidth"; Units]
+   PageX ["-pagex"; Units]
+   PageY ["-pagey"; Units]
+   Rotate ["-rotate"; bool]
    Width
-   X "-x" (Units)
-   Y "-y" (Units)
+   X ["-x"; Units]
+   Y ["-y"; Units]
    }
 
 type CanvasItem {
-   Arc_item "arc" 
-   Line_item "line" 
-   Rectangle_item "rectangle" 
-   Oval_item "oval" 
-   Bitmap_item "bitmap"
-   Polygon_item "polygon" 
-   Text_item "text" 
-   Window_item "window"
+   Arc_item ["arc"]
+   Line_item ["line"]
+   Rectangle_item ["rectangle"]
+   Oval_item ["oval"]
+   Bitmap_item ["bitmap"]
+   Polygon_item ["polygon"]
+   Text_item ["text"]
+   Window_item ["window"]
 }
 
 widget canvas {
@@ -421,74 +436,73 @@ widget canvas {
    option XScrollCommand
    option YScrollCommand
 
-   option CloseEnough "-closeenough" (float)
-   option Confine "-confine" (bool)
-   option Height "-height" (Units)
-   option ScrollIncrement "-scrollincrement" (Units)
-   option ScrollRegion "-scrollregion" {Units,Units,Units,Units}
-   option Width "-width" (Units)
+   option CloseEnough ["-closeenough"; float]
+   option Confine ["-confine"; bool]
+   option Height ["-height"; Units]
+   option ScrollIncrement ["-scrollincrement"; Units]
+   option ScrollRegion ["-scrollregion"; [Units;Units;Units;Units]]
+   option Width ["-width"; Units]
 
-   function () addtag "addtag" (TagOrId, SearchSpec)     # Tag only
-   # bbox not fully supported
-   # should be builtin because of ambiguous result
-   function (float, float, float, float) bbox "bbox" (TagOrId list)
+   function () addtag [widget(canvas); "addtag"; TagOrId; SearchSpec]     # Tag only
+   # bbox not fully supported. should be builtin because of ambiguous result
+   function (float, float, float, float) bbox [widget(canvas); "bbox"; TagOrId list]
    # bind is builtin
-   function (int) canvasx "canvasx" (Units, Units)
-   function (int) canvasy "canvasy" (Units, Units)
-   function () configure "configure" (option (label) list)
-   function (string) configure_get "configure" ()
+   function (int) canvasx [widget(canvas); "canvasx"; Units; Units]
+   function (int) canvasy [widget(canvas); "canvasy"; Units; Units]
+   function () configure [widget(canvas); "configure"; option (canvas) list]
+   function (string) configure_get [widget(canvas); "configure"]
 
    # TODO: check result
-   function (int list) coords_get "coords" (TagOrId)
-   function ()         coords_set "coords" (TagOrId, Units list)
+   function (int list) coords_get [widget(canvas); "coords"; TagOrId]
+   function ()         coords_set [widget(canvas); "coords"; TagOrId; Units list]
     
-   function () dchars "dchars" (TagOrId, Index(canvas), Index(canvas))
-   function () delete "delete" (TagOrId list)
-   function () dtag "dtag" (TagOrId, TagOrId)     # 2d arg is tag only 
-   function (TagOrId list) find "find" (SearchSpec)
-   function () focus_reset "focus" ()
-   function () focus "focus" (TagOrId)
-   function (TagOrId list) gettags "gettags" (TagOrId)
-   function () icursor "icursor" (TagOrId, Index(canvas))
-   function (int) index "index" (TagOrId, Index(canvas))
-   function () insert "insert" (TagOrId, Index(canvas), string)
-   function (string) item_configure_get "itemconfigure" (TagOrId)
-   function () arc_configure "itemconfigure" (TagOrId, option (arc) list)
-   function () bitmap_configure "itemconfigure" (TagOrId, option (bitmap) list)
-   function () line_configure "itemconfigure" (TagOrId, option (line) list)
-   function () oval_configure "itemconfigure" (TagOrId, option (oval) list)
-   function () polygon_configure "itemconfigure" (TagOrId, option (polygon) list)
-   function () rectangle_configure "itemconfigure" (TagOrId, option (rectangle) list)
-   function () text_configure "itemconfigure" (TagOrId, option (canvastext) list)
-   function () window_configure "itemconfigure" (TagOrId, option (window) list)
-   function () lower "lower" (TagOrId, TagOrId)
-   function () lowest "lower" (TagOrId)
-   function () move "move" (TagOrId,Units,Units)
-   function (string) postscript "postscript" (option (postscript) list)
-   function () postscript_file "postscript -file" (string,option(postscript) list)
+   function () dchars [widget(canvas); "dchars"; TagOrId; Index(canvas); Index(canvas)]
+   function () delete [widget(canvas); "delete"; TagOrId list]
+   function () dtag [widget(canvas); "dtag"; TagOrId; TagOrId]     # 2d arg is tag only 
+   function (TagOrId list) find [widget(canvas); "find"; SearchSpec]
+   function () focus_reset [widget(canvas); "focus" ]
+   function () focus [widget(canvas); "focus"; TagOrId]
+   function (TagOrId list) gettags [widget(canvas); "gettags"; TagOrId]
+   function () icursor [widget(canvas); "icursor"; TagOrId; Index(canvas)]
+   function (int) index [widget(canvas); "index"; TagOrId; Index(canvas)]
+   function () insert [widget(canvas); "insert"; TagOrId; Index(canvas); string]
+   function (string) item_configure_get [widget(canvas); "itemconfigure"; TagOrId]
+   function () arc_configure [widget(canvas); "itemconfigure"; TagOrId; option (arc) list]
+   function () bitmap_configure [widget(canvas); "itemconfigure"; TagOrId; option (bitmap) list]
+   function () line_configure [widget(canvas); "itemconfigure"; TagOrId; option (line) list]
+   function () oval_configure [widget(canvas); "itemconfigure"; TagOrId; option (oval) list]
+   function () polygon_configure [widget(canvas); "itemconfigure"; TagOrId; option (polygon) list]
+   function () rectangle_configure [widget(canvas); "itemconfigure"; TagOrId; option (rectangle) list]
+   function () text_configure [widget(canvas); "itemconfigure"; TagOrId; option (canvastext) list]
+   function () window_configure [widget(canvas); "itemconfigure"; TagOrId; option (window) list]
+   function () lower [widget(canvas); "lower"; TagOrId; TagOrId]
+   function () lowest [widget(canvas); "lower"; TagOrId]
+   function () move [widget(canvas); "move"; TagOrId; Units; Units]
+   function (string) postscript [widget(canvas); "postscript"; option (postscript) list]
+   function () postscript_file [widget(canvas); "postscript"; "-file"; string; option(postscript) list]
    # do not use raise !
-   function () raiseabove "raise" (TagOrId, TagOrId)
-   function () raisetop "raise" (TagOrId)
-   function () scale "scale" (TagOrId, Units, Units, float, float)
-   function () scan_mark "scan mark" (int, int)
-   function () scan_dragto "scan dragto" (int, int)
-   function () select_adjust "select adjust" (TagOrId,Index(canvas))
-   function () select_clear "select clear" ()
-   function () select_from "select from" (TagOrId,Index(canvas))
-   function (TagOrId) select_item "select item" ()
-   function () select_to  "select to" (TagOrId,Index(canvas))
-   function (CanvasItem) typeof "type" (TagOrId)
-   function () xview "xview" (Index(canvas))
-   function () yview "yview" (Index(canvas))
-   function (TagOrId) createarc "create arc" (Units, Units, Units, Units, option (arc) list)
-   function (TagOrId) createbitmap "create bitmap" (Units, Units, option (bitmap) list)
-   function (TagOrId) createline "create line" (Units list, option (line) list)
-   function (TagOrId) createoval "create oval" (Units, Units, Units, Units, option (oval) list)
-   function (TagOrId) createpolygon "create polygon" (Units list, option (polygon) list)
-   function (TagOrId) createrectangle "create rectangle" (Units, Units, Units, Units, option (rectangle) list)
-   function (TagOrId) createtext "create text" (Units, Units, option (canvastext) list)
-   function (TagOrId) createwindow "create window" (Units, Units, option (window) list)
-   function () move "move" (TagOrId, Units, Units)
+   function () raiseabove [widget(canvas); "raise"; TagOrId; TagOrId]
+   function () raisetop [widget(canvas); "raise"; TagOrId]
+   function () scale [widget(canvas); "scale"; TagOrId; Units; Units; float; float]
+   function () scan_mark [widget(canvas); "scan"; "mark"; int; int]
+   function () scan_dragto [widget(canvas); "scan"; "dragto"; int; int]
+   function () select_adjust [widget(canvas); "select"; "adjust"; TagOrId ;Index(canvas)]
+   function () select_clear [widget(canvas); "select"; "clear" ]
+   function () select_from [widget(canvas); "select"; "from"; TagOrId; Index(canvas)]
+   function (TagOrId) select_item [widget(canvas); "select"; "item" ]
+   function () select_to  [widget(canvas); "select"; "to"; TagOrId; Index(canvas)]
+   function (CanvasItem) typeof [widget(canvas); "type"; TagOrId]
+   function () xview [widget(canvas); "xview"; Index(canvas)]
+   function () yview [widget(canvas); "yview"; Index(canvas)]
+   function (TagOrId) createarc [widget(canvas); "create"; "arc"; Units; Units; Units; Units; option (arc) list]
+   function (TagOrId) createbitmap [widget(canvas); "create"; "bitmap"; Units; Units; option (bitmap) list]
+   function (TagOrId) createline [widget(canvas); "create"; "line"; Units list; option (line) list]
+   function (TagOrId) createoval [widget(canvas); "create"; "oval"; Units; Units; Units; Units; option (oval) list]
+   function (TagOrId) createpolygon [widget(canvas); "create"; "polygon"; Units list; option (polygon) list]
+   function (TagOrId) createrectangle [widget(canvas); "create"; "rectangle"; Units; Units; Units; Units; option (rectangle) list]
+   function (TagOrId) createtext [widget(canvas); "create"; "text"; Units; Units; option (canvastext) list]
+   function (TagOrId) createwindow [widget(canvas); "create"; "window"; Units; Units; option (window) list]
+   function () move [widget(canvas); "move"; TagOrId; Units; Units]
    }
 
 widget label {
@@ -510,8 +524,8 @@ widget label {
    option Width
    option TextWidth
 
-   function () configure "configure" (option (label) list)
-   function (string) configure_get "configure" ()
+   function () configure [widget(label); "configure"; option (label) list]
+   function (string) configure_get [widget(label); "configure"]
    }
 
 # Defined internally
@@ -535,24 +549,25 @@ widget listbox {
    option XScrollCommand
    option YScrollCommand
 
-   function () configure "configure" (option(listbox) list)
-   function (string) configure_get "configure" ()
+   function () configure [widget(listbox); "configure"; option(listbox) list]
+   function (string) configure_get [widget(listbox); "configure" ]
 
    # TODO: pb with returning empty list ?
-   function (Index list) curselection "curselection" ()
-   function () delete "delete" (Index(listbox), Index(listbox))
-   function (string) get "get" (Index(listbox))
-   function () insert "insert" (Index(listbox), string list)
-   function (Index) nearest "nearest" (int)
-   function () scan_mark "scanmark" (int, int)
-   function () scan_dragto "scandragto" (int, int)
-   function () select_adjust "select adjust" (Index(listbox))
-   function () select_clear "select clear" ()
-   function () select_from "select from" (Index(listbox))
-   function () select_to "select to" (Index(listbox))
-   function (int) size "size" ()
-   function () xview "xview" (Index(listbox))
-   function () yview "yview" (Index(listbox))
+   function (Index list) curselection [widget(listbox); "curselection" ]
+   function () delete [widget(listbox); "delete"; Index(listbox); Index(listbox)]
+   function (string) get [widget(listbox); "get"; Index(listbox)]
+   function () insert [widget(listbox); "insert"; Index(listbox); string list]
+   function (Index) nearest [widget(listbox); "nearest"; int]
+   function () scan_mark [widget(listbox); "scan"; "mark"; int; int]
+   function () scan_dragto [widget(listbox); "scan"; "dragto"; int; int]
+   function () select_adjust [widget(listbox); "select"; "adjust"; Index(listbox)]
+   function () select_clear [widget(listbox); "select"; "clear" ]
+   function () select_from [widget(listbox); "select"; "from"; Index(listbox)]
+   function () select_to [widget(listbox); "select"; "to"; Index(listbox)]
+   function (int) size [widget(listbox); "size"]
+   function () xview [widget(listbox); "xview"; Index(listbox)]
+   function () yview [widget(listbox); "yview"; Index(listbox)]
+   function () SingleSelect ["tk_listboxSingleSelect"; widget(listbox) list]
    }
 
 widget menubutton {
@@ -574,14 +589,14 @@ widget menubutton {
    option UnderlinedChar
 
    option Height
-   option Menu "-menu" (widget(menu))
-   option State "-state" (State)
+   option Menu ["-menu"; widget(menu)]
+   option State ["-state"; State]
    option Width
 
-   function () configure "configure" (option(menubutton) list)
-   function (string) configure_get "configure" ()
-   function () activate "activate" ()
-   function () deactivate "deactivate" ()
+   function () configure [widget(menubutton); "configure"; option(menubutton) list]
+   function (string) configure_get [widget(menubutton); "configure" ]
+   function () activate [widget(menubutton); "activate" ]
+   function () deactivate [widget(menubutton); "deactivate" ]
    }
 
 type MenuIndex external
@@ -598,47 +613,47 @@ widget menu {
    option Font
    option Foreground
 
-   option PostCommand "-postcommand" function()
+   option PostCommand ["-postcommand"; function()]
    option Selector
 
-   function () activate "activate" (MenuIndex)
-   function () add_cascade "add cascade" (option(menucascade) list)
-   function () add_checkbutton "add checkbutton" (option(menucheck) list)
-   function () add_command "add command" (option(menucommand) list)
-   function () add_radiobutton "add radiobutton" (option(menuradio) list)
-   function () add_separator "add separator" ()
-   function () configure "configure" (option(menu) list)
-   function () delete "delete" (MenuIndex,MenuIndex)
-   function () disable "disable" (MenuIndex)	# obsolete
-   function () enable "enable" (MenuIndex)      # obsolete
+   function () activate [widget(menu); "activate"; MenuIndex]
+   function () add_cascade [widget(menu); "add"; "cascade"; option(menucascade) list]
+   function () add_checkbutton [widget(menu); "add"; "checkbutton"; option(menucheck) list]
+   function () add_command [widget(menu); "add"; "command"; option(menucommand) list]
+   function () add_radiobutton [widget(menu); "add"; "radiobutton"; option(menuradio) list]
+   function () add_separator [widget(menu); "add"; "separator"]
+   function () configure [widget(menu); "configure"; option(menu) list]
+   function () delete [widget(menu); "delete"; MenuIndex; MenuIndex]
+   function () disable [widget(menu); "disable"; MenuIndex]	# obsolete
+   function () enable [widget(menu); "enable"; MenuIndex]      # obsolete
    function () entryconfigure_cascade 
-                    "entryconfigure" (MenuIndex, option (menucascade) list)
+                    [widget(menu); "entryconfigure"; MenuIndex; option (menucascade) list]
    function () entryconfigure_checkbutton 
-                    "entryconfigure" (MenuIndex, option (menucheck)list)
+                    [widget(menu); "entryconfigure"; MenuIndex; option (menucheck) list]
    function () entryconfigure_command  
-                    "entryconfigure" (MenuIndex, option (menucommand) list)
+                    [widget(menu); "entryconfigure"; MenuIndex; option (menucommand) list]
    function () entryconfigure_radiobutton 
-                    "entryconfigure" (MenuIndex, option (menuradio) list)
-   function (string) entryconfigure_get "entryconfigure" (MenuIndex)
+                    [widget(menu); "entryconfigure"; MenuIndex; option (menuradio) list]
+   function (string) entryconfigure_get [widget(menu); "entryconfigure"; MenuIndex]
    # none not supported
-   function (int) index "index" (MenuIndex)
-   function (string) invoke "invoke" (MenuIndex)
-   function () post "post" (int, int)
-   function () unpost "unpost" ()
-   function (int) yposition "yposition" (MenuIndex)
+   function (int) index [widget(menu); "index"; MenuIndex]
+   function (string) invoke [widget(menu); "invoke"; MenuIndex]
+   function () post [widget(menu); "post"; int; int]
+   function () unpost [widget(menu); "unpost"]
+   function (int) yposition [widget(menu); "yposition"; MenuIndex]
    }
 
 # Options for menu add cascade
 subtype option(menucascade) {
 	ActiveBackground
-	Accelerator "-accelerator" (string)
+	Accelerator ["-accelerator"; string]
 	Background    
 	Bitmap
-	Command "-command" function ()
-	Font "-font" (string)
-	Label "-label" (string)
-	Menu "-menu" (widget(menu))
-	State "-state" (State)
+	Command ["-command"; function() ]
+	Font ["-font"; string]
+	Label ["-label"; string]
+	Menu ["-menu"; widget(menu)]
+	State ["-state"; State]
 	UnderlinedChar
 	}
 
@@ -662,8 +677,8 @@ subtype option(menucommand) {
 
 ##### Menubar
 module menubar {
-  function (widget list) get "tk_menuBar" (widget(frame))
-  function () set "tk_menuBar" (widget(frame), widget list)
+  function (widget list) get ["tk_menuBar"; widget(frame)]
+  function () set ["tk_menuBar"; widget(frame); widget list]
 # clear ?
   }
 
@@ -681,11 +696,11 @@ widget message {
    option TextVariable
    option Width
 
-   option Aspect "-aspect" (int)
-   option Justify "-justify" (Justification)
+   option Aspect ["-aspect"; int]
+   option Justify ["-justify"; Justification]
 
-   function () configure "configure" (option(message) list)
-   function (string) configure_get "configure" ()
+   function () configure [widget(message); "configure"; option(message) list]
+   function (string) configure_get [widget(message); "configure"]
    }
 
 widget scale {
@@ -699,22 +714,22 @@ widget scale {
    option Relief
 
    # cannot be called Command
-   option Slidecommand "-command" function (int)
-   option From "-from" (int)
-   option Label "-label" (string)
-   option Length "-length" (Units)
-   option ShowValue "-showvalue" (bool)
-   option SliderForeground "-sliderforeground" (Color)
-   option SliderLength "-sliderlength" (Units)
-   option State "-state" (State)	# except Active
-   option TickInterval "-tickinterval" (int)
-   option To "-to" (int)
+   option Slidecommand ["-command"; function (int)]
+   option From ["-from"; int]
+   option Label ["-label"; string]
+   option Length ["-length"; Units]
+   option ShowValue ["-showvalue"; bool]
+   option SliderForeground ["-sliderforeground"; Color]
+   option SliderLength ["-sliderlength"; Units]
+   option State ["-state"; State]	# except Active
+   option TickInterval ["-tickinterval"; int]
+   option To ["-to"; int]
    option Width
 
-   function () configure "configure" (option(scale) list)
-   function (string) configure_get "configure" ()
-   function (int) get "get" ()
-   function () set "set" (int)
+   function () configure [widget(scale); "configure"; option(scale) list]
+   function (string) configure_get [widget(scale); "configure"]
+   function (int) get [widget(scale); "get" ]
+   function () set [widget(scale); "set"; int]
    }
 
 widget scrollbar {
@@ -731,10 +746,10 @@ widget scrollbar {
    option Slidecommand
    option Width
 
-   function () configure "configure" (option(scrollbar) list)
-   function (string) configure_get "configure" ()
-   function (int, int, int, int) get "get" ()
-   function () set "set" (int, int, int, int)
+   function () configure [widget(scrollbar); "configure"; option(scrollbar) list]
+   function (string) configure_get ["configure"]
+   function (int, int, int, int) get [widget(scrollbar); "get"]
+   function () set [widget(scrollbar); "set"; int; int; int; int]
    }
 
 
@@ -747,28 +762,28 @@ type TextMark external
 
 subtype option(texttag) {
    Background
-   BgStipple "-bgstipple" (Bitmap)
+   BgStipple ["-bgstipple"; Bitmap]
    Borderwidth
-   FgStipple "-fgstipple" (Bitmap)
+   FgStipple ["-fgstipple"; Bitmap]
    Font
    Foreground
    Relief
-   Underline "-underline" (bool)
+   Underline ["-underline"; bool]
    }
 
 type WrapMode { 
-  WrapNone "none"
-  WrapChar "char"
-  WrapWord "word"
+  WrapNone ["none"]
+  WrapChar ["char"]
+  WrapWord ["word"]
 }
 
 type Comparison { 
-  GT "<"
-  GE "<="
-  EQ "=="
-  LE "=>"
-  LT ">"
-  NEQ "!="
+  GT ["<"]
+  GE ["<="]
+  EQ ["=="]
+  LE ["=>"]
+  LT [">"]
+  NEQ ["!="]
 }
 
 
@@ -793,49 +808,49 @@ widget text {
    option SetGrid
    option YScrollCommand
 
-   option TextHeight "-height" (int)
-   option State "-state" (State)
-   option TextWidth "-width" (int)
-   option Wrap "-wrap" (WrapMode)
+   option TextHeight ["-height"; int]
+   option State ["-state"; State]
+   option TextWidth ["-width"; int]
+   option Wrap ["-wrap"; WrapMode]
 
-   function (bool) compare "compare" (TextIndex, Comparison, TextIndex)
-   function () configure "configure" (option(text) list)
-   function (string) configure_get "configure" ()
-   function () debug "debug" (bool)
-   function () delete "delete" (TextIndex, TextIndex)
-   function () delete_char "delete" (TextIndex)
-   function (string) get "get" (TextIndex, TextIndex)
-   function (string) get_char "get" (TextIndex)
-   function (BaseTextIndex) index "index" (TextIndex)
-   function () insert "insert" (TextIndex, string)
+   function (bool) compare [widget(text); "compare"; TextIndex; Comparison; TextIndex]
+   function () configure [widget(text); "configure"; option(text) list]
+   function (string) configure_get [widget(text); "configure"]
+   function () debug [widget(text); "debug"; bool]
+   function () delete [widget(text); "delete"; TextIndex; TextIndex]
+   function () delete_char [widget(text); "delete"; TextIndex]
+   function (string) get [widget(text); "get"; TextIndex; TextIndex]
+   function (string) get_char [widget(text); "get"; TextIndex]
+   function (BaseTextIndex) index [widget(text); "index"; TextIndex]
+   function () insert [widget(text); "insert"; TextIndex; string]
    # Mark 
-   function (TextMark list) mark_names "mark names" ()
-   function () mark_set "mark set" (TextMark, TextIndex)
-   function () mark_unset "mark unset" (TextMark list)
+   function (TextMark list) mark_names [widget(text); "mark"; "names"]
+   function () mark_set [widget(text); "mark"; "set"; TextMark; TextIndex]
+   function () mark_unset [widget(text); "mark"; "unset"; TextMark list]
    # Scan 
-   function (int) scan_mark "scan mark" (int)
-   function (int) scan_dragto "scan dragto" (int)
+   function (int) scan_mark [widget(text); "scan"; "mark"; int]
+   function (int) scan_dragto [widget(text); "scan"; "dragto"; int]
    # Tags
-   function () tag_add "tag add" (TextTag, TextIndex, TextIndex)
-   function () tag_add_char "tag add" (TextTag, TextIndex)
+   function () tag_add [widget(text); "tag"; "add"; TextTag; TextIndex; TextIndex]
+   function () tag_add_char [widget(text); "tag"; "add"; TextTag; TextIndex]
    # tag_bind is builtin. beware: text_tag_bind
-   function () tag_configure "tag configure" (TextTag, option (texttag) list)
-   function () tag_delete "tag delete" (TextTag list)
-   function () tag_lower "tag lower" (TextTag, TextTag)
-   function () tag_lowest "tag lower" (TextTag)
-   function (TextTag list) tag_allnames "tag names" ()
-   function (TextTag list) tag_indexnames "tag names" (TextIndex)
+   function () tag_configure [widget(text); "tag"; "configure"; TextTag; option (texttag) list]
+   function () tag_delete [widget(text); "tag"; "delete"; TextTag list]
+   function () tag_lower [widget(text); "tag";  "lower"; TextTag; TextTag]
+   function () tag_lowest [widget(text); "tag"; "lower"; TextTag]
+   function (TextTag list) tag_allnames [widget(text); "tag"; "names"]
+   function (TextTag list) tag_indexnames [widget(text); "tag"; "names"; TextIndex]
    function (BaseTextIndex, BaseTextIndex) tag_nextrange 
-        "tag nextrange" (TextTag, TextIndex, TextIndex)
-   function () tag_raise "tag raise" (TextTag)
-   function () tag_raisetop "tag raise" ()
-   function (BaseTextIndex list) tag_ranges "tag ranges" (TextTag)
-   function () tag_remove "tag remove" (TextTag, TextIndex, TextIndex)
-   function () tag_remove_char "tag remove" (TextTag, TextIndex)
-   function () yview "yview" (TextIndex)
-   function () yview_line "yview" (int)
-   function () yview_pickplace "yview -pickplace" (TextIndex)
-   function () yview_pickplace_line "yview -pickplace" (int)
+        [widget(text); "tag"; "nextrange"; TextTag; TextIndex; TextIndex]
+   function () tag_raise [widget(text); "tag"; "raise"; TextTag]
+   function () tag_raisetop [widget(text); "tag"; "raise"]
+   function (BaseTextIndex list) tag_ranges [widget(text); "tag"; "ranges"; TextTag]
+   function () tag_remove [widget(text); "tag"; "remove"; TextTag; TextIndex; TextIndex]
+   function () tag_remove_char [widget(text); "tag"; "remove"; TextTag; TextIndex]
+   function () yview [widget(text); "yview"; TextIndex]
+   function () yview_line [widget(text); "yview"; int]
+   function () yview_pickplace [widget(text); "yview"; "-pickplace"; TextIndex]
+   function () yview_pickplace_line [widget(text); "yview"; "-pickplace"; int]
    }
 
 # This module will be renamed "toplevelw" to avoid collision with
@@ -846,277 +861,279 @@ widget toplevel {
    option Geometry
    option Relief
 
-   option Screen "-screen" (string)
-   option Class "-class" (string)
+   option Screen ["-screen"; string]
+   option Class ["-class"; string]
 
-   function () configure "configure" (option(toplevel) list)
-   function (string) configure_get "configure" ()
+   function () configure [widget(toplevel); "configure"; option(toplevel) list]
+   function (string) configure_get [widget(toplevel); "configure"]
    }
 
 ################### Various functions
-function ()    destroy "destroy" (widget)
+function ()    destroy ["destroy"; widget]
 # use Predefined "" for empty bitmap
-function (int) dialog  "tk_dialog" (widget, string, string, Bitmap, int, string list)
-function () listboxSingleSelect "tk_listboxSingleSelect" (widget(listbox) list)
+function (int) dialog  ["tk_dialog"; widget; string; string; Bitmap; int; string list]
+# also in listbox
+function () listboxSingleSelect ["tk_listboxSingleSelect"; widget(listbox) list]
 
 	
 ##### focus variations
 module focus {
-  function (widget) get "focus" ()
-  function ()       set "focus" (widget)
-  # bogus when "none" is returned
-  function (widget) default_get "focus default" ()
-  function ()       default_set "focus default" (widget)
-  function  ()      none "focus none" ()
+  function (widget) get ["focus"]
+  function ()       set ["focus"; widget]
+  # bogus when "none"; is returned
+  function (widget) default_get ["focus"; "default"]
+  function ()       default_set ["focus"; "default"; widget]
+  function ()      none ["focus"; "none"]
 }
 
 type GrabStatus {
-   GrabNone "none"
-   GrabLocal "local"
-   GrabGlobal "global"
+   GrabNone ["none"]
+   GrabLocal ["local"]
+   GrabGlobal ["global"]
 }
 
 ##### grab (current is missing)
 module grab {
-   function () set_local "grab" (widget)
-   function () set_global "grab -global" (widget)
-   function (GrabStatus) status "grab status" ()
-   function () release "grab release" (widget)
+   function () set_local ["grab"; widget]
+   function () set_global ["grab"; "-global"; widget]
+   function (GrabStatus) status ["grab"; "status"]
+   function () release ["grab"; "release"; widget]
 }
 
 ##### lower
-function () lower "lower" (widget)
+function () lower ["lower"; widget]
 # lower window ?belowThis? can't be written
 
 
 
 ############ Options
 type OptionPriority {
-   WidgetDefault  "widgetDefault"
-   StartupFile    "startupFile"
-   UserDefault    "userDefault"
-   Interactive    "interactive"
+   WidgetDefault  ["widgetDefault"]
+   StartupFile    ["startupFile"]
+   UserDefault    ["userDefault"]
+   Interactive    ["interactive"]
 #  Priority (int)
    }
 
 module resource {
-   function () add "option add" (string,string,OptionPriority)
-   function () clear "option clear" ()
-   function (string) get "option get" (widget,string,string)
-   function () readfile "option readfile" (string,OptionPriority)
+   function () add ["option"; "add"; string; string; OptionPriority]
+   function () clear ["option"; "clear"]
+   function (string) get ["option";  "get"; widget; string; string]
+   function () readfile ["option"; "readfile"; string; OptionPriority]
    }
 
 
 ########### Pack
 type Side { 
-   Side_Left "left"
-   Side_Right "right"
-   Side_Top "top"
-   Side_Bottom "bottom"
+   Side_Left ["left"]
+   Side_Right ["right"]
+   Side_Top ["top"]
+   Side_Bottom ["bottom"]
 }
 
 type FillMode { 
-   Fill_None "none"
-   Fill_X "x"
-   Fill_Y "y"
-   Fill_Both "both"
+   Fill_None ["none"]
+   Fill_X ["x"]
+   Fill_Y ["y"]
+   Fill_Both ["both"]
 }
 
 subtype option(pack) {
-	After "-after" (widget)
+	After ["-after"; widget]
 	Anchor
-	Before "-before" (widget)
-	Expand "-expand" (bool)
-	Fill "-fill" (FillMode)
-	In "-in" (widget)
+	Before ["-before"; widget]
+	Expand ["-expand"; bool]
+	Fill ["-fill"; FillMode]
+	In ["-in"; widget]
 	PadX
 	PadY
-	IPadX "-ipadx" (Units)
-	IPadY "-ipady" (Units)
-	Side "-side" (Side)
+	IPadX ["-ipadx"; Units]
+	IPadY ["-ipady"; Units]
+	Side ["-side"; Side]
 	}
 
-function ()  pack "pack" (widget list, option(pack) list)
+function ()  pack ["pack"; widget list; option(pack) list]
+
 module pack {
-    function () configure "pack configure" (widget list, option(pack) list)  
-    function () forget "pack forget" (widget list)
-    function (bool) propagate_get "pack propagate" (widget)
-    function () propagate_set "pack propagate" (widget,bool)
-    function (widget list) slaves "pack slaves" (widget)
+    function () configure ["pack"; "configure"; widget list; option(pack) list]
+    function () forget ["pack"; "forget"; widget list]
+    function (bool) propagate_get ["pack"; "propagate"; widget]
+    function () propagate_set ["pack"; "propagate"; widget; bool]
+    function (widget list) slaves ["pack"; "slaves"; widget]
     }
 
 
 type BorderMode {
-  BorderInside "inside"
-  BorderOutside "outside"
-  BorderIgnore "ignore"
+  BorderInside ["inside"]
+  BorderOutside ["outside"]
+  BorderIgnore ["ignore"]
 }
 
 subtype option(place) {
 	In X Y Anchor Width Height
-	RelX "-relx" (Units)
-	RelY "-rely" (Units)
-	RelWidth "-relwidth" (float)
-	RelHeigth "-relheight" (float)
-	BorderMode "-bordermode" (BorderMode)
+	RelX ["-relx"; Units]
+	RelY ["-rely"; Units]
+	RelWidth ["-relwidth"; float]
+	RelHeigth ["-relheight"; float]
+	BorderMode ["-bordermode"; BorderMode]
 }
 
-function () place "place" (widget, option(place) list)
+function () place ["place"; widget; option(place) list]
 module place {
-    function ()	configure "place configure" (widget, option(place) list)
-    function () forget "place forget" (widget)
-    function (string) info "place info" (widget)
-    function (widget list) slaves "place slaves" (widget)
+    function ()	configure ["place"; "configure"; widget; option(place) list]
+    function () forget ["place"; "forget"; widget]
+    function (string) info ["place"; "info"; widget]
+    function (widget list) slaves ["place"; "slaves"; widget]
 }
 
 
 module selection {
-   function () clear "selection clear" (widget)
-   function (string) get "selection get" ()
+   function () clear ["selection"; "clear"; widget]
+   function (string) get ["selection"; "get"]
    }
 
 
 type ColorModel {
-  Color "color"
-  Monochrome "monochrome"
+  Color ["color"]
+  Monochrome ["monochrome"]
   }
 
 module colormodel {
-   function (ColorModel) get "tk colormodel" (widget)
-   function () set "tk colormodel" (widget, ColorModel)
+   function (ColorModel) get ["tk"; "colormodel"; widget]
+   function () set ["tk"; "colormodel"; widget; ColorModel]
    }
 
 module wait {
-   function () visibility "tkwait visibility" (widget)
-   function () window "tkwait window" (widget)
+   function () visibility ["tkwait"; "visibility"; widget]
+   function () window ["tkwait"; "window"; widget]
    }
 
 type AtomId {
-   AtomId (int)
+   AtomId [int]
    }
 
 ## update
-function () update "update" ()
-function () update_idletasks "update idletasks" ()
+function () update ["update"]
+function () update_idletasks ["update"; "idletasks"]
    
 module winfo {
-   function (AtomId) atom "winfo atom" (string)
-   function (string) atomname "winfo atomname" (AtomId)
-   function (int) cells "winfo cells" (widget)
-   function (widget list) children "winfo children" (widget)
-   function (string) class "winfo class" (widget)
-   function (widget) containing "winfo containing" (int,int)
-   function (int) depth "winfo depth" (widget)
-   function (bool) exists "winfo exists" (widget)
-   function (float) fpixels "winfo fpixels" (widget,int)
-   function (string) geometry "winfo geometry" (widget)
-   function (int) height "winfo height" (widget)
-   function (string) id "winfo id" (widget)
-   function (symbol list) interps "winfo interps" ()
-   function (bool) ismapped "winfo ismapped" (widget)
-   function (string) name "winfo name" (widget)
-   function (widget) parent "winfo parent" (widget)        # bogus for top
-   function (widget) pathname "winfo pathname" (string)
-   function (int) pixels "winfo pixels" (widget,int)
-   function (int) reqheight "winfo reqheight" (widget)
-   function (int) reqwidth "winfo reqwidth" (widget)
-   function (int,int,int) rgb "winfo rgb" (widget,Color)
-   function (int) rootx "winfo rootx" (widget)
-   function (int) rooty "winfo rooty" (widget)
-   function (string) screen "winfo screen" (widget)
-   function (int) screencells "winfo screencells" (widget)
-   function (int) screendepth "winfo screendepth" (widget)
-   function (int) screenheight "winfo screenheight" (widget)
-   function (int) screenmmdepth "winfo screenmmdepth" (widget)
-   function (int) screenmmheight "winfo screenmmheight" (widget)
-   function (string) screenvisual "winfo screenvisual" (widget)
-   function (int) screenwidth "winfo screenwidth" (widget)
-   function (widget) toplevel "winfo toplevel" (widget)
-   function (string) visual "winfo visual" (widget)
-   function (int) vrootheight "winfo vrootheight" (widget)
-   function (int) vrootwidth "winfo vrootwidth" (widget)
-   function (int) vrootx "winfo vrootx" (widget)
-   function (int) vrooty "winfo vrooty" (widget)
-   function (int) width "winfo width" (widget)
-   function (int) x "winfo x" (widget)
-   function (int) y "winfo y" (widget)
+   function (AtomId) atom ["winfo"; "atom"; string]
+   function (string) atomname ["winfo"; "atomname"; AtomId]
+   function (int) cells ["winfo"; "cells"; widget]
+   function (widget list) children ["winfo"; "children"; widget]
+   function (string) class ["winfo"; "class"; widget]
+   function (widget) containing ["winfo"; "containing"; int; int]
+   function (int) depth ["winfo"; "depth"; widget]
+   function (bool) exists ["winfo"; "exists"; widget]
+   function (float) fpixels ["winfo"; "fpixels"; widget; int]
+   function (string) geometry ["winfo"; "geometry"; widget]
+   function (int) height ["winfo"; "height"; widget]
+   function (string) id ["winfo"; "id"; widget]
+   function (symbol list) interps ["winfo"; "interps"]
+   function (bool) ismapped ["winfo"; "ismapped"; widget]
+   function (string) name ["winfo"; "name"; widget]
+   function (widget) parent ["winfo"; "parent"; widget]        # bogus for top
+   function (widget) pathname ["winfo"; "pathname"; string]
+   function (int) pixels ["winfo"; "pixels"; widget; int]
+   function (int) reqheight ["winfo"; "reqheight"; widget]
+   function (int) reqwidth ["winfo"; "reqwidth"; widget]
+   function (int,int,int) rgb ["winfo"; "rgb"; widget; Color]
+   function (int) rootx ["winfo"; "rootx"; widget]
+   function (int) rooty ["winfo"; "rooty"; widget]
+   function (string) screen ["winfo"; "screen"; widget]
+   function (int) screencells ["winfo"; "screencells"; widget]
+   function (int) screendepth ["winfo"; "screendepth"; widget]
+   function (int) screenheight ["winfo"; "screenheight"; widget]
+   function (int) screenmmdepth ["winfo"; "screenmmdepth"; widget]
+   function (int) screenmmheight ["winfo"; "screenmmheight"; widget]
+   function (string) screenvisual ["winfo"; "screenvisual"; widget]
+   function (int) screenwidth ["winfo"; "screenwidth"; widget]
+   function (widget) toplevel ["winfo"; "toplevel"; widget]
+   function (string) visual ["winfo"; "visual"; widget]
+   function (int) vrootheight ["winfo"; "vrootheight"; widget]
+   function (int) vrootwidth ["winfo"; "vrootwidth"; widget]
+   function (int) vrootx ["winfo"; "vrootx"; widget]
+   function (int) vrooty ["winfo"; "vrooty"; widget]
+   function (int) width ["winfo"; "width"; widget]
+   function (int) x ["winfo"; "x"; widget]
+   function (int) y ["winfo"; "y"; widget]
 }
 
 type FocusModel {
-   FocusActive "active"
-   FocusPassive "passive"
+   FocusActive ["active"]
+   FocusPassive ["passive"]
 }
 
 module wm {
 ### Aspect
-   function () aspect_set "wm aspect" (widget,int,int,int,int)
+   function () aspect_set ["wm"; "aspect"; widget;int;int;int;int]
    # aspect: problem with empty return
-   function (int,int,int,int) aspect_get "wm aspect" (widget)
+   function (int,int,int,int) aspect_get ["wm"; "aspect"; widget]
    # clear missing
 ### WM_CLIENT_MACHINE
-   function () client_set "wm client" (widget,string)
-   function (string) client_get "wm client" (widget)
+   function () client_set ["wm"; "client"; widget; string]
+   function (string) client_get ["wm"; "client"; widget]
    # clear missing
 ### WM_COMMAND
    # command requires lists
 
-   function () deiconify "wm deiconify" (widget)
+   function () deiconify ["wm"; "deiconify"; widget]
 
 ### Focus model
-   function () focusmodel_set "wm focusmodel" (widget,FocusModel)
-   function (FocusModel) focusmodel_get "wm focusmodel" (widget)
+   function () focusmodel_set ["wm"; "focusmodel"; widget; FocusModel]
+   function (FocusModel) focusmodel_get ["wm"; "focusmodel"; widget]
 
-   function (string) frame "wm frame" (widget)
+   function (string) frame ["wm"; "frame"; widget]
 
 ### Geometry
    # geometry should be a type
-   function () geometry_set "wm geometry" (widget,string)
-   function (string) geometry_get "wm geometry" (widget)
+   function () geometry_set ["wm"; "geometry"; widget; string]
+   function (string) geometry_get ["wm"; "geometry"; widget]
 
    # grid is missing
 
 ### Groups
-   function () group_set "wm group" (widget,widget)
+   function () group_set ["wm"; "group"; widget; widget]
    # group: problem with empty return
-   function (string) group_get "wm group" (widget)
+   function (string) group_get ["wm"; "group"; widget]
 ### Icon bitmap
-   function () iconbitmap_set "wm iconbitmap" (widget,Bitmap)
+   function () iconbitmap_set ["wm"; "iconbitmap"; widget; Bitmap]
    # iconbitmap: problem with empty return
-   function (Bitmap) iconbitmap_get "wm iconbitmap" (widget)
+   function (Bitmap) iconbitmap_get ["wm"; "iconbitmap"; widget]
    # clear missing
 
-   function () iconify "wm iconify" (widget)
+   function () iconify ["wm"; "iconify"; widget]
 
 ### Icon mask
-   function () iconmask_set "wm iconmask" (widget,Bitmap)
+   function () iconmask_set ["wm"; "iconmask"; widget; Bitmap]
    # iconmask: problem with empty return
-   function (Bitmap) iconmask_get "wm iconmask" (widget)
+   function (Bitmap) iconmask_get ["wm"; "iconmask"; widget]
    # clear missing
 ### Icon name
-   function () iconname_set "wm iconname" (widget,string)
-   function (string) iconname_get "wm iconname" (widget)
+   function () iconname_set ["wm"; "iconname"; widget; string]
+   function (string) iconname_get ["wm"; "iconname"; widget]
 ### Icon position
-   function () iconposition_set "wm iconposition" (widget,int,int)
+   function () iconposition_set ["wm"; "iconposition"; widget; int; int]
    # iconposition: problem with empty return
-   function (int,int) iconposition_get "wm iconposition" (widget)
+   function (int,int) iconposition_get ["wm"; "iconposition"; widget]
 ### Icon window
-   function () iconwindow_set "wm iconwindow" (widget,widget)
+   function () iconwindow_set ["wm"; "iconwindow"; widget; widget]
    # iconwindow: problem with empty return
-   function (widget) iconwindow_get "wm iconwindow" (widget)
+   function (widget) iconwindow_get ["wm"; "iconwindow"; widget]
    # clear missing
 ### Sizes
-   function () maxsize_set "wm maxsize" (widget,int,int)
-   function (int,int) maxsize_get "wm maxsize" (widget)
+   function () maxsize_set ["wm"; "maxsize"; widget; int; int]
+   function (int,int) maxsize_get ["wm"; "maxsize"; widget]
    # clear missing
-   function () minsize_set "wm minsize" (widget,int,int)
-   function (int,int) minsize_get "wm minsize" (widget)
+   function () minsize_set ["wm"; "minsize"; widget; int; int]
+   function (int,int) minsize_get ["wm"; "minsize"; widget]
 ### Override
-   function () overrideredirect_set "wm overrideredirect" (widget,bool)
-   function (bool) overrideredirect_get "wm overrideredirect" (widget)
-   function (string) state "wm state" (widget)
-   function (string) title_get "wm title" (widget)
-   function () title_set "wm title" (widget,string)
-   function () withdraw "wm withdraw" (widget)
+   function () overrideredirect_set ["wm"; "overrideredirect"; widget; bool]
+   function (bool) overrideredirect_get ["wm"; "overrideredirect"; widget]
+   function (string) state ["wm"; "state"; widget]
+   function (string) title_get ["wm"; "title"; widget]
+   function () title_set ["wm"; "title"; widget; string]
+   function () withdraw ["wm"; "withdraw"; widget]
 }
 
 ################ This stuff is not native Tk
@@ -1129,5 +1146,5 @@ module wm {
 # or something equivalent (man library(n) in tcl docs)
 module contrib {
    # File Dialog by Sven Delmas
-   function (string) FSBox "FSBox" ()
+   function (string) FSBox ["FSBox"]
    }
