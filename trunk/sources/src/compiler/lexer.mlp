@@ -195,8 +195,8 @@ rule main = parse
   | "|" { BAR }
   | "|]" { BARRBRACKET }
   | "}" { RBRACE }
-  | "/\\" { SLASHBACKSLASH }
-  | "\\/" { BACKSLASHSLASH }
+  | "&&" { AMPERAMPER }
+  | "||" { BARBAR }
 
   | "!="    { INFIX1 "!=" }
   | "-"     { SUBTRACTIVE "-" }
