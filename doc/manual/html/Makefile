@@ -8,6 +8,9 @@ all: $(FILES) FORCE
 	../../tools/texexpand manual.tex \
         | ../../tools/htmlgen \
         | ../../tools/htmltbl > manual.html
+	cd man-caml; \
+        ../../../tools/htmlcut -3 -11 -12 ../manual.html > index.html
+	cd man-caml; ../../../tools/htmlthread node*.html
 
 FORCE:
 
@@ -16,6 +19,7 @@ clean:
 	@$(MAKE) -f Makefile.refman clean
 	@$(MAKE) -f Makefile.library clean
 	@$(MAKE) -f Makefile.cmds clean
+	cd man-caml; rm -f index.html node*.html
 
 .SUFFIXES:
 .SUFFIXES: .tex .etex
