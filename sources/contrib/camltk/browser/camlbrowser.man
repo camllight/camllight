@@ -39,6 +39,9 @@ modules. Clicking on the
 button will display the list of compiled module interfaces available
 in the 
 .I Load path.
+If a directory is highlighted in the 
+.I Load path
+display, only modules in that directory are prooposed.
 After clicking on the
 .I Ok
 button, the selected modules will be added to the list of 
@@ -92,12 +95,16 @@ is qualified (module__symbol).
 
 .TP
 .B Source display
-.I Open source file
+.I View source file
 allows the display of Caml Light source files, that is implementations (.ml)
 or interfaces (.mli). The given file will be looked for in the
 .I Load path
 (where the current directory is always first and implicit).
 Caml Light keywords are underlined, comments are displayed in red.
+Double-clicking on a directory in the
+.I Load path
+display proposes sources in that directory only.
+
 
 .TP
 .B Source navigation
@@ -119,6 +126,11 @@ definition of the value.
 .B TAGS
 file are loaded when a directory is added to the
 .I Load path.
+
+.TP
+.B Module selection
+Module selection features keyboard completion, and selection of all modules
+(Meta-A).
 
 .SH OPTIONS
 .TP
@@ -165,6 +177,9 @@ Francois Rouaix (Francois.Rouaix@inria.fr)
 .SH BUGS
 Positioning a displayed source file on a given symbol according to a TAGS
 file does not always work (it doesn't work exactly like in Gnu-Emacs anyway).
+
+Special characters (anything except alphanumeric and underscore) will defeat
+the anchor mechanism.
 
 .B camlbrowser
 being the main test program for CamlTk, it is subject to creeping featurism.

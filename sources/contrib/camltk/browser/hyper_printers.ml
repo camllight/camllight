@@ -346,14 +346,24 @@ let hypertext top hn ht =
   (* Disable editing *)
   text__configure t [State Disabled];
   text__yview_line t ht.start_line;
-  (* Assume mark "current" is in anchor *)
+  (* Assume mark "current" is in anchor
+   * Note: there is no way to tell Tk what the syntax table is. Operators
+   * like == and <= will confuse our code. It seems also there is no way
+   * to get the tag region in the context of a tag callback.
+   *)
   let get_current_anchor tagname =
     let b,e = match tagname with
        "" -> text__index t (TextIndex (TI_Mark "current", [WordStart])),
              text__index t (TextIndex (TI_Mark "current", [WordEnd]))
-    | tagname -> text__tag_nextrange t tagname
+    | tagname -> 
+      	try
+          text__tag_nextrange t tagname
       	       	    (TextIndex (TI_Mark "current", [WordStart]))
-		    (TextIndex (TI_End, [])) in
+		    (TextIndex (TI_End, [])) 
+        with
+      	  _ -> 
+           text__index t (TextIndex (TI_Mark "current", [WordStart])),
+           text__index t (TextIndex (TI_Mark "current", [WordEnd]))  in
     text__get t (TextIndex(b,[]))  (TextIndex(e,[])) in
   (* Setup the callbacks *)
   do_list
