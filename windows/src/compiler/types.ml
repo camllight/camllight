@@ -316,24 +316,28 @@ let rec filter (ty1, ty2) =
     and ty2 = type_repr ty2 in
       if ty1 == ty2 then () else begin
         match (ty1.typ_desc, ty2.typ_desc) with
-          Tvar link1, Tvar link2 ->
-            if ty1.typ_level == generic then raise Unify;
+          Tvar link1, Tvar link2 when ty1.typ_level != generic ->
             link1 <- Tlinkto ty2
-        | Tvar link1, _ ->
-            if ty1.typ_level == generic then raise Unify;
-            occur_check ty1.typ_level ty1 ty2;
+        | Tvar link1, _ when ty1.typ_level != generic
+                           & not(occur_check ty1.typ_level ty1 ty2) ->
             link1 <- Tlinkto ty2
         | Tarrow(t1arg, t1res), Tarrow(t2arg, t2res) ->
             filter (t1arg, t2arg);
             filter (t1res, t2res)
         | Tproduct(t1args), Tproduct(t2args) ->
             filter_list (t1args, t2args)
-        | Tconstr(cstr1, ty_list1), Tconstr(cstr2, ty_list2) ->
-            if same_type_constr cstr1 cstr2
-            then filter_list (ty_list1, ty_list2)
-            else filter_expand ty1 ty2
-        | _ ->
-            filter_expand ty1 ty2
+        | Tconstr(cstr1, []), Tconstr(cstr2, [])
+          when same_type_constr cstr1 cstr2 ->
+            ()
+        | Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args), _ ->
+            filter (expand_abbrev params body args, ty2)
+        | _, Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args) ->
+            filter (ty1, expand_abbrev params body args)
+        | Tconstr(cstr1, tyl1), Tconstr(cstr2, tyl2)
+          when same_type_constr cstr1 cstr2 ->
+            filter_list (tyl1, tyl2)
+        | _, _ ->
+            raise Unify
       end
   end
 
@@ -342,15 +346,6 @@ and filter_list = function
   | ty1::rest1, ty2::rest2 ->
       filter(ty1,ty2); filter_list(rest1,rest2)
   | _ ->
-      raise Unify
-
-and filter_expand ty1 ty2 =
-  match (ty1.typ_desc, ty2.typ_desc) with
-    (Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args), _) ->
-      filter (expand_abbrev params body args, ty2)
-  | (_, Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args)) ->
-      filter (ty1, expand_abbrev params body args)
-  | (_, _) ->
       raise Unify
 ;;
 
