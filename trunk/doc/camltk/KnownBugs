@@ -1,0 +1,13 @@
+* duplicate declaration of value constructor (in different types) is not
+  checked. This will cause masking of value constructors
+* subtype definition is not checked by tkcompiler
+  Will produce an "Unbound variable" error message by the Caml compiler
+  on variables of the form "type_subtype_table"
+* builtin types cannot be subtyped 
+* removing actions with various form of "bind" is sometimes incorrect
+
+Missing stuff: 
+	* parsing of configurations
+	* widget classes (bind, ... )
+	* wm functions
+        * placer
