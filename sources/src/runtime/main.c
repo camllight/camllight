@@ -121,6 +121,9 @@ int main(argc, argv)
         break;
       }
 #endif
+      case 'v':
+        verbose_init = 1;
+        break;
       case 'V':
         fprintf(stderr, "The Caml Light runtime system, version %s\n",
                 VERSION);
