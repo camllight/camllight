@@ -13,9 +13,6 @@
 #ifdef macintosh
 #include <Memory.h>
 #endif
-#ifdef __TURBOC__
-#include <alloc.h>
-#endif
 
 #ifdef ANSI
 #include <limits.h>
