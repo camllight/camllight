@@ -451,7 +451,7 @@ let write_function w def =
   | l -> w (catenate_sep " " l); w " =\n"
   end;
   begin match def.result with
-    Unit ->  w "tkEval ";  w code; w ";()\n"
+    Unit ->  w "tkDo ";  w code; w "\n"
   | ty -> w "let res = tkEval "; w code ; w " in \n";
       	  write_result_parsing w ty
   end;
@@ -461,7 +461,7 @@ let write_function w def =
 let write_create w class =
   w  "let create parent options =\n";
   w ("   let w = new_widget_atom \"" ^ class ^ "\" parent in\n");
-  w  "     tkEval [|";
+  w  "     tkDo [|";
   w ("TkToken \"" ^ class ^ "\";\n");
   w ("              TkToken (widget_name w);\n");
   w ("              TkTokenList (map (function x -> "^
@@ -473,7 +473,7 @@ let write_create w class =
 let write_named_create w class =
   w  "let create_named parent name options =\n";
   w ("   let w = new_named_widget \"" ^ class ^ "\" parent name in\n");
-  w  "     tkEval [|";
+  w  "     tkDo [|";
   w ("TkToken \"" ^ class ^ "\";\n");
   w ("              TkToken (widget_name w);\n");
   w ("              TkTokenList (map (function x -> "^

@@ -45,7 +45,7 @@ let search_in_path name =
   let check name =
     try access name [X_OK]; name with Unix_error _ -> raise Not_found
   in
-    if (try string_pos name `/`; true with Not_found -> false) then
+    if (try let _ = string_pos name `/` in true with Not_found -> false) then
       check name
     else
       let path = sys__getenv "PATH" in

@@ -12,7 +12,7 @@ let loc() =
   let n = symbol_end() - debut in
     let buffer = create_string n in
         seek_in !lexer__input_chan debut;
-        input !lexer__input_chan buffer 0 n;
+        let _ = input !lexer__input_chan buffer 0 n in
         seek_in !lexer__input_chan save;
         Tag(buffer, line, debut)
 ;;

@@ -109,7 +109,7 @@ let do_table f h =
         Empty ->
           ()
       | Cons(k, d, rest) -> 
-          f k d; do_bucket rest in
+          let _ = f k d in do_bucket rest in
     do_bucket h.data.(i)
   done
 ;;
@@ -121,7 +121,7 @@ let do_table_rev f h =
         Empty ->
           ()
       | Cons(k, d, rest) ->
-          do_bucket rest; f k d; () in
+          do_bucket rest; let _ = f k d in () in
     do_bucket h.data.(i)
   done
 ;;

@@ -56,17 +56,15 @@ let bind w name f =
 ;;
 (* Sends event <name> to all widgets *)
 let broadcast name =
-  tkEval [| TkToken "set"; 
-      	    TkToken ("camltk_events(" ^ name ^")");
-	    TkToken "all" |];
-  ()	    
+  tkDo [| TkToken "set"; 
+          TkToken ("camltk_events(" ^ name ^")");
+	  TkToken "all" |]
 ;;
 (* Sends event <name> to widget <w> *)
 let send name w =
-  tkEval [| TkToken "set"; 
-      	    TkToken ("camltk_events(" ^ name ^")");
-	    TkToken (support__widget_name w) |];
-  ()	    
+  tkDo [| TkToken "set"; 
+          TkToken ("camltk_events(" ^ name ^")");
+	  TkToken (support__widget_name w) |]
 ;;
 (* Remove all callbacks associated to widget <w> *)
 let remove_callbacks w =

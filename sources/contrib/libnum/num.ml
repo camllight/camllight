@@ -25,12 +25,12 @@ let num_of_big_int bi =
 ;;
 
 let numerator_num = function
-  Ratio r -> normalize_ratio r; num_of_big_int (numerator_ratio r)
+  Ratio r -> num_of_big_int (numerator_ratio (normalize_ratio r))
 | n -> n
 ;;
 
 let denominator_num = function
-  Ratio r -> normalize_ratio r; num_of_big_int (denominator_ratio r)
+  Ratio r -> num_of_big_int (denominator_ratio (normalize_ratio r))
 | n -> Int 1
 ;;
 
@@ -354,7 +354,7 @@ let ratio_of_num = function
 | Ratio r -> r
 
 and num_of_ratio r = 
- normalize_ratio r; 
+ let r = normalize_ratio r in
  if not (is_integer_ratio r) then Ratio r
  else if is_int_big_int (numerator_ratio r) then
         Int (int_of_big_int (numerator_ratio r))

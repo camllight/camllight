@@ -15,8 +15,9 @@ let create top opts navigation =
     if navigation then frx_text__navigation_keys t;
  
     (* Make the text widget an embedded canvas object *)
-    canvas__create_window c (Pixels 0) (Pixels 0)
-      	[Anchor NW; Window t; Tags [Tag "main"]];
+    let _ =
+     canvas__create_window c (Pixels 0) (Pixels 0)
+                           [Anchor NW; Window t; Tags [Tag "main"]] in
     canvas__focus c (Tag "main");
     (*
     canvas__configure c [Width (Pixels (winfo__reqwidth t));

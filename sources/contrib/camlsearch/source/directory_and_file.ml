@@ -14,4 +14,4 @@ let directory_content directory_name =
 
 let is_directory file = (stat file).st_kind = S_DIR;;
 
-let file_exist file = try stat file; true with _ -> false;;
+let file_exist file = try let _ = stat file in true with _ -> false;;

@@ -584,6 +584,9 @@ let make_formatter f g =
 let std_formatter =
     make_formatter (output std_out) (fun () -> flush std_out);;
 
+let err_formatter =
+    make_formatter (output std_err) (fun () -> flush std_err);;
+
 let open_hbox = pp_open_hbox std_formatter
 and open_vbox = pp_open_vbox std_formatter
 and open_hvbox = pp_open_hvbox std_formatter

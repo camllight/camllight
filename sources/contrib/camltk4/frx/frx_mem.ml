@@ -60,7 +60,7 @@ let init () =
     let rec tim () =
       if winfo__exists top then begin
       	display();
-	add_timer (!delay * 1000) tim;
+	let _ = add_timer (!delay * 1000) tim in
 	()
       end
     in

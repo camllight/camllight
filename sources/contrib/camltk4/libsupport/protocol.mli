@@ -72,6 +72,7 @@ and   add_fileoutput : file_descr -> (unit -> unit) -> unit
 and   remove_fileoutput: file_descr -> unit
       (* see [tk] module *)
 and   tkEval : tkArgs vect -> string
+and   tkDo : tkArgs vect -> unit
 and   tkreturn : string -> unit
          = 1 "camltk_return"
 ;;

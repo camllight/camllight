@@ -3,7 +3,7 @@
 #open "unix";;
 
 (*** Miscellaneous ***)
-let nothing _ = ();;
+let ignore _ = ();;
 
 (*** Operations on lists. ***)
 
@@ -114,6 +114,8 @@ let string_trim s =
 
 (*** I/O channels ***)
 
+let skip_binary_int inchan = ignore (input_binary_int inchan);;
+
 let io_channel_of_descr fd =
   {Io_in = in_channel_of_descr fd;
    Io_out = out_channel_of_descr fd;
@@ -129,3 +131,10 @@ let close_io io_channel =
   close_in io_channel.Io_in;;
 
 let std_io = {Io_in = std_in; Io_out = std_out; Io_fd = stdin};;
+
+(*** Formatting ***)
+#open "format";;
+
+let print_word s = print_string s; print_space();;
+
+let message s = print_string s; print_newline();;

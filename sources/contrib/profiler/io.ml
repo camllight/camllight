@@ -59,12 +59,12 @@ let rec input_line chan =
     raise End_of_file
   else if n > 0 then begin              (* n > 0: newline found in buffer *)
     let res = create_string (n-1) in
-    fast_input chan res 0 (n-1);
-    input_char chan;                    (* skip the newline *)
+    let _ = fast_input chan res 0 (n-1) in
+    let _ = input_char chan in          (* skip the newline *)
     res
   end else begin                        (* n < 0: newline not found *)
     let beg = create_string (-n) in
-    fast_input chan beg 0 (-n);
+    let _ = fast_input chan beg 0 (-n) in
     try
       beg ^ input_line chan
     with End_of_file ->

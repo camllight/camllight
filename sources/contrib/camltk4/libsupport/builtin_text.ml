@@ -57,8 +57,9 @@ type textIndex =
 let ppTextIndex = function
    TextIndexNone -> ""
  | TextIndex (base, ml) -> 
-     let (TkToken ppbase) = cCAMLtoTKindex index_text_table base in 
-       it_list (prefix ^) ppbase (map ppTextModifier ml)
+     match cCAMLtoTKindex index_text_table base with
+     | TkToken ppbase -> it_list (prefix ^) ppbase (map ppTextModifier ml)
+     | _ -> raise (TkError "ppTextIndex")
 ;;
 
 let cCAMLtoTKtextIndex i = 

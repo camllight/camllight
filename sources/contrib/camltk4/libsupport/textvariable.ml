@@ -47,7 +47,7 @@ let getv () =
       let v = set__choose !freelist in
 	freelist := set__remove v !freelist;
 	v in
-    tkEval [| TkToken "set"; TkToken v; TkToken "" |];
+    tkDo [| TkToken "set"; TkToken v; TkToken "" |];
     v
 ;;
 
@@ -62,7 +62,7 @@ let create () = getv ()
 ;;
 
 let set v x =
-  tkEval [| TkToken "set"; TkToken v; TkToken x |]; ()
+  tkDo [| TkToken "set"; TkToken v; TkToken x |]
 ;;
 let get v =
   tkEval [| TkToken "set"; TkToken v |]

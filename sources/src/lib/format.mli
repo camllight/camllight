@@ -31,33 +31,6 @@
 #open "io";;
 
 (*** Boxes *)
-value open_hbox : unit -> unit;;
-        (* [open_hbox ()] opens a new pretty-printing box.
-           This box is ``horizontal'': the line is not split in this box
-           (new lines may still occur inside boxes nested deeper). *)
-value open_vbox : int -> unit;;
-        (* [open_vbox d] opens a new pretty-printing box
-           with offset [d]. 
-           This box is ``vertical'': every break hint inside this
-           box leads to a new line.
-           When a new line is printed in the box, [d] is added to the
-           current indentation. *)
-value open_hvbox : int -> unit;;
-        (* [open_hovbox d] opens a new pretty-printing box
-           with offset [d]. 
-           This box is ``horizontal-vertical'': it behaves as an
-           ``horizontal'' box if it fits on a single line,
-           otherwise it behaves as a ``vertical'' box.
-           When a new line is printed in the box, [d] is added to the
-           current indentation. *)
-value open_hovbox : int -> unit;;
-        (* [open_hovbox d] opens a new pretty-printing box
-           with offset [d]. 
-           This box is ``horizontal or vertical'': break hints
-           inside this box may lead to a new line, if there is no more room
-           on the line to print the remainder of the box.
-           When a new line is printed in the box, [d] is added to the
-           current indentation. *)
 value open_box : int -> unit;;
         (* [open_box d] opens a new pretty-printing box
            with offset [d]. 
@@ -89,6 +62,19 @@ value print_bool : bool -> unit;;
         (* Print an boolean in the current box. *)
 
 (*** Break hints *)
+value print_space : unit -> unit;;
+        (* [print_space ()] is used to separate items (typically to print
+           a space between two words). 
+           It indicates that the line may be split at this
+           point. It either prints one space or splits the line.
+           It is equivalent to [print_break (1, 0)]. *)
+value print_cut : unit -> unit;;
+        (* [print_cut ()] is used to mark a good break position.
+           It indicates that the line may be split at this 
+           point. It either prints nothing or splits the line.
+           This allows line splitting at the current
+           point, without printing spaces or adding indentation.
+           It is equivalent to [print_break (0, 0)]. *)
 value print_break : int * int -> unit;;
         (* Insert a break hint in a pretty-printing box.
            [print_break (nspaces, offset)] indicates that the line may
@@ -97,15 +83,6 @@ value print_break : int * int -> unit;;
            If the line is split at that point, [offset] is added to
            the current indentation. If the line is not split,
            [nspaces] spaces are printed. *)
-value print_cut : unit -> unit;;
-        (* [print_cut ()] is equivalent to [print_break (0,0)].
-           This allows line splitting at the current point, without printing
-           spaces or adding indentation. *)
-value print_space : unit -> unit;;
-        (* [print_space ()] is equivalent to [print_break (1,0)].
-           This either prints one space or splits the line at that point. *)
-value force_newline : unit -> unit;;
-        (* Force a newline in the current box. *)
 
 value print_flush : unit -> unit;;
         (* Flush the pretty printer: all opened boxes are closed,
@@ -113,31 +90,13 @@ value print_flush : unit -> unit;;
 value print_newline : unit -> unit;;
         (* Equivalent to [print_flush] followed by a new line. *)
 
+value force_newline : unit -> unit;;
+        (* Force a newline in the current box. Not the normal way of
+           pretty-printing, you should prefer break hints. *)
 value print_if_newline : unit -> unit;;
         (* Execute the next formatting command if the preceding line
            has just been split. Otherwise, ignore the next formatting
            command. *)
-
-(*** Tabulations *)
-value open_tbox : unit -> unit;;
-        (* Open a tabulation box. *)
-value close_tbox : unit -> unit;;
-        (* Close the most recently opened tabulation box. *)
-value print_tbreak : int * int -> unit;;
-        (* Break hint in a tabulation box.
-           [print_tbreak (spaces, offset)] moves the insertion point to
-           the next tabulation ([spaces] being added to this position).
-           Nothing occurs if insertion point is already on a
-           tabulation mark.
-           If there is no next tabulation on the line, then a newline
-           is printed and the insertion point moves to the first
-           tabulation of the box.
-           If a new line is printed, [offset] is added to the current
-           indentation. *)
-value set_tab : unit -> unit;;
-        (* Set a tabulation mark at the current insertion point. *)
-value print_tab : unit -> unit;;
-        (* [print_tab ()] is equivalent to [print_tbreak (0,0)]. *)
 
 (*** Margin *)
 value set_margin : int -> unit;;
@@ -172,6 +131,56 @@ value set_max_boxes : int -> unit;;
 value get_max_boxes : unit -> int;;
         (* Return the maximum number of boxes allowed before ellipsis. *)
 
+(*** Advanced formatting *)
+value open_hbox : unit -> unit;;
+        (* [open_hbox ()] opens a new pretty-printing box.
+           This box is ``horizontal'': the line is not split in this box
+           (new lines may still occur inside boxes nested deeper). *)
+value open_vbox : int -> unit;;
+        (* [open_vbox d] opens a new pretty-printing box
+           with offset [d]. 
+           This box is ``vertical'': every break hint inside this
+           box leads to a new line.
+           When a new line is printed in the box, [d] is added to the
+           current indentation. *)
+value open_hvbox : int -> unit;;
+        (* [open_hovbox d] opens a new pretty-printing box
+           with offset [d]. 
+           This box is ``horizontal-vertical'': it behaves as an
+           ``horizontal'' box if it fits on a single line,
+           otherwise it behaves as a ``vertical'' box.
+           When a new line is printed in the box, [d] is added to the
+           current indentation. *)
+value open_hovbox : int -> unit;;
+        (* [open_hovbox d] opens a new pretty-printing box
+           with offset [d]. 
+           This box is ``horizontal or vertical'': break hints
+           inside this box may lead to a new line, if there is no more room
+           on the line to print the remainder of the box.
+           When a new line is printed in the box, [d] is added to the
+           current indentation. *)
+
+(*** Tabulations *)
+value open_tbox : unit -> unit;;
+        (* Open a tabulation box. *)
+value close_tbox : unit -> unit;;
+        (* Close the most recently opened tabulation box. *)
+value print_tbreak : int * int -> unit;;
+        (* Break hint in a tabulation box.
+           [print_tbreak (spaces, offset)] moves the insertion point to
+           the next tabulation ([spaces] being added to this position).
+           Nothing occurs if insertion point is already on a
+           tabulation mark.
+           If there is no next tabulation on the line, then a newline
+           is printed and the insertion point moves to the first
+           tabulation of the box.
+           If a new line is printed, [offset] is added to the current
+           indentation. *)
+value set_tab : unit -> unit;;
+        (* Set a tabulation mark at the current insertion point. *)
+value print_tab : unit -> unit;;
+        (* [print_tab ()] is equivalent to [print_tbreak (0,0)]. *)
+
 (*** Ellipsis *)
 value set_ellipsis_text : string -> unit;;
         (* Set the text of the ellipsis printed when too many boxes
@@ -182,8 +191,9 @@ value get_ellipsis_text : unit -> string;;
 (*** Redirecting formatter output *)
 value set_formatter_out_channel : out_channel -> unit;;
         (* Redirect the pretty-printer output to the given channel. *)
+
 value set_formatter_output_functions :
-        (string -> int -> int -> unit) -> (unit -> unit) -> unit;;
+      (string -> int -> int -> unit) -> (unit -> unit) -> unit;;
         (* [set_formatter_output_functions out flush] redirects the
            pretty-printer output to the functions [out] and [flush].
            The [out] function performs the pretty-printer output.
@@ -205,16 +215,28 @@ type formatter;;
            Parameters of the pretty-printer are local to the pretty-printer:
            margin, maximum indentation limit, maximum number of boxes
            simultaneously opened, ellipsis, and so on, are specific to
-           each pretty-printer and may be fixed independantly. *)
+           each pretty-printer and may be fixed independantly.
+           A new formatter is obtained by calling the [make_formatter]
+           function. *) 
 
 value std_formatter : formatter;;
         (* The standard formatter used by the formatting functions
-           above. *)
+           above. It is defined using [make_formatter] with
+           output function [output std_out] and flushing function
+           [fun () -> flush std_out]. *)
+
+value err_formatter : formatter;;
+        (* A formatter to use with formatting functions below for
+           output to standard error. It is defined using [make_formatter] with
+           output function [output std_err] and flushing function
+           [fun () -> flush std_err]. *)
 
 value make_formatter :
         (string -> int -> int -> unit) -> (unit -> unit) -> formatter;;
-        (* Return a new formatter that writes according to the
-           output functions given as argument. *)
+        (* [make_formatter out flush] returns a new formatter that
+           writes according to the output function [out], and flushing
+           function [flush]. Hence, a formatter to out channel [oc]
+           is returned by [make_formatter (output oc) (fun () -> flush oc)]. *)
 
 value pp_open_hbox : formatter -> unit -> unit;;
 value pp_open_vbox : formatter -> int -> unit;;
@@ -258,5 +280,4 @@ value pp_get_formatter_output_functions :
            operating on the standard formatter are defined via partial
            evaluation of these primitives. For instance,
            [print_string] is equal to [pp_print_string std_formatter]. *)
-
 
