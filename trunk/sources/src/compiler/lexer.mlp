@@ -241,18 +241,12 @@ and string = parse
       { () }
   | `\\` [` ` `\010` `\013` `\009` `\026` `\012`] +
       { string lexbuf }
-  | `\\` [`\\` `"` `*` `)` `n` `t` `b` `r`]
+  | `\\` [`\\` `"` `n` `t` `b` `r`]
       { store_string_char(char_for_backslash(get_lexeme_char lexbuf 1));
         string lexbuf }
   | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`]
       { store_string_char(char_for_decimal_code lexbuf 1);
          string lexbuf }
-  | "(*"
-      { raise (Lexical_error(No_comment_start_in_string,
-                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
-  | "*)"
-      { raise (Lexical_error(No_comment_end_in_string,
-                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
   | eof
       { raise (Lexical_error(Unterminated_string, -1, -1)) }
   | _

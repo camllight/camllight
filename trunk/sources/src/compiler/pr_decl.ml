@@ -7,37 +7,37 @@
 #open "printf";;
 
 let print_expr ty =
-  printf "(\* - : %v *\)\n" ty;
+  printf "(* - : %a *)\n" output_one_type ty;
   flush std_out
 ;;
 
 let print_valdef env =
   do_list
-    (fun (name, (typ, mut_flag)) -> printf "value %s : %v;;\n" name typ)
+    (fun (name, (typ, mut_flag)) ->
+       printf "value %s : %a;;\n" name output_one_type typ)
     env;
   flush std_out
 ;;
 
 let print_constr_decl cstr =
-  print_string cstr.qualid.id;
   match cstr.info.cs_kind with
     Constr_constant ->
       printf "%s\n" cstr.qualid.id
   | _ ->
-      printf "%s of %s%t\n"
+      printf "%s of %s%a\n"
              cstr.qualid.id
              (match cstr.info.cs_mut with Mutable -> "mutable " | _ -> "")
-             cstr.info.cs_arg
+             output_type cstr.info.cs_arg
 ;;
 
 let print_label_decl lbl =
-  printf "%s%s : %t\n"
+  printf "%s%s : %a\n"
          (match lbl.info.lbl_mut with Mutable -> "mutable " | _ -> "")
-         lbl.qualid.id lbl.info.lbl_arg
+         lbl.qualid.id output_type lbl.info.lbl_arg
 ;;
 
 let print_one_typedecl (ty_res, ty_comp) =
-  printf "%v" ty_res;
+  output_one_type stdout ty_res;
   begin match ty_comp with
     Variant_type(cstr1::cstrl) ->
       print_string " = \n    "; print_constr_decl cstr1;
@@ -47,7 +47,7 @@ let print_one_typedecl (ty_res, ty_comp) =
       do_list (fun lbl -> print_string "  ; "; print_label_decl lbl) lbll;
       print_string "  }\n"
   | Abbrev_type(_, ty_body) ->
-      printf " == %t\n" ty_body
+      printf " == %a\n" output_type ty_body
   | Abstract_type ->
       print_string "\n"
   end

@@ -75,6 +75,7 @@ version.ml: version.mlp ../version.h
 ### DO NOT DELETE THIS LINE
 lexer.zi: parser.zi 
 parser.zi: syntax.zo 
+all.zo: misc.zo pr_type.zo modules.zo globals.zo config.zi compiler.zo 
 back.zo: prim.zo lambda.zo const.zo misc.zo instruct.zo 
 buffcode.zo: misc.zo config.zi opcodes.zo 
 builtins.zo: misc.zo modules.zo globals.zo const.zo 
@@ -89,7 +90,8 @@ emit_phr.zo: event.zo reloc.zo lambda.zo emitcode.zo buffcode.zo \
     instruct.zo labels.zo 
 emitcode.zo: prim.zo reloc.zo prim_opc.zo lambda.zo config.zi labels.zo \
     const.zo misc.zo event.zo instruct.zo buffcode.zo opcodes.zo 
-error.zo: misc.zo syntax.zo location.zi globals.zo types.zo const.zo 
+error.zo: misc.zo syntax.zo pr_type.zo location.zi globals.zo types.zo \
+    const.zo 
 event.zo: syntax.zo lambda.zo modules.zo location.zi 
 front.zo: trstream.zo prim.zo lambda.zo error.zo tr_env.zo modules.zo \
     location.zi const.zo misc.zo match.zo event.zo syntax.zo globals.zo \

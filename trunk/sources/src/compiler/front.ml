@@ -94,6 +94,33 @@ let partial_try (tsb : bool) =
   Lprim(Praise, [Lvar 0])
 ;;
 
+(* Optimisation of generic comparisons *)
+
+let translate_compar gen_fun (int_comp, float_comp) ty arg1 arg2 =
+  let comparison =
+    if types__same_base_type ty type_int or
+       types__same_base_type ty type_char then
+      Ptest int_comp
+    else if types__same_base_type ty type_float then
+      Ptest float_comp
+    else match (int_comp, arg1, arg2) with
+      (Pint_test PTeq, Lconst(SCblock(tag, [])), _) -> Ptest Peq_test
+    | (Pint_test PTnoteq, Lconst(SCblock(tag, [])), _) -> Ptest Pnoteq_test
+    | (Pint_test PTeq, _, Lconst(SCblock(tag, []))) -> Ptest Peq_test
+    | (Pint_test PTnoteq, _, Lconst(SCblock(tag, []))) -> Ptest Pnoteq_test
+    | _ -> Pccall(gen_fun, 2) in
+  Lprim(comparison, [arg1; arg2])
+;;
+
+let comparison_table =
+  ["equal",        (Pint_test PTeq, Pfloat_test PTeq);
+   "notequal",     (Pint_test PTnoteq, Pfloat_test PTnoteq);
+   "lessthan",     (Pint_test PTlt, Pfloat_test PTlt);
+   "lessequal",    (Pint_test PTle, Pfloat_test PTle);
+   "greaterthan",  (Pint_test PTgt, Pfloat_test PTgt);
+   "greaterequal", (Pint_test PTge, Pfloat_test PTge)]
+;;
+
 (* Translation of expressions *)
 
 let rec translate_expr env =
@@ -172,6 +199,13 @@ let rec translate_expr env =
             match (p, args) with
               (Praise, [arg1]) ->
                 Lprim(p, [event__after env arg1 (transl arg1)])
+            | (Pccall(fn, _), [arg1; arg2]) ->
+                begin try
+                  translate_compar fn (assoc fn comparison_table)
+                                   arg1.e_typ (transl arg1) (transl arg2)
+                with Not_found ->
+                  Lprim(p, map transl args)
+                end
             | (_, _) ->
                 Lprim(p, map transl args)
           else
