@@ -2,45 +2,61 @@
 #open "const";;
 #open "globals";;
 #open "modules";;
-#open "hyper_printers";;
-#open "tk";;
 
+#open "tk";;
+#open "support";;
+
+#open "hyper_printers";;
+#open "source";;
+#open "tags";;
+
+
+(* Namer for toplevel widgets *)
 let new_visual_top =
   let cnter = ref 0 in
   function () ->
    incr cnter; "global" ^ string_of_int !cnter
 ;;
 
-
+(* Abstraction for displaying an object of type 'a associated to a symbol  *)
 type 'a visual =
-    { namer : 'a -> string;
-      finder : string -> 'a;
-      hyperprinter : 'a -> unit
+    { titler : 'a -> string;		(* title from object *)
+      finder : string -> 'a;		(* finding an object *)
+      hyperprinter : 'a -> hypertext;   (* printing the object *)
+      hypernav : 'a -> hypernav         (* navigation *)
     }
 ;;
-    
+
+(* Display on object associated to sym according to abstraction visual *)    
+
 let rec visual_meta visual silent sym =
   try
-    let desc = visual.finder sym in
+    (* Find the object *)
+    let object = visual.finder sym in
+
     let t = toplevelw__create 
-      	       (support__new_toplevel_widget (new_visual_top ())) [] in
+      	       (new_toplevel_widget (new_visual_top ())) [] in
     let title =
-      label__create t [Text (visual.namer desc); Relief Raised] in
+      label__create t [Text (visual.titler object); Relief Raised] in
+
     pack [title] [Fill Fill_X];
     label__configure title [Cursor (XCursor "watch")];
-    update_idletasks();
+    update_idletasks(); (* should display the title ! *)
+
     let f = frame__create t [] in
-    let tx = hypertext f visual.hyperprinter desc in
+    let tx = 
+       hypertext f (visual.hypernav object) (visual.hyperprinter object) in
     let sb = scrollbar__create f [] in
       util__scroll_text_link sb tx;
       pack [tx] [Side Side_Left; Fill Fill_Both; Expand true];
       pack [sb] [Side Side_Left; Fill Fill_Y];
-      (* This does not work at the moment *)
       util__navigation_keys tx sb;
 
     let q = 
       button__create t [Text "Ok"; Relief Raised; 
       	       	        Command (fun _ -> destroy t)] in
+
+    (* An easy way to quit *)
     bind tx [[Any],XKey "Escape"] 
       	     (BindSet([], (fun _ -> button__invoke q)));
     pack [f] [Fill Fill_Both; Expand true];
@@ -49,7 +65,7 @@ let rec visual_meta visual silent sym =
     util__resizeable t
    with   
     Toplevel -> begin
-	 dialog (support__new_toplevel_widget "error")
+	 dialog (new_toplevel_widget "error")
 	     "Caml Browser Error"
 	     ( "Cannot open module :" ^ sym)
 	     (Predefined "error")
@@ -59,13 +75,20 @@ let rec visual_meta visual silent sym =
 	end
    | Desc_not_found -> 
       	if not silent then begin
-	  dialog (support__new_toplevel_widget "error")
+	  dialog (new_toplevel_widget "error")
 	      "Caml Browser Error"
 	      ( sym ^ " is undefined")
 	      (Predefined "error")
 	      0
 	      ["Ok"];
 	  ()
+         end
+   | Cannot_find_file filename ->
+      begin 
+       dialog (support__new_toplevel_widget "error")
+      	      "Caml Browser Error"
+	      ("Cannot open " ^ filename )
+	      (Predefined "error") 0 ["Ok"]; ()
         end
 ;;
 
@@ -95,53 +118,156 @@ let str_to_qual s =
   with Not_found -> GRname s
 ;;
 
-let global_namer g =
-  g.qualid.qual ^ "__" ^ g.qualid.id
+(* Associate a title to a global *)
+let global_titler what g =
+  what ^ " " ^ g.qualid.qual ^ "__" ^ g.qualid.id
 ;;
 
 
-let visual_type =
-    visual_meta {namer = (function g -> "Type " ^ global_namer g);
+(* The navigators *)
+(* Monomorphic let rec hits again : one global_navigators should be enough *)
+(*  anchor "hypertype"  : we know it is a type so search only in types *)
+(*  anchor "hypersource": we don't know what it is, and we want to se  *)
+(*                       its source, if possible. Use Emacs TAGS       *)
+
+let rec type_navigators desc =
+  { anchor_attribs =
+      	["hypertype", [Foreground Blue]; "hypersource", [Foreground Red]];
+    navigators =
+      	["hypertype", visual_type false; 
+      	 "hypersource", visual_source desc.qualid.qual]
+  }
+and constr_navigators desc =
+  { anchor_attribs =
+      	["hypertype", [Foreground Blue]; "hypersource", [Foreground Red]];
+    navigators =
+      	["hypertype", visual_type false; 
+      	 "hypersource", visual_source desc.qualid.qual]
+  }
+and label_navigators desc =
+  { anchor_attribs =
+      	["hypertype", [Foreground Blue]; "hypersource", [Foreground Red]];
+    navigators =
+      	["hypertype", visual_type false; 
+      	 "hypersource", visual_source desc.qualid.qual]
+  }
+and value_navigators desc =
+  { anchor_attribs =
+      	["hypertype", [Foreground Blue]; "hypersource", [Foreground Red]];
+    navigators =
+      	["hypertype", visual_type false; 
+      	 "hypersource", visual_source desc.qualid.qual]
+  }
+
+(* Visualisation of type definitions *)
+and visual_type f d =
+    visual_meta {titler = global_titler "Type";
       	       	 finder = (function s -> find_type_desc (str_to_qual s));
-		 hyperprinter = print_type_desc}
-;;
+		 hyperprinter = hyper_print print_type_desc;
+      	       	 hypernav = type_navigators
+                } f d
 
-hyper_action := visual_type false
-;;
-
-
-let visual_constr =
-    visual_meta {namer = (function g -> "Constructor " ^ global_namer g);
+(* Visualisation of value constructors *)
+and visual_constr f d =
+    visual_meta {titler = global_titler "Constructor";
       	       	 finder = (function s -> find_constr_desc (str_to_qual s));
-		 hyperprinter = print_constr_desc}
-;;
-
-let visual_value =
-    visual_meta {namer = (function g -> "Value " ^ global_namer g);
+		 hyperprinter = hyper_print print_constr_desc;
+                 hypernav = constr_navigators
+                } f d
+(* Visualisation of values *)
+and visual_value f d =
+    visual_meta {titler = global_titler "Value";
       	       	 finder = (function s -> find_value_desc (str_to_qual s));
-		 hyperprinter = print_value_desc}
-;;
-
-let visual_label =
-    visual_meta {namer = (function g -> "Label " ^ global_namer g);
+		 hyperprinter = hyper_print print_value_desc;
+      	       	 hypernav = value_navigators
+                } f d
+(* Visualisation of labels *)
+and visual_label f d =
+    visual_meta {titler = global_titler "Label";
       	       	 finder = (function s -> find_label_desc (str_to_qual s));
-		 hyperprinter = print_label_desc}
-;;
-
-let visual_module =
-    visual_meta {namer = (function m -> "Module " ^ m.mod_name);
-      	         finder = find_module;
-		 hyperprinter = print_module}
-;;
-
-		 
-
-
-let visual_search_any s =
+		 hyperprinter = hyper_print print_label_desc;
+      	       	 hypernav = label_navigators
+                } f d
+(* Combined search, does not expect to find objects *)
+and visual_search_any s =
   visual_type true s;
   visual_constr true s;
   visual_value true s;
   visual_label true s
+
+(* Navigation when we browse source files (.ml and .mli) *)
+and source_navigator _ = { 
+    anchor_attribs = ["keyword", [Underline true];
+       	       	      "comment", [Foreground Red];
+      	       	      "modules", [Foreground Green]];
+    navigators = [ "", visual_search_any;
+      	       	   "modules", visual_module true]}
+
+(* Visualize source for s in module m *)
+and visual_source_ml m s =
+ try 
+  let h1 = hashtbl__find dotml_emacs_tags m in
+  let linenum = hashtbl__find h1 s in
+    visual_meta {titler = (function _ -> m ^ ".ml") ;
+                 finder = (function _ -> load_file (m^".ml"));
+                 hyperprinter = 
+      	       	    (function src -> 
+      	       	       	{text = src;
+		         start_line = linenum;
+			 anchor_indexes= compute_source_tags src});
+		 hypernav = source_navigator}
+                true 
+                s
+ with
+  _ -> ()
+
+(* Visualize interface for s in module m *)
+and visual_source_mli m s =
+ try 
+  let h1 = hashtbl__find dotmli_emacs_tags m in
+  let linenum = hashtbl__find h1 s in
+    visual_meta {titler = (function _ -> m ^ ".mli") ;
+                 finder = (function _ -> load_file (m^".mli"));
+                 hyperprinter = 
+      	       	    (function s -> {text = s;
+		                    start_line = linenum;
+				    anchor_indexes= compute_source_tags s});
+		 hypernav = source_navigator}
+                true 
+                s
+ with
+  _ -> ()
+
+(* Visual whatever source is available for s in m *)
+and visual_source m s =
+  visual_source_ml m s;
+  visual_source_mli m s
+
+(* Display a source file (.ml or .mli) *)
+and display_file f =
+    visual_meta {titler = (function _ -> f) ;
+                 finder = (function _ -> load_file f);
+                 hyperprinter = 
+      	       	    (function s -> {text = s;
+		                    start_line = 0;
+				    anchor_indexes= compute_source_tags s});
+		 hypernav = source_navigator}
+                true 
+                f
+(* Visualize a full module from its compiled interface *)
+and module_navigators m =
+  { anchor_attribs =
+      	["hypertype", [Foreground Blue]; "hypersource", [Foreground Red]];
+    navigators =
+      	["hypertype", visual_type false; 
+      	 "hypersource", visual_source m.mod_name]
+  }
+
+
+and visual_module f d =
+    visual_meta {titler = (function m -> "Module " ^ m.mod_name);
+      	         finder = find_module;
+		 hyperprinter = hyper_print print_module;
+      	       	 hypernav = module_navigators;
+                } f d
 ;;
-
-

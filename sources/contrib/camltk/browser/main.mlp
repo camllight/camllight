@@ -4,9 +4,8 @@
 #open "config";;
 #open "misc";;
 #open "modules";;
-#open "hyper_printers";;
 #open "visual";;
-#open "source";;
+#open "tags";;
 #open "util";;
 
 let bye () = 
@@ -84,7 +83,8 @@ let path_panel parent =
 
   let add_path n =
       load_path := n :: !load_path;
-      listbox__insert lb (Number 0) [n] in
+      listbox__insert lb (Number 0) [n];
+      read_tags n in
 
   let o = button__create f
       [Text "Add Directory"; Relief Raised; 
@@ -122,7 +122,8 @@ let browsing_panel parent =
    (* Loading a source file *)
    let o2 = button__create f
       [Text "Open source file"; Relief Raised;
-       Command (fun () -> open_req "Open a source file" display_file)] in
+       Command 
+        (fun () -> open_req "Open a source file" display_file)] in
 
    pack [o2; enterf] [Side Side_Bottom; Fill Fill_X];
    f
@@ -137,12 +138,6 @@ let main () =
       WidgetDefault;
   resource__add "*module_set" "cautious"
       WidgetDefault;
-
-  (* highlighting of anchors *)
-  begin match colormodel__get top with
-      Monochrome -> anchor_attrib := [Underline true]
-    | _ -> ()
-  end;
 
   let t = label__create top [Text "Caml Browser"; Relief Raised] in
 
@@ -172,6 +167,8 @@ let main () =
   add_path !path_library;
   reset_opened_modules();
   do_list add_module !default_used_modules;
+
+  do_list read_tags !load_path ;
 
   arg__parse [
        "-stdlib", arg__String 
