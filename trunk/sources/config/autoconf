@@ -209,6 +209,16 @@ if sh hasgot mkfifo; then
   echo "#define HAS_MKFIFO" >> s.h
 fi
 
+if sh hasgot getcwd; then
+  echo "getcwd() found."
+  echo "#define HAS_GETCWD" >> s.h
+fi
+
+if sh hasgot getwd; then
+  echo "getwd() found."
+  echo "#define HAS_GETWD" >> s.h
+fi
+
 if sh hasgot getpriority setpriority; then
   echo "getpriority() found."
   echo "#define HAS_GETPRIORITY" >> s.h
