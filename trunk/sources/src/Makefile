@@ -13,7 +13,7 @@ OPTS=#-fno-defer-pop
 # Extra libraries that have to be linked with the runtime system.
 # The math library "-lm" is linked by default.
 # On most machines, nothing else is needed.
-# On System V and derivatives, you may need -lsocket, -lnsl, and/or -lucb.
+# Under Solaris: -lsocket -lnsl
 LIBS=
 
 # How to call the C preprocessor on a file that does not have the .c extension.
