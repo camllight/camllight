@@ -71,6 +71,10 @@ while : ; do
       shift;;
     -custom)
       custom="-custom /tmp/camlprim.$$.c";;
+    -lang)
+      compflags="$compflags -lang $2"
+      linkflags="$compflags -lang $2"
+      shift;;
     *.c)
       $cc -c -I$stdlib $ccopt $1 || exit $?
       ccfiles="$ccfiles `basename $1 .c`.o";;
@@ -91,10 +95,6 @@ while : ; do
       p=p
       prodump=$stdlib/prodump.zo
       proflags=`echo $1 | sed -e 's/^-p//'`;;
-    -lang)
-      compflags="$compflags -lang $2"
-      linkflags="$compflags -lang $2"
-      shift;;
     -*)
       echo "Unknown option \"$1\", ignored" >&2;;
     *)
