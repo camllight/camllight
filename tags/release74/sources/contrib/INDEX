@@ -1,0 +1,99 @@
+debugger
+--------
+  A source-level debugger with full replay capability.
+
+  Requirements:
+        - a Unix kernel that supports sockets
+        - the "libunix" package
+        - the "camlmode" package to benefit from the Emacs interface.
+
+profiler
+--------
+  A profiler for Caml Light programs. Counts the number of times functions
+  are called, and conditional branches are selected.
+
+camltk
+------
+  An X Windows toolkit to build graphical user interfaces, built on top of
+  Tcl/Tk.
+
+  Requirements:
+        - X11R5 or later
+        - Tk 3.3 or later (tested on 3.6)
+        - a full installation of Tcl/Tk (including the libraries libtcl.a
+          and libtk.a, and the wish interpreter)
+        - the "libunix" package
+
+camltk4
+-------
+  Same as camltk, but for Tk 4.0
+  Requirements:
+        - X11R5 or later
+        - Tk 4.0
+        - a full installation of Tcl/Tk (including the libraries libtcl.a
+          and libtk.a, and the wish interpreter)
+        - the "libunix" package
+
+libgraph
+--------
+  An X Windows implementation of the portable drawing library "graphics".
+
+  Requirements:
+        - X11R4 or later
+        - the "libunix" package
+  
+libunix
+-------
+  A library of Unix system calls, to support systems programming in Caml Light.
+
+libnum
+------
+  A library of arbitrary-precision arithmetic functions over integers and
+  rationals.
+  
+libstr
+------
+  A library of string processing functions (regular expression matching, etc).
+
+mletags
+-------
+  A tool to index Caml Light sources and generate "tag" files for Gnu Emacs.
+
+  Requirements:
+        - Gnu Emacs 18 or 19
+
+camlmode
+--------
+  Emacs Lisp files to edit Caml code, interface with the debugger, and
+  run the toplevel under Gnu Emacs.
+
+  Requirements:
+        - Gnu Emacs 19
+
+caml-tex
+--------
+  A preprocessor to insert Caml code in TeX/LaTeX sources.
+
+  Requirements:
+        - TeX/LaTeX 2.09
+        - Perl
+
+caml-latex2e
+--------
+  Enhanced version of caml-tex, for use with Latex2e.
+
+  Requirements:
+        - LaTeX2e
+        - Perl
+
+camlsearch
+----------
+  A tool to search library functions by their types.
+
+  Requirements:
+        - the "libunix" package
+
+lorder
+------
+  A tool to compute the dependencies between a set of .zo files
+  and suggest a correct linking order.

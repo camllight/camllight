@@ -1,0 +1,483 @@
+#open "printf";;
+#open "filename";;
+#open "config";;
+#open "misc";;
+#open "modules";;
+#open "location";;
+#open "syntax";;
+#open "lexer";;
+#open "parser";;
+#open "typing";;
+#open "ty_decl";;
+#open "ty_intf";;
+
+
+(* Errors specific to the profiler *)
+exception Profiler
+;;
+
+let profiler_failwith s =
+  eprintf "Profiler error: %s\n" s;
+  flush stderr;
+  raise Profiler
+;;
+
+
+(* Modes *)
+let instr_fun    = ref false
+and instr_match  = ref false
+and instr_if	 = ref false
+and instr_loops  = ref false
+and instr_try	 = ref false
+;;
+
+let cur_point = ref 0
+and infile = ref stdin
+and outfile = ref stdout
+;;
+
+(* In case we forgot something *)
+exception Inversion of int * int;;
+
+let copy next =
+  seek_in !infile !cur_point;
+  let buf = try create_string (next - !cur_point)
+            with Invalid_argument _ -> raise (Inversion (!cur_point,next))
+  in really_input !infile buf 0 (next - !cur_point);
+     fprint !outfile buf; 
+     cur_point := next
+;;
+
+let profile_counter = ref 0;;
+
+let instr_mode = ref false;;
+let insert_action = ref (fun x -> () : int -> unit)
+;;
+
+(* Producing instrumented code *)
+let add_incr_counter mod_name prof_counter =
+   fprintf !outfile "%s__profile.(%d) <- %s__profile.(%d) + 1; "
+           mod_name prof_counter mod_name prof_counter; 
+   ()
+;;
+
+let counters = ref (make_vect 0 0)
+;;
+
+(* User defined marker *)
+let special_id = ref ""
+;;
+
+(* Producing results of profile run *)
+let add_val_counter prof_counter =
+   fprintf !outfile "(* %s%d *) " !special_id !counters.(prof_counter); 
+   ()
+;;
+
+let insert_profile {e_loc = Loc(st,en)} =
+   copy st;
+   !insert_action !profile_counter; 
+   incr profile_counter
+;;
+
+let insert_open {e_loc = Loc(st,_)} =
+   if !instr_mode then begin
+     copy st;
+     fprint !outfile "("
+     end
+;;
+
+let insert_close {e_loc = Loc(_,fin)} =
+   if !instr_mode then begin
+     copy fin;
+     fprint !outfile ")"
+     end
+;;
+
+let init_rewrite modes mod_name =
+  cur_point := 0;
+  profile_counter := 0;
+  if !instr_mode then begin
+                 (* 0123456789012345678901234567890 *)
+  fprintf !outfile "let profile = make_vect 000000 0;; ";
+  fprintf !outfile 
+      	  "profiler__counters := (\"%s\", (\"%s\",profile)) :: !profiler__counters;; "
+          mod_name
+	  modes
+  end
+;;
+
+let final_rewrite () =
+  copy (in_channel_length !infile);
+  if !instr_mode then begin
+  let len = string_of_int !profile_counter
+  in if string_length len > 6 then profiler_failwith "too many functions";
+     seek_out !outfile (30 - string_length len);
+     fprint !outfile len
+   end;
+  close_out !outfile
+;;
+
+
+let do_directive loc = function
+    Zdir("open", name) ->
+      open_module name
+  | Zdir("close", name) ->
+      close_module name
+  | Zdir("infix", name) ->
+      add_infix name
+  | Zdir("uninfix", name) ->
+      remove_infix name
+  | Zdir("directory", dirname) ->
+      load_path := dirname :: !load_path
+  | Zdir(d, name) ->
+      eprintf 
+        "%aWarning: unknown directive \"#%s\", ignored.\n"
+        output_location loc d;
+      flush stderr
+;;
+
+(* Monomorphic letrec hits again. *)
+let rec rewrite_patexpr_list l
+    = rewrite_expr_list (map snd l)
+
+and rewrite_patlexpr_list l
+    = rewrite_expr_list (map snd l)
+
+and rewrite_labelexpr_list l
+    = rewrite_expr_list (map snd l)
+
+and rewrite_expr_list l = do_list rewrite_expr l
+
+and rewrite_expr e =
+  match e.e_desc
+  with 
+       Zident _ -> ()
+     | Zconstant _ -> ()
+     | Ztuple l -> rewrite_expr_list l
+     | Zconstruct0 _ -> ()
+     | Zconstruct1 (_, e) -> rewrite_expr e
+     | Zapply ({e_desc=Zfunction plelist; e_loc=Loc(_,endb)}, 
+      	     [{e_desc=_; e_loc=Loc(starte, _)} as e])
+         -> if starte > endb 
+	    then begin (* not a match *)
+	      if !instr_fun then rewrite_funmatching plelist
+	      else rewrite_patlexpr_list plelist;
+	      rewrite_expr e
+              end
+	    else begin (* it's a match *)
+	      rewrite_expr e;
+      	      if !instr_match then rewrite_funmatching plelist
+	      else rewrite_patlexpr_list plelist
+	      end
+     | Zapply (f, args) -> rewrite_expr f; rewrite_expr_list args
+     | Zlet (_, pelist, body)
+         -> begin match (pelist, body)
+            with ((_,{e_loc=Loc(starte,_)})::_, {e_loc=Loc (startb, _)})
+            -> if starte < startb then begin (* let in *)
+                 rewrite_patexpr_list pelist;
+                 rewrite_expr body
+               end else begin (* where *)
+                 rewrite_expr body;
+                 rewrite_patexpr_list pelist
+               end
+            | _ -> () 
+            end
+     | Zfunction plelist -> 
+      	  if !instr_fun then
+      	   rewrite_funmatching plelist
+	  else
+	   rewrite_patlexpr_list plelist
+     | Ztrywith (body, handlers) -> 
+      	 rewrite_expr body;
+	 if !instr_try then 
+      	  rewrite_trymatching handlers
+	 else 
+	  rewrite_patexpr_list handlers
+     | Zsequence (e1, e2) -> rewrite_expr e1; rewrite_expr e2
+     | Zcondition (e1, e2, ({e_loc=locelse} as e3)) -> 
+      	 rewrite_expr e1; 
+	 if !instr_if then begin
+	    insert_open e2;
+	    insert_profile e2;
+      	    rewrite_expr e2;
+	    insert_close e2
+	    end
+	 else
+      	    rewrite_expr e2;
+         if !instr_if && e.e_loc <> locelse then begin
+	    insert_open e3;
+	    insert_profile e3;
+      	    rewrite_expr e3;
+	    insert_close e3
+	    end
+	 else
+      	    rewrite_expr e3
+     | Zwhile (e1, e2) -> 
+      	 rewrite_expr e1; 
+      	 if !instr_loops then insert_profile e2;
+      	 rewrite_expr e2
+     | Zfor (_, e1, e2, _, e3) -> 
+      	 rewrite_expr e1; rewrite_expr e2;
+      	 if !instr_loops then insert_profile e3; 
+      	 rewrite_expr e3
+     | Zconstraint (e, _) -> rewrite_expr e
+     | Zvector l -> rewrite_expr_list l
+     | Zassign (_, e) -> rewrite_expr e
+     | Zrecord l -> rewrite_labelexpr_list (rev l)
+     | Zrecord_access (e, _) -> rewrite_expr e
+     | Zrecord_update (e1, _, e2) -> rewrite_expr e1; rewrite_expr e2
+     | Zstream l -> rewrite_str_comp_list l
+     | Zparser l -> rewrite_str_pat_l_expr_l l
+     | Zwhen(e1, e2) ->  (* used only when not !instr_fun  *)
+      	 rewrite_expr e1; rewrite_expr e2
+
+and rewrite_str_comp_list l =
+  do_list (
+    function Zterm e -> rewrite_expr e
+      | Znonterm e -> rewrite_expr e
+  ) l
+
+and rewrite_str_pat_l_expr_l l =
+  do_list (
+    fun (l, e) -> rewrite_str_pat_l l; insert_profile e; rewrite_expr e
+  ) l
+
+and rewrite_str_pat_l l =
+  do_list (
+    function Znontermpat (e, _) -> rewrite_expr e
+      | _ -> ()
+  ) l
+
+(* called only when !instr_fun *)
+and rewrite_annotate_expr_list l =
+  do_list (function 
+      	    {e_desc = Zwhen(e1,e2)} ->
+      	       	      insert_profile e1;
+      	       	      rewrite_expr e1; 
+      	       	      insert_profile e2;
+		      rewrite_expr e2
+           | e -> insert_profile e; rewrite_expr e)
+          l
+
+and rewrite_funmatching l = rewrite_annotate_expr_list (map snd l)
+
+and rewrite_trymatching l = rewrite_annotate_expr_list (map snd l)
+;;
+
+(* Simulate part of the compiler job to get constructors and all *)
+
+let rec rewrite_impl_phrase impl =
+  reset_type_expression_vars();
+  match impl.im_desc
+  with Zexpr e -> rewrite_expr e
+     | Zletdef (_, pelist) -> rewrite_patexpr_list pelist
+     | Ztypedef decl -> let _ = type_typedecl impl.im_loc decl in ()
+     | Zexcdef decl -> let _ = type_excdecl impl.im_loc decl in ()
+     | Zimpldirective d -> do_directive impl.im_loc d
+;;
+
+(* Stolen from compiler. We don't need skip (no toplevel) *)
+let parse_phrase parsing_fun lexing_fun lexbuf =
+  try
+    parsing_fun lexing_fun lexbuf
+  with parsing__Parse_error ->
+         let pos1 = lexing__get_lexeme_start lexbuf in
+         let pos2 = lexing__get_lexeme_end lexbuf in
+         eprintf "%aSyntax error.\n" output_location (Loc(pos1, pos2));
+	 flush stderr;
+         raise Profiler
+     | lexer__Lexical_error(errcode, pos1, pos2) ->
+         let l = Loc(pos1, pos2) in
+         begin match errcode with
+           lexer__Illegal_character ->
+             eprintf "%aIllegal character.\n" output_location l
+         | lexer__Unterminated_comment ->
+             eprintf "%tComment not terminated.\n" output_input_name
+         | lexer__Bad_char_constant ->
+             eprintf "%aIll-formed character literal.\n"
+                             output_location l
+         | lexer__Unterminated_string ->
+             eprintf "%tString literal not terminated.\n"
+                             output_input_name
+         end;
+	 flush stderr;
+         raise Profiler
+;;
+
+(* Common rewrite function *)
+(* filename: path/base  modname: base *)
+let rewrite_file filename modname =
+  let source_name = filename ^ ".ml" 
+  in
+    if file_exists (filename ^ ".mli") then begin
+	let intf = read_module modname (filename ^ ".zi") in
+	start_compiling_implementation modname intf;
+	enter_interface_definitions intf
+    end else
+	start_compiling_interface modname;
+
+    let ch = open_in source_name
+    in let lexbuf = lexing__create_lexer_channel ch
+    in
+      input_name := source_name;
+      input_chan := ch;
+      input_lexbuf := lexbuf;
+      try
+        while true do
+          rewrite_impl_phrase (parse_phrase Implementation lexer__main lexbuf)
+        done
+      with End_of_file -> final_rewrite ()
+;;
+
+
+(* Setting flags from saved config *)
+let set_flags s =
+  for i = 0 to string_length s - 1
+  do
+    match nth_char s i with
+      `f` -> instr_fun := true
+    | `m` -> instr_match := true
+    | `i` -> instr_if := true
+    | `l` -> instr_loops := true
+    | `t` -> instr_try := true
+    | `a` -> instr_fun := true; instr_match := true;
+      	     instr_if := true; instr_loops := true;
+	     instr_try := true
+    | _ -> ()
+  done
+;;
+
+(* Largely based on compiler/main.ml *)
+let set_stdlib p =
+  path_library := p;
+  load_path := [!path_library]
+and add_include d =
+  load_path := d :: !load_path
+and open_set set =
+  try
+    default_used_modules := assoc set default_used_interfaces
+  with Not_found ->
+    raise (arg__Bad ("unknown module set " ^ set))
+;;
+
+(* camlinstr will get exactly the same options as camlcomp, for
+   compatibility. Some of them are not used during translation.
+   Profiler + debugger will break locations and thus breakpoints.
+   camlpro *must* also get the same options
+ *)
+let std_options = [
+  "-stdlib", arg__String set_stdlib;
+  "-I", arg__String add_include;
+  "-include", arg__String add_include;
+  "-O", arg__String open_set;
+  "-open", arg__String open_set;
+  "-g", arg__Unit (function () ->
+      	eprintf "Warning: -p option incompatible with debugger\n";
+	flush stderr);
+  "-debug", arg__Unit (function () ->
+        eprintf "Warning: -p option incompatible with debugger\n";
+	flush stderr);
+  "-i", arg__Unit (function () -> ()); (* ignored *)
+  "-lang", arg__String (function lang -> ()); (* ignored *)
+  "-W", arg__Unit (function () -> ()) (* ignored *)
+ ]
+;;
+
+
+let main () =
+  (* Common init *)
+  default_used_modules := assoc "cautious" default_used_interfaces;
+  path_library := "LIBDIR";
+  load_path := [!path_library] ;
+
+  (* Check which mode *)
+  instr_mode := (basename sys__command_line.(0)) = "camlinstr";
+
+  let filename = ref ""
+  and modname = ref "" in
+    if !instr_mode then begin (* Instrumentation mode *)
+      let modes = ref "fm" 
+      and anonargs = ref 0 in
+      let anon s = 
+      	incr anonargs;
+	match !anonargs with
+	   1 -> if check_suffix s ".ml" then begin
+	           infile := open_in s;
+		   filename := chop_suffix s ".ml";
+		   modname := basename !filename
+		   end
+		else
+      	       	   profiler_failwith "first argument must end in .ml"
+	| 2 -> outfile := open_out s
+	| _ -> 
+          profiler_failwith "camlinstr [-m [afilmt]+] infile.ml outfile.ml"
+
+      in
+      	arg__parse 
+      	  (("-m", arg__String (fun s -> modes := s))::std_options)
+	 anon;
+        if !anonargs < 2 then
+      	 profiler_failwith "camlinstr [-m [afilmt]+] [std options] infile.ml outfile.ml";
+        insert_action := add_incr_counter !modname;
+        set_flags !modes;
+	init_rewrite !modes !modname;
+	rewrite_file !filename !modname
+      end     
+    else begin (* Results mode *)
+      let dumpfile = ref "camlpro.dump" 
+      and firstarg = ref true in
+      let anon s = 
+      	if !firstarg then begin
+	   firstarg := false;
+	   if check_suffix s ".ml" then begin
+	      infile := open_in s;
+	      filename := chop_suffix s ".ml";
+	      modname := basename !filename
+	      end
+	   else
+      	      profiler_failwith "first argument must end in .ml"
+           end
+        else 
+	   outfile := open_out s 
+      in
+      arg__parse 
+      	(["-f", arg__String (fun s -> dumpfile := s);
+          "-F", arg__String (fun s -> special_id := s)]
+         @std_options) 
+      	anon;
+      if !firstarg then
+      	profiler_failwith "camlpro [-f dumpfile] [-F keystring] [stdoptions] infile.ml [outfile]";
+
+      insert_action := add_val_counter;
+
+      let ic = open_in_bin !dumpfile in
+      let allcounters = input_value ic in
+      let modes,cv = 
+      	 try assoc !modname allcounters 
+      	 with Not_found -> profiler_failwith ("Module " ^ !modname ^ " not used in this profile.")
+      in
+      	counters := cv;
+	set_flags modes;
+	init_rewrite modes !modname;
+	rewrite_file !filename !modname
+     end
+	
+;;
+
+(* Catch at least our own errors *)
+let protected_main () =
+  try 
+    main ()
+  with 
+    Profiler -> exit 2
+ |  Toplevel -> exit 2
+ |  Inversion (pos,next)
+       -> eprintf 
+           "Profiler internal error: inversion at char %d (%d).\nPlease report it.\n" pos next;
+          flush stderr;
+      	  exit 2
+;;
+
+printexc__f protected_main (); exit 0;;
+

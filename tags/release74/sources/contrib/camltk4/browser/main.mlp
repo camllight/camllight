@@ -1,0 +1,247 @@
+#open "unix";;
+#open "protocol";;
+#open "tk";;
+#open "config";;
+#open "misc";;
+#open "modules";;
+#open "visual";;
+#open "tags";;
+
+(******* Modules *********)
+(* returns: panel widget, add *)
+let module_panel parent selected_paths =
+  let f = frame__create parent [] in (* vgroup *)
+  let title = label__create f [Text "Opened Modules"] in
+
+  let fls = frame__create f [Relief Sunken; BorderWidth (Pixels 2)] in 
+  let lb = listbox__create fls [] in
+  let sb = scrollbar__create fls [] in
+    frx_listbox__scroll_link sb lb;
+    tk__bind lb [[Double], ButtonPressDetail 1] 
+           (BindSet ([], fun _ ->
+                          do_list (fun s ->
+			             visual_module false (listbox__get lb s))
+                                     (listbox__curselection lb)));
+  let add_module n =
+    try 
+      modules__open_module n;
+      listbox__insert lb End [n];
+      listbox__yview_index lb (Number (max 0 (listbox__size lb - 4)));
+      true
+    with
+      Toplevel -> begin
+	 error ( "Cannot open module: " ^ n);
+         false
+	end
+
+  and close_module () =
+   let sels = listbox__curselection lb in
+    do_list (fun s -> modules__close_module (listbox__get lb s)) sels ;
+    (* Assume indexes of curselection in increasing order *)
+    do_list (fun s -> listbox__delete lb s s) (rev sels) in
+
+  let c = button__create f
+      [Text "Close Module"; Relief Raised;
+       Command close_module]
+  and o = button__create f
+      [Text "Open Module"; Relief Raised; 
+       Command (fun () -> 
+                 frx_req__open_list "Open a module" 
+      	       	       	   (modlist__modules_of_path (selected_paths ()))
+      	       	       	   (fun m -> let _ = add_module m in ())
+      	       	       	   (fun _ -> ()))]
+  and o1 = button__create f
+      [Text "Open and View Module"; Relief Raised; 
+       Command (fun () -> 
+                 frx_req__open_list "Open and View a module" 
+      	       	       	   (modlist__modules_of_path (selected_paths ()))
+      	       	       	   (function n -> if add_module n then
+      	       	       	       	       	  visual_module false n)
+                           (fun _ -> ()))] in
+
+   pack [title] [Fill Fill_X];
+    pack [lb] [Side Side_Left; Fill Fill_Both; Expand true];
+    pack [sb] [Side Side_Right; Fill Fill_Y];
+   pack [fls] [Fill Fill_Both; Expand true];
+   pack [c;o1;o] [Side Side_Bottom; Anchor Center; Fill Fill_X];
+
+   f, add_module
+;;
+
+
+(******* Load path panel ******)
+(* returns: path widget, add, selected *)
+let path_panel parent =
+  let f = frame__create parent [] in (* vgroup *)
+  let title = label__create f [Text "Load Path"] in
+
+  let fls = frame__create f [Relief Sunken; BorderWidth (Pixels 2)] in 
+  let lb = listbox__create fls [] in
+  let sb = scrollbar__create fls [] in
+    frx_listbox__scroll_link sb lb;
+
+  let add_path n =
+    begin try
+      let dh = opendir n in 
+         closedir dh;
+	 load_path := n :: !load_path;
+	 listbox__insert lb (Number 0) [n];
+	 read_tags n
+    with
+      _ -> error ("Cannot open directory: " ^ n)
+    end in
+
+  let selected () =
+    match listbox__curselection lb with 
+      	[] -> !load_path
+     |  l -> map (listbox__get lb) l  in
+
+  tk__bind lb [[Double], ButtonPressDetail 1] 
+     (BindSet ([], 
+       fun _ -> do_list (fun s ->
+	  frx_req__open_list "Select a source file"
+            (set__elements (modlist__sources_of_directory (listbox__get lb s)))
+            display_file
+      	    (fun _ -> ()))
+        (listbox__curselection lb)));
+
+  let memory = textvariable__create () in
+  let o = button__create f
+      [Text "Add Directory"; Relief Raised; 
+       Command (fun () -> 
+      	       	 frx_req__open_simple "Add a directory to the load path" 
+      	       	      add_path (fun _ -> ()) memory)
+      ] in
+
+   pack [title] [Fill Fill_X];
+    pack [lb] [Side Side_Left; Fill Fill_Both; Expand true];
+    pack [sb] [Side Side_Right; Fill Fill_Y];
+   pack [fls] [Fill Fill_Both; Expand true];
+   pack [o] [Side Side_Bottom; Anchor Center; Fill Fill_X];
+   f, add_path, selected
+;;
+
+(********** Browsing panel *********)
+let browsing_panel parent =
+  let f = frame__create parent [] in (* vgroup *)
+   (* Entering something *)
+   let enterf = frame__create f [] in
+   let m = label__create enterf [Text "Enter a global symbol:"] in
+   let e = entry__create enterf [Relief Sunken] in
+      tk__bind e [[], KeyPressDetail "Return"]
+                 (BindSet ([], (fun _ -> visual_search_any 
+      	       	       	       	       	  (entry__get e))));
+      (* Make e the default focus for the toplevel *)
+      focus__set e;
+
+      pack [m] [Side Side_Left];
+      pack [e] [Side Side_Left; Fill Fill_X];
+
+   let cb = checkbutton__create f
+      [Text "Source navigation with TAGS files";
+       Command (function _ ->
+		   use_tags := not !use_tags;
+		   if !use_tags then
+		     do_list read_tags ("." :: !load_path)
+		   else clear_tags ())] in
+   (* when -tags was used *)
+   if !use_tags then checkbutton__select cb;		  
+   
+   (* Loading a source file *)
+   let o2 = button__create f
+      [Text "View source file"; Relief Raised;
+       Command 
+        (fun () -> frx_req__open_list "Open a source file" 
+      	       	     (modlist__sources_of_path !load_path)
+      	       	     display_file
+      	       	     (fun _ -> ()))] in
+
+   pack [cb; o2; enterf] [Side Side_Bottom; Fill Fill_X];
+   f
+;;
+
+let bye () = 
+  closeTk();
+  exit 0
+;;
+
+let main () = 
+  let display = ref (try sys__getenv("DISPLAY") with Not_found -> "")
+  and ask_monochrome = ref false
+  and libpath = ref "LIBDIR" 
+  and initial_path = ref [] 
+  and module_set = ref "cautious" 
+  and initial_modules = ref [] 
+  in
+
+  (* we must parse first to find display ... *)
+  arg__parse [
+    "-d", arg__String (fun s -> display := s);
+    "-display", arg__String (fun s -> display := s);
+    "-mono", arg__Unit (function () -> ask_monochrome := true);
+    "-stdlib", arg__String (fun s -> libpath := s);
+    "-I", arg__String (fun s -> initial_path := !initial_path @ [s]);
+    "-O", arg__String (fun s -> module_set := s);
+    "-tags", arg__Unit (function () -> use_tags := true);
+    ]
+    (fun s -> initial_modules := s :: !initial_modules);
+    
+  let top = openTkDisplayClass !display "CamlBrowser" in
+     frx_text__init();
+     signal SIGINT (Signal_handle bye);
+     signal SIGTERM (Signal_handle bye);
+(*
+  begin match colormodel__get top with
+     Color -> if !ask_monochrome then begin
+      	       	 colormodel__set top Monochrome;
+      	       	 use_monochrome_attribs()
+		 end
+	      else use_color_attribs ()
+   | Monochrome -> use_monochrome_attribs ()
+  end; *)
+
+  use_color_attribs () ;
+
+  let g = frame__create top [] in (* hgroup *)
+    let dirs, add_path, selected_paths = path_panel g in
+    let mods, add_module = module_panel g selected_paths in
+      pack [mods;dirs] [Side Side_Left; Fill Fill_Both; Expand true];
+
+  let browse = browsing_panel top
+  and quitb = button__create top [Text "Quit"; Relief Raised; Command bye] in
+
+    pack [g] [Side Side_Top; Fill Fill_Both; Expand true];
+    pack [browse] [Side Side_Top; Fill Fill_Both];
+    pack [quitb] [Side Side_Bottom; Fill Fill_X];
+    frx_widget__resizeable top;
+
+  (* Initialisation of the module machinery *)
+  default_used_modules := assoc !module_set default_used_interfaces;
+  load_path := [];
+  path_library := !libpath;
+  add_path !path_library;
+  reset_opened_modules();
+  do_list (fun m -> let _ = add_module m in ()) !default_used_modules;
+  do_list add_path !initial_path;
+
+  read_tags "."; (* . is implicit in load_path *)
+
+   try
+     do_list (function m -> if add_module m then visual_module false m) 
+      	     !initial_modules;
+     tk__mainLoop()
+   with
+     TkError s as ex -> begin 
+      	 prerr_string s;
+      	 prerr_string "\n";
+      	 flush std_err;
+      	 closeTk(); 
+      	 raise ex 
+	 end
+   | ex -> begin closeTk(); raise ex end
+;;
+
+
+printexc__f (handle_unix_error main) ()
+;;
+

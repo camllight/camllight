@@ -1,0 +1,6 @@
+; Byte-compile the Emacs Lisp files
+
+(setq load-path (cons "." load-path))
+(byte-compile-file "caml.el")
+(byte-compile-file "inf-caml.el")
+(byte-compile-file "camldebug.el")

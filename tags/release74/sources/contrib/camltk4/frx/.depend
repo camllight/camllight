@@ -1,0 +1,13 @@
+frx_ctext.zo: frx_fit.zi frx_text.zo 
+frx_dialog.zo: frx_misc.zo 
+frx_fit.zo: frx_fit.zi frx_after.zo frx_misc.zo 
+frx_font.zo: frx_font.zi frx_misc.zo 
+frx_lbutton.zo: frx_lbutton.zi 
+frx_mem.zo: frx_misc.zo 
+frx_req.zo: frx_entry.zo frx_widget.zi frx_listbox.zo 
+frx_rpc.zo: frx_rpc.zi 
+frx_selection.zo: frx_selection.zi frx_misc.zo 
+frx_synth.zo: frx_synth.zi 
+frx_text.zo: frx_misc.zo 
+frx_toplevel.zo: frx_toplevel.zi 
+frx_widget.zo: frx_widget.zi 

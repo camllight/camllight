@@ -1,0 +1,30 @@
+#!/bin/sh
+# Make backup copies of the given files and renumber previous backup files
+
+n=0
+notfound=true
+
+while $notfound; do
+  n=`expr $n + 1`
+  notfound=false
+  for f in $*; do
+    if test -f $f.$n; then notfound=true; break; fi
+  done
+done
+
+# Slot number n is completely free. Move all slots between 1 and n-1 down
+# by one.
+
+while test $n -gt 1; do
+  n1=`expr $n - 1`
+  for f in $*; do
+    test -f $f.$n1 && mv $f.$n1 $f.$n
+  done
+  n=$n1
+done
+
+# Copy the files to backup in the slot number 1
+
+for f in $*; do
+  cp $f $f.1
+done

@@ -1,0 +1,18 @@
+WARNING: this is a beta-release, partially tested
+
+Prerequisites:
+ Works only on Unix
+ Caml Light 0.7, and the "unix" contrib
+ Tk >=3.3 (tested on 3.6). A full installation of Tcl/Tk is required
+    (includes, librairies libtcl.a and libtk.a, wish interpreter)
+
+Installation steps:
+1 - Check that the prerequisites are available
+2 - Extract this archive in the contrib directory of Caml Light
+3 - Edit the file Makefile to reflect your installation.
+4 - cd .../contrib/camltk; make
+    This will produce the tkcompiler, the library and toplevels.
+
+5 (optional) - make examples
+
+Then, type "make install". You're set.

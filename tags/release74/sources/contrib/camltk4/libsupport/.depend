@@ -1,0 +1,17 @@
+canvas_bind.zi: support.zi 
+optionmenu.zi: textvariable.zi support.zi 
+protocol.zi: hashtblc.zi support.zi 
+text_tag_bind.zi: support.zi 
+textvariable.zi: protocol.zi support.zi 
+canvas_bind.zo: canvas_bind.zi 
+dialog.zo: dialog.zi 
+hashtblc.zo: hashtblc.zi 
+mainloop.zo: protocol.zi 
+optionmenu.zo: optionmenu.zi protocol.zi textvariable.zi support.zi 
+protocol.zo: protocol.zi hashtblc.zi camltk.zi support.zi 
+selection_handle_set.zo: selection_handle_set.zi 
+selection_own_set.zo: selection_own_set.zi 
+support.zo: support.zi hashtblc.zi 
+text_tag_bind.zo: text_tag_bind.zi 
+textvariable.zo: textvariable.zi hashtblc.zi protocol.zi 
+winfo_contained.zo: winfo_contained.zi 

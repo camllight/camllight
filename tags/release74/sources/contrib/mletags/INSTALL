@@ -1,0 +1,17 @@
+This version of mletags must be compiled with Caml Light v0.6 or later. It
+is known not to work with release 0.5.
+
+Check the variables CPP, BINDIR, MANEXT and MANDIR at the beginning of the
+Makefile, then type 
+% make
+During the compilation, you will see a warning
+
+File "parser.ml", line 11, characters 262-297:
+#        input !lexer__input_chan buffer 0 n;
+#        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#Warning: the value of this expression is ignored.
+
+that you can ignore.
+
+You should now have an operational "mletags" binary, that you can install:
+% make install
