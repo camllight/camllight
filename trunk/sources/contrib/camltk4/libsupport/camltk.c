@@ -2,6 +2,7 @@
 /* tk.h must be included first */
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/param.h>
 
 #include <tk.h>
 #include <mlvalues.h>
@@ -111,7 +112,7 @@ void invoke_pending_caml_signals (clientdata)
 {
   enter_blocking_section();
   /* Rearm timer */
-  Tk_CreateTimerHandler(100, invoke_pending_caml_signals, NULL);
+  Tk_CreateTimerHandler(300, invoke_pending_caml_signals, NULL);
   leave_blocking_section();
 }
 
@@ -373,7 +374,8 @@ void FileProc(clientdata, mask)
   camltk_dispatch_callback(copy_string_list(2,arg));
 }
 
-
+/* Avoid space leak */
+static char *file_cbids[NOFILE];
 
 value camltk_add_file_input(fd, cbid)    /* ML */
      value fd;
@@ -384,6 +386,7 @@ value camltk_add_file_input(fd, cbid)    /* ML */
 
   Tk_CreateFileHandler(Int_val(fd), TK_READABLE, 
 		       FileProc, (ClientData) cbid_save);
+  file_cbids[Int_val(fd)] = cbid_save;
   return Atom(0);
 }
 
@@ -391,6 +394,10 @@ value camltk_rem_file_input(fd) /* ML */
      value fd;
 {
   Tk_DeleteFileHandler(Int_val(fd));
+  if (file_cbids[Int_val(fd)]) {
+    free(file_cbids[Int_val(fd)]);
+    file_cbids[Int_val(fd)] = NULL;
+  };
   return Atom(0);
 }
 
@@ -400,3 +407,34 @@ value camltk_tk_mainloop() /* ML */
   return Atom(0);
 }
 
+
+/* Basically the same thing as FileProc */
+/* Since a timer handler is called only once, we can free */
+/* the clientdata. Space leak will occur when timer is */
+/* cancelled. */
+
+void TimerProc (ClientData clientdata)
+{
+  static char *arg[3] = {"camlcb", NULL, NULL};
+
+  arg[1] = (char *)clientdata;
+  camltk_dispatch_callback(copy_string_list(2,arg));
+  free(arg[1]);
+}
+
+value camltk_add_timer(milli, cbid) /* ML */
+     value milli;
+     value cbid;
+{
+  /* Make a copy of the cbid and put it in the CliendData */
+  char *cbid_save = string_to_c(cbid);
+  return ((value)Tk_CreateTimerHandler(Int_val(milli), TimerProc, 
+				       (ClientData) cbid_save));
+}
+
+value camltk_rem_timer(token) /* ML */
+     value token;
+{
+  Tk_DeleteTimerHandler((Tk_TimerToken) token);
+  return Atom(0);
+}
