@@ -407,6 +407,27 @@ test 3
 eq_big_int (base_power_big_int 10 1 (big_int_of_int 123), big_int_of_int 1230)
 ;;
 
+testing_function "power_int_positive_big_int";;
+
+test 1
+eq_big_int (power_int_positive_big_int 2 (big_int_of_int 10),
+            big_int_of_int 1024);;
+test 2
+eq_big_int
+ (power_int_positive_big_int 2 (big_int_of_int 65),
+  big_int_of_string "36893488147419103232");;
+
+testing_function "power_big_int_positive_big_int";;
+
+test 1
+eq_big_int
+ (power_big_int_positive_big_int (big_int_of_int 2) (big_int_of_int 10),
+  big_int_of_int 1024);;
+
+test 2
+eq_big_int
+ (power_big_int_positive_big_int (big_int_of_int 2) (big_int_of_int 65),
+  big_int_of_string "36893488147419103232");;
 
 testing_function "square_big_int";;
 
