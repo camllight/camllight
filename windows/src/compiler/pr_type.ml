@@ -39,7 +39,8 @@ let name_of_type_var var =
   try
     assq var !type_vars_names
   with Not_found ->
-    let var_name = int_to_alpha !type_vars_counter in
+    let name = int_to_alpha !type_vars_counter in
+    let var_name = if var.typ_level == generic then name else "_" ^ name in
     incr type_vars_counter;
     type_vars_names := (var, var_name) :: !type_vars_names;
     var_name
