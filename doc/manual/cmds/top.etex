@@ -174,107 +174,11 @@ toplevel system is launched, provides a number of functions that
 control the toplevel behavior, load files in memory, and trace program
 execution.
 
-\begin{options}
+\bigskip
 
-\item["quit ()"]\index{quit@\verb`quit`}%
-Exit the toplevel loop and terminate the Caml Light command.
-
-\item["include \""\var{filename}"\""]\index{include@\verb`include`}%
-Read, compile and execute source phrases from the file \var{filename}.
-The ".ml" extension is automatically added to \var{filename}, if not
-present. This is textual inclusion: phrases are processed just as if
-they were typed on standard input. In particular, global identifiers
-defined by these phrases are entered in the module named "top", not in
-a new module.
-
-\item["load \""\var{filename}"\""]\index{load@\verb`load`}%
-Load in memory the source code for a module implementation. Read,
-compile and execute source phrases from file \var{filename}. The ".ml"
-extension is automatically added to \var{filename}, if not present.
-The "load" function behaves much like "include", except that a new module is
-created, with name the base name of \var{filename}. Global identifiers
-defined in file \var{filename} are entered in this module, instead of
-the "top" module as in the case of "include". For instance,
-assuming file "foo.ml" contains the single phrase
-\begin{verbatim}
-        let bar = 1;;
-\end{verbatim}
-executing "load \"foo\"" defines the identifier "foo__bar" with value 1.
-
-Caveat: the loaded module is not automatically opened: the identifier
-"bar" does not automatically complete to "foo__bar". To achieve this,
-you must execute the directive "#open \"foo\"" afterwards.
-
-\item["compile \""\var{filename}"\""]\index{compile@\verb`compile`}%
-Compile the source code for a module implementation or interface
-(".ml" or ".mli" file). Compilation proceeds as with the batch
-compiler, and produces the same results as "camlc -c "\var{filename}.
-If the toplevel system is in debugging mode (option "-g" or function
-"debug_mode" below), the compilation is also performed in debugging mode,
-as when giving the "-g" option to the batch compiler. The result of
-the compilation is left in files (".zo", ".zi", ".zix"). The compiled
-code is not loaded in memory.
-
-\item["load_object \""\var{filename}"\""]\index{load_object@\verb`load_object`}%
-Load in memory the compiled bytecode contained in file \var{filename}.
-The ".zo" extension is automatically added to \var{filename}, if not
-present. The bytecode file has been produced by the standalone
-compiler "camlc". Global identifiers defined in file \var{filename}
-are entered in their own module, not in the "top" module, just as with
-the "load" function.
-
-\item["trace \""\var{function-name}"\""]\index{trace@\verb`trace`}%
-After the execution of "trace \"foo\"", all calls to the global
-function named "foo" will be ``traced''. That is, the argument and the
-result are displayed for each call, as well as the exceptions escaping
-out of "foo", either raised by "foo" itself, or raised by one of the
-functions called from "foo". If "foo" is a curried function, each
-argument is printed as it is passed to the function.
-
-\item["untrace \""\var{function-name}"\""]\index{untrace@\verb`untrace`}%
-Executing "untrace \"foo\"" stops all tracing over the global
-function named "foo".
-
-\item["install_printer \""\var{printername}"\""]\index{install_printer@\verb`install_printer`}%
-Register the function bound to the identifier \var{printername}
-as a printer for objects whose types match the argument type of the
-function. The toplevel loop will then call \var{printername} when it
-has such an object to print. The printing function \var{printername}
-must use the "format" library module (see section~\ref{s:format}),
-otherwise its output will not be correctly located inside the values
-printed by the toplevel loop.
-
-\item["remove_printer \""\var{printername}"\""]\index{remove_printer@\verb`remove_printer`}%
-Remove the given function from the table of toplevel printers.
-
-\item["set_print_depth "\var{n}]\index{set_print_depth@\verb`set_print_depth`}%
-Limit the printing of values to a maximal depth of \var{n}. The parts
-of values whose depth exceed \var{n} are ellipsed (printed as "...").
-A higher \var{n} shows more of the values; a lower \var{n} makes the
-toplevel loop less verbose.
-
-\item["debug_mode "\var{boolean-flag}]\index{debug_mode@\verb`debug_mode`}%
-Set the debugging mode on ("debug_mode true") or off ("debug_mode false").
-Executing "debug_mode true" is equivalent to starting the toplevel
-system with the "-g" option. In debugging mode, values and types local to
-a module (not exported by its interface) are visible, just like
-the exported values and types. See the description of the "-g" option
-in section~\ref{s:toplevel-options}.
-
-\item["verbose_mode "\var{boolean-flag}]\index{verbose_mode@\verb`verbose_mode`}%
-After executing "verbose_mode true", the compilations performed by
-"compile" print the objects defined by the module, along with their
-types, just as with the "-i" option to the batch compiler.
-To revert to silent compilations, execute "verbose_mode false".
-
-\item["cd \""\var{directory-name}"\""]\index{cd@\verb`cd`}%
-Set the current working directory.
-
-\item["directory \""\var{directory-name}"\""]\index{directory@\verb`directory`}%
-Add the given directory to the search path for files. Same behavior as the
-"-I" option to "camllight", or the "#directory" directive.
-
-\end{options}
+\begin{library}
+\input toplevel.tex
+\end{library}
 
 \section{The toplevel and the module system} \label{s:toplevel-modules}
 
@@ -412,6 +316,11 @@ section~\ref{s:toplevel-modules} above.
 See section~\ref{s:comp-errors}.
 
 \item[Expression of type \nth{t}{1} cannot be used with type \nth{t}{2}]
+See section~\ref{s:comp-errors}.
+
+\item[The type inferred for the value \var{name},
+	that is, \var{t},
+	contains type variables that cannot be generalized]
 See section~\ref{s:comp-errors}.
 
 \end{options}
