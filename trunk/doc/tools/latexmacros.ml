@@ -49,6 +49,7 @@ def "\\ldots" [Print "..."];
 def "\\ " [Print " "];
 def "\\{" [Print "{"];
 def "\\}" [Print "}"];
+def "\\%" [Print "%"];
 def "\\/" [];
 def "\\newpage" [];
 def "\\label" [Print "<A name=\""; Print_arg; Print "\"></A>"];
