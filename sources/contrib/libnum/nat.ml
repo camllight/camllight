@@ -3,16 +3,16 @@
    Adapte a Caml Light par Xavier Leroy & Pierre Weis.
    Portage 64 bits: Pierre Weis. *)
 
-(**) #open "eq";;
-(**) #open "exc";;
-(**) #open "int";;
-(**) #open "bool";;
-(**) #open "ref";;
-(**) #open "fstring";;
-(**) #open "fvect";;
-(**) #open "fchar";;
-(**) #open "int_misc";;
-(**) #open "string_misc";;
+#open "eq";;
+#open "exc";;
+#open "int";;
+#open "bool";;
+#open "ref";;
+#open "fstring";;
+#open "fvect";;
+#open "fchar";;
+#open "int_misc";;
+#open "string_misc";;
 
 (* Sizes of words and strings. *)
 
@@ -234,16 +234,13 @@ let string_of_digit nat =
     sys_string_of_digit nat 0
 ;;
 
-(*
-   make_power_base affecte power_base des puissances successives de base a 
+(* make_power_base affecte power_base des puissances successives de base a 
    partir de la puissance 1-ieme.
    A la fin de la boucle i-1 est la plus grande puissance de la base qui tient 
    sur un seul digit et j est la plus grande puissance de la base qui tient 
    sur un int.
    Attention base n''est pas forcément une base valide (utilisé en
-   particulier dans big_int avec un entier quelconque).
-
-*)
+   particulier dans big_int avec un entier quelconque). *)
 let make_power_base base power_base = 
   let i = ref 1
   and j = ref 0 in
@@ -256,11 +253,9 @@ let make_power_base base power_base =
   while !j <= !i && is_digit_int power_base !j do incr j done;
   (!i - 1, min !i !j);;
 
-(* /*
-   on compte les zéros placés au début de la chaine, 
-   on en déduit la longueur réelle de la chaine 
-   et on construit la chaine adhoc en y ajoutant before et after.
-*/ *)
+(* On compte les zéros placés au début de la chaîne, 
+   on en déduit la longueur réelle de la chaîne 
+   et on construit la chaîne adhoc en y ajoutant before et after. *)
 let adjust_string s before after =
   let len_s = string_length s
   and k = ref 0 in
@@ -323,7 +318,7 @@ let power_base_int base i =
   end
 ;;
 
-(* /* PW: rajoute avec 32 et 64 bits */ *)
+(* PW: rajoute avec 32 et 64 bits *)
 
 (* the base-th element (base >= 2) of num_digits_max_vector is :
     |                                     |
@@ -331,7 +326,13 @@ let power_base_int base i =
     | ----------------------------------- | + 1
     |      length_of_digit * log (2)      |
     --                                   --
-La base la plus grande possible pour l impression est 16. *)
+La base la plus grande possible pour l'impression est 16. *)
+
+(* num_digits_max_vector.(base) gives the maximum number of words that
+   may have the biggest big number that can be printed into a single
+   character string of maximum length (the number being printed in
+   base [base]). (This computation takes into account the size of the
+   machine word (length_of_digit or size_word).) *)
 
 let num_digits_max_vector =
  match sys__word_size with
@@ -343,13 +344,6 @@ let num_digits_max_vector =
        1661953; 1741646; 1813737; 1879552; 1940095; 1996149; 2048335;
        2097151 |]
  | _ -> invalid_arg "Bad word size";;
-
-(* num_digits_max_vector.(base) gives the maximum number of words that
-   may have the biggest big number that can be printed into a single
-   character string of maximum length (the number being printed in
-   base [base]). (This computation takes into account the size of the
-   machine word (length_of_digit or size_word).)
-*)
 
 let zero_nat = make_nat 1;;
 
@@ -366,43 +360,34 @@ let power_max base =
 let sys_string_list_of_nat base nat off len =
   if is_nat_int nat off len 
   then [sys_string_of_int base "" (nth_digit_nat nat off) ""] else begin
-  (* /* 
-     pmax : L indice de la plus grande puissance de base qui soit un digit 
+  (* pmax : L'indice de la plus grande puissance de base qui soit un digit 
      pint : La plus grande puissance de base qui soit un int 
-     power_base : nat de (length_of_digit + 1) digits dont le i-eme digit 
-     contient base^(i+1)
-  */ *)
+     power_base : nat de (length_of_digit + 1) digits dont le i-ème digit 
+     contient base^(i+1) *)
   check_base base;
   let power_base = make_nat (succ length_of_digit) in
   let (pmax, pint) = make_power_base base power_base in
-  (* /* 
-     La representation de 2^length_of_digit en base base a real_pmax chiffres
-  */ *)
+  (* La représentation de 2^length_of_digit en base base
+     a real_pmax chiffres *)
   let real_pmax = pmax + 2
   and num_int_in_digit = pmax / pint
-  (* /* 
-     new_nat est une copie de nat qui a un chiffre de plus à cause de 
-     la division
-   */ *)
+  (* new_nat est une copie de nat qui a un chiffre de plus à cause de
+     la division *)
   and new_nat = make_nat (succ len)
   and len_copy = ref (succ (num_digits_nat nat off len)) in
   let len_new_nat = ref !len_copy in 
-  (* /* 
-     copy1 et copy2 sont en fait 2 noms pour un me^me contenu, 
-     copy1 est l argument sur lequel se fait la division, 
+  (* copy1 et copy2 sont en fait 2 noms pour un même contenu, 
+     copy1 est l'argument sur lequel se fait la division, 
      copy2 est le quotient de la division 
-     et on remet copy1 à la bonne valeur à la fin de la boucle
-  */ *)
+     et on remet copy1 à la bonne valeur à la fin de la boucle *)
   let copy1 = create_nat !len_copy
   and copy2 = make_nat !len_copy
   and rest_digit = make_nat 2
   and rest_int = create_nat 1
   and places = ref 0 in
-  (* /*
-     On divise nat par power_max jusqu' 'à épuisement, on écrit les restes 
+  (* On divise nat par power_max jusqu'à épuisement, on écrit les restes 
      successifs, la représentation de ces nombres en base base tient sur 
-     biggest_int chiffres donc sur une chaine de caractères
-  */ *)
+     biggest_int chiffres donc sur une chaîne de caractères *)
   let length_block = num_digits_max_vector.(base) in
   let l = ref ([] : string list) in
     len_copy := pred !len_copy; 
@@ -421,10 +406,8 @@ let sys_string_list_of_nat base nat off len =
                 len_new_nat := max 1 (!len_new_nat - length_block);
                 blit_nat new_nat 0 new_nat length_block !len_new_nat;
                 set_to_zero_nat new_nat !len_new_nat length_block;
-                (* /* 
-                   new_nat a un premier digit nul pour les divisions 
-                   ultérieures éventuelles
-                */ *)
+                (* new_nat a un premier digit nul pour les divisions 
+                   ultérieures éventuelles *)
                 len_new_nat := 
                   (if is_zero_nat new_nat 0 !len_new_nat 
                      then 1 
@@ -437,28 +420,24 @@ let sys_string_list_of_nat base nat off len =
       let s = make_string len_s `0`
       and pos_ref = ref (pred len_s) in
         while not (is_zero_nat copy1 0 !len_copy) do 
-           (* /* On récupère un digit dans rest_digit */ *)
+           (* On récupère un digit dans rest_digit *)
            set_digit_nat copy1 !len_copy 0; 
            div_digit_nat copy2 0
                          rest_digit 0 copy1 0 (succ !len_copy) power_base pmax;
            places := succ pmax;
            for j = 0 to num_int_in_digit do
-             (* /* 
-                On récupère un int dans rest_int
+             (* On récupère un int dans rest_int.
                 La valeur significative de copy se trouve dans copy2 
                 on peut donc utiliser copy1 pour stocker la valeur du 
-                quotient avant de la remettre dans rest_digit.
-             */ *)
+                quotient avant de la remettre dans rest_digit. *)
              if compare_digits_nat rest_digit 0 power_base (pred pint) == 0
                 then (set_digit_nat rest_digit 0 1;
                       set_digit_nat rest_int 0 0)
                 else (div_digit_nat copy1 0 rest_int 0 rest_digit 0 2
                                      power_base (pred pint);
                       blit_nat rest_digit 0 copy1 0 1);
-             (* /* 
-                On l''écrit dans la chaine s en lui réservant la place 
-                nécessaire 
-             */ *)
+             (* On l'écrit dans la chaîne s en lui réservant la place 
+                nécessaire. *)
              int_to_string 
                (nth_digit_nat rest_int 0) s pos_ref base 
                  (if is_zero_nat copy2 0 !len_copy then min !pos_ref pint else
@@ -550,23 +529,25 @@ let sys_string_of_nat base before nat off len after =
 ;;
 
 
+(* Pour debugger, on écrit les digits du nombre en base 16, séparés par
+   des barres: |dn|dn-1 ...|d0| *)
 let power_debug = nat_of_int 256;;
 
-(*
-   On écrit le nombre en base = 16, avec length_of_digit = 32 
-   avec des barres pour séparer les digits
-*)
+(* Nombre de caractères d'un digit écrit en base 16, avec un caractère
+   supplémentaire pour la barre de séparation des digits. *)
+let chars_in_digit_debug = succ (length_of_digit / 4);;
+
 let debug_string_vect_nat nat =
-  let len = length_nat nat in
-  let max_digits = sys__max_string_length / max_superscript_10_power_in_int in
-  let blocks = len / max_digits
-  and rest = len mod max_digits in
-  let length = max_superscript_10_power_in_int * max_digits
+  let len_n = length_nat nat in
+  let max_digits = sys__max_string_length / chars_in_digit_debug in
+  let blocks = len_n / max_digits
+  and rest = len_n mod max_digits in
+  let length = chars_in_digit_debug * max_digits
   and vs = make_vect (succ blocks) "" in
     for i = 0 to blocks do
       let len_s =
        if i == blocks
-        then 1 + max_superscript_10_power_in_int * rest else length in
+        then 1 + chars_in_digit_debug * rest else length in
       let s = make_string len_s `0` 
       and pos = ref (len_s - 1) in
       let treat_int int end_digit =
@@ -577,12 +558,12 @@ let debug_string_vect_nat nat =
         s.[!pos] <- digits.[rest_int mod 16];
         if end_digit then (decr pos; s.[!pos] <- `|`)
       in s.[!pos] <- `|`;
-         for j = i * max_digits to pred (min len (succ i * max_digits)) do
+         for j = i * max_digits to pred (min len_n (succ i * max_digits)) do
              let digit = make_nat 1
              and digit1 = make_nat 2
              and digit2 = make_nat 2 in
                blit_nat digit1 0 nat j 1;
-               for k = 0 to 2 do
+               for k = 1 to pred (length_of_digit / 8) do
                    div_digit_nat digit2 0 digit 0 digit1 0 2 power_debug 0;
                    blit_nat digit1 0 digit2 0 1;
                    treat_int (nth_digit_nat digit 0) false
@@ -599,13 +580,10 @@ let debug_string_nat nat =
   if vect_length vs == 1 then vs.(0) else invalid_arg "debug_string_nat"
 ;;
 
-(* 
-   La sous-chaine (s, off, len) représente un nat en base base que 
-   on détermine ici 
-*)
+(* La sous-chaine (s, off, len) représente un nat en base base que 
+   on détermine ici. *)
 let simple_sys_nat_of_string base s off len = 
-  (* check_base base; : inutile la base est vérifiée par
-   base_digit_of_char *)
+  (* check_base base; : inutile la base est vérifiée par base_digit_of_char *)
   let power_base = make_nat (succ length_of_digit) in
   let (pmax, pint) = make_power_base base power_base in
   let new_len = ref (1 + len / (pmax + 1))
@@ -620,10 +598,8 @@ let simple_sys_nat_of_string base s off len =
   and int = ref 0 in
 
   for i = off to bound do
-    (* /*
-       on lit pint (au maximum) chiffres, on en fait un int 
-       et on l''intègre au nombre
-     */ *)
+    (* On lit pint (au maximum) chiffres, on en fait un int 
+       et on l'intègre au nombre. *)
       let c = s.[i]  in
         begin match c with 
         | ` ` | `\t` | `\n` | `\r` | `\\` -> ()
@@ -649,9 +625,7 @@ let simple_sys_nat_of_string base s off len =
            digits_read := 0
            end
   done;
-  (* 
-     On recadre le nat 
-  *)
+  (* On recadre le nat *)
   let nat = create_nat !current_len in
     blit_nat nat 0 nat1 0 !current_len;
     nat

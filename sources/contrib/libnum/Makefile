@@ -48,14 +48,13 @@ install:
 
 clean:
 	rm -f libnums.a *.o *.z[io] camlnum
-	rm -f nat.ml int_misc.ml
 	@ cd bignum; make scratch
 	@ cd test; make clean
 
 nums.zo: $(ZOFILES)
 	$(CAMLLIBR) -o nums.zo $(ZOFILES)
 
-.SUFFIXES: .ml .mli .mlp .zi .zo
+.SUFFIXES: .ml .mli .zi .zo
 
 .mli.zi:
 	$(CAMLCOMP) $(COMPFLAGS) $<
@@ -63,15 +62,9 @@ nums.zo: $(ZOFILES)
 .ml.zo:
 	$(CAMLCOMP) $(COMPFLAGS) $<
 
-.mlp.ml:
-	@rm -f $@
-	$(CPP) $< > $@
-	@chmod a-w $@
-
-int_misc.ml: int_misc.mlp
 nat.o: nat.h
 
-depend: nat.ml int_misc.ml
+depend:
 	mv Makefile Makefile.BAK; \
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.BAK; \
 	 ../../src/tools/camldep *.mli *.ml) > Makefile
