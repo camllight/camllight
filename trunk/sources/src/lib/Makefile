@@ -19,7 +19,7 @@ STD_IMPL= bool.zo eq.zo exc.zo int.zo fstring.zo string.zo fchar.zo \
     char.zo float.zo list.zo fvect.zo vect.zo io.zo pair.zo arg.zo \
     filename.zo hashtbl.zo lexing.zo parsing.zo printexc.zo sort.zo \
     printf.zo stream.zo stack.zo queue.zo format.zo random.zo genlex.zo \
-    baltree.zo set.zo map.zo
+    baltree.zo set.zo map.zo gc.zo
 
 all: $(STD_INTF) stdlib.zo
 
@@ -59,6 +59,7 @@ genlex.ml: genlex.mlp
 ### DO NOT DELETE THIS LINE
 filename.zi: sys.zi 
 format.zi: io.zi 
+gc.zi: io.zi 
 genlex.zi: stream.zi 
 io.zi: sys.zi 
 iparsing.zi: parsing.zi obj.zi 
@@ -82,6 +83,7 @@ format.zo: format.zi eq.zi exc.zi bool.zi queue.zi fchar.zi fstring.zi \
     io.zi ref.zi float.zi int.zi 
 fstring.zo: fstring.zi eq.zi fchar.zi ref.zi int.zi 
 fvect.zo: fvect.zi eq.zi list.zi int.zi 
+gc.zo: gc.zi 
 genlex.zo: genlex.zi hashtbl.zi stream.zi exc.zi eq.zi fchar.zi float.zi \
     fstring.zi list.zi ref.zi int.zi 
 hashtbl.zo: hashtbl.zi eq.zi exc.zi fvect.zi int.zi 
