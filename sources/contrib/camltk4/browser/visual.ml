@@ -65,7 +65,7 @@ let rec visual_meta visual silent sym =
 
     frx_text__navigation_keys tx;
     (* An easy way to quit *)
-    bind tx [[],XKey "Escape"] (BindSet([], (fun _ -> button__invoke q)));
+    bind tx [[],KeyPressDetail "Escape"] (BindSet([], (fun _ -> button__invoke q)));
 
     pack__forget [title];
     pack [f] [Fill Fill_Both; Expand true];

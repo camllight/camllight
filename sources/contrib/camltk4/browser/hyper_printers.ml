@@ -311,7 +311,7 @@ let hyper_print f x =
 
 (* convert an integer to an absolute index *)
 let abs_index n =
-  TextIndex (TI_LineChar(0,0), [CharOffset n])
+  TextIndex (LineChar(0,0), [CharOffset n])
 ;;
 
 
@@ -331,7 +331,7 @@ type hypernav = {
 let hypertext top hn ht =
   let t = text__create top []  in
   (* Insert the text *)
-  text__insert t (TextIndex (TI_End, [])) ht.text ;
+  text__insert t (TextIndex (End, [])) ht.text [];
   (* Define the anchors *)
   do_list (function (tagname, l) ->
       	     do_list (function (b,e) -> 
@@ -353,34 +353,34 @@ let hypertext top hn ht =
    *)
   let get_current_anchor tagname =
     let b,e = match tagname with
-       "" -> text__index t (TextIndex (TI_Mark "current", [WordStart])),
-             text__index t (TextIndex (TI_Mark "current", [WordEnd]))
+       "" -> text__index t (TextIndex (Mark "current", [WordStart])),
+             text__index t (TextIndex (Mark "current", [WordEnd]))
     | tagname -> 
       	try
           text__tag_nextrange t tagname
-      	       	    (TextIndex (TI_Mark "current", [WordStart]))
-		    (TextIndex (TI_End, [])) 
+      	       	    (TextIndex (Mark "current", [WordStart]))
+		    (TextIndex (End, [])) 
         with
       	  _ -> 
-           text__index t (TextIndex (TI_Mark "current", [WordStart])),
-           text__index t (TextIndex (TI_Mark "current", [WordEnd]))  in
+           text__index t (TextIndex (Mark "current", [WordStart])),
+           text__index t (TextIndex (Mark "current", [WordEnd]))  in
     text__get t (TextIndex(b,[]))  (TextIndex(e,[])) in
   (* Setup the callbacks *)
   do_list
       (function 
          ("", action) -> 
-           bind t [[Double], WhatButton 1] 
+           bind t [[Double], ButtonPressDetail 1] 
 	     (BindExtend ([], fun _ -> action (get_current_anchor "")))
        | (tagname, action) ->
-      	   text_tag_bind t tagname [[Double], WhatButton 1]
+      	   text_tag_bind t tagname [[Double], ButtonPressDetail 1]
 	     (BindSet ([], function _ -> action (get_current_anchor tagname))))
       hn.navigators;
     
   (* Make reasonable size *)
-  let i = text__index t (TextIndex(TI_End,[])) in
+  let i = text__index t (TextIndex(End,[])) in
   let lines = 
      match i with
-      TI_LineChar(l,c) -> l
+      LineChar(l,c) -> l
     | _ -> failwith "subliminal" (* not suppose to happen *) in
   text__configure t [TextHeight (if lines < 15 then lines else 15)];
 
