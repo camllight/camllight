@@ -186,6 +186,7 @@ let rec is_nonexpansive expr =
   | Zcondition(cond, ifso, ifnot) ->
       is_nonexpansive ifso & is_nonexpansive ifnot
   | Zconstraint(e, ty) -> is_nonexpansive e
+  | Zvector [] -> true
   | Zrecord lbl_expr_list ->
       for_all (fun (lbl, expr) ->
                   lbl.info.lbl_mut == Notmutable & is_nonexpansive expr)
