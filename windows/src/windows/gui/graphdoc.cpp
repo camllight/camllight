@@ -680,8 +680,10 @@ GRAPHPRIM( BlitImage, gr_blit_image, (value i, value x, value y), (i, x, y) )
 	CBitmap * oldBmp = m_tempDC->SelectObject(Data(i));
 	int xsrc = Int_val(x);
 	int ysrc = UD(Int_val(y) + Height(i) - 1); 
+    SelectDC(m_OffScreenDC);
 	m_tempDC->BitBlt(0, 0, Width(i), Height(i),
 								m_OffScreenDC, xsrc, ysrc, SRCCOPY);
+	UnselectDC();
 	m_tempDC->SelectObject(oldBmp);
 	return Val_unit;
 }
@@ -692,17 +694,21 @@ GRAPHPRIM( DrawImage, gr_draw_image, (value i, value x, value y), (i, x, y) )
 	int ydst = UD(Int_val(y) + Height(i) - 1); 
 	if (Mask(i) == NULL) {
       CBitmap * oldBmp = m_tempDC->SelectObject(Data(i));
+      SelectDC(m_OffScreenDC);
 	  m_OffScreenDC->BitBlt(xdst, ydst, Width(i), Height(i),
 								       m_tempDC, 0, 0, SRCCOPY);
+	  UnselectDC();
 	  m_tempDC->SelectObject(oldBmp);
 	} else {
       CBitmap * oldBmp = m_tempDC->SelectObject(Mask(i));
+      SelectDC(m_OffScreenDC);
 	  m_OffScreenDC->BitBlt(xdst, ydst, Width(i), Height(i),
 								       m_tempDC, 0, 0, SRCAND);
 	  m_tempDC->SelectObject(Data(i));
  	  m_OffScreenDC->BitBlt(xdst, ydst, Width(i), Height(i),
 								       m_tempDC, 0, 0, SRCPAINT);
-  	  m_tempDC->SelectObject(oldBmp);
+ 	  UnselectDC();
+ 	  m_tempDC->SelectObject(oldBmp);
 	}
 
 	SelectDC(m_DC);
