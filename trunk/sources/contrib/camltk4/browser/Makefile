@@ -78,13 +78,6 @@ install: camlbrowser
 
 
 depend: main.ml lexer.ml
-	mv Makefile Makefile.bak
-	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
-	 $(CAMLDEP) *.mli *.ml) > Makefile
+	$(CAMLDEP) *.mli *.ml > .depend
 
-
-### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
-### DO NOT DELETE THIS LINE
-main.zo: modlist.zo visual.zo tags.zo 
-source.zo: lexer.zo 
-visual.zo: source.zo hyper_printers.zo tags.zo 
+include .depend
