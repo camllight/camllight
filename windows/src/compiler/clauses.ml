@@ -297,7 +297,9 @@ let get_mins ps =
 
 let partial_match casel =
   let pss = get_mins (make_matrix casel) in
-  satisfiable pss (map (fun _ -> omega) (hd pss))
+  match pss with
+    []     -> true
+  | ps::_  -> satisfiable pss (map (fun _ -> omega) ps)
 ;;
 
 
