@@ -3,6 +3,7 @@
 #include "config.h"
 #include "mlvalues.h"
 #include "memory.h"
+#include "alloc.h"
 
 struct parser_tables {    /* Mirrors parse_tables in ../lib/parsing.mli */
   value actions;
@@ -99,10 +100,29 @@ value parse_engine(tables, env, cmd, arg) /* ML */
     sp = Int_val(env->sp);
     state = Int_val(env->state);
     env->curr_char = Field(tables->transl, Tag_val(arg));
-    if (Wosize_val(arg) == 0) {
-      env->lval = Val_long(0);
-    } else {
-      modify(&env->lval, Field(arg, 0));
+    switch (Wosize_val(arg)) {
+    case 0:
+      env->lval = Val_long(0); break;
+    case 1:
+      modify(&env->lval, Field(arg, 0)); break;
+    default: {
+      value tuple;
+      mlsize_t size, i;
+      Push_roots(r, 4);
+      r[0] = (value) tables;
+      r[1] = (value) env;
+      r[2] = cmd;
+      r[3] = arg;
+      size = Wosize_val(arg);
+      tuple = alloc_tuple(size);
+      tables = (struct parser_tables *) r[0];
+      env = (struct parser_env *) r[1];
+      cmd = r[2];
+      arg = r[3];
+      for (i = 0; i < size; i++) Field(tuple, i) = Field(arg, i);
+      modify(&env->lval, tuple);
+      Pop_roots();
+      break; }
     }
     Trace(printf("Token %d (0x%lx)\n", Int_val(env->curr_char), env->lval));
     
