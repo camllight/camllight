@@ -83,9 +83,10 @@ let add_param_f y=fun
      P_arity=pa} -> {P_constant=pc;P_frozen_variable=pf;P_subst_variable=ps@[y,
                                {Count=1 ; Parameter=[Unit]}];P_arity=pa};;
 
-let is_bound_with_unit subst_list x=let (depth,Bound val)=(assoc x subst_list)
-                                    in 
-				    (depth=0)&(val=Unit);;
+let is_bound_with_unit subst_list x = 
+    match assoc x subst_list with
+       (depth, Bound val) -> (depth = 0) & (val = Unit)
+     | _ -> false;;
 
 
 let rec change_max_depth parb=fun

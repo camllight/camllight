@@ -150,7 +150,7 @@ let main () =
       prerr_string c;
       prerr_endline " is used implicitly before defined";
       exit 1
- | Cyclic ->
+ | tsort__Cyclic ->
       prerr_endline "Cyclic dependency of types";
       exit 1
 ;;
