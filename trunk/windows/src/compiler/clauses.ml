@@ -219,14 +219,10 @@ let rec satisfiable pss qs = match pss with
         (simple_match_args q0 q @ qs)
 ;;
 
-let has_guard = function
-    (ps, Lwhen(_,_)) -> true
-  | _ -> false
-;;
 
 let rec make_matrix pses = match pses with
-  ((ps,_) as clause)::pses ->
-     if has_guard clause then
+  (ps,act)::pses ->
+     if has_guard act then
        make_matrix pses
      else
        ps::make_matrix pses
@@ -287,8 +283,8 @@ let extract_loc_from_clause clause = match clause with
 let check_unused casel =
   let prefs =   
     list_it
-      (fun ((ps,_) as clause) r ->
-         if has_guard clause then ([],clause)::r
+      (fun (ps,act as clause) r ->
+         if has_guard act then ([],clause)::r
          else
            ([],clause)::map (fun (pss,clause) -> ps::pss,clause) r)
       casel [] in

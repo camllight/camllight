@@ -385,8 +385,6 @@ let rec compile_expr staticfail =
               compexp expr code (* don't destroy tail call opt. *)
           | _ -> compexp expr (Kevent event :: code)
        end
-  | Lwhen(cond, body) ->
-      compexp cond (Kbranchifnot staticfail :: compexp body code)
 
   and compexplist = fun
       [] code -> code

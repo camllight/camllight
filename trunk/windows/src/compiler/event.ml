@@ -17,13 +17,6 @@ let before env {e_loc = Loc(p1,p2)} l =
   else l
 ;;
 
-let action env exp = function
-    Lifthenelse(l1, l2, Lstaticfail) -> (* This is a guard *)
-      Lifthenelse(l1, before env exp l2, Lstaticfail)
-  | l ->
-      before env exp l
-;;
-
 let after_pat env {p_loc = Loc(p1,p2)} l =
   if !record_events then
     Levent({ev_kind = Lbefore;
