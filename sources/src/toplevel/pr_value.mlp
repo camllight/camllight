@@ -92,8 +92,8 @@ let rec print_val prio depth obj ty =
     | Tarrow(ty1, ty2) ->
         print_string "<fun>"
     | Tproduct(ty_list) ->
-        if prio > 0 then begin open_hovbox 1; print_string "(" end
-         else open_hovbox 0;
+        if prio > 0 then begin open_box 1; print_string "(" end
+         else open_box 0;
         print_val_list 1 depth obj ty_list;
         if prio > 0 then print_string ")";
         close_box()
@@ -126,19 +126,19 @@ and print_concrete_type prio depth obj cstr ty ty_list =
           Constr_constant ->
             output_constr constr
         | Constr_regular ->
-            if prio > 1 then begin open_hovbox 2; print_string "(" end
-             else open_hovbox 1;
+            if prio > 1 then begin open_box 2; print_string "(" end
+             else open_box 1;
             output_constr constr;
             print_space();
             cautious (print_val 2 (depth - 1) (obj_field obj 0)) ty_arg;
             if prio > 1 then print_string ")";
             close_box()
         | Constr_superfluous n ->
-            if prio > 1 then begin open_hovbox 2; print_string "(" end
-            else open_hovbox 1;
+            if prio > 1 then begin open_box 2; print_string "(" end
+            else open_box 1;
             output_constr constr;
             print_space();
-            open_hovbox 1;
+            open_box 1;
             print_string "(";
             print_val_list 1 depth obj (filter_product n ty_arg);
             print_string ")";
@@ -155,7 +155,7 @@ and print_concrete_type prio depth obj cstr ty ty_list =
       end
   | Record_type label_list ->
       let print_field depth lbl =
-        open_hovbox 1;
+        open_box 1;
         output_label lbl;
         print_string " ="; print_space();
         let (ty_res, ty_arg) =
@@ -177,7 +177,7 @@ and print_concrete_type prio depth obj cstr ty ty_list =
                 loop (depth - 1) true rest in
           loop depth false label_list
       in
-      open_hovbox 1;
+      open_box 1;
       print_string "{";
       cautious (print_fields depth) label_list;
       print_string "}";
@@ -207,7 +207,7 @@ and print_list depth obj ty_arg =
      end
    end
  in
-   open_hovbox 1;
+   open_box 1;
    print_string "[";
    cautious (print_conses depth) obj;
    print_string "]";
@@ -224,7 +224,7 @@ and print_vect depth obj ty_arg =
            end in
       loop depth 0
   in
-    open_hovbox 2;
+    open_box 2;
     print_string "[|";
     cautious (print_items depth) obj;
     print_string "|]";
