@@ -130,10 +130,10 @@ char *fl_allocate (wo_sz)
 
 void fl_init_merge ()
 {
+  fl_merge = Fl_head;
 #ifdef DEBUG
   fl_check ();
 #endif
-  fl_merge = Fl_head;
 }
 
 /* [fl_merge_block] returns the head pointer of the next block after [bp],

@@ -20,9 +20,13 @@
 #endif
 #if defined (macintosh) && !defined (HAS_UI)
 #include <CursorCtl.h>
+#ifdef powerc
+#define PERIODIC_ACTION_FREQ 5000
+#else
 #define PERIODIC_ACTION_FREQ 2000
-#define ui_periodic_action() SpinCursor ((short) 32)
 #endif
+#define ui_periodic_action() SpinCursor ((short) 32)
+#endif /* macintosh && !HAS_UI */
 
 #ifdef DEBUG
 static long icount = 0;

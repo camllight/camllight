@@ -6,7 +6,6 @@
 #else
 #include <fcntl.h>
 #endif
-#include "version.h"
 #include "alloc.h"
 #include "debugcom.h"
 #include "debugger.h"
@@ -20,7 +19,11 @@
 #include "mlvalues.h"
 #include "stacks.h"
 #include "sys.h"
+#include "version.h"
 
+#ifdef macintosh
+#include "mac_os.h"
+#endif
 #ifndef __STDC__
 extern char *getenv ();
 #endif /* not __STDC__ */
@@ -144,7 +147,7 @@ main(argc, argv)
      last word of the ML name of the option (see [lib/gc.mli]). */
 
   {
-#if macintosh && HAS_UI
+#if defined (macintosh) && defined (HAS_UI)
     char *opt = get_env_resource ("\pCAMLRUNPARAM");
 #else
     char *opt = getenv ("CAMLRUNPARAM");
