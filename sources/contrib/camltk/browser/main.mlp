@@ -5,6 +5,7 @@
 #open "modules";;
 #open "hyper_printers";;
 #open "visual";;
+#open "source";;
 
 
 let bye () = 
@@ -20,11 +21,20 @@ let internal_close_module name =
       used_modules := exceptq (find_module name) !used_modules; ()
 ;;
 
-let open action =
+
+(* Open generic requester *)
+let new_open_top = 
+  let cnter = ref 0 in
+  function () ->
+   incr cnter; "open" ^ string_of_int !cnter
+;;
+
+
+let open title action =
   let t = toplevelw__create (support__new_toplevel_widget "open") [] in
   focus__set t;
   grab__set_local t;
-  let tit = label__create t [Text "Open a module"] in
+  let tit = label__create t [Text title] in
   let e = entry__create t [Relief Sunken] in
     tk__bind e [[], XKey "Return"]
       	(BindSet ([], fun _ -> action (entry__get e); destroy t));
@@ -56,38 +66,8 @@ let internal_add_directory dirname =
 ;;
 
 let add_directory () =
-  let t = toplevelw__create (support__new_toplevel_widget "open") [] in
-  focus__set t;
-  grab__set_local t;
-  let tit = label__create t [Text "Add a directory to the load path"] in
-  let e = entry__create t [Relief Sunken] in
-    tk__bind e [[], XKey "Return"]
-      	(BindSet ([], fun _ -> internal_add_directory (entry__get e); 
-                               destroy t));
-
-  let f = frame__create t [] in
-  let bok = button__create f 
-      	    [Text "Ok"; 
-      	     Command (fun () -> internal_add_directory (entry__get e); 
-      	       	       	       	destroy t)] in
-  let bcancel = button__create f
-      	    [Text "Cancel"; 
-      	     Command (fun () -> destroy t)] in
-
-    tk__bind t [[], XKey "Return"]
-      	 (BindSet ([], (fun _ -> button__invoke bok)));
-    tk__bind t [[], XKey "Escape"]
-      	 (BindSet ([], (fun _ -> button__invoke bcancel)));
-    tk__bind e [[], XKey "Escape"]
-      	 (BindSet ([], (fun _ -> button__invoke bcancel)));
-
-    pack [bok; bcancel] [Side Side_Left; Fill Fill_X; Expand true];
-    pack [tit;e] [Fill Fill_X];
-    pack [f] [Side Side_Bottom; Fill Fill_X];
-    util__resizeable t;
-    focus__set e
+  open "Add a directory to the load path" internal_add_directory
 ;;
-
 
 let main () = 
   let top = OpenTkClass "CamlBrowser" in
@@ -153,19 +133,22 @@ let main () =
                       listbox__insert lb End [n]) !default_used_modules;
  
 
+   let o2 = button__create f
+      [Text "Open source file"; Relief Raised;
+       Command (fun () -> open "Open a source file" display_file)] in
    let c = button__create f
       [Text "Close Module"; Relief Raised;
        Command close_module] in
    let o = button__create f
       [Text "Open Module"; Relief Raised; 
-       Command (fun () -> open open_module)] in
+       Command (fun () -> open "Open a module" open_module)] in
    let a = button__create f
       [Text "Add Directory"; Relief Raised; 
        Command add_directory] in
 
    pack [mods] [Fill Fill_X];
    pack [f1] [Fill Fill_Both; Expand true];
-   pack [c;o;a] [Side Side_Bottom; Anchor Center; Fill Fill_X];
+   pack [o2;c;o;a] [Side Side_Bottom; Anchor Center; Fill Fill_X];
 
    let f2 = frame__create g [] in
    let m = label__create f2 [Text "Enter a global symbol:"] in
@@ -184,9 +167,9 @@ let main () =
    pack [g] [Expand true; Fill Fill_Both];
    pack [b] [Side Side_Bottom; Fill Fill_X];
    (* Make e "autofocus" *)
-   tk__bind e [[], Enter]
+   tk__bind e [[Any], Enter]
        	 (BindSet ([], (fun _ -> focus__set e)));
-   tk__bind e [[], Leave]
+   tk__bind e [[Any], Leave]
        	 (BindSet ([], (fun _ -> focus__none ())));
    util__resizeable top;
    focus__set e;
