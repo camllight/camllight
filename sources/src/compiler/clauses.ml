@@ -316,7 +316,7 @@ let check_unused casel =
       casel [] in
   let rec check_rec l   = match l with
     (pss,((qs,_) as clause)) :: l ->       
-       if satisfiable (get_mins pss) qs then
+       if satisfiable pss qs then
          clause::check_rec l
        else
          begin
