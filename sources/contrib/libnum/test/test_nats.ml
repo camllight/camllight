@@ -182,8 +182,8 @@ let (sbi, size) = decimal_of_string 10 "12.3/34.56" 5 5 in
  test 15 eq_string (sbi, "3456") && test 16 eq_int (size, -2);;
 
 failwith_test 17
- (decimal_of_string 10 "cklefohj" 0) 4
- (Failure "decimal_of_string");;
+ (decimal_of_string 10 "cklefohj" 0) 8
+ (Failure "invalid digit");;
 
 
 testing_function "nat_of_string";;
