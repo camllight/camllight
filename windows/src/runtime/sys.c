@@ -76,6 +76,9 @@ value sys_exit(retcode)          /* ML */
      value retcode;
 {
   debugger(PROGRAM_EXIT);
+#ifdef NEED_FREE_ALL
+  xfree_all();
+#endif
 #ifdef HAS_UI
   ui_exit(Int_val(retcode));
 #else

@@ -131,16 +131,77 @@ void memmov (dst, src, length)
 
 #endif /* USING_MEMMOV */
 
-char *aligned_malloc (size, modulo)
+char * aligned_malloc (size, modulo)
      asize_t size;
      int modulo;
 {
   char *raw_mem;
   unsigned long aligned_mem;
                                                  Assert (modulo < Page_size);
-  raw_mem = (char *) malloc (size + Page_size);
+  raw_mem = (char *) xmalloc (size + Page_size);
   if (raw_mem == NULL) return NULL;
   raw_mem += modulo;		/* Address to be aligned */
   aligned_mem = (((unsigned long) raw_mem / Page_size + 1) * Page_size);
   return (char *) (aligned_mem - modulo);
 }
+
+#ifdef NEED_FREE_ALL
+
+struct malloc_header {
+  struct malloc_header * prev, * next;
+};
+
+static struct malloc_header malloc_chain = { &malloc_chain, &malloc_chain };
+
+#define Header(b) ((struct malloc_header *)(b) - 1)
+
+char * xmalloc(size)
+     asize_t size;
+{
+  char * res = (char *) malloc(sizeof(struct malloc_header) + size);
+  if (res == NULL) return NULL;
+  res += sizeof(struct malloc_header);
+  Header(res)->next = malloc_chain.next;
+  malloc_chain.next->prev = Header(res);
+  malloc_chain.next = Header(res);
+  Header(res)->prev = &malloc_chain;
+  return res;
+}
+
+void xfree(block)
+     char * block;
+{
+  Header(block)->next->prev = Header(block)->prev;
+  Header(block)->prev->next = Header(block)->next;
+  free(block);
+}
+
+char * xrealloc(block, size)
+     char * block;
+     asize_t size;
+{
+  char * res;
+  Header(block)->next->prev = Header(block)->prev;
+  Header(block)->prev->next = Header(block)->next;
+  res = (char *) realloc(block, sizeof(struct malloc_header) + size);
+  if (res == NULL) return NULL;
+  res += sizeof(struct malloc_header);
+  Header(res)->next = malloc_chain.next;
+  malloc_chain.next->prev = Header(res);
+  malloc_chain.next = Header(res);
+  Header(res)->prev = &malloc_chain;
+  return res;
+}
+
+void xfree_all()
+{
+  struct malloc_header * p, * q;
+  for (p = malloc_chain.next; p != &malloc_chain; /*nothing*/) {
+    q = p->next;
+    free((char *) p);
+    p = q;
+  }
+}
+
+#endif
+

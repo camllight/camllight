@@ -54,6 +54,5 @@ void reset_roots P((void));
 void init_stacks P((void));
 void realloc_stacks P((void));
 
-
 #endif /* _stacks_ */
 
