@@ -45,6 +45,7 @@
 \input lexyacc.tex
 \input debugger.tex
 \input profil.tex
+\input emacs.tex
 \input intf-c.tex
 
 \part{Appendix}
