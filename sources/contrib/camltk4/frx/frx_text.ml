@@ -110,7 +110,7 @@ let init () =
 
 let navigation_keys tx =
    bindtags tx [WidgetBindings tx; TagBindings "TEXT_RO"; 
-      	        TagBindings "Text"; TagBindings "All"]
+      	        TagBindings "Text"; TagBindings "."; TagBindings "all"]
 ;;
 
 let new_scrollable_text top options navigation =
@@ -118,8 +118,9 @@ let new_scrollable_text top options navigation =
   let tx = text__create f options 
   and sb = scrollbar__create f [] in
     scroll_link sb tx;
+    (* IN THIS ORDER -- RESIZING *)
+    pack [sb] [Side Side_Right; Fill Fill_Y];
     pack [tx] [Side Side_Left; Fill Fill_Both; Expand true];
-    pack [sb] [Side Side_Left; Fill Fill_Y];
     if navigation then navigation_keys tx;
     f, tx
 ;;
