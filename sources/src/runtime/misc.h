@@ -35,6 +35,11 @@ typedef char * addr;
 #endif
 
 extern int verb_gc;
+#ifdef ANSI
+extern int volatile something_to_do;
+#else
+extern int something_to_do;
+#endif
 
 void gc_message P((char *, unsigned long));
 void fatal_error P((char *));

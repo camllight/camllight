@@ -55,9 +55,6 @@ value quit : unit -> unit
            to private types and variables of modules, and private functions
            can be traced with [trace]. Setting [debug_mode true] is equivalent
            to starting the toplevel with the [-g] option. *)
-  and gc : unit -> int
-        (* Finish the current GC cycle and return the number of free bytes
-	   in the heap. *)
   and cd : string -> unit
         (* Change the current working directory. *)
 ;;    

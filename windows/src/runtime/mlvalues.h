@@ -123,9 +123,14 @@ bits  63    10 9     8 7   0
 #define Bhsize_bosize(sz) ((sz) + sizeof (header_t))
 #define Bosize_val(val) (Bsize_wsize (Wosize_val (val)))
 #define Bosize_op(op) (Bosize_val (Val_op (op)))
+#define Bosize_bp(bp) (Bosize_val (Val_bp (bp)))
+#define Bosize_hd(hd) (Bsize_wsize (Wosize_hd (hd)))
 #define Whsize_hp(hp) (Whsize_wosize (Wosize_hp (hp)))
 #define Whsize_val(val) (Whsize_hp (Hp_val (val)))
+#define Whsize_bp(bp) (Whsize_val (Val_bp (bp)))
+#define Whsize_hd(hd) (Whsize_wosize (Wosize_hd (hd)))
 #define Bhsize_hp(hp) (Bsize_wsize (Whsize_hp (hp)))
+#define Bhsize_hd(hd) (Bsize_wsize (Whsize_hd (hd)))
 
 #ifdef BIG_ENDIAN
 #define Tag_val(val) (((unsigned char *) (val)) [-1])

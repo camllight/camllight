@@ -2,6 +2,7 @@
 #include "fail.h"
 #include "freelist.h"
 #include "gc.h"
+#include "gc_ctrl.h"
 #include "major_gc.h"
 #include "memory.h"
 #include "minor_gc.h"
@@ -24,8 +25,8 @@ static char *expand_heap (request)
   asize_t i, more_pages;
 
   malloc_request = round_heap_chunk_size (Bhsize_wosize (request));
-  gc_message ("Growing heap to %ld kB.\n",
-	      (total_heap_size + malloc_request) / 1024);
+  gc_message ("Growing heap to %ldk.\n",
+	      (stat_heap_size + malloc_request) / 1024);
   mem = aligned_malloc (malloc_request + sizeof (heap_chunk_head),
                         sizeof (heap_chunk_head));
   if (mem == NULL){
@@ -39,7 +40,7 @@ static char *expand_heap (request)
 
 #ifndef SIXTEEN
   if (mem < heap_start){
-    more_pages = -Page (mem);  /* ### page numbers are unsigned ! */
+    more_pages = -Page (mem);
   }else if (Page (mem + malloc_request) > page_table_size){
     Assert (mem >= heap_end);
     more_pages = Page (mem + malloc_request) - page_table_size;
@@ -110,7 +111,7 @@ static char *expand_heap (request)
   for (i = Page (mem); i < Page (mem + malloc_request); i++){
     page_table [i] = In_heap;
   }
-  total_heap_size += malloc_request;
+  stat_heap_size += malloc_request;
   return Bp_hp (mem);
 }
 
@@ -121,11 +122,11 @@ value raw_alloc_shr (wosize, tag)
   char *hp, *new_block;
 
   while (1){
-    hp = fl_allocate (master_fl, wosize);
+    hp = fl_allocate (wosize);
     if (hp != NULL) break;
     new_block = expand_heap (wosize);
     if (new_block == NULL) raise_out_of_memory ();
-    fl_add_block (master_fl, new_block);
+    fl_add_block (new_block);
   }
   Assert (Is_in_heap (Val_hp (hp)));
 
@@ -138,14 +139,38 @@ value raw_alloc_shr (wosize, tag)
   return Val_hp (hp);
 }
 
+/* We could set [force_minor_gc] instead. */
 value alloc_shr (wosize, tag)
      mlsize_t wosize;
      tag_t tag;
 {
-  if (allocated_words > Wsize_bsize (young_end - young_start)) {
+  if (allocated_words > Wsize_bsize (minor_heap_size)) {
     minor_collection ();
   }
   return raw_alloc_shr (wosize, tag);
+}
+
+/* Use this function to tell the major GC to speed up when you use
+   finalized objects to automatically deallocate extra-heap objects.
+   The GC will do at least one cycle every [max] allocated words;
+   [mem] is the number of words allocated this time.
+   Note that only [mem/max] is relevant.  You can use numbers of bytes
+   (or kilobytes, ...) instead of words.  You can change units between
+   calls to [adjust_collector_speed].
+*/
+void adjust_gc_speed (mem, max)
+     mlsize_t mem, max;
+{
+  if (max == 0) max = 1;
+  if (mem > max) mem = max;
+  extra_heap_memory += ((float) mem / max) * stat_heap_size;
+  if (extra_heap_memory > stat_heap_size){
+    extra_heap_memory = stat_heap_size;
+  }
+  if (extra_heap_memory > Wsize_bsize (minor_heap_size) / 2){
+    force_minor_gc = 1;
+    something_to_do = 1;
+  }
 }
 
 /* You must use [initialize] to store the initial value in a field of
@@ -163,7 +188,7 @@ void initialize (fp, val)
   Assert (Is_in_heap (fp));
   if (Is_block (val) && Is_young (val)){
     *ref_table_ptr++ = fp;
-    if (ref_table_ptr >= ref_table_end){
+    if (ref_table_ptr >= ref_table_limit){
       realloc_ref_table ();
     }
   }
@@ -180,10 +205,10 @@ void modify (fp, val)
   Modify (fp, val);
 }
 
-char * stat_alloc (sz)
+char *stat_alloc (sz)
      asize_t sz;
 {
-  char * result = (char *) malloc (sz);
+  char *result = (char *) malloc (sz);
 
   if (result == NULL) raise_out_of_memory ();
   return result;
@@ -195,17 +220,17 @@ void stat_free (blk)
   free (blk);
 }
 
-char * stat_resize (blk, sz)
+char *stat_resize (blk, sz)
      char *blk;
      asize_t sz;
 {
-  return (char *) realloc (blk, sz);
+  char *result = (char *) realloc (blk, sz);
+
+  if (result == NULL) raise_out_of_memory ();
+  return result;
 }
 
-void init_memory (generation_size, heap_size)
-     asize_t generation_size, heap_size;
+void init_c_roots ()
 {
-  init_minor_heap (generation_size);
-  init_major_heap (heap_size);
   c_roots_head = NULL;
 }

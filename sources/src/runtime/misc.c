@@ -4,6 +4,11 @@
 #include "misc.h"
 
 int verb_gc;
+#ifdef ANSI
+int volatile something_to_do = 0;
+#else
+int something_to_do = 0;
+#endif
 
 void gc_message (msg, arg)
      char *msg;
@@ -34,49 +39,64 @@ void memmov (dst, src, length)
   unsigned long i;
 
   if ((unsigned long) dst <= (unsigned long) src){
-    /* Copy in ascending order. */
+
+      /* Copy in ascending order. */
     if (((unsigned long) src - (unsigned long) dst) % sizeof (long) != 0){
-      /* The pointers are not equal modulo sizeof (long). Copy byte by byte. */
-      for (; length > 0; length--){
+
+        /* The pointers are not equal modulo sizeof (long).
+           Copy byte by byte. */
+      for (; length != 0; length--){
 	*dst++ = *src++;
       }
     }else{
-      /* Copy the first few bytes. */
+
+        /* Copy the first few bytes. */
       i = (unsigned long) dst % sizeof (long);
       if (i != 0){
-	for (; i < sizeof (long); i++){
+	i = sizeof (long) - i;              /* Number of bytes to copy. */
+	if (i > length) i = length;         /* Never copy more thant length.*/
+	for (; i != 0; i--){
 	  *dst++ = *src++; --length;
 	}
-      }
+      }                    Assert ((unsigned long) dst % sizeof (long) == 0);
+                           Assert ((unsigned long) src % sizeof (long) == 0);
+
       /* Then copy as many entire words as possible. */
       for (i = length / sizeof (long); i > 0; i--){
 	*(long *) dst = *(long *) src;
 	dst += sizeof (long); src += sizeof (long);
       }
+
       /* Then copy the last few bytes. */
       for (i = length % sizeof (long); i > 0; i--){
 	*dst++ = *src++;
       }
     }
-  }else{
-    /* Copy in descending order. */
+  }else{                                       /* Copy in descending order. */
     src += length; dst += length;
     if (((unsigned long) dst - (unsigned long) src) % sizeof (long) != 0){
-      /* The pointers are not equal modulo sizeof (long). Copy byte by byte. */
+
+        /* The pointers are not equal modulo sizeof (long).
+	   Copy byte by byte. */
       for (; length > 0; length--){
 	*--dst = *--src;
       }
     }else{
-      /* Copy the first few bytes. */
-      for (i = (unsigned long) dst % sizeof (long); i > 0; i--){
+
+        /* Copy the first few bytes. */
+      i = (unsigned long) dst % sizeof (long);
+      if (i > length) i = length;           /* Never copy more than length. */
+      for (; i > 0; i--){
 	*--dst = *--src; --length;
       }
-      /* Then copy as many entire words as possible. */
+
+        /* Then copy as many entire words as possible. */
       for (i = length / sizeof (long); i > 0; i--){
 	dst -= sizeof (long); src -= sizeof (long);
 	*(long *) dst = *(long *) src;
       }
-      /* Then copy the last few bytes. */
+
+        /* Then copy the last few bytes. */
       for (i = length % sizeof (long); i > 0; i--){
 	*--dst = *--src;
       }
@@ -92,8 +112,7 @@ char *aligned_malloc (size, modulo)
 {
   char *raw_mem;
   unsigned long aligned_mem;
-
-  Assert (modulo < Page_size);
+                                                 Assert (modulo < Page_size);
   raw_mem = (char *) malloc (size + Page_size);
   if (raw_mem == NULL) return NULL;
   raw_mem += modulo;		/* Address to be aligned */

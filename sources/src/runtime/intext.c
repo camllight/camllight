@@ -395,7 +395,7 @@ static void expand_block(source, dest, source_len, dest_len, color)
         new_sz = (sz * sizeof(value32) + sizeof(value) - 1) / sizeof(value);
         *d++ = Make_header(new_sz, String_tag, color);
         Field(d, new_sz - 1) = 0;
-        bcopy(p, d, len);
+        bcopy((char *)p, (char *)d, len);
         ofs_last_byte = new_sz * sizeof(value) - 1;
         Byte(d, ofs_last_byte) = ofs_last_byte - len;
         p += sz;

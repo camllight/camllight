@@ -16,6 +16,14 @@
 #include "sys.h"
 #include "debugcom.h"
 
+#ifndef macintosh
+#ifdef __STDC__
+#include <stdlib.h>
+#else
+extern char *getenv ();
+#endif /* __STDC__ */
+#endif /* not macintosh */
+
 extern value interprete();
 
 #ifndef O_BINARY
@@ -78,6 +86,8 @@ int attempt_open(name, trail)
   return fd;
 }
 
+char usage[] = "usage: camlrun [-V] <file> <args>\n";
+
 int main(argc, argv)
      int argc;
      char * argv[];
@@ -85,26 +95,20 @@ int main(argc, argv)
   int fd;
   struct exec_trailer trail;
   int i;
-  asize_t heap_size, generation_size;
   struct longjmp_buffer raise_buf;
   struct channel * chan;
-  char * debugger_address;
+  int verbose_init = 0, percent_free_init = Percent_free_def;
+  long minor_heap_init = Minor_heap_def, heap_chunk_init = Heap_chunk_def;
+  char * debugger_address = NULL;
+
+#ifdef DEBUG
+  verbose_init = 1;
+#endif
 
 #ifdef MSDOS
   extern char ** check_args();
   argv = check_args(argv);
 #endif
-
-  heap_size = Heap_size;
-  generation_size = Generation_size;
-  free_mem_percent_min = Free_mem_percent_min;
-  free_mem_percent_max = Free_mem_percent_max;
-#ifdef DEBUG
-  verb_gc = 1;
-#else
-  verb_gc = 0;
-#endif
-  debugger_address = NULL;
 
   i = 0;
   fd = attempt_open(&argv[0], &trail);
@@ -113,13 +117,11 @@ int main(argc, argv)
 
     for(i = 1; i < argc && argv[i][0] == '-'; i++) {
       switch(argv[i][1]) {
-      case 'v':
-        verb_gc = 1;
-        break;
 #ifdef DEBUG
       case 't':
         { extern int trace_flag;
-          trace_flag = 1; }
+          trace_flag = 1;
+	}
         break;
 #endif
       case 'V':
@@ -128,20 +130,6 @@ int main(argc, argv)
                   MAJOR, MINOR);
           exit(0);
         }
-      case 'g':
-        generation_size = atoi(argv[++i]) * 256;
-        break;
-#ifdef SMALL
-      case 'f':
-        free_mem_percent_min = atoi(argv[++i]);
-        break;
-#endif
-      case 'F':
-        free_mem_percent_max = atoi(argv[++i]);
-        break;
-      case 'D':
-        debugger_address = argv[++i];
-        break;
       default:
         fprintf(stderr, "Unknown option %s.\n", argv[i]);
         exit(2);
@@ -169,6 +157,24 @@ int main(argc, argv)
     }
   }
 
+#ifndef macintosh
+  /* Runtime options.  The option letter is the first letter of the
+     last word of the ML name of the option (see [lib/gc.mli]). */
+
+  { char *opt = getenv ("CAMLRUNPARAM");
+    if (opt != NULL){
+      while (*opt != '\0'){
+	switch (*opt++){
+	case 's': sscanf (opt, "=%ld", &minor_heap_init); break;
+	case 'i': sscanf (opt, "=%ld", &heap_chunk_init); break;
+	case 'o': sscanf (opt, "=%d", &percent_free_init); break;
+	case 'v': sscanf (opt, "=%d", &verbose_init); break;
+	}
+      }
+    }
+  }
+#endif /* not macintosh */
+
   if (debugger_address == NULL)
     debugger_address = getenv("CAML_DEBUG_SOCKET");
 
@@ -176,7 +182,8 @@ int main(argc, argv)
 
     external_raise = &raise_buf;
 
-    init_memory(generation_size, heap_size);
+    init_gc (minor_heap_init, heap_chunk_init, percent_free_init,
+	     verbose_init);
     init_stacks();
     init_atoms();
 
@@ -208,7 +215,6 @@ int main(argc, argv)
       fatal_error ("Fatal error: out of memory.\n");
     else
       fatal_error ("Fatal error: uncaught exception.\n");
-
   }
 }
 
