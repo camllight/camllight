@@ -220,6 +220,7 @@ type Index external   # builtin_index
 #   SelFirst "sel.first"
 #   SelLast "sel.last" 
 #   At "@" (int)
+#   AtXY "@" (int)
 
 # Defined internally
 # subtype Index(entry) {
@@ -276,7 +277,12 @@ type TagOrId external # because of builtins
 #   }
 
 type SearchSpec external	# builtin_canvas
-type CanvasIndex external       # builtin_canvas
+
+# defined internally
+# subtype Index(canvas) {
+#   Number End Insert SelFirst SelLast AtXY
+#   }
+
 
 type ArcStyle {
     Pieslice "pieslice"
@@ -436,16 +442,16 @@ widget canvas {
    function (int list) coords_get "coords" (TagOrId)
    function ()         coords_set "coords" (TagOrId, Units list)
     
-   function () dchars "dchars" (TagOrId, CanvasIndex, CanvasIndex)
+   function () dchars "dchars" (TagOrId, Index(canvas), Index(canvas))
    function () delete "delete" (TagOrId list)
    function () dtag "dtag" (TagOrId, TagOrId)     # 2d arg is tag only 
    function (TagOrId list) find "find" (SearchSpec)
    function () focus_reset "focus" ()
    function () focus "focus" (TagOrId)
    function (TagOrId list) gettags "gettags" (TagOrId)
-   function () icursor "icursor" (TagOrId, CanvasIndex)
-   function (int) index "index" (TagOrId, CanvasIndex)
-   function () insert "insert" (TagOrId, CanvasIndex, string)
+   function () icursor "icursor" (TagOrId, Index(canvas))
+   function (int) index "index" (TagOrId, Index(canvas))
+   function () insert "insert" (TagOrId, Index(canvas), string)
    function (string) item_configure_get "itemconfigure" (TagOrId)
    function () arc_configure "itemconfigure" (TagOrId, option (arc) list)
    function () bitmap_configure "itemconfigure" (TagOrId, option (bitmap) list)
@@ -466,14 +472,14 @@ widget canvas {
    function () scale "scale" (TagOrId, Units, Units, float, float)
    function () scan_mark "scan mark" (int, int)
    function () scan_dragto "scan dragto" (int, int)
-   function () select_adjust "select adjust" (TagOrId,CanvasIndex)
+   function () select_adjust "select adjust" (TagOrId,Index(canvas))
    function () select_clear "select clear" ()
-   function () select_from "select from" (TagOrId,CanvasIndex)
+   function () select_from "select from" (TagOrId,Index(canvas))
    function (TagOrId) select_item "select item" ()
-   function () select_to  "select to" (TagOrId,CanvasIndex)
+   function () select_to  "select to" (TagOrId,Index(canvas))
    function (CanvasItem) typeof "type" (TagOrId)
-   function () xview "xview" (CanvasIndex)
-   function () yview "yview" (CanvasIndex)
+   function () xview "xview" (Index(canvas))
+   function () yview "yview" (Index(canvas))
    function (TagOrId) createarc "create arc" (Units, Units, Units, Units, option (arc) list)
    function (TagOrId) createbitmap "create bitmap" (Units, Units, option (bitmap) list)
    function (TagOrId) createline "create line" (Units list, option (line) list)
