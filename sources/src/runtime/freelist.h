@@ -7,7 +7,6 @@
 #include "misc.h"
 #include "mlvalues.h"
 
-extern unsigned long fl_whsize;
 char *fl_allocate P((mlsize_t));
 void fl_init_merge P((void));
 char *fl_merge_block P((char *));
