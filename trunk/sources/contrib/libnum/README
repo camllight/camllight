@@ -45,6 +45,7 @@ KNOWN TARGET ARCHITECTURES:
         i960            Intel 80960A assembly code
         ns              National Semiconductors 32032 assembly code
         pyramid         Pyramid minicomputers assembly code
+        pentium         Intel x86 assembly code
 
 LEGAL NOTICE:
 
