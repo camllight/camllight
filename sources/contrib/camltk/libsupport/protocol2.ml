@@ -52,7 +52,9 @@ exception TkError of string
 let read_string end_char port = 
   let rec read_rec buf bufsize offs =
     let n = read port buf offs 1 in
-      let c = nth_char buf offs in
+      if n == 0 then (* wish interpreter has quit *)
+      	raise (TkError "terminated")
+      else let c = nth_char buf offs in
       	if end_char c then sub_string buf 0 offs
         else let offs = succ offs in
     	        if offs = bufsize
@@ -90,7 +92,7 @@ let read_line port =
      prerr_string str;
      prerr_string "\n"
      end;
-  if sub_string str 0 7 = "TkError"
+  if string_length str >= 7 & sub_string str 0 7 = "TkError"  
   then let errmsg = sub_string str 8 (string_length str - 8) in
        raise (TkError errmsg)
   else str
@@ -156,7 +158,7 @@ proc safeeval { chan cmd } {
 
 
 (* could use argument to do some setup *)
-let OpenTk = function () ->
+let OpenTkInternal = function argv ->
   (* rw_rw_rw for named pipes *)
   umask 0;
   let dollardollar = string_of_int (getpid()) in
@@ -169,10 +171,9 @@ let OpenTk = function () ->
   (* fork our slave Tk interpreter *)
     match fork() with
       0 -> (* the child *)
-      	let Argv = [|"wish"|] in
       	(* connect stdin to emission pipe *)
 	  dup2 !PipeCaml2Tk stdin;
-      	  execvp "wish" Argv;	
+      	  execvp "wish" argv;	
 	  failwith "exec failed"
     | _ -> (* Caml process *)
       	(* open the other pipes *)
@@ -187,6 +188,12 @@ let OpenTk = function () ->
 	(* return the toplevel widget *)
         default_toplevel_widget
 ;;
+
+let OpenTk () = OpenTkInternal [| "wish" |]
+;;
+let OpenTkClass s = OpenTkInternal [| "wish"; "-name"; s |]
+;;
+
 
 let CloseTk = function () ->
   (* Don't use Send2Tk because last space prevents wish from exiting *)
