@@ -2,7 +2,8 @@ CAMLC=camlc
 CAMLLIBR=camllibr
 CAMLLEX=camllex
 CAMLYACC=camlyacc
-CAMLDEP=perl /caml386/src/tools/camldep
+COMPFLAGS=-W
+CAMLDEP=perl /caml/src/tools/camldep
 
 all: docteur.exe
 

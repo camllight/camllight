@@ -2,7 +2,8 @@ CAMLC=camlc
 CAMLLIBR=camllibr
 CAMLLEX=camllex
 CAMLYACC=camlyacc
-CAMLDEP=perl /caml386/src/tools/camldep
+COMPFLAGS=-W
+CAMLDEP=perl /caml/src/tools/camldep
 
 all: demonstr.exe
 
@@ -24,9 +25,9 @@ clean:
 depend:
 	$(CAMLDEP) >> makefile
 
-asynt.zi: prop.zi 
-lexuniv.zo: lexuniv.zi 
-demo.zo: asynt.zi prop.zi 
-loadall.zo: demo.zo 
 asynt.zo: asynt.zi prop.zi lexuniv.zi 
+asynt.zi: prop.zi 
+demo.zo: asynt.zi prop.zi 
+lexuniv.zo: lexuniv.zi 
+loadall.zo: demo.zo 
 prop.zo: prop.zi 
