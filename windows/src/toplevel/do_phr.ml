@@ -27,8 +27,8 @@ let do_toplevel_phrase phr =
       let res =
         load_phrase(compile_lambda false (translate_expression expr)) in
       flush std_err;
-      open_hovbox 0;
-      print_string "- : ";
+      open_hovbox 1;
+      print_string "- :"; print_space();
       print_one_type ty;
       print_string " ="; print_space();
       print_value res ty;
@@ -48,8 +48,8 @@ let do_toplevel_phrase phr =
       reset_rollback ();
       do_list
         (fun (name, (typ, mut_flag)) ->
-          open_hovbox 0;
-          print_string name; print_string " : ";
+          open_hovbox 1;
+          print_string name; print_string " :"; print_space();
           print_one_type typ; print_string " ="; print_space();
           print_value
             global_data.(get_slot_for_variable
