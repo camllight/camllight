@@ -6,6 +6,10 @@ Wed Oct 26 14:05:49 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
 
 	* Reorganised compiler to be architecture independant
 
+Thu Oct 20 17:22:00 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+        * Release alpha2
+
 Thu Oct 20 16:21:46 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
 
 	* Widgets.src: added grab, update
