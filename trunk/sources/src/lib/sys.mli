@@ -80,6 +80,8 @@ value exit : int -> 'a = 1 "sys_exit"
         (* Change the current working directory of the process.
 	   Note that there is no easy way of getting the current
 	   working directory from the operating system. *)
+  and system_command : string -> int = 1 "sys_system_command"
+        (* Execute the given shell command and return its exit code. *)
 ;;
 
 exception Break
