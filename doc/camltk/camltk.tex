@@ -1,9 +1,9 @@
-\documentstyle[11pt,html,fullpage]{book}
+\documentstyle[11pt,html,fullpage,epsf]{book}
 
+% As in ../manual
 \newif\ifplaintext
 \plaintextfalse
-
-\input ../manual/macros.tex
+\input macros.tex
 
 % Various notations
 \newcommand{\tcl}	{{\sf Tcl}}
@@ -11,6 +11,108 @@
 \newcommand{\caml}	{{\sf Caml Light}}
 \newcommand{\camltk}	{{\sf CamlTk}}
 \newcommand{\wish}	{{\sf wish}}
-\newcommand{\thisrelease}{{\tt beta2 (for 0.7)}}
+\newcommand{\thisrelease}{{\tt 0.7}}
 
-\input chapeau.tex
+\title{The \camltk\ interface \\
+       Release \thisrelease}
+
+\author{Fran\c{c}ois Pessaux and Fran\c{c}ois Rouaix \\
+           Projet Cristal, INRIA Rocquencourt \\
+        {\small Francois.Pessaux@inria.fr, Francois.Rouaix@inria.fr}
+        }
+\date{July 1995}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}
+
+\tk\ is a GUI (graphical user-interface) library for the \tcl\ language.
+Normally, \tk\ is controlled from \tcl. The purpose of the \camltk\
+interface is to provide a \caml\ library to control \tk\ from \caml\
+programs. Thus, \tk\ can be used to program user-interfaces in \caml\
+without knowledge of the \tcl\ language.
+
+\section*{Installation}
+\addcontentsline{toc}{section}{Installation}
+
+\begin{itemize}
+\item This release runs only on Unix systems.
+\item You need Caml Light 0.7.
+\item You need to have \tcl\ and \tk\ installed (that is, at least the
+include filess and libraries). 
+This release has been tested with \tcl\ 7.3 and \tk\ 3.6, but will have
+problems with \tk\ 4.0 because of incompatibilities.
+\end{itemize} 
+
+\begin{htmlonly}
+Check 
+\htmladdnormallink{here}{http://pauillac.inria.fr/\%7Erouaix/camltk-porting.html}
+for problems reported since the distribution.
+\end{htmlonly}
+
+\section*{This documentation}
+\addcontentsline{toc}{section}{This documentation}
+
+{\bf The present documentation is sketchy, thus some basic background
+about toolkits, event-driven programming, and \tk\ is assumed.}
+Documentation for \tk\ is currently available in \cite{ouster94},
+\cite{welch95}, and in the {\tt man} pages of the \tk\ distribution.
+What you will find here is:
+\begin{description}
+\item[The user's manual] : a short tutorial describing how to write \caml\
+programs using the \tk\ interface and how to compile them. 
+\item[The implementor's manual] : describing how the interface library is
+generated from a high-level description, and some technical details on
+the interface. This part is of interest mainly for
+expert \tk\ users who wish to extend the interface to support more
+functions, more widgets, or simply to fix bugs in test versions.
+\item[The Tentative reference manual] : the collection of interface files
+from the library.
+\end{description}
+
+The \camltk\ distribution also includes a first shot at a \caml\ browser,
+an {\em hypertext} tool that may help in finding the types of functions or
+types definitions available in \caml\ libraries.
+
+\section*{Bug reports}
+\addcontentsline{toc}{section}{Bug reports}
+
+% Before reporting a bug, please check the \verb|KnownBugs| file in the
+% \verb|doc| directory of the distribution.
+Release notes and porting problems can be found on WWW at the following
+address:\\
+\verb|http://pauillac.inria.fr/~rouaix/camltk-porting.html|.
+
+Please report problems and bugs directly to \verb|Francois.Rouaix@inria.fr|
+instead of \caml\ mailing lists.
+Don't hesitate to make comments and suggestions, or ask questions.
+
+\section*{Acknowledgments}
+% <Loic.Prylli@lip.ens-lyon.fr>
+% <raffalli@cs.chalmers.se>
+Thanks to Loic Prylli, Christophe Raffalli, Hendrik Tews for bug reports.
+Thanks to Pierre Weis for many comments and suggestions during the
+development and testing phases.
+\input{user}
+\input{impl}
+
+% Not included in html version, by command line option
+\input{reference}
+
+% Can't hack translator to do what I want, that is have the entry
+% directly point to the url.
+\begin{htmlonly}
+\chapter{The Library}
+\htmladdnormallink{Library}{/bin/psearch/doc-camltk/library}
+\end{htmlonly}
+
+\bibliography{tk}
+\bibliographystyle{plain}
+\appendix
+\chapter{BNF syntax of the interface description language}
+\input{bnf}
+\end{document}

@@ -1,11 +1,14 @@
 (* Tk initialisation functions, event bindings, extensions *)
 
 value OpenTk : unit -> Widget
-and   OpenTkClass : string -> Widget
-      (* Initialisation of the Tk interface, should be called only once.
-         Both functions will return the toplevel widget.
+  and OpenTkClass : string -> Widget
+  and OpenTkDisplayClass : string -> string -> Widget
+      (* Initialisation of the Tk interface (should be called only once).
+         All functions will return the toplevel widget.
          [OpenTkClass "class"] lets you specify the (resource) class 
-         of the toplevel widget *)
+         of the toplevel widget.
+      	 [OpenTkDisplayClass "display" "class"] lets you specify the display
+      	 and the resource class. *)
 ;;
 
 value MainLoop : unit -> unit 

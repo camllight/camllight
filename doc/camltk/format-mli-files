@@ -2,14 +2,17 @@
 
 # derived from XL format-mli-files for Caml Light library
 
-open(SUMMARY, "> camltk/library-modules.html");
+$root="$ENV{DESTDIR}/camltk";
+$urlroot= "$ENV{'URLROOT'}";
+
+open(SUMMARY, "> $root/library-modules.html");
 
 select(SUMMARY);
 print "<TITLE>Caml Tk, library modules</TITLE>\n";
 print "<H1>List of library modules</H1>\n";
 $summary_in_dl = 0;
 
-open(INDEX, "> camltk/library.html");
+open(INDEX, "> $root/library.html");
 
 select(INDEX);
 print "<TITLE>Caml Tk, index to the library</TITLE>\n";
@@ -31,7 +34,7 @@ $modname =~ s|^.*/||;
 $modname =~ s|\.mli||;
 
 open(INPUT, $infile) || (warn "cannot open $infile", next);
-open(OUTPUT, "> camltk/library/$modname.html");
+open(OUTPUT, "> $root/library/$modname.html");
 select(OUTPUT);
 
 $_ = <INPUT>;
@@ -61,9 +64,9 @@ while(<INPUT>) {
   s/;;//;
   next if /^\s*$/;
   next if /^#/;
-  s/&/&amp/g;
-  s/</&lt/g;
-  s/>/&gt/g;
+  s/&/&amp;/g;
+  s/</&lt;/g;
+  s/>/&gt;/g;
 
   if (/^\(\*\*+\s*(.*)\*\)$/) {
     print "</PRE>\n" if ($in_pre);
@@ -93,7 +96,7 @@ while(<INPUT>) {
     }
     $count = 0;
 # Hack to make cross refs
-    s|\[([a-z]+)\] and \[([a-z]+)\] modules|<A HREF=\"\1.html\"><code>\1</code></A> and <A HREF=\"\2.html\"><code>\2<code></A> modules|g;
+    s|\[([a-z]+)\] and \[([a-z]+)\] modules|<A HREF=\"\1.html\"><code>\1</code></A> and <A HREF=\"\2.html\"><code>\2</code></A> modules|g;
     s|\[([a-z]+)\] module|<A HREF=\"\1.html\"><code>\1</code></A> module|g;
     s|module \[([a-z]+)\]|module <A HREF=\"\1.html\"><code>\1</code></A>|g;
     foreach $part (split(/([\[\]])/, $_)) {
@@ -148,6 +151,6 @@ close(INDEX);
 sub index {
   local ($class, $name, $xref) = @_;
   printf INDEX
-  ("<LI><A HREF=\"/doc-camltk/library/%s.html#%s\">Module <code>%s</code>, %s <code>%s</code></A>\n\n", 
+  ("<LI><A HREF=\"$urlroot/library/%s.html#%s\">Module <code>%s</code>, %s <code>%s</code></A>\n\n", 
    $modname, $xref, $modname, $class, $name);
 }
