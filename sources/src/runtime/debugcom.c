@@ -102,8 +102,6 @@ static void close_connection()
   close(dbg_socket);
 }
 
-extern char * getenv();
-
 void debugger_init(address)
      char * address;
 {
