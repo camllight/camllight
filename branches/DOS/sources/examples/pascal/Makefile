@@ -2,7 +2,8 @@ CAMLC=camlc
 CAMLLIBR=camllibr
 CAMLLEX=camllex
 CAMLYACC=camlyacc
-CAMLDEP=perl /caml386/src/tools/camldep
+COMPFLAGS=-W
+CAMLDEP=perl /caml/src/tools/camldep
 
 all: ipascal.exe cpascal.exe
 
@@ -27,17 +28,17 @@ clean:
 depend:
 	$(CAMLDEP) >> makefile
 
-compil.zi: syntaxe.zi 
-envir.zo: envir.zi interp.zi syntaxe.zi 
-envir.zi: syntaxe.zi 
-interp.zi: syntaxe.zi 
-lexuniv.zo: lexuniv.zi 
-typage.zi: syntaxe.zi 
-cpascal.zo: compil.zi typage.zi syntaxe.zi 
-ipascal.zo: interp.zi typage.zi syntaxe.zi 
-loadall.zo: ipascal.zo cpascal.zo 
-typage.zo: typage.zi envir.zi syntaxe.zi 
-valeur.zo: valeur.zi interp.zi 
 compil.zo: compil.zi envir.zi typage.zi syntaxe.zi 
+compil.zi: syntaxe.zi 
+cpascal.zo: compil.zi typage.zi syntaxe.zi 
+envir.zo: envir.zi syntaxe.zi 
+envir.zi: syntaxe.zi 
 interp.zo: interp.zi valeur.zi envir.zi syntaxe.zi 
+interp.zi: syntaxe.zi 
+ipascal.zo: interp.zi typage.zi syntaxe.zi 
+lexuniv.zo: lexuniv.zi 
+loadall.zo: ipascal.zo cpascal.zo 
 syntaxe.zo: syntaxe.zi lexuniv.zi 
+typage.zo: typage.zi envir.zi syntaxe.zi 
+typage.zi: syntaxe.zi 
+valeur.zo: valeur.zi interp.zi 

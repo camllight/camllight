@@ -2,7 +2,8 @@ CAMLC=camlc
 CAMLLIBR=camllibr
 CAMLLEX=camllex
 CAMLYACC=camlyacc
-CAMLDEP=perl /caml386/src/tools/camldep
+COMPFLAGS=-W
+CAMLDEP=perl /caml/src/tools/camldep
 
 all: logo.exe
 
@@ -24,10 +25,3 @@ clean:
 depend:
 	$(CAMLDEP) >> makefile
 
-langage.zo: langage.zi crayon.zi 
-alex.zo: alex.zi 
-loadall.zo: logo.zo 
-asynt.zi: langage.zi alex.zi 
-asynt.zo: asynt.zi langage.zi alex.zi 
-crayon.zo: crayon.zi 
-logo.zo: asynt.zi langage.zi alex.zi 
