@@ -1,0 +1,883 @@
+# ############## Widgets Properties Definition ##############
+
+type Color { 
+   Blue "blue"
+   Green "green"
+   Red "red"
+   White "white"
+   Black "black"
+   NamedColor (string)
+}
+
+type Relief { 
+   Raised "raised"
+   Sunken "sunken"
+   Flat "flat"
+   Ridge "ridge"
+   Groove "groove"
+}
+
+type State { 
+   Normal "normal"
+   Active "active"
+   Disabled "disabled"
+}
+
+type Anchor { 
+   N "n"
+   NE "ne"
+   E "e"
+   SE "se"
+   S "s"
+   SW "sw"
+   W "w"
+   NW "nw"
+   Center "center"
+}
+type Side { 
+   Side_Left "left"
+   Side_Right "right"
+   Side_Top "top"
+   Side_Bottom "bottom"
+}
+
+type FillMode { 
+   Fill_None "none"
+   Fill_X "x"
+   Fill_Y "y"
+   Fill_Both "both"
+}
+
+type Justification { 
+   Justify_Left "left"
+   Justify_Center "center"
+   Justify_Right "right"
+}
+
+subtype Index(entry) {
+   Number (int)
+   End "end"
+   Insert "insert"
+   SelFirst "sel.first"
+   SelLast "sel.last" 
+}
+
+subtype Index(listbox) {
+   Number (int)
+   End "end"
+   Insert "insert"
+}
+
+# CanvasIndex is external
+# TextIndex is external
+# MenuIndex is external
+
+widget frame
+	{
+	option Background "-background" (Color)
+	option Borderwidth "-borderwidth" (int)
+	option Height "-height" (int)
+	option Relief "-relief" (Relief)
+	option Width "-width" (int)
+
+	function () configure "configure" (option(frame) list)
+	}
+
+widget button
+	{
+	option ActiveBackground "-activebackground" (Color)
+	option ActiveForeground "-activeforeground" (Color)
+	option Anchor "-anchor" (Anchor)
+	option Background "-background" (Color)
+	option Bitmap "-bitmap" (string)
+	option Borderwidth "-borderwidth" (int)
+	option Command "-command" (function ())
+	option Disableforeground "-disableforeground"()
+	option Font "-font"(string)
+	option Foreground "-foreground"(Color)
+	option Height "-height" (int)
+	option Padx "-padx" (int)
+	option Pady "-pady" (int)
+	option Relief "-relief" (Relief)
+	option State "-state" (State)
+	option Text "-text" (string)
+	option Width "-width" (int)
+
+	function () activate "activate" ()
+	function () deactivate "deactivate" ()
+	function () flash "flash" ()
+	function () invoke "invoke" ()
+	function () configure "configure" (option(button) list)
+	}
+
+widget checkbutton
+	{	
+	option ActiveBackground "-activebackground" (Color)
+	option ActiveForeground "-activeforeground" (Color)
+	option Anchor "-anchor" (Anchor)
+	option Background "-background" (Color)
+	option Bitmap "-bitmap" (string)
+	option Borderwidth "-borderwidth" (int)
+	option Command "-command" (function ())
+	option Disableforeground "-disableforeground" ()
+	option Font "-font" (string)
+	option Foreground "-foreground" (Color)
+	option Height "-height" (int)
+	option Padx "-padx" (int)
+	option Pady "-pady" (int)
+	option Relief "-relief" (Relief)
+	option State "-state" (State)
+	option Text "-text" (string)
+	option Width "-width" (int)
+
+	function () activate "activate" ()
+	function () deactivate "deactivate" ()
+	function () deselect "deselect" ()
+	function () flash "flash" ()
+	function () invoke "invoke" ()
+	function () select "select" ()
+	function () toggle "toggle" ()	
+	}
+
+widget radiobutton
+	{
+	option ActiveBackground "-activebackground" (Color)
+	option ActiveForeground "-activeforeground" (Color)
+	option Anchor "-anchor" (Anchor)
+	option Background "-background" (Color)
+	option Bitmap "-bitmap" (string)
+	option Borderwidth "-borderwidth" (int)
+	option Command "-command"(function ())
+	option Disableforeground "-disableforeground"()
+	option Font "-font"(string)
+	option Foreground "-foreground"(Color)
+	option Height "-height" (int)
+	option Padx "-padx" (int)
+	option Pady "-pady" (int)
+	option Relief "-relief" (Relief)
+	option State "-state" (State)
+	option Text "-text" (string)
+	option Width "-width" (int)
+	option Selector "-selector" (Color)
+
+	function () activate "activate" ()
+	function () deactivate "deactivate" ()
+	function () deselect "deselect" ()
+	function () flash "flash" ()
+	function () invoke "invoke" ()
+	function () select "select" ()
+	function () configure "configure" (option(radiobutton) list)
+	}
+
+widget entry
+	{
+	option Background "-background" (Color)
+	option Borderwidth "-borderwidth" (int)
+	option Exportselection "-exportselection" (bool)
+	option Font "-font" (string)
+	option Foreground "-foreground" (Color)
+	option Insertbackground "-insertbackground" (Color)
+	option Insertborderwidth "-insertborderwidth" (int)
+	option Insertofftime "-insertofftime" (int)
+	option Insertontime "-insertontime" (int)
+	option Insertwidth "-insertwidth" (int)
+	option Relief "-relief" (Relief)
+	option Scrollcommand "-scrollcommand" (function(int, int, int, int))
+	option Selectbackground "-selectbackground" (Color)
+	option Selectborderwidth "-selectborderwidth" (int)
+	option Selectforeground "-selectforeground" (Color)
+	option State "-state" (State)
+	option Width "-width" (int)
+
+	function () delete "delete" (Index(entry), Index(entry))
+	function (string) get "get" ()
+	function () icursor "icursor" (Index(entry))
+	function () iindex "iindex" (Index(entry))
+	function () insert "insert" (Index(entry), string)
+	function () scanmark "scanmark" (int)
+	function () scandragto "scandragto" (int)
+	function () selectadjust "selectadjust" (Index(entry))
+	function () selectclear "selectclear" ()
+	function () selectfrom "selectfrom" (Index(entry))
+	function () selectto "selectto" (Index(entry))
+	function () view "view" (Index(entry))
+	function () configure "configure" (option(entry) list)
+	}
+
+# EXTERN TagOrId
+# EXTERN SearchSpec
+# EXTERN CanvasCoordinates
+type ArcStyle {
+    Pieslice "pieslice"
+    Chord "chord"
+}
+
+subtype option (arc)
+	{
+	 Extent "-extent" (float)
+	 FillColor "-fill" (Color)
+	 Outline "-outline" (Color)
+	 Start "-start" (float)
+	 Stipple "-stipple" (string)
+	 ArcStyle "-style" (ArcStyle)
+	 Tags "-tags" (TagOrId)
+	 LineWidth "-width" (float)
+	}
+
+subtype option (bitmap)
+	{
+	Anchor "-anchor" (Anchor)
+	Background "-background" (Color)
+	Bitmap "-bitmap" (string)
+	Foreground "-foreground" (Color)
+	Tags "-tags" (TagOrId)
+	}
+type ArrowStyle { 
+   Arrow_None "none"
+   Arrow_First "first"
+   Arrow_Last "last"
+   Arrow_Both "both" 
+}
+type CapStyle { 
+   CS_Butt "butt"
+   CS_Projecting "projecting"
+   CS_Round "round" 
+}
+type JoinStyle { 
+   JS_Bevel "bevel"
+   JS_Miter "miter"
+   JS_Round "round" 
+}
+
+subtype option(line)
+	{
+	ArrowStyle "-arrow" (ArrowStyle)
+	ArrowShape "-arrowshape" (float, float, float)
+	CapStyle "-capstyle" (CapStyle)
+	FillColor "-fill" (Color)
+	JoinStyle "-joinstyle" (JoinStyle)
+	Smooth "-smooth" (bool)
+	SplineSteps "-splinesteps" (float)
+	Stipple "-stipple" (string)
+	Tags "-tags" (TagOrId)
+	LineWidth "-width" (float)
+	}
+
+subtype option(oval)
+	{
+	FillColor "-fill" (Color)
+	Outline "-outline" (Color)
+	Stipple "-stipple" (string)
+	Tags "-tags" (TagOrId)
+	LineWidth "-width" (float)
+	}
+
+subtype option(polygon)
+	{
+	FillColor "-fill" (Color)
+	Smooth "-smooth" (bool)
+	SplineSteps "-splinesteps" (float)
+	Stipple "-stipple" (string)
+	Tags "-tags" (TagOrId)
+	}
+
+subtype option(rectangle)
+	{
+	FillColor "-fill" (Color)
+	Outline "-outline" (Color)
+	Stipple "-stipple" (string)
+	Tags "-tags" (TagOrId)
+	LineWidth "-width" (float)
+	}
+
+subtype option(canvastext)
+	{
+	Anchor "-anchor" (Anchor)
+	FillColor "-fill" (Color)
+	Font "-font" (string)
+	Justify "-justify" (Justification)
+	Stipple "-stipple" (string)
+	Tags "-tags" (TagOrId)
+	Text "-text" (string)
+	LineWidth "-width" (float)
+	}
+
+subtype option(window)
+	{
+	Anchor "-anchor" (Anchor)
+	WindowHeight "-height" (float)
+	Tags "-tags" (TagOrId)
+	WindowWidth "-width" (float)
+	Window "-window" (widget)
+	}
+
+
+type ColorMode { 
+   Color "color"
+   Gray "gray"
+   Mono "mono"
+}
+
+subtype option(postscript)
+	{
+	PS_Colormap "-colormap" (string)
+	PS_Colormode "-colormode" (ColorMode)
+	PS_File "-file" (string)
+	PS_Fontmap "-fontmap" (string)
+	PS_Height "-height" (float)
+	PS_Pageanchor "-pageanchor" (Anchor)
+	PS_Pageheight "-pageheight" (float)
+	PS_Pagewidth "-pagewidth" (float)
+	PS_Pagex "-pagex" (float)
+	PS_Pagey "-pagey" (float)
+	PS_Rotate "-rotate" (bool)
+	PS_Width "-width" (float)
+	PS_X "-x" (float)
+	PS_Y "-y" (float)
+	}
+
+type CanvasItem {
+   Arc_item "arc" 
+   Line_item "line" 
+   Rectangle_item "rectangle" 
+   Oval_item "oval" 
+   Bitmap_item "bitmap"
+   Polygon_item "polygon" 
+   Text_item "text" 
+   Window_item "window"
+}
+
+widget canvas
+	{
+	option Background "-background" (Color)
+	option Borderwidth "-borderwidth" (int)
+	option Height "-height" (int)
+	option Insertbackground "-insertbackground" (Color)
+	option Insertborderwidth "-insertborderwidth" (int)
+	option Insertofftime "-insertofftime" (int)
+	option Insertontime "-insertontime" (int)
+	option Insertwidth "-insertwidth" (int)
+	option Relief "-relief" (Relief)
+	option Selectbackground "-selectbackground" (Color)
+	option Selectborderwidth "-selectborderwidth" (int)
+	option Selectforeground "-selectforeground" (Color)
+	option Width "-width" (int)
+	option Xscrollcommand "-xscrollcommand" (function (int, int, int, int))
+	option Yscrollcommand "-yscrollcommand" (function (int, int, int, int))
+
+	function (TagOrId) addtag "addtag" (TagOrId, SearchSpec)
+	function (float, float, float, float) bbox "bbox" (TagOrId list)
+	function (float) canvasx "canvasx" (float, float)
+	function (float) canvasy "canvasy" (float, float)
+	function (float list) getcoords "coords" (TagOrId)
+	function () setcoords "coords" (TagOrId, int list)
+	function () dchars "dchars" (TagOrId, int, int)
+	function () delete "delete" (TagOrId list)
+	function () dtag "dtag" (TagOrId, TagOrId)
+	function (TagOrId list) find "find" (SearchSpec)
+	function () focus "focus" (TagOrId list)
+	function (TagOrId list) gettags "gettags" (TagOrId)
+	function () icursor "icursor" (TagOrId, CanvasIndex)
+	function (int) index "index" (TagOrId, CanvasIndex)
+	function () insert "insert" (TagOrId, CanvasIndex, string)
+	function (string) getitemoptions "itemconfigure" (TagOrId)
+	function () arcconfigure "itemconfigure" (TagOrId, option (arc) list)
+	function () bitmapconfigure "itemconfigure" (TagOrId, option (bitmap) list)
+	function () lineconfigure "itemconfigure" (TagOrId, option (line) list)
+	function () ovalconfigure "itemconfigure" (TagOrId, option (oval) list)
+	function () polygonconfigure "itemconfigure" (TagOrId, option (polygon) list)
+	function () rectangleconfigure "itemconfigure" (TagOrId, option (rectangle) list)
+	function () textconfigure "itemconfigure" (TagOrId, option (canvastext) list)
+	function () windowconfigure "itemconfigure" (TagOrId, option (window) list)
+	function () lower "lower" (TagOrId, TagOrId)
+	function () lower "lowest" (TagOrId)
+	function () postscript "postscript" (option (postscript) list)
+	function () raise "raise" (TagOrId, TagOrId)
+	function () raisetop "raise" (TagOrId)
+	function () scale "scale" (TagOrId, float, float, float, float)
+	function () scanmark "scan mark" (float, float)
+	function () scanmark "scan dragto" (float, float)
+	function () selectadjust "select adjust" (TagOrId, CanvasIndex)
+	function () selectclear "select clear" ()
+	function () selectfrom "select from" (TagOrId, CanvasIndex)
+	function () selectto "select to" (TagOrId, CanvasIndex)
+	function (CanvasItem) typeof "type" (TagOrId)
+	function () xview "xview" (CanvasIndex)
+	function () yview "yview" (CanvasIndex)
+	function (TagOrId) createarc "create arc" (float, float, float, float, option (arc) list)
+	function (TagOrId) createbitmap "create bitmap" (float, float, option (bitmap) list)
+	function (TagOrId) createline "create line" (float list, option (line) list)
+	function (TagOrId) createoval "create oval" (float, float, float, float, option (oval) list)
+	function (TagOrId) createpolygon "create polygon" (float list, option (polygon) list)
+	function (TagOrId) createrectangle "create rectangle" (float, float, option (rectangle) list)
+	function (TagOrId) createtext "create text" (float, float, option (canvastext) list)
+	function (TagOrId) createwindow "create window" (float, float, option (window) list)
+	function () move "move" (TagOrId, float, float)
+	}
+
+widget label
+	{
+	option Anchor "-anchor" (Anchor)
+	option Background "-background" (Color)
+	option Bitmap "-bitmap" (string)
+	option Borderwidth "-borderwidth" (int)
+	option Font "-font" (string)
+	option Foreground "-foreground" (Color)
+	option Height "-height" (int)
+	option Padx "-padx" (int)
+	option Pady "-pady" (int)
+	option Relief "-relief" (Relief)
+	option Text "-text" (string)
+	option Width "-width" (int)
+
+	function () configure "configure" (option (label) list)
+	}
+
+widget listbox
+	{
+	option Background "-background" (Color)
+	option Borderwidth "-borderwidth" (int)
+	option Exportselection "-exportselection" (bool)
+	option Font "-font" (string)
+	option Foreground "-foreground" (Color)
+	option Relief "-relief" (Relief)
+	option Selectbackground "-selectbackground" (Color)
+	option Selectborderwidth "-selectborderwidth" (int)
+	option Selectforeground "-selectforeground" (Color)
+	option Setgrid "-setgrid" (bool)
+	option Xscrollcommand "-xscrollcommand" (function (int, int, int, int))
+	option Yscrollcommand "-yscrollcommand" (function (int, int, int, int))
+
+	function (int) curselection "curselection" ()
+	function () delete "delete" (Index(listbox), Index(listbox))
+	function (string) get "get" (Index(listbox))
+	function () insert "insert" (Index(listbox), string list)
+	function (int) nearest "nearest" (int)
+	function () scanmark "scanmark" (int, int)
+	function () scandragto "scandragto" (int, int)
+	function () selectadjust "selectadjust" (Index(listbox))
+	function () selectclear "selectclear" ()
+	function () selectfrom "selectfrom" (Index(listbox))
+	function () selectto "selectto" (Index(listbox))
+	function (int) size "size" ()
+	function	() xview "xview" (Index(listbox))
+	function () yview "yview" (Index(listbox))
+	function () configure "configure" (option(listbox) list)
+	}
+
+
+widget menubutton
+	{
+	option ActiveBackground "-activebackground" (Color)
+	option ActiveForeground "-activeforeground" (Color)
+	option Anchor "-anchor" (Anchor)
+	option Background "-background" (Color)
+	option Bitmap "-bitmap" (string)
+	option Borderwidth "-borderwidth" (int)
+	option Disableforeground "-disableforeground"()
+	option Font "-font"(string)
+	option Foreground "-foreground"(Color)
+	option Height "-height" (int)
+	option Padx "-padx" (int)
+	option Pady "-pady" (int)
+	option Relief "-relief" (Relief)
+	option State "-state" (State)
+	option Text "-text" (string)
+	option Width "-width" (int)
+	option UnderlinedChar "-underline" (int)
+	option Menu "-menu" (widget(menu))
+
+	function () activate "activate" ()
+	function () deactivate "deactivate" ()
+	function () configure "configure" (option(menubutton) list)
+	}
+
+widget menu
+	{
+	option ActiveBackground "-activebackground" (Color)
+	option Activeborderwidth "-activeborderwidth" (int)
+	option ActiveForeground "-activeforeground" (Color)
+	option Background "-background" (Color)
+	option Borderwidth "-borderwidth" (int)
+	option Disableforeground "-disableforeground" ()
+	option Font "-font" (string)
+	option Foreground "-foreground" (Color)
+
+	function () addcascade "add cascade" (option(menucascade) list)
+	function () addcommand "add command" (option(menucommand) list)
+	function () addseparator "add separator" ()
+	function () configure "configure" (option(menu) list)
+	function () activate "activate" (MenuIndex)
+	function () delete "delete" (MenuIndex)
+	function () disable "disable" (MenuIndex)
+	function () enable "enable" (MenuIndex)
+	function () invoke "invoke" (MenuIndex)
+	function () entryconfigurecascade "entryconfigure" (MenuIndex, option (menucascade) list)
+	function () entryconfigurecheckbutton "entryconfigure" (MenuIndex, option (menucheckbutton)list)
+	function () entryconfigurefunction "entryconfigure" (MenuIndex, option (menucommand) list)
+	function () entryconfigureradiobutton "entryconfigure" (MenuIndex, option (menuradiobutton) list)
+	function () post "post" (int, int)
+	function () unpost "unpost" ()
+	function (int) index "index" (MenuIndex)
+	function (int) yposition "yposition" (MenuIndex)
+	}
+
+subtype option(menucascade)
+	{
+	ActiveBackground "-activebackground" (Color)
+	Accelerator "-accelerator" (string)
+	Background "-background" (Color)
+	Bitmap "-bitmap" (string)
+	Command "-command" (function ())
+	Font "-font" (string)
+	Label "-label" (string)
+	Menu "-menu" (widget(menu))
+	State "-state" (State)
+	UnderlinedChar "-underline" (int)
+	}
+
+subtype option(menucommand)
+	{
+	ActiveBackground "-activebackground" (Color)
+	Accelerator "-accelerator" (string)
+	Background "-background" (Color)
+	Bitmap "-bitmap" (string)
+	Command "-command" (function ())
+	Font "-font" (string)
+	Label "-label" (string)
+	State "-state" (State)
+	UnderlinedChar "-underline" (int)
+	}
+
+subtype option(menuradiobutton)
+	{
+	ActiveBackground "-activebackground" (Color)
+	Accelerator "-accelerator" (string)
+	Background "-background" (Color)
+	Bitmap "-bitmap" (string)
+	Command "-command" (function ())
+	Font "-font" (string)
+	Label "-label" (string)
+	State "-state" (State)
+	UnderlinedChar "-underline" (int)
+	}
+
+subtype option(menucheckbutton)
+	{
+	ActiveBackground "-activebackground" (Color)
+	Accelerator "-accelerator" (string)
+	Background "-background" (Color)
+	Bitmap "-bitmap" (string)
+	Command "-command" (function ())
+	Font "-font" (string)
+	Label "-label" (string)
+	State "-state" (State)
+	UnderlinedChar "-underline" (int)
+	}
+
+##### Menubar
+module menubar {
+  function (widget list) get "menubar" (widget(frame))
+  function () set "menubar" (widget(frame), widget list)
+# clear ?
+  }
+
+widget message
+	{
+	option Anchor "-anchor" (Anchor)
+	option Background "-background" (Color)
+	option Borderwidth "-borderwidth" (int)
+	option Font "-font" (string)
+	option Foreground "-foreground" (Color)
+	option Padx "-padx" (int)
+	option Pady "-pady" (int)
+	option Relief "-relief" (Relief)
+	option Text "-text" (string)
+	option Width "-width" (int)
+	option Aspect "-aspect" (int)
+	option Justify "-justify" (Justification)
+
+	function () configure "configure" (option(message) list)
+	}
+
+type Orientation { 
+    Vertical "vertical"
+    Horizontal "horizontal" 
+}
+
+widget scrollbar
+	{
+	option ActiveForeground "-activeforeground" (Color)
+	option Background "-background" (Color)
+	option Borderwidth "-borderwidth" (int)
+	option Slidecommand "-command" (function (int))
+	option Foreground "-foreground" (Color)
+	option Orient "-orient" (Orientation)
+	option Relief "-relief" (Relief)
+	option Repeatdelay "-repeatDelay" (int)
+	option Repeatinterval "-repeatInterval" (int)
+	option Width "-width" (int)
+
+	function (int, int, int, int) get "get" ()
+	function () set "set" (int, int, int, int)
+	function () configure "configure" (option(scrollbar) list)
+	}
+
+
+
+
+widget scale
+	{
+	option ActiveForeground "-activeforeground" (Color)
+	option Background "-background" (Color)
+	option Borderwidth "-borderwidth" (int)
+	option Slidecommand "-command" (function (int))
+	option Foreground "-foreground" (Color)
+	option Orient "-orient" (Orientation)
+	option Relief "-relief" (Relief)
+	option Repeatdelay "-repeatDelay" (int)
+	option Repeatinterval "-repeatInterval" (int)
+	option Width "-width" (int)
+
+	function (int) get "get" ()
+	function () set "set" (int)
+	function () configure "configure" (option(scale) list)
+	}
+
+subtype option(texttag)
+	{
+	Background "-background" (Color)
+	Bgstipple "-bgstipple" (string)
+	Borderwidth "-borderwidth" (int)
+	Fgstipple "-fgstipple" (string)
+	Font "-font" (string)
+	Foreground "-foreground" (Color)
+	Relief "-relief" (Relief)
+	Underline "-underline" (bool)
+	}
+
+
+# TextMark is external (== string)
+# TextTag is external
+
+type WrapMode { 
+  Wrap_None "none"
+  Wrap_Char "char"
+  Wrap_Word "word"
+}
+
+type Comparison { 
+  GT "<"
+  GE "<="
+  EQ "=="
+  LE "=>"
+  LT ">"
+}
+
+
+widget text
+	{
+	option Background "-background" (Color)
+	option Borderwidth "-borderwidth" (int)
+	option Exportselection "-exportselection" (bool)
+	option Font "-font" (string)
+	option Foreground "-foreground" (Color)
+	option Height "-height" (int)
+	option Insertbackground "-insertbackground" (Color)
+	option Insertborderwidth "-insertborderwidth" (int)
+	option Insertofftime "-insertofftime" (int)
+	option Insertontime "-insertontime" (int)
+	option Insertwidth "-insertwidth" (int)
+	option Padx "-padx" (int)
+	option Pady "-pady" (int)
+	option Selectbackground "-selectbackground" (Color)
+	option Selectborderwidth "-selectborderwidth" (int)
+	option Selectforeground "-selectforeground" (Color)
+	option State "-state" (State)
+	option Width "-width" (int)
+	option Yscrollcommand "-yscrollcommand" (function (int, int, int, int))
+	option Wrap "-wrap" (WrapMode)
+
+	function (bool) compare "compare" (TextIndex, Comparison, TextIndex)
+	function () debug "debug" (bool)
+	function () delete "delete" (TextIndex, TextIndex)
+	function (string) get "get" (TextIndex, TextIndex)
+	function (BaseTextIndex) index "index" (TextIndex)
+	function () insert "insert" (TextIndex, string)
+	function (TextMark list) marknames "mark names" ()
+	function () markset "mark set" (string, TextIndex)
+	function () markunset "mark unset" (string list)
+	function (int) scanmark "scan mark" (int)
+	function (int) scandragto "scan dragto" (int)
+	function () configure "configure" (option(text) list)
+	function () markset "mark set" (TextMark, TextIndex)
+	function () markunset "mark unset" (TextMark)
+	function (TextMark list) marknames "mark names" ()
+	function () tagadd "tag add" (TextTag, TextIndex, TextIndex)
+	function () tagconfigure "tag configure" (TextTag, option (texttag) list)
+	function () tagdelete "tag delete" (TextTag list)
+	function () taglower "tag lower" (TextTag, TextTag)
+	function () taglowest "tag lower" (TextTag)
+	function (TextTag list) tagallnames "tag names" ()
+	function (TextTag list) tagindexnames "tag names" (TextIndex)
+	function (int, int) tagnextrange1 "tag next range" (TextTag, TextIndex)
+	function (int, int) tagnextrange2 "tag next range" (TextTag, TextIndex, TextIndex)
+	function () tagraise "tag raise" (TextTag)
+	function () tagraisetop "tag raise" ()
+	function (BaseTextIndex list) tagrange "tag range" (TextTag)
+	function () remove "remove" (TextTag, TextIndex, TextIndex)
+	function () yview "yview" (TextIndex)
+	function () yviewabsolute "yview" (int)
+	function () yviewpickplace "yview -pickplace" (TextIndex)
+	function () yviewpickplaceabsolute "yview -pickplace" (int)
+	}
+
+
+widget toplevel {
+	option Background "-background" (Color)
+	option Relief "-relief" (Relief)
+	option Geometry "-geometry" (string)
+	option Screen "-screen" (string)
+	option Class "-class" (string)
+        # not exactly ...
+	function () configure "configure" (option(toplevel) list)
+        }
+
+################### Various functions
+function ()    destroy "destroy" (widget)
+function (int) dialog  "tk_dialog" (widget, string, string, string, int, string list)
+
+##### focus variations
+module focus {
+  function (widget) get "focus" ()
+  function ()       set "focus" (widget)
+  # bogus when "none" is returned
+  function (widget) default_get "focus default" ()
+  function ()       default_set "focus default" (widget)
+  function  ()      none "focus none" ()
+}
+
+##### grab (TODO)
+##### lower
+function () lower "lower" (widget)
+# lower window ?belowThis? can't be written
+
+
+
+############ Options
+type OptionPriority {
+   WidgetDefault  "widgetDefault"
+   StartupFile    "startupFile"
+   UserDefault    "userDefault"
+   Interactive    "interactive"
+#  Priority (int)
+   }
+
+module resource {
+   function () add "option add" (string,string,OptionPriority)
+   function () clear "option clear" ()
+   function (string) get "get" (widget,string,string)
+   function () readfile "readfile" (string,OptionPriority)
+   }
+
+
+########### Pack
+type PackOption {
+	After "-after" (widget)
+	Anchor "-anchor" (Anchor)
+	Before "-before" (widget)
+	Expand "-expand" (bool)
+	Fill "-fill" (FillMode)
+	In "-in" (widget)
+	Padx "-padx" (int)
+	Pady "-pady" (int)
+#	ipadx "-ipadx" (int)
+#	ipady "-ipady" (int)
+	Side "-side" (Side)
+	}
+
+function ()  pack "pack" (widget list, PackOption list)
+module pack {
+    function () configure "pack configure" (widget list, PackOption list)  
+    function () forget "pack forget" (widget list)
+    function (bool) propapage_get "pack propagate" (widget)
+    function () propapage_set "pack propagate" (widget,bool)
+    function (widget list) slaves "pack slaves" (widget)
+    }
+
+module selection {
+   function () clear "selection clear" (widget)
+   function (string) get "selection get" ()
+   }
+
+
+type ColorModel {
+  Color "color"
+  Monochrome "monochrome"
+  }
+
+module colormodel {
+   function (ColorModel) get "tk colormodel" (widget)
+   function () set "tk colormodel" (widget, ColorModel)
+   }
+
+module wait {
+   function () visibility "tkwait visibility" (widget)
+   function () window "tkwait window" (widget)
+   }
+
+type AtomId {
+   AtomId (int)
+   }
+   
+module winfo {
+   function (AtomId) atom "winfo atom" (string)
+   function (string) atomname "winfo atomname" (AtomId)
+   function (int) cells "winfo cells" (widget)
+   function (widget list) children "winfo children" (widget)
+   function (string) class "winfo class" (widget)
+   function (widget) containing "winfo containing" (int,int)
+   function (int) depth "winfo depth" (widget)
+   function (bool) exists "winfo exists" (widget)
+   function (float) fpixels "winfo fpixels" (widget,int)
+   function (string) geometry "winfo geometry" (widget)
+   function (int) height "winfo height" (widget)
+   function (string) id "winfo id" (widget)
+   function (symbol) interps "winfo interps" ()
+   function (bool) ismapped "winfo ismapped" (widget)
+   function (string) name "winfo name" (widget)
+   function (widget) parent "winfo parent" (widget)        # bogus for top
+   function (widget) pathname "winfo pathname" (string)
+   function (int) pixels "winfo pixels" (widget,int)
+   function (int) reqheight "winfo reqheight" (widget)
+   function (int) reqwidth "winfo reqwidth" (widget)
+   function (int,int,int) rgb "winfo rgb" (widget,Color)
+   function (int) rootx "winfo rootx" (widget)
+   function (int) rooty "winfo rooty" (widget)
+   function (string) screen "winfo screen" (widget)
+   function (int) screencells "winfo screencells" (widget)
+   function (int) screendepth "winfo screendepth" (widget)
+   function (int) screenheight "winfo screenheight" (widget)
+   function (int) screenmmdepth "winfo screenmmdepth" (widget)
+   function (int) screenmmheight "winfo screenmmheight" (widget)
+   function (string) screenvisual "winfo screenvisual" (widget)
+   function (int) screenwidth "winfo screenwidth" (widget)
+   function (widget) toplevel "winfo toplevel" (widget)
+   function (string) visual "winfo visual" (widget)
+   function (int) vrootheight "winfo vrootheight" (widget)
+   function (int) vrootwidth "winfo vrootwidth" (widget)
+   function (int) vrootx "winfo vrootx" (widget)
+   function (int) vrooty "winfo vrooty" (widget)
+   function (int) width "winfo width" (widget)
+   function (int) x "winfo x" (widget)
+   function (int) y "winfo y" (widget)
+}
+
+module wm {
+   function () deiconify "wm deiconify" (widget)
+   function () iconify "wm iconify" (widget)
+   function (string) state "wm state" (widget)
+   function (string) title_get "wm title" (widget)
+   function () title_set "wm title" (widget,string)
+   function () withdraw "wm withdraw" (widget)
+}
