@@ -68,9 +68,9 @@ caml-tex
         - TeX/LaTeX
         - Perl 4.0
 
-search_isos
------------
-  A tool to retrieve library functions by their types.
+camlsearch
+----------
+  A tool to search library functions by their types.
 
   Requirements:
         - the "libunix" package
