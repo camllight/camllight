@@ -75,7 +75,7 @@ exception Ellipsis;;
 let gensym = ref 0;;
 let gen_sym () = incr gensym; !gensym;;
 
-let evct = (hashtbl__new 10 : (int , (int -> unit)) hashtbl__t);;
+let evct = (hashtbl__new 11 : (int, (int -> unit)) hashtbl__t);;
 
 let record_ellipsed_value cont =
     let marker = gen_sym () in
@@ -98,8 +98,8 @@ let rec print_val prio depth obj ty =
     | Tarrow(ty1, ty2) ->
         print_string "<fun>"
     | Tproduct(ty_list) ->
-        if prio > 0 then begin open_hovbox 1; print_string "(" end
-         else open_hovbox 0;
+        if prio > 0 then begin open_box 1; print_string "(" end
+         else open_box 0;
         print_val_list 1 depth obj ty_list;
         if prio > 0 then print_string ")";
         close_box()
@@ -132,8 +132,8 @@ and print_concrete_type prio depth obj cstr ty ty_list =
           Constr_constant ->
             output_constr constr
         | Constr_regular ->
-            if prio > 1 then begin open_hovbox 2; print_string "(" end
-             else open_hovbox 1;
+            if prio > 1 then begin open_box 2; print_string "(" end
+             else open_box 1;
             output_constr constr;
             print_space();
             cautious (print_val 2 (depth - 1) (value_nth_field obj 0)) ty_arg
@@ -142,11 +142,11 @@ and print_concrete_type prio depth obj cstr ty ty_list =
             if prio > 1 then print_string ")";
             close_box()
         | Constr_superfluous n ->
-            if prio > 1 then begin open_hovbox 2; print_string "(" end
-            else open_hovbox 1;
+            if prio > 1 then begin open_box 2; print_string "(" end
+            else open_box 1;
             output_constr constr;
             print_space();
-            open_hovbox 1;
+            open_box 1;
             print_string "(";
             print_val_list 1 depth obj (filter_product n ty_arg);
             print_string ")";
@@ -163,7 +163,7 @@ and print_concrete_type prio depth obj cstr ty ty_list =
       end
   | Record_type label_list ->
       let print_field depth lbl =
-        open_hovbox 1;
+        open_box 1;
         output_label lbl;
         print_string " ="; print_space();
         let (ty_res, ty_arg) =
@@ -189,7 +189,7 @@ and print_concrete_type prio depth obj cstr ty ty_list =
                          (function depth -> loop depth true rest) in
           loop depth false label_list
       in
-      open_hovbox 1;
+      open_box 1;
       print_string "{";
       cautious (print_fields depth) label_list
                (function depth -> print_fields depth label_list);
@@ -223,7 +223,7 @@ and print_list depth obj ty_arg =
      end
    end
  in
-   open_hovbox 1;
+   open_box 1;
    print_string "[";
    cautious (print_conses depth) obj
             (function depth -> print_conses depth obj);
@@ -242,7 +242,7 @@ and print_vect depth obj ty_arg =
            end in
       loop depth 0
   in
-    open_hovbox 2;
+    open_box 2;
     print_string "[|";
     cautious (print_items depth) obj
              (function depth -> print_items depth obj);
@@ -260,12 +260,12 @@ let more m =
     try
      let c = hashtbl__find evct m in
      print_string ("<"^string_of_int m^">:"); force_newline();
-     open_hovbox 0;
+     open_box 0;
      printer_steps := !max_printer_steps;
      c !max_printer_depth;
      print_newline()
     with Not_found ->
-          open_hovbox 0;
+          open_box 0;
           print_string "No such printing continuation."; force_newline();
           print_string "Available printing continuations: ";
           hashtbl__do_table (fun m _ -> print_int m; print_space()) evct;
