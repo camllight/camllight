@@ -652,11 +652,9 @@ extern "C" static void finalize_image (value i)
 GRAPHPRIM( CreateImage, gr_create_image, (value w, value h), (w, h) )
 {
 	if (Int_val (w) < 0 || Int_val (h) < 0)
-	    graphic_fail("get_image: width and height must be positive");
-	BITMAP bmp;
-	m_bmp->GetObject(sizeof(bmp),&bmp);
-	CBitmap * cbm = new CBitmap;
-	cbm->CreateBitmap(Int_val(w), Int_val(h),  bmp.bmPlanes, bmp.bmBitsPixel, NULL);
+	    graphic_fail("create_image: width and height must be positive");
+    CBitmap * cbm = new CBitmap;
+	cbm->CreateCompatibleBitmap(m_DC, Int_val(w), Int_val(h));
 	value res = alloc_shr(sizeof(struct image) / sizeof(value), Final_tag);
 	Final_fun (res) = finalize_image;
 	Width (res) = Int_val(w);
@@ -739,10 +737,8 @@ GRAPHPRIM( MakeImage, gr_make_image, (value matrix), (matrix) )
 	}
 	m_tempDC->SelectObject(oldBmp);
 	if (has_transp) {
-		BITMAP bmp;
-		m_bmp->GetObject(sizeof(bmp),&bmp);
-		CBitmap * cbm = new CBitmap;
-		cbm->CreateBitmap(width, height,  bmp.bmPlanes, bmp.bmBitsPixel, NULL);
+        CBitmap * cbm = new CBitmap;
+	    cbm->CreateCompatibleBitmap(m_DC, width, height);
 		Mask(img) = cbm;
 		CBitmap * oldBmp = m_tempDC->SelectObject(Mask(img));
 		ASSERT(oldBmp != NULL);
