@@ -8,7 +8,7 @@ INCLUDES=-stdlib ../lib -I ../compiler -I ../linker
 COMPFLAGS=-W -O fast $(INCLUDES)
 LINKFLAGS=-g $(INCLUDES)
 CPP=/lib/cpp -P -Dunix
-CPPFLAGS=-UPRINT_NUMS
+CPPFLAGS=
 
 EXTERNOBJS=config.zo misc.zo interntl.zo \
     const.zo prim.zo instruct.zo lambda.zo \
