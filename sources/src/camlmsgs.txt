@@ -77,7 +77,7 @@ src:	%aThe variable %s is bound several times in this pattern.\n
 fr:	%aL'identificateur %s est défini plusieurs fois dans ce motif.\n
 es:     %aEl identificador %s se ha definido varias veces en este patrón.\n
 
-src:	%aWarning: the variable %s is starts with an upper case letter in this pattern.\n
+src:	%aWarning: the variable %s starts with an upper case letter in this pattern.\n
 fr:	%aAttention: dans ce motif l'identificateur %s commence par une majuscule.\n
 es:     %aAdvertencia: el identificador %s se ha definido varias veces en este patrón.\n
 
