@@ -17,12 +17,12 @@ case "$1,$2,$3" in
   4,4,4) echo "OK, this is a regular 32 bit architecture.";;
   4,8,8) echo "Wow! A 64 bit architecture!"
          echo "#define SIXTYFOUR" >> m.h;;
-  8,8,8) echo "Wow! A 64 bit architecture!"
-         echo "Unfortunately, Caml Light has never been tested in the case"
+  8,*,*) echo "Wow! A 64 bit architecture!"
+         echo "Unfortunately, Caml Light does not handle the case"
          echo "sizeof(int) = 8."
          echo "Caml Light won't run on this architecture."
          exit 2;;
-  4,4,8) echo "Wow! A 64 bit architecture!"
+  *,4,8) echo "Wow! A 64 bit architecture!"
          echo "Unfortunately, Caml Light cannot work in the case"
          echo "sizeof(long) != sizeof(long *)."
          echo "Caml Light won't run on this architecture."
@@ -31,6 +31,10 @@ case "$1,$2,$3" in
          echo "Caml Light won't run on this architecture."
          exit 2;;
 esac
+
+# "unix" is not always defined by cpp, so add it here just in case
+
+echo "#define unix" >> s.h
 
 # Are chars signed?
 
@@ -55,7 +59,7 @@ case $? in
                echo "Please figure it out yourself, and"
                echo "add it to OPTS in src/runtime/Makefile.";;
             *) echo "Yippie! Option $goodopt works. Good!"
-               echo "Add \"$goodopt\" to OPTS in src/runtime/Makefile.";;
+               echo "Add \"$goodopt\" to OPTS in src/Makefile.";;
          esac;;
      esac;;
 esac
@@ -255,7 +259,7 @@ if sh hasgot waitpid;  then
   echo "#define HAS_WAITPID" >> s.h
 fi
 
-if test -f /usr/include/sys/param.h & sh runtest getgroups.c; then
+if test -f /usr/include/sys/param.h && sh runtest getgroups.c; then
   echo "getgroups() found."
   echo "#define HAS_GETGROUPS" >> s.h
 fi
