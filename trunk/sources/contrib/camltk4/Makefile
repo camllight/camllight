@@ -5,20 +5,21 @@ CC=gcc
 OPTS=
 CPP=/lib/cpp -P
 RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
-BINDIR=${HOME}/mycl/bin
-LIBDIR=${HOME}/mycl
 RANLIB=ranlib
 MANEXT=1
 MANDIR=/usr/local/man/man$(MANEXT)
+BINDIR=/usr/local/bin
+LIBDIR=/usr/local/lib/caml-light
 X11_INCLUDES=/usr/include
 X11_LIB=/usr/X11R6/lib
 TCLINCLDIR=/usr/local/lib/tcl7.4/include
 TKINCLDIR=/usr/local/lib/tk4.0/include
-TKLIBDIR=/usr/local/lib/tk4.0/lib
 TCLLIBDIR=/usr/local/lib/tcl7.4/lib
+TKLIBDIR=/usr/local/lib/tk4.0/lib
 #Does not work on SunOS
 #TKLIBS=-ltk4.0 -ltcl7.4 -lX11
-#Does not work on Linux with tcl/tk installed in /usr/lib
+#Does not work on Linux with old tcl/tk installed in /usr/lib
+#unless we use -static
 TKLIBS=-ltk -ltcl -lX11
 
 MKF=\

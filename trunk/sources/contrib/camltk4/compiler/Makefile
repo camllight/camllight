@@ -16,7 +16,7 @@ lexer.ml: lexer.mll
 	$(CAMLLEX) lexer.mll
 
 parser.ml parser.mli: parser.mly
-	$(CAMLYACC) parser.mly
+	$(CAMLYACC) -v parser.mly
 
 clean : 
 	rm -f *.z*  parser.ml lexer.ml tkcompiler

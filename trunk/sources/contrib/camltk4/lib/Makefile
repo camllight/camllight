@@ -1,19 +1,19 @@
-PROFILING=${CAMLPROF}
 SUPPORTDIR=../libsupport
 UNIXDIR=../../libunix
 CAMLC=camlc
 CAMLCOMP=$(CAMLC) -c
 CPP=/lib/cpp -P -Dunix
-COMPFLAGS=-O fast -g -I $(UNIXDIR) -I $(SUPPORTDIR) $(PROFILING)
-LINKFLAGS=-g $(PROFILING)
+COMPFLAGS=-O fast -g -I $(UNIXDIR) -I $(SUPPORTDIR)
+LINKFLAGS=-g
 CAMLYACC=camlyacc -v
 CAMLLEX=camllex
 CAMLDEP=../../../src/tools/camldep
 
+LIBDIR=/usr/local/lib/caml-light
 
 X11_LIB=/usr/X11R6/lib
-TCLLIBDIR=/usr/local/lib/tcl/lib
-TKLIBDIR=/usr/local/lib/tk/lib
+TCLLIBDIR=/usr/local/lib/tcl7.4/lib
+TKLIBDIR=/usr/local/lib/tk4.0/lib
 TKLIBS=-ltk -ltcl -lX11
 
 TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
@@ -45,7 +45,7 @@ tklib.zo : $(SUPPORT) $(WIDGETOBJS) tk.zo
 	camllibr -o tklib.zo $(SUPPORT) tk.zo $(WIDGETOBJS)
 
 camltktop : $(WIDGETOBJS) $(SUPPORT)
-	camlmktop -o camltktop -I $(SUPPORTDIR) $(PROFILING) \
+	camlmktop -o camltktop -I $(SUPPORTDIR) \
 	          -custom $(SUPPORT) tk.zo $(WIDGETOBJS) \
 		                $(TKLINKOPT)
 
