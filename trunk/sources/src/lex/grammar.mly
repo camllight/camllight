@@ -92,7 +92,7 @@ char_class1:
         { char_class $1 $3 }
   | Tchar
         { [$1] }
-  | char_class char_class %prec CONCAT
+  | char_class1 char_class1 %prec CONCAT
         { $1 @ $2 }
 ;
 
