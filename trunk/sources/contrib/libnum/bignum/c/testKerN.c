@@ -102,7 +102,7 @@ int dummy()
 {
     /* a simple way to get control after <n> steps in the debugger */
     printf("TestCount = %d\n", TestCount);
-};
+}
 
 int TestCountInc()
 {
