@@ -1,0 +1,70 @@
+.TH MLETAGS n "27 August 1993"
+
+.SH NAME
+mletags \- GnuEmacs tags for Caml Light sources
+
+.SH SYNOPSIS
+.B mletags
+[
+.B \-a
+]
+[
+.BI \-o \ tagfile
+]
+.I filename ...
+
+.SH DESCRIPTION
+
+.B mletags
+produces tag data for use with Gnu Emacs. Tags are computed for
+symbols bound by top-level let,  type declarations (type name,
+constructors or labels), exceptions.
+
+.B mletags
+uses the Caml Light parser and lexer to analyse the source files: it
+will only work on syntactically correct files.
+Each
+.I filename
+must be a Caml Light source or interface file, ending in .ml or .mli. 
+
+The tag table is written to the tag file (default: TAGS in the current
+directory). 
+
+One may also consider including TAG information from the standard library
+(normally in /usr/local/lib/caml-light), thus providing instant
+access to the documented interfaces of the library.
+
+ % mletags *.{ml,mli} \\
+          /usr/local/lib/caml-light/*.mli
+
+
+.SH OPTIONS
+
+.TP
+.B \-a
+Append tag table to an already existing tag file.
+.TP
+.BI \-o \ tagfile
+Explicit name of file for tag table; overrides  default `TAGS'.
+
+.SH SEE ALSO
+
+.B camlc
+(1),
+.B emacs
+(1).
+
+.SH BUGS
+
+Tested only on Unix systems.
+#infix directives will cause problem.
+Suppose that you run 
+ mletags foo.ml bar.ml
+ where foo.ml contains an infix directive. Then this directive will also be
+used when parsing bar.ml which is clearly a bug. To get around this problem
+simply do
+ mletags foo.ml
+ mletags -a bar.ml
+
+
+

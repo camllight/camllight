@@ -1,0 +1,2 @@
+This is a simple implementation of the Knuth-Bendix completion
+procedure for rewriting systems, written by Gerard Huet (Gerard.Huet@inria.fr).

@@ -1,0 +1,3 @@
+This parser generator for Caml Light is based on Bob Corbett's public
+domain Yacc, also known as Berkeley Yacc. It is a pleasure to
+acknowledge Corbett's outstanding work.
