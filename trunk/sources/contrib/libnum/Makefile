@@ -36,7 +36,7 @@ libnums.a: bignum/libbignum.a $(OBJFILES)
 	if $(RANLIBTEST); then $(RANLIB) libnums.a; else true; fi
 
 bignum/libbignum.a:
-	cd bignum; make $(BIGNUM_ARCH) CC=$(CC)
+	cd bignum; make $(BIGNUM_ARCH) CC="$(CC)"
 
 install:
 	cp libnums.a $(LIBDIR)/libnums.a
