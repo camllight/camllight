@@ -48,7 +48,7 @@ camltktop : $(WIDGETOBJS) $(SUPPORT)
 		                $(TKLINKOPT)
 
 clean : 
-	rm -f *.z* *.ml *.mli tklib*.zo  camltktop*
+	rm -f *.z* *.ml *.mli tklib.zo  camltktop
 
 install: tklib.zo camltktop
 	if test -d $(LIBDIR); then : ; else mkdir $(LIBDIR); fi
