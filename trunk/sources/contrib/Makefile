@@ -1,7 +1,7 @@
 ### Configuration section
 
 # Which packages to compile and install.
-# See the file README for a description of the packages and their requirements.
+# See the file INDEX for a description of the packages and their requirements.
 # Remember that "libunix" is required for
 # "debugger", "libgraph", "camltk",  and "search_isos".
 PACKAGES=libunix libgraph debugger libnum libstr mletags \
@@ -53,7 +53,7 @@ X11_LIB=/usr/lib
 # Used only for the libnum library (arbitrary-precision arithmetic), to
 # select assembly-language versions of time-critical low-level routines.
 # Known targets: 68K, vax, ns, mips, alpha, pyramid, i960, sparc, supersparc.
-# See the file libnum/INSTALL for more explanations.
+# See the file libnum/README for more explanations.
 # If you don't know, leave BIGNUM_ARCH=C, which selects a portable
 # C implementation of these routines.
 BIGNUM_ARCH=C
