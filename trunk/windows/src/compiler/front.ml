@@ -311,21 +311,21 @@ let rec translate_expr env =
       let (stream_type, _) = types__filter_arrow expr.e_typ in
       translate_parser translate_expr expr.e_loc env case_list stream_type
   | Zwhen(e1,e2) ->
-      guard_expression (transl e1) (transl e2)
+      Lwhen(transl e1, transl e2)
   in transl
 
 and translate_match loc env failure_code casel =
   let transl_action (patlist, expr) =
     let (new_env, add_lets) = add_pat_list_to_env env patlist in
       (patlist,
-       add_lets(event__before new_env expr (translate_expr new_env expr))) in
+       add_lets(event__action new_env expr (translate_expr new_env expr))) in
   translate_matching_check_failure failure_code loc (map transl_action casel)
 
 and translate_simple_match loc env failure_code pat_expr_list =
   let transl_action (pat, expr) =
     let (new_env, add_lets) = add_pat_to_env env pat in
       ([pat],
-       add_lets(event__before new_env expr (translate_expr new_env expr))) in
+       add_lets(event__action new_env expr (translate_expr new_env expr))) in
   translate_matching failure_code loc (map transl_action pat_expr_list)
 
 and translate_let env = function

@@ -63,33 +63,11 @@ type lambda =
   | Lsequor of lambda * lambda
   | Lshared of lambda * int ref
   | Levent of event * lambda
+  | Lwhen of lambda * lambda
 ;;
 
-let share_lambda l =
-  Lshared(l, ref (-1))
+let rec share_lambda = function
+    Lwhen(l1, l2) -> Lwhen(l1, share_lambda l2)
+  | l -> Lshared(l, ref (-1))
 ;;
-
-(* Guards *)
-let has_guard = function
-    _,Lifthenelse(l1, l2, Lstaticfail) -> true
-  | _,Levent (_,Lifthenelse(l1, l2, Lstaticfail)) -> true
-  | _ -> false
-
-and set_guard_else that = function
-    Lifthenelse(cond, act, Lstaticfail) ->
-      Lifthenelse (cond, act, that)
-  | Levent (e,Lifthenelse(cond, act, Lstaticfail)) ->
-       Levent (e,Lifthenelse(cond, act, that))
-  | e -> e
-
-and apply_guard_action f = function
-    patl,Lifthenelse(cond, act, Lstaticfail) ->
-      patl,Lifthenelse (cond, f act, Lstaticfail)
-  | patl,Levent (e,Lifthenelse(cond, act, Lstaticfail)) ->
-       patl,Levent (e,Lifthenelse(cond, f act, Lstaticfail))
-  | patl,e -> patl,f e
-;;
-
-let guard_expression l1 l2 =  Lifthenelse(l1, l2, Lstaticfail);;
-
 

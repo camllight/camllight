@@ -219,6 +219,10 @@ let rec satisfiable pss qs = match pss with
         (simple_match_args q0 q @ qs)
 ;;
 
+let has_guard = function
+    (ps, Lwhen(_,_)) -> true
+  | _ -> false
+;;
 
 let rec make_matrix pses = match pses with
   ((ps,_) as clause)::pses ->
