@@ -1,19 +1,16 @@
 This directory contains some examples of Caml programs.
 
 The examples can either be compiled and executed as standalone programs
-(just type "make" in the subdirectory), or run interactively under
-"camllight" (the graphics programs must be run under "camlgraph"), by
-executing 
+(if you have a "make" utility, just type "make" in the subdirectory),
+or run interactively under "caml", by executing 
+
                 include "loadall";;
 
 in the appropriate directory.
 
 Examples marked (*) are taken from the book ``Le langage Caml'', by
 Pierre Weis and Xavier Leroy (InterEditions, 1993). Messages and
-identifiers are in French and contain accented letters (ISO 8859-1
-encoding). You'll need an 8-bit clean system to read them.
-
-Examples marked (G) assume installed the contrib/libgraph library.
+identifiers are in French.
 
 basics:
         Three all-time favorites: Fibonacci, Eratosthene's sieve, and the
@@ -28,9 +25,8 @@ calc:
         This is a simple desk calculator that illustrates the use of camllex 
         and camlyacc.
 
-colwheel: (G)
-        The "color wheel" (color space in HSV coordinates).
-        Needs at least 256 colors to look good.
+colwheel:
+        Display the "color wheel" (color space in HSB coordinates).
 
 compress: (*)
         File compression and decompression (Huffman).
@@ -39,7 +35,7 @@ demonstr: (*)
         Tautology checker.
 
 docteur: (*)
-        A (French-speaking) clone of Eliza.
+        A clone of Eliza.
 
 grep: (*)
         Regular expressions and automata.
@@ -54,8 +50,10 @@ kb:
 minicaml: (*)
         An interpreter and typechecker for a subset of Caml.
 
-minilogo: (*) (G)
+minilogo: (*)
         An interpreter for a small language with turtle graphics.
+        Requires the "libunix" and "libgraph" libraries,
+        or the "camlgraph" interactive system.
 
 pascal: (*)
         An interpreter and compiler for a subset of Pascal.
@@ -64,13 +62,9 @@ pascal: (*)
 picomach: (*)
         An assembler and simulator for a RISC processor.
 
-showsort: (G)
-        Graphic animation of sorting algorithms.
+showsort:
+        Graphics animation of sorting algorithms.
 
-spirals: (G)
-        Explore a family of flashy curves. (Use spir on a color screen
-        and spir-bw on a black and white screen.)
+spirals:
+        Draw a family of flashy curves.
 
-config:
-        This directory does not contain an example, but configuration
-        files used to generate the Makefiles.
