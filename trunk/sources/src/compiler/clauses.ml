@@ -6,10 +6,12 @@
 #open "location";;
 #open "syntax";;
 #open "lambda";;
+#open "types";;
 
-let make_pat desc = {p_desc = desc; p_loc = no_location; p_typ = no_type};;
+let make_pat desc ty =
+  {p_desc = desc; p_loc = no_location; p_typ = ty};;
 
-let omega = make_pat Zwildpat;;
+let omega = make_pat Zwildpat no_type;;
 
 let rec omegas i =
   if i <= 0 then [] else omega::omegas (i-1)
@@ -30,31 +32,13 @@ let simple_match p1 p2 =
 ;;
 
 
-let rec add_labels labels args = match labels with
-  (label,_)::labels ->
-     if
-       exists
-         (fun (lbl,_) -> lbl.info.lbl_pos = label.info.lbl_pos)
-         args
-     then
-        add_labels labels args
-     else
-        (label,omega)::add_labels labels args
-| [] -> args
+
+let record_labels p = labels_of_type p.p_typ
 ;;
 
-let max_pos l =
-  let rec max_rec max l = match l with
-    [] -> max
-  | (lbl,_)::l ->
-      max_rec
-        (if lbl.info.lbl_pos > max then
-          lbl.info.lbl_pos
-        else
-          max)
-        l in
-  max_rec 0 l
+let record_nargs p = list_length (record_labels p)
 ;;
+
 
 let set_fields size l =
 
@@ -70,17 +54,13 @@ let set_fields size l =
 let simple_match_args p1 p2 =
   match p2.p_desc with
     Zconstruct1pat(_,arg) -> [arg]
-  | Ztuplepat(args) -> args
-  | Zrecordpat(args2) ->
-      begin match p1.p_desc with
-        Zrecordpat(args1) -> set_fields (max_pos args1 + 1) args2
-      | _ -> fatal_error "simple_match: record expected."
-      end
+  | Ztuplepat(args)  -> args
+  | Zrecordpat(args) ->  set_fields (record_nargs p1) args
   | (Zwildpat | Zvarpat(_)) ->
       begin match p1.p_desc with
         Zconstruct1pat(_,_) ->  [omega]
       | Ztuplepat(args) -> map (fun _ -> omega) args
-      | Zrecordpat(args) -> omegas (max_pos args + 1) 
+      | Zrecordpat(args) ->  map (fun _ -> omega) args
       | _ -> []
       end
   | _ -> []
@@ -89,8 +69,7 @@ let simple_match_args p1 p2 =
 (*
   Computes the discriminating pattern for matching by the first
   column of pss, that is:
-     checks for a tuple when q is a variable,
-     or collect all fields of records, when q is a variable or a record.
+     checks for a tuple or a record when q is a variable.
 *)
 
 let rec simple_pat q pss = match pss with
@@ -98,17 +77,10 @@ let rec simple_pat q pss = match pss with
 | ({p_desc = Zconstraintpat(p,_)}::ps)::pss -> simple_pat q ((p::ps)::pss)
 | ({p_desc = Zorpat(p1,p2)}::ps)::pss -> simple_pat q ((p1::ps)::(p2::ps)::pss)
 | ({p_desc = (Zwildpat | Zvarpat(_))}::_)::pss -> simple_pat q pss
-| ({p_desc = Ztuplepat(args)}::_)::_ ->
-    make_pat(Ztuplepat(map (fun _ -> omega) args))
+| (({p_desc = Ztuplepat(args)} as p)::_)::_ ->
+    make_pat(Ztuplepat(map (fun _ -> omega) args)) p.p_typ
 | (({p_desc = Zrecordpat(args)} as p)::_)::pss ->
-    begin match q.p_desc with
-      Zrecordpat(args0) ->
-        make_pat(Zrecordpat(add_labels args args0))
-    | _ ->
-        simple_pat
-          (make_pat(Zrecordpat (map (fun (lbl,_) -> lbl,omega) args)))
-          pss
-    end
+    make_pat(Zrecordpat (map (fun lbl -> lbl,omega) (record_labels p))) p.p_typ
 | _ -> q
 ;;
 
@@ -275,7 +247,7 @@ let rec le_pat p q =
       c1.info.cs_tag == c2.info.cs_tag & le_pat p q
   | Ztuplepat(ps), Ztuplepat(qs) -> le_pats ps qs
   | Zrecordpat(l1), Zrecordpat(l2) ->
-     let size = max (max_pos l1) (max_pos l2) + 1 in
+     let size = record_nargs p in
      le_pats (set_fields size l1) (set_fields size l2)
   | _,_ -> false  
 
