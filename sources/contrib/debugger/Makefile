@@ -17,7 +17,7 @@ CFLAGS=$(OPTS) -O -I../../src/runtime
 
 
 EXTERNOBJS = \
-	config.zo globals.zo misc.zo \
+	config.zo globals.zo misc.zo interntl.zo \
 	symtable.zo modules.zo builtins.zo \
 	types.zo fmt_type.zo \
 	tr_env.zo 
@@ -136,7 +136,7 @@ command_line_interpreter.zo: command_line_interpreter.zi breakpoints.zi \
 communication.zo: communication.zi primitives.zi value.zi input_handling.zi \
     unix_tools.zi 
 debugger_config.zo: debugger_config.zi 
-events.zo: events.zi checkpoints.zi primitives.zi communication.zi 
+events.zo: events.zi primitives.zi checkpoints.zi communication.zi 
 frames.zo: frames.zi events.zi checkpoints.zi primitives.zi \
     communication.zi 
 history.zo: history.zi checkpoints.zi primitives.zi 
