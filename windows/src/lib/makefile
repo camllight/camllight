@@ -18,7 +18,7 @@ STD_INTF= arg.zi bool.zi char.zi string.zi vect.zi eq.zi exc.zi \
     int.zi io.zi lexing.zi list.zi obj.zi pair.zi parsing.zi printexc.zi \
     ref.zi sort.zi sys.zi printf.zi stream.zi stack.zi queue.zi random.zi \
     genlex.zi baltree.zi set.zi map.zi gc.zi graphics.zi \
-	big_int.zi nat.zi num.zi ratio.zi arstatus.zi
+	big_int.zi fnat.zi nat.zi num.zi ratio.zi arstatus.zi
 
 # The list of all implementations. In dependency order.
 
@@ -27,10 +27,10 @@ STD_IMPL= bool.zo eq.zo exc.zo int.zo fstring.zo string.zo fchar.zo \
     filename.zo hashtbl.zo lexing.zo parsing.zo printexc.zo sort.zo \
     printf.zo stream.zo stack.zo queue.zo format.zo random.zo genlex.zo \
     baltree.zo set.zo map.zo gc.zo graphics.zo \
-    int_misc.zo nat.zo big_int.zo arflags.zo ratio.zo \
+    int_misc.zo fnat.zo nat.zo big_int.zo arflags.zo ratio.zo \
     num.zo arstatus.zo
 
-GENSOURCES=filename.ml genlex.ml int_misc.ml nat.ml
+GENSOURCES=filename.ml genlex.ml
 
 all: $(STD_INTF) stdlib.zo
 
@@ -44,12 +44,6 @@ filename.ml: filename.mlp
 
 genlex.ml: genlex.mlp
 	$(CPP) genlex.mlp > genlex.ml
-
-int_misc.ml: int_misc.mlp
-	$(CPP) int_misc.mlp > int_misc.ml
-
-nat.ml: nat.mlp
-	$(CPP) nat.mlp > nat.ml
 
 install:
 	copy stdlib.zo $(LIBDIR)
