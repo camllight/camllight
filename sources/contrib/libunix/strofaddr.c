@@ -11,9 +11,9 @@ extern char * inet_ntoa();
 value unix_string_of_inet_addr(a) /* ML */
      value a;
 {
-  struct in_addr addr;
-  addr.s_addr = GET_INET_ADDR(a);
-  return copy_string(inet_ntoa(addr));
+  struct in_addr address;
+  address.s_addr = GET_INET_ADDR(a);
+  return copy_string(inet_ntoa(address));
 }
 
 #else
