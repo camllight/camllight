@@ -14,9 +14,11 @@ let set v x =
   TkEval [| TkToken "set"; TkToken v; TkToken x |]; ()
 ;;
 let get v =
- let res = TkEval [| TkToken "set"; TkToken v |] in
-    res_GetTkString res
+  TkEval [| TkToken "set"; TkToken v |]
 ;;
 
 let CAMLtoTKTextVariable s = TkToken s
+;;
+
+let name s = s
 ;;

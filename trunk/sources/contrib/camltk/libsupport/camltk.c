@@ -326,6 +326,30 @@ value v;
   }
 }
 
+/* Parsing results */
+value camltk_splitlist (v) /* ML */
+     value v;
+{
+  int argc;
+  char **argv;
+  int result;
+  
+  result = Tcl_SplitList(tclinterp,String_val(v),&argc,&argv);
+  switch(result) {
+  case TCL_OK:
+   { value res = copy_string_list(argc,argv);
+     int i;
+     /* we now have a copy */
+     for (i=0; i<argc;i++)
+       free((char *)argv);
+     return res;
+   }
+  case TCL_ERROR:
+  default:
+    tk_error(tclinterp->result);
+  }
+}
+
 /*
  * File descriptor callbacks
  * It's not possible to call non-global ML code, so use general 

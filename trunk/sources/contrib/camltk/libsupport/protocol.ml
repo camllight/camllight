@@ -10,34 +10,13 @@ let debug =
 (* Evaluating Tcl code                                                     *)
 (***************************************************************************)
 
-type result_buffer == string list ref
-;;
 type callback_buffer == string list ref
 ;;
-let token_sep = function
-   ` ` -> true
- | `\n` -> true
- | _ -> false
-;;
 
-let res_GetTkToken l =
+let arg_GetTkToken l =
   match !l with
     [] -> ""
  | car::cdr -> l := cdr; car
-;;
-
-let res_GetTkString = res_GetTkToken
-;;
-
-let res_GetTkTokenList l =
-  let x = !l in
-  l := [];
-  x
-;;
-  
-let arg_GetTkTokenList = res_GetTkTokenList
-and arg_GetTkToken = res_GetTkToken
-and arg_GetTkString = res_GetTkToken
 ;;
 
 (* This is approximative, since we don't quote what needs to be quoted *)
@@ -54,8 +33,7 @@ let dump_args args =
 
 let TkEval args = 
   if !debug then dump_args args;
-  let tcl_res = tcl_direct_eval args in
-    ref (split_str token_sep tcl_res)
+  tcl_direct_eval args
 ;;
 
 (***************************************************************************)

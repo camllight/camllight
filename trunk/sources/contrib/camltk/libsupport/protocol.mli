@@ -13,8 +13,6 @@ value debug : bool ref
 
 type callback_buffer
       (* Buffer for reading callback arguments *)
-and result_buffer
-      (* Buffer for reading Tcl results *)
 ;;
 
 type TkArgs =
@@ -24,17 +22,12 @@ type TkArgs =
 ;;
 
 
-
-value arg_GetTkToken : callback_buffer -> string
-and arg_GetTkString : callback_buffer -> string
-and arg_GetTkTokenList : callback_buffer -> string list
-      (* Extracting arguments from callback information *)
+value splitlist : string -> string list
+      	= 1 "camltk_splitlist"
 ;;
 
-value res_GetTkToken : result_buffer -> string
-and   res_GetTkString : result_buffer -> string
-and   res_GetTkTokenList: result_buffer -> string list
-      (* Extracting results of function call *)
+value arg_GetTkToken : callback_buffer -> string
+      (* Extracting arguments from callback information *)
 ;;
 
 value register_callback : Widget -> (callback_buffer -> unit) -> string
@@ -57,5 +50,5 @@ and   MainLoop : unit -> unit
 and   add_fileinput : file_descr -> (unit -> unit) -> unit
 and   remove_fileinput: file_descr -> unit
       (* see [tk] module *)
-and   TkEval : TkArgs vect -> result_buffer
+and   TkEval : TkArgs vect -> string
 ;;
