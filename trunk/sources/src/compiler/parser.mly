@@ -11,23 +11,25 @@
 
 /* Tokens */
 
+/* Identifiers, prefixes, infixes */
 %token <string> IDENT
-%token <string> INFIX
+%token <string> PREFIX
+%token <string> INFIX1
+%token <string> INFIX2
+%token <string> SUBTRACTIVE
+%token <string> INFIX3
+%token <string> INFIX4
+/* Literals */
 %token <int> INT
 %token <char> CHAR
 %token <float> FLOAT
 %token <string> STRING
+/* The end-of-file marker */
 %token EOF
-%token <string> EXPONENTIATION /* "**" */
-%token <string> MULTIPLICATIVE /* "/" "*." "/." -- "*" is STAR */
-%token <string> ADDITIVE       /* "+" "+." */
-%token <string> SUBTRACTIVE    /* "-" "-." */
-%token <string> CONCATENATION  /* "^" "@" */
-%token <string> COMPARISON     /* "<>" "!=" "<" "<=" ">" ">=" etc */
+/* Special symbols */
 %token EQUAL          /* "=" */
 %token EQUALEQUAL     /* "==" */
 %token SHARP          /* "#" */
-%token BANG           /* "!" */
 %token AMPERSAND      /* "&" */
 %token AMPERAMPER     /* "&&" */
 %token QUOTE          /* "'" */
@@ -58,6 +60,7 @@
 %token BARRBRACKET    /* "|]" */
 %token GREATERRBRACKET/* ">]" */
 %token RBRACE         /* "}" */
+/* Keywords */
 %token AND            /* "and" */
 %token AS             /* "as" */
 %token BEGIN          /* "begin" */
@@ -78,7 +81,7 @@
 %token NOT            /* "not" */
 %token OF             /* "of" */
 %token OR             /* "or" */
-%token PREFIX         /* "prefix" */
+%token PREF           /* "prefix" */
 %token REC            /* "rec" */
 %token THEN           /* "then" */
 %token TO             /* "to" */
@@ -105,18 +108,16 @@
 %right OR BARBAR
 %left  AMPERSAND AMPERAMPER
 %left  NOT
-%left  COMPARISON EQUAL EQUALEQUAL
-%right CONCATENATION
-%right COLONCOLON
-%left  ADDITIVE SUBTRACTIVE
+%left  INFIX1 EQUAL EQUALEQUAL          /* comparisons, concatenations */
+%right COLONCOLON                       /* cons */
+%left  INFIX2 SUBTRACTIVE               /* additives, subtractives */
 %right prec_typearrow
-%left  STAR MULTIPLICATIVE
-%left  INFIX
-%left  EXPONENTIATION
+%left  STAR INFIX3                      /* multiplicatives */
+%left  INFIX4                           /* exponentiations */
 %right prec_uminus
 %right prec_app
 %left  DOT DOTLPAREN DOTLBRACKET
-%right BANG
+%right PREFIX                           /* prefix operators, e.g. ! */
 
 /* Entry points */
 
@@ -217,39 +218,26 @@ Expr :
           { make_unop "not" $2 }
       | Ide LESSMINUS Expr
           { make_expr (Zassign($1, $3)) }
-      | Expr INFIX Expr
+      | Expr INFIX4 Expr
           { make_binop $2 $1 $3 }
-      | Expr MULTIPLICATIVE Expr
+      | Expr INFIX3 Expr
           { make_binop $2 $1 $3 }
-      | Expr STAR Expr
-          { make_binop "*" $1 $3 }
-      | Expr ADDITIVE Expr
+      | Expr INFIX2 Expr
           { make_binop $2 $1 $3 }
       | Expr SUBTRACTIVE Expr
           { make_binop $2 $1 $3 }
+      | Expr INFIX1 Expr
+          { make_binop $2 $1 $3 }
+      | Expr STAR Expr
+          { make_binop "*" $1 $3 }
       | Expr COLONCOLON Expr
           { make_expr(Zconstruct1(constr_cons, make_expr(Ztuple [$1; $3]))) }
-      | Expr CONCATENATION Expr
-          { make_binop $2 $1 $3 }
-      | Expr COMPARISON Expr
-          { make_binop $2 $1 $3 }
       | Expr EQUAL Expr
           { make_binop "=" $1 $3 }
       | Expr EQUALEQUAL Expr
           { make_binop "==" $1 $3 }
       | Expr COLONEQUAL Expr
-          { match $1.e_desc with
-              Zapply ({e_desc = Zident (ref (Zlocal op)); _},
-                      [e1;e2]) ->
-               begin match op with
-                    "vect_item" -> make_ternop "vect_assign" e1 e2 $3
-                  | "nth_char" -> make_ternop "set_nth_char" e1 e2 $3
-                  | _ -> make_binop ":=" $1 $3
-                  end
-            | Zrecord_access (e1,lab) ->
-               make_expr(Zrecord_update(e1, lab, $3))
-            | e -> make_binop ":=" $1 $3 }
-
+          { make_assignment $1 $3 }
       | Expr AMPERSAND Expr 
           { make_expr(Zsequand($1, $3)) }
       | Expr AMPERAMPER Expr 
@@ -325,8 +313,8 @@ Simple_expr :
           { $2 }
       | LBRACE Expr_label_list Opt_semi RBRACE
           { make_expr (Zrecord $2) }
-      | BANG Simple_expr
-          { make_unop "!" $2 }
+      | PREFIX Simple_expr
+          { make_unop $1 $2 }
       | Simple_expr DOT Ext_ident
           { make_expr(Zrecord_access($1, find_label $3)) }
       | Simple_expr DOTLPAREN Expr RPAREN  %prec DOT
@@ -538,19 +526,17 @@ Parser_match :
 Ide :
         IDENT
           { $1 }
-      | PREFIX Infx
+      | PREF Infx
           { $2 }
 ;
 
 Infx :
-        INFIX           { $1 }
-      | ADDITIVE        { $1 }    | SUBTRACTIVE   { $1 }
-      | MULTIPLICATIVE  { $1}     | STAR          { "*" }
-      | CONCATENATION   { $1 }
-      | COMPARISON      { $1 }    | COLONCOLON    { "::" }
+        INFIX1          { $1 }    | INFIX2        { $1 }
+      | INFIX3          { $1 }    | INFIX4        { $1 }
+      | STAR            { "*" }   | COLONCOLON    { "::" }
       | COLONEQUAL      { ":=" }  | EQUAL         { "=" }
       | EQUALEQUAL      { "==" }  | NOT           { "not" }
-      | BANG            { "!" }
+      | SUBTRACTIVE     { $1 }    | PREFIX        { $1 }
 ;
 
 Qual_ident :
