@@ -137,7 +137,7 @@ let print_type_desc
     begin match ty_c with
       Abstract_type -> print_string " abstract\n"
     | Variant_type ([]) -> print_string " extensible\n"
-    | Variant_type (x::l) -> 
+    | Variant_type l -> 
        	 let print_constructor cstr =
 	   begin match  cstr.info.cs_mut with
 	    Mutable -> print_string "mutable "
@@ -155,12 +155,14 @@ let print_type_desc
 		  print_string "\n" 
       	         end 
            end in
-	 print_string "\n\t\t";
-	 print_constructor x;
-	 do_list (fun c -> 
-      	       	   print_string "\t|\t";
-      	       	   print_constructor c) l
-     |  Record_type (x::l)  -> 
+       let sorted_l = 
+      	 sort__sort (fun c c' -> le_string c.qualid.id c'.qualid.id) l in
+       print_string "\n\t\t";
+       print_constructor (hd sorted_l);
+       do_list (fun c -> 
+		 print_string "\t|\t";
+		 print_constructor c) (tl sorted_l)
+     |  Record_type l  -> 
        	 let print_label lbl =
 	   begin match  lbl.info.lbl_mut with
 	    Mutable -> print_string "mutable "
@@ -169,11 +171,13 @@ let print_type_desc
 	   print_string lbl.qualid.id;
 	   print_string " : ";
 	   print_typ 0 lbl.info.lbl_arg in
+        let sorted_l =
+	  sort__sort (fun l l' -> le_string l.qualid.id l'.qualid.id) l in
 	 print_string " {\n\t";
-	 print_label x;
+	 print_label (hd sorted_l);
 	 do_list (fun lbl ->
 	           print_string ";\n\t";
-		   print_label lbl) l;
+		   print_label lbl) (tl sorted_l);
 	 print_string "\n}\n"
      |  Abbrev_type (_,body) -> 
        	 print_string "= ";
