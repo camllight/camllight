@@ -87,6 +87,7 @@ install:
 	cd ..\lex
 	make -DBINDIR=$(BINDIR) -DLIBDIR=$(LIBDIR) install
 	cd ..
+	cp camlmsgs.txt $(LIBDIR)
 
 # Remove the Caml Light system after installation
 uninstall:
