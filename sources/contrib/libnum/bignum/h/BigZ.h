@@ -1,6 +1,6 @@
 /* Copyright     Digital Equipment Corporation & INRIA     1988, 1989 */
-/* Last modified on Fri Oct  5 16:45:46 GMT+1:00 1990 by herve */
-/*      modified on Thu Mar 22 21:29:09 GMT+1:00 1990 by shand */
+/* Last modified_on Fri Oct  5 16:45:46 GMT+1:00 1990 by herve */
+/*      modified_on Thu Mar 22 21:29:09 GMT+1:00 1990 by shand */
 
 /* BigZ.h: Types and structures for clients of BigZ */
  
@@ -31,7 +31,7 @@
 
 struct BigZHeader
 {
-    unsigned long			Size;
+    BigNumLength			Size;
     BzSign				Sign;
 };
 
@@ -62,36 +62,36 @@ typedef struct BigZStruct * 		BigZ;
 
 		/*********** functions of bz.c **********/
 
-extern void             BzInit                  ();
-extern void             BzClose                  ();
+extern void	BzInit			__((void));
+extern void	BzClose			__((void));
 
-extern BigZ 		BzCreate		();
-extern void 		BzFree			();
-extern void 		BzFreeString		();
+extern BigZ	BzCreate		__((BigNumLength));
+extern void	BzFree			__((BigZ));
+extern void	BzFreeString		__((char *));
 
-extern unsigned		BzNumDigits		();
+extern BigNumLength BzNumDigits		__((BigZ));
 
-extern BigZ 		BzCopy			();
-extern BigZ 		BzNegate		();
-extern BigZ 		BzAbs			();
-extern BzCmp 		BzCompare		();
+extern BigZ	BzCopy			__((BigZ));
+extern BigZ	BzNegate		__((BigZ));
+extern BigZ	BzAbs			__((BigZ));
+extern BigNumCmp BzCompare		__((BigZ, BigZ));
 
-extern BigZ 		BzAdd			();
-extern BigZ 		BzSubtract		();
-extern BigZ 		BzMultiply		();
-extern BigZ 		BzDivide		();
-extern BigZ 		BzDiv			();
-extern BigZ 		BzMod			();
+extern BigZ	BzAdd			__((BigZ, BigZ));
+extern BigZ	BzSubtract		__((BigZ, BigZ));
+extern BigZ	BzMultiply		__((BigZ, BigZ));
+extern BigZ	BzDivide		__((BigZ, BigZ, BigZ *));
+extern BigZ	BzDiv			__((BigZ, BigZ));
+extern BigZ	BzMod			__((BigZ, BigZ));
 
-extern BigZ 		BzFromString		();
-extern char *		BzToString		();
+extern BigZ	BzFromString		__((char *, BigNumDigit));
+extern char *	BzToString		__((BigZ, BigNumDigit));
 
-extern BigZ             BzFromInteger           ();
-extern int		BzToInteger             ();
+extern BigZ	BzFromInteger		__((int));
+extern int	BzToInteger		__((BigZ));
 
-extern BigZ		BzFromBigNum		();
-extern BigNum		BzToBigNum		();
+extern BigZ	BzFromBigNum		__((BigNum, BigNumLength));
+extern BigNum	BzToBigNum		__((BigZ, BigNumLength *));
 
 		/*********** functions of bzf.c **********/
 
-extern BigZ 		BzFactorial		();
+extern BigZ 	BzFactorial		__((BigZ));

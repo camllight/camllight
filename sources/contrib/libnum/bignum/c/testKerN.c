@@ -1,8 +1,8 @@
 /* Copyright     Digital Equipment Corporation & INRIA     1988, 1989 */
 /* testKerN.c: tests des primitives de KerN                           */
-/* Last modified on Wed Feb 27 23:26:55 GMT+1:00 1991 by shand        */
-/*      modified on Wed Feb 14 16:14:04 GMT+1:00 1990 by herve        */
-/*      modified on 17-OCT-1989 20:35:55.91 by Jim Lawton             */
+/* Last modified_on Thu Feb 20 17:26:13 GMT+1:00 1992 by shand        */
+/*      modified_on Wed Feb 14 16:14:04 GMT+1:00 1990 by herve        */
+/*      modified_on 17-OCT-1989 20:35:55.91 by Jim Lawton             */
 
 /* You can comment the line below if you want to test the C macro Package
    instead of C or Assembly functions. */
@@ -11,7 +11,64 @@
 
 
 #include "BigNum.h"
-#include "BntoBnn.h"
+		/* old types of Bn */
+
+typedef BigNumDigit 	BigNumType;	/* A BigNum's type */
+
+struct BigNumHeader  			/* The header of a BigNum */
+{
+   BigNumType 	type;
+   BigNumLength	length;
+};
+
+		/* old functions of Bn */
+
+/*
+ *	Creation and access to type and length fields.
+ */
+extern char *malloc();
+/* Allocates a BigNum structure and returns a pointer to it */
+BigNum BnAlloc(size) int size; {
+	register BigNum n;
+ 
+	n = (BigNum) (malloc(sizeof(struct BigNumHeader) +
+				size * sizeof(BigNumDigit))
+			+ sizeof(struct BigNumHeader));
+	(((struct BigNumHeader *) n) - 1)->length = size;
+	return(n);
+}
+ 
+/* Allocates a BigNum, inserts its Type, and returns a pointer to it */
+BigNum BnCreate(type, size) BigNumType type; int size; {
+	register BigNum n;
+ 
+	n = BnAlloc(size);
+	(((struct BigNumHeader *) n) - 1)->type = type;
+	BnnSetToZero ((n+ 0),  size);
+	return(n);
+}
+ 
+/* Frees a BigNum structure */
+BnFree(n) BigNum n; {
+	free(((struct BigNumHeader *) n) - 1);
+        return 1; 
+}
+ 
+/* Returns the BigNum's Type */
+BigNumType BnGetType(n) BigNum n; {
+        return((((struct BigNumHeader *) n) - 1)->type);
+}
+ 
+/* Sets the BigNum's Type */
+BnSetType(n, type) BigNum n; BigNumType type; {
+        (((struct BigNumHeader *) n) - 1)->type = type;
+}
+ 
+/* Returns the number of digits allocated for the BigNum */
+BnGetSize(n) BigNum n; {
+	return((((struct BigNumHeader *) n) - 1)->length);
+}
+ 
 
 
 			/* structure d'un test */
@@ -56,8 +113,8 @@ int TestCountInc()
 
 ResetTest(n) int n; {
 	/* Remet le nieme nombre a` la valeur prototype. */
-	BnAssign(RN(n), 0, NumbProto, 0, TESTLENGTH);
-	BnAssign(SN(n), 0, NumbProto, 0, TESTLENGTH);
+	BnnAssign ((RN(n)+ 0), ( NumbProto+ 0),  TESTLENGTH);
+	BnnAssign ((SN(n)+ 0), ( NumbProto+ 0),  TESTLENGTH);
 }
 
 Check(n) int n; {
@@ -73,7 +130,7 @@ CheckSubRange(x, nd, nl) int x, nd, nl; {
            (RN(x), nd, nl) et (SN(x), nd, nl) */
 	while(nl) {
 		nl--;
-		if(BnCompareDigits(RN(x), nd, SN(x), nd)) return(nd + 1);
+		if(BnnCompareDigits (*(RN(x)+ nd), *( SN(x)+ nd))) return(nd + 1);
 		nd++;
 	}
 	return(FALSE);
@@ -157,8 +214,10 @@ RangeNumberPrint(s, n, nd, nl) char *s; BigNum n; int nd, nl; {
 		nl--;
 		if(!first) printf(", "); else first = 0;
 		if(BN_DIGIT_SIZE <= 16)
-			printf("%.4X", BnGetDigit(n, nd + nl));
-		else	printf("%.8X", BnGetDigit(n, nd + nl));
+			printf("%.4X", BnnGetDigit ((n+ nd + nl)));
+		else if(BN_DIGIT_SIZE <= 32)
+			printf("%.8X", BnnGetDigit ((n+ nd + nl)));
+		else	printf("%.16lX", BnnGetDigit ((n+ nd + nl)));
 	}
 	printf("}\n");
 }
@@ -237,18 +296,18 @@ Generique(e) struct testenv *e; {
 ___BnSetToZero___(n, nd, nl) register BigNum n; register int nd, nl; {
 	register int i;
 	for(i=0; i<nl; i++)
-		BnSetDigit(n, nd + i, 0);
+		BnnSetDigit ((n+ nd + i),  0);
 }
 
 TestBnSetToZero(e) struct testenv *e; {
 	int nd, nl;
 
-	e->depend = "()";
+	e->depend = "(BnSetDigit)";
 	for(nd = 0; nd <= TESTLENGTH; nd++)
 	   for(nl = 0; nl <= TESTLENGTH - nd; nl++) {
 		TestCountInc();
 		ResetTest(0);
-		   BnSetToZero   (RN(0), nd, nl);
+		   BnnSetToZero ((RN(0)+ nd),  nl);
 		___BnSetToZero___(SN(0), nd, nl);
 		if(Check(1)) {
 			sprintf(e->hist, "%s(n, %d, %d)", e->name, nd, nl);
@@ -261,25 +320,26 @@ TestBnSetToZero(e) struct testenv *e; {
  *	BnAssign
  */
 ___BnAssign___(m, md, n, nd, nl) BigNum m, n; int md, nd, nl; {
-	BnSetToZero(NtmpBig, 0, nl);
-	BnAdd(NtmpBig, 0, nl, n, nd, nl, 0);
-	BnSetToZero(m, md, nl);
-	BnAdd(m, md, nl, NtmpBig, 0, nl, 0);
+	register int i;
+	for(i=0; i<nl; i++)
+		BnnSetDigit ((NtmpBig+ i),  BnnGetDigit ((n+ nd + i)));
+	for(i=0; i<nl; i++)
+		BnnSetDigit ((m+ md + i),  BnnGetDigit ((NtmpBig+ i)));
 }
 
 TestBnAssign(e) struct testenv *e; {
 	int md, nd, nl;
 
-	e->depend = "(BnSetToZero, BnAdd)";
+	e->depend = "(BnGetDigit, BnSetDigit)";
 	for(md = 0; md <= TESTLENGTH; md++)
 	  for(nd = 0; nd <= TESTLENGTH; nd++)
 	    for(nl=0; ((nl<=TESTLENGTH-nd) && (nl<=TESTLENGTH-md)); nl++) {
 		TestCountInc();
 		ResetTest(0);
-		   BnAssign   (RN(0), md, RN(0), nd, nl);
+		   BnnAssign ((RN(0)+ md), ( RN(0)+ nd),  nl);
 		___BnAssign___(SN(0), md, SN(0), nd, nl);
 		if(Check(1)) {
-			sprintf(e->hist, "%s(n, %d, n, %d, %d)", e->name,
+			sprintf(e->hist, "%s(m, %d, n, %d, %d)", e->name,
 						md, nd, nl);
 			if(ShowDiff1(e, 0, 0, "n", md, nl)) return(1);
 	}	}
@@ -294,7 +354,7 @@ ___BnNumDigits___(n, nd, nl) register BigNum n; register int nd, nl; {
 
 	while(nl != 0) {
 		nl--;
-		if(!BnIsDigitZero(n, nd + nl)) break;
+		if(!BnnIsDigitZero (*(n+ nd + nl))) break;
 	}
 	return(nl + 1);
 }
@@ -309,9 +369,9 @@ TestBnNumDigits(e) struct testenv *e; {
 	      for(nl = 0; nl <= TESTLENGTH - nd; nl++) {
 		TestCountInc();
 		ResetTest(0);
-		BnSetToZero(RN(0), nd0, nl0);
-		BnSetToZero(SN(0), nd0, nl0);
-		l1 =    BnNumDigits   (RN(0), nd, nl);
+		BnnSetToZero ((RN(0)+ nd0),  nl0);
+		BnnSetToZero ((SN(0)+ nd0),  nl0);
+		l1 =    BnnNumDigits ((RN(0)+ nd),  nl);
 		l2 = ___BnNumDigits___(SN(0), nd, nl);
 		if(Check(1) || l1 != l2) {
 			sprintf(e->hist, "%s(n, %d, %d)", e->name, nd, nl);
@@ -326,11 +386,11 @@ TestBnNumDigits(e) struct testenv *e; {
 __BnNumLeadingZeroBitsInDigit__(n, nd) BigNum n; int nd; {
 	int p = 0;
 
-	if(BnIsDigitZero(n, nd)) return(BN_DIGIT_SIZE);
-	BnAssign(Ntmp2, 0, n, nd, 1);
-	BnShiftLeft(Ntmp2, 0, 1, Ntmp2, 1, 1);
-	while(BnIsDigitZero(Ntmp2, 1)) {
-		BnShiftLeft(Ntmp2, 0, 1, Ntmp2, 1, 1);
+	if(BnnIsDigitZero (*(n+ nd))) return(BN_DIGIT_SIZE);
+	BnnAssign ((Ntmp2+ 0), ( n+ nd),  1);
+	*( Ntmp2+ 1) = BnnShiftLeft ((Ntmp2+ 0),  1,  1);
+	while(BnnIsDigitZero (*(Ntmp2+ 1))) {
+		*( Ntmp2+ 1) = BnnShiftLeft ((Ntmp2+ 0),  1,  1);
 		p++;
 	}
 	return(p);
@@ -344,7 +404,7 @@ TestBnNumLeadingZeroBitsInDigit(e) struct testenv *e; {
 	ResetTest(0);
 	for(nd = 0; nd < TESTLENGTH; nd++) {
 		TestCountInc();
-		l1 =    BnNumLeadingZeroBitsInDigit   (RN(0), nd);
+		l1 =    BnnNumLeadingZeroBitsInDigit (*(RN(0)+ nd));
 		l2 = __BnNumLeadingZeroBitsInDigit__(SN(0), nd);
 		if(Check(1) || l1 != l2) {
 			sprintf(e->hist, "%s(n, %d)", e->name, nd);
@@ -357,7 +417,7 @@ TestBnNumLeadingZeroBitsInDigit(e) struct testenv *e; {
  *	BnIsDigitZero
  */
 ___BnIsDigitZero___(n, nd) BigNum n; int nd; {
-	if(BnGetDigit(n, nd) == 0) return(1);
+	if(BnnGetDigit ((n+ nd)) == 0) return(1);
 	return(0);
 }
 
@@ -368,7 +428,7 @@ TestBnIsDigitZero(e) struct testenv *e; {
 	ResetTest(0);
 	for(nd = 0; nd < TESTLENGTH; nd++) {
 		TestCountInc();
-		l1 =    BnIsDigitZero   (RN(0), nd);
+		l1 =    BnnIsDigitZero (*(RN(0)+ nd));
 		l2 = ___BnIsDigitZero___(SN(0), nd);
 		if(Check(1) || ((l1 == 0) && (l2 != 0)) ||
 			       ((l1 != 0) && (l2 == 0))) {
@@ -382,9 +442,9 @@ TestBnIsDigitZero(e) struct testenv *e; {
  *	BnIsDigitNormalized
  */
 ___BnIsDigitNormalized___(n, nd) BigNum n; int nd; {
-	BnAssign(Ntmp2, 0, n, nd, 1);
-	BnShiftLeft(Ntmp2, 0, 1, Ntmp2, 1, 1);
-	if(BnIsDigitZero(Ntmp2, 1)) return(0);
+	BnnAssign ((Ntmp2+ 0), ( n+ nd),  1);
+	*( Ntmp2+ 1) = BnnShiftLeft ((Ntmp2+ 0),  1,  1);
+	if(BnnIsDigitZero (*(Ntmp2+ 1))) return(0);
 	return(1);
 }
 
@@ -395,7 +455,7 @@ TestBnIsDigitNormalized(e) struct testenv *e; {
 	ResetTest(0);
 	for(nd = 0; nd < TESTLENGTH; nd++) {
 		TestCountInc();
-		l1 =    BnIsDigitNormalized   (RN(0), nd);
+		l1 =    BnnIsDigitNormalized (*(RN(0)+ nd));
 		l2 = ___BnIsDigitNormalized___(SN(0), nd);
 		if(Check(1) || ((l1 == 0) && (l2 != 0)) ||
 			       ((l1 != 0) && (l2 == 0))) {
@@ -409,9 +469,9 @@ TestBnIsDigitNormalized(e) struct testenv *e; {
  *	BnIsDigitOdd
  */
 ___BnIsDigitOdd___(n, nd) BigNum n; int nd; {
-	BnAssign(Ntmp2, 0, n, nd, 1);
-	BnShiftRight(Ntmp2, 0, 1, Ntmp2, 1, 1);
-	if(BnIsDigitZero(Ntmp2, 1)) return(0);
+	BnnAssign ((Ntmp2+ 0), ( n+ nd),  1);
+	*( Ntmp2+ 1) = BnnShiftRight ((Ntmp2+ 0),  1,  1);
+	if(BnnIsDigitZero (*(Ntmp2+ 1))) return(0);
 	return(1);
 }
 
@@ -422,7 +482,7 @@ TestBnIsDigitOdd(e) struct testenv *e; {
 	ResetTest(0);
 	for(nd = 0; nd < TESTLENGTH; nd++) {
 		TestCountInc();
-		l1 =    BnIsDigitOdd   (RN(0), nd);
+		l1 =    BnnIsDigitOdd (*(RN(0)+ nd));
 		l2 = ___BnIsDigitOdd___(SN(0), nd);
 		if(Check(1) || ((l1 == 0) && (l2 != 0)) ||
 			       ((l1 != 0) && (l2 == 0))) {
@@ -436,11 +496,11 @@ TestBnIsDigitOdd(e) struct testenv *e; {
  *	BnCompareDigits
  */
 ___BnCompareDigits___(n, nd, m, md) BigNum n, m; int nd, md; {
-	BnAssign(Ntmp2, 0, n, nd, 1);
-	BnComplement(Ntmp2, 0, 1);
-	if(BnAdd(Ntmp2, 0, 1, m, md, 1, 0)) return(-1);
-	BnComplement(Ntmp2, 0, 1);
-	if(BnIsDigitZero(Ntmp2, 0)) return(0);
+	BnnAssign ((Ntmp2+ 0), ( n+ nd),  1);
+	BnnComplement ((Ntmp2+ 0),  1);
+	if(BnnAdd ((Ntmp2+ 0),  1, ( m+ md),  1,  (BigNumCarry) 0)) return(-1);
+	BnnComplement ((Ntmp2+ 0),  1);
+	if(BnnIsDigitZero (*(Ntmp2+ 0))) return(0);
 	return(1);
 }
 
@@ -453,7 +513,7 @@ TestBnCompareDigits(e) struct testenv *e; {
 	for(nd = 0; nd < TESTLENGTH; nd++)
 	   for(md = 0; md < TESTLENGTH; md++) {
 		TestCountInc();
-		l1 =    BnCompareDigits   (RN(0), nd, RN(1), md);
+		l1 =    BnnCompareDigits (*(RN(0)+ nd), *( RN(1)+ md));
 		l2 = ___BnCompareDigits___(SN(0), nd, SN(1), md);
 		if(Check(2) || l1 != l2) {
 			sprintf(e->hist, "%s(n, %d, m, %d)", e->name, nd, md);
@@ -469,10 +529,10 @@ TestBnCompareDigits(e) struct testenv *e; {
 ___BnComplement___(n, nd, nl) BigNum n; int nd, nl; {
 	int i;
 
-	BnSetDigit(Ntmp2, 0, 0);
-	BnSubtractBorrow(Ntmp2, 0, 1, 0);
+	BnnSetDigit ((Ntmp2+ 0),  0);
+	BnnSubtractBorrow ((Ntmp2+ 0),  1,  0);
 	for(i = 0; i < nl; i++)
-		BnXorDigits(n, nd + i, Ntmp2, 0);
+		BnnXorDigits ((n+ nd + i), *( Ntmp2+ 0));
 }
 
 TestBnComplement(e) struct testenv *e; {
@@ -483,7 +543,7 @@ TestBnComplement(e) struct testenv *e; {
 	   for(nl = 0; nl <= TESTLENGTH - nd; nl++) {
 		TestCountInc();
 		ResetTest(0);
-		   BnComplement   (RN(0), nd, nl);
+		   BnnComplement ((RN(0)+ nd),  nl);
 		___BnComplement___(SN(0), nd, nl);
 		if(Check(1)) {
 			sprintf(e->hist, "%s(n, %d, %d)", e->name, nd, nl);
@@ -496,10 +556,10 @@ TestBnComplement(e) struct testenv *e; {
  *	BnAndDigits
  */
 ___BnAndDigits___(n, nd, m, md) BigNum n, m; int nd, md; {
-	BnAssign(Ntmp2, 0, n, nd, 1);
-	BnOrDigits(Ntmp2, 0, m, md);
-	BnXorDigits(Ntmp2, 0, m, md);
-	BnXorDigits(n, nd, Ntmp2, 0);
+	BnnAssign ((Ntmp2+ 0), ( n+ nd),  1);
+	BnnOrDigits ((Ntmp2+ 0), *( m+ md));
+	BnnXorDigits ((Ntmp2+ 0), *( m+ md));
+	BnnXorDigits ((n+ nd), *( Ntmp2+ 0));
 }
 
 TestBnAndDigits(e) struct testenv *e; {
@@ -511,7 +571,7 @@ TestBnAndDigits(e) struct testenv *e; {
 	   for(md = 0; md < TESTLENGTH; md++) {
 		TestCountInc();
 		ResetTest(0);
-		   BnAndDigits   (RN(0), nd, RN(1), md);
+		   BnnAndDigits ((RN(0)+ nd), *( RN(1)+ md));
 		___BnAndDigits___(SN(0), nd, SN(1), md);
 		if(Check(2)) {
 			sprintf(e->hist, "%s(n, %d, m, %d)", e->name, nd, md);
@@ -525,10 +585,10 @@ TestBnAndDigits(e) struct testenv *e; {
  *	BnOrDigits
  */
 ___BnOrDigits___(n, nd, m, md) BigNum n, m; int nd, md; {
-	BnAssign(Ntmp2, 0, n, nd, 1);
-	BnAndDigits(Ntmp2, 0, m, md);
-	BnXorDigits(Ntmp2, 0, m, md);
-	BnXorDigits(n, nd, Ntmp2, 0);
+	BnnAssign ((Ntmp2+ 0), ( n+ nd),  1);
+	BnnAndDigits ((Ntmp2+ 0), *( m+ md));
+	BnnXorDigits ((Ntmp2+ 0), *( m+ md));
+	BnnXorDigits ((n+ nd), *( Ntmp2+ 0));
 }
 
 TestBnOrDigits(e) struct testenv *e; {
@@ -540,7 +600,7 @@ TestBnOrDigits(e) struct testenv *e; {
 	   for(md = 0; md < TESTLENGTH; md++) {
 		TestCountInc();
 		ResetTest(0);
-		   BnOrDigits   (RN(0), nd, RN(1), md);
+		   BnnOrDigits ((RN(0)+ nd), *( RN(1)+ md));
 		___BnOrDigits___(SN(0), nd, SN(1), md);
 		if(Check(2)) {
 			sprintf(e->hist, "%s(n, %d, m, %d)", e->name, nd, md);
@@ -554,11 +614,11 @@ TestBnOrDigits(e) struct testenv *e; {
  *	BnXorDigits
  */
 ___BnXorDigits___(n, nd, m, md) BigNum n, m; int nd, md; {
-	BnAssign(Ntmp2, 0, n, nd, 1);
-	BnAndDigits(Ntmp2, 0, m, md);
-	BnComplement(Ntmp2, 0, 1);
-	BnOrDigits(n, nd, m, md);
-	BnAndDigits(n, nd, Ntmp2, 0);
+	BnnAssign ((Ntmp2+ 0), ( n+ nd),  1);
+	BnnAndDigits ((Ntmp2+ 0), *( m+ md));
+	BnnComplement ((Ntmp2+ 0),  1);
+	BnnOrDigits ((n+ nd), *( m+ md));
+	BnnAndDigits ((n+ nd), *( Ntmp2+ 0));
 }
 
 TestBnXorDigits(e) struct testenv *e; {
@@ -570,7 +630,7 @@ TestBnXorDigits(e) struct testenv *e; {
 	   for(md = 0; md < TESTLENGTH; md++) {
 		TestCountInc();
 		ResetTest(0);
-		   BnXorDigits   (RN(0), nd, RN(1), md);
+		   BnnXorDigits ((RN(0)+ nd), *( RN(1)+ md));
 		___BnXorDigits___(SN(0), nd, SN(1), md);
 		if(Check(2)) {
 			sprintf(e->hist, "%s(n, %d, m, %d)", e->name, nd, md);
@@ -584,17 +644,17 @@ TestBnXorDigits(e) struct testenv *e; {
  *	BnShiftLeft
  */
 ___BnShiftLeft___(n, nd, nl, m, md, s) BigNum n, m; int nd, nl, md; int s; {
-	BnSetDigit(m, md, 2);
-	BnSetDigit(Ntmp2, 0, 1);
+	BnnSetDigit ((m+ md),  2);
+	BnnSetDigit ((Ntmp2+ 0),  1);
 	while(s--) {
-		BnSetToZero(NtmpBig, 0, 2);
-		BnMultiplyDigit(NtmpBig, 0, 2, Ntmp2, 0, 1, m, md);
-		BnAssign(Ntmp2, 0, NtmpBig, 0, 1);
+		BnnSetToZero ((NtmpBig+ 0),  2);
+		BnnMultiplyDigit ((NtmpBig+ 0),  2, ( Ntmp2+ 0),  1, *( m+ md));
+		BnnAssign ((Ntmp2+ 0), ( NtmpBig+ 0),  1);
 	}
-	BnSetToZero(NtmpBig, 0, nl + 1);
-	BnMultiplyDigit(NtmpBig, 0, nl + 1, n, nd, nl, Ntmp2, 0);
-	BnAssign(n, nd, NtmpBig, 0, nl);
-	BnAssign(m, md, NtmpBig, nl, 1);
+	BnnSetToZero ((NtmpBig+ 0),  nl + 1);
+	BnnMultiplyDigit ((NtmpBig+ 0),  nl + 1, ( n+ nd),  nl, *( Ntmp2+ 0));
+	BnnAssign ((n+ nd), ( NtmpBig+ 0),  nl);
+	BnnAssign ((m+ md), ( NtmpBig+ nl),  1);
 }
 
 TestBnShiftLeft(e) struct testenv *e; {
@@ -608,7 +668,7 @@ TestBnShiftLeft(e) struct testenv *e; {
 	      for(s = 0; s < BN_DIGIT_SIZE; s++) {
 		TestCountInc();
 		ResetTest(0);
-		   BnShiftLeft   (RN(0), nd, nl, RN(1), md, s);
+		   *( RN(1)+ md) = BnnShiftLeft ((RN(0)+ nd),  nl,  s);
 		___BnShiftLeft___(SN(0), nd, nl, SN(1), md, s);
 		if(Check(2)) {
 			sprintf(e->hist, "%s(n, %d, %d, m, %d, %d)",
@@ -624,13 +684,13 @@ TestBnShiftLeft(e) struct testenv *e; {
  */
 ___BnShiftRight___(n, nd, nl, m, md, s) BigNum n, m; int nd, nl, md; int s; {
 	if((nl == 0) || (s == 0)) {
-		BnSetDigit(m, md, 0);
+		BnnSetDigit ((m+ md),  0);
 		return;
 	}
-	BnAssign(NtmpBig, 0, n, nd, nl);
-	BnShiftLeft(NtmpBig, 0, nl, NtmpBig, nl, BN_DIGIT_SIZE - s);
-	BnAssign(n, nd, NtmpBig, 1, nl);
-	BnAssign(m, md, NtmpBig, 0, 1);
+	BnnAssign ((NtmpBig+ 0), ( n+ nd),  nl);
+	*( NtmpBig+ nl) = BnnShiftLeft ((NtmpBig+ 0),  nl,  BN_DIGIT_SIZE - s);
+	BnnAssign ((n+ nd), ( NtmpBig+ 1),  nl);
+	BnnAssign ((m+ md), ( NtmpBig+ 0),  1);
 }
 
 TestBnShiftRight(e) struct testenv *e; {
@@ -644,7 +704,7 @@ TestBnShiftRight(e) struct testenv *e; {
 	      for(s = 0; s < BN_DIGIT_SIZE; s++) {
 		TestCountInc();
 		ResetTest(0);
-		   BnShiftRight   (RN(0), nd, nl, RN(1), md, s);
+		   *( RN(1)+ md) = BnnShiftRight ((RN(0)+ nd),  nl,  s);
 		___BnShiftRight___(SN(0), nd, nl, SN(1), md, s);
 		if(Check(2)) {
 			sprintf(e->hist, "%s(n, %d, %d, m, %d, %d)",
@@ -658,11 +718,12 @@ TestBnShiftRight(e) struct testenv *e; {
 /*
  *	BnAddCarry
  */
+BigNumCarry
 ___BnAddCarry___(n, nd, nl, r) BigNum n; int nd, nl; int r;{
 	if(r == 0) return(0);
-	BnComplement(n, nd, nl);
-	r = BnSubtractBorrow(n, nd, nl, 0);
-	BnComplement(n, nd, nl);
+	BnnComplement ((n+ nd),  nl);
+	r = BnnSubtractBorrow ((n+ nd),  nl,  0);
+	BnnComplement ((n+ nd),  nl);
 	if(r == 0) return(1);
 	return(0);
 }
@@ -676,7 +737,7 @@ TestBnAddCarry(e) struct testenv *e; {
 	    for(r = 0; r < 2; r++) {
 		TestCountInc();
 		ResetTest(0);
-		l1 =    BnAddCarry   (RN(0), nd, nl, r);
+		l1 =    BnnAddCarry ((RN(0)+ nd),  nl,  r);
 		l2 = ___BnAddCarry___(SN(0), nd, nl, r);
 		if(Check(1) || l1 != l2) {
 			sprintf(e->hist, "%s(n, %d, %d, %d)",
@@ -689,15 +750,16 @@ TestBnAddCarry(e) struct testenv *e; {
 /*
  *	BnAdd
  */
-___BnAdd___(n, nd, nl, m, md, ml, r) BigNum n, m; int nd, nl, md, ml; int r;{
-	BnComplement(m, md, ml);
-	r = BnSubtract(n, nd, ml, m, md, ml, r);
-	BnComplement(m, md, ml);
-	return(BnAddCarry(n, nd + ml, nl - ml, r));
+BigNumCarry
+___BnAdd___(n, nd, nl, m, md, ml, r) BigNum n, m; int nd, nl, md, ml; BigNumCarry r;{
+	BnnComplement ((m+ md),  ml);
+	r = BnnSubtract ((n+ nd),  ml, ( m+ md),  ml,  r);
+	BnnComplement ((m+ md),  ml);
+	return(BnnAddCarry ((n+ nd + ml),  nl - ml,  r));
 }
 
 TestBnAdd(e) struct testenv *e; {
-	int nd, nl, md, ml; int r, l1, l2;
+	int nd, nl, md, ml; int l1, l2; BigNumCarry r;
 
 	e->depend = "(BnComplement, BnSubtract, BnAddCarry)";
 	ResetTest(1);
@@ -708,7 +770,7 @@ TestBnAdd(e) struct testenv *e; {
 	    for(r = 0; r < 2; r++) {
 		TestCountInc();
 		ResetTest(0);
-		l1 =    BnAdd   (RN(0), nd, nl, RN(1), md, ml, r);
+		l1 =    BnnAdd ((RN(0)+ nd),  nl, ( RN(1)+ md),  ml,  r);
 		l2 = ___BnAdd___(SN(0), nd, nl, SN(1), md, ml, r);
 		if(Check(2) || l1 != l2) {
 			sprintf(e->hist, "%s(n, %d, %d, m, %d, %d, %d)",
@@ -722,17 +784,18 @@ TestBnAdd(e) struct testenv *e; {
 /*
  *	BnSubtractBorrow
  */
-___BnSubtractBorrow___(n, nd, nl, r) BigNum n; int nd, nl; int r;{
+BigNumCarry
+___BnSubtractBorrow___(n, nd, nl, r) BigNum n; int nd, nl; BigNumCarry r;{
 	if(r == 1) return(1);
-	BnComplement(n, nd, nl);
-	r = BnAddCarry(n, nd, nl, 1);
-	BnComplement(n, nd, nl);
+	BnnComplement ((n+ nd),  nl);
+	r = BnnAddCarry ((n+ nd),  nl,  (BigNumCarry) 1);
+	BnnComplement ((n+ nd),  nl);
 	if(r == 0) return(1);
 	return(0);
 }
 
 TestBnSubtractBorrow(e) struct testenv *e; {
-	int nd, nl; int r, l1, l2;
+	int nd, nl; int l1, l2; BigNumCarry r;
 
 	e->depend = "(BnComplement, BnAddCarry)";
 	for(nd = 0; nd <= TESTLENGTH; nd++)
@@ -740,7 +803,7 @@ TestBnSubtractBorrow(e) struct testenv *e; {
 	    for(r = 0; r < 2; r++) {
 		TestCountInc();
 		ResetTest(0);
-		l1 =    BnSubtractBorrow   (RN(0), nd, nl, r);
+		l1 =    BnnSubtractBorrow ((RN(0)+ nd),  nl,  r);
 		l2 = ___BnSubtractBorrow___(SN(0), nd, nl, r);
 		if(Check(1) || l1 != l2) {
 			sprintf(e->hist, "%s(n, %d, %d, %d)",
@@ -753,15 +816,16 @@ TestBnSubtractBorrow(e) struct testenv *e; {
 /*
  *	BnSubtract
  */
-___BnSubtract___(n, nd, nl, m, md, ml, r) BigNum n, m; int nd, nl, md, ml; int r;{
-	BnComplement(m, md, ml);
-	r = BnAdd(n, nd, ml, m, md, ml, r);
-	BnComplement(m, md, ml);
-	return(BnSubtractBorrow(n, nd + ml, nl - ml, r));
+BigNumCarry
+___BnSubtract___(n, nd, nl, m, md, ml, r) BigNum n, m; int nd, nl, md, ml; BigNumCarry r;{
+	BnnComplement ((m+ md),  ml);
+	r = BnnAdd ((n+ nd),  ml, ( m+ md),  ml,  r);
+	BnnComplement ((m+ md),  ml);
+	return(BnnSubtractBorrow ((n+ nd + ml),  nl - ml,  r));
 }
 
 TestBnSubtract(e) struct testenv *e; {
-	int nd, nl, md, ml; int r, l1, l2;
+	int nd, nl, md, ml; int l1, l2; BigNumCarry r;
 
 	e->depend = "(BnComplement, BnAdd, BnSubtractBorrow)";
 	ResetTest(1);
@@ -772,7 +836,7 @@ TestBnSubtract(e) struct testenv *e; {
 	    for(r = 0; r < 2; r++) {	
 		TestCountInc();
 		ResetTest(0);
-		l1 =    BnSubtract   (RN(0), nd, nl, RN(1), md, ml, r);
+		l1 =    BnnSubtract ((RN(0)+ nd),  nl, ( RN(1)+ md),  ml,  r);
 		l2 = ___BnSubtract___(SN(0), nd, nl, SN(1), md, ml, r);
 		if(Check(2) || l1 != l2) {
 			sprintf(e->hist, "%s(n, %d, %d, m, %d, %d, %d)",
@@ -786,21 +850,22 @@ TestBnSubtract(e) struct testenv *e; {
 /*
  *	BnMultiplyDigit
  */
+BigNumCarry
 ___BnMultiplyDigit___(p, pd, pl, n, nd, nl, m, md) BigNum p, n, m; int pd, pl, nd, nl, md; {
-	int r = 0, ret = 0;
+	BigNumCarry r = 0, ret = 0;
 
-	BnAssign(Ntmp2, 0, m, md, 1);
-	BnAssign(NtmpBig, 0, n, nd, nl);
-	BnSetToZero(NtmpBig, nl, 1);
-	while(!BnIsDigitZero(Ntmp2, 0)) {
-		if(BnIsDigitOdd(Ntmp2, 0)) {
-			r = BnAdd(p, pd, pl, NtmpBig, 0, nl + 1, 0);
+	BnnAssign ((Ntmp2+ 0), ( m+ md),  1);
+	BnnAssign ((NtmpBig+ 0), ( n+ nd),  nl);
+	BnnSetToZero ((NtmpBig+ nl),  1);
+	while(!BnnIsDigitZero (*(Ntmp2+ 0))) {
+		if(BnnIsDigitOdd (*(Ntmp2+ 0))) {
+			r = BnnAdd ((p+ pd),  pl, ( NtmpBig+ 0),  nl + 1,  (BigNumCarry) 0);
 			if((ret == 0) && (r == 1)) ret = 1;
 			else if((ret == 1) && (r == 1))	ret = 2;
 		}
-		BnShiftRight(Ntmp2, 0, 1, Ntmp2, 1, 1);
-		BnShiftLeft(NtmpBig, 0, nl + 1, Ntmp2, 1, 1);
-		if(!BnIsDigitZero(Ntmp2, 1)) ret = 3;
+		*( Ntmp2+ 1) = BnnShiftRight ((Ntmp2+ 0),  1,  1);
+		*( Ntmp2+ 1) = BnnShiftLeft ((NtmpBig+ 0),  nl + 1,  1);
+		if(!BnnIsDigitZero (*(Ntmp2+ 1))) ret = 3;
 	}
 	return(ret);
 }
@@ -818,7 +883,7 @@ TestBnMultiplyDigit(e) struct testenv *e; {
 	    for(md = 0; md < TESTLENGTH; md++) {
 		TestCountInc();
 		ResetTest(0);
-		l1 =    BnMultiplyDigit   (RN(0),pd,pl,RN(1),nd,nl,RN(2),md);
+		l1 =    BnnMultiplyDigit ((RN(0)+pd), pl, (RN(1)+nd), nl, *(RN(2)+md));
 		l2 = ___BnMultiplyDigit___(SN(0),pd,pl,SN(1),nd,nl,SN(2),md);
 		if(Check(3) || l1 != l2) {
 			sprintf(e->hist,
@@ -844,17 +909,17 @@ TestBnDivideDigit(e) struct testenv *e; {
 	  for(md = 0; md < TESTLENGTH; md++)
 	   for(qd = 0; qd < TESTLENGTH - nl + 1 ; qd++)
 	    for(rd = 0; rd < 2; rd++)
-	     if((!BnIsDigitZero(RN(3), md)) &&
-			(BnCompareDigits(RN(2), nd+nl-1, RN(3), md) == -1)) {
+	     if((!BnnIsDigitZero (*(RN(3)+ md))) &&
+			(BnnCompareDigits (*(RN(2)+ nd+nl-1), *( RN(3)+ md)) == -1)) {
 		TestCountInc();
 		ResetTest(0);
 		ResetTest(1);
-		BnDivideDigit(RN(0), qd, RN(1), rd, RN(2), nd, nl, RN(3), md);
-		BnAssign(SN(0), qd, RN(0), qd, nl - 1);
-		BnAssign(SN(1), rd, RN(1), rd, 1);
-		BnSetToZero(SN(2), nd, nl);
-		BnAssign(SN(2), nd, SN(1), rd, 1);
-		l2 = BnMultiplyDigit(SN(2),nd,nl, SN(0),qd,nl - 1, SN(3), md);
+		*( RN(1)+ rd) = BnnDivideDigit ((RN(0)+ qd), ( RN(2)+ nd),  nl, *( RN(3)+ md));
+		BnnAssign ((SN(0)+ qd), ( RN(0)+ qd),  nl - 1);
+		BnnAssign ((SN(1)+ rd), ( RN(1)+ rd),  1);
+		BnnSetToZero ((SN(2)+ nd),  nl);
+		BnnAssign ((SN(2)+ nd), ( SN(1)+ rd),  1);
+		l2 = BnnMultiplyDigit ((SN(2)+nd), nl, ( SN(0)+qd), nl - 1, *( SN(3)+ md));
 		if(Check(4) || l2 != 0) {
 			sprintf(e->hist,
 			   "BnDivideDigit(q, %d, r, %d, n, %d, %d, m, %d)",
@@ -873,12 +938,12 @@ ___BnMultiply___(p, pd, pl, m, md, ml, n, nd, nl) BigNum p, m, n; int pd, pl, md
 	int ret;
 
         for (ret = 0; nl-- > 0; pd++, nd++, pl--)
-           ret += BnMultiplyDigit (p, pd, pl, m, md, ml, n, nd);
+           ret += BnnMultiplyDigit ((p+ pd),  pl, ( m+ md),  ml, *( n+ nd));
 	return(ret);
 }
 
 TestBnMultiply(e) struct testenv *e; {
-	int pd, pl, nd, nl, md, ml; int l1, l2;
+	BigNumLength pd, pl, nd, nl, md, ml; int l1, l2;
 
 	e->depend = "(BnSetToZero, BnMultiplyDigit)";
 	ResetTest(1);
@@ -893,7 +958,7 @@ TestBnMultiply(e) struct testenv *e; {
 	        /* Test squaring */
 	        TestCountInc();
 		ResetTest(0);
-		l1 =    BnMultiply   (RN(0),pd,pl,RN(1),nd,nl,RN(1),nd,nl);
+		l1 =    BnnMultiply ((RN(0)+pd), pl, (RN(1)+nd), nl, (RN(1)+nd), nl);
 		l2 = ___BnMultiply___(SN(0),pd,pl,SN(1),nd,nl,SN(1),nd,nl);
 		if(Check(3) || l1 != l2) {
 			sprintf(e->hist,
@@ -908,7 +973,7 @@ TestBnMultiply(e) struct testenv *e; {
 	     for (ml = 0; ml <= pl-nl && ml <= TESTLENGTH/3 && md+ml <= TESTLENGTH; ml++) {
 		TestCountInc();
 		ResetTest(0);
-		l1 =    BnMultiply   (RN(0),pd,pl,RN(1),nd,nl,RN(2),md,ml);
+		l1 =    BnnMultiply ((RN(0)+pd), pl, (RN(1)+nd), nl, (RN(2)+md), ml);
 		l2 = ___BnMultiply___(SN(0),pd,pl,SN(1),nd,nl,SN(2),md,ml);
 		if(Check(3) || l1 != l2) {
 			sprintf(e->hist,
@@ -964,16 +1029,16 @@ main(n, s) int n; char **s; {
 	NtmpBig = BnAlloc(2 * TESTLENGTH);
 	NumbProto = BnAlloc(TESTLENGTH);
 	/* Creation du nombre prototype. */
-	BnSetDigit(NumbProto, 0, 0);		/* Les 2 premiers a` ze'ro. */
-	BnSetDigit(NumbProto, 1, 0);
+	BnnSetDigit ((NumbProto+ 0),  0);		/* Les 2 premiers a` ze'ro. */
+	BnnSetDigit ((NumbProto+ 1),  0);
 	for(i=0; i < TESTLENGTH/4 - 1; i++)	/* Le premier quart est la */
-		BnSetDigit(NumbProto, i + 2, i + 1);	/* suite 1, 2, 3, ...      */
+		BnnSetDigit ((NumbProto+ i + 2),  i + 1);	/* suite 1, 2, 3, ...      */
 	/* Le 2nd quart est le 1er shifte de BN_DIGIT_SIZE - 2. 0x4000 0x8000 ...*/
-	BnAssign(NumbProto, QTL + 1, NumbProto, 2, QTL - 1);
-	BnShiftLeft(NumbProto, QTL + 1, QTL - 1, NumbProto, 0, BN_DIGIT_SIZE - 2);
+	BnnAssign ((NumbProto+ QTL + 1), ( NumbProto+ 2),  QTL - 1);
+	*( NumbProto+ 0) = BnnShiftLeft ((NumbProto+ QTL + 1),  QTL - 1,  BN_DIGIT_SIZE - 2);
 	/* La 2nd moitie est l'inverse logique de la 1ere */
-	BnAssign(NumbProto, DTL, NumbProto, 0, DTL);
-	BnComplement(NumbProto, DTL, DTL);
+	BnnAssign ((NumbProto+ DTL), ( NumbProto+ 0),  DTL);
+	BnnComplement ((NumbProto+ DTL),  DTL);
 	/* Allocation des nombres utilise's */
 	for(i=0; i < 5; i++) {
 		RN(i) = BnAlloc(TESTLENGTH);
