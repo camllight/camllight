@@ -45,8 +45,8 @@ value quit : unit -> unit
   and remove_printer : string -> unit
         (* [remove_printer "printername"] removes the function named
            [printername] from the table of toplevel printers. *)
-  and set_print_depth : int -> unit
-        (* [set_print_depth n] limits the printing of values to a maximal
+  and set_printer_depth : int -> unit
+        (* [set_printer_depth n] limits the printing of values to a maximal
            depth of [n]. The parts of values whose depth exceed [n]
            are printed as [...] (ellipsis). *)
   and debug_mode: bool -> unit

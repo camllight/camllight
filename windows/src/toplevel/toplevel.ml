@@ -281,5 +281,5 @@ let verbose_mode status =
 
 (* Set the maximal depth for printing values. *)
 
-let set_print_depth n =
-  if n >= 0 then pr_value__printer_depth := n;;
+let set_printer_depth n =
+  if n > 0 then pr_value__printer_depth := n;;
