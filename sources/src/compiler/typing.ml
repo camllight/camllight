@@ -25,8 +25,8 @@ let bind_type_expression_vars var_list =
       if mem_assoc v !type_expr_vars then
         failwith "bind_type_expression_vars"
       else begin
-        let t = new_type_var() in
-          type_expr_vars := (v, t) :: !type_expr_vars; t
+        let t = new_global_type_var() in
+        type_expr_vars := (v, t) :: !type_expr_vars; t
       end)
     var_list
 ;;
@@ -41,7 +41,7 @@ let type_of_type_expression strict_flag typexp =
         if strict_flag then
           unbound_type_var_err v typexp
         else begin
-          let t = new_type_var() in
+          let t = new_global_type_var() in
           type_expr_vars := (v,t) :: !type_expr_vars; t
         end
       end

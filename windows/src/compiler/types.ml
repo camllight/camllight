@@ -54,6 +54,10 @@ let new_type_var_list n =
   type_var_list n !current_level
 ;;
 
+let new_global_type_var () =
+  {typ_desc = Tvar Tnolink; typ_level = 1}
+;;
+
 (* To compute the free type variables in a type *)
 
 let free_type_vars level ty =
