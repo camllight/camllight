@@ -31,3 +31,5 @@ clean:
 	(cd source; $(MAKE) clean)
 	rm -f *~
 
+depend:
+	(cd source; $(MAKE) depend)
