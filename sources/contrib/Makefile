@@ -5,10 +5,10 @@
 # Remember that "libunix" is required for
 # "debugger", "libgraph", "camltk", "camltk4", and "search_isos".
 PACKAGES=libunix libgraph debugger libnum libstr mletags \
-  camlmode lorder profiler camltk4 camlsearch
-# caml-tex
-# caml-latex2e
-# camltk
+  camlmode lorder profiler camltk4 camlsearch caml-tex
+
+# By default caml-latex2e is not installed:
+# you have to choose between caml-tex and caml-latex2e
 
 # Which C compiler to use.
 # Should be the same compiler used to compile the main system (../src).
@@ -48,11 +48,10 @@ MANDIR=/usr/local/man/man$(MANEXT)
 # Needed for the "libgraph" and "camltk" packages.
 # For True64 Unix
 #X11_INCLUDES=/usr/include/X11
-
-# For Linux, could also be 
-#X11_INCLUDES=/usr/X11R6/include/
 # For Linux, generally
 X11_INCLUDES=/usr/X11R6/include/X11
+# For Linux, could also be 
+#X11_INCLUDES=/usr/X11R6/include/
 
 # The path to the directory containing the X11 libraries, for instance
 # libX11.a (usually /usr/lib; for SunOS with OpenLook, /usr/openwin/lib)
@@ -72,15 +71,15 @@ X11_LIB=/usr/X11R6/lib
 # See the file libnum/README for more explanations.
 # If you don't know, leave BIGNUM_ARCH=C, which selects a portable
 # C implementation of these routines.
-BIGNUM_ARCH=C
+#BIGNUM_ARCH=C
+BIGNUM_ARCH=pentium
 
 # Name of the directory where LaTeX style files should be installed.
 # Should be a sub-directory of the directory Latex, in which you find
 # a lot of auxilliary styles (.sty files).
 # Needed only for the "caml-tex" and "caml-latex2e" packages.
 # For True64 Unix
-#TEXINPUTDIR=/usr/lib/texmf/tex/latex/etc
-
+#TEXINPUTDIR=/usr/local/teTeX/share/texmf/tex/latex/misc
 # For Linux, generally
 TEXINPUTDIR=/usr/share/texmf/tex/latex/misc
 
@@ -88,8 +87,7 @@ TEXINPUTDIR=/usr/share/texmf/tex/latex/misc
 # Needed only for the "camlmode" package. The location of the
 # site-lisp sub-directory.
 # For True64 Unix
-#EMACSLISPDIR=/usr/lib/emacs/site-lisp
-
+#EMACSLISPDIR=/usr/local/lib/emacs/site-lisp
 # For Linux, generally
 EMACSLISPDIR=/usr/share/emacs/site-lisp
 
@@ -97,33 +95,31 @@ EMACSLISPDIR=/usr/share/emacs/site-lisp
 # Needed only for the "camltk" package.
 
 # /usr/local configuration
-# True64 configuration
+# For True64 Unix
 #TCLINCLDIR=/usr/local/lib/tcl8.0/include
 #TKINCLDIR=/usr/local/lib/tk8.0/include
-
-# RedHat (and Mandrake) Linux configuration
+# For Linux, generally
 TCLINCLDIR=/usr/include
 TKINCLDIR=/usr/include
 
 # Name of the directories where the libtcl.a and libtk.a libraries can be found
 # Needed only for the "camltk" package.
 # /usr/local configuration
-# True64 Unix configuration
+# For True64 Unix
 #TKLIBDIR=/usr/local/lib/tk8.0/lib
 #TCLLIBDIR=/usr/local/lib/tcl8.0/lib
-
-# RedHat (and Mandrake) Linux configuration
+# For Linux, generally
 TKLIBDIR=/usr/lib
 TCLLIBDIR=/usr/lib
 
 # List of libraries required to link Tcl/Tk. This may help if you have
 # a custom Tcl/Tk with various extensions (such as Xpm)
-#TKLIBS=-ltk -ltcl -lX11
-# True64 Unix configuration
+# For True64 Unix
 #TKLIBS=-ltk8.0 -ltcl8.0 -lX11 -lm
-
-# RedHat (and Mandrake) Linux configuration
+# For Linux generally
 TKLIBS=-ltk8.3 -ltcl8.3 -lX11 -ldl -lm
+# Could also be
+#TKLIBS=-ltk -ltcl -lX11
 
 # Some "make"s need this to ensure that they call /bin/sh, not /bin/csh
 # Seems harmless on most other "make"s. Try removing this line if you
