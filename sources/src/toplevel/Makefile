@@ -21,8 +21,9 @@ EXTERNOBJS=config.zo misc.zo \
 OBJS=pr_value.zo load_phr.zo do_phr.zo toplevel.zo version.zo main.zo
 
 PERVASIVES=baltree bool char eq exc fchar filename float fstring fvect \
-    genlex hashtbl int io iparsing lexing list map obj pair parsing printexc \
-    printf queue random ref set sort stack stream string toplevel vect
+    gc genlex hashtbl int io iparsing lexing list map obj pair parsing \
+    printexc printf queue random ref set sort stack stream string \
+    toplevel vect
 
 SPECIALS=sys
 
