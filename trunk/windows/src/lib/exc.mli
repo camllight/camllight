@@ -9,13 +9,13 @@ exception Out_of_memory;;
         (* Raised by the garbage collector, when there is insufficient
            memory to complete the computation. *)
 exception Invalid_argument of string;;
-        (* Raised by some library functions, to signal that the given
+        (* Raised by library functions to signal that the given
            arguments do not make sense. *)
 exception Failure of string;;
-        (* Raised by some library functions, to signal that they are
+        (* Raised by library functions to signal that they are
            undefined on the given arguments. *)
 exception Not_found;;
-        (* Raised by search library functions, when the required object
+        (* Raised by search functions when the desired object
            could not be found. *)
 exception Exit;;
         (* This exception is not raised by any library function.  It is

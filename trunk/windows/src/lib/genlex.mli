@@ -31,9 +31,9 @@ value make_lexer: string list -> (char stream -> token stream);;
            belongs to this list, and cause a lexical error (exception
            [Parse_error]) otherwise. Blanks and newlines are skipped.
            Comments delimited by [(*] and [*)] are skipped as well,
-           and can be nested.
+           and can be nested. *)
 
-           Example: a lexer suitable for a desk calculator is obtained by
+         (*Example: a lexer suitable for a desk calculator is obtained by
            [
            let lexer = make_lexer ["+";"-";"*";"/";"let";"="; "("; ")"]
            ]
@@ -43,8 +43,8 @@ value make_lexer: string list -> (char stream -> token stream);;
            let parse_expr = function
                   [< 'Int n >] -> n
                 | [< 'Kwd "("; parse_expr n; 'Kwd ")" >] -> n
-                | [< parse_expr n1; (parse_end n1) n2 >] -> n2
-           and parse_end n1 = function
+                | [< parse_expr n1; (parse_remainder n1) n2 >] -> n2
+           and parse_remainder n1 = function
                   [< 'Kwd "+"; parse_expr n2 >] -> n1+n2
                 | ...
            ]

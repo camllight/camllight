@@ -15,6 +15,8 @@ type stat = {
   largest_free : int;
   fragments : int
 };;
+        (* Memory allocation and garbage collection statistics,
+           as returned by the [stat] function. *)
 
 type control = {
   mutable minor_heap_size : int;
@@ -22,10 +24,18 @@ type control = {
   mutable space_overhead : int;
   mutable verbose : bool
 };;
+	(* User-settable GC parameters. *)
 
 value stat : unit -> stat = 1 "gc_stat";;
+        (* Return the current memory allocation and garbage collection 
+           statistics. *)
 value get : unit -> control = 1 "gc_get";;
+        (* Return the current values of the GC parameters. *)
 value set : control -> unit = 1 "gc_set";;
+        (* Set the values of the GC parameters. *)
 value minor : unit -> unit = 1 "gc_minor";;
+        (* Trigger a minor collection. *)
 value major : unit -> unit = 1 "gc_major";;
+        (* Trigger a major collection cycle. *)
 value full_major : unit -> unit = 1 "gc_full_major";;
+        (* Trigger a complete major collection. *)

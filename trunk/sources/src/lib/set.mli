@@ -18,8 +18,8 @@ value empty: ('a -> 'a -> int) -> 'a t
            [f e1 e2] is strictly negative if [e1] is smaller than [e2],
            and [f e1 e2] is strictly positive if [e1] is greater than [e2].
            Examples: a suitable ordering function for type [int]
-           is [prefix -]. For type [string], you could use
-           [compare_strings]. *)
+           is [prefix -]. You can also use the generic structural comparison
+           function [eq__compare]. *)
   and is_empty: 'a t -> bool
         (* Test whether a set is empty or not. *)
   and mem: 'a -> 'a t -> bool

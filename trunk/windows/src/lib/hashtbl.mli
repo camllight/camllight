@@ -40,8 +40,8 @@ value new : int -> ('a,'b) t
 	   discarding all the results.
            [f] receives the key as first argument, and the associated value
            as second argument. The order in which the bindings are passed to
-           [f] is unpredictable. The same binding
-           can be presented several times to [f]. *)
+           [f] is unpredictable. Each binding is presented exactly once
+           to [f]. *)
 ;;
 
 (*** The polymorphic hash primitive *)

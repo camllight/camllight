@@ -109,7 +109,7 @@ value open_out : string -> out_channel
         (* Flush the buffer associated with the given output channel, 
            performing all pending writes on that channel.
            Interactive programs must be careful about flushing [std_out]
-           at the right times. *)
+           and [std_err] at the right time. *)
   and output_char : out_channel -> char -> unit = 2 "output_char"
         (* Write the character on the given output channel. *)
   and output_string : out_channel -> string -> unit
@@ -135,21 +135,23 @@ value open_out : string -> out_channel
            by the function [input_value]. The format is compatible across
 	   all machines for a given version of Caml Light. *)
   and output_compact_value : out_channel -> 'a -> unit = 2 "extern_compact_val"
-        (* Same as [output_value], but uses a different format, more compact,
-           but slower to generate and read back. *)
+        (* Same as [output_value], but uses a different format, which
+           occupies less space on the file, but takes more time to generate
+           and read back. *)
   and seek_out : out_channel -> int -> unit = 2 "seek_out"
         (* [seek_out chan pos] sets the current writing position to [pos]
            for channel [chan]. This works only for regular files. On
-           files of other kinds (such as terminals, pipes and sockets,)
+           files of other kinds (such as terminals, pipes and sockets),
 	   the behavior is unspecified. *)
   and pos_out : out_channel -> int = 1 "pos_out"
         (* Return the current writing position for the given channel. *)
   and out_channel_length : out_channel -> int = 1 "channel_size"
         (* Return the total length (number of characters) of the
-           given channel. *)
+           given channel.  This works only for regular files. On files of
+           other kinds, the result is meaningless. *)
   and close_out : out_channel -> unit = 1 "close_out"
         (* Close the given channel, flushing all buffered write operations.
-	   The behavior is unspecified if any of the above functions is
+	   The behavior is unspecified if any of the functions above is
 	   called on a closed channel. *)
 ;;
 
@@ -225,7 +227,8 @@ value open_in : string -> in_channel
 	   belong to the given type. *)
   and seek_in : in_channel -> int -> unit = 2 "seek_in"
         (* [seek_in chan pos] sets the current reading position to [pos]
-           for channel [chan]. *)
+           for channel [chan]. This works only for regular files. On
+           files of other kinds, the behavior is unspecified. *)
   and pos_in : in_channel -> int = 1 "pos_in"
         (* Return the current reading position for the given channel. *)
   and in_channel_length : in_channel -> int = 1 "channel_size"
@@ -234,7 +237,7 @@ value open_in : string -> in_channel
            other kinds, the result is meaningless. *)
   and close_in : in_channel -> unit = 1 "close_in"
         (* Close the given channel. Anything can happen if any of the
-           above functions is called on a closed channel. *)
+           functions above is called on a closed channel. *)
 ;;
 
 (*--*)

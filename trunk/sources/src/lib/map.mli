@@ -18,8 +18,8 @@ value empty: ('a -> 'a -> int) -> ('a, 'b) t
            [f e1 e2] is strictly negative if [e1] is smaller than [e2],
            and [f e1 e2] is strictly positive if [e1] is greater than [e2].
            Examples: a suitable ordering function for type [int]
-           is [prefix -]. For type [string], you could use
-           [compare_strings]. *)
+           is [prefix -]. You can also use the generic structural comparison
+           function [eq__compare]. *)
   and add: 'a -> 'b -> ('a, 'b) t -> ('a, 'b) t
         (* [add x y m] returns a map containing the same bindings as
            [m], plus a binding of [x] to [y]. Previous bindings for [x] 

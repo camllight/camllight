@@ -1,6 +1,6 @@
 (* Operations on integers *)
 
-(* Integers are 31 bits wide (or 63 on 64-bit processors).
+(* Integers are 31 bits wide (or 63 bits on 64-bit processors).
    All operations are taken modulo $2^{31}$ (or $2^{63}$).
    They do not fail on overflow. *)
 
