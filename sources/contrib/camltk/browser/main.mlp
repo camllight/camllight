@@ -15,7 +15,7 @@ let bye () =
 
 (******* Modules *********)
 (* returns: panel widget, add *)
-let module_panel parent =
+let module_panel parent selected_paths =
   let f = frame__create parent [] in (* vgroup *)
   let title = label__create f [Text "Opened Modules"] in
 
@@ -32,7 +32,8 @@ let module_panel parent =
     try 
       modules__open_module n;
       listbox__insert lb End [n];
-      listbox__yview lb (Number (max 0 (listbox__size lb - 4)))
+      listbox__yview lb (Number (max 0 (listbox__size lb - 4)));
+      true
     with
       Toplevel -> begin
 	 dialog (support__new_toplevel_widget "error")
@@ -41,7 +42,7 @@ let module_panel parent =
 	     (Predefined "error")
 	     0
 	     ["Ok"];
-	 ()
+         false
 	end
 
   and close_module () =
@@ -57,14 +58,14 @@ let module_panel parent =
       [Text "Open Module"; Relief Raised; 
        Command (fun () -> 
                  open_list_req "Open a module" 
-      	       	       	   (modlist__modules_of_path !load_path)
+      	       	       	   (modlist__modules_of_path (selected_paths ()))
       	       	       	   add_module)]
   and o1 = button__create f
       [Text "Open and View Module"; Relief Raised; 
        Command (fun () -> 
                  open_list_req "Open and View a module" 
-      	       	       	   (modlist__modules_of_path !load_path)
-      	       	       	   (function n -> add_module n;
+      	       	       	   (modlist__modules_of_path (selected_paths ()))
+      	       	       	   (function n -> if add_module n then
       	       	       	       	       	  visual_module false n))] in
 
    pack [title] [Fill Fill_X];
@@ -78,7 +79,7 @@ let module_panel parent =
 
 
 (******* Load path panel ******)
-(* returns: path widget, add *)
+(* returns: path widget, add, selected *)
 let path_panel parent =
   let f = frame__create parent [] in (* vgroup *)
   let title = label__create f [Text "Load Path"] in
@@ -101,8 +102,14 @@ let path_panel parent =
 	     ( "Cannot open directory: " ^ n)
 	     (Predefined "error")
 	     0
-	     ["Ok"]; ()
+	     ["Ok"];
+	     ()
     end in
+
+  let selected () =
+    match listbox__curselection lb with 
+      	[] -> !load_path
+     |  l -> map (listbox__get lb) l  in
 
   tk__bind lb [[Double], WhatButton 1] 
      (BindSet ([], 
@@ -112,17 +119,19 @@ let path_panel parent =
             display_file)
         (listbox__curselection lb)));
 
+  let memory = textvariable__new () in
   let o = button__create f
       [Text "Add Directory"; Relief Raised; 
-       Command (fun () ->
-      	       	 open_req "Add a directory to the load path" add_path)] in
+       Command (fun () -> 
+      	       	 open_req "Add a directory to the load path" add_path memory)
+      ] in
 
    pack [title] [Fill Fill_X];
     pack [lb] [Side Side_Left; Fill Fill_Both; Expand true];
     pack [sb] [Side Side_Right; Fill Fill_Y];
    pack [fls] [Fill Fill_Both; Expand true];
    pack [o] [Side Side_Bottom; Anchor Center; Fill Fill_X];
-   f, add_path
+   f, add_path, selected
 ;;
 
 (********** Browsing panel *********)
@@ -169,17 +178,17 @@ let main () =
   let top = OpenTkClass "CamlBrowser" in
      signal SIGINT (Signal_handle bye);
      signal SIGTERM (Signal_handle bye);
-  (* Resources *)
-  resource__add "*library_path" "LIBDIR"
-      WidgetDefault;
-  resource__add "*module_set" "cautious"
-      WidgetDefault;
-
+  resource__add "*library_path" "LIBDIR" WidgetDefault;
+  resource__add "*module_set" "cautious" WidgetDefault;
+  begin match colormodel__get top with
+     Color -> use_color_attribs ()
+   | Monochrome -> use_monochrome_attribs ()
+  end;
   let t = label__create top [Text "Caml Browser"; Relief Raised] in
 
   let g = frame__create top [] in (* hgroup *)
-    let mods, add_module = module_panel g 
-    and dirs, add_path = path_panel g in
+    let dirs, add_path, selected_paths = path_panel g in
+    let mods, add_module = module_panel g selected_paths in
       pack [mods;dirs] [Side Side_Left; Fill Fill_Both; Expand true];
 
   let browse = browsing_panel top
@@ -208,14 +217,14 @@ let main () =
   arg__parse [
        "-stdlib", arg__String 
       	   (fun s -> path_library := s; add_path s);
-       "-I", arg__String add_path
+       "-I", arg__String add_path;
+       "-mono", arg__Unit (function () -> colormodel__set top Monochrome;
+      	       	       	       	       	  use_monochrome_attribs())
        ]
        (fun s -> initial_modules := s :: !initial_modules);
 
    try
-     do_list (function m -> 
-       	       add_module m;
-      	       visual_module false m) 
+     do_list (function m -> if add_module m then visual_module false m) 
       	     !initial_modules;
      tk__MainLoop()
    with

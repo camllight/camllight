@@ -10,7 +10,6 @@
 #open "source";;
 #open "tags";;
 
-
 (* Namer for toplevel widgets *)
 let new_visual_top =
   let cnter = ref 0 in
@@ -23,7 +22,8 @@ type 'a visual =
     { titler : 'a -> string;		(* title from object *)
       finder : string -> 'a;		(* finding an object *)
       hyperprinter : 'a -> hypertext;   (* printing the object *)
-      hypernav : 'a -> hypernav         (* navigation *)
+      hypernav : 'a -> hypernav;        (* navigation *)
+      editor : 'a -> unit		(* further external edition *)
     }
 ;;
 
@@ -52,15 +52,22 @@ let rec visual_meta visual silent sym =
       pack [sb] [Side Side_Left; Fill Fill_Y];
       util__navigation_keys tx sb;
 
-    let q = 
-      button__create t [Text "Ok"; Relief Raised; 
+    let f2 = frame__create t [] in
+    let edit =
+      button__create f2 [Text "Edit"; Relief Raised;
+      	       	       	 Command (fun _ -> visual.editor object)]
+    and q = 
+      button__create f2 [Text "Ok"; Relief Raised; 
       	       	        Command (fun _ -> destroy t)] in
 
     (* An easy way to quit *)
     bind tx [[Any],XKey "Escape"] 
       	     (BindSet([], (fun _ -> button__invoke q)));
+
     pack [f] [Fill Fill_Both; Expand true];
-    pack [q] [Side Side_Bottom; Fill Fill_X];
+     pack [edit] [Side Side_Left];
+     pack [q] [Side Side_Right; Fill Fill_X; Expand true];
+    pack [f2] [Side Side_Bottom; Fill Fill_X];
     label__configure title [Cursor (XCursor "hand2")];
     util__resizeable t
    with   
@@ -80,16 +87,17 @@ let rec visual_meta visual silent sym =
 	      ( sym ^ " is undefined")
 	      (Predefined "error")
 	      0
-	      ["Ok"];
-	  ()
+	      ["Ok"]; 
+         ()
          end
    | Cannot_find_file filename ->
       begin 
        dialog (support__new_toplevel_widget "error")
       	      "Caml Browser Error"
 	      ("Cannot open " ^ filename )
-	      (Predefined "error") 0 ["Ok"]; ()
-        end
+	      (Predefined "error") 0 ["Ok"]; 
+       ()
+      end
 ;;
 
 (* Parsing a qualified ident by hand ... *)
@@ -124,6 +132,38 @@ let global_titler what g =
 ;;
 
 
+let source_editor m = 
+  function _ ->
+    try
+    let m = misc__find_in_path m in
+      sys__system_command ("$EDITOR "^m^"&"); ()
+    with
+      _ -> ()
+;;
+
+(* This should be configurable *)
+let default_anchor_attribs = ref [];;
+
+(* in monochrome: all true anchors are underlined *)
+let use_monochrome_attribs () =
+  default_anchor_attribs :=
+   ["hypertype", [Underline true];
+    "hypersource", [Underline true];
+    "keyword", [];
+    "comment", [];
+    "modules", [Underline true]
+   ]
+(* in color: true anchors are in blue shades *)
+and use_color_attribs () =
+  default_anchor_attribs :=
+   ["hypertype", [Foreground Blue];
+    "hypersource", [Foreground (NamedColor "purple")];
+    "keyword", [Foreground (NamedColor "SeaGreen")];
+    "comment", [Foreground (NamedColor "brown")];
+    "modules", [Foreground Blue]
+   ]
+;;
+
 (* The navigators *)
 (* Monomorphic let rec hits again : one global_navigators should be enough *)
 (*  anchor "hypertype"  : we know it is a type so search only in types *)
@@ -131,29 +171,25 @@ let global_titler what g =
 (*                       its source, if possible. Use Emacs TAGS       *)
 
 let rec type_navigators desc =
-  { anchor_attribs =
-      	["hypertype", [Foreground Blue]; "hypersource", [Foreground Red]];
+  { anchor_attribs = !default_anchor_attribs;
     navigators =
       	["hypertype", visual_type false; 
       	 "hypersource", visual_source desc.qualid.qual]
   }
 and constr_navigators desc =
-  { anchor_attribs =
-      	["hypertype", [Foreground Blue]; "hypersource", [Foreground Red]];
+  { anchor_attribs = !default_anchor_attribs;
     navigators =
       	["hypertype", visual_type false; 
       	 "hypersource", visual_source desc.qualid.qual]
   }
 and label_navigators desc =
-  { anchor_attribs =
-      	["hypertype", [Foreground Blue]; "hypersource", [Foreground Red]];
+  { anchor_attribs = !default_anchor_attribs;
     navigators =
       	["hypertype", visual_type false; 
       	 "hypersource", visual_source desc.qualid.qual]
   }
 and value_navigators desc =
-  { anchor_attribs =
-      	["hypertype", [Foreground Blue]; "hypersource", [Foreground Red]];
+  { anchor_attribs = !default_anchor_attribs;
     navigators =
       	["hypertype", visual_type false; 
       	 "hypersource", visual_source desc.qualid.qual]
@@ -164,7 +200,8 @@ and visual_type f d =
     visual_meta {titler = global_titler "Type";
       	       	 finder = (function s -> find_type_desc (str_to_qual s));
 		 hyperprinter = hyper_print print_type_desc;
-      	       	 hypernav = type_navigators
+      	       	 hypernav = type_navigators;
+		 editor = (function _ -> ())
                 } f d
 
 (* Visualisation of value constructors *)
@@ -172,21 +209,24 @@ and visual_constr f d =
     visual_meta {titler = global_titler "Constructor";
       	       	 finder = (function s -> find_constr_desc (str_to_qual s));
 		 hyperprinter = hyper_print print_constr_desc;
-                 hypernav = constr_navigators
+                 hypernav = constr_navigators;
+		 editor = (function _ -> ())
                 } f d
 (* Visualisation of values *)
 and visual_value f d =
     visual_meta {titler = global_titler "Value";
       	       	 finder = (function s -> find_value_desc (str_to_qual s));
 		 hyperprinter = hyper_print print_value_desc;
-      	       	 hypernav = value_navigators
+      	       	 hypernav = value_navigators;
+		 editor = (function _ -> ())
                 } f d
 (* Visualisation of labels *)
 and visual_label f d =
     visual_meta {titler = global_titler "Label";
       	       	 finder = (function s -> find_label_desc (str_to_qual s));
 		 hyperprinter = hyper_print print_label_desc;
-      	       	 hypernav = label_navigators
+      	       	 hypernav = label_navigators;
+		 editor = (function _ -> ())
                 } f d
 (* Combined search, does not expect to find objects *)
 and visual_search_any s =
@@ -197,9 +237,7 @@ and visual_search_any s =
 
 (* Navigation when we browse source files (.ml and .mli) *)
 and source_navigator _ = { 
-    anchor_attribs = ["keyword", [Underline true];
-       	       	      "comment", [Foreground Red];
-      	       	      "modules", [Foreground Green]];
+    anchor_attribs = !default_anchor_attribs;
     navigators = [ "", visual_search_any;
       	       	   "modules", visual_module true]}
 
@@ -215,7 +253,8 @@ and visual_source_ml m s =
       	       	       	{text = src;
 		         start_line = linenum;
 			 anchor_indexes= compute_source_tags src});
-		 hypernav = source_navigator}
+		 hypernav = source_navigator;
+		 editor = source_editor (m ^".ml")}
                 true 
                 s
  with
@@ -232,7 +271,8 @@ and visual_source_mli m s =
       	       	    (function s -> {text = s;
 		                    start_line = linenum;
 				    anchor_indexes= compute_source_tags s});
-		 hypernav = source_navigator}
+		 hypernav = source_navigator;
+		 editor = source_editor (m ^ ".mli")}
                 true 
                 s
  with
@@ -251,13 +291,13 @@ and display_file f =
       	       	    (function s -> {text = s;
 		                    start_line = 0;
 				    anchor_indexes= compute_source_tags s});
-		 hypernav = source_navigator}
+		 hypernav = source_navigator;
+		 editor = source_editor f}
                 true 
                 f
 (* Visualize a full module from its compiled interface *)
 and module_navigators m =
-  { anchor_attribs =
-      	["hypertype", [Foreground Blue]; "hypersource", [Foreground Red]];
+  { anchor_attribs = !default_anchor_attribs;
     navigators =
       	["hypertype", visual_type false; 
       	 "hypersource", visual_source m.mod_name]
@@ -269,5 +309,6 @@ and visual_module f d =
       	         finder = find_module;
 		 hyperprinter = hyper_print print_module;
       	       	 hypernav = module_navigators;
+		 editor = (function _ -> ());
                 } f d
 ;;
