@@ -317,7 +317,8 @@ value fprintf : formatter -> ('a, formatter, unit) format -> 'a;;
            optionally specified with the following syntax: 
            the [<] character, followed by an integer [nspaces] value,
            then an integer offset, and a closing [>] character. 
--          [?]: flush the pretty printer as with [print_flush ()].
+-          [?]: flush the pretty printer and output a new line, as with
+           [print_flush ()].
 -          [.]: flush the pretty printer as with [print_newline ()].
 -          [@]: a plain [@] character. *)
 
