@@ -258,8 +258,9 @@ let rec stop_on_event report =
            with
        	     Not_found ->
 	       find_event ())
-    | {Rep_type = Rep_trap} ->		(* No event at this time. *)
-      	if trap_barrier () then		(* Uncaught exception if no trap barrier. *)
+    | {Rep_type = Rep_trap; Rep_stack_pointer = trap_frame} ->
+					(* No event at current position. *)
+      	if trap_frame > 0 then		(* Not an uncaught exception. *)
 	  find_event ()
     | _ ->
       	();;
@@ -373,7 +374,7 @@ let forget_process fd pid =
     prerr_string "Lost connection with process ";
     prerr_int pid;
     if checkpoint = !current_checkpoint then
-      (prerr_endline " (actif process)";
+      (prerr_endline " (active process)";
        match !current_checkpoint.C_state with
        	 C_stopped ->
 	   prerr_string "at time ";
@@ -419,11 +420,9 @@ let rec step_forward duration =
 
 (* Go to time `time' from current checkpoint (internal). *)
 let internal_go_to time =
-  let duration = time - current_time () - 1 in
+  let duration = time - current_time () in
     if duration > 0 then
-      execute_without_breakpoints (function () -> step_forward duration);
-    if current_time () < time then
-      step_forward 1;;
+      execute_without_breakpoints (function () -> step_forward duration);;
 
 (* Move to a given time. *)
 let go_to time =
@@ -501,25 +500,26 @@ let finish () =
       prerr_endline "`finish' not meaningful in the outermost frame.";
       raise Toplevel
   | Some (frame, pc) ->
-      install_trap_barrier frame;
-      exec_with_temporary_breakpoint
-        pc
-        (function () ->
-           while
-             run ();
-	     match current_report () with
-	       Some
-                 {Rep_type = Rep_breakpoint;
-                  Rep_stack_pointer = sp;
-                  Rep_program_pointer = pc2}
-             ->
-	       (pc = pc2) & (frame <> sp)
-             | _ ->
-	       false
-           do
-	     ()
-	   done);
-      remove_trap_barrier ();;
+      exec_with_trap_barrier
+      	frame
+	(function () ->
+           exec_with_temporary_breakpoint
+             pc
+             (function () ->
+                while
+                  run ();
+     	          match current_report () with
+     	            Some
+                      {Rep_type = Rep_breakpoint;
+                       Rep_stack_pointer = sp;
+                       Rep_program_pointer = pc2}
+                  ->
+     	            (pc = pc2) & (frame <> sp)
+                  | _ ->
+     	            false
+                do
+     	          ()
+     	        done));;
 
 (* --- We can't rely on frame 0 as local variables are *)
 (* --- put on the return stack. *)
@@ -532,8 +532,8 @@ let next_1 () =
         step 1;
 	if not !interrupted then
 	  match move_frame 1 with	(* Call `finish' if we have *)
-	    None -> ()		(* entered a function. *)
-	  | Some (frame2, _) ->	(* --- Should work in most cases... *)
+	    None -> ()			(* entered a function. *)
+	  | Some (frame2, _) ->		(* --- Should work in most cases... *)
 	      match frame_info with
 		None -> finish ()
 	      | Some (frame1, _) ->

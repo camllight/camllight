@@ -8,6 +8,7 @@ value event_mark_after : string;;
 value runtime_program : string;;
 value always_opened_modules :string list;;
 value default_modules : string list;;
+value history_size : int ref;;
 
 (*** Time travel paramaters. ***)
 
@@ -16,3 +17,10 @@ value checkpoint_small_step : int ref;;
 value checkpoint_max_count : int ref;;
 value make_checkpoints : bool ref;;
 
+(*** Screen parameters. ***)
+
+(* --- Must be >= 3. *)
+value screen_width : int ref;;
+
+(* Maximum number of lines used for printing a value. *)
+value max_height : int ref;;
