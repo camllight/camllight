@@ -8,6 +8,7 @@
 #endif
 #include <signal.h>
 #include <string.h>
+#include <time.h>
 
 #include "alloc.h"
 #include "config.h"
@@ -21,6 +22,10 @@
 #include "sys.h"
 #ifdef HAS_UI
 #include "ui.h"
+#endif
+#ifdef unix
+#include <sys/types.h>
+#include <sys/times.h>
 #endif
 #ifdef macintosh
 #include "mac_os.h"
@@ -183,6 +188,26 @@ value sys_system_command(command)   /* ML */
   int retcode = system(String_val(command));
   if (retcode == -1) sys_error(command);
   return Val_int(retcode);
+#endif
+}
+
+value sys_time(unit)            /* ML */
+     value unit;
+{
+#ifdef unix
+#ifndef CLK_TCK
+#ifdef HZ
+#define CLK_TCK HZ
+#else
+#define CLK_TCK 60
+#endif
+#endif
+  struct tms t;
+  times(&t);
+  return copy_double((double)(t.tms_utime + t.tms_stime) / CLK_TCK);
+#else
+  /* clock() is standard ANSI C */
+  return copy_double((double)clock() / CLOCKS_PER_SEC);
 #endif
 }
 

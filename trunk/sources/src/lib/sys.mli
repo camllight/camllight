@@ -84,6 +84,11 @@ value exit : int -> 'a = 1 "sys_exit"
         (* Execute the given shell command and return its exit code. *)
 ;;
 
+value time : unit -> float = 1 "sys_time"
+        (* Return the processor time, in seconds, used by the program
+           since the beginning of execution. *)
+;;
+
 exception Break
         (* Exception [Break] is raised on user interrupt if [catch_break]
            is on. *)
