@@ -323,3 +323,13 @@ char *s;
 {
     fprintf(stderr, "%s: w - the symbol %s is undefined\n", myname, s);
 }
+
+
+entry_without_type(s)
+char *s;
+{
+    fprintf(stderr,
+            "%s: e - no type has been declared for the start symbol %s\n",
+            myname, s);
+    done(1);
+}
