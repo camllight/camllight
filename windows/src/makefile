@@ -1,6 +1,3 @@
-# BINDIR=\caml7\bin
-# LIBDIR=\caml7\lib
-
 TOPDIR=C:\CAML7
 BINDIR=$(TOPDIR)\bin
 LIBDIR=$(TOPDIR)\lib
@@ -170,6 +167,6 @@ distrib:
 	xcopy /e /s /i $(EXDIR) CAML\EXAMPLES
 	xcopy /e /s /i $(DOCDIR) CAML\DOC
 	rm -f cl71win.zip
-    pkzip -r -P -ex cl71win.zip CAML\*.*
+	pkzip -r -P -ex cl71win.zip CAML\*.*
 	rm -rf CAML
 
