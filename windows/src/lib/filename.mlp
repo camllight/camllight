@@ -2,7 +2,6 @@
 
 (**) #open "int";;
 (**) #open "eq";;
-(**) #open "fchar";;
 (**) #open "fstring";;
 (**) #open "exc";;
 
@@ -13,6 +12,8 @@ let check_suffix name suff =
     = suff
 ;;
 #else
+(**) #open "fchar";;
+
 let lowercase s =
   let s' = create_string (string_length s) in
   for i = 0 to string_length s - 1 do
