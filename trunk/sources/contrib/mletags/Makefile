@@ -40,7 +40,7 @@ install: mletags mletags.man
 	cp mletags.man $(MANDIR)/mletags.$(MANEXT)
 
 TAGS:
-	mletags *.ml *.mli
+	./mletags *.ml *.mli
 
 .SUFFIXES :
 .SUFFIXES : .mli .ml .zi .zo .mlp
@@ -63,7 +63,8 @@ depend: $(GENFILES)
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
+lexer.zi: parser.zi 
 parser.zi: tags.zi 
-lexer.zo: parser.zi 
-main.zo: parser.zi lexer.zo tags.zi 
-parser.zo: parser.zi lexer.zo tags.zi 
+lexer.zo: lexer.zi parser.zi 
+main.zo: parser.zi lexer.zi tags.zi 
+parser.zo: parser.zi lexer.zi tags.zi 
