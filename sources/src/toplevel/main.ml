@@ -70,7 +70,7 @@ try
          | Toplevel ->
              flush std_err;
              rollback ()
-         | Break ->
+         | sys__Break ->
              print_string(interntl__translate "Interrupted.\n");
              rollback ()
     done
