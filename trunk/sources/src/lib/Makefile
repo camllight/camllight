@@ -11,14 +11,14 @@ STD_INTF= arg.zi bool.zi char.zi string.zi vect.zi eq.zi exc.zi \
     fchar.zi filename.zi float.zi fstring.zi fvect.zi hashtbl.zi \
     int.zi io.zi lexing.zi list.zi obj.zi pair.zi parsing.zi printexc.zi \
     ref.zi sort.zi sys.zi printf.zi stream.zi stack.zi queue.zi random.zi \
-    genlex.zi baltree.zi set.zi map.zi gc.zi
+    genlex.zi baltree.zi set.zi map.zi gc.zi format.zi
 
 # The list of all implementations. In dependency order.
 
 STD_IMPL= eq.zo exc.zo int.zo float.zo fstring.zo string.zo fchar.zo \
-    char.zo list.zo fvect.zo vect.zo io.zo list.zo pair.zo arg.zo \
+    char.zo bool.zo list.zo fvect.zo vect.zo io.zo list.zo pair.zo arg.zo \
     filename.zo hashtbl.zo lexing.zo parsing.zo printexc.zo sort.zo \
-    printf.zo stream.zo stack.zo queue.zo random.zo genlex.zo \
+    printf.zo stream.zo stack.zo queue.zo format.zo random.zo genlex.zo \
     baltree.zo set.zo map.zo
 
 all: $(STD_INTF) stdlib.zo
@@ -58,6 +58,8 @@ genlex.ml: genlex.mlp
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
 filename.zi: sys.zi 
+format.zi: io.zi 
+format.new.zi: io.zi 
 genlex.zi: stream.zi 
 io.zi: sys.zi 
 iparsing.zi: parsing.zi obj.zi 
@@ -68,12 +70,23 @@ stream.zi: io.zi
 arg.zo: arg.zi eq.zi exc.zi sys.zi fchar.zi fstring.zi list.zi io.zi \
     float.zi fvect.zi int.zi 
 baltree.zo: baltree.zi exc.zi eq.zi int.zi 
+bool.zo: bool.zi 
 char.zo: char.zi exc.zi fchar.zi int.zi 
 eq.zo: eq.zi bool.zi 
 exc.zo: exc.zi 
 fchar.zo: fchar.zi fstring.zi int.zi 
 filename.zo: filename.zi exc.zi eq.zi fstring.zi int.zi 
 float.zo: float.zi 
+format.zo: format.zi eq.zi exc.zi bool.zi queue.zi fchar.zi fstring.zi \
+    io.zi ref.zi float.zi int.zi 
+format.new.zo: format.new.zi eq.zi exc.zi bool.zi fchar.zi fstring.zi io.zi \
+    ref.zi float.zi int.zi 
+format1.zo: eq.zi exc.zi bool.zi queue.zi fchar.zi fstring.zi io.zi ref.zi \
+    float.zi int.zi 
+format2.zo: eq.zi exc.zi bool.zi queue.zi fchar.zi fstring.zi io.zi ref.zi \
+    float.zi int.zi 
+format3.zo: eq.zi exc.zi bool.zi queue.zi fchar.zi fstring.zi io.zi ref.zi \
+    float.zi int.zi 
 fstring.zo: fstring.zi eq.zi fchar.zi ref.zi int.zi 
 fvect.zo: fvect.zi eq.zi list.zi int.zi 
 genlex.zo: genlex.zi hashtbl.zi stream.zi exc.zi fchar.zi float.zi \

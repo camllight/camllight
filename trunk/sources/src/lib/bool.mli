@@ -12,3 +12,7 @@
 value prefix not : bool -> bool = 1 "not"
         (* The boolean negation. *)
 ;;
+
+value string_of_bool : bool -> string
+        (* Return a string representing the given boolean. *)
+;;

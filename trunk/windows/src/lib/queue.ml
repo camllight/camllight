@@ -1,7 +1,6 @@
 #open "int";;
 #open "ref";;
 #open "exc";;
-#open "queue";;
 
 type 'a queue_cell =
     Nil
