@@ -88,7 +88,7 @@ let check_unused_opens () =
      (fun name used ->
        if not !used & not (mem name !default_used_modules)
        then unused_open_warning name)
-     used_opened_modules
+     !used_opened_modules
 ;;
 
 (* Compiling an interface *)
