@@ -6,6 +6,7 @@
 #open "modules";;
 #open "location";;
 #open "syntax";;
+#open "types";;
 #open "typing";;
 #open "ty_decl";;
 #open "front";;
@@ -23,8 +24,11 @@ let do_toplevel_phrase phr =
   reset_type_expression_vars ();
   begin match phr.im_desc with
     Zexpr expr ->
+      push_type_level();
       let ty =
         type_expression phr.im_loc expr in
+      pop_type_level();
+      if is_nonexpansive expr then generalize_type ty;
       let res =
         load_phrase(compile_lambda false (translate_expression expr)) in
       open_hovbox 0;
@@ -49,7 +53,7 @@ let do_toplevel_phrase phr =
         (fun (name, (typ, mut_flag)) ->
           open_hovbox 0;
           print_string name; print_string " : ";
-          print_one_schema typ; print_string " ="; print_space();
+          print_one_type typ; print_string " ="; print_space();
           print_value
             global_data.(get_slot_for_variable
                          {qual=compiled_module_name(); id=name})
