@@ -74,7 +74,8 @@ Caml Light 0.7:
 
 * camlyacc: more checks on grammar for missing actions, etc.
   Parsing engine now reentrant; a camlyacc-generated parser can call
-  another one in one of its actions.
+  another one in one of its actions. Bug with tokens having a tuple as
+  semantic attribute fixed.
 
 * Better support for 64-bit architectures: 32-bit architectures can read
   values written on a file by a 64-bit architecture; max length of strings
@@ -90,7 +91,8 @@ Caml Light 0.7:
 
 * contrib/libgraph: implemented alternate event handling methods if async I/O
   are not available; ask for system calls to be restarted if possible;
-  restart read and write system calls if interrupted.
+  restart read and write system calls if interrupted; better handling
+  of "button up" and "mouse motion" events.
 
 * contrib/libnums: upgraded the bignum library; better 64-bit support
   (but still has some 64-bit bugs); alternate names for num operations
