@@ -1,0 +1,13 @@
+#!/usr/local/bin/perl
+
+$f = $ARGV[0];
+open(FILE, $f) || die("Cannot open $f");
+seek(FILE, -20, 2);
+$buff = ' ' x 20;
+read(FILE, $buff, 20) == 20 || die("Truncated bytecode file $f");
+($code_size, $data_size, $symbol_size, $debug_size, $magic) =
+  unpack("N5", $buff);
+$magic == 0x434c3036 || die("$f is not a CL 0.6 bytecode file");
+printf ("\tcode: %d    data: %d    symbols: %d    debug: %d\n",
+        $code_size, $data_size, $symbol_size, $debug_size);
+close(FILE);

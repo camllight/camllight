@@ -1,0 +1,5 @@
+CamlProg(asm,code.zo stockage.zo lexuniv.zo lecture.zo asm.zo,)
+CamlProg(exec,code.zo simul.zo exec.zo,)
+
+clean::
+	$(RM) *.o
