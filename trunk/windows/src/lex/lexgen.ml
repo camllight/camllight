@@ -17,7 +17,7 @@ type regexp =
 
 let chars = ref ([] : char list list);;
 let chars_count = ref 0;;
-let actions = ref ([] : (int * location) list);;
+let actions = ref ([] : (int * string * location) list);;
 let actions_count = ref 0;;
 
 let rec encode_regexp = function
@@ -35,12 +35,12 @@ let rec encode_regexp = function
       Star (encode_regexp r)
 ;;
 
-let encode_casedef =
+let encode_casedef name =
   it_list
    (fun reg (expr,act) ->
      let act_num = !actions_count in
      incr actions_count;
-     actions := (act_num, act) :: !actions;
+     actions := (act_num, name, act) :: !actions;
      Alt(reg, Seq(encode_regexp expr, Action act_num)))
   Empty
 ;;
@@ -51,7 +51,7 @@ let encode_lexdef (Lexdef(_, ld)) =
   actions := [];
   actions_count := 0;
   let name_regexp_list =
-    map (fun (name, casedef) -> (name, encode_casedef casedef)) ld in
+    map (fun (name, casedef) -> (name, encode_casedef name casedef)) ld in
   let chr = vect_of_list (rev !chars)
   and act = !actions in
   chars := [];
