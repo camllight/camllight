@@ -44,6 +44,11 @@ value quit : unit -> unit
   and default_printer : string -> unit
         (* [default_printer "mytype"] reverts to the default printing
            behavior for objects of type [mytype]. *)
+  and set_printer_depth : int -> unit
+        (* [set_printer_depth "mynumber"] tells the toplevel pretty printer
+           to abort recursive descent into values when a depth greater than
+           [mynumber] has been reached (nodes nested deeper are printed as an
+           ellipsis). *)
   and debug_mode: bool -> unit
         (* Set whether extended module interfaces must be used
            [debug_mode true] or not [debug_mode false]. Extended

@@ -9,6 +9,7 @@
 #open "emitcode";;
 #open "tr_const";;
 #open "pr_value";;
+#open "format";;
 
 let do_code may_free code entrypoint len =
   if number_of_globals() >= vect_length global_data then
@@ -30,9 +31,10 @@ let do_code may_free code entrypoint len =
       | _ ->
           ()
       end;
-      printf__printf "Uncaught exception: ";
+      open_hovbox 0;
+      print_string "Uncaught exception: ";
       print_value (obj__repr x) builtins__type_exn;
-      print_endline "";
+      print_newline();
       raise Toplevel
   in
     if may_free then static_free code;

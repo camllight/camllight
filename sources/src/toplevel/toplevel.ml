@@ -17,7 +17,9 @@
 #open "do_phr";;
 #open "load_phr";;
 #open "compiler";;
+#open "fmt_type";;
 #open "pr_value";;
+#open "format";;
 
 (* Utility functions *)
 
@@ -133,23 +135,34 @@ let quit x = io__exit 0; ()
 
 let trace_env = ref ([] : (int * obj) list);;
 
+let do_trace = ref true;;
+
 let rec trace_instr name val ty =
   match (type_repr ty).typ_desc with
     Tarrow(t1,t2) ->
       let namestar = name ^ "*" in
       repr(fun arg ->
+        if !do_trace then begin
+        do_trace := false;
         print_string name; print_string " <-- ";
         print_value arg t1; print_newline ();
+        do_trace := true end;
         try
           let res = (magic_obj val : obj -> obj) arg in
-          print_string name; print_string " --> ";
-          print_value res t2; print_newline ();
+          if !do_trace then begin
+           do_trace := false;
+           print_string name; print_string " --> ";
+           print_value res t2; print_newline ();
+           do_trace := true end;
           trace_instr namestar res t2
         with exc ->
-          print_string name;
-          print_string " raises ";
-          print_value (repr exc) builtins__type_exn;
-          print_newline ();
+          if !do_trace then begin
+           do_trace := false;
+           print_string name;
+           print_string " raises ";
+           print_value (repr exc) builtins__type_exn;
+           print_newline ();
+           do_trace := true end;
           raise exc)
   | Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args) ->
       trace_instr name val (expand_abbrev params body args)
@@ -260,3 +273,7 @@ let debug_mode status =
 let verbose_mode status =
   compiler__verbose := status
 ;;
+
+(* Set the depth of the recursive descent into values done by the printer *)
+let set_printer_depth n = if n >= 0 then pr_value__printer_depth := n;;
+

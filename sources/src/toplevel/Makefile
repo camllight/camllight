@@ -18,9 +18,10 @@ EXTERNOBJS=config.zo misc.zo \
     primdecl.zo lexer.zo par_aux.zo parser.zo compiler.zo \
     predef.zo prim_c.zo symtable.zo patch.zo tr_const.zo
 
-OBJS=pr_value.zo load_phr.zo do_phr.zo toplevel.zo version.zo main.zo
+OBJS=fmt_type.zo pr_value.zo load_phr.zo do_phr.zo toplevel.zo \
+     version.zo main.zo
 
-PERVASIVES=baltree bool char eq exc fchar filename float fstring fvect \
+PERVASIVES=baltree bool char eq exc fchar filename float format fstring fvect \
     gc genlex hashtbl int io iparsing lexing list map obj pair parsing \
     printexc printf queue random ref set sort stack stream string \
     toplevel vect
@@ -86,9 +87,11 @@ version.ml: version.mlp ../version.h
 do_phr.zo: pr_value.zo ../compiler/typing.zo meta.zi \
     ../compiler/location.zi ../compiler/modules.zo ../compiler/compiler.zo \
     ../compiler/const.zo ../compiler/misc.zo load_phr.zo \
-    ../compiler/back.zo ../compiler/front.zo ../linker/symtable.zo \
-    ../compiler/syntax.zo ../compiler/ty_decl.zo ../compiler/pr_type.zo 
-expunge.zo: ../linker/symtable.zo ../linker/readword.zo \
+    ../compiler/back.zo ../compiler/front.zo fmt_type.zo \
+    ../linker/symtable.zo ../compiler/syntax.zo ../compiler/ty_decl.zo 
+expunge.zo: ../linker/symtable.zo ../compiler/const.zo 
+fmt_type.zo: ../compiler/misc.zo ../compiler/modules.zo \
+    ../compiler/builtins.zo ../compiler/globals.zo ../compiler/types.zo \
     ../compiler/const.zo 
 load_phr.zo: pr_value.zo ../compiler/reloc.zo meta.zi ../linker/tr_const.zo \
     ../compiler/labels.zo ../compiler/misc.zo ../linker/symtable.zo \
@@ -97,9 +100,9 @@ load_phr.zo: pr_value.zo ../compiler/reloc.zo meta.zi ../linker/tr_const.zo \
 main.zo: meta.zi toplevel.zi ../compiler/location.zi ../compiler/modules.zo \
     ../compiler/config.zi ../compiler/compiler.zo version.zo \
     ../compiler/misc.zo do_phr.zo ../linker/symtable.zo 
-pr_value.zo: ../compiler/misc.zo ../linker/symtable.zo \
-    ../compiler/pr_type.zo ../compiler/modules.zo ../compiler/builtins.zo \
-    ../compiler/globals.zo ../compiler/types.zo ../compiler/const.zo 
+pr_value.zo: ../compiler/modules.zo ../compiler/const.zo \
+    ../compiler/misc.zo fmt_type.zo ../linker/symtable.zo \
+    ../compiler/globals.zo ../compiler/builtins.zo ../compiler/types.zo 
 provide.zo: ../compiler/prim.zo ../compiler/modules.zo \
     ../compiler/config.zi ../compiler/const.zo ../compiler/misc.zo \
     ../compiler/globals.zo 
@@ -108,5 +111,5 @@ toplevel.zo: toplevel.zi meta.zi ../compiler/modules.zo \
     ../linker/symtable.zo ../linker/patch.zo ../compiler/lexer.zi \
     ../compiler/builtins.zo ../compiler/globals.zo pr_value.zo \
     ../compiler/location.zi ../compiler/const.zo ../compiler/compiler.zo \
-    load_phr.zo do_phr.zo ../compiler/instruct.zo ../compiler/types.zo \
-    ../compiler/opcodes.zo 
+    load_phr.zo do_phr.zo fmt_type.zo ../compiler/instruct.zo \
+    ../compiler/types.zo ../compiler/opcodes.zo 
