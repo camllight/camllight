@@ -79,6 +79,27 @@ value mem : 'a -> 'a list -> bool
            that is structurally equal to [a]. The head of the list has
            position 0. Raise [Not_found] if [a] is not present in [l]. *)
 ;;
+
+(** List searching *)
+
+value find : ('a -> bool) -> 'a list -> 'a;;
+        (* [find p l] returns the first element of the list [l]
+           that satisfies the predicate [p].
+           Raise [Not_found] if there is no value that satisfies [p] in the
+           list [l]. *)
+
+value find_all : ('a -> bool) -> 'a list -> 'a list;;
+        (* [find_all p l] returns all the elements of the list [l]
+           that satisfies the predicate [p]. *)
+
+value partition : ('a -> bool) -> 'a list -> 'a list * 'a list;;
+        (* [partition p l] returns a pair of lists [(l1, l2)], such
+        that [l1] is the list of all the elements of [l] that
+        satisfy the predicate [p], and [l2] is the list of all the
+        elements of [l] that do not satisfy [p]. *)
+
+(** Association lists *)
+
 value assoc : 'a -> ('a * 'b) list -> 'b
         (* [assoc a l] returns the value associated with key [a] in the list of
            pairs [l]. That is,

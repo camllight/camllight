@@ -169,3 +169,20 @@ let mem_assoc name = assoc_rec where rec assoc_rec =
   function [] -> false
          | (x,y)::l -> name = x || assoc_rec l
 ;;
+
+let rec find p = function
+  | [] -> raise Not_found
+  | x :: l -> if p x then x else find p l;;
+
+let find_all p =
+  let rec find accu = function
+  | [] -> rev accu
+  | x :: l -> if p x then find (x :: accu) l else find accu l in
+  find [];;
+
+let rec partition p l =
+  let rec part yes no = function
+  | [] -> (rev yes, rev no)
+  | x :: l -> if p x then part (x :: yes) no l else part yes (x :: no) l in
+  part [] [] l;;
+
