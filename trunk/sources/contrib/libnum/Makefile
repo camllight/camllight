@@ -2,7 +2,7 @@
 
 # These options are overriden when called from ../Makefile
 
-TARGET_ARCH=C
+BIGNUM_ARCH=C
 CC=cc
 CPP=/lib/cpp -P
 
@@ -36,7 +36,7 @@ libnums.a: bignum/libbignum.a $(OBJFILES)
 	if $(RANLIBTEST); then $(RANLIB) libnums.a; else true; fi
 
 bignum/libbignum.a:
-	cd bignum; make $(TARGET_ARCH)
+	cd bignum; make $(BIGNUM_ARCH)
 
 install:
 	cp libnums.a $(LIBDIR)/libnums.a
