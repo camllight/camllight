@@ -26,6 +26,9 @@ value minus : float -> float = 1 "~float"
   and prefix /. : float -> float -> float = 2 "/"
   and div_float : float -> float -> float = 2 "/"
         (* Division. The result is unpredictable if the dividend is 0.0. *)
+  and prefix ** : float -> float -> float = 2 "power_float"
+  and power : float -> float -> float = 2 "power_float"
+        (* Exponentiation. *)
   and eq_float : float -> float -> bool = 2 "=float"
   and prefix =. : float -> float -> bool = 2 "=float"
         (* Floating-point equality.
@@ -47,7 +50,6 @@ value minus : float -> float = 1 "~float"
 value exp : float -> float = 1 "exp_float"
   and log : float -> float = 1 "log_float"
   and sqrt : float -> float = 1 "sqrt_float"
-  and power : float -> float -> float = 2 "power_float"
   and sin : float -> float = 1 "sin_float"
   and cos : float -> float = 1 "cos_float"
   and tan : float -> float = 1 "tan_float"
