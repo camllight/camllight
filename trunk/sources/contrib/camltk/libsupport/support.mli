@@ -27,10 +27,6 @@ value check_widget_class : Widget -> string -> unit;;
 
 value chk_sub : string -> 'a list -> 'a -> unit;;
 
-value register_callback : (unit -> unit) -> string;;
-value callback_table : (string, unit -> unit) hashtbl__t;;
-
-
 value quote_string : string -> string;;
 type symbol
 ;;
@@ -38,4 +34,6 @@ value CAMLtoTKsymbol : symbol -> string;;
 value TKtoCAMLsymbol : string -> symbol;;
 
 value catenate_sep : string -> string list -> string
+;;
+value split_str : (char -> bool) -> string -> string list
 ;;
