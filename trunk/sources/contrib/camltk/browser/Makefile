@@ -18,7 +18,7 @@ camlbrowser: $(COMPILEROBJS) $(OBJS)
                 tklib.zo $(COMPILEROBJS) $(OBJS) -lunix
 
 clean : 
-	rm -f *.z? camlbrowser
+	rm -f *.z* location.ml config.ml  camlbrowser
 
 .SUFFIXES :
 .SUFFIXES : .mli .ml .zi .zo .mlp
