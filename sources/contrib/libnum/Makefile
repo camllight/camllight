@@ -74,19 +74,19 @@ depend:
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
 big_int.zi: nat.zi 
-fmt_num.zi: num.zi nat.zi big_int.zi ratio.zi 
-ltx_num.zi: num.zi nat.zi big_int.zi ratio.zi 
+fmt_num.zi: ratio.zi num.zi nat.zi big_int.zi 
+ltx_num.zi: ratio.zi num.zi nat.zi big_int.zi 
 nat.zi: fnat.zi 
-num.zi: nat.zi big_int.zi ratio.zi 
+num.zi: ratio.zi nat.zi big_int.zi 
 ratio.zi: nat.zi big_int.zi 
 arith_flags.zo: arith_flags.zi 
 arith_status.zo: arith_status.zi arith_flags.zi 
-big_int.zo: big_int.zi nat.zi int_misc.zi fnat.zi 
-fmt_num.zo: fmt_num.zi num.zi nat.zi big_int.zi int_misc.zi ratio.zi 
+big_int.zo: big_int.zi int_misc.zi nat.zi fnat.zi 
+fmt_num.zo: fmt_num.zi ratio.zi num.zi int_misc.zi nat.zi big_int.zi 
 fnat.zo: fnat.zi int_misc.zi 
 int_misc.zo: int_misc.zi 
-ltx_num.zo: ltx_num.zi num.zi nat.zi big_int.zi int_misc.zi ratio.zi 
+ltx_num.zo: ltx_num.zi num.zi int_misc.zi nat.zi big_int.zi ratio.zi 
 nat.zo: nat.zi fnat.zi 
-num.zo: num.zi arith_flags.zi int_misc.zi fnat.zi big_int.zi ratio.zi 
-numprint.zo: num.zi nat.zi big_int.zi ratio.zi 
-ratio.zo: ratio.zi arith_flags.zi int_misc.zi fnat.zi big_int.zi 
+num.zo: num.zi int_misc.zi big_int.zi ratio.zi fnat.zi arith_flags.zi 
+numprint.zo: ratio.zi num.zi nat.zi big_int.zi 
+ratio.zo: ratio.zi int_misc.zi big_int.zi fnat.zi arith_flags.zi 
