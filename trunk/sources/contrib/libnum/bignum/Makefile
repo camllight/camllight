@@ -7,6 +7,7 @@
 CC = cc
 AR = ar
 RANLIB = ranlib
+RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
 LIB = libbignum.a
 OBJECT = o/KerN.o o/bnInit.o o/bnMult.o o/bnDivide.o o/bnCmp.o o/bzf.o o/bz.o 
 KERNH = h/BigNum.h 
@@ -37,7 +38,7 @@ scratch:tidy
 $(LIB): $(OBJECT)
 	-rm -f $(LIB)
 	$(AR) cr $(LIB) $(OBJECT)
-	$(RANLIB) $(LIB)
+	if $(RANLIBTEST); then $(RANLIB) $(LIB); else true; fi
 
 # How to choose the machine dependent version. All produce KerN.o
 o/KerN.o: c/KerN.c 
