@@ -68,3 +68,13 @@ type lambda =
 let share_lambda l =
   Lshared(l, ref (-1))
 ;;
+
+(* Guards *)
+let has_guard = function
+    _,Lifthenelse(l1, l2, Lstaticfail) -> true
+  | _ -> false;;
+
+let guard_expression l1 l2 =
+  Lifthenelse(l1, l2, Lstaticfail);;
+
+

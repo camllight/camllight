@@ -186,6 +186,7 @@ let rec is_nonexpansive expr =
   | Zsequence(e1, e2) -> is_nonexpansive e2
   | Zcondition(cond, ifso, ifnot) ->
       is_nonexpansive ifso & is_nonexpansive ifnot
+  | Zwhen(cond, act) -> is_nonexpansive act
   | Zwhile(cond, body) -> true          (* returns () *)
   | Zfor(id, lo, hi, up, body) -> true  (* returns () *)
   | Zsequand(e1, e2) -> true            (* returns a boolean *)
@@ -301,6 +302,9 @@ let rec type_expr env expr =
         type_expect env ifnot ty;
         ty
       end
+  | Zwhen (cond, act) ->
+      type_expect env cond type_bool;
+      type_expr env act
   | Zwhile (cond, body) ->
       type_expect env cond type_bool;
       type_statement env body;

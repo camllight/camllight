@@ -59,6 +59,7 @@ and expression_desc =
   | Zrecord_update of expression * label_desc global * expression
   | Zstream of stream_component list
   | Zparser of (stream_pattern list * expression) list
+  | Zwhen of expression * expression
 
 and expr_ident =
     Zglobal of value_desc global

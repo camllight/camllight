@@ -41,6 +41,7 @@ do_list (fun (str,tok) -> hashtbl__add keyword_table str tok) [
   "try", TRY;
   "type", TYPE;
   "value", VALUE;
+  "when", WHEN;
   "where", WHERE;
   "while", WHILE;
   "with", WITH

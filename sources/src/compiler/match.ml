@@ -248,7 +248,11 @@ let rec conquer_matching =
   in function
     Matching([], _) ->
       Lstaticfail, True
-  | Matching(([], action) :: rest, _) ->
+  | Matching(([], Lifthenelse (cond, act, Lstaticfail)) :: rest, pathl) ->
+      let lambda2, partial2 =
+          conquer_matching (Matching (rest, pathl)) in
+      Lifthenelse (cond, act, lambda2), partial2
+   | Matching(([], action) :: rest, _) ->
       action, False
   | Matching(_, (path :: _)) as matching ->
       begin match upper_left_pattern matching with
@@ -304,7 +308,11 @@ let make_initial_matching = function
 
 let translate_matching_hidden check_partial_match failure_code loc casel =
   let casel' =
-    map (fun (patl,l) -> (patl, share_lambda l)) (check_unused casel) in
+    map (fun 
+           (patl, Lifthenelse(cond,act,Lstaticfail)) ->
+              (patl, Lifthenelse(cond, share_lambda act, Lstaticfail))
+         | (patl,l) -> (patl, share_lambda l)) 
+        (check_unused casel) in
   let (lambda, partial) =
     conquer_matching (make_initial_matching casel') in
   if check_partial_match & partial_match casel then

@@ -85,6 +85,7 @@
 %token TRY            /* "try" */
 %token TYPE           /* "type" */
 %token VALUE          /* "value" */
+%token WHEN           /* "when" */
 %token WHERE          /* "where" */
 %token WHILE          /* "while" */
 %token WITH           /* "with" */
@@ -237,7 +238,18 @@ Expr :
       | Expr EQUALEQUAL Expr
           { make_binop "==" $1 $3 }
       | Expr COLONEQUAL Expr
-          { make_binop ":=" $1 $3 }
+          { match $1.e_desc with
+              Zapply ({e_desc = Zident (ref (Zlocal op)); _},
+                      [e1;e2]) ->
+               begin match op with
+                    "vect_item" -> make_ternop "vect_assign" e1 e2 $3
+                  | "nth_char" -> make_ternop "set_nth_char" e1 e2 $3
+                  | _ -> make_binop ":=" $1 $3
+                  end
+            | Zrecord_access (e1,lab) ->
+               make_expr(Zrecord_update(e1, lab, $3))
+            | e -> make_binop ":=" $1 $3 }
+
       | Expr AMPERSAND Expr 
           { make_expr(Zsequand($1, $3)) }
       | Expr AMPERAMPER Expr 
@@ -248,16 +260,10 @@ Expr :
           { make_expr(Zsequor($1, $3)) }
       | Simple_expr DOT Ext_ident LESSMINUS Expr
           { make_expr(Zrecord_update($1, find_label $3, $5)) }
-      | Simple_expr DOT Ext_ident COLONEQUAL Expr
-          { make_expr(Zrecord_update($1, find_label $3, $5)) }
       | Simple_expr DOTLPAREN Expr RPAREN LESSMINUS Expr
           { make_ternop "vect_assign" $1 $3 $6 }
-      | Simple_expr DOTLPAREN Expr RPAREN COLONEQUAL Expr
-          { make_ternop "set_nth_char" $1 $3 $6 }
       | Simple_expr DOTLBRACKET Expr RBRACKET LESSMINUS Expr
           { make_ternop "set_nth_char" $1 $3 $6 }
-      | Simple_expr DOTLBRACKET Expr RBRACKET COLONEQUAL Expr
-          { make_ternop "vect_assign" $1 $3 $6 }
       | IF Expr THEN Expr ELSE Expr  %prec prec_if
           { make_expr(Zcondition($2, $4, $6)) }
       | IF Expr THEN Expr  %prec prec_if
@@ -354,25 +360,32 @@ Opt_bar:
       | /*epsilon*/     { () }
 ;
 
+Action :
+        MINUSGREATER Expr
+          { $2 }
+      | WHEN Expr MINUSGREATER Expr
+          { make_expr (Zwhen($2,$4)) }
+;
+
 Fun_match :
-        Simple_pattern_list MINUSGREATER Expr BAR Fun_match
-          { ($1, $3) :: $5 }
-      | Simple_pattern_list MINUSGREATER Expr
-	  { [$1, $3] }
+        Simple_pattern_list Action BAR Fun_match
+          { ($1, $2) :: $4}
+      | Simple_pattern_list Action
+	  { [$1, $2] }
 ;
 
 Function_match :
-        Pattern MINUSGREATER Expr BAR Function_match
-          { ([$1], $3) :: $5 }
-      | Pattern MINUSGREATER Expr
-	  { [[$1], $3] }
+        Pattern Action BAR Function_match
+          { ([$1], $2) :: $4 }
+      | Pattern Action
+	  { [[$1], $2] }
 ;
 
 Try_match :
-        Pattern MINUSGREATER Expr BAR Try_match
-          { ($1, $3) :: $5 }
-      | Pattern MINUSGREATER Expr
-          { [$1, $3] }
+        Pattern Action BAR Try_match
+          { ($1, $2) :: $4 }
+      | Pattern Action
+          { [$1, $2] }
 ;
 
 Binding_list :

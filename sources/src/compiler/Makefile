@@ -78,7 +78,8 @@ parser.zi: syntax.zo
 back.zo: prim.zo lambda.zo const.zo misc.zo instruct.zo 
 buffcode.zo: misc.zo config.zi opcodes.zo 
 builtins.zo: misc.zo modules.zo globals.zo const.zo 
-clauses.zo: misc.zo syntax.zo location.zi globals.zo const.zo 
+clauses.zo: lambda.zo error.zo location.zi const.zo misc.zo syntax.zo \
+    globals.zo 
 compiler.zo: pr_decl.zo typing.zo parser.zi error.zo modules.zo location.zi \
     const.zo emit_phr.zo misc.zo back.zo front.zo ty_intf.zo syntax.zo \
     instruct.zo ty_decl.zo lexer.zi globals.zo builtins.zo types.zo 
@@ -88,8 +89,7 @@ emit_phr.zo: event.zo reloc.zo lambda.zo emitcode.zo buffcode.zo \
     instruct.zo labels.zo 
 emitcode.zo: prim.zo reloc.zo prim_opc.zo lambda.zo config.zi labels.zo \
     const.zo misc.zo event.zo instruct.zo buffcode.zo opcodes.zo 
-error.zo: misc.zo syntax.zo globals.zo types.zo const.zo 
-errors.zo: misc.zo location.zi globals.zo const.zo 
+error.zo: misc.zo syntax.zo location.zi globals.zo types.zo const.zo 
 event.zo: syntax.zo lambda.zo modules.zo location.zi 
 front.zo: trstream.zo prim.zo lambda.zo error.zo tr_env.zo modules.zo \
     location.zi const.zo misc.zo match.zo event.zo syntax.zo globals.zo \
@@ -122,8 +122,6 @@ trstream.zo: prim.zo lambda.zo tr_env.zo const.zo misc.zo match.zo \
     syntax.zo 
 ty_decl.zo: typing.zo error.zo modules.zo location.zi const.zo misc.zo \
     syntax.zo globals.zo builtins.zo types.zo 
-ty_error.zo: misc.zo syntax.zo errors.zo pr_type.zo location.zi globals.zo \
-    types.zo const.zo 
 ty_intf.zo: misc.zo ty_decl.zo error.zo modules.zo globals.zo types.zo \
     const.zo 
 types.zo: misc.zo modules.zo builtins.zo globals.zo const.zo 
