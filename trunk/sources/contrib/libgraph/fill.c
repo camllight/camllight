@@ -37,7 +37,7 @@ value gr_fill_poly(array)
   XFillPolygon(grdisplay, grbstore.win, grbstore.gc, points,
                npoints, Complex, CoordModeOrigin);
   XFlush(grdisplay);
-  stat_free(points);
+  stat_free((char *) points);
   return Val_unit;
 }
 

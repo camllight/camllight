@@ -34,7 +34,7 @@ libgraph.a: $(OBJS)
 
 camlgraph: libgraph.a graphics.zo
 	$(CAMLMKTOP) -custom -o camlgraph ../libunix/unix.zo graphics.zo \
-        libgraph.a ../libunix/libunix.a -lX11
+        libgraph.a ../libunix/libunix.a -ccopt -L$(X11_LIB) -lX11
 
 clean:
 	rm -f libgraph.a camlgraph $(GENFILES) *.o *.z[io] *~ #*#
