@@ -59,39 +59,34 @@ let num_of_ratio r =
 
 (* Operations on num *)
 
-let add_num = fun
-  | (Int int1) (Int int2) ->
-      let r = add_int int1 int2 in
-       if sign_int int1 == sign_int int2
-        then if int1 >= 0
-              then if r >= int1 then Int r
-                    else Big_int
-                          (add_big_int 
-                            (big_int_of_int int1) (big_int_of_int int2))
-             else if r <= int1 then Int r
-                   else Big_int
-                          (add_big_int
-                           (big_int_of_int int1) (big_int_of_int int2))
-        else Int r
-
-  | (Int i) (Big_int bi) ->
-      num_of_big_int (add_int_big_int i bi)
-  | (Big_int bi) (Int i) ->
-      num_of_big_int (add_int_big_int i bi)
-
-  | (Int i) (Ratio r) ->
-      Ratio (add_int_ratio i r)
-  | (Ratio r) (Int i) ->
-      Ratio (add_int_ratio i r)
-
-  | (Big_int bi1) (Big_int bi2) -> num_of_big_int (add_big_int bi1 bi2)
-
-  | (Big_int bi) (Ratio r) ->
-      Ratio (add_big_int_ratio bi r)
-  | (Ratio r) (Big_int bi) ->
-      Ratio (add_big_int_ratio bi r)
-
-  | (Ratio r1) (Ratio r2) -> num_of_ratio (add_ratio r1 r2)
+let add_num n1 n2 =
+ match n1 with
+ | Int i1 ->
+    begin match n2 with
+    | Int i2 ->
+      let r = i1 + i2 in
+      if sign_int i1 != sign_int i2 then Int r else
+      if i1 >= 0 then
+       if r >= i1 then Int r else
+       Big_int
+        (add_big_int 
+          (big_int_of_int i1) (big_int_of_int i2)) else
+      if r <= i1 then Int r else
+      Big_int
+       (add_big_int
+        (big_int_of_int i1) (big_int_of_int i2))
+    | Big_int bi2 -> num_of_big_int (add_int_big_int i1 bi2)
+    | Ratio r2 -> Ratio (add_int_ratio i1 r2) end
+ | Big_int bi1 ->
+    begin match n2 with
+    | Int i2 -> num_of_big_int (add_int_big_int i2 bi1)
+    | Big_int bi2 -> num_of_big_int (add_big_int bi1 bi2)
+    | Ratio r2 -> Ratio (add_big_int_ratio bi1 r2) end
+ | Ratio r1 ->
+    begin match n2 with
+    | Int i2 -> Ratio (add_int_ratio i2 r1)
+    | Big_int bi2 -> Ratio (add_big_int_ratio bi2 r1)
+    | Ratio r2 -> num_of_ratio (add_ratio r1 r2) end
 ;;
 
 let prefix +/ = add_num;;
@@ -108,69 +103,57 @@ let sub_num n1 n2 = add_num n1 (minus_num n2);;
 
 let prefix -/ = sub_num;;
 
-let mult_num = fun
- | (Int int1) (Int int2) ->
-    if num_bits_int int1 + num_bits_int int2 < length_of_int
-       then Int (int1 * int2)
-       else num_of_big_int (mult_big_int (big_int_of_int int1) 
-                                         (big_int_of_int int2))
-
- | (Int i) (Big_int bi) ->
-     num_of_big_int (mult_int_big_int i bi)
- | (Big_int bi) (Int i) ->
-     num_of_big_int (mult_int_big_int i bi)
-
- | (Int i) (Ratio r) ->
-     num_of_ratio (mult_int_ratio i r)
- | (Ratio r) (Int i) ->
-     num_of_ratio (mult_int_ratio i r)
-
- | (Big_int bi1) (Big_int bi2) -> 
-     Big_int (mult_big_int bi1 bi2)
- | (Big_int bi) (Ratio r) ->
-     num_of_ratio (mult_big_int_ratio bi r)
- | (Ratio r) (Big_int bi) ->
-     num_of_ratio (mult_big_int_ratio bi r)
-
- | (Ratio r1) (Ratio r2) ->
-     num_of_ratio (mult_ratio r1 r2)
+let mult_num n1 n2 =
+ match n1 with
+ | Int i1 ->
+    begin match n2 with
+    | Int i2 ->
+       if num_bits_int i1 + num_bits_int i2 < length_of_int then Int (i1 * i2)
+       else num_of_big_int
+             (mult_big_int (big_int_of_int i1) (big_int_of_int i2))
+    | Big_int bi2 -> num_of_big_int (mult_int_big_int i1 bi2)
+    | Ratio r2 -> num_of_ratio (mult_int_ratio i1 r2) end
+ | Big_int bi1 ->
+    begin match n2 with
+    | Int i2 -> num_of_big_int (mult_int_big_int i2 bi1)
+    | Big_int bi2 -> Big_int (mult_big_int bi1 bi2)
+    | Ratio r2 -> num_of_ratio (mult_big_int_ratio bi1 r2) end
+ | Ratio r1 ->
+    begin match n2 with
+    | Int i2 -> num_of_ratio (mult_int_ratio i2 r1)
+    | Big_int bi2 -> num_of_ratio (mult_big_int_ratio bi2 r1)
+    | Ratio r2 -> num_of_ratio (mult_ratio r1 r2) end
 ;;
 
 let prefix */ = mult_num;;
 
 let square_num = function
-| Int i -> if 2 * num_bits_int i < length_of_int 
-              then Int (i * i)
-              else num_of_big_int (square_big_int (big_int_of_int i))
+| Int i -> if 2 * num_bits_int i < length_of_int then Int (i * i)
+            else num_of_big_int (square_big_int (big_int_of_int i))
 | Big_int bi -> Big_int (square_big_int bi)
 | Ratio r -> Ratio (square_ratio r)
 ;;
 
-let div_num = fun
- | (Int int1) (Int int2) -> 
-     num_of_ratio (create_ratio (big_int_of_int int1) (big_int_of_int int2))
+let div_num n1 n2 =
+ match n1 with
+ | Int i1 ->
+    begin match n2 with
+    | Int i2 ->
+       num_of_ratio (create_ratio (big_int_of_int i1) (big_int_of_int i2))
+    | Big_int bi2 -> num_of_ratio (create_ratio (big_int_of_int i1) bi2)
+    | Ratio r2 -> num_of_ratio (div_int_ratio i1 r2) end
 
- | (Int i) (Big_int bi) ->
-     num_of_ratio (create_ratio (big_int_of_int i) bi)
+ | Big_int bi1 ->
+     begin match n2 with
+     | Int i2 -> num_of_ratio (create_ratio bi1 (big_int_of_int i2))
+     | Big_int bi2 -> num_of_ratio (create_ratio bi1 bi2)
+     | Ratio r2 -> num_of_ratio (div_big_int_ratio bi1 r2) end
 
- | (Big_int bi) (Int i) ->
-     num_of_ratio (create_ratio bi (big_int_of_int i))
-
- | (Int i) (Ratio r) ->
-     num_of_ratio (div_int_ratio i r)
- | (Ratio r) (Int i) ->
-     num_of_ratio (div_ratio_int r i)
-
- | (Big_int bi1) (Big_int bi2) ->
-     num_of_ratio (create_ratio bi1 bi2)
-
- | (Big_int bi) (Ratio r) -> 
-     num_of_ratio (div_big_int_ratio bi r)
- | (Ratio r) (Big_int bi) -> 
-     num_of_ratio (div_ratio_big_int r bi)
-
- | (Ratio r1) (Ratio r2) -> 
-     num_of_ratio (div_ratio r1 r2)
+ | Ratio r1 ->
+     begin match n2 with
+     | Int i2 -> num_of_ratio (div_ratio_int r1 i2)
+     | Big_int bi2 -> num_of_ratio (div_ratio_big_int r1 bi2)
+     | Ratio r2 -> num_of_ratio (div_ratio r1 r2) end
 ;;
 
 let prefix // = div_num;;
@@ -187,52 +170,52 @@ let quo_num x y = floor_num (div_num x y)
 let mod_num x y = sub_num x (mult_num y (quo_num x y))
 ;;
 
-let power_num_int nu n =
- match nu with
+let power_num_int n p =
+ match n with
  | Int i ->
-       (match sign_int n with
-         | 0 -> Int 1
-         | 1 -> num_of_big_int (power_int_positive_int i n)
-         | _ -> num_of_ratio
-                  (create_normalized_ratio
-                     unit_big_int (power_int_positive_int i (- n))))
+    begin match sign_int p with
+    | 0 -> Int 1
+    | 1 -> num_of_big_int (power_int_positive_int i p)
+    | _ -> num_of_ratio
+            (create_normalized_ratio
+              unit_big_int (power_int_positive_int i (- p))) end
  | Big_int bi -> 
-        (match sign_int n with
-          | 0 -> Int 1
-          | 1 -> num_of_big_int (power_big_int_positive_int bi n)
-          | _ -> Ratio (create_normalized_ratio
-                  unit_big_int (power_big_int_positive_int bi (- n))))
+    begin match sign_int p with
+    | 0 -> Int 1
+    | 1 -> num_of_big_int (power_big_int_positive_int bi p)
+    | _ -> Ratio (create_normalized_ratio
+            unit_big_int (power_big_int_positive_int bi (- p))) end
  | Ratio r ->
-        (match sign_int n with
-          | 0 -> Int 1
-          | 1 -> Ratio (power_ratio_positive_int r n)
-          | _ -> num_of_ratio (power_ratio_positive_int 
-                          (inverse_ratio r) (- n)))
+    begin match sign_int p with
+    | 0 -> Int 1
+    | 1 -> Ratio (power_ratio_positive_int r p)
+    | _ -> num_of_ratio (power_ratio_positive_int 
+                          (inverse_ratio r) (- p)) end
 ;;
 
-let power_num_big_int bi n =
-  match bi with
-  | Int i -> 
-    (match sign_big_int n with
-     | 0 -> Int 1
-     | 1 -> num_of_big_int (power_int_positive_big_int i n)
-     | _ -> num_of_ratio
-             (create_normalized_ratio
-               unit_big_int 
-               (power_int_positive_big_int i (minus_big_int n))))
-  | Big_int bi -> 
-    (match sign_big_int n with
-     | 0 -> Int 1
-     | 1 -> num_of_big_int (power_big_int_positive_big_int bi n)
-     | _ -> Ratio (create_normalized_ratio
-                    unit_big_int 
-                    (power_big_int_positive_big_int bi (minus_big_int n))))
-  | Ratio r ->
-    (match sign_big_int n with
-      | 0 -> Int 1
-      | 1 -> Ratio (power_ratio_positive_big_int r n)
-      | _ -> num_of_ratio (power_ratio_positive_big_int 
-                      (inverse_ratio r) (minus_big_int n)))
+let power_num_big_int bi p =
+ match bi with
+ | Int i -> 
+    begin match sign_big_int p with
+    | 0 -> Int 1
+    | 1 -> num_of_big_int (power_int_positive_big_int i p)
+    | _ -> num_of_ratio
+            (create_normalized_ratio
+              unit_big_int 
+              (power_int_positive_big_int i (minus_big_int p))) end
+ | Big_int bi -> 
+    begin match sign_big_int p with
+    | 0 -> Int 1
+    | 1 -> num_of_big_int (power_big_int_positive_big_int bi p)
+    | _ -> Ratio (create_normalized_ratio
+                   unit_big_int 
+                   (power_big_int_positive_big_int bi (minus_big_int p))) end
+ | Ratio r ->
+    begin match sign_big_int p with
+    | 0 -> Int 1
+    | 1 -> Ratio (power_ratio_positive_big_int r p)
+    | _ -> num_of_ratio (power_ratio_positive_big_int 
+                          (inverse_ratio r) (minus_big_int p)) end
 ;;
 
 let power_num n = function
@@ -274,42 +257,46 @@ let sign_num = function
 | Ratio r -> sign_ratio r
 ;;
 
-let eq_num = fun
-| (Int int1) (Int int2) -> int1 == int2
-
-| (Int i) (Big_int bi) -> eq_big_int (big_int_of_int i) bi
-| (Big_int bi) (Int i) -> eq_big_int (big_int_of_int i) bi
-
-| (Int i) (Ratio r) -> eq_big_int_ratio (big_int_of_int i) r
-| (Ratio r) (Int i) -> eq_big_int_ratio (big_int_of_int i) r
-
-| (Big_int bi1) (Big_int bi2) -> eq_big_int bi1 bi2
-
-| (Big_int bi) (Ratio r) -> eq_big_int_ratio bi r
-| (Ratio r) (Big_int bi) -> eq_big_int_ratio bi r
-
-| (Ratio r1) (Ratio r2) -> eq_ratio r1 r2
+let eq_num n1 n2 =
+ match n1 with
+ | Int i1 ->
+    begin match n2 with
+    | Int i2 -> i1 == i2
+    | Big_int bi2 -> eq_big_int (big_int_of_int i1) bi2
+    | Ratio r2 -> eq_big_int_ratio (big_int_of_int i1) r2 end
+ | Big_int bi1 ->
+    begin match n2 with
+    | Int i2 -> eq_big_int (big_int_of_int i2) bi1
+    | Big_int bi2 -> eq_big_int bi1 bi2
+    | Ratio r2 -> eq_big_int_ratio bi1 r2 end
+ | Ratio r1 ->
+    begin match n2 with
+    | Int i2 -> eq_big_int_ratio (big_int_of_int i2) r1
+    | Big_int bi2 -> eq_big_int_ratio bi2 r1
+    | Ratio r2 -> eq_ratio r1 r2 end
 ;;
 
 let prefix =/ = eq_num;;
 
 let prefix <>/ a b = not(eq_num a b);;
 
-let compare_num = fun
-| (Int int1) (Int int2) -> compare_int int1 int2
-
-| (Int i) (Big_int bi) -> compare_big_int (big_int_of_int i) bi
-| (Big_int bi) (Int i) -> compare_big_int bi (big_int_of_int i)
-
-| (Int i) (Ratio r) -> compare_big_int_ratio (big_int_of_int i) r
-| (Ratio r) (Int i) -> - (compare_big_int_ratio (big_int_of_int i) r)
-
-| (Big_int bi1) (Big_int bi2) -> compare_big_int bi1 bi2
-
-| (Big_int bi) (Ratio r) -> compare_big_int_ratio bi r
-| (Ratio r) (Big_int bi) -> - (compare_big_int_ratio bi r)
-
-| (Ratio r1) (Ratio r2) -> compare_ratio r1 r2
+let compare_num n1 n2 =
+ match n1 with
+ | Int i1 ->
+    begin match n2 with
+    | Int i2 -> compare_int i1 i2
+    | Big_int bi2 -> compare_big_int (big_int_of_int i1) bi2
+    | Ratio r2 -> compare_big_int_ratio (big_int_of_int i1) r2 end
+ | Big_int bi1 ->
+    begin match n2 with
+    | Int i2 -> compare_big_int bi1 (big_int_of_int i2)
+    | Big_int bi2 -> compare_big_int bi1 bi2
+    | Ratio r2 -> compare_big_int_ratio bi1 r2 end
+ | Ratio r1 ->
+    begin match n2 with
+    | Int i2 -> compare_big_int_ratio (big_int_of_int i2) r1
+    | Big_int bi2 -> compare_big_int_ratio bi2 r1
+    | Ratio r2 -> compare_ratio r1 r2 end
 ;;
 
 let lt_num num1 num2 = compare_num num1 num2 < 0
