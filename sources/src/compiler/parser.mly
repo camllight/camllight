@@ -216,16 +216,16 @@ Expr :
           { make_expr(Zcondition($2, $4, $6)) }
       | IF Expr THEN Expr  %prec prec_if
           { make_expr(Zcondition($2, $4, make_expr(Zconstruct0(constr_void)))) }
-      | WHILE Expr DO Expr Opt_semi DONE
+      | WHILE Expr DO Opt_expr DONE
           { make_expr(Zwhile($2, $4)) }
-      | FOR Ide EQUAL Expr TO Expr DO Expr Opt_semi DONE
+      | FOR Ide EQUAL Expr TO Expr DO Opt_expr DONE
           { make_expr(Zfor($2, $4, $6, true, $8)) }
-      | FOR Ide EQUAL Expr DOWNTO Expr DO Expr Opt_semi DONE
+      | FOR Ide EQUAL Expr DOWNTO Expr DO Opt_expr DONE
           { make_expr(Zfor($2, $4, $6, false, $8)) }
       | Expr SEMI Expr
           { make_expr(Zsequence($1,$3)) }
-      | Expr SEMI Expr SEMI
-          { make_expr(Zsequence($1,$3)) }
+      | Expr SEMI
+          { $1 }
       | MATCH Expr WITH Opt_bar Function_match
           { make_expr(Zapply(make_expr(Zfunction $5), [$2])) }
       | MATCH Expr WITH Opt_bar Parser_match
@@ -253,27 +253,21 @@ Simple_expr :
           { make_expr(Zconstant $1) }
       | Ext_ident
           { expr_constr_or_ident $1 }
-      | LPAREN RPAREN
-          { make_expr(Zconstruct0(constr_void)) }
-      | LBRACKET Expr_sm_list Opt_semi RBRACKET
+      | LBRACKET Expr_sm_list RBRACKET
           { make_list $2 }
-      | LBRACKET RBRACKET
-          { make_expr(Zconstruct0(constr_nil)) }
-      | LBRACKETBAR Expr_sm_list Opt_semi BARRBRACKET
+      | LBRACKETBAR Expr_sm_list BARRBRACKET
           { make_expr(Zvector(rev $2)) }
-      | LBRACKETBAR BARRBRACKET
-          { make_expr(Zvector []) }
-      | LBRACKETLESS Stream_expr Opt_semi GREATERRBRACKET
+      | LBRACKETLESS Stream_expr GREATERRBRACKET
           { make_expr(Zstream (rev $2)) }
       | LBRACKETLESS GREATERRBRACKET
           { make_expr(Zstream []) }
       | LPAREN Expr COLON Type RPAREN
           { make_expr(Zconstraint($2, $4)) }
-      | LPAREN Expr RPAREN
+      | LPAREN Opt_expr RPAREN
           { $2 }
-      | BEGIN Expr Opt_semi END
+      | BEGIN Opt_expr END
           { $2 }
-      | LBRACE Expr_label_list Opt_semi RBRACE
+      | LBRACE Expr_label_list RBRACE
           { make_expr (Zrecord $2) }
       | PREFIX Simple_expr
           { make_unop $1 $2 }
@@ -302,14 +296,22 @@ Expr_comma_list :
 Expr_sm_list :
         Expr_sm_list SEMI Expr  %prec prec_list
           { $3 :: $1 }
+      | Expr_sm_list SEMI
+          { $1 }
       | Expr  %prec prec_list
           { [$1] }
+      | /*epsilon*/
+          { [] }
 ;
 
 Opt_semi :
         SEMI            { () }
       | /*epsilon*/     { () }
 ;
+
+Opt_expr :
+        Expr            { $1 }
+      | /*epsilon*/     { make_expr(Zconstruct0(constr_void)) }
 
 Expr_label :
         Ext_ident EQUAL Expr
@@ -319,6 +321,8 @@ Expr_label :
 Expr_label_list :
         Expr_label_list SEMI Expr_label  %prec prec_list
           { $3 :: $1 }
+      | Expr_label_list SEMI
+          { $1 }
       | Expr_label  %prec prec_list
           { [$1] }
 ;
@@ -396,10 +400,12 @@ Pattern_sm_list :
         Pattern SEMI Pattern_sm_list
           { make_pat(Zconstruct1pat(constr_cons,
               make_pat(Ztuplepat[$1; $3]))) }
-      | Pattern Opt_semi
+      | Pattern
           { make_pat(Zconstruct1pat(constr_cons,
               make_pat(Ztuplepat [$1;
                 make_pat(Zconstruct0pat(constr_nil))]))) }
+      | /*epsilon*/
+          { make_pat(Zconstruct0pat(constr_nil)) }
 ;
 
 Pattern_label_list :
@@ -461,8 +467,6 @@ Simple_pattern :
           { make_pat(Zconstruct0pat(find_constructor (GRmodname $1))) }
       | LPAREN RPAREN
           { make_pat(Zconstruct0pat(constr_void)) }
-      | LBRACKET RBRACKET
-          { make_pat(Zconstruct0pat(constr_nil)) }
       | LBRACKET Pattern_sm_list RBRACKET
           { $2 }
       | LPAREN Pattern COLON Type RPAREN
@@ -480,6 +484,8 @@ Simple_pattern :
 Stream_expr :
         Stream_expr SEMI Stream_expr_component  %prec prec_list
           { $3 :: $1 }
+      | Stream_expr SEMI
+          { $1 }
       | Stream_expr_component  %prec prec_list
           { [$1] }
 ;
