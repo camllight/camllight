@@ -1,4 +1,4 @@
-\chapter{The "unix" library: Unix system calls}
+\chapter{The unix library: Unix system calls}
 
 The "unix" library (distributed in "contrib/libunix") makes many Unix
 system calls and system-related library functions available to Caml

@@ -1,4 +1,4 @@
-\chapter{The "num" library: arbitrary-precision rational arithmetic}
+\chapter{The num library: arbitrary-precision rational arithmetic}
 
 The "num" library (distributed in "contrib/libnum") implements
 exact-precision rational arithmetic. It is built upon the
