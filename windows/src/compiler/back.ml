@@ -11,6 +11,7 @@
 let rec is_return = function
     Kreturn :: _ -> true
   | Klabel lbl :: c -> is_return c
+  | Kevent e :: c -> is_return c
   | _ -> false
 ;;
 
@@ -196,12 +197,12 @@ let rec compile_expr staticfail =
           (Kquote _ | Kget_global _ | Kaccess _ | Kpushmark) :: _ -> code
         | _ -> Kquote cst :: code)
   | Lapply(body, args) ->
-       (match code with
-          Kreturn :: code' ->
-            compexplist args (Kpush :: compexp body (Ktermapply :: code'))
-        | _ ->
-            Kpushmark ::
-            compexplist args (Kpush :: compexp body (Kapply :: code)))
+        if is_return code then
+          compexplist args (Kpush ::
+            compexp body (Ktermapply :: discard_dead_code code))
+        else
+          Kpushmark ::
+          compexplist args (Kpush :: compexp body (Kapply :: code))
   | Lfunction body ->
         if is_return code then
           Kgrab :: compexp body code
@@ -295,12 +296,14 @@ let rec compile_expr staticfail =
             Kmakeblock(ConstrRegular(0,1), 1) :: Klet ::
             compexp stop (
               Klet :: Klabel lbl_loop :: Kcheck_signals ::
-              Kaccess 1 :: Kprim(Pfield 0) :: Kpush :: Kaccess 0 ::
+              Kaccess 1 :: Kprim(Pfield 0) :: Klet :: 
+              Kpush :: Kaccess 1 ::
               Ktest(Pint_test(if up_flag then PTlt else PTgt), lbl_end) ::
               compexp body (
+                Kendlet 1 ::
                 Kaccess 1 :: Kprim(if up_flag then Pincr else Pdecr) ::
                 Kbranch lbl_loop ::
-                Klabel lbl_end :: Kendlet 2 ::
+                Klabel lbl_end :: Kendlet 3 ::
                 Kquote(const_unit) :: code)))
   | Lsequand(exp1, exp2) ->
        (match code with
@@ -382,10 +385,9 @@ let rec compile_expr staticfail =
          Lbefore ->
            Kevent event :: compexp expr code
        | Lafter ty ->                 (* expr is either raise arg or apply *)
-          match code with
-            Kreturn :: _ ->
-              compexp expr code (* don't destroy tail call opt. *)
-          | _ -> compexp expr (Kevent event :: code)
+           if is_return code
+           then compexp expr code (* don't destroy tail call opt. *)
+           else compexp expr (Kevent event :: code)
        end
 
   and compexplist = fun

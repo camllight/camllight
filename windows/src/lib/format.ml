@@ -80,13 +80,13 @@ and pp_curr_depth = ref 0	  (* current number of opened blocks *)
 and pp_max_boxes = ref 35	  (* maximum number of blocks which can be
                                      opened at the same time *)
 and pp_ellipsis = ref "."         (* ellipsis string *)
-and pp_out_channel = ref std_out  (* out_channel of the pretty_printer *)
+and pp_output_function = ref(output std_out) (* output function *)
+and pp_flush_function = ref(fun () -> flush std_out) (* flushing function *)
 ;;
 
 (* Output functions for the formatter *)
-let pp_output s = output !pp_out_channel s
-and pp_output_string s = output_string !pp_out_channel s
-and pp_output_newline () = output_char !pp_out_channel `\n`;;
+let pp_output_string s = !pp_output_function s 0 (string_length s)
+and pp_output_newline () = !pp_output_function "\n" 0 1;;
 
 (* The pretty-printer queue *)
 let pp_queue = (queue__new () : pp_queue_elem queue__t);;
@@ -104,7 +104,7 @@ let pp_enqueue ({Length=len;_} as token) =
 let blank_line = make_string 80 ` `;;
 let display_blanks n =
     if n > 0 then
-    if n <= 80 then pp_output blank_line 0 n
+    if n <= 80 then !pp_output_function blank_line 0 n
     else pp_output_string (make_string n ` `);;
 
 (* To format a break, indenting a new line *)
@@ -155,8 +155,9 @@ let format_pp_token size = function
          (* can't open a block right there ! *)
          pp_force_newline () else
          (* If block is rejected on the left current indentation will change *)
-      if size > !pp_space_left & !pp_current_indent < insertion_point then
+(*      if size > !pp_space_left & !pp_current_indent < insertion_point then
          pp_force_newline ();
+*)
       let offset = !pp_space_left - off in
       let bl_type =
        begin match ty with
@@ -243,7 +244,7 @@ let rec advance_left () =
      match queue__peek pp_queue with
       {Elem_size = size; Token = tok; Length = len} ->
        if not (size < 0 &
-               (!pp_right_total - !pp_left_total <= !pp_space_left)) then
+               (!pp_right_total - !pp_left_total < !pp_space_left)) then
         begin
          queue__take pp_queue;
          format_pp_token (if size < 0 then pp_infinity else size) tok;
@@ -352,7 +353,7 @@ let pp_flush b =
     done;
     pp_right_total := pp_infinity; advance_left ();
     if b then pp_output_newline ();
-    flush !pp_out_channel;
+    !pp_flush_function ();
     pp_rinit();;
 
 (**************************************************************
@@ -477,8 +478,13 @@ let set_min_space_left n =
 let set_max_indent n = set_min_space_left (!pp_margin - n);;
 let get_max_indent () = !pp_max_indent;;
 
-let set_formatter_output os = pp_out_channel := os;;
-let get_formatter_output () = !pp_out_channel;;
+let set_formatter_output_functions f g =
+  pp_output_function := f; pp_flush_function := g;;
+let set_formatter_output_channel os = 
+  pp_output_function := (output os);
+  pp_flush_function := (fun () -> flush os);;
+let get_formatter_output_functions () = 
+  (!pp_output_function, !pp_flush_function);;
 
 (* Initializing formatter *)
 pp_rinit();;

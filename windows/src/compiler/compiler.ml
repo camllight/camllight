@@ -45,13 +45,13 @@ let parse_phrase parsing_fun lexing_fun lexbuf =
            lexer__Illegal_character ->
              eprintf "%aIllegal character.\n" output_location l
          | lexer__Unterminated_comment ->
-             eprintf "%tComment not terminated.\n" output_input_name
+             eprintf "%aComment not terminated.\n" output_location l
          | lexer__Bad_char_constant ->
              eprintf "%aIll-formed character literal.\n"
                              output_location l
          | lexer__Unterminated_string ->
-             eprintf "%tString literal not terminated.\n"
-                             output_input_name
+             eprintf "%aString literal not terminated.\n"
+                             output_location l
          end;
          skip();
          raise Toplevel
@@ -207,13 +207,15 @@ let compile_implementation modname filename suffix =
   external_types := [];
   if file_exists (filename ^ ".mli") then begin
     try
-      if not (file_exists (filename ^ ".zi")) then begin
-        eprintf
-          "Cannot find file %s.zi. Please compile %s.mli first.\n"
-          filename filename;
-        raise Toplevel
-      end;
-      let intf = read_module modname (filename ^ ".zi") in
+      let intfname =
+        try
+          find_in_path (modname ^ ".zi")
+        with Cannot_find_file _ ->
+          eprintf
+            "Cannot find file %s.zi. Please compile %s.mli first.\n"
+            modname filename;
+          raise Toplevel in
+      let intf = read_module modname intfname in
       start_compiling_implementation modname intf;
       enter_interface_definitions intf;
       compile_impl modname filename suffix;

@@ -102,12 +102,13 @@ interp.o: interp.c alloc.h misc.h config.h ../../config/m.h ../../config/s.h \
 ints.o: ints.c alloc.h misc.h config.h ../../config/m.h ../../config/s.h \
   mlvalues.h fail.h memory.h gc.h major_gc.h freelist.h minor_gc.h
 io.o: io.c alloc.h misc.h config.h ../../config/m.h ../../config/s.h mlvalues.h \
-  fail.h io.h memory.h gc.h major_gc.h freelist.h minor_gc.h signals.h sys.h ui.h
+  debugger.h fail.h io.h memory.h gc.h major_gc.h freelist.h minor_gc.h signals.h \
+  sys.h ui.h
 lexing.o: lexing.c mlvalues.h config.h ../../config/m.h ../../config/s.h misc.h \
   stacks.h memory.h gc.h major_gc.h freelist.h minor_gc.h str.h
-main.o: main.c ../version.h alloc.h misc.h config.h ../../config/m.h \
-  ../../config/s.h mlvalues.h exec.h fail.h gc.h globals.h intext.h io.h stacks.h \
-  memory.h major_gc.h freelist.h minor_gc.h sys.h debugcom.h
+main.o: main.c alloc.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h debugcom.h debugger.h exec.h fail.h gc_ctrl.h globals.h intext.h io.h \
+  stacks.h memory.h gc.h major_gc.h freelist.h minor_gc.h sys.h ../version.h
 major_gc.o: major_gc.c config.h ../../config/m.h ../../config/s.h debugger.h \
   misc.h mlvalues.h fail.h freelist.h gc.h gc_ctrl.h globals.h major_gc.h roots.h
 memory.o: memory.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
@@ -135,6 +136,6 @@ stacks.o: stacks.c config.h ../../config/m.h ../../config/s.h debugger.h misc.h 
   minor_gc.h
 str.o: str.c alloc.h misc.h config.h ../../config/m.h ../../config/s.h \
   mlvalues.h debugger.h
-sys.o: sys.c config.h ../../config/m.h ../../config/s.h alloc.h misc.h \
+sys.o: sys.c alloc.h misc.h config.h ../../config/m.h ../../config/s.h \
   mlvalues.h debugcom.h fail.h globals.h instruct.h signals.h stacks.h memory.h \
-  gc.h major_gc.h freelist.h minor_gc.h
+  gc.h major_gc.h freelist.h minor_gc.h ui.h

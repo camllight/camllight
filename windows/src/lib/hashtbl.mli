@@ -39,9 +39,16 @@ value new : int -> ('a,'b) t
         (* [do_table f tbl] applies [f] to all bindings in table [tbl],
 	   discarding all the results.
            [f] receives the key as first argument, and the associated value
-           as second argument. The order in which the bindings are passed to
-           [f] is unpredictable. Each binding is presented exactly once
-           to [f]. *)
+           as second argument.
+           Each binding is presented exactly once to [f].
+           The order in which the bindings are passed to
+           [f] is unpredictable, except that successive bindings for the same
+           key are presented in reverse chronological order 
+           (most recent first). *)
+
+  and do_table_rev : ('a -> 'b -> 'c) -> ('a, 'b) t -> unit
+        (* Same as [do_table], except that successive bindings for the same
+           key are presented in chronological order (oldest first). *)
 ;;
 
 (*** The polymorphic hash primitive *)

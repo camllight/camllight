@@ -298,15 +298,18 @@ illegal_token_ref(i, name)
 int i;
 char *name;
 {
-    fprintf(stderr, "%s: e - line %d of \"%s\", $%d refers to terminal `%s', which has no argument\n",
+    fprintf(stderr, "%s: e - line %d of \"%s\", $%d refers to terminal `%s', \
+which has no argument\n",
 	    myname, lineno, input_file_name, i, name);
     done(1);
 }
 
-default_action_warning()
+default_action_error()
 {
-    fprintf(stderr, "%s: w - line %d of \"%s\", the default action assigns an \
-undefined value to $$\n", myname, lineno, input_file_name);
+    fprintf(stderr, "%s: e - line %d of \"%s\", no action specified for \
+this production\n",
+            myname, lineno, input_file_name);
+    done(1);
 }
 
 

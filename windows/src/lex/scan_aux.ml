@@ -33,10 +33,10 @@ let get_stored_string () =
 ;;
 
 let char_for_backslash = function
-    `n` -> `\010` (* `\n` quand bootstrappe *)
-  | `t` -> `\009` (* `\t` *)
-  | `b` -> `\008` (* `\b` *)
-  | `r` -> `\013` (* `\r` *)
+    `n` -> `\n`  (* do NOT put explicit numeric values here -- DD *)
+  | `t` -> `\t`
+  | `b` -> `\b`
+  | `r` -> `\r`
   | c   -> c
 ;;
 

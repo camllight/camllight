@@ -107,7 +107,7 @@ static void mark_slice (work)
       Assert (Is_gray_val (v));
       Hd_val (v) = Blackhd_hd (Hd_val (v));
       if (Tag_val (v) < No_scan_tag){
-	for (i = Wosize_val (v); i > 0;){
+	for (i = Wosize_val (v); i != 0;){
 	  --i;
 	  child = Field (v, i);
 	  darken (child);
@@ -304,6 +304,8 @@ void init_major_heap (heap_size)
   gc_phase = Phase_mark;
   gray_vals_size = 2048;
   gray_vals = (value *) malloc (gray_vals_size * sizeof (value));
+  if (gray_vals == NULL)
+    fatal_error ("Fatal error: not enough memory for the initial heap.\n");
   gray_vals_cur = gray_vals;
   gray_vals_end = gray_vals + gray_vals_size;
   heap_is_pure = 1;

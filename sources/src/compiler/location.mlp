@@ -21,7 +21,7 @@ let get_current_location () =
 
 #ifdef macintosh
 let output_lines oc char1 char2 charline1 line1 line2 =
-  fprintf oc "; Line \165!%d:\165!%d\n" char1 char2; ()
+  fprintf oc (*'"'"*)"; Line \165!%d:\165!%d\n"(*"'"'*) char1 char2; ()
 ;;
 #else
 let output_lines oc char1 char2 charline1 line1 line2 =
@@ -67,7 +67,7 @@ let output_loc oc input seek line_flag (Loc(pos1, pos2)) =
           else ()
         done
       with End_of_file ->
-        pr_chars 5 ch in
+        if !f = 0 & !l > 0 then pr_chars 5 ch in
   let pos = ref 0
   and line1 = ref 1
   and line1_pos = ref 0

@@ -58,8 +58,8 @@
 %token BARRBRACKET    /* "|]" */
 %token GREATERRBRACKET/* ">]" */
 %token RBRACE         /* "}" */
-%token SLASHBACKSLASH /* "/\" */
-%token BACKSLASHSLASH /* "\/" */
+%token AMPERAMPER     /* "&&" */
+%token BARBAR         /* "||" */
 /* Keywords */
 %token AND            /* "and" */
 %token AS             /* "as" */
@@ -107,8 +107,8 @@
 %left  AS
 %left  BAR
 %left  COMMA
-%left  OR BACKSLASHSLASH
-%left  AMPERSAND SLASHBACKSLASH
+%left  OR BARBAR
+%left  AMPERSAND AMPERAMPER
 %left  NOT
 %left  INFIX1 EQUAL EQUALEQUAL          /* comparisons, concatenations */
 %right COLONCOLON                       /* cons */
@@ -198,23 +198,17 @@ Expr :
           { make_binop "==" $1 $3 }
       | Expr AMPERSAND Expr
           { make_expr(Zsequand($1, $3)) }
-      | Expr SLASHBACKSLASH Expr
+      | Expr AMPERAMPER Expr
           { make_expr(Zsequand($1, $3)) }
       | Expr OR Expr
           { make_expr(Zsequor($1, $3)) }
-      | Expr BACKSLASHSLASH Expr
+      | Expr BARBAR Expr
           { make_expr(Zsequor($1, $3)) }
       | Simple_expr DOT Ext_ident LESSMINUS Expr
           { make_expr(Zrecord_update($1, find_label $3, $5)) }
-      | Simple_expr DOT Ext_ident COLONEQUAL Expr
-          { make_expr(Zrecord_update($1, find_label $3, $5)) }
       | Simple_expr DOTLPAREN Expr RPAREN LESSMINUS Expr
           { make_ternop "vect_assign" $1 $3 $6 }
-      | Simple_expr DOTLPAREN Expr RPAREN COLONEQUAL Expr
-          { make_ternop "vect_assign" $1 $3 $6 }
       | Simple_expr DOTLBRACKET Expr RBRACKET LESSMINUS Expr
-          { make_ternop "set_nth_char" $1 $3 $6 }
-      | Simple_expr DOTLBRACKET Expr RBRACKET COLONEQUAL Expr
           { make_ternop "set_nth_char" $1 $3 $6 }
       | Expr COLONEQUAL Expr
           { make_binop ":=" $1 $3 }
@@ -283,11 +277,11 @@ Simple_expr :
           { make_expr (Zrecord $2) }
       | PREFIX Simple_expr
           { make_unop $1 $2 }
-      | Simple_expr DOT Ext_ident %prec COLONEQUAL
+      | Simple_expr DOT Ext_ident
           { make_expr(Zrecord_access($1, find_label $3)) }
-      | Simple_expr DOTLPAREN Expr RPAREN  %prec COLONEQUAL
+      | Simple_expr DOTLPAREN Expr RPAREN
           { make_binop "vect_item" $1 $3 }
-      | Simple_expr DOTLBRACKET Expr RBRACKET  %prec COLONEQUAL
+      | Simple_expr DOTLBRACKET Expr RBRACKET
           { make_binop "nth_char" $1 $3 }
 ;
 
@@ -402,7 +396,7 @@ Pattern_sm_list :
         Pattern SEMI Pattern_sm_list
           { make_pat(Zconstruct1pat(constr_cons,
               make_pat(Ztuplepat[$1; $3]))) }
-      | Pattern
+      | Pattern Opt_semi
           { make_pat(Zconstruct1pat(constr_cons,
               make_pat(Ztuplepat [$1;
                 make_pat(Zconstruct0pat(constr_nil))]))) }
@@ -411,9 +405,9 @@ Pattern_sm_list :
 Pattern_label_list :
         Pattern_label SEMI Pattern_label_list
           { $1 :: $3 }
-      | Pattern_label
+      | Pattern_label Opt_semi
           { [$1] }
-      | UNDERSCORE
+      | UNDERSCORE Opt_semi
           { [] }
 ;
 
@@ -469,11 +463,11 @@ Simple_pattern :
           { make_pat(Zconstruct0pat(constr_void)) }
       | LBRACKET RBRACKET
           { make_pat(Zconstruct0pat(constr_nil)) }
-      | LBRACKET Pattern_sm_list Opt_semi RBRACKET
+      | LBRACKET Pattern_sm_list RBRACKET
           { $2 }
       | LPAREN Pattern COLON Type RPAREN
           { make_pat(Zconstraintpat($2, $4)) }
-      | LBRACE Pattern_label_list Opt_semi RBRACE
+      | LBRACE Pattern_label_list RBRACE
           { make_pat(Zrecordpat $2) }
       | LPAREN Pattern RPAREN
           { $2 }
@@ -633,7 +627,7 @@ Constr_decl :
 Label_decl :
         Label1_decl SEMI Label_decl
           { $1 :: $3 }
-      | Label1_decl
+      | Label1_decl Opt_semi
           { [$1] }
 ;
 
@@ -659,7 +653,7 @@ Type1_def :
           { Zabstract_type }
       | EQUAL Opt_bar Constr_decl
           { Zvariant_type $3 }
-      | EQUAL LBRACE Label_decl Opt_semi RBRACE
+      | EQUAL LBRACE Label_decl RBRACE
           { Zrecord_type $3 }
       | EQUALEQUAL Type
           { Zabbrev_type $2 }

@@ -58,8 +58,8 @@ error.zo: misc.zo syntax.zo pr_type.zo location.zi interntl.zo globals.zo \
     types.zo const.zo 
 event.zo: syntax.zo lambda.zo modules.zo location.zi 
 front.zo: trstream.zo prim.zo lambda.zo error.zo tr_env.zo matching.zo \
-    modules.zo location.zi const.zo misc.zo event.zo syntax.zo globals.zo \
-    builtins.zo types.zo 
+    modules.zo const.zo misc.zo event.zo syntax.zo globals.zo builtins.zo \
+    types.zo 
 globals.zo: prim.zo const.zo 
 instruct.zo: prim.zo lambda.zo const.zo 
 interntl.zo: misc.zo 
@@ -68,8 +68,8 @@ lambda.zo: prim.zo globals.zo const.zo
 lexer.zi: parser.zi 
 main.zo: typing.zo modules.zo interntl.zo config.zi compiler.zo misc.zo \
     version.zo event.zo 
-matching.zo: clauses.zo prim.zo lambda.zo location.zi const.zo misc.zo \
-    syntax.zo globals.zo types.zo 
+matching.zo: clauses.zo prim.zo lambda.zo error.zo location.zi const.zo \
+    misc.zo syntax.zo globals.zo builtins.zo types.zo 
 modules.zo: misc.zo interntl.zo globals.zo const.zo 
 par_aux.zo: error.zo modules.zo location.zi const.zo misc.zo syntax.zo \
     globals.zo builtins.zo 

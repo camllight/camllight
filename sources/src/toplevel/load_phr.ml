@@ -40,6 +40,7 @@ let do_code may_free code entrypoint len =
           (interntl__translate "<Internal error while printing the exception>")
       end;
       print_newline();
+      flush std_out;
       raise Toplevel
   in
     if may_free then static_free code;
