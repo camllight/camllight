@@ -102,7 +102,8 @@ let write_type w name typdef =
   (* Dynamic Subtyping *)
   if typdef.subtypes <> [] then begin
     (* The set of its constructors *)
-    w ("type "^name^"_constrs =\n\t");
+    (* sp before "type" to avoid being picked up in documentation *)
+    w (" type "^name^"_constrs =\n\t");
     write_constructor_set w "\n\t| " typdef.constructors;
     w "\n;;\n\n";
     (* The set of all constructors *)
