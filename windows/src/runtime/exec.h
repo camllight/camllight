@@ -23,4 +23,4 @@ struct exec_trailer {
 
 /* Magic number for this release */
 
-#define EXEC_MAGIC 0x434c3036   /* "CL06" */
+#define EXEC_MAGIC 0x434c3037   /* "CL07" */
