@@ -26,6 +26,9 @@ type unit = ();;
 type 'a list = [] | prefix :: of 'a * 'a list;;
         (* The type of lists. *)
 
+type 'a option = None | Some of 'a;;
+        (* The type of optional values. *)
+
 exception Match_failure of string * int * int;;
         (* The exception raised when a pattern-matching fails.
            The argument indicates the position in the source code of the
