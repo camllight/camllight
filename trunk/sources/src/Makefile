@@ -2,7 +2,7 @@
 
 # Which C compiler to use.
 # Performance is often improved if you use gcc 2.x instead of cc.
-CC=cc
+CC=gcc
 
 # Additional options to $(CC).
 # If you are using gcc, add -fno-defer-pop.
