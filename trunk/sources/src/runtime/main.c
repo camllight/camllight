@@ -169,8 +169,10 @@ int main(argc, argv)
   }
 #endif /* not macintosh */
 
+#ifdef HAS_SOCKETS
   if (debugger_address == NULL)
     debugger_address = getenv("CAML_DEBUG_SOCKET");
+#endif
 
   if (setjmp(raise_buf.buf) == 0) {
 
