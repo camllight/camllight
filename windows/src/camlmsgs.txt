@@ -538,7 +538,7 @@ it:	%tNota: la direttiva #open per il modulo "%s" é inutile.\n
 src:	%aThe type %a has been declared with %d parameter(s)\n\
 	but is here defined with %d parameter(s).\n
 fr:	%aLe type %a, qui a été déclaré avec %d paramètre(s),\n\
-	est défini ici avec %d paramètres(s).\n
+	est défini ici avec %d paramètre(s).\n
 es:	%aEl tipo %a que fue declarado con %d parámetro(s),\n\
 	se define aquí con %d parámetro(s).\n
 de:	%aDer Typ %a wurde mit %d Parameter(n) deklariert,\n\
