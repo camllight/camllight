@@ -1,3 +1,16 @@
+Wed May 31 16:16:20 1995  Francois Rouaix  <rouaix@fronsac.inria.fr>
+
+	* Fixed result parsing. text__get and entry__get should now work
+	  decently.
+
+Tue May 30 11:06:51 1995  Francois Rouaix  <rouaix@fronsac.inria.fr>
+
+	* New version of protocol, using direct calls to Tcl procs.
+	* Rewrote tkcompiler accordingly
+	* Abandoned support of protocol2
+	* Moved some builtins for canvases in Widgets.src
+	* Added support__toplevel_widget_atom
+
 Beta 4 (May 2 1995)  Francois Rouaix  <rouaix@fronsac.inria.fr>
 
 	* Collision on constructor Color
