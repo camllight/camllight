@@ -206,15 +206,9 @@ Expr :
           { make_expr(Zsequor($1, $3)) }
       | Simple_expr DOT Ext_ident LESSMINUS Expr
           { make_expr(Zrecord_update($1, find_label $3, $5)) }
-      | Simple_expr DOT Ext_ident COLONEQUAL Expr
-          { make_expr(Zrecord_update($1, find_label $3, $5)) }
       | Simple_expr DOTLPAREN Expr RPAREN LESSMINUS Expr
           { make_ternop "vect_assign" $1 $3 $6 }
-      | Simple_expr DOTLPAREN Expr RPAREN COLONEQUAL Expr
-          { make_ternop "vect_assign" $1 $3 $6 }
       | Simple_expr DOTLBRACKET Expr RBRACKET LESSMINUS Expr
-          { make_ternop "set_nth_char" $1 $3 $6 }
-      | Simple_expr DOTLBRACKET Expr RBRACKET COLONEQUAL Expr
           { make_ternop "set_nth_char" $1 $3 $6 }
       | Expr COLONEQUAL Expr
           { make_binop ":=" $1 $3 }
@@ -283,11 +277,11 @@ Simple_expr :
           { make_expr (Zrecord $2) }
       | PREFIX Simple_expr
           { make_unop $1 $2 }
-      | Simple_expr DOT Ext_ident %prec COLONEQUAL
+      | Simple_expr DOT Ext_ident
           { make_expr(Zrecord_access($1, find_label $3)) }
-      | Simple_expr DOTLPAREN Expr RPAREN  %prec COLONEQUAL
+      | Simple_expr DOTLPAREN Expr RPAREN
           { make_binop "vect_item" $1 $3 }
-      | Simple_expr DOTLBRACKET Expr RBRACKET  %prec COLONEQUAL
+      | Simple_expr DOTLBRACKET Expr RBRACKET
           { make_binop "nth_char" $1 $3 }
 ;
 

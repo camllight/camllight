@@ -176,27 +176,27 @@ let tcl_string_for_read s =
         for i = 0 to string_length s - 1 do
           begin
             match nth_char s i with
-              `"` -> s'.[!n] := `\\`; incr n; s'.[!n] := `"`
-            | `\\` -> s'.[!n] := `\\`; incr n; s'.[!n] := `\\`
-            | `\n` -> s'.[!n] := `\\`; incr n; s'.[!n] := `n`
-            | `\t` -> s'.[!n] := `\\`; incr n; s'.[!n] := `t`
-            | `[` -> s'.[!n] := `\\`; incr n; s'.[!n] := `[`
-            | `]` -> s'.[!n] := `\\`; incr n; s'.[!n] := `]`
-            | `$` -> s'.[!n] := `\\`; incr n; s'.[!n] := `$`
-            | `{` -> s'.[!n] := `\\`; incr n; s'.[!n] := `{`
-            | `}` -> s'.[!n] := `\\`; incr n; s'.[!n] := `}`
+              `"` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `"`
+            | `\\` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `\\`
+            | `\n` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `n`
+            | `\t` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `t`
+            | `[` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `[`
+            | `]` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `]`
+            | `$` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `$`
+            | `{` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `{`
+            | `}` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `}`
             | c ->
                 if is_printable c then
-                  s'.[!n] := c
+                  s'.[!n] <- c
                 else begin
                   let a = int_of_char c in
-                  s'.[!n] := `\\`;
+                  s'.[!n] <- `\\`;
                   incr n;
-                  s'.[!n] := (char_of_int (48 + a / 100));
+                  s'.[!n] <- (char_of_int (48 + a / 100));
                   incr n;
-                  s'.[!n] := (char_of_int (48 + (a / 10) mod 10));
+                  s'.[!n] <- (char_of_int (48 + (a / 10) mod 10));
                   incr n;
-                  s'.[!n] := (char_of_int (48 + a mod 10))
+                  s'.[!n] <- (char_of_int (48 + a mod 10))
                 end
           end;
           incr n
@@ -208,12 +208,12 @@ let tcl_string_for_read s =
 let quote_string x =
   let n = string_length x + 2 in
   let s = create_string n in
-    s.[0] := ` `;
-    s.[n-1] := ` `;
+    s.[0] <- ` `;
+    s.[n-1] <- ` `;
     blit_string x 0 s 1 (n-2);
   let s' = tcl_string_for_read s in
-    s'.[0] := `"`;
-    s'.[string_length s'-1] := `"`;
+    s'.[0] <- `"`;
+    s'.[string_length s'-1] <- `"`;
    s'
 ;;
 
