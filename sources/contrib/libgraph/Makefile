@@ -34,7 +34,7 @@ all: libgraph.a graphics.zo graphics.zi camlgraph
 libgraph.a: $(OBJS)
 	rm -f libgraph.a
 	ar rc libgraph.a $(OBJS)
-	ranlib libgraph.a
+	if $(RANLIBTEST); then $(RANLIB) libgraph.a; else true; fi
 
 camlgraph: libgraph.a graphics.zo
 	$(CAMLMKTOP) -custom -o camlgraph ../libunix/unix.zo graphics.zo \
