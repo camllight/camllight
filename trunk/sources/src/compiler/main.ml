@@ -25,11 +25,11 @@ and open_set set =
   with Not_found ->
     raise (arg__Bad ("unknown module set " ^ set))
 and show_version () =
-   prerr_string version__banner; prerr_endline ""
+  version__print_banner(); flush std_err
 and show_types_flag () =
   compiler__verbose := true
 and debug_option () =
-  compiler__write_extended_zi := true
+  event__record_events := true; compiler__write_extended_intf := true
 ;;
 
 let main() =
@@ -46,15 +46,17 @@ try
               "-version", arg__Unit show_version;
               "-i", arg__Unit show_types_flag;
               "-g", arg__Unit debug_option;
-              "-debug", arg__Unit debug_option;
               "-", arg__String anonymous]
              anonymous;
   exit 0
-
 with Toplevel -> exit 2
-   | sys__Break -> exit 3
-   | Zinc s -> prerr_string "# Internal error: "; prerr_endline s; exit 4
+   | sys__Break -> exit 2
+   | sys__Sys_error msg ->
+      printf__eprintf "Input/output error: %s.\n" msg;
+      exit 2
+   | Zinc s ->
+      printf__eprintf "Internal error: %s.\nPlease report it.\n" s;
+      exit 100
 ;;
 
-printexc__f main ()
-;;
+printexc__f main ();;

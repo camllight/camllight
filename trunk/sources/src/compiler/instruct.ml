@@ -32,6 +32,7 @@ type zam_instruction =
   | Ktest of bool_test * int
   | Kbranchinterval of int * int * int * int
   | Kswitch of int vect
+  | Kevent of lambda__event
 ;;
 
 type zam_phrase =

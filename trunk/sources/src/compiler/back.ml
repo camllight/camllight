@@ -370,6 +370,15 @@ let rec compile_expr staticfail =
        end else begin
          Kbranch !lbl_ref :: discard_dead_code C
        end
+  | Levent(event, expr) ->
+       begin match event.ev_kind with
+         Lbefore ->
+           Kevent event :: compexp expr C
+       | Lafter ty ->                 (* expr is either raise arg or apply *)
+          match C with
+            Kreturn :: _ -> compexp expr C (* don't destroy tail call opt. *)
+          | _ -> compexp expr (Kevent event :: C)
+       end
 
   and compexplist = fun
       [] C -> C

@@ -18,7 +18,8 @@
 %token <float> FLOAT
 %token <string> STRING
 %token EOF
-%token <string> MULTIPLICATIVE /* "/" "*." "/." */
+%token <string> EXPONENTIATION /* "**" */
+%token <string> MULTIPLICATIVE /* "/" "*." "/." -- "*" is STAR */
 %token <string> ADDITIVE       /* "+" "+." */
 %token <string> SUBTRACTIVE    /* "-" "-." */
 %token <string> CONCATENATION  /* "^" "@" */
@@ -28,6 +29,7 @@
 %token SHARP          /* "#" */
 %token BANG           /* "!" */
 %token AMPERSAND      /* "&" */
+%token AMPERAMPER     /* "&&" */
 %token QUOTE          /* "'" */
 %token LPAREN         /* "(" */
 %token RPAREN         /* ")" */
@@ -37,20 +39,22 @@
 %token DOT            /* "." */
 %token DOTDOT         /* ".." */
 %token DOTLPAREN      /* ".(" */
+%token DOTLBRACKET    /* ".[" */
 %token COLON          /* ":" */
 %token COLONCOLON     /* "::" */
 %token COLONEQUAL     /* ":=" */
 %token SEMI           /* ";" */
 %token SEMISEMI       /* ";;" */
-%token LESSMINUS      /* "<-" */
 %token LBRACKET       /* "[" */
 %token LBRACKETBAR    /* "[|" */
 %token LBRACKETLESS   /* "[<" */
+%token LESSMINUS      /* "<-" */
 %token RBRACKET       /* "]" */
 %token UNDERSCORE     /* "_" */
 %token UNDERUNDER     /* "__" */
 %token LBRACE         /* "{" */
 %token BAR            /* "|" */
+%token BARBAR         /* "||" */
 %token BARRBRACKET    /* "|]" */
 %token GREATERRBRACKET/* ">]" */
 %token RBRACE         /* "}" */
@@ -97,8 +101,8 @@
 %left  AS
 %left  BAR
 %right COMMA
-%right OR
-%left  AMPERSAND
+%right OR BARBAR
+%left  AMPERSAND AMPERAMPER
 %left  NOT
 %left  COMPARISON EQUAL EQUALEQUAL
 %right CONCATENATION
@@ -107,9 +111,10 @@
 %right prec_typearrow
 %left  STAR MULTIPLICATIVE
 %left  INFIX
+%left  EXPONENTIATION
 %right prec_uminus
 %right prec_app
-%left  DOT DOTLPAREN
+%left  DOT DOTLPAREN DOTLBRACKET
 %right BANG
 
 /* Entry points */
@@ -179,6 +184,11 @@ Expr_sm_list :
           { [$1] }
 ;
 
+Opt_semi :
+        SEMI            { () }
+      | /*epsilon*/     { () }
+;
+
 Expr_label :
         Ext_ident EQUAL Expr
           { (find_label $1, $3)  }
@@ -230,11 +240,23 @@ Expr :
           { make_binop ":=" $1 $3 }
       | Expr AMPERSAND Expr 
           { make_expr(Zsequand($1, $3)) }
+      | Expr AMPERAMPER Expr 
+          { make_expr(Zsequand($1, $3)) }
       | Expr OR Expr
+          { make_expr(Zsequor($1, $3)) }
+      | Expr BARBAR Expr
           { make_expr(Zsequor($1, $3)) }
       | Simple_expr DOT Ext_ident LESSMINUS Expr
           { make_expr(Zrecord_update($1, find_label $3, $5)) }
+      | Simple_expr DOT Ext_ident COLONEQUAL Expr
+          { make_expr(Zrecord_update($1, find_label $3, $5)) }
       | Simple_expr DOTLPAREN Expr RPAREN LESSMINUS Expr
+          { make_ternop "vect_assign" $1 $3 $6 }
+      | Simple_expr DOTLPAREN Expr RPAREN COLONEQUAL Expr
+          { make_ternop "set_nth_char" $1 $3 $6 }
+      | Simple_expr DOTLBRACKET Expr RBRACKET LESSMINUS Expr
+          { make_ternop "set_nth_char" $1 $3 $6 }
+      | Simple_expr DOTLBRACKET Expr RBRACKET COLONEQUAL Expr
           { make_ternop "vect_assign" $1 $3 $6 }
       | IF Expr THEN Expr ELSE Expr  %prec prec_if
           { make_expr(Zcondition($2, $4, $6)) }
@@ -248,22 +270,22 @@ Expr :
           { make_expr(Zfor($2, $4, $6, false, $8)) }
       | Expr SEMI Expr
           { make_expr(Zsequence($1, $3)) }
-      | MATCH Expr WITH Function_match
-          { make_expr(Zapply(make_expr(Zfunction $4), [$2])) }
-      | MATCH Expr WITH Parser_match
-          { make_expr(Zapply(make_expr(Zparser $4), [$2])) }
+      | MATCH Expr WITH Opt_bar Function_match
+          { make_expr(Zapply(make_expr(Zfunction $5), [$2])) }
+      | MATCH Expr WITH Opt_bar Parser_match
+          { make_expr(Zapply(make_expr(Zparser $5), [$2])) }
       | LET Binding_list IN Expr  %prec prec_let
           { make_expr(Zlet(false, $2, $4)) }
       | LET REC Binding_list IN Expr  %prec prec_let
           { make_expr(Zlet(true, $3, $5)) }
-      | FUN Fun_match
-          { make_expr(Zfunction $2) }
-      | FUNCTION Function_match
-          { make_expr(Zfunction $2) }
-      | FUNCTION Parser_match
-          { make_expr(Zparser $2) }
-      | TRY Expr WITH Try_match
-	  { make_expr(Ztrywith($2, $4)) }
+      | FUN Opt_bar Fun_match
+          { make_expr(Zfunction $3) }
+      | FUNCTION Opt_bar Function_match
+          { make_expr(Zfunction $3) }
+      | FUNCTION Opt_bar Parser_match
+          { make_expr(Zparser $3) }
+      | TRY Expr WITH Opt_bar Try_match
+	  { make_expr(Ztrywith($2, $5)) }
       | Expr WHERE Binding_list  %prec prec_where
           { make_expr(Zlet(false, $3, $1)) }
       | Expr WHERE REC Binding_list  %prec prec_where
@@ -277,15 +299,15 @@ Simple_expr :
           { expr_constr_or_ident $1 }
       | LPAREN RPAREN
           { make_expr(Zconstruct0(constr_void)) }
-      | LBRACKET Expr_sm_list RBRACKET
+      | LBRACKET Expr_sm_list Opt_semi RBRACKET
           { make_list $2 }
       | LBRACKET RBRACKET
           { make_expr(Zconstruct0(constr_nil)) }
-      | LBRACKETBAR Expr_sm_list BARRBRACKET
+      | LBRACKETBAR Expr_sm_list Opt_semi BARRBRACKET
           { make_expr(Zvector(rev $2)) }
       | LBRACKETBAR BARRBRACKET
           { make_expr(Zvector []) }
-      | LBRACKETLESS Stream_expr GREATERRBRACKET
+      | LBRACKETLESS Stream_expr Opt_semi GREATERRBRACKET
           { make_expr(Zstream (rev $2)) }
       | LBRACKETLESS GREATERRBRACKET
           { make_expr(Zstream []) }
@@ -293,9 +315,9 @@ Simple_expr :
           { make_expr(Zconstraint($2, $4)) }
       | LPAREN Expr RPAREN
           { $2 }
-      | BEGIN Expr END
+      | BEGIN Expr Opt_semi END
           { $2 }
-      | LBRACE Expr_label_list RBRACE
+      | LBRACE Expr_label_list Opt_semi RBRACE
           { make_expr (Zrecord $2) }
       | BANG Simple_expr
           { make_unop "!" $2 }
@@ -303,6 +325,8 @@ Simple_expr :
           { make_expr(Zrecord_access($1, find_label $3)) }
       | Simple_expr DOTLPAREN Expr RPAREN  %prec DOT
           { make_binop "vect_item" $1 $3 }
+      | Simple_expr DOTLBRACKET Expr RBRACKET  %prec DOT
+          { make_binop "nth_char" $1 $3 }
 ;
 
 /* Constants */
@@ -324,6 +348,11 @@ Atomic_constant :
 ;
 
 /* Definitions by pattern matchings */
+
+Opt_bar:
+        BAR             { () }
+      | /*epsilon*/     { () }
+;
 
 Fun_match :
         Simple_pattern_list MINUSGREATER Expr BAR Fun_match
@@ -357,14 +386,15 @@ Binding :
         Pattern EQUAL Expr  %prec prec_define
           { ($1, $3) }
       | Ide Simple_pattern_list EQUAL Expr  %prec prec_define
-          { (pat_constr_or_var $1, make_expr(Zfunction [$2, $4])) }
+          { (make_pat(Zvarpat $1), make_expr(Zfunction [$2, $4])) }
 ;
 
 /* Patterns */
 
 Pattern_sm_list :
         Pattern SEMI Pattern_sm_list
-          { make_pat(Zconstruct1pat(constr_cons, make_pat(Ztuplepat[$1; $3]))) }
+          { make_pat(Zconstruct1pat(constr_cons,
+              make_pat(Ztuplepat[$1; $3]))) }
       | Pattern
           { make_pat(Zconstruct1pat(constr_cons,
               make_pat(Ztuplepat [$1;
@@ -432,11 +462,11 @@ Simple_pattern :
           { make_pat(Zconstruct0pat(constr_void)) }
       | LBRACKET RBRACKET
           { make_pat(Zconstruct0pat(constr_nil)) }
-      | LBRACKET Pattern_sm_list RBRACKET
+      | LBRACKET Pattern_sm_list Opt_semi RBRACKET
           { $2 }
       | LPAREN Pattern COLON Type RPAREN
           { make_pat(Zconstraintpat($2, $4)) }
-      | LBRACE Pattern_label_list RBRACE
+      | LBRACE Pattern_label_list Opt_semi RBRACE
           { make_pat(Zrecordpat $2) }
       | LPAREN Pattern RPAREN
           { $2 }
@@ -463,7 +493,7 @@ Stream_expr_component :
 Stream_pattern :
         LBRACKETLESS GREATERRBRACKET
           { [] }
-      | LBRACKETLESS Stream_pattern_component_list GREATERRBRACKET
+      | LBRACKETLESS Stream_pattern_component_list Opt_semi GREATERRBRACKET
           { $2 }
 ;
 
@@ -621,9 +651,7 @@ Type1_decl :
 
 Type1_def :
         /* epsilon */
-          { Zabstract_type Notmutable }
-      | MUTABLE
-          { Zabstract_type Mutable }
+          { Zabstract_type }
       | EQUAL Constr_decl
           { Zvariant_type $2 }
       | EQUAL LBRACE Label_decl RBRACE

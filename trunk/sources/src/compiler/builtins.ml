@@ -12,26 +12,26 @@ let builtin n d = {qualid={qual="builtin"; id=n}; info=d}
 (* Some types that must be known to the type checker *)
 
 let constr_type_unit =
-  builtin "unit" {ty_stamp=2; ty_dang=false; ty_abbr=Tnotabbrev}
+  builtin "unit" {ty_stamp=2; ty_abbr=Tnotabbrev}
 and constr_type_exn =
-  builtin "exn" {ty_stamp=3; ty_dang=false; ty_abbr=Tnotabbrev}
+  builtin "exn" {ty_stamp=3; ty_abbr=Tnotabbrev}
 and constr_type_bool =
-  builtin "bool" {ty_stamp=4; ty_dang=false; ty_abbr=Tnotabbrev}
+  builtin "bool" {ty_stamp=4; ty_abbr=Tnotabbrev}
 and constr_type_int =
-  builtin "int" {ty_stamp=5; ty_dang=false; ty_abbr=Tnotabbrev}
+  builtin "int" {ty_stamp=5; ty_abbr=Tnotabbrev}
 and constr_type_float =
-  builtin "float" {ty_stamp=6; ty_dang=false; ty_abbr=Tnotabbrev}
+  builtin "float" {ty_stamp=6; ty_abbr=Tnotabbrev}
 and constr_type_string =
-  builtin "string" {ty_stamp=7; ty_dang=false; ty_abbr=Tnotabbrev}
+  builtin "string" {ty_stamp=7; ty_abbr=Tnotabbrev}
 and constr_type_char =
-  builtin "char" {ty_stamp=8; ty_dang=false; ty_abbr=Tnotabbrev}
+  builtin "char" {ty_stamp=8; ty_abbr=Tnotabbrev}
 and constr_type_list =
-  builtin "list" {ty_stamp=9; ty_dang=false; ty_abbr=Tnotabbrev}
+  builtin "list" {ty_stamp=9; ty_abbr=Tnotabbrev}
 and constr_type_vect =
-  builtin "vect" {ty_stamp=10; ty_dang=true; ty_abbr=Tnotabbrev}
+  builtin "vect" {ty_stamp=10; ty_abbr=Tnotabbrev}
 and constr_type_stream =
   {qualid = {qual="stream"; id="stream"};
-   info   = {ty_stamp=1; ty_dang=false; ty_abbr=Tnotabbrev}}
+   info   = {ty_stamp=1; ty_abbr=Tnotabbrev}}
     (* This assumes that "stream" is the first type defined in
        the module "stream". *)
 ;;
