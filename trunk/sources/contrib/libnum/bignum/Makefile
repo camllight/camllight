@@ -98,6 +98,27 @@ supersparc: scratch
 	make CC="$(CC)" CFLAGS="$(CFLAGS)" \
 	     OBJECT="$(OBJECT)" all
 
+sparc-solaris: scratch
+	sed -e 's/_Bnn/Bnn/g' s/sparcKerN.s > s/KerN.s
+	as s/KerN.s -o o/KerN.o
+	rm -f s/KerN.s
+	make CC="$(CC)" CFLAGS="$(CFLAGS)" \
+	     OBJECT="$(OBJECT)" all
+
+sparcfpu-solaris: scratch
+	sed -e 's/_Bnn/Bnn/g' s/sparcfpuKerN.s > s/KerN.s
+	as s/KerN.s -o o/KerN.o
+	rm -f s/KerN.s
+	make CC="$(CC)" CFLAGS="$(CFLAGS)" \
+	     OBJECT="$(OBJECT)" all
+
+supersparc-solaris: scratch
+	sed -e 's/_Bnn/Bnn/g' s/supersparcKerN.s > s/KerN.s
+	as s/KerN.s -o o/KerN.o
+	rm -f s/KerN.s
+	make CC="$(CC)" CFLAGS="$(CFLAGS)" \
+	     OBJECT="$(OBJECT)" all
+
 # Construct VMS assembler from UNIX version
 
 s/vaxKerN.mar: s/vaxKerN.s

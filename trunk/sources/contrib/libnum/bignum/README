@@ -32,6 +32,8 @@ This directory contains the C and assembler source code for BigNum.
       sparcfpuKerN.s	- SPARC implementation of KerN using FPU, may
 			  give faster multiplication on SPARC
 			  implementations with fast floating point
+      supersparcKerN.s  - SPARC V8 implementation of KerN
+                          (with hardware integer multiplication)
 
    Other Files:
       Makefile		- U*ix makefile
@@ -48,8 +50,12 @@ Now, to build or modify the current version of the package, type one of:
 	make mips	- to use mips assembly code
 	make pyramid	- to use pyramid assembly code
 	make i960	- to use intel 80960 assembly code
-	make sparc	- to use sparc assembly code
+	make sparc	- to use sparc assembly code (SunOS 4)
 	make sparcfpu	- to use sparc assembly code (with multiply in FPU)
+	make supersparc	- to use sparc V8 assembly code (Sun OS 4)
+        make sparc-solaris
+        make sparcfpu-solaris  same as above, for Solaris 2 instead of SunOS 4
+        make supersparc-solaris
 	make C16	- to use C code with 16 bits digits
 	make C32	- to use C code with 32 bits digits (default version)
 
