@@ -37,7 +37,11 @@ void get_sockaddr(a)
     }
   case 1:                       /* ADDR_INET */
     {
-      bzero(&sock_addr.s_inet, sizeof(sock_addr.s_inet));
+      char * p;
+      int n;
+      for (p = (char *) &sock_addr.s_inet, n = sizeof(sock_addr.s_inet);
+           n > 0; p++, n--)
+        *p = 0;
       sock_addr.s_inet.sin_family = AF_INET;
       sock_addr.s_inet.sin_addr.s_addr = GET_INET_ADDR(Field(a, 0));
       sock_addr.s_inet.sin_port = htons(Int_val(Field(a, 1)));
