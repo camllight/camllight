@@ -75,9 +75,10 @@
   (define-key camldebug-mode-map "\C-l" 'camldebug-refresh)
   (define-key camldebug-mode-map "\C-c\C-c" 'camldebug-control-c-subjob)
   (define-key camldebug-mode-map "\t" 'comint-dynamic-complete)
-  (define-key camldebug-mode-map "\M-?" 'comint-dynamic-list-completions)
-  (if camldebug-emacs-19
-      (define-key camldebug-mode-map [double-mouse-1] 'camldebug-more)))
+  (define-key camldebug-mode-map "\M-?" 'comint-dynamic-list-completions))
+
+;;;  (if camldebug-emacs-19
+;;;      (define-key camldebug-mode-map [double-mouse-1] 'camldebug-more)))
 
 (if caml-mode-map
     (progn
@@ -361,7 +362,7 @@ Obeying it means displaying in another window the specified file and line."
   (if (and camldebug-emacs-19 window-system)
       (progn
         (if (save-excursion
-              (set-buffer before)
+              (set-buffer buffer)
               (goto-char (1+ pos))
               (looking-at "\n"))
             (setq pos (1- pos)))
@@ -432,23 +433,24 @@ Obeying it means displaying in another window the specified file and line."
                                  (camldebug-module-name file-name)
 				 (1- pos)))))
 
-(defun camldebug-more (ev)
-  "Print ellipsed value."
-  (interactive "e")
-  (let* ((click-posn (event-start click))
-         (click-point (posn-point click-posn))
-         (click-window (posn-window click-posn)))
-    (select-window click-window)
-    (save-excursion
-      (goto-char click-point)
-      (skip-chars-backward "^<")
-      (if (and (> (point) (point-min))
-               (forward-char -1)
-               (looking-at "<\\([0-9]+\\)>"))
-          (process-send-string
-           (get-buffer-process current-camldebug-buffer)
-           (format "more %s\n"
-                   (buffer-substring (match-beginning 1) (match-end 1))))))))
+;;; (defun camldebug-more (ev)
+;;;   "Print ellipsed value."
+;;;   (interactive "e")
+;;;   (let* ((click-posn (event-start click))
+;;;          (click-point (posn-point click-posn))
+;;;          (click-window (posn-window click-posn)))
+;;;     (select-window click-window)
+;;;     (save-excursion
+;;;       (goto-char click-point)
+;;;       (skip-chars-backward "^<")
+;;;       (if (and (> (point) (point-min))
+;;;                (forward-char -1)
+;;;                (looking-at "<\\([0-9]+\\)>"))
+;;;           (process-send-string
+;;;            (get-buffer-process current-camldebug-buffer)
+;;;            (format "more %s\n"
+;;;                    (buffer-substring (match-beginning 1)
+;;;                                      (match-end 1))))))))
 
 (defun camldebug-control-c-subjob ()
   "Send a Control-C to the subprocess."
