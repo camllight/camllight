@@ -11,6 +11,11 @@
 type num = Int of int | Big_int of big_int | Ratio of ratio;;
         (* The type of numbers. *)
 
+value normalize_num : num -> num;;
+
+value numerator_num : num -> num;;
+value denominator_num : num -> num;;
+
 (*** Arithmetic operations *)
 
 value prefix +/ : num -> num -> num

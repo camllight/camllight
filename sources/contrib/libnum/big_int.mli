@@ -6,7 +6,8 @@
    
 type big_int;;
 
-value sign_big_int : big_int -> int
+value create_big_int : int -> nat -> big_int
+  and sign_big_int : big_int -> int
   and abs_value_big_int : big_int -> nat
   and zero_big_int : big_int
   and unit_big_int : big_int
