@@ -39,8 +39,8 @@ try
               "-debug", arg__Unit debug_option]
              anonymous;
   default_used_modules := "toplevel" :: !default_used_modules;
-  print_string version__banner;
-  print_newline(); print_newline();
+  version__print_banner();
+  print_newline();
   let ic = open_in_bin command_line.(0) in
     seek_in ic (in_channel_length ic - 20);
     let size_code = input_binary_int ic in
@@ -65,17 +65,21 @@ try
       with End_of_file ->
              io__exit 0
          | Toplevel ->
-             flush std_out;
+             flush std_err;
              rollback ()
          | Break ->
-             print_begline "Interrupted."; print_endline "";
-             flush std_out;
+             printf__printf "Interrupted.\n";
+             flush std_err;
              rollback ()
     done
 
 with Toplevel -> exit 2
-   | Zinc s -> prerr_string "# Internal error: "; prerr_endline s; exit 4
+   | sys__Sys_error msg ->
+      printf__eprintf "Input/output error: %s.\n" msg;
+      exit 2
+   | Zinc s ->
+      printf__eprintf "Internal error: %s.\nPlease report it.\n" s;
+      exit 100
 ;;
 
-printexc__f main ()
-;;
+printexc__f main ();;

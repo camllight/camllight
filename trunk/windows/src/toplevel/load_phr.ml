@@ -30,7 +30,7 @@ let do_code may_free code entrypoint len =
       | _ ->
           ()
       end;
-      print_begline "Uncaught exception: ";
+      printf__printf "Uncaught exception: ";
       print_value (obj__repr x) builtins__type_exn;
       print_endline "";
       raise Toplevel
