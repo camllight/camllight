@@ -48,6 +48,12 @@ let parse_file filename =
       prerr_string s; prerr_string " "; prerr_string s';
       prerr_string " is defined twice.\n";
       exit 1
+  | Compiler_Error s ->
+      close_in ic;
+      prerr_error_header();
+      prerr_string "Internal error: "; prerr_string s; prerr_string "\n";
+      prerr_string "Please report bug\n";
+      exit 1
   | End_of_file ->
       close_in ic
 ;;

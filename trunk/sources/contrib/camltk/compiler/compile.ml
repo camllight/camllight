@@ -12,6 +12,7 @@ let must_quote c =
     c == `[` or c == `]` or c == `$` or c == `{` or c == `}`
 ;;
 
+(* Quadratic, but here used only on small strings *)
 let quote_string s =
   let s = string_for_read s in
   let rec sfr cur res =
@@ -54,6 +55,7 @@ let rec ppMLtype =
       	(catenate_sep " -> " (map ppMLtype tyl))^ " ->  unit"
   | Function ty ->
       	(ppMLtype ty) ^ " -> unit"
+  | Braced ty -> ppMLtype ty
 ;;
 
 
@@ -73,7 +75,7 @@ let write_constructor w
 
 (* Write a rhs type decl *)
 let write_constructors w = function
-    [] -> failwith "empty type"
+    [] -> fatal_error "empty type"
   | x::l -> write_constructor w x;
 	    do_list (function x ->
 		      w "\n\t| ";
@@ -83,7 +85,7 @@ let write_constructors w = function
 
 (* List of constructors *)
 let write_constructor_set w sep = function
-    [] -> failwith "empty type"
+    [] -> fatal_error "empty type"
   | x::l -> w ("C" ^ x.MLName);
       	    do_list (function x ->
 		       w sep;
@@ -146,8 +148,7 @@ let rec converterTKtoCAML argname = function
  | Subtype (s,s') -> "TKtoCAML"^s^" "^argname
  | List ty ->  "(map (function x -> " 
                  ^ (converterTKtoCAML "x) " ty) ^ argname ^ ")"
-
- | _ -> failwith "bug"
+ | _ -> fatal_error "converterTKtoCAML"
 ;;
 
 let write_wrapper_code w fname argtys =
@@ -256,13 +257,17 @@ let write_TKtoCAML w name typdef =
 (* Converters                 *)
 (******************************)
 
-(* Produce an in-lined converter Caml -> Tk for simple *valid* type *)
+(* Produce an in-lined converter Caml -> Tk for simple types *)
+(* the converter is a function of type:  <type> -> string  *)
 let rec converterCAMLtoTK context_widget argname = function
     Int -> "string_of_int " ^ argname
- |  Char -> "char_for_read " ^ argname
  |  Float -> "string_of_float " ^ argname
  |  Bool -> "if "^argname^" then \"1\" else \"0\""
+ |  Char -> "char_for_read " ^ argname
  |  String -> "quote_string " ^ argname
+ |  List ty -> 
+      "catenate_sep \" \" (map (function x -> " 
+             ^ (converterCAMLtoTK context_widget "x) " ty) ^ argname ^ ")"
  |  UserDefined s -> 
        let name = "CAMLtoTK"^s^" " in
        let args = argname in
@@ -275,9 +280,6 @@ let rec converterCAMLtoTK context_widget argname = function
 	     context_widget^" "^args
            else args in
        name^args
- |  List ty -> 
-      "catenate_sep \" \" (map (function x -> " 
-             ^ (converterCAMLtoTK context_widget "x) " ty) ^ argname ^ ")"
  |  Subtype (s,s') ->
        let name = "CAMLtoTK"^s^" " in
        let args = s^"_"^s'^"_table "^argname in
@@ -286,25 +288,43 @@ let rec converterCAMLtoTK context_widget argname = function
 	     context_widget^" "^args
            else args in
        name^args
- | ty -> failwith "debug"
+ | Braced ty ->
+       "\"{\" ^ " ^ 
+       (converterCAMLtoTK context_widget argname ty) ^ 
+       " ^ \"}\""
+ | Function _ -> fatal_error "unexpected function type in converterCAMLtoTK"
+ | Unit       -> fatal_error "unexpected unit type in converterCAMLtoTK"
+ | Product _  -> fatal_error "unexpected product type in converterCAMLtoTK"
 ;;
 
+(* For each case of a concrete type *)
 let write_clause w context_widget subtyp comp =
+
+  (* Check if whole argument is braced *)
+  let braced, ty = match comp.Arg with
+      Braced ty -> true, ty
+    | _ -> false, comp.Arg in
+
   let warrow () = 
       w " -> ";
       if subtyp then 
-         w ("chk_sub \""^comp.MLName^"\" table C" ^ comp.MLName ^ "; ")
+         w ("chk_sub \""^comp.MLName^"\" table C" ^ comp.MLName ^ "; ");
   in
+
   w comp.MLName;
-  match comp.Arg with
+
+  match ty with
     Unit -> warrow (); w "\""; w (quote_string comp.TkName); w "\""
   | Product tyl ->
        let vars = varnames "a" (list_length tyl) in
        	 w "( ";  w (catenate_sep ", " vars); w ")";
 	 warrow(); w "\""; w (quote_string comp.TkName); w "\"";
+         if braced then w " ^ \" {\"";
 	 do_list2 (fun v ty -> w "^\" \"^"; 
                                w (converterCAMLtoTK context_widget v ty))
-	          vars tyl
+	          vars tyl;
+         if braced then w " ^ \" }\""
+
   | Function ty -> 
       let vars = match ty with
       	Product tyl -> varnames "p" (list_length tyl)
@@ -319,15 +339,20 @@ let write_clause w context_widget subtyp comp =
       	   Unit ->  w "(function _ -> f ())"
          | _ -> write_wrapper_code w "f" ty
       end;
-      w (" in \"{camlcb \"^id^\"}\"")
+      w (" in \"{camlcb \"^id^\"}\"");
   | ty -> 
       w " x"; warrow();
       if comp.TkName <> "" then begin
       	  w "\""; w (quote_string comp.TkName); w "\"^\" \"^"
       end;
-      w (converterCAMLtoTK context_widget "x" ty)
+      if braced then w " ^ \" {\"";
+      w (converterCAMLtoTK context_widget "x" ty);
+      if braced then w " ^ \" }\""
+
 ;;
-	 
+
+
+(* The full converter *)	 
 let write_CAMLtoTK w name typdef =
   w ("let CAMLtoTK"^name);
   let context_widget = 

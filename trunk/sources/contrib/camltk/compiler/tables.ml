@@ -1,5 +1,10 @@
-(* Tables built by the parser *)
+(* Internal compiler errors *)
 
+exception Compiler_Error of string ;;
+let fatal_error s = raise (Compiler_Error s);;
+
+
+(* Types of the description language *)
 type MLtype =
    Unit
  | Int
@@ -12,13 +17,16 @@ type MLtype =
  | UserDefined of string
  | Subtype of string * string
  | Function of MLtype			(* arg type only *)
+ | Braced of MLtype
 ;;
 
+(* Sorts of components *)
 type ComponentType =
    Constructor
  | Command
 ;;
 
+(* Full definition of a component *)
 type FullComponent = {
   Component : ComponentType;
   MLName : string;
@@ -28,14 +36,18 @@ type FullComponent = {
   }
 ;;
 
+(* Components are given either in full or abbreviated *)
 type Component = 
    Full of FullComponent
  | Abbrev of string
 ;;
 
-(* requires_widget_context: the converter of the type MUST be passed
+(* A type definition *)
+(* 
+ requires_widget_context: the converter of the type MUST be passed
    an additional argument of type Widget.
 *)
+
 type TypeDef = {
   mutable constructors : FullComponent list;
   mutable subtypes : (string * FullComponent list) list;
@@ -43,19 +55,58 @@ type TypeDef = {
 }
 ;;
 
+type ModuleType =
+    Widget
+  | Family
+;;
 
+type ModuleDef = {
+  ModuleType : ModuleType;
+  Commands : FullComponent list
+}
+;;
+
+(******************** The tables ********************)
+
+(* the table of all explicitly defined types *)
 let types_table = (hashtbl__new 37 : (string, TypeDef) hashtbl__t)
 ;;
-let types_order = (tsort__new () : string tsort__porder)
-;;
+(* "builtin" types *)
 let types_external = ref ([] : string list)
 ;;
+(* dependancy order *)
+let types_order = (tsort__new () : string tsort__porder)
+;;
+(* Types of atomic values returned by Tk functions *)
+let types_returned = ref  ([] : string list)
+;;
+(* Function table *)
+let function_table = ref ([] : FullComponent list)
+;;
+(* Widget/Module table *)
+let module_table = (hashtbl__new 37 : (string, ModuleDef) hashtbl__t)
+;;
 
+
+(***** Some utilities on the various tables *****)
+(* Enter a new empty type *)
+let new_type typname = 
+  tsort__add_element types_order typname;
+  let typdef = {constructors = []; 
+      	        subtypes = []; 
+      	       	requires_widget_context = false} in
+    hashtbl__add types_table typname typdef;
+    typdef
+;;
+
+
+(* Assume that types not yet defined are not subtyped *)
+(* Widget is builtin and implicitly subtyped *)
 let is_subtyped s =
   s = "Widget" or
   try  
-    let typdef = hashtbl__find types_table s
-    in typdef.subtypes <> []
+    let typdef = hashtbl__find types_table s in
+      typdef.subtypes <> []
   with
     Not_found -> false
 ;;
@@ -71,10 +122,33 @@ let enter_external_type s =
   types_external := s::!types_external
 ;;
 
-(* Types of values returned by Tk functions *)
-let types_returned = ref  ([] : string list)
+(*** Stuff for topological sort of types ***)
+(* Make sure all types used in commands and functions are in *)
+(* the table *)
+let rec enter_argtype = function
+    Unit | Int | Float | Bool | Char | String -> ()
+  | List ty -> enter_argtype ty
+  | Product tyl -> do_list enter_argtype tyl
+  | UserDefined s -> tsort__add_element types_order s
+  | Subtype (s,_) -> tsort__add_element types_order s
+  | Function ty -> enter_argtype ty
+  | Braced ty -> enter_argtype ty
 ;;
 
+(* Find type dependancies on s *)
+let rec add_dependancies s =
+  function
+    List ty -> add_dependancies s ty
+  | Product tyl -> do_list (add_dependancies s) tyl
+  | Subtype(s',_) -> if s <> s' then tsort__add_relation types_order (s', s)
+  | UserDefined s' -> if s <> s' then tsort__add_relation types_order (s', s)
+  | Function ty -> add_dependancies s ty
+  | Braced ty -> add_dependancies s ty
+  | _ -> ()
+;;
+
+
+(*** Returned types ***)
 let really_add ty = 
   if mem ty !types_returned then ()
   else types_returned := ty :: !types_returned
@@ -91,10 +165,21 @@ let rec add_return_type = function
   | Product tyl -> do_list add_return_type tyl
   | UserDefined s -> really_add s
   | Subtype (s,_) -> really_add s
-  | Function _ -> () (* whoah *)
+  | Function _ -> fatal_error "unexpected return type (function)" (* whoah *)
+  | Braced _ -> fatal_error "unexpected return type (brace)"
 ;;
 
+(*** Update tables for a component ***)
+let enter_component_types c =
+  add_return_type c.Result;
+  enter_argtype c.Result;
+  enter_argtype c.Arg
+;;
+
+
+(******************** Types and subtypes ********************)
 exception Duplicate_Definition of string * string;;
+exception Invalid_implicit_constructor of string;;
 
 (* Checking duplicate definition of constructor in subtypes *)
 let rec check_duplicate_constr allowed c =
@@ -109,60 +194,39 @@ let rec check_duplicate_constr allowed c =
     else check_duplicate_constr allowed c rest
 ;;
 
-(* Find type dependancies *)
-let rec add_dependancies s =
-  function
-    List ty -> add_dependancies s ty
-  | Product tyl -> do_list (add_dependancies s) tyl
-  | Subtype(s',_) -> if s <> s' then tsort__add_relation types_order (s', s)
-  | UserDefined s' -> if s <> s' then tsort__add_relation types_order (s', s)
-  | Function ty -> add_dependancies s ty
-  | _ -> ()
-;;
-
-(* Enter a type *)
-(* Must not be previously defined *)
-let enter_type typname constructors =
-  try
-      hashtbl__find types_table typname;
-      raise (Duplicate_Definition ("type", typname))
-  with Not_found ->
-    tsort__add_element types_order typname;
-    let typdef = {constructors = []; subtypes = []; 
-      	       	  requires_widget_context = false} in
-    do_list (function c ->
-		if not (check_duplicate_constr false c typdef.constructors)
-		then begin 
-		   typdef.constructors := c :: typdef.constructors;
-		   add_dependancies typname c.Arg
-		end;
-      	       	match c.Arg with
-      	       	  Function _ -> typdef.requires_widget_context := true
-                | _ -> ())
-            constructors;
-    hashtbl__add types_table typname typdef
-;;
-
 (* Retrieve constructor *)
-exception Invalid_implicit_constructor of string
-;;
 let rec find_constructor cname = function
    [] -> raise (Invalid_implicit_constructor cname)
  | c::l -> if c.MLName = cname then c
        	   else find_constructor cname l
 ;;
 
+(* Enter a type, must not be previously defined *)
+let enter_type typname constructors =
+  try
+      hashtbl__find types_table typname;
+      raise (Duplicate_Definition ("type", typname))
+  with Not_found ->
+    let typdef = new_type typname in
+    do_list (function c ->
+		if not (check_duplicate_constr false c typdef.constructors)
+		then begin 
+		   typdef.constructors := c :: typdef.constructors;
+		   add_dependancies typname c.Arg
+		end;
+		(* Callbacks require widget context *)
+      	       	match c.Arg with
+      	       	  Function _ -> typdef.requires_widget_context := true
+                | _ -> ())
+            constructors
+;;
+
 (* Enter a subtype *)
 let enter_subtype typ subtyp constructors =
+  (* Retrieve the type if already defined, else add a new one *)
   let typdef = 
     try hashtbl__find types_table typ
-    with
-      Not_found -> 
-        tsort__add_element types_order typ;
-      	let typdef = {constructors = []; subtypes = [];
-      	       	      requires_widget_context = false} in
-      	hashtbl__add types_table typ typdef;
-	typdef 
+    with Not_found -> new_type typ
   in
     if mem_assoc subtyp typdef.subtypes
     then raise (Duplicate_Definition ("subtype", typ ^" "^subtyp))
@@ -180,7 +244,7 @@ let enter_subtype typ subtyp constructors =
                     |  _ -> ()
                     end;
                     c
-                | Abbrev name -> find_constructor name typdef.constructors
+               | Abbrev name -> find_constructor name typdef.constructors
                 )
 	       constructors in
        (* TODO: duplicate def in subtype are not checked *)
@@ -188,6 +252,9 @@ let enter_subtype typ subtyp constructors =
     end
 ;;
 
+(******************** Widgets ********************)
+(* used by the parser; when enter_widget is called,
+   all components are assumed to be in Full form *)
 let retrieve_option optname =
   let optiontyp =
     try hashtbl__find types_table "option"
@@ -196,39 +263,6 @@ let retrieve_option optname =
   in find_constructor optname optiontyp.constructors
 ;;
   
-
-(* Just enter a type *)
-let rec enter_argtype = function
-    Unit -> ()
-  | Int -> ()
-  | Float -> ()
-  | Bool -> ()
-  | Char -> ()
-  | String -> ()
-  | List ty -> enter_argtype ty
-  | Product tyl -> do_list enter_argtype tyl
-  | UserDefined s -> tsort__add_element types_order s
-  | Subtype (s,_) -> tsort__add_element types_order s
-  | Function _ -> () (* whoah *)
-;;
-   
-
-type ModuleType =
-    Widget
-  | Family
-;;
-
-type ModuleDef = {
-  ModuleType : ModuleType;
-  Commands : FullComponent list
-}
-;;
-
-let module_table = (hashtbl__new 37 : (string, ModuleDef) hashtbl__t)
-;;
-
-
-
 (* Sort components by type *)
 let rec add_sort = fun
    [] obj -> [obj.Component ,[obj]]
@@ -242,7 +276,6 @@ let rec add_sort = fun
 let separate_components =  it_list add_sort []
 ;;
 
-
 let enter_widget name components =
   try 
     hashtbl__find module_table name;
@@ -254,10 +287,7 @@ let enter_widget name components =
       	 Constructor, l ->
 	   enter_subtype "option" name (map (function c -> Full c) l)
        | Command, l -> 
-	       do_list (fun c -> add_return_type c.Result;
-				 enter_argtype c.Result;
-				 enter_argtype c.Arg) 
-		       l
+	   do_list enter_component_types l
        )
       sorted_components;
   let commands = 
@@ -267,28 +297,20 @@ let enter_widget name components =
   hashtbl__add module_table name {ModuleType = Widget; Commands = commands}
 ;;
   
-(* Functions go in tk.ml *)
-
-let function_table = ref ([] : FullComponent list)
-;;
-
+(******************** Functions ********************)
 let enter_function comp =
-  add_return_type comp.Result;
-  enter_argtype comp.Result;
-  enter_argtype comp.Arg;
+  enter_component_types comp;
   function_table := comp :: !function_table
 ;;
 
 
+(******************** Modules ********************)
 let enter_module name components = 
   try 
     hashtbl__find module_table name;
     raise (Duplicate_Definition ("widget/module", name))
   with Not_found ->
-    do_list (fun c -> add_return_type c.Result;
-      	       	    enter_argtype c.Result;
-                    enter_argtype c.Arg) 
-            components;
+    do_list enter_component_types components;
     hashtbl__add module_table name {ModuleType = Family; Commands = components}
 ;;
 
