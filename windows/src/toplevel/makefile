@@ -32,9 +32,10 @@ CAMLLIBR=..\camlrun ..\camllibr
 CAMLLEX=..\camlrun ..\camllex
 CAMLYACC=..\camlyacc -s
 CPP=cl -EP -Dmsdos -Uunix
-PERL=C:\bin\perl.exe
+PERL=perl
 COMPFLAGS=-stdlib ../lib -W -O fast $(INCLUDES)
 LINKFLAGS=-stdlib ../lib -g $(INCLUDES)
+GENSOURCES=pr_value.ml
 
 all: camltop
 
@@ -62,6 +63,9 @@ provide: provide.zo
 	$(CAMLLINK) $(LINKFLAGS) -o provide @<<
 stdlib.zo config.zo misc.zo interntl.zo modules.zo provide.zo
 <<
+
+pr_value.ml: pr_value.mlp
+	$(CPP) -DPRINT_NUMS pr_value.mlp > pr_value.ml
 
 install:
 	copy camltop $(LIBDIR)

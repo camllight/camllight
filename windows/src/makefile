@@ -154,8 +154,8 @@ depend:
 	cd ..
 
 gui:
-	cd $(GUIDIR)
-        nmake -f camlwin.mak CFG="Camlwin - Win32 Release"
+	cd windows
+        nmake
 
 # Make the distribution:
 distrib:

@@ -3,7 +3,7 @@
 CC=gcc
 CFLAGS=-I.. -O
 LDFLAGS=-lm
-PERL=C:\bin\perl.exe
+PERL=perl
 
 OUTPUT=camlrun.exe
 
@@ -14,9 +14,9 @@ OBJS=interp.o misc.o stacks.o fix_code.o main.o fail.o signals.o debugcom.o \
   compare.o ints.o floats.o str.o io.o \
   extern.o externcp.o intern.o interncp.o \
   hash.o sys.o meta.o parsing.o lexing.o gc_ctrl.o \
-  msdos.o graph.o aexpand.o nat.o
+  msdos.o graph.o nat.o
   
-LIBNUM=bignum\libbignum.a
+LIBNUM=bignum\bignum.a
 
 DOBJS=debugger.o
 
@@ -63,9 +63,9 @@ opnames.h : instruct.h
 
 # jumptbl.h is required only if you have GCC 2.0 or later
 jumptbl.h : instruct.h
-	$(PERL) ../tools/mkjumptbl instruct.h > jumptbl.h
+	$(PERL) ../tools/mkjumptb instruct.h > jumptbl.h
 
-bignum\libbignum.a:
+bignum\bignum.a:
 	cd bignum
 	$(MAKE)	-f Makefile.gcc
 	cd ..

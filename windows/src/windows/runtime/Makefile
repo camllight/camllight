@@ -7,14 +7,15 @@ GUIDIR=..\gui
 CC=cl
 INCLUDES=-I$(RUNTIMEDIR) -I$(SOURCEDIR) -I$(GUIDIR)
 CFLAGS=$(INCLUDES) -DHAS_UI -Ox -G3 -MT -Zi
-PERL=C:\bin\perl.exe
+PERL=perl
+BIGNUMLIB=$(RUNTIMEDIR)\bignum\bignum.lib
 
 OBJS=interp.obj misc.obj stacks.obj fix_code.obj main.obj fail.obj signals.obj debugcom.obj \
   freelist.obj major_gc.obj minor_gc.obj memory.obj alloc.obj roots.obj \
   compare.obj ints.obj floats.obj str.obj io.obj \
   extern.obj externcp.obj intern.obj interncp.obj \
   hash.obj sys.obj meta.obj parsing.obj lexing.obj gc_ctrl.obj \
-  msdos.obj graph.obj prims.obj nat.obj $(RUNTIMEDIR)\bignum\libbignum.lib
+  msdos.obj graph.obj prims.obj nat.obj $(BIGNUMLIB)
 
 PRIMS=$(RUNTIMEDIR)\compare.c $(RUNTIMEDIR)\extern.c $(RUNTIMEDIR)\externcp.c $(RUNTIMEDIR)\floats.c $(RUNTIMEDIR)\gc_ctrl.c $(RUNTIMEDIR)\hash.c \
   $(RUNTIMEDIR)\intern.c $(RUNTIMEDIR)\interncp.c $(RUNTIMEDIR)\interp.c $(RUNTIMEDIR)\ints.c $(RUNTIMEDIR)\io.c $(RUNTIMEDIR)\lexing.c $(RUNTIMEDIR)\meta.c $(RUNTIMEDIR)\parsing.c \
@@ -40,7 +41,7 @@ opnames.h : $(RUNTIMEDIR)\instruct.h
 
 # jumptbl.h is required only if you have GCC 2.0 or later
 jumptbl.h : $(RUNTIMEDIR)\instruct.h
-	$(PERL) $(TOOLSDIR)/mkjumptbl $(RUNTIMEDIR)/instruct.h > jumptbl.h
+	$(PERL) $(TOOLSDIR)/mkjumptb $(RUNTIMEDIR)/instruct.h > jumptbl.h
 
 clean:
 	rm -f $(GENSOURCES)
@@ -56,6 +57,8 @@ depend: $(GENSOURCES)
 	gcc -MM $(INCLUDES) -DHAS_UI *.c $(RUNTIMEDIR)\*.c >> makefile
 	rm -f makefile.bak
 
+$(BIGNUMLIB):
+	cd $(RUNTIMEDIR)\bignum && nmake
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT WILL BE ERASED WITHOUT WARNING
 ### DO NOT DELETE THIS LINE

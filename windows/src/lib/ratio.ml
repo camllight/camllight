@@ -9,10 +9,15 @@
 #open "fstring";;
 #open "fchar";;
 #open "int_misc";;
-#open "string_misc";;
 #open "nat";;
 #open "big_int";;
-#open "arith_flags";;
+#open "arflags";;
+
+let rec index_char str chr pos =
+  if pos >= string_length str then -1
+  else if nth_char str pos == chr then pos
+  else index_char str chr (succ pos)
+;;
 
 (* Definition of the type ratio :
    Conventions :                                 

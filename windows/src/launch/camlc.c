@@ -25,8 +25,6 @@ char * ext_obj = ".obj";
 char * ext_lib = ".lib";
 #endif
 
-extern int expand_diversions(int *ref_argc, char ***ref_argv);
-     
 main(argc, argv)
      int argc;
      char ** argv;
@@ -38,8 +36,6 @@ main(argc, argv)
   int status;
   char * lang;
   
-  if (expand_diversions(&argc, &argv) == -1) return 2; 
-
   stdlib = getenv("CAMLLIB");
   if (stdlib == NULL) {
     fprintf(stderr, "Variable CAMLLIB is undefined.\n");

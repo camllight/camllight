@@ -2,7 +2,7 @@
 
 CC=gcc
 CFLAGS=-I.. -O -DNDEBUG
-PERL=C:\bin\perl.exe
+PERL=perl
 
 OUTPUT=camlyacc.exe
 

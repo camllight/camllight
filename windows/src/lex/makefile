@@ -16,7 +16,7 @@ CAMLLIBR=..\camlrun ..\camllibr
 CAMLLEX=..\camlrun ..\camllex
 CAMLYACC=..\camlyacc -s
 CPP=cl -EP -Dmsdos -Uunix
-PERL=C:\bin\perl.exe
+PERL=perl
 COMPFLAGS=-stdlib ../lib -W -O fast $(INCLUDES)
 LINKFLAGS=-stdlib ../lib -g $(INCLUDES)
 
@@ -26,6 +26,12 @@ camllex: $(OBJS)
 	$(CAMLLINK) $(LINKFLAGS) -o camllex @<<
 stdlib.zo $(OBJS)
 <<
+
+scanner.ml: scanner.mll
+	$(CAMLLEX) scanner.mll
+
+grammar.ml grammar.mli: grammar.mly
+	$(CAMLYACC) grammar.mly
 
 install:
 	..\tools\installb camllex $(BINDIR)\camllex

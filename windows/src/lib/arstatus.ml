@@ -2,7 +2,7 @@
 #open "bool";;
 #open "ref";;
 #open "io";;
-#open "arith_flags";;
+#open "arflags";;
 
 let get_error_when_null_denominator () =
   !error_when_null_denominator_flag 

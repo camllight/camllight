@@ -17,7 +17,7 @@ CAMLLIBR=..\camlrun ..\camllibr
 CAMLLEX=..\camlrun ..\camllex
 CAMLYACC=..\camlyacc -s
 CPP=cl -EP -Dmsdos -Uunix
-PERL=C:\bin\perl.exe
+PERL=perl
 COMPFLAGS=-stdlib ../lib -W -O fast $(INCLUDES)
 LINKFLAGS=-stdlib ../lib -g $(INCLUDES)
 
