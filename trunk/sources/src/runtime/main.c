@@ -237,6 +237,8 @@ int main(argc, argv)
 
   } else {
 
+    debugger(UNCAUGHT_EXC);
+
     if (exn_bucket == Atom(OUT_OF_MEMORY_EXN))
       fatal_error ("Fatal error: out of memory.\n");
     else
