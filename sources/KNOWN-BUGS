@@ -7,6 +7,3 @@ The following problems have not been fixed at the time of this release:
    The problem occurs only if s is in tail position inside s'.
    To guarantee proper sharing, move s in non-tail position, e.g.
    take s' = [< '1; s; [<>] >].
-
-2- (macintosh) The graphics window does not work with monitors set to
-   more than 256 colors.
