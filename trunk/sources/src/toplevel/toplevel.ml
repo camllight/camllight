@@ -287,3 +287,6 @@ let verbose_mode status =
 let set_print_depth n =
   if n > 0 then pr_value__printer_depth := n;;
 
+let set_print_length n =
+  if n > 0 then pr_value__printer_steps := n;;
+
