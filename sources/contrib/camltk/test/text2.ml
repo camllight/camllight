@@ -1,21 +1,22 @@
 #open "tk";;
 
-let Top = OpenTk () ;;
-let TextW = text__create Top [TextWidth 20] ;;
-let ScrollW = scrollbar__create Top [] ;;
-let ByeW = button__create Top [Text "Quit" ; Command (function () -> CloseTk () ; exit 0)] ;;
+(* Linking a text widget with a scrollbar widget *)
 
-let TextScrollCB = scrollbar__set ScrollW
+let main () =
+  let top = OpenTk() in
+  let tw = text__create top [TextWidth 20] 
+  and sb = scrollbar__create top [] 
+  and q = button__create top 
+      	    [Text "Quit"; Command (function () -> CloseTk(); exit 0)] in
+
+    scrollbar__configure sb [Slidecommand (text__yview_line tw)];
+    text__configure tw [YScrollCommand (scrollbar__set sb)];
+
+    pack [sb] [Fill Fill_Y;Side Side_Right];
+    pack [tw; q] [];
+    MainLoop()
 ;;
 
-let ScrollBCB = text__yview_line TextW
+
+printexc__f main ()
 ;;
-
-scrollbar__configure ScrollW [Slidecommand ScrollBCB] ;;
-text__configure TextW [YScrollCommand TextScrollCB] ;;
-
-pack [ScrollW] [Fill Fill_Y;Side Side_Right] ;;
-pack [TextW] [] ;;
-pack [ByeW] [] ;;
-
-MainLoop () ;;

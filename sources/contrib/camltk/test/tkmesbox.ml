@@ -1,11 +1,20 @@
 #open "tk";;
 
+(* A simple dialog example *)
 
+let main () =
+  let top = OpenTk() in
+  let r = dialog (support__new_toplevel_widget "dialog")
+      	       	 "The title"
+      	       	 "Dialog example"	(* Text in the dialog window *)
+		 (Predefined "warning") (* Bitmap *)
+      	       	 1			(* Default button *)
+		 ["Button 0"; "Button 1"; "Button 2"] in
+  (* This is modal interaction, so we don't need to call MainLoop() *)
+  print_string "You pressed button "; print_int r; print_newline();
+  flush std_out;
+  CloseTk()
+;;
 
-let Top = OpenTk () ;;
-let f = frame__create Top [] ;;
-let r = tk__dialog f ("-") ("Appuyez sur un bouton") ("warning") (1) (["Bouton0" ; "Bouton1" ; "Bouton2"]) in
-  print_string ("Bouton "^(string_of_int r)^(" presse.\n")) ; flush std_out ;;
-CloseTk () ;
-exit (0) ;;
-(* For this example, there's no Mainloop !!! *)
+printexc__f main ()
+;;
