@@ -68,7 +68,7 @@ camlmode
   run the toplevel under Gnu Emacs.
 
   Requirements:
-        - Gnu Emacs 19 (Emacs 18 is partially supported)
+        - Gnu Emacs 19
 
 caml-tex
 --------

@@ -8,6 +8,7 @@ PACKAGES=libunix libgraph debugger libnum libstr mletags \
   camlmode lorder profiler camltk4 camlsearch
 # caml-tex
 # caml-latex2e
+# camltk
 
 
 # Which C compiler to use.
