@@ -143,6 +143,164 @@ let main () =
 printexc__f main () ;;
 \end{verbatim}
 
+\section{Bindings}
+\tk\ offers, in addition to widget-specific callbacks, a general facility
+for binding functions to events. (bind(n)).
+In the \caml\tk\ interface, this is implemented by the function
+\begin{verbatim}
+bind: Widget -> (Modifier list * XEvent) list -> BindAction -> unit
+\end{verbatim} 
+with the following types
+\begin{verbatim}
+type Modifier =
+    Control
+  | Shift
+  | Lock
+  | Button1
+  | Button2
+  | Button3
+  | Button4
+  | Button5
+  | Any
+  | Double
+  | Triple
+  | Mod1
+  | Mod2
+  | Mod3
+  | Mod4
+  | Mod5
+  | Meta
+  | Alt 
+;;
+
+type XEvent =
+    XKey of string	(* /usr/include/X11/keysymdef.h *)
+  | ButtonPress
+  | Button
+  | ButtonRelease
+  | Circulate
+  | CirculateRequest
+  | ColorMap
+  | Configure
+  | ConfigureRequest
+  | Destroy
+  | Enter
+  | Expose
+  | FocusIn
+  | FocusOut
+  | Gravity
+  | Keymap
+  | KeyPress
+  | Key
+  | KeyRelease
+  | MapRequest
+  | Motion
+  | Leave
+  | Map
+  | Property
+  | Reparent
+  | ResizeRequest
+  | Unmap
+  | Visibility 
+;;
+
+type EventField =
+    Above
+  | ButtonNumber
+  | Count
+  | Detail
+  | Focus
+  | Height
+  | KeyCode
+  | Mode
+  | State
+  | ValueMask
+  | Width
+  | MouseX
+  | MouseY
+  | WidgetName
+  | Time 
+  | OverrideRedirect
+  | Place
+  | Char
+  | BorderWidth
+  | Display
+  | SendEvent
+  | KeySymString
+  | KeySymInt
+  | RootWindow
+  | SubWindow
+  | Type
+  | RootX
+  | RootY
+;;
+
+type EventInfo = {
+  mutable Ev_Above : int;
+  mutable Ev_ButtonNumber : int;
+  mutable Ev_Count : int;
+  mutable Ev_Detail : string;
+  mutable Ev_Focus : bool;
+  mutable Ev_Height : int;
+  mutable Ev_KeyCode : int;
+  mutable Ev_Mode : string;
+  mutable Ev_State : string;
+  mutable Ev_ValueMask : int;
+  mutable Ev_Width : int;
+  mutable Ev_MouseX : int;
+  mutable Ev_MouseY : int;
+  mutable Ev_WidgetName : string;
+  mutable Ev_Time : string;
+  mutable Ev_OverrideRedirect : string;
+  mutable Ev_Place : string;
+  mutable Ev_Char : string;
+  mutable Ev_BorderWidth : int;
+  mutable Ev_Display : int;
+  mutable Ev_SendEvent : int;
+  mutable Ev_KeySymString : string;
+  mutable Ev_KeySymInt : int;
+  mutable Ev_RootWindow : int;
+  mutable Ev_SubWindow : int;
+  mutable Ev_Type : int;
+  mutable Ev_RootX : int;
+  mutable Ev_RootY : int }
+;;
+
+type BindAction =
+   BindSet of EventField list *  (EventInfo -> unit)
+ | BindRemove
+;;
+\end{verbatim} 
+The first argument of type \verb|Widget| is naturally the widget for which
+this binding is defined (there is no support yet for bindings on whole
+widget classes).
+The second argument of type \verb|(Modifier list * XEvent) list| is the 
+succession of events that will trigger the callback.
+The last argument is the action : \verb|BindRemove| will remove a binding.
+\verb|BindSet| will set a binding.
+The argument of \verb|BindSet| are an \verb|EventField list| and the
+callback itself. 
+In bindings, the callback needs some information about the event that
+triggered it. This information is contained in the \verb|EventInfo| passed
+to the callback, but the user has to specify which fields in this record are
+relevant for this particular callback. The other fields do {\bf not} contain
+accurate information. Check also the \tk\ documentation for finding out
+which field is valid for a given event.
+
+\paragraph{Example}
+\begin{verbatim}
+bind MyCan [[],Motion] 
+   (BindSet([MouseX; MouseY;Place;SendEvent;KeySymString], BindCmd)) ;;
+\end{verbatim} 
+will trigger the callback \verb|BindCmd| when the event \verb|Motion| occurs
+in the \verb|MyCan| widget. The command \verb|BindCmd| may assume that the 
+information in the fields {\tt Ev\_MouseX, Ev\_MouseY, Ev\_Place, Ev\_Place,
+Ev\_SendEvent, Ev\_KeySymString} of its \verb|EventInfo| argument contain
+accurate information.
+
+Bindings for \verb|text| and \verb|canvas| widgets obey the same rules.
+
+
 \section{More examples}
 The \verb|test| directory of the distribution contains several other
 examples. Read them to learn more about \caml\tk\ programming.
