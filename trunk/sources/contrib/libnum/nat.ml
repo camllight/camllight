@@ -12,7 +12,6 @@
 #open "fvect";;
 #open "fchar";;
 #open "int_misc";;
-#open "string_misc";;
 
 (* Sizes of words and strings. *)
 
@@ -666,54 +665,68 @@ let base_power_nat base n nat =
          else res
 ;;
 
+(* Tests if s has only zeros characters from index i to index lim *)
+let rec only_zeros s i lim =
+ i >= lim || s.[i] == `0` && only_zeros s (succ i) lim;;
+
+(* Parses a string d*.d*e[+/-]d* *)
+let rec only_zeros s i lim =
+ i >= lim || s.[i] == `0` && only_zeros s (succ i) lim;;
+
+(* Parses a string d*.d*e[+/-]d* *)
 let decimal_of_string base s off len =
  (* Skipping leading + sign if any *)
  let skip_first = s.[off] == `+` in
  let offset = if skip_first then off + 1 else off
  and length = if skip_first then len - 1 else len in
 
- let offset_limit = pred (offset + length) in
- let n = (index_char s `.` offset) in
-   (* s ends with a `.` *)
-   if n == offset_limit then failwith "decimal_of_string" else
-   if n == -1 || n > offset_limit
-    then
-     let n2 = (index_char s `e` offset) in
-      (* s ends with a `e` *)
-      if n2 == offset_limit then failwith "decimal_of_string" else
-      (* No `.` no `e` : regular integer *)
-      if n2 == -1 || n2 > offset_limit
-       then (sub_string s offset length, 0)
-       else (* integer e int *)
-            let new_len = n2 - offset in
-                     (sub_string s offset new_len,
-                      sys_int_of_string base s (succ n2)
-                         (pred (length - new_len)))
-         (* '.' is well formed into the string *)
-    else let len = pred (length + offset - n) in
-         let n2 = (index_char s `e` n) in
-           (* s ends with a `e` *)
-           if n2 == offset_limit then failwith "decimal_of_string" else
-           if n2 == (-1) || n2 > offset_limit
-              then (* integer . integer *)
-                   (let s_res = make_string (pred length) ` `
-                    and new_len = n - offset in
-                         (blit_string s offset s_res 0 new_len);
-                         (blit_string s (succ n) s_res new_len len);
-                         s_res, 
-                    -len)
-              else (* integer . integer e int *)
-                   (let s_res = make_string 
-                               (pred (n2 - offset)) ` `
-                    and new_len = sub_int n offset in
-                      (blit_string s offset s_res 0 new_len);
-                      (blit_string s (succ n) s_res new_len 
-                                     (pred (n2 - n)));
-                         s_res,
-                    (sys_int_of_string
-                      base s (succ n2) (offset_limit - n2)) -
-                    (pred (n2 - n)))
-;;
+ let offset_limit = offset + length - 1 in
+
+ try
+  let dot_pos = index_char s offset length `.` in
+  try
+   if dot_pos = offset_limit then raise Not_found else
+   let e_pos = index_char s (dot_pos + 1) (offset_limit - dot_pos - 1) `e` in
+   (* int.int e int *)
+   let e_arg =
+      if e_pos = offset_limit then 0 else
+     sys_int_of_string base s (succ e_pos) (offset_limit - e_pos) in
+   let exponant = e_arg - (e_pos - dot_pos - 1) in
+   let s_res = create_string (e_pos - offset - 1) in
+   let int_part_length = dot_pos - offset in
+   blit_string s offset s_res 0 int_part_length;
+   blit_string s (dot_pos + 1) s_res int_part_length (e_pos - dot_pos - 1);
+   s_res, exponant
+  with Not_found ->
+   (* `.` found, no `e` *)
+   if only_zeros s (dot_pos + 1) (offset_limit + 1)
+   then (sub_string s offset (dot_pos - offset), 0)
+   else
+    let exponant = - (offset_limit - dot_pos) in
+    let s_res = create_string (length - 1) in
+    let int_part_length = dot_pos - offset in
+    blit_string s offset s_res 0 int_part_length;
+    if dot_pos < offset_limit then
+      blit_string s (dot_pos + 1)
+                  s_res int_part_length (offset_limit - dot_pos);
+    (s_res, exponant)
+ with Not_found ->
+   (* no `.` *)
+   try
+    (* int e int *)
+    let e_pos = index_char s offset length `e` in
+    let e_arg =
+      if e_pos = offset_limit then 0 else
+      sys_int_of_string base s (succ e_pos) (offset_limit - e_pos) in
+    let exponant = e_arg in
+    let int_part_length = e_pos - offset in
+    let s_res = create_string int_part_length in
+    blit_string s offset s_res 0 int_part_length;
+    s_res, exponant
+   with Not_found ->
+   (* a bare int *)
+   (sub_string s offset length, 0);;
+
 
 (* La chaîne s contient un entier en notation scientifique, de off sur
    une longueur de len *)
