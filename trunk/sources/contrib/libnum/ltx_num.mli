@@ -17,21 +17,21 @@
 (*               Valerie Menissier                                       *)
 (* Adaptation Caml Light: Pierre Weis                                    *)
 
-#open "nat";;
 #open "big_int";;
 #open "ratio";;
 #open "num";;
 
 value set_latex_margin : int -> unit
-and latex_print_nat : nat -> unit
-and latex_print_for_read_nat : nat -> unit
+and latex_print_nat : fnat__nat -> unit
+and latex_print_for_read_nat : fnat__nat -> unit
 and latex_print_big_int : big_int -> unit
 and latex_print_for_read_big_int : big_int -> unit
 and latex_print_ratio : ratio -> unit
 and latex_print_for_read_ratio : ratio -> unit
 and latex_print_num : num -> unit
 and latex_print_for_read_num : num -> unit
-and sys_latex_print_nat : int -> string -> nat -> int -> int -> string -> unit
+and sys_latex_print_nat :
+    int -> string -> fnat__nat -> int -> int -> string -> unit
 and sys_latex_print_big_int : int -> string -> big_int -> string -> unit
 and sys_latex_print_ratio : int -> string -> ratio -> string -> unit
 and sys_latex_print_num : int -> string -> num -> string -> unit

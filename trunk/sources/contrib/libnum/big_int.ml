@@ -10,11 +10,11 @@
 #open "fchar";;
 #open "pair";;
 #open "int_misc";;
-#open "nat";;
+#open "fnat";;
 
 type big_int = 
     { Sign : int; 
-      Abs_Value : nat }
+      Abs_Value : fnat__nat }
 ;;
 
 (* Accessing Sign and Absolute value fields of a big_int *)
