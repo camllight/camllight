@@ -14,7 +14,3 @@ let string_of_float f =
   with Exit ->
     s
 ;;
-
-let abs_float f =
-  if f <. 0.0 then minus_float f else f
-;;

@@ -25,7 +25,7 @@ value minus : float -> float = 1 "~float"
   and prefix / : float -> float -> float = 2 "/"
   and prefix /. : float -> float -> float = 2 "/"
   and div_float : float -> float -> float = 2 "/"
-        (* Division. Raise [Division_by_zero] if the dividend is 0.0. *)
+        (* Division. *)
   and prefix ** : float -> float -> float = 2 "power_float"
   and prefix **. : float -> float -> float = 2 "power_float"
   and power : float -> float -> float = 2 "power_float"
@@ -52,21 +52,12 @@ value acos : float -> float = 1 "acos_float"
   and asin : float -> float = 1 "asin_float"
   and atan : float -> float = 1 "atan_float"
   and atan2 : float -> float -> float = 2 "atan2_float"
-  and ceil : float -> float = 1 "ceil_float"
   and cos : float -> float = 1 "cos_float"
   and cosh : float -> float = 1 "cosh_float"
   and exp : float -> float = 1 "exp_float"
-  and fabs : float -> float = 1 "fabs_float"
-  and floor : float -> float = 1 "floor_float"
-  and fmod : float -> float -> float = 2 "fmod_float"
-
-  and frexp : float -> float * int = 1 "frexp_float"
-  and ldexp : float -> int -> float = 2 "ldexp_float"
 
   and log : float -> float = 1 "log_float"
   and log10 : float -> float = 1 "log10_float"
-
-  and modf : float -> float * float = 1 "modf_float"
 
   and sin : float -> float = 1 "sin_float"
   and sinh : float -> float = 1 "sin_float"
@@ -76,8 +67,30 @@ value acos : float -> float = 1 "acos_float"
           (* Usual transcendental functions on floating-point numbers. *)
 ;;
 
-value abs_float : float -> float
+value ceil : float -> float = 1 "ceil_float"
+  and floor : float -> float = 1 "floor_float"
+          (* Round the given float to an integer value.
+             [floor f] returns the greatest integer value less than or
+             equal to [f].
+             [ceil f] returns the least integer value greater than or
+             equal to [f]. *)
+  and fabs : float -> float = 1 "fabs_float"
+  and abs_float : float -> float = 1 "fabs_float"
           (* Return the absolute value of the argument. *)
+  and fmod : float -> float -> float = 2 "fmod_float"
+          (* [fmod a b] returns the remainder of [a] with respect to
+             [b]. *)
+  and frexp : float -> float * int = 1 "frexp_float"
+          (* [frexp f] returns the pair of the significant
+             and the exponent of [f] (when $f$ is zero, the
+             significant $x$ and the exponent $n$ of $f$ are equal to
+             zero; when $f$ is non-zero, they are defined by
+             $f = x * 2^{n}$). *)
+  and ldexp : float -> int -> float = 2 "ldexp_float"
+           (* [ldexp x n] returns [x *. 2 ** n]. *)
+  and modf : float -> float * float = 1 "modf_float"
+           (* [modf f] returns the pair of the fractional and integral
+              part of [f]. *)
 ;;
 
 value string_of_float : float -> string
