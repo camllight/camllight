@@ -1,4 +1,4 @@
-(* The Caml Light toplevel system. Command-line parsing and main loop *)
+(* The Caml Light toplevel system. Command-line parsing and initializations *)
 
 #open "config";;
 #open "misc";;
@@ -27,7 +27,7 @@ and set_language lang =
   interntl__language := lang
 ;;
 
-let main() =
+let init() =
 try
   toplevel := true;
   default_used_modules := assoc "cautious" default_used_interfaces;
@@ -46,35 +46,17 @@ try
   version__print_banner();
   print_newline();
   let ic = open_in_bin sys__command_line.(0) in
-    seek_in ic (in_channel_length ic - 20);
-    let size_code = input_binary_int ic in
-    let size_data = input_binary_int ic in
-    let size_symb = input_binary_int ic in
-    let size_debug = input_binary_int ic in
-    seek_in ic (in_channel_length ic - 20 - size_debug - size_symb);
-    load_linker_tables ic;
-    set_c_primitives (meta__available_primitives());
-    close_in ic;
-    meta__global_data.(16) <- obj__repr true; (* 16: cf ../runtime/globals.h *)
-    start_compiling_interface "top";
-    sys__catch_break true;
-    let lexbuf = lexing__create_lexer_channel std_in in
-    input_lexbuf := lexbuf;
-    while true do
-      try
-        print_string toplevel_input_prompt;
-        print_flush ();
-        reset_rollback();
-        do_toplevel_phrase(parse_impl_phrase lexbuf)
-      with End_of_file ->
-             io__exit 0
-         | Toplevel ->
-             flush std_err;
-             rollback ()
-         | sys__Break ->
-             print_string(interntl__translate "Interrupted.\n");
-             rollback ()
-    done
+  seek_in ic (in_channel_length ic - 20);
+  let size_code = input_binary_int ic in
+  let size_data = input_binary_int ic in
+  let size_symb = input_binary_int ic in
+  let size_debug = input_binary_int ic in
+  seek_in ic (in_channel_length ic - 20 - size_debug - size_symb);
+  load_linker_tables ic;
+  set_c_primitives (meta__available_primitives());
+  close_in ic;
+  meta__global_data.(16) <- obj__repr true; (* 16: cf ../runtime/globals.h *)
+  start_compiling_interface "top"
 
 with Toplevel -> exit 2
    | sys__Sys_error msg ->
@@ -85,4 +67,5 @@ with Toplevel -> exit 2
       exit 100
 ;;
 
-printexc__f main (); exit 0;;
+printexc__f init ();;
+
