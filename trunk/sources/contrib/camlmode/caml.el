@@ -132,12 +132,14 @@ Does nothing otherwise."
 
 ;;; Error processing
 
-;; In Emacs 18, the regexp compilation-error-regexp matches the error 
-;; messages produced by camlc. In Emacs 19, none of the regexps in
-;; compilation-error-regexp-alist matches. Hence we add one.
+(require 'compile)
+
+;; In Emacs 19, the regexps in compilation-error-regexp-alist do not
+;; match the error messages when the language is not English.
+;; Hence we add a regexp.
 
 (defconst caml-error-regexp
-  "\"\\([^,\" \n\t]+\\)\", lines? \\([0-9]+\\)[-:,]"
+  "^[A-\377]+ \"\\([^\"\n]+\\)\", [A-\377]+ \\([0-9]+\\)[-,:]"
   "Regular expression matching the error messages produced by camlc.")
 
 (if (boundp 'compilation-error-regexp-alist)
@@ -150,7 +152,7 @@ Does nothing otherwise."
 ;; A regexp to extract the range info
 
 (defconst caml-error-chars-regexp
-  "File.*, line.*, characters \\([0-9]+\\)-\\([0-9]+\\):"
+  ".*, .*, [A-\377]+ \\([0-9]+\\)-\\([0-9]+\\):"
   "Regular expression extracting the character numbers
 from an error message produced by camlc.")
 
@@ -166,13 +168,12 @@ except that it reads the extra positional information provided by the Caml
 compiler in the error message, and puts the point and the mark exactly
 around the erroneous program fragment. The erroneous fragment is also
 temporarily highlighted if possible.
-A prefix arg means ignore the warnings and skip to the next fatal error.
-Just C-u as a prefix means reparse the error message buffer and start
+A C-u prefix means reparse the error message buffer and start
 at the first error (or warning)."
   (interactive "P")
   (next-error (if (consp arg) arg nil))
   (if (consp arg) (setq arg nil))
-  (let ((beg nil) (end nil) (ignore-message nil))
+  (let ((beg nil) (end nil))
     (save-excursion
       (set-buffer
        (if (boundp 'compilation-last-buffer) 
@@ -186,18 +187,8 @@ at the first error (or warning)."
                    (buffer-substring (match-beginning 1) (match-end 1)))
                   end
                   (string-to-int
-                   (buffer-substring (match-beginning 2) (match-end 2)))))
-        (if arg
-            (progn
-              (forward-line 1)
-              (setq ignore-message
-                    (catch 'exit
-                      (while (looking-at "^#")
-                        (if (looking-at "^# Warning: ") (throw 'exit t))
-                        (forward-line 1))))))))
-    (cond (ignore-message
-           (caml-next-error arg))
-          (beg
+                   (buffer-substring (match-beginning 2) (match-end 2)))))))
+    (cond (beg
            (setq beg (+ (point) beg)
                  end (+ (point) end))
            (goto-char beg)
