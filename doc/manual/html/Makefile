@@ -20,6 +20,9 @@ clean:
 	@$(MAKE) -f Makefile.cmds clean
 	cd man-caml; rm -f index.html node*.html
 
+release:
+	tar cf - man-caml/*.* | gzip > $$HOME/release/cl7refman.html.tar.gz
+
 .SUFFIXES:
 .SUFFIXES: .tex .etex
 
