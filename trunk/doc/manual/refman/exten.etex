@@ -252,7 +252,7 @@ expression. For instance, @'function' '|' pat_1 '->' expr_1 '|' \ldots@
 is syntactically correct and synonymous with
 @'function' pat_1 '->' expr_1 '|' \ldots@.
 
-\item The tokens "/\\" and "\\/" are recognized as synonymous for "&"
+\item The tokens "&&" and "||" are recognized as synonymous for "&"
 (sequential ``and'') and "or" (sequential ``or''), respectively.
 
 \end{itemize}
@@ -313,8 +313,8 @@ symbol starting with "*"''.
 \entree{{\tt \char64} "^"}{right}
 \entree{comparisons ("=  ==  < " etc.), all other infix symbols}{left}
 \entree{"not"}{--}
-\entree{"&   /\\"}{left}
-\entree{"or  \\/"}{left}
+\entree{"&   &&"}{left}
+\entree{"or  ||"}{left}
 \entree{","}{--}
 \entree{"<-   :="}{right}
 \entree{"if"}{--}
