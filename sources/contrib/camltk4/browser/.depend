@@ -1,3 +1,0 @@
-main.zo: tags.zo visual.zo modlist.zo 
-source.zo: lexer.zo 
-visual.zo: tags.zo source.zo hyper_printers.zo 
