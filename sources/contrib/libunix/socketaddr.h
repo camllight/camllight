@@ -14,6 +14,6 @@ int sock_addr_len;
 
 void get_sockaddr P((value));
 value alloc_sockaddr P((void));
-value alloc_inet_addr P((unsigned int));
+value alloc_inet_addr P((uint32));
 
 #define GET_INET_ADDR(v) (*((uint32 *) (v)))
