@@ -9,6 +9,7 @@ MKF=\
   BINDIR='$(BINDIR)' \
   LIBDIR='$(LIBDIR)' \
   MANDIR='$(MANDIR)' \
+  MANEXT='$(MANEXT)' \
   X11_INCLUDES='$(X11_INCLUDES)' \
   X11_LIB='$(X11_LIB)' \
   TCLINCLDIR='$(TCLINCLDIR)' \
@@ -43,6 +44,7 @@ install:
 	cd lib; $(MAKE) $(LIBMKF) install
 	cd libsupport; $(MAKE) $(MKF) install
 	cd compiler; $(MAKE) $(MKF) install
+	cd browser; $(MAKE) $(MKF) install
 #	cp -p Widgets.src $(LIBDIR)
 
 
