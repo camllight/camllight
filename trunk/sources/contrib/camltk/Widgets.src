@@ -470,7 +470,7 @@ widget canvas {
    function (TagOrId) createline "create line" (Units list, option (line) list)
    function (TagOrId) createoval "create oval" (Units, Units, Units, Units, option (oval) list)
    function (TagOrId) createpolygon "create polygon" (Units list, option (polygon) list)
-   function (TagOrId) createrectangle "create rectangle" (Units, Units, option (rectangle) list)
+   function (TagOrId) createrectangle "create rectangle" (Units, Units, Units, Units, option (rectangle) list)
    function (TagOrId) createtext "create text" (Units, Units, option (canvastext) list)
    function (TagOrId) createwindow "create window" (Units, Units, option (window) list)
    function () move "move" (TagOrId, Units, Units)
@@ -824,7 +824,7 @@ widget text {
    function () yview_pickplace_line "yview -pickplace" (int)
    }
 
-# This module will be renamed "tktoplevel" to avoid collision with
+# This module will be renamed "toplevelw" to avoid collision with
 # Caml Light standard toplevel module.
 widget toplevel {
    option Background

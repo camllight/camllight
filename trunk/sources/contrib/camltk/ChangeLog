@@ -1,3 +1,15 @@
+Fri Dec 16 18:11:39 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+	* Cleanup, comments, generated types commented
+
+Thu Dec  1 10:00:00 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+	* Moved to cl7 alpha
+
+Thu Nov 17 16:56:00 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+	* Release alpha3
+
 Wed Oct 26 14:05:49 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
 
 	* Added one-process architecture
