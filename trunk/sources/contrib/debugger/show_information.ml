@@ -41,8 +41,7 @@ let show_current_event () =
   | Some {Rep_type = Rep_exited} ->
       print_newline (); print_string "Program end."; print_newline ();
       show_no_point ()
-  | Some {Rep_type = Rep_trap} -> (* Other cases of `Rep_trap' are caught *)
-				  (* in `internal_step' *)
+  | Some {Rep_type = Rep_exc} ->
       print_newline ();
       print_string "Program end.";
       print_newline ();
@@ -51,7 +50,11 @@ let show_current_event () =
       print_value (get_accu ()) type_exn;
       close_box();
       print_newline();
-      show_no_point ();;
+      show_no_point ()
+  | Some {Rep_type = Rep_trap} ->
+					(* Rep_trap not visible outside *)
+	       	       	       	       	(* of module `time_travel'. *)
+      failwith "???show_current_event";;
 
 (* Display information about the current frame. *)
 (* --- `select frame' must have succeded before calling this function. *)

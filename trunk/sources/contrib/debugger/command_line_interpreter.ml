@@ -795,7 +795,7 @@ Argument N means do this N times (or till program stops for another reason).";
 "step program until it reaches the next event.\n\
 Skip over function calls.\n\
 Argument N means do this N times (or till program stops for another reason).";
-     "print", false, instr_print, true,
+     "print", true, instr_print, true,
 "print value of variables (`*' stand for the accumulator).";
      "more", false, instr_more, true,
 "print more on given ellipsis (`<n>' stands for ellipsis number n).";

@@ -32,5 +32,5 @@ let current_report () =
 
 let current_pc () =
   match current_report () with
-    None | Some {Rep_type = Rep_exited | Rep_trap} -> None
+    None | Some {Rep_type = Rep_exited | Rep_exc} -> None
   | Some {Rep_program_pointer = pc } -> Some pc;;

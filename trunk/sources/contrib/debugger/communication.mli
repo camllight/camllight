@@ -33,13 +33,13 @@ type REPORT_TYPE =
     Rep_event
   | Rep_breakpoint
   | Rep_exited
-  | Rep_trap;;
+  | Rep_trap
+  | Rep_exc;;
 
 type REPORT =
   {Rep_type : REPORT_TYPE;
    Rep_event_count : int;
    Rep_stack_pointer : int;
-     (* ^ In fact, current trap frame when Rep_type = Rep_trap. *)
    Rep_program_pointer : int};;
 
 type CHECKPOINT_REPORT =
