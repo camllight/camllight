@@ -105,5 +105,18 @@ let do_table f h =
   done
 ;;
 
+let do_table_rev f h =
+  let len = vect_length h.data in
+  for i = 0 to vect_length h.data - 1 do
+    let rec do_bucket = function
+        Empty ->
+          ()
+      | Cons(k, d, rest) ->
+          do_bucket rest;
+          if (hash_param 10 100 k) mod len == i then begin f k d; () end in
+    do_bucket h.data.(i)
+  done
+;;
+
 let hash x = hash_param 50 500 x
 ;;
