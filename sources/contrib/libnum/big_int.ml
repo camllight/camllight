@@ -510,11 +510,10 @@ let big_int_of_string_gen nat_of base s off_set length =
   match start_char with
   | `-` | `+` -> nat_of base s (succ off_set) (pred length)
   | _ -> nat_of base s off_set length in
- let sgn =
-  if is_zero_nat abs_val 0 (length_nat abs_val) then 0 else
-  if start_char == `-` then -1 else 1 in
-  { Sign = sgn;
-    Abs_Value = abs_val};;
+ if is_zero_nat abs_val 0 (length_nat abs_val) then zero_big_int else
+ let sgn = if start_char == `-` then -1 else 1 in
+ {Sign = sgn; Abs_Value = abs_val}
+;;
 
 (* La chaîne s contient un entier signé sans notation scientifique:
    on appelle la fonction correspondante des nat. *)
@@ -552,22 +551,19 @@ let leading_digit_big_int bi =
 (* Integer part of the square root of a big_int *)
 let sqrt_big_int bi =
  match bi.Sign with 
-   -1 -> invalid_arg "sqrt_big_int"
- | 0  ->  {Sign = 0;
-           Abs_Value = make_nat 1}
- |  _  -> {Sign = 1;
-           Abs_Value = sqrt_nat (bi.Abs_Value) 0 (num_digits_big_int bi)}
+ | 0 -> zero_big_int
+ | -1 -> invalid_arg "sqrt_big_int"
+ | _ -> {Sign = 1;
+         Abs_Value = sqrt_nat (bi.Abs_Value) 0 (num_digits_big_int bi)}
 ;;
 
 let square_big_int bi =
-  if bi.Sign == 0 then zero_big_int 
-  else
-   let len_bi = num_digits_big_int bi in
-   let len_res = 2 * len_bi in
-   let res = make_nat len_res in
-   set_square_nat res 0 len_res (bi.Abs_Value) 0 len_bi;
-     { Sign = 1;
-       Abs_Value = res }
+  if bi.Sign == 0 then zero_big_int else
+  let len_bi = num_digits_big_int bi in
+  let len_res = 2 * len_bi in
+  let res = make_nat len_res in
+  set_square_nat res 0 len_res (bi.Abs_Value) 0 len_bi;
+  {Sign = 1; Abs_Value = res}
 ;;
 
 (* round off of the futur last digit (of the integer represented by the string
