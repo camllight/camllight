@@ -43,9 +43,7 @@ invoking "caml.out" directly.
 
 \section{Options}
 
-The following command-line option is recognized by "camlrun". (There
-are additional options to control the behavior of the garbage
-collector, but they are not for the casual user.)
+The following command-line option is recognized by "camlrun".
 
 \begin{options}
 
@@ -54,6 +52,16 @@ Set up "camlrun" to print various diagnostic messages relative to
 memory allocation and garbage collection. Useful to debug
 memory-related problems.
 
+\end{options}
+
+The following environment variable are also consulted:
+
+\begin{options}
+\item["CAMLRUNPARAM"] Set various parameters for the memory manager.
+(Description!).
+
+\item["PATH"] List of directories searched to find the bytecode
+executable file.
 \end{options}
 
 \section{Common errors}

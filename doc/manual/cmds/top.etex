@@ -115,6 +115,14 @@ searched last). Directories can also be added to the search path once
 the toplevel is running with the "#directory" directive; see
 chapter~\ref{c:extensions}.
 
+\item["-lang" \var{language-code}]
+Translate the toplevel messages to the specified language.
+The \var{language-code} is "fr" for French, "es" for Spanish, "de" for
+German, \ldots\ (See the file "camlmsgs.txt" in the Caml Light
+standard library directory for a list of available languages.)
+When an unknown language is specified, or no translation is available
+for a message, American English is used by default.
+
 \item["-O" \var{module-set}]
 Specify which set of standard modules is to be implicitly ``opened''
 when the toplevel starts. There are three module sets currently available:
@@ -136,6 +144,27 @@ chapter~\ref{c:stdlib} for a complete listing of the modules in the
 "cautious" and "fast" sets.
 
 \end{options}
+
+\begin{unix} The following environment variables are also consulted:
+\begin{options}
+\item["LANG"] When set, control which language is used to print the
+compiler messages (see the "-lang" command-line option).
+
+\item["LC_CTYPE"] If set to "iso_8859_1", accented characters (from the
+ISO Latin-1 character set) in string and character literals are
+printed as is; otherwise, they are printed as decimal escape sequences
+("\\"\var{ddd}).
+\end{options}
+\end{unix}
+
+\begin{pc} The following environment variables are also consulted:
+\begin{options}
+\item["CAMLLIB"] Contain the path to the standard library directory.
+
+\item["LANG"] When set, control which language is used to print the
+compiler messages (see the "-lang" command-line option).
+\end{options}
+\end{pc}
 
 \section{Toplevel control functions}
 \label{s:control}

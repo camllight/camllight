@@ -1,0 +1,55 @@
+\chapter{Profiling (camlpro)} \label{c:profiler}
+
+This chapter describes how the execution of Caml Light programs can be
+profiled, by recording how many times functions are called, branches
+of conditionals are taken, \ldots 
+
+\begin{mac} This command is not available. \end{mac}
+\begin{pc} This command is not available. \end{pc}
+
+\section{Compiling for profiling}
+
+Before profiling an execution, the program must be compiled in
+profiling mode, using the "-p" option to the batch compiler "camlc"
+(see chapter~\ref{c:camlc}). When compiling modules separately, the
+"-p" option must be given both when compiling the modules (production
+of ".zo" files) and when linking them together.
+
+The amount of profiling information can be controlled by adding one or
+several letters after the "-p" option, indicating which parts of the
+program should be profiled:
+
+%% description des options
+
+For instance, compiling with "-pzorglub" profiles this, this, and
+that.
+
+The "-p" option without additional letters defaults to "-ptoto",
+meaning that the following are profiled: this, this, and that.
+
+\section{Profiling an execution}
+
+Running a bytecode executable file that has been compiled with "-p"
+records the execution counts for the specified parts of the program
+and saves them in a file called "gabu.zomeu" in the current directory.
+
+The program must terminate via the function "io__exit", otherwise
+execution counts are not written.
+
+\section{Printing profiling information}
+
+The "camlpro" command produces a source listing of the program modules
+where execution counts have been inserted as comments. For instance,
+\begin{verbatim}
+        camlpro list
+\end{verbatim}
+prints the source code for the "list" module, with comments indicating
+how many times the functions in this module have been called.
+
+The following options are recognized by "camlpro":
+
+\begin{options}
+\item["-glop" \var{arg}] ...
+\end{options}
+
+
