@@ -4,17 +4,17 @@
 
 let write_create_p w wname =
   w "value create : Widget -> option list -> Widget ;;\n";
-  w "             (* [create p options] creates a new widget with parent p.";
-  w "		     Options are restricted to the widget class subset,";
-  w "		     and checked dynamically. *)\n"
+  w "             (* [create p options] creates a new widget with parent p.\n";
+  w "                Options are restricted to the widget class subset,\n";
+  w "                and checked dynamically. *)\n"
 ;;
 
 let write_named_create_p w wname =
   w "value create_named : Widget -> string -> option list -> Widget ;;\n";
-  w "             (* [create p name options] creates a new widget with ";
-  w "                parent p and new patch component name.";
-  w "		     Options are restricted to the widget class subset,";
-  w "		     and checked dynamically. *)\n"
+  w "             (* [create p name options] creates a new widget with\n";
+  w "                parent p and new patch component name.\n";
+  w "                Options are restricted to the widget class subset,\n";
+  w "                and checked dynamically. *)\n"
 ;;
 
 let write_command_p wname w def =
