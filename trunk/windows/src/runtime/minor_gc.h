@@ -6,7 +6,6 @@
 
 extern char *young_start, *young_ptr, *young_end;
 extern value **ref_table_ptr, **ref_table_limit;
-extern int force_minor_gc;
 extern asize_t minor_heap_size;
 
 #define Is_young(val) \

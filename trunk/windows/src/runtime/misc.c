@@ -7,7 +7,14 @@
 #endif
 
 int verb_gc;
-Volatile int something_to_do = 0;
+int Volatile something_to_do = 0;
+int Volatile force_minor_flag = 0;
+
+void force_minor_gc ()
+{
+  force_minor_flag = 1;
+  something_to_do = 1;
+}
 
 void gc_message (msg, arg)
      char *msg;
