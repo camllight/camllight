@@ -1,5 +1,5 @@
 FILES=install.tex comp.tex top.tex runtime.tex librar.tex lexyacc.tex \
-  intf-c.tex
+  debugger.tex intf-c.tex
 
 TRANSF=../../tools/transf
 TEXQUOTE=../../tools/texquote2
