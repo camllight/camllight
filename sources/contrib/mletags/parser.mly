@@ -30,6 +30,7 @@ let do_directive =
 /* Identifiers, prefixes, infixes */
 %token <string> IDENT
 %token <string> PREFIX
+%token <string> INFIX0
 %token <string> INFIX1
 %token <string> INFIX2
 %token <string> SUBTRACTIVE
@@ -126,7 +127,8 @@ let do_directive =
 %left  OR BARBAR
 %left  AMPERSAND AMPERAMPER
 %left  NOT
-%left  INFIX1 EQUAL EQUALEQUAL          /* comparisons, concatenations */
+%left  INFIX0 EQUAL EQUALEQUAL          /* comparisons */
+%right INFIX1                           /* concatenations */
 %right COLONCOLON                       /* cons */
 %left  INFIX2 SUBTRACTIVE               /* additives, subtractives */
 %left  STAR INFIX3                      /* multiplicatives */
@@ -204,6 +206,8 @@ Expr :
           { () }
       | Expr INFIX1 Expr
           { () }
+      | Expr INFIX0 Expr
+          { () }
       | Expr STAR Expr
           { () }
       | Expr COLONCOLON Expr
@@ -232,11 +236,11 @@ Expr :
           { () }
       | IF Expr THEN Expr  %prec prec_if
           { () }
-      | WHILE Expr DO Expr DONE
+      | WHILE Expr DO Opt_expr DONE
           { () }
-      | FOR Ide EQUAL Expr TO Expr DO Expr DONE
+      | FOR Ide EQUAL Expr TO Expr DO Opt_expr DONE
           { () }
-      | FOR Ide EQUAL Expr DOWNTO Expr DO Expr DONE
+      | FOR Ide EQUAL Expr DOWNTO Expr DO Opt_expr DONE
           { () }
       | Expr SEMI Expr
           { () }
@@ -245,6 +249,8 @@ Expr :
       | MATCH Expr WITH Opt_bar Function_match
           { () }
       | MATCH Expr WITH Opt_bar Parser_match
+          { () }
+      | WHEN Opt_bar When_match
           { () }
       | LET Binding_list IN Expr  %prec prec_let
           { () }
@@ -269,25 +275,17 @@ Simple_expr :
           { () }
       | Ext_ident
           { () }
-      | LPAREN RPAREN
-          { () }
       | LBRACKET Expr_sm_list RBRACKET
-          { () }
-      | LBRACKET RBRACKET
           { () }
       | LBRACKETBAR Expr_sm_list BARRBRACKET
           { () }
-      | LBRACKETBAR BARRBRACKET
-          { () }
       | LBRACKETLESS Stream_expr GREATERRBRACKET
-          { () }
-      | LBRACKETLESS GREATERRBRACKET
           { () }
       | LPAREN Expr COLON Type RPAREN
           { () }
-      | LPAREN Expr RPAREN
+      | LPAREN Opt_expr RPAREN
           { () }
-      | BEGIN Expr END
+      | BEGIN Opt_expr END
           { () }
       | LBRACE Expr_label_list RBRACE
           { () }
@@ -318,16 +316,17 @@ Expr_comma_list :
 Expr_sm_list :
         Expr_sm_list SEMI Expr  %prec prec_list
           { () }
+      | Expr                    %prec prec_list
+          { () }
       | Expr_sm_list SEMI
           { () }
-      | Expr  %prec prec_list
+      | /*epsilon*/
           { () }
 ;
 
-Opt_semi :
-        SEMI            { () }
+Opt_expr :
+        Expr            { () }
       | /*epsilon*/     { () }
-;
 
 Expr_label :
         Ext_ident EQUAL Expr
@@ -335,11 +334,11 @@ Expr_label :
 ;
 
 Expr_label_list :
-        Expr_label_list SEMI Expr_label  %prec prec_list
+        Expr_label SEMI Expr_label_list
           { () }
-      | Expr_label_list SEMI
+      | Expr_label
           { () }
-      | Expr_label  %prec prec_list
+      | Expr_label SEMI
           { () }
 ;
 
@@ -396,6 +395,15 @@ Try_match :
           { () }
 ;
 
+When_match :
+        Expr MINUSGREATER Expr BAR When_match
+          { () }
+      | UNDERSCORE MINUSGREATER Expr
+	  { () }
+      | Expr MINUSGREATER Expr
+          { ()}
+;
+
 Binding_list :
         Binding AND Binding_list
           { $1 :: $3 }
@@ -413,18 +421,24 @@ Binding :
 /* Patterns */
 
 Pattern_sm_list :
-        Pattern SEMI Pattern_sm_list
+        Pattern_sm_list SEMI Pattern
           { () }
-      | Pattern Opt_semi
+      | Pattern
+          { () }
+      | Pattern_sm_list SEMI
+          { () }
+      | /*epsilon*/
           { () }
 ;
 
 Pattern_label_list :
         Pattern_label SEMI Pattern_label_list
           { () }
-      | Pattern_label Opt_semi
+      | Pattern_label
           { () }
-      | UNDERSCORE Opt_semi
+      | UNDERSCORE
+          { () }
+      | /*epsilon*/
           { () }
 ;
 
@@ -481,8 +495,6 @@ Simple_pattern :
           { () }
       | LPAREN RPAREN
           { () }
-      | LBRACKET RBRACKET
-          { () }
       | LBRACKET Pattern_sm_list RBRACKET
           { () }
       | LPAREN Pattern COLON Type RPAREN
@@ -498,11 +510,13 @@ Simple_pattern :
 /* Streams */
 
 Stream_expr :
-        Stream_expr SEMI Stream_expr_component  %prec prec_list
+        Stream_expr SEMI Stream_expr_component
+          { () }
+      | Stream_expr_component
           { () }
       | Stream_expr SEMI
           { () }
-      | Stream_expr_component  %prec prec_list
+      | /*epsilon*/
           { () }
 ;
 
@@ -514,18 +528,18 @@ Stream_expr_component :
 ;
 
 Stream_pattern :
-        LBRACKETLESS GREATERRBRACKET
+        LBRACKETLESS Stream_pattern_component_list GREATERRBRACKET
           { () }
-      | LBRACKETLESS Stream_pattern_component_list Opt_semi GREATERRBRACKET
+      | LBRACKETLESS GREATERRBRACKET
           { () }
 ;
 
 Stream_pattern_component_list :
-        Stream_pattern_component
-          { () }
-      | IDENT
+        IDENT
           { () }
       | Stream_pattern_component SEMI Stream_pattern_component_list
+          { () }
+      | Stream_pattern_component
           { () }
 ;
 
@@ -533,6 +547,8 @@ Stream_pattern_component :
         Simple_expr Simple_pattern
           { () }
       | QUOTE Pattern
+          { () }
+      | Stream_pattern_component SEMI
           { () }
 ;
 
@@ -557,7 +573,8 @@ Ide :
 ;
 
 Infx :
-        INFIX1          { () }    | INFIX2        { () }
+        INFIX0          { () }
+      | INFIX1          { () }    | INFIX2        { () }
       | INFIX3          { () }    | INFIX4        { () }
       | STAR            { () }    | COLONCOLON    { () }
       | COLONEQUAL      { () }    | EQUAL         { () }
@@ -653,7 +670,9 @@ Constr_decl :
 Label_decl :
         Label1_decl SEMI Label_decl
           { $1 :: $3 }
-      | Label1_decl Opt_semi
+      | Label1_decl SEMI
+          { [$1] }
+      | Label1_decl
           { [$1] }
 ;
 
