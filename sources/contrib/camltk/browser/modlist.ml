@@ -25,6 +25,6 @@ let modules_of_path path =
    it_list (fun accu dir ->
 	     set__union accu (modules_of_directory dir))
 	   (set__empty compare_strings) 
-	   path in
+	   ("." :: path) in
   sort__sort le_string (set__elements modset)
 ;;

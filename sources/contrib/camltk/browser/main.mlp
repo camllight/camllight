@@ -168,7 +168,7 @@ let main () =
   reset_opened_modules();
   do_list add_module !default_used_modules;
 
-  do_list read_tags !load_path ;
+  do_list read_tags ("." :: !load_path) ;
 
   arg__parse [
        "-stdlib", arg__String 
