@@ -6,7 +6,7 @@
 #include "alloc.h"
 #include "exec.h"
 #include "fail.h"
-#include "gc.h"
+#include "gc_ctrl.h"
 #include "globals.h"
 #include "intext.h"
 #include "io.h"
@@ -17,11 +17,9 @@
 #include "debugcom.h"
 
 #ifndef macintosh
-#ifdef __STDC__
-#include <stdlib.h>
-#else
+#ifndef __STDC__
 extern char *getenv ();
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 #endif /* not macintosh */
 
 extern value interprete();

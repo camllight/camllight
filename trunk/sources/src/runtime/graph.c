@@ -184,12 +184,6 @@ static GrTextOption * text_option()
     GR_ALIGN_BOTTOM,            /* Y alignment */
     GR_BYTE_TEXT
   };
-  if (textopt.txo_font == NULL) {
-    if ((textopt.txo_font = GrLoadBIOSFont("@:pc8x16.fnt")) == NULL &&
-        (textopt.txo_font = GrLoadBIOSFont("@:pc8x14.fnt")) == NULL &&
-        (textopt.txo_font = GrLoadBIOSFont("@:pc8x8.fnt")) == NULL)
-      graphic_failure("cannot find default font");
-  }
   textopt.txo_fgcolor.v = cc;
   return &textopt;
 }
