@@ -16,6 +16,7 @@ value nth_char : string -> int -> char = 2 "get_nth_char"
   and set_nth_char : string -> int -> char -> unit = 3 "set_nth_char"
 ;;
 value prefix ^ : string -> string -> string
+  and concat : string list -> string
   and sub_string : string -> int -> int -> string
 ;;
 value create_string : int -> string = 1 "create_string"
