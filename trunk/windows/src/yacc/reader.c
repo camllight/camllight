@@ -1085,8 +1085,6 @@ int s_lineno;
 
 end_rule()
 {
-    register int i;
-
     if (!last_was_action) default_action_error();
 
     last_was_action = 0;
