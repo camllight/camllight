@@ -6,7 +6,7 @@
 #include "alloc.h"
 #include "exec.h"
 #include "fail.h"
-#include "gc.h"
+#include "gc_ctrl.h"
 #include "globals.h"
 #include "intext.h"
 #include "io.h"
