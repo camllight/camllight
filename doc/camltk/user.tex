@@ -38,7 +38,7 @@ This is because some functions (such as \verb|create| and \verb|configure|)
 exist in many different modules, and it is more practical to refer to the
 function with its exact qualified name.
 
-All modules required by the \camltk\ interface are in the \verb|tklib1.zo|
+All modules required by the \camltk\ interface are in the \verb|tklib.zo|
 or \verb|tklib2.zo| library archives (only one of them is required,
 depending on the architecture you choose, cf. section~\ref{sec:compiling}).
 
@@ -152,12 +152,12 @@ should be inserted also.
 \section{Errors}
 The \camltk\ interface may raise the following exceptions:
 \begin{description}
-\item[TkError of string] this exception is raised when a \tcl\tk\ fails
+\item[TkError of string] this exception is raised when a \tcl\tk\ command fails
 during an evaluation. Normally, static typing in \caml, in addition to some
 run-time verifications should prevent this situation from happening.
 However, some errors are due to the external environment (e.g.
-\verb|selection__get|) and cannot be prevented. The exception will carry the
-\tcl\tk error message.
+\verb|selection__get|) and cannot be prevented. The exception carries the
+\tcl\tk\ error message.
 
 \item[IllegalWidgetType of string]
 this exception is raised when a widget command is applied to a widget of a
@@ -173,8 +173,10 @@ incomplete description of a widget, widget command or type.
 \end{description} 
 
 \section{More examples}
-The \verb|test| directory of the distribution contains several other
-examples. Read them to learn more about \camltk\ programming.
+The \verb|test| directory of the distribution contains several test
+examples. 
+The \verb|books-examples| directory contains translations in \camltk\ of
+several examples from \cite{ouster94}.
 
 %The \verb|tktop| directory contains a more advanced example, although
 %not very robust.
@@ -209,15 +211,22 @@ architecture, where \caml\ communicates to a slave \wish\ interpreter.
 There is now a {\em single-process} architecture, where both \caml\ and \tk\
 coexist in a single process.
 
+{\bf Note: } because the {\em two-process} architecture is less portable and
+less robust than the {\em single-process} architecture, the former may not
+be supported in future versions.
+
+
 %% Avec la 0.7, Camltk est installe avec le reste du bouzin
 % In the following, we refer to \verb|CAMLTKDIR| as an environment variable
 % pointing to the directory where the interface library has been
 % installed, that is normally \verb|/usr/local/lib/caml-light/tk|.
 In the following, we refer to \verb|TCLLIBDIR| (resp. \verb|TKLIBDIR|) as
 an environment variable containing the directory where \verb|libtcl.a|
-(resp. \verb|libtk.a|) are located. Consult your system administrator if you
+(resp. \verb|libtk.a|) is located. Consult your system administrator if you
 don't have this information. Moreover, we assume a ``standard installation''
-of \caml from the distribution.
+of \caml\ and \camltk from the distribution. This means, starting from
+release \thisrelease, that all \camltk\ library files are installed in the
+same directory as standard \caml\ library files.
 
 \subsection{Compilation for Single-process architecture}
 The library is named \verb|tklib.zo|.
@@ -243,6 +252,8 @@ $ camlc -custom -o addition unix.zo tklib2.zo addition.zo -lunix
 \end{verbatim} 
  \verb|unix.zo| comes from the \verb|libunix| contrib, and is normally
 installed in the same directory as standard \caml\ libraries. 
+The commands are simpler because we rely on the external \verb|wish|
+interpreter.
 
 \subsection{Toplevels}
 The distribution also contains two toplevels featuring the \camltk\
@@ -331,17 +342,20 @@ value constructors.
 \verb|TextVariables| are now available in \camltk. However,
 \verb|textvariables| are not physically shared between \caml\ and \tk.
 Instead, setting or consulting a \verb|textvariable| requires a transaction
-between \caml\ and \tk. However, if the \verb|textvariable| is for example
-used to physically share the content of an {\tt entry} with the text of a
-{\tt label}, then this sharing will effectively occur in the \tk\ world, and
-\caml\ is not concerned with the actual contents of the \verb|textvariable|.
+between \caml\ and \tk. However, the "sharing" properties of 
+\verb|textvariables| in \tk\ are preserved. For example, if the
+\verb|textvariable| is  
+used to physically share the content of an {\tt entry} with the text
+of a {\tt label}, then this sharing will effectively occur in the \tk\
+world, whether your \caml\ program is concerned with the actual
+contents of the \verb|textvariable| or not. 
 
 \subsection{How to find out the \caml\ name of \tk\ keywords and functions}
 Since this documentation is not a reference manual, you have unfortunately
 to make some efforts to find out what functions are available, and how the
 datatypes are defined. For the time being the best methods are:
 \begin{itemize}
-\item Check the .mli files in the library directory (they also appear in
+\item Check the .mli files in the \verb|lib| directory (they also appear in
 chapter~\ref{chap:ref}). This will give you at least the functions for each
 widget class. For each function, the basic form of its \tk\ equivalent is
 given in a comment. When a \tk\  function has several forms (e.g. variable
@@ -353,9 +367,10 @@ this function with different names (hopefully significative enough).
 \end{itemize} 
 
 \section{Debugging}
-Since this is an alpha release, some \tk\ functions may have been improperly
-implemented in the \caml\ library. This may cause undue \tk\ errors
-(exception \verb|TkError|). To facilitate the debugging, you can set the
+Since this is a beta release, some \tk\ functions may have been improperly
+implemented in the \camltk\ library. This may cause undue \tk\ errors
+(exception \verb|TkError|, or sometimess \verb|Invalid\_Argument| ). To
+facilitate the debugging, you can set the 
 Unix environment variable \verb|CAMLTKDEBUG| to any value before launching
 your program. This will allow you to see all
 data transferred between the \caml\ and the \tk\ processes. Since this data is
