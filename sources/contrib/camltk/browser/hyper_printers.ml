@@ -290,6 +290,7 @@ let hypertext top f arg =
   do_list (function (b,e ) ->
       	    text__tag_add t "hyper" (abs_index b) (abs_index e))
           !tags;
+  reset_state ();
   text__tag_configure t "hyper" !anchor_attrib;
   (* Disable editing *)
   text__configure t [State Disabled];

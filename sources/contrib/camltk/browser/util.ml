@@ -3,7 +3,7 @@
 
 (* Make a window (toplevel widget) resizeable *)
 let resizeable t =
-  update(); (* wait until layout is computed *)
+  update_idletasks(); (* wait until layout is computed *)
   wm__minsize_set t (winfo__width t) (winfo__height t)
 ;;
 
@@ -107,4 +107,71 @@ let navigation_keys tx sb =
    page_up_keys tx sb;
    line_down_keys tx sb;
    line_up_keys tx sb
+;;
+
+(********************* Line editor for entry widgets *********************)
+(* tk 3.6 has standard bindings
+   - (mouse selection)
+   - Delete/BackSpace/Control-h	: backward-delete-char
+   - Control-d			: kill-region
+   - Control-u			: clear entry
+   - Control-v			: paste
+   - Control-w			: backward-kill-word
+*)
+
+let entry_backward_char e _ = 
+  entry__icursor e (Number (pred (entry__index e Insert)));
+  entry_see_caret e;
+;;
+let entry_forward_char e _ = 
+  entry__icursor e (Number (succ (entry__index e Insert)));
+  entry_see_caret e;
+;;
+let entry_bol e _ =
+  entry__icursor e (Number 0);
+  entry_see_caret e;
+;;
+let entry_eol e _ =
+  entry__icursor e End;
+  entry_see_caret e;
+;;
+let entry_kill_line e _ =
+  entry__delete e Insert End;
+  entry_see_caret e;
+;;
+let entry_delete_char e _ =
+  entry__delete e Insert Insert;
+  entry_see_caret e;
+;;
+let entry_kill_region e _ =
+  try
+    entry__delete e SelFirst SelLast;
+    entry_see_caret e;
+  with
+   protocol__TkError "selection isn't in entry" -> ()
+;;
+
+
+let entry_bindings e =
+  (* paste with mouse (already on C-v) *)
+  bind e [[], WhatButton 2]
+      	 (BindSet ([], (fun _ -> 
+      	       	       	 try
+      	       	       	   let s = selection__get() in
+      	       	       	     entry__insert e Insert s
+			 with _ -> ())));
+  bind e [[Control], XKey "b"] (BindSet ([], entry_backward_char e));
+  bind e [[], XKey "Left"] (BindSet ([], entry_backward_char e));
+  bind e [[Control], XKey "f"] (BindSet ([], entry_forward_char e));
+  bind e [[], XKey "Right"] (BindSet ([], entry_forward_char e));
+  bind e [[Control], XKey "a"] (BindSet ([], entry_bol e));
+  bind e [[], XKey "Home"] (BindSet ([], entry_bol e));
+  bind e [[Control], XKey "e"] (BindSet ([], entry_eol e));
+  bind e [[], XKey "End"] (BindSet ([], entry_eol e));
+  bind e [[Control], XKey "k"] (BindSet ([], entry_kill_line e));
+  (* Remove older bindings *)
+  bind e [[Control], XKey "d"] BindRemove;
+  bind e [[Control], XKey "w"] BindRemove;
+  bind e [[Control], XKey "d"] (BindSet ([], entry_delete_char e));
+  bind e [[Control], XKey "w"] (BindSet ([], entry_kill_region e));
 ;;
