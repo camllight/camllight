@@ -16,7 +16,7 @@ STD_INTF= arg.zi bool.zi char.zi string.zi vect.zi eq.zi exc.zi \
 # The list of all implementations. In dependency order.
 
 STD_IMPL= bool.zo eq.zo exc.zo int.zo float.zo fstring.zo string.zo fchar.zo \
-    char.zo list.zo fvect.zo vect.zo io.zo list.zo pair.zo arg.zo \
+    char.zo list.zo fvect.zo vect.zo io.zo pair.zo arg.zo \
     filename.zo hashtbl.zo lexing.zo parsing.zo printexc.zo sort.zo \
     printf.zo stream.zo stack.zo queue.zo format.zo random.zo genlex.zo \
     baltree.zo set.zo map.zo
