@@ -9,6 +9,7 @@ value gr_fill_rect(vx, vy, vw, vh)
   int w = Int_val(vw);
   int h = Int_val(vh);
 
+  gr_check_open();
   XFillRectangle(grdisplay, grwindow.win, grwindow.gc,
                  x, Wcvt(y) - h + 1, w, h);
   XFillRectangle(grdisplay, grbstore.win, grbstore.gc,
@@ -23,6 +24,7 @@ value gr_fill_poly(array)
   XPoint * points;
   int npoints, i;
 
+  gr_check_open();
   npoints = Wosize_val(array);
   points = (XPoint *) stat_alloc(npoints * sizeof(XPoint));
   for (i = 0; i < npoints; i++) {
@@ -51,6 +53,7 @@ value gr_fill_arc(argv, argc)
   int ry = Int_val(argv[3]);
   int a1 = Int_val(argv[4]);
   int a2 = Int_val(argv[5]);
+  gr_check_open();
   XFillArc(grdisplay, grwindow.win, grwindow.gc,
            x - rx, Wcvt(y) - ry, rx * 2, ry * 2, a1 * 64, (a2 - a1) * 64);
   XFillArc(grdisplay, grbstore.win, grbstore.gc,

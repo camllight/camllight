@@ -31,6 +31,7 @@ value gr_wait_event(eventlist)
   sighandler_return_type (*oldsig)();
   XEvent event;
 
+  gr_check_open();
   mask = 0;
   poll = False;
   while (Tag_val(eventlist) == 1) {
