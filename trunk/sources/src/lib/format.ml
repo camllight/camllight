@@ -155,8 +155,9 @@ let format_pp_token size = function
          (* can't open a block right there ! *)
          pp_force_newline () else
          (* If block is rejected on the left current indentation will change *)
-      if size > !pp_space_left & !pp_current_indent < insertion_point then
+(*      if size > !pp_space_left & !pp_current_indent < insertion_point then
          pp_force_newline ();
+*)
       let offset = !pp_space_left - off in
       let bl_type =
        begin match ty with
@@ -243,7 +244,7 @@ let rec advance_left () =
      match queue__peek pp_queue with
       {Elem_size = size; Token = tok; Length = len} ->
        if not (size < 0 &
-               (!pp_right_total - !pp_left_total <= !pp_space_left)) then
+               (!pp_right_total - !pp_left_total < !pp_space_left)) then
         begin
          queue__take pp_queue;
          format_pp_token (if size < 0 then pp_infinity else size) tok;
