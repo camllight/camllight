@@ -1,6 +1,5 @@
-CAMLLATEX=../../contrib/caml-tex/caml-tex -n 80
+CAMLLATEX=../tools/caml-tex -n 80
 DVI2TXT=../tools/dvi2txt
-RELEASE=../../rel6/cl6
 
 CHAPTERS = Gen.mltex Fund.mltex Basic.mltex Lists.mltex \
   Types.mltex Annot.mltex Exc.mltex IO.mltex Streams.mltex \

@@ -271,14 +271,20 @@ Plus {Arg1=Var "x";
 The recursive definition of types may lead to types such that it is
 hard or impossible to build values of these types.
 For example:
+%% \begin{caml_example}
+%% type stupid = {Head:stupid; Tail:stupid};;
+%% \end{caml_example}
 \begin{caml_example}
-type stupid = {Head:stupid; Tail:stupid};;
+type stupid = {Next:stupid};;
 \end{caml_example}
 Elements of this type are {\em infinite} data structures. Essentially,
 the only way to construct one is:
+%% \begin{caml_example}
+%% let rec stupid_value =
+%%     {Head=stupid_value; Tail=stupid_value};;
+%% \end{caml_example}
 \begin{caml_example}
-let rec stupid_value =
-    {Head=stupid_value; Tail=stupid_value};;
+let rec stupid_value = {Next=stupid_value};;
 \end{caml_example}
 
 Recursive type definitions should be {\em well-founded} (i.e. possess
@@ -347,11 +353,12 @@ match t with Btree{Op=x; Son1=_; Son2=_} -> x
 One may ask: ``What is the difference between a sum data constructor and a
 function?''.
 At first sight, they look very similar. We assimilate constant data
-constructors (such as {\tt Heart}) to constants. However, in Caml Light, sum data constructors with arguments are not presented as functions from the element types to the sum type:
+constructors (such as {\tt Heart}) to constants. Similarly, in Caml
+Light, sum data constructors with arguments also possess a functional type:
 \begin{caml_example}
 Ace;;
 \end{caml_example}
-The reason is that a data constructor possesses particular properties
+However, a data constructor possesses particular properties
 that a general function does not possess, and it is interesting to
 understand these differences.  From the mathematical point of view, a
 sum data constructor is known to be an {\em injection} while a Caml
