@@ -234,7 +234,7 @@ let compile s =
   protect_current_input (fun () -> protect_current_module (fun () ->
     if filename__check_suffix s ".ml" then
       let filename = filename__chop_suffix s ".ml" in
-      compile_implementation (filename__basename filename) filename
+      compile_implementation (filename__basename filename) filename ".ml"
     else if filename__check_suffix s ".mli" then
       let filename = filename__chop_suffix s ".mli" in
       compile_interface (filename__basename filename) filename
