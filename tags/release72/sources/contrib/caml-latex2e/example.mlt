@@ -1,0 +1,51 @@
+\documentclass{article}
+\usepackage[slanted]{caml}
+
+\setlength{\camlboxindent}{1em}
+\setlength{\camlboxsep}{2pt}
+
+\newlength{\promptlength}
+\settowidth{\promptlength}
+  {\rmfamily\upshape Output: }
+
+\renewcommand{\camlinputprompt}
+  {\makebox[\promptlength][r]{\rmfamily\upshape Input: }}   
+\renewcommand{\camloutputprompt}
+  {\makebox[\promptlength][r]{\rmfamily\upshape Output: }} 
+
+\renewcommand{\camlsize}
+  {\small}
+
+\boxedcaml
+\nofollowinprompt
+\nofollowoutprompt
+
+\begin{document}
+Text text text text text text text text text text text text text text text text
+text text text text text text text text text text text text text  text text
+text text text text text text text text text text text text text text text text
+text text.
+\begin{caml_example}
+let rec filter p = function
+    [] -> [] 
+  | x::s -> if (p x) then x::(filter p s) 
+            else filter p s;;
+\end{caml_example}
+Text text text text text text text text text text text text text text text text
+text text text text text text text text text text text text text  text text
+text text text text text text text text text text text text text text text text
+text text.
+\noboxedcaml
+\begin{caml_example}
+let rec qsort q = function
+    [] -> []  
+  | x::s -> 
+      qsort q (filter (function y -> not (q x y)) s) 
+        @ [x]
+        @ qsort q (filter (q x) s);;
+\end{caml_example}
+Text text text text text text text text text text text text text text text text
+text text text text text text text text text text text text text  text text
+text text text text text text text text text text text text text text text text
+text text.
+\end{document}

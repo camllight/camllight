@@ -1,0 +1,4 @@
+In the style of ctags and etags, this program generates a "tags" file
+for Emacs from Caml Light sources.
+
+Contributed by Francois Rouaix (Francois.Rouaix@inria.fr).

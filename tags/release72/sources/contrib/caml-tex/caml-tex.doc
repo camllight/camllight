@@ -1,0 +1,131 @@
+
+
+
+   17 July 1993                                                   CAML-TEX(1)
+
+
+
+
+   NAME
+     caml-tex - Process Caml phrases embedded in LaTeX files
+
+
+   SYNOPSIS
+     caml-tex [ -o output-file ] [ -n line-width ] [ -w ] input-file ...
+
+
+
+   DESCRIPTION
+
+     The caml-tex filter extracts Caml Light phrases embedded in LaTeX files,
+     evaluates them, and insert the outcome of the evaluation after each
+     phrase.
+
+     Three LaTeX environments are provided to include Caml Light code in the
+     input files:
+
+     caml_example
+          The phrases between \begin{caml_example} and \end{caml_example} are
+          evaluated and copied into the output file. Each phrase is followed
+          by the response of the toplevel loop.
+
+     caml_example*
+          The phrases between \begin{caml_example*} and \end{caml_example*}
+          are evaluated and copied into the output file. The responses of the
+          toplevel loop are discarded.
+
+     caml_eval
+          The phrases between \begin{caml_eval} and \end{caml_eval} are
+          silently evaluated. They are not copied into the output file, and
+          the responses of the toplevel loop are discarded.
+
+     The resulting LaTeX code is stored in the file file.ml.tex if the input
+     file has a name of the form file.tex, otherwise the name of the output
+     file is the name of the input file with `.ml.tex' appended.
+
+     The files produced by caml-tex can be directly processed by LaTeX, pro-
+     vided the `caml' or `caml-sl' document style option is provided in the
+     \documentstyle. The `caml' style typesets both the Caml phrases and the
+     toplevel output in typewriter font. The `caml-sl' style typesets the
+     input in typewriter font, and the output in slanted typewriter font.
+
+
+   OPTIONS
+
+
+     -o output-file
+          Specify the name of a file where the LaTeX output is to be stored.
+          A dash `-' causes the LaTeX output to be printed on standard out-
+          put.
+
+
+
+                                                                            1
+
+
+
+
+
+
+   CAML-TEX(1)                                                   17 July 1993
+
+
+     -n line-width
+          Set the line width. The default is 72 characters. The responses of
+          the toplevel loop are folded if they are longer than the line
+          width. No folding is performed on the Caml input text.
+
+     -w   Cause lines to be folded on a space character whenever possible,
+          avoiding word cuts in the output. By default, folding occurs at the
+          line width, regardless of word cuts.
+
+
+   CAVEATS
+     The \begin... and \end... phrases must sit on a line by themselves, with
+     no characters before the backslash or after the closing brace.  Each
+     Caml phrase must be terminated by `;;' at the end of a line.  Blank
+     space is accepted between `;;' and the newline, but any other character
+     will cause caml-tex to ignore the end of the phrase, resulting in an
+     incorrect shuffling of the responses into the phrases.  (The responses
+     ``lag behind''.)
+
+
+   SEE ALSO
+
+     camllight (1).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   2
+
+

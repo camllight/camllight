@@ -1,0 +1,75 @@
+% Copyright     Digital Equipment Corporation & INRIA     1988, 1989
+% Last modified_on Wed Feb 27 19:49:15 GMT+1:00 1991 by herve
+
+%\documentstyle[fullpageusa,makeidx]{article}    % Specifies the document style.
+\documentstyle[makeidx]{article}
+
+\title{{\Huge BigNum:  A Portable and \\ Efficient Package \\ for
+Arbitrary-Precision \\ Arithmetic}}
+\author{ B. Serpette  \thanks{Institut National de Recherche
+          en Informatique et Automatique, 78150, Rocquencourt, France.} \\
+        J. Vuillemin \thanks{Digital Equipment Corp., Paris Research Laboratory,
+        85, Av. Victor Hugo.        92563 Rueil-Malmaison Cedex, France.}  \\
+        J.C. Herv\'e  $^{\dagger}$  \\
+       }  
+
+\newtheorem{func}{Procedure}
+\newcommand{\mod}{\bmod}
+\newcommand{\lelisp}{LeLisp }
+\newcommand{\ob}{\, _{b}[}
+\newcommand{\N}{\mbox{{\bf N}}}
+\newcommand{\n}{\mbox{{\verb+N+}}}
+\newcommand{\m}{\mbox{{\verb+M+}}}
+\newcommand{\p}{\mbox{{\verb+P+}}}
+\newcommand{\q}{\mbox{{\verb+Q+}}}
+\newcommand{\r}{\mbox{{\verb+R+}}}
+\newcommand{\dd}{\mbox{{\verb+D+}}}
+\newcommand{\bb}{\mbox{{\bf b}}}
+\newcommand{\Z}{\mbox{{\bf Z}}}
+\newcommand{\Bd}{\mbox{\bf B}_{2}}
+\newcommand{\Bb}{\mbox{\bf B}_{b}}
+\newcommand{\Nd}{\mbox{\bf N}_{2}}
+\newcommand{\V}{{\cal V}}
+\newcommand{\ips}[1]{\dotfill\ {\it #1}}
+
+\makeindex
+\begin{document}
+              
+\maketitle                 % Produces the title.
+\begin{abstract}
+We describe a C package for arbitrary-precision integer
+arithmetic that is portable, yet efficient. Making the package run fast
+on a given computer involves re-writing a small
+kernel of our package in native assembly language. 
+We provide such assembly code for VAX, 68020 and NS instruction sets,
+with good benchmarks. This package serves as a foundation for
+two arithmetic packages written in higher level
+languages \lelisp \footnote{\lelisp is a registered
+trade-mark of INRIA.} and Modula2+. The package is publicly available for
+non-commercial uses.
+This report will also appear in French as an INRIA report.
+\end{abstract}
+
+\clearpage
+
+\newpage
+
+\input{bnbody.tex}
+
+\clearpage
+
+{\Large \bf Acknowledgements}\\
+
+We are thankfull to the following people, for their contributions
+to this package:
+Patrice Bertin, Hans Boehm, Jerome Chailloux, Michel Gangnet, 
+Fran\c{c}ois Morain, David Salesin and Mark Shand.
+
+\vspace{2cm}
+
+\tableofcontents
+
+\clearpage
+\printindex
+
+\end{document}

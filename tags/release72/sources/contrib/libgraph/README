@@ -1,0 +1,48 @@
+The "libgraph" library implements the portable graphics library
+(module "graphics") under X11 release 4 or 5.  See the reference
+manual for a description of the "graphics" module.
+
+This library requires the "libunix" library.
+
+It has been contributed by Xavier Leroy (Xavier.Leroy@inria.fr).
+
+
+USAGE:
+
+To use the graphics library from your programs, just do
+
+        camlc -custom <other options> \
+              unix.zo graphics.zo <other .zo and .ml files> \
+              -lgraph -lunix -lX11
+
+for the linking phase.
+
+A toplevel system with the graphics functions available is run as follows:
+
+        camllight camlgraph
+
+
+NOTES ON THE IMPLEMENTATION:
+
+* The argument to open_graph has the form "display geometry".
+Either or both components can be omitted, but a space is required before
+the geometry.
+
+* set_font takes an X-windows font name as argument, e.g. "8x13".
+The font name can contain wildcards "*".
+
+* set_text_size has no effect. To change the text size, use set_font to 
+select a font with the desired size.
+
+* fill_poly uses the "even-odd rule", which explains why some points
+"inside" the polygon are not traced if the polygon outline intersects 
+itself in non-trivial ways (e.g. a pentagram).
+
+* Most X servers restrict the number of colors that can be simultaneously
+displayed on the screen. set_color will usually try to find the best
+approximation of the required color, but there are no guarantees that the
+actual color will exactly match the given R, G, B specification.
+
+* User interrupts are ignored while waiting for an event (with
+wait_next_event). The interruption is processed when wait_next_event
+returns.

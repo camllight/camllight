@@ -1,0 +1,43 @@
+  This is version 1.1 of the caml package for caml-tex 
+
+
+OVERVIEW:
+
+  This package re-implements the caml style for formatting
+  Caml Light source code parts in LaTeX2e documents after
+  processing with caml-tex. In addition it provides new features,
+  such as boxed Caml Light code or arbitrary input and output prompts.
+
+
+REQUIREMENTS:
+
+  You will need a LaTeX2e release from <1994/06/01> or later.
+
+
+CONTENTS:
+
+  INSTALL               instructions for installation
+  Makefile              the Makefile
+  README                this file
+  caml-tex              the modified version of the caml-tex filter
+  caml.dtx              the documented source code of the caml package
+  caml.ins              an installation driver
+  example.mlt           an example
+
+
+INSTALLATION:
+
+  See the file INSTALL for installation instructions.
+
+
+AUTHOR:
+
+  Jens Kloecker <kloecker@informatik.uni-wuerzburg.de>
+
+
+AVAILABILITY:
+
+  The caml package resides on
+
+        host:       sunshine.informatik.uni-wuerzburg.de
+        directory:  pub/kloecker/caml-tex
