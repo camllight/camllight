@@ -9,13 +9,13 @@ all: $(FILES) FORCE
         | ../../tools/htmlgen \
         | ../../tools/htmltbl > manual.html
 	cd man-caml; \
-        ../../../tools/htmlcut -3 -11 -12 ../manual.html > index.html
+        ../../../tools/htmlcut -3 -4 -11 -12 ../manual.html > index.html
 	cd man-caml; ../../../tools/htmlthread node*.html
 
 FORCE:
 
 clean:
-	rm -f $(FILES)
+	rm -f $(FILES) manual.html
 	@$(MAKE) -f Makefile.refman clean
 	@$(MAKE) -f Makefile.library clean
 	@$(MAKE) -f Makefile.cmds clean
