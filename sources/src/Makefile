@@ -26,7 +26,8 @@ LIBS=
 # not all Unix C preprocessors define it.
 # If your cpp is too fussy, make tools/clprepro and use this:
 # CPP=../../src/tools/clprepro -Dunix
-CPP=/lib/cpp -P -traditional -Dunix
+#CPP=/lib/cpp -P -traditional -Dunix
+CPP=/usr/bin/cpp -P -traditional -Dunix
 
 # The directory where public executables will be installed
 BINDIR=/usr/local/bin
@@ -120,8 +121,9 @@ compile:
 
 # Install the Caml Light system
 install:
-	if test -d $(BINDIR); then : ; else mkdir $(BINDIR); fi
-	if test -d $(LIBDIR); then : ; else mkdir $(LIBDIR); fi
+	if test -d $(BINDIR); then : ; else mkdir -p $(BINDIR); fi
+	if test -d $(LIBDIR); then : ; else mkdir -p $(LIBDIR); fi
+	if test -d $(MANDIR); then : ; else mkdir -p $(MANDIR); fi
 	cd runtime; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
 	cd launch; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
 	cd lib; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
@@ -151,3 +153,15 @@ depend:
 	for d in $(SUBDIRS); \
 	do (cd $$d; make depend); \
         done
+
+# Make MacOS X package
+
+package-macosx: FORCE
+	make BINDIR="`pwd`"/package-macosx/root$(BINDIR) \
+	     LIBDIR="`pwd`"/package-macosx/root$(LIBDIR) \
+	     MANDIR="`pwd`"/package-macosx/root$(MANDIR) install
+	tools/make-package-macosx
+
+FORCE:
+
+#

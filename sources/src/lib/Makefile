@@ -31,7 +31,7 @@ clean:
 	rm -f filename.ml genlex.ml
 
 install:
-	cp stdlib.zo *.zi *.zix *.mli *.ml $(LIBDIR)
+	cp -f stdlib.zo *.zi *.zix *.mli *.ml $(LIBDIR)
 	rm $(LIBDIR)/iparsing.mli
 
 .SUFFIXES :
