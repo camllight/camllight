@@ -72,11 +72,11 @@ while : ; do
     -custom)
       custom="-custom /tmp/camlprim.$$.c";;
     -lang)
-      compflags="$compflags -lang $2"
-      linkflags="$compflags -lang $2"
+      compopt="$compopt -lang $2"
+      linkopt="$linkopt -lang $2"
       shift;;
     -W)
-      compflags="$compflags -W";;
+      compopt="$compopt -W";;
     *.c)
       $cc -c -I$stdlib $ccopt $1 || exit $?
       ccfiles="$ccfiles `basename $1 .c`.o";;
