@@ -27,11 +27,6 @@
 #endif
 #endif
 
-#ifndef HAS__SETJMP
-#define _setjmp setjmp
-#define _longjmp longjmp
-#endif
-
 /* Signed char type */
 
 #if defined(__STDC__) || defined(SIGNED_CHAR_WORKS)
