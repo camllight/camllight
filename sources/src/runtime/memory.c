@@ -115,19 +115,21 @@ static char *expand_heap (request)
   return Bp_hp (mem);
 }
 
-value raw_alloc_shr (wosize, tag)
+value alloc_shr (wosize, tag)
      mlsize_t wosize;
      tag_t tag;
 {
   char *hp, *new_block;
 
-  while (1){
-    hp = fl_allocate (wosize);
-    if (hp != NULL) break;
+  hp = fl_allocate (wosize);
+  if (hp == NULL){
     new_block = expand_heap (wosize);
     if (new_block == NULL) raise_out_of_memory ();
     fl_add_block (new_block);
+    hp = fl_allocate (wosize);
+    if (hp == NULL) fatal_error ("alloc_shr: expand heap failed\n");
   }
+
   Assert (Is_in_heap (Val_hp (hp)));
 
   if (gc_phase == Phase_mark || (addr)hp >= (addr)gc_sweep_hp){
@@ -136,18 +138,8 @@ value raw_alloc_shr (wosize, tag)
     Hd_hp (hp) = Make_header (wosize, tag, White);
   }
   allocated_words += Whsize_wosize (wosize);
+  if (allocated_words > Wsize_bsize (minor_heap_size)) force_minor_gc = 1;
   return Val_hp (hp);
-}
-
-/* We could set [force_minor_gc] instead. */
-value alloc_shr (wosize, tag)
-     mlsize_t wosize;
-     tag_t tag;
-{
-  if (allocated_words > Wsize_bsize (minor_heap_size)) {
-    minor_collection ();
-  }
-  return raw_alloc_shr (wosize, tag);
 }
 
 /* Use this function to tell the major GC to speed up when you use
