@@ -150,7 +150,7 @@ value sys_system_command(command)   /* ML */
      value command;
 {
 #ifdef macintosh
-  invalid_arg("system_command unavailable");
+  invalid_argument("system_command unavailable");
 #else
   int retcode = system(String_val(command));
   if (retcode == -1) sys_error(String_val(command));
