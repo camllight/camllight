@@ -859,7 +859,9 @@ It can be either :
      "history", integer_variable false history__history_size,
 "history size.";
      "print_depth", integer_variable false printer_depth,
-"maximal depth for printing of values."];
+"maximal depth for printing of values.";
+     "print_length", integer_variable false printer_steps,
+"maximal number of value nodes printed."];
   info_list :=
     (* info name, function, help *)
     ["modules", info_modules,
