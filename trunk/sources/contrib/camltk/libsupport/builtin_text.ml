@@ -1,13 +1,15 @@
 (* Not a string as such, more like a symbol *)
 
-type TextMark == string ;;
+type TextMark == string
+;;
 
 let CAMLtoTKTextMark  x =  x
 ;;
 let TKtoCAMLTextMark x = x
 ;;
 
-type TextTag == string ;;
+type TextTag == string
+;;
 
 let CAMLtoTKTextTag  x =  x
 ;;
@@ -16,12 +18,12 @@ let TKtoCAMLTextTag x = x
 
 
 type TextModifier =
-    CharOffset of int
-  | LineOffset of int
-  | LineStart
-  | LineEnd
-  | WordStart
-  | WordEnd 
+    CharOffset of int		(* tk keyword: +/- Xchars *)
+  | LineOffset of int		(* tk keyword: +/- Xlines *)
+  | LineStart			(* tk keyword: linestart *)
+  | LineEnd			(* tk keyword: lineend *)
+  | WordStart			(* tk keyword: wordstart *)
+  | WordEnd 			(* tk keyword: wordend *)
 ;;
 
 (* TextModifiers are never returned by Tk *)
@@ -41,12 +43,12 @@ let ppTextModifier = function
 ;;
 
 type BaseTextIndex =
-   TI_LineChar of int * int
- | TI_Mark of TextMark
- | TI_End 
- | TI_At of int * int
- | TI_TagFirst of TextTag
- | TI_TagLast of TextTag
+   TI_LineChar of int * int		(* tk keyword: l.c *)
+ | TI_Mark of TextMark			(* tk keyword: *)
+ | TI_End 				(* tk keyword: end *)
+ | TI_At of int * int			(* tk keyword: @x,y *)
+ | TI_TagFirst of TextTag		(* tk keyword: tag.first *)
+ | TI_TagLast of TextTag		(* tk keyword: tag.last *)
 ;;
 
 let CAMLtoTKBaseTextIndex = function

@@ -1,11 +1,11 @@
 (* Color *)
 type Color =
-	NamedColor of string
-	| Black
-	| White
-	| Red
-	| Green
-	| Blue
+     NamedColor of string
+   | Black			(* tk keyword: black *)
+   | White			(* tk keyword: white *)
+   | Red			(* tk keyword: red *)
+   | Green			(* tk keyword: green *)
+   | Blue			(* tk keyword: blue *)
 ;;
 
 let CAMLtoTKColor = function

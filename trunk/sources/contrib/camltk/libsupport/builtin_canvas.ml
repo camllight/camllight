@@ -1,11 +1,12 @@
 (* TagOrId is builtin  because of SearchSpec *)
 type TagOrId =
     Tag of string
-  | Id of int ;;
+  | Id of int
+;;
 
 
 let CAMLtoTKTagOrId = function
-   Tag name -> name	
+   Tag name -> name
  | Id  n -> string_of_int n
 ;;
 
@@ -17,13 +18,13 @@ let TKtoCAMLTagOrId n =
 ;;
 
 type SearchSpec =
-    Above of TagOrId
-  | All
-  | Below of TagOrId
-  | Closest of int * int
-  | Enclosed of int * int * int * int
-  | Overlapping of int * int * int * int
-  | Withtag of TagOrId
+    Above of TagOrId			(* tk keyword: above *)
+  | All					(* tk keyword: all *)
+  | Below of TagOrId			(* tk keyword: below *)
+  | Closest of int * int		(* tk keyword: closest *)
+  | Enclosed of int * int * int * int	(* tk keyword: enclosed *)
+  | Overlapping of int * int * int * int  (* tk keyword: overlapping *)
+  | Withtag of TagOrId			(* tk keyword: withtag *)
 ;;
 
 let CAMLtoTKSearchSpec = function
@@ -42,12 +43,12 @@ let CAMLtoTKSearchSpec = function
 
 
 type CanvasIndex = 
-    CI_Number of int
-  | CI_End
-  | CI_Insert
-  | CI_SelFisrt
-  | CI_SelLast
-  | CI_At of int * int
+    CI_Number of int		(* tk keyword: *)
+  | CI_End			(* tk keyword: end *)
+  | CI_Insert			(* tk keyword: insert *)
+  | CI_SelFirst			(* tk keyword: sel.first *)
+  | CI_SelLast			(* tk keyword: sel.last *)
+  | CI_At of int * int		(* tk keyword: @x,y *)
 ;;
 
 
@@ -55,7 +56,7 @@ let CAMLtoTKCanvasIndex = function
     CI_Number (bar) -> string_of_int bar
   | CI_End -> "end"
   | CI_Insert -> "insert"
-  | CI_SelFisrt -> "sel.first"
+  | CI_SelFirst -> "sel.first"
   | CI_SelLast -> "sel.last"
   | CI_At (foo, bar) -> ("@"^(string_of_int foo)^","^(string_of_int bar))
 ;;

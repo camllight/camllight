@@ -1,9 +1,9 @@
 type MenuIndex =
-    MI_Number of int
-  | MI_Active
-  | MI_Last
-  | MI_None
-  | MI_At of int
+    MI_Number of int		
+  | MI_Active			(* tk keyword: active *)
+  | MI_Last			(* tk keyword: last *)
+  | MI_None			(* tk keyword: none *)
+  | MI_At of int		(* tk keyword: @x *)
   | MI_Pattern of string
 ;;
 
