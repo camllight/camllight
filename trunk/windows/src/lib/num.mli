@@ -1,7 +1,6 @@
 (* Operations on numbers *)
 
 #open "ref";;
-#open "nat";;
 #open "big_int";;
 #open "ratio";;
 
@@ -10,6 +9,11 @@
 
 type num = Int of int | Big_int of big_int | Ratio of ratio;;
         (* The type of numbers. *)
+
+value normalize_num : num -> num;;
+
+value numerator_num : num -> num;;
+value denominator_num : num -> num;;
 
 (*** Arithmetic operations *)
 
@@ -98,11 +102,15 @@ value prefix +/ : num -> num -> num
 
   and int_of_num : num -> int
   and num_of_int : int -> num
-  and nat_of_num : num -> nat
-  and num_of_nat : nat -> num
+  and nat_of_num : num -> nat__nat
+  and num_of_nat : nat__nat -> num
   and num_of_big_int : big_int -> num
   and big_int_of_num : num -> big_int
   and ratio_of_num : num -> ratio
   and num_of_ratio : ratio -> num
   and float_of_num : num -> float
+  and num_of_float : float -> num
 ;;
+
+value sys_print_num : int -> string -> num -> string -> unit;;
+value print_num : num -> unit;;
