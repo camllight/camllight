@@ -89,7 +89,7 @@ let compile () =
   (* Write the interface for public functions *)
   (* this interface is used only for documentation *)
   let oc = open_out_bin "lib/tkgen.mli" in
-    do_list (write_function_p (output_string oc)) !function_table;
+    do_list (write_function_type (output_string oc)) !function_table;
     close_out oc;
   hashtbl__do_table 
     (fun wname wdef ->
@@ -111,11 +111,11 @@ let compile () =
             write_named_create (output_string oc) wname;
 	    write_create_p (output_string oc') wname;
 	    write_named_create_p (output_string oc') wname;
-      	    do_list (write_command wname (output_string oc)) wdef.Commands;
-	    do_list (write_command_p wname (output_string oc')) wdef.Commands
+      	    do_list (write_function (output_string oc)) wdef.Commands;
+	    do_list (write_function_type (output_string oc')) wdef.Commands
         | Family ->
 	    do_list (write_function (output_string oc)) wdef.Commands;
-	    do_list (write_function_p (output_string oc')) wdef.Commands
+	    do_list (write_function_type (output_string oc')) wdef.Commands
         end;
 	close_out oc;
 	close_out oc'

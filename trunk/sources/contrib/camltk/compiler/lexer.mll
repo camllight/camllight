@@ -97,9 +97,12 @@ rule Main = parse
         STRING (get_stored_string()) }
   | "(" { LPAREN }
   | ")" { RPAREN }
+  | "[" { LBRACKET }
+  | "]" { RBRACKET }
   | "{" { LBRACE }
   | "}" { RBRACE }
   | "," { COMMA }
+  | ";" { SEMICOLON }
   | "#" { Comment lexbuf; Main lexbuf }
   | eof { EOF }
   | _

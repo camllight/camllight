@@ -17,28 +17,16 @@ let write_named_create_p w wname =
   w "                and checked dynamically. *)\n"
 ;;
 
-let write_command_p wname w def =
-  w "value "; w def.MLName; w " : Widget";
-  begin match def.Arg with
-    Unit -> ()       (* no arg *)
-  | Product tyl -> 
-        do_list (function t -> w " -> "; w (ppMLtype t)) tyl
-  | t -> w " -> "; w (ppMLtype t)
-  end;
-  w " -> ";
-  w (ppMLtype def.Result);
-  w " ;;\n";
-  w "               (* tk command: ."; w wname; w " "; w def.TkName; w " *)\n"
-;;
 
-let write_function_p w def =
+
+let write_function_type w def =
   w "value "; w def.MLName; w " : ";
-  begin match def.Arg with
-    Product tyl -> 
-        do_list (function t -> w (ppMLtype t); w " -> ") tyl
-  | t -> w (ppMLtype t); w " -> "
+  begin match types_of_template def.Template with
+    [] -> w "unit ->"
+  | l -> do_list (function t -> w (ppMLtype t);  w " -> ") l
   end;
   w (ppMLtype def.Result);
   w " ;;\n";
-  w "               (* tk function: "; w def.TkName; w " *)\n"
+  w "(* tk invocation: "; w (doc_of_template def.Template);
+  w " *)\n\n";
 ;;
