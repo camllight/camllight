@@ -76,7 +76,7 @@ key inserts a newline without sending the contents of the Input
 window. (This can be configured with the ``Preferences'' menu item.)
 
 The contents of the input window can be edited at all times, with the
-standard Macintosh interface. An history of previously entered phrases
+standard Windows interface. An history of previously entered phrases
 is maintained and displayed in a separate window.
 
 To quit the "Camlwin" application, either select ``Quit'' from
@@ -85,6 +85,10 @@ the ``File'' menu, or use the "quit" function described below.
 At any point, the parsing, compilation or evaluation of the current
 phrase can be interrupted by selecting the ``Interrupt Caml Light''
 menu item. This goes back to the "#" prompt.
+
+A text-only version of the toplevel system is available under the name
+"caml.exe". It runs under MSDOS as well as under Windows in a DOS window.
+No editing facilities are provided.
 \end{pc}
 
 \section{Options} \label{s:toplevel-options}
