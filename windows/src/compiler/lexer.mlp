@@ -126,7 +126,7 @@ let char_for_decimal_code lexbuf i =
 #endif
 
 #define SYMBOLS \
-    `!` `%` `&` `*` `+` `-` `.` `/` `:` `<` `=` `>` `?` `@` `^` `|` `~`
+    `!` `$` `%` `&` `*` `+` `-` `.` `/` `:` `<` `=` `>` `?` `@` `^` `|` `~`
 
 #ifdef msdos
 #define End_of_file (eof | `\026`)
@@ -204,7 +204,7 @@ rule main = parse
 
   | [ `!` `?` ] [ SYMBOLS ] *
             { PREFIX(get_lexeme lexbuf) }
-  | [ `=` `<` `>` `@` `^` `|` `&` `~` ] [ SYMBOLS ] *
+  | [ `=` `<` `>` `@` `^` `|` `&` `~` `$` ] [ SYMBOLS ] *
             { INFIX1(get_lexeme lexbuf) }
   | [ `+` `-` ] [ SYMBOLS ] *
             { INFIX2(get_lexeme lexbuf) }
