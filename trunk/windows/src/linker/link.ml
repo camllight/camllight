@@ -152,8 +152,8 @@ let link module_list exec_name =
     output_string outchan "CL07";
     close_out outchan
   with x ->
-    remove_file exec_name;
     close_out outchan;
+    remove_file exec_name;
     raise x
 ;;
 
