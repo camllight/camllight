@@ -23,7 +23,7 @@ static struct {
   header_t h;
   value first_bp;
   value filler2; /* Make sure the sentinel is never adjacent to any block. */
-} sentinel = {0, Make_header (0, 0, Blue), NULL, 0};
+} sentinel = {0, Make_header (0, 0, Blue), 0, 0};
 
 #define Fl_head ((char *) (&(sentinel.first_bp)))
 static char *fl_prev = Fl_head;  /* Current allocation pointer. */
