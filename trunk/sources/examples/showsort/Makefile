@@ -2,6 +2,7 @@
 # $XConsortium: imake.c,v 1.65 91/07/25 17:50:17 rws Exp $
 
 CAMLC=camlc
+COMPFLAGS=-W
 CAMLLIBR=camllibr
 CAMLLEX=camllex
 CAMLYACC=camlyacc
@@ -46,7 +47,4 @@ makefiles:: makefile
 
 # Generated dependencies below
 
-animation.zo: animation.zi 
-bubble.zo: animation.zi 
-insertion.zo: animation.zi 
 loadall.zo: showsort.zo 
