@@ -69,14 +69,14 @@ The following environment variable are also consulted:
   major heap.
   \item[o] ("space_overhead")  The major GC speed setting.
   \item[v] ("verbose")  Whether to print GC messages or not.  0 is
-  false; any other number is true.
+  false; 1 is true; other values may give unexpected results.
   \end{options}
   For example, under "csh" the command
 \begin{alltt}
         setenv CAMLRUNPARAM 's=250000 v=1'
 \end{alltt}
   tells a subsequent "camlrun" to set its initial minor heap size to
-  1~megabyte (on a 32-bit machine) and to print its GC messages.
+  about 1~megabyte (on a 32-bit machine) and to print its GC messages.
 
 \item["PATH"] List of directories searched to find the bytecode
 executable file.
