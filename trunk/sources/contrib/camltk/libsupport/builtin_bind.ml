@@ -338,10 +338,10 @@ let bind widget eventsequence action =
   begin match action with
      BindRemove -> Send2Tk buf "{}"
   |  BindSet (what, f) ->
-      let CbId = register_callback (WrapEventInfo f what) in
+      let CbId = register_callback widget (WrapEventInfo f what) in
         Send2Tk buf (" {camlcb " ^ CbId ^ (WriteEventField what) ^"}")
   |  BindExtend (what, f) ->
-      let CbId = register_callback (WrapEventInfo f what) in
+      let CbId = register_callback widget (WrapEventInfo f what) in
         Send2Tk buf (" {+camlcb " ^ CbId ^ (WriteEventField what) ^"}")
   end;
   Send2TkEval buf;
@@ -357,10 +357,10 @@ let class_bind class eventsequence action =
   begin match action with
      BindRemove -> Send2Tk buf "{}"
   |  BindSet (what, f) ->
-      let CbId = register_callback (WrapEventInfo f what) in
+      let CbId = register_callback dummy_widget (WrapEventInfo f what) in
         Send2Tk buf (" {camlcb " ^ CbId ^ (WriteEventField what) ^"}")
   |  BindExtend (what, f) ->
-      let CbId = register_callback (WrapEventInfo f what) in
+      let CbId = register_callback dummy_widget (WrapEventInfo f what) in
         Send2Tk buf (" {+camlcb " ^ CbId ^ (WriteEventField what) ^"}")
   end;
   Send2TkEval buf;
