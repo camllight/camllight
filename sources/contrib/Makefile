@@ -58,6 +58,7 @@ X11_LIB=/usr/X11R6/lib
 # Known targets:
 #       68K     vax     ns      mips    alpha   pyramid i960
 #       sparc   supersparc      sparc-solaris   supersparc-solaris
+#       pentium
 # See the file libnum/README for more explanations.
 # If you don't know, leave BIGNUM_ARCH=C, which selects a portable
 # C implementation of these routines.
