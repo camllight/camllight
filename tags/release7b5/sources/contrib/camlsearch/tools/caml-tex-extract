@@ -1,0 +1,37 @@
+#!/usr/local/bin/perl
+
+$output = "";
+
+while ($#ARGV >= 0) {
+    $_ = $ARGV[0];
+    last unless (/^-/);
+    $output  = $ARGV[1], shift, shift, next    if (/^-o$/);
+    printf STDERR ("Unknown option '%s', ignored\n", $_);
+    shift;
+}
+
+if ($output) {
+    if ($output eq "-") {
+	open(OUT, ">&STDOUT");
+    } else {
+	open(OUT, ">$output") || die("Cannot create $output: $!");
+    }
+}
+
+foreach $infile (@ARGV) {
+    open(IN, $infile) || die("Cannot open $infile: $!");
+    if (! $output) {
+	$outfile = $infile;
+	$outfile =~ s/\.tex$//;
+	open(OUT, "> $outfile") || die("Cannot create $outfile: $!");
+    }
+    while(<IN>) {
+	if (m/^\\begin{caml_(code|hidden)}\s*$/) {
+	    while(<IN>) {
+		last if m/^\\end{caml_(code|hidden)}\s*$/;
+		print OUT $_;
+	    }
+	}
+    }
+    close(IN);
+}

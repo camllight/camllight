@@ -1,0 +1,8 @@
+CamlProg(grep,expr.zo auto.zo ensent.zo determ.zo grep.zo,)
+CamlCustomProg(fastgrep,expr.zo auto.zo ensent.zo determ.zo fastgrep.zo fastrec.o,,)
+
+fastrec.o: fastrec.c
+	$(CAMLC) -c fastrec.c
+
+clean::
+	rm -f fastrec.o

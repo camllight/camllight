@@ -1,0 +1,13 @@
+DESCRIPTION. The caml-tex filter extracts Caml Light phrases
+embedded in LaTeX files, evaluates them, and insert the outcome of the
+evaluation after each phrase. 
+
+INSTALLATION. Edit the variables at the beginning of the Makefile and
+do "make install".
+
+The filter is written in Perl, so you'll need Perl version 4 installed
+on your machine.
+
+USAGE. See the manual page (caml-tex.1 or caml-tex.doc).
+
+AUTHOR. Xavier Leroy (Xavier.Leroy@inria.fr).
