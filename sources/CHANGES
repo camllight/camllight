@@ -1,3 +1,94 @@
+Caml Light 0.7:
+--------------
+
+* Source-level debugger with replay capabilities. Compiler support for
+  the debugger added.
+
+* New contributed libraries and tools:
+        - a complete X-windows toolkit based on TCL/TK.
+        - a profiler for Caml Light programs (execution counts)
+        - lorder: determine ordering of .zo files at link-time
+
+* Polymorphism is now restricted to values (let x = e generalizes the type of
+  x only if e is syntactically a value, e.g. a constant, a variable, a
+  function, a tuple of values, etc). This ensures correct, type-safe handling
+  of polymorphic mutable structures.
+
+* "Guards" in pattern-matching (match ... with pat when cond -> expr).
+
+* Partial matches and unused match cases are correctly detected now.
+
+* All error messages now go through printf, as a first move towards 
+  internationalization. More detailed error messages.
+
+* Various fixes in the garbage collector to fight fragmentation of the
+  major heap, result in major speedups for some long-running programs.
+
+* Generic comparisons (prefix < : 'a -> 'a -> bool). Compiler optimizations
+  for comparisons on base types.
+
+* Type-checker rewritten in bottom-up style instead of top-down style.
+  Hopefully this makes type errors more understandable.
+
+* let rec (f : ty) = ... now supported.
+
+* New class of infix and prefix symbols supported (e.g. *=, !!, ++, with
+  precedence/associativity determined by their first character).
+  As a consequence, blanks need to be added in some old code (e.g. x@!y
+  should now be written x@ !y).
+
+* Syntactic sugar:
+  - Alternate syntax for string access and update (s.[i], s.[i] <- c).
+  - := can be used instead of <- in array,  record and string assignment,
+    e.g. rec.lbl := val or array.(index) := val).
+  - Final semicolons permitted in sequences, lists, arrays and records
+    (e.g. begin ...; ...; end or [1;2;]).
+  - "\/" and "/\" synonymous for "&" and "or".
+
+* Optimized access to unqualified identifiers, makes the compiler run
+  noticeably faster.
+
+* Parser cleaned up a little, reduce/reduce conflicts eliminated.
+
+* New library modules: format (to write pretty-printers), gc (to control the
+  garbage collector and obtain various statistics on memory allocation).
+
+* The toplevel pretty-prints values and types.
+
+* New toplevel functions: install_printer (user-defined printing functions,
+  now type safe and associated with a type expression -- e.g. int list --
+  instead of a type constructor -- e.g. list); set_print_depth (control
+  the printing depth for values).
+
+* Better support for non-generalizable type variables in phrases:
+  they no longer cause an error immediately, the check is delayed till
+  the end of the compilation unit.
+
+* Static type-checking of printf. User-defined printers supported in printf
+  formats (%a and %t).
+
+* Parsing engine now reentrant; a camlyacc-generated parser can now call
+  another one in one of its actions.
+
+* Better support of 64-bit architectures: 32-bit architectures can read
+  values written on a file by a 64-bit architecture; max length of strings
+  and arrays now determined by the runtime system.
+
+* New primitive ouput_compact_value to write arbitrary values to disk in
+  a more compact (but more CPU-demanding) format than output_value.
+
+* More robust parsing of argv (some Unix kernels set argv[0] = argv[1] = file
+  when a #! file is run).
+
+* CAMLRUNPARAM environment variable to set GC parameters.
+
+* contrib/libgraph: implemented alternate event handling methods if async I/O
+  are not available; ask for system calls to be restarted if possible.
+
+* contrib/libnums: upgraded the bignum library; better 64-bit support
+  (but still has some 64-bit bugs); alternate names for num operations
+  (+/ -/ */ etc).
+
 Caml Light 0.61:
 ----------------
 

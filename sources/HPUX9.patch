@@ -1,0 +1,186 @@
+Date: Wed, 6 Apr 1994 12:25:35 +0200
+From: Damien.Doligez@inria.fr (Damien Doligez)
+Subject: Patch for Caml Light on HP-UX 9.01
+
+This patch will make Caml Light work on HP-UX 9.01 with cc.  
+
+It is not recommended to install this patch on systems where it is not
+needed.  All it does is change some instances of "x - y" to "x + (0 - y)".
+You will also have to remove the -O flag from variable OPTS in src/Makefile.
+
+To install this patch, go to the src/runtime directory and type
+
+        patch < ../../HPUX9.patch
+
+(You will need the "patch" utility, which is widely available in
+source form. (e.g. from ftp.inria.fr).) Then you can compile and
+install Caml Light.
+
+
+*** alloc.c	Sat Jun 19 00:53:32 1993
+--- alloc.c.new	Tue Apr  5 21:00:11 1994
+***************
+*** 82,88 ****
+    if (nbr == 0) {
+      v = Atom(0);
+    } else {
+!     while (extern_asp - nbr <= arg_stack_low)
+        realloc_stacks();
+      for (n = 0; n < nbr; n++)
+        *--extern_asp = funct(arr[n]);
+--- 82,88 ----
+    if (nbr == 0) {
+      v = Atom(0);
+    } else {
+!     while (extern_asp + (0 - nbr) <= arg_stack_low)
+        realloc_stacks();
+      for (n = 0; n < nbr; n++)
+        *--extern_asp = funct(arr[n]);
+*** freelist.c	Wed Jun 17 12:12:45 1992
+--- freelist.c.new	Tue Apr  5 21:00:11 1994
+***************
+*** 58,64 ****
+      if (Wosize_op (cur) >= sz){
+        if (Wosize_op (cur) >= Whsize_wosize (sz) + 1){
+  	/* Allocate a chunk from the end of the block. */
+! 	new_hp = cur + Bosize_op (cur) - Bhsize_wosize (sz);
+  	/* Blue tells the GC not to collect this block. */
+  	Hd_hp (new_hp) = Make_header (sz, 0, Blue);
+  	Hd_op (cur) = Make_header(Wosize_op(cur) - Whsize_wosize(sz), 0, Blue);
+--- 58,64 ----
+      if (Wosize_op (cur) >= sz){
+        if (Wosize_op (cur) >= Whsize_wosize (sz) + 1){
+  	/* Allocate a chunk from the end of the block. */
+!         new_hp = cur + Bosize_op (cur) + (0 - Bhsize_wosize (sz));
+  	/* Blue tells the GC not to collect this block. */
+  	Hd_hp (new_hp) = Make_header (sz, 0, Blue);
+  	Hd_op (cur) = Make_header(Wosize_op(cur) - Whsize_wosize(sz), 0, Blue);
+*** interp.c	Mon Sep 20 21:25:11 1993
+--- interp.c.new	Tue Apr  5 21:00:11 1994
+***************
+*** 457,463 ****
+  
+      Instruct(RAISE):
+        rsp = (value *) tp;
+!       if (rsp >= (value *)((char *) ret_stack_high - initial_rsp_offset)) {
+          exn_bucket = accu;
+          external_raise = initial_external_raise;
+          longjmp(external_raise->buf, 1);
+--- 457,463 ----
+  
+      Instruct(RAISE):
+        rsp = (value *) tp;
+!       if (rsp >= (value *)((char *) ret_stack_high + (0 - initial_rsp_offset))) {
+          exn_bucket = accu;
+          external_raise = initial_external_raise;
+          longjmp(external_raise->buf, 1);
+*** io.c	Tue Aug 17 23:59:24 1993
+--- io.c.new	Tue Apr  5 21:00:11 1994
+***************
+*** 152,158 ****
+    dest = Long_val(pos);
+    if (dest >= channel->offset &&
+        dest <= channel->offset + channel->max - channel->buff) {
+!     channel->curr = channel->buff + dest - channel->offset;
+    } else {
+      flush(channel);
+      if (lseek(channel->fd, dest, 0) != dest) sys_error();
+--- 152,158 ----
+    dest = Long_val(pos);
+    if (dest >= channel->offset &&
+        dest <= channel->offset + channel->max - channel->buff) {
+!     channel->curr = channel->buff + dest + (0 - channel->offset);
+    } else {
+      flush(channel);
+      if (lseek(channel->fd, dest, 0) != dest) sys_error();
+***************
+*** 285,291 ****
+    dest = Long_val(pos);
+    if (dest >= channel->offset - (channel->max - channel->buff) &&
+        dest <= channel->offset) {
+!     channel->curr = channel->max - (channel->offset - dest);
+    } else {
+      if (lseek(channel->fd, dest, 0) != dest) sys_error();
+      channel->offset = dest;
+--- 285,291 ----
+    dest = Long_val(pos);
+    if (dest >= channel->offset - (channel->max - channel->buff) &&
+        dest <= channel->offset) {
+!     channel->curr = channel->max + (0 - (channel->offset - dest));
+    } else {
+      if (lseek(channel->fd, dest, 0) != dest) sys_error();
+      channel->offset = dest;
+*** parsing.c	Sat Feb 27 02:59:13 1993
+--- parsing.c.new	Tue Apr  5 21:00:11 1994
+***************
+*** 136,142 ****
+      env->sp = Val_int(sp);
+      env->rule_number = Val_int(n);
+      env->rule_len = Val_int(m);
+!     sp = sp - m + 1;
+      m = Short(tables->lhs, n);
+      state1 = Int_val(Field(env->s_stack, sp - 1));
+      n1 = Short(tables->gindex, m);
+--- 136,142 ----
+      env->sp = Val_int(sp);
+      env->rule_number = Val_int(n);
+      env->rule_len = Val_int(m);
+!     sp = sp + (0 - m) + 1;
+      m = Short(tables->lhs, n);
+      state1 = Int_val(Field(env->s_stack, sp - 1));
+      n1 = Short(tables->gindex, m);
+*** roots.c	Wed Aug 26 15:46:32 1992
+--- roots.c.new	Tue Apr  5 21:00:11 1994
+***************
+*** 35,41 ****
+    {
+      value *block;
+      for (block = c_roots_head; block != NULL; block = (value *) block [1]){
+!       for (sp = block - (long) block [0]; sp < block; sp++){
+  	copy_fn (sp, *sp);
+        }
+      }
+--- 35,41 ----
+    {
+      value *block;
+      for (block = c_roots_head; block != NULL; block = (value *) block [1]){
+!       for (sp = block + (0 - (long) block [0]); sp < block; sp++){
+  	copy_fn (sp, *sp);
+        }
+      }
+*** stacks.c	Wed Aug 26 10:03:31 1992
+--- stacks.c.new	Tue Apr  5 21:00:11 1994
+***************
+*** 48,54 ****
+    new_high = new_low + size;
+  
+  #define shift(ptr) \
+!     ((char *) new_high - ((char *) arg_stack_high - (char *) (ptr)))
+  
+    new_asp = (value *) shift(extern_asp);
+    bcopy((char *) extern_asp,
+--- 48,54 ----
+    new_high = new_low + size;
+  
+  #define shift(ptr) \
+!     ((char *) new_high + (0 - ((char *) arg_stack_high - (char *) (ptr))))
+  
+    new_asp = (value *) shift(extern_asp);
+    bcopy((char *) extern_asp,
+***************
+*** 82,88 ****
+    new_high = new_low + size;
+  
+  #define shift(ptr) \
+!     ((char *) new_high - ((char *) ret_stack_high - (char *) (ptr)))
+  
+    new_rsp = (value *) shift(extern_rsp);
+    bcopy((char *) extern_rsp,
+--- 82,88 ----
+    new_high = new_low + size;
+  
+  #define shift(ptr) \
+!     ((char *) new_high + (0 - ((char *) ret_stack_high - (char *) (ptr))))
+  
+    new_rsp = (value *) shift(extern_rsp);
+    bcopy((char *) extern_rsp,
