@@ -22,18 +22,27 @@ GENSOURCES=prims prims.c opnames.h jumptbl.h
 
 all: camlrun.exe
 
-camlrun.out: $(OBJS) prims.o
-	$(CC) $(CFLAGS) -o camlrun.out @&&!
-prims.o $(OBJS) $(LIBS)
-!
+camlrun.out: libcaml.a prims.o
+	$(CC) $(CFLAGS) -o camlrun.out prims.o libcaml.a $(LIBS)
 
-camlrund.out: opnames.h $(OBJS) prims.o $(DOBJS) $(RUNTIME32)
-	$(CC) $(CFLAGS) -o camlrund.out @&&!
-prims.o $(OBJS) $(DOBJS) $(LIBS)
+camlrund.out: opnames.h libcaml.a prims.o $(DOBJS)
+	$(CC) $(CFLAGS) -o camlrund.out prims.o libcaml.a $(DOBJS) $(LIBS)
+
+libcaml.a: $(OBJS)
+	rm -f libcaml.a
+	ar rc libcaml.a @&&!
+$(OBJS)
 !
+	ranlib libcaml.a
 
 install:
 	copy camlrun.exe $(BINDIR)
+	copy libcaml.a $(LIBDIR)
+	sed -f ../tools/mkconfig.sed config.h > $(LIBDIR)\config.h
+	copy mlvalues.h $(LIBDIR)
+	copy alloc.h $(LIBDIR)
+	copy misc.h $(LIBDIR)
+	sed -f ../tools/mkmemory.sed memory.h > $(LIBDIR)\memory.h
 
 prims: $(PRIMS)
 	perl ../tools/findprim prims <<!

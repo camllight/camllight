@@ -141,6 +141,7 @@ void debugger_init(address)
     sock_addr_len = sizeof(sock_addr.s_inet);
   }
   open_connection(CONNECT_STARTUP);
+  trap_barrier = ret_stack_high;
   debugger(PROGRAM_START);
 }
 

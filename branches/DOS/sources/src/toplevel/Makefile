@@ -26,12 +26,11 @@ SPECIALS=sys
 
 all: camltop
 
-camltop: $(OBJS) provide expunge
+camltop: toplib.zo provide expunge
 	$(CAMLRUN) provide -stdlib ../lib @&&!
 $(PERVASIVES)
 ! > required
-	$(CAMLLINK) $(LINKFLAGS) -o camltop1 -require required @&&!
-stdlib.zo $(EXTERNOBJS) $(OBJS)
+	$(CAMLLINK) $(LINKFLAGS) -o camltop1 -require required stdlib.zo toplib.zo
 !
 	$(CAMLRUN) expunge camltop1 camltop @&&!
 $(PERVASIVES) $(SPECIALS)
@@ -39,6 +38,11 @@ $(PERVASIVES) $(SPECIALS)
 	del camltop1
 	del required
 	copy toplevel.zi ..\lib
+
+toplib.zo: $(OBJS)
+	$(CAMLLIBR) $(INCLUDES) -o toplib.zo @&&!
+$(EXTERNOBJS) $(OBJS)
+!
 
 expunge: expunge.zo
 	$(CAMLLINK) $(LINKFLAGS) -o expunge stdlib.zo readword.zo expunge.zo
@@ -50,6 +54,9 @@ stdlib.zo config.zo misc.zo interntl.zo modules.zo provide.zo
 
 install:
 	copy camltop $(LIBDIR)
+	copy provide $(LIBDIR)
+	copy expunge $(LIBDIR)
+	copy toplib.zo $(LIBDIR)
 
 !include "../tools/make-ml.inc"
 

@@ -4,9 +4,16 @@
 #open "sys";;
 #open "symtable";;
 
+let (debug_flag, input_name, output_name, perv_pos) =
+  if command_line.(1) = "-g"
+  then (true, command_line.(2), command_line.(3), 4)
+  else (false, command_line.(1), command_line.(2), 3)
+;;
+
 let pervasives =
   map filename__basename
-      (list_of_vect(sub_vect command_line 3 (vect_length command_line - 3)))
+      (list_of_vect(sub_vect command_line perv_pos
+                             (vect_length command_line - perv_pos)))
 ;;
 
 let qualid_pervasive qualid =
@@ -43,10 +50,10 @@ let copy_bytes inchan outchan n =
 ;;
 
 let main() =
-  let ic = open_in_bin command_line.(1) 
+  let ic = open_in_bin input_name
   and oc = open_out_gen [O_WRONLY; O_TRUNC; O_CREAT; O_BINARY]
                         (s_irall + s_iwall + s_ixall)
-                        command_line.(2) in
+                        output_name in
   let pos_hdr = in_channel_length ic - 20 in
   seek_in ic pos_hdr;
   let size_code = input_binary_int ic in
@@ -58,7 +65,6 @@ let main() =
   let global_table = (input_value ic : qualified_ident numtable) in 
   let exn_tag_table = (input_value ic : (qualified_ident * int) numtable) in 
   let tag_exn_table = (input_value ic : (qualified_ident * int) vect) in 
-  close_in ic;
   let new_global_table =
     expunge_numtable qualid_pervasive 263 global_table in
   let new_exn_tag_table =
@@ -69,10 +75,13 @@ let main() =
   output_value oc new_exn_tag_table;
   output_value oc tag_exn_table;
   let pos2 = pos_out oc in
+  if debug_flag then copy_bytes ic oc size_debug;
+  let pos3 = pos_out oc in
+  close_in ic;
   output_binary_int oc size_code;
   output_binary_int oc size_data;
   output_binary_int oc (pos2 - pos1);
-  output_binary_int oc 0;
+  output_binary_int oc (pos3 - pos2);
   output_string oc "CL07";
   close_out oc
 ;;

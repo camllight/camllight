@@ -1622,6 +1622,8 @@ make_goal()
       fprintf(entry_file,
               "let %s lexfun lexbuf = yyparse yytables %d lexfun lexbuf;;\n",
               bp->name, bp->entry);
+      if (bp->tag == NULL)
+        entry_without_type(bp->name);
       fprintf(interface_file,
               "value %s :\n  (lexing__lexbuf  -> token) -> lexing__lexbuf -> %s;;\n",
               bp->name,

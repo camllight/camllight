@@ -83,6 +83,9 @@ int k;
     if (output_file && k > 0) {
       fclose(output_file); unlink(output_file_name);
     }
+    if (interface_file && k > 0) {
+      fclose(interface_file); unlink(interface_file_name);
+    }
     exit(k);
 }
 
