@@ -79,7 +79,7 @@ value quit : unit -> unit
            [printername] from the table of toplevel printers. *)
   and set_print_depth : int -> unit
         (* [set_print_depth n] limits the printing of values to a maximal
-           depth of [n]. The parts of values whose depth exceed [n]
+           depth of [n]. The parts of values whose depth exceeds [n]
            are printed as [...] (ellipsis). *)
   and set_print_length : int -> unit
         (* [set_print_length n] limits the number of value nodes
