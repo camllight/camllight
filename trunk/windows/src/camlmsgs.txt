@@ -295,6 +295,9 @@ src:	The function %s is now traced.\n
 fr:	La fonction %s est dorénavant tracée.\n
 es:     La función %s estará trazada de ahora en adelante.\n
 
+src:    The function %s is a primitive, it cannot be traced.\n
+fr:     La fonction %s est une fonction primitive, elle ne peut être tracée.\n
+
 src:	Unknown function %s.\n
 fr:	La fonction %s n'est pas définie.\n
 es:     La función %s no está definida.\n
