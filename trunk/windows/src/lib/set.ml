@@ -1,6 +1,7 @@
 (* Sets over ordered types *)
 
 #open "eq";;
+#open "exc";;
 #open "baltree";;
 
 (* Sets are represented by AVL trees. *)
@@ -79,3 +80,11 @@ let elements s =
     Empty -> accu
   | Node(l, v, r, _) -> elements (v :: elements accu r) l
   in elements [] s.tree;;
+
+let rec choose_aux = function
+    Empty -> raise Not_found
+  | Node(Empty, v, r, _) -> v
+  | Node(l, v, r, _) -> choose_aux l;;
+
+let choose s =
+  choose_aux s.tree;;
