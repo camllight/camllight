@@ -59,7 +59,7 @@ value get_lexeme : lexbuf -> string
            of the first character of the matched string. The first character
            of the stream has position 0. *)
   and get_lexeme_end : lexbuf -> int
-        (* [get_lexeme_start lexbuf] returns the position in the input stream
+        (* [get_lexeme_end lexbuf] returns the position in the input stream
            of the character following the last character of the matched
            string. The first character of the stream has position 0. *)
 ;;

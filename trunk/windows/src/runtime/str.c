@@ -67,17 +67,17 @@ value fill_string(s, offset, len, init) /* ML */
 }
 
 #ifdef unix
-static unsigned char printable_chars_ascii[32] = /* 0x20-0x7E */
+static unsigned char printable_chars_ascii[] = /* 0x20-0x7E */
   "\000\000\000\000\377\377\377\377\377\377\377\377\377\377\377\177\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000";
-static unsigned char printable_chars_iso[32] = /* 0x20-0x7E 0xA1-0xFF */
+static unsigned char printable_chars_iso[] = /* 0x20-0x7E 0xA1-0xFF */
   "\000\000\000\000\377\377\377\377\377\377\377\377\377\377\377\177\000\000\000\000\376\377\377\377\377\377\377\377\377\377\377\377";
 #endif
 #ifdef macintosh
-static unsigned char printable_chars[32] = /* 0x20-0x7E 0x80-0xC9 0xCB-0xD8 */
+static unsigned char printable_chars[] = /* 0x20-0x7E 0x80-0xC9 0xCB-0xD8 */
   "\000\000\000\000\377\377\377\377\377\377\377\377\377\377\377\177\377\377\377\377\377\377\377\377\377\373\377\001\000\000\000\000";
 #endif
 #ifdef MSDOS
-static unsigned char printable_chars[32] = /* 0x20-0xFE */
+static unsigned char printable_chars[] = /* 0x20-0xFE */
   "\000\000\000\000\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\177";
 #endif
 
@@ -87,7 +87,7 @@ value is_printable(chr) /* ML */
   int c;
 #ifdef unix
   static int iso_charset = -1;
-  char * printable_chars;
+  unsigned char * printable_chars;
 
   if (iso_charset == -1) {
     char * lc_ctype = (char *) getenv("LC_CTYPE");

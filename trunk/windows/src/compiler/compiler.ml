@@ -187,6 +187,14 @@ let compile_implementation modname filename =
   external_types := [];
   if file_exists (filename ^ ".mli") then begin
     try
+      if not (file_exists (filename ^ ".zi")) then begin
+        prerr_begline " Cannot find file ";
+        prerr_string filename;
+        prerr_string ".zi. Please compile ";
+        prerr_string filename;
+        prerr_endline ".mli first.";
+        raise Toplevel
+      end;
       let intf = read_module (filename ^ ".zi") in
       start_compiling_implementation modname intf;
       enter_interface_definitions intf;
