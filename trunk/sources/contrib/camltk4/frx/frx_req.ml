@@ -18,7 +18,7 @@ let version = "$Id$"
 *)
 
 let open_simple title action notaction memory =
-  let t = toplevelw__create (support__new_toplevel_widget "simpleReq") [] in
+  let t = toplevelw__create support__default_toplevel_widget [] in
   focus__set t;
   wm__title_set t title;
   let tit = label__create t [Text title] in
@@ -57,7 +57,7 @@ let open_simple title action notaction memory =
  * focus seems to be in the listbox automatically
  *)
 let open_list title elements action notaction =
-  let t = toplevelw__create (support__new_toplevel_widget "openlist") [] in
+  let t = toplevelw__create support__default_toplevel_widget [] in
   wm__title_set t title;
 
   let tit = label__create t [Text title] in
@@ -103,7 +103,7 @@ let open_passwd title =
   let username = ref ""
   and password = ref ""
   and cancelled = ref false in
-  let t = toplevelw__create (support__new_toplevel_widget "passwReq") [] in
+  let t = toplevelw__create support__default_toplevel_widget [] in
   focus__set t;
   wm__title_set t title;
   let tit = label__create t [Text title]

@@ -22,6 +22,9 @@ let TextEnd =
   TextIndex(End, [])
 ;;
 
+let TextBegin =
+  TextIndex (LineChar(0,0), [])
+;;
 
 (* 
  * Link a scrollbar and a text widget 
@@ -41,7 +44,7 @@ let page_up tx   =  text__yview tx (ScrollPage (-1))
 and page_down tx =  text__yview tx (ScrollPage 1)
 and line_up tx   =  text__yview tx (ScrollUnit (-1))
 and line_down tx =  text__yview tx (ScrollUnit 1)
-and top tx = text__yview_index tx (TextIndex (LineChar(0,0),[]))
+and top tx = text__yview_index tx TextBegin
 and bottom tx = text__yview_index tx TextEnd
 ;;
 
@@ -125,35 +128,32 @@ let new_scrollable_text top options navigation =
  * Searching
  *)
 
-let topsearch =
-  let newid =
-    let cnter = ref 0 in
-    (fun () -> incr cnter; "search"^string_of_int !cnter) in
-  function t ->
-    let current_index = ref (TextIndex(LineChar(0,0), [])) in
-    let top = toplevelw__create (support__new_toplevel_widget (newid())) [] in
+let topsearch t =
+  (* The user interface *)
+  let top = toplevelw__create t [] in
+  wm__title_set top "Text search";
     let f = frame__create top [] in
       let m = label__create f [Text "Search pattern"]
       and e = entry__create f [Relief Sunken] in
-    let hgroup = frame__create top []
-    and bgroup = frame__create top [] in
+  let hgroup = frame__create top []
+  and bgroup = frame__create top [] in
     let fdir = frame__create hgroup [] 
     and fmisc = frame__create hgroup [] 
     and direction = textvariable__new ()
     and exactv = textvariable__new ()
     and casev = textvariable__new () in
-    let forw = radiobutton__create fdir 
-      	   [Text "Forward"; Variable direction; Value "f"]
-    and backw = radiobutton__create fdir
-      	   [Text "Backward"; Variable direction; Value "b"]
-    and exact = checkbutton__create fmisc
-      	   [Text "Exact match"; Variable exactv]
-    and case = checkbutton__create fmisc
-      	   [Text "Fold Case"; Variable casev] 
-    and searchb = button__create bgroup [Text "Search"]
-    and contb = button__create bgroup [Text "Continue"]
-    and dismissb = button__create bgroup 
-      	[Text "Dismiss"; 
+       let forw = radiobutton__create fdir 
+	     [Text "Forward"; Variable direction; Value "f"]
+      and backw = radiobutton__create fdir
+	     [Text "Backward"; Variable direction; Value "b"]
+      and exact = checkbutton__create fmisc
+	     [Text "Exact match"; Variable exactv]
+      and case = checkbutton__create fmisc
+	     [Text "Fold Case"; Variable casev] 
+      and searchb = button__create bgroup [Text "Search"]
+      and contb = button__create bgroup [Text "Continue"]
+      and dismissb = button__create bgroup 
+	 [Text "Dismiss"; 
          Command (fun () -> text__tag_delete t ["search"]; destroy top)] in
 
       radiobutton__invoke forw;
@@ -164,6 +164,9 @@ let topsearch =
       pack [fdir; fmisc] [Side Side_Left; Anchor Center];
       pack [searchb; contb; dismissb] [Side Side_Left; Fill Fill_X];
       pack [f;hgroup;bgroup] [Fill Fill_X; Expand true];
+
+  let current_index = ref TextBegin in
+
    let search cont = fun () ->
      let opts = ref [] in
      if textvariable__get direction = "f" then
@@ -174,15 +177,16 @@ let topsearch =
      if textvariable__get casev = "1" then
        opts := Nocase :: !opts;
      try
+       let forward = textvariable__get direction = "f" in
        let i = text__search t !opts (entry__get e)
-      	  (if cont then !current_index else 
-      	   if textvariable__get direction = "f" then
-      	      TextIndex(LineChar(0,0), [])
-	   else TextEnd)
-	  (if textvariable__get direction = "f" then TextEnd 
-      	   else TextIndex(LineChar(0,0), [])) in
+      	  (if cont then !current_index 
+      	   else if forward then TextBegin
+	   else TextIndex(End, [CharOffset (-1)])) (* does not work with end *)
+	  (if forward then TextEnd 
+      	   else TextBegin) in
        let found = TextIndex (i, []) in
-       	 current_index := TextIndex(i, [CharOffset 1]);
+       	 current_index := 
+      	   TextIndex(i, [CharOffset (if forward then 1 else (-1))]);
 	 text__tag_delete t ["search"];
 	 text__tag_add t "search" found (TextIndex (i, [WordEnd]));
 	 text__tag_configure t "search" 
