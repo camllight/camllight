@@ -102,13 +102,8 @@ let char_for_backslash = function
     `n` -> `\010`
   | `r` -> `\013`
 #endif
-#ifdef FUSSY
-  | `b` -> `\b`
-  | `t` -> `\t`
-#else
   | `b` -> `\008`
   | `t` -> `\009`
-#endif
   | c   -> c
 ;;
 
@@ -142,11 +137,7 @@ let char_for_decimal_code lexbuf i =
 #endif
 
 rule main = parse
-#ifdef FUSSY
-    [` ` `\010` `\013` `\t` `\012`] +
-#else
     [` ` `\010` `\013` `\009` `\012`] +
-#endif
       { main lexbuf }
   | [`A`-`Z` `a`-`z` ACCENTED ]
     ( `_` ? [`A`-`Z` `a`-`z` ACCENTED `'` (*'*) `0`-`9` ] ) *
@@ -284,11 +275,7 @@ and char = parse
 and string = parse
     `"` (*"'"'*)
       { () }
-#ifdef FUSSY
-  | `\\` (`\010` | `\013` | `\013``\010`) [` ` `\t`] *
-#else
   | `\\` ("\010" | "\013" | "\013\010") [` ` `\009`] *
-#endif
       { string lexbuf }
   | `\\` [`\\` `"` (*"'"'*) `n` `t` `b` `r`]
       { store_string_char(char_for_backslash(get_lexeme_char lexbuf 1));
