@@ -12,7 +12,7 @@ let display_source t start s =
   text__tag_configure t "comment" [Foreground Red];
   let l = create_lexer_string s in
   let rec next_token () =
-    match Main l with
+    match main l with
       Keyword(_,i,j) -> 
       	text__tag_add t "keyword"
 	   (TextIndex (start, [CharOffset i]))
@@ -84,7 +84,7 @@ let display_file filename =
 
        util__resizeable t
   with 
-    Toplevel ->
+    Cannot_find_file filename ->
       begin dialog (support__new_toplevel_widget "error")
       	"Caml Browser Error"
 	("Cannot open " ^ filename )
