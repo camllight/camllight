@@ -683,6 +683,10 @@ value socket : socket_domain -> socket_type -> int -> file_descr
            an end-of-file condition.
            [SHUTDOWN_RECEIVE] causes writes on the other end of the connection
            to return a closed pipe condition ([SIGPIPE] signal). *)
+  and getsockname : file_descr -> sockaddr = 1 "unix_getsockname"
+        (* Return the address of the given socket. *)
+  and getpeername : file_descr -> sockaddr = 1 "unix_getpeername"
+        (* Return the address of the host connected to the given socket. *)
   and recv : file_descr -> string -> int -> int -> msg_flag list -> int
                                   = 5 "unix_recv"
   and recvfrom :
