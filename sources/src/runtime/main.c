@@ -107,11 +107,6 @@ int main(argc, argv)
   verbose_init = 1;
 #endif
 
-#ifdef MSDOS
-  extern char ** check_args();
-  argv = check_args(argv);
-#endif
-
   i = 0;
   fd = attempt_open(&argv[0], &trail);
 

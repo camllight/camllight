@@ -15,8 +15,8 @@
 #include "str.h"
 #include "unalignd.h"
 #include "debugcom.h"
-#ifdef macintosh
-#include <CursorCtl.h>
+#ifdef HAS_UI
+#include "ui.h"
 #endif
 
 #ifdef DEBUG
