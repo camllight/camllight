@@ -3,9 +3,9 @@
 # Which packages to compile and install.
 # See the file README for a description of the packages and their requirements.
 # Remember that "libunix" is required for
-# "debugger", "libgraph" and "search_isos".
+# "debugger", "libgraph", "camltk",  and "search_isos".
 PACKAGES=libunix libgraph debugger libnum libstr mletags search_isos \
-  caml-tex camlmode lorder profiler
+  caml-tex camlmode lorder profiler camltk
 
 # Some "make"s need this to ensure that they call /bin/sh, not /bin/csh
 # Seems harmless on most other "make"s. Try removing this line if you
@@ -18,7 +18,7 @@ SHELL=/bin/sh
 ### End of configuration section
 
 SUBDIRS=libunix libgraph debugger libnum libstr mletags search_isos \
-  caml-tex camlmode lorder profiler
+  caml-tex camlmode lorder profiler camltk
 
 MKF=-f ../Makefile.conf -f Makefile
 
