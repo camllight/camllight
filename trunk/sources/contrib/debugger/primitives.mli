@@ -3,7 +3,7 @@
 #open "unix";;
 
 (*** Miscellaneous ***)
-value nothing : 'a -> unit;;
+value ignore : 'a -> unit;;
 
 (*** Types and exceptions. ***)
 
@@ -52,6 +52,8 @@ value string_trim : string -> string;;
 
 (*** I/O channels ***)
 
+value skip_binary_int : in_channel -> unit;;
+
 type IO_CHANNEL =
   {Io_in : in_channel;
    Io_out : out_channel;
@@ -60,3 +62,8 @@ type IO_CHANNEL =
 value io_channel_of_descr : file_descr -> IO_CHANNEL;;
 value close_io : IO_CHANNEL -> unit;;
 value std_io :IO_CHANNEL;;
+
+(*** Formatting ***)
+value print_word : string -> unit;;
+
+value message : string -> unit;;

@@ -178,8 +178,7 @@ let instr_cd lexbuf =
 
 let instr_pwd lexbuf =
   end_of_line lexbuf;
-  system "/bin/pwd";
-  ();;
+  ignore (system "/bin/pwd");;
 
 let instr_dir lexbuf =
   let new_directory = Argument_list_eol Argument lexbuf in
@@ -270,12 +269,12 @@ let instr_quit _ =
 
 let print_variable_list () =
   print_endline "List of variables :";
-  do_list (function (nm, _, _) -> print_string nm; print_space()) !variable_list;
+  do_list (function (nm, _, _) -> print_word nm) !variable_list;
   print_newline ();;
 
 let print_info_list () =
   print_endline "List of info commands :";
-  do_list (function (nm, _, _) -> print_string nm; print_space()) !info_list;
+  do_list (function (nm, _, _) -> print_word nm) !info_list;
   print_newline ();;
 
 let instr_complete lexbuf =
@@ -285,35 +284,37 @@ let instr_complete lexbuf =
       	    do_list (function i -> begin print_string i; print_newline () end)
  	    l
 	with _ -> remove_file !user_channel)
-    and match_list lexbuf = (match Identifier_or_eol Lexeme lexbuf with
-	  Some x -> (match matching_instructions x with
-	      	( [("set",_,_,_,_)] | [("show",_,_,_,_)] ) as i ->
-		(let [(i_full,_,_,_,_)] = i in
-		    if x = i_full then
-	      	      (match Identifier_or_eol Lexeme lexbuf with
-	     	   	  | Some ident ->
-			    (match matching_variables ident with
-				  [v,_,_] -> if v = ident then [] else [v]
-				| l -> map (function (nm,_,_) ->nm) l)
-		       	  | None ->   map (function (nm, _, _) -> nm)
-			    !variable_list)
-		    else [i_full])
-	      | [("info",_,_,_,_)] ->
-		if x = "info" then
-	       	  (match Identifier_or_eol Lexeme lexbuf with
- 	      	       	Some ident ->
-			(match matching_variables ident with
-			      [v,_,_] -> if v = ident then [] else [v]
-			    | l -> map (function (nm,_,_) ->nm) l)
-		      | None ->   map (function (nm, _, _) -> nm)
-			!variable_list)
-		else ["info"]
-	      |	["help",_,_,_,_] -> if x <> "help" then ["help"]
-	      else
-		match_list lexbuf
-	      |	[i,_,_,_,_] -> if i = x then [] else [i]
-	      | l -> map (function (nm,_,_,_,_) -> nm) l)
-	| None -> map (function (nm,_,_,_,_) -> nm) !instruction_list)
+    and match_list lexbuf = 
+       (match Identifier_or_eol Lexeme lexbuf with
+	| Some x -> 
+           (match matching_instructions x with
+            | [(i_full, _, _, _, _)] as i ->
+              begin match i_full with
+              | "set" | "show" ->
+                  (if x = i_full then
+                    (match Identifier_or_eol Lexeme lexbuf with
+                     | Some ident ->
+                        (match matching_variables ident with
+                         | [v, _, _] -> if v = ident then [] else [v]
+                         | l -> map (function (nm, _, _) -> nm) l)
+                     | None -> map (function (nm, _, _) -> nm)
+                                   !variable_list)
+                   else [i_full])
+              | "info" ->
+                  if x = "info" then
+                   (match Identifier_or_eol Lexeme lexbuf with
+                    | Some ident ->
+                       (match matching_variables ident with
+                        | [v, _, _] -> if v = ident then [] else [v]
+                        | l -> map (function (nm, _, _) -> nm) l)
+                    | None -> map (function (nm, _, _) -> nm)
+                                  !variable_list)
+                  else ["info"]
+              | "help" ->
+                  if x <> "help" then ["help"] else match_list lexbuf
+              | i -> if i = x then [] else [i] end
+            | l -> map (function (nm, _, _, _, _) -> nm) l)
+	| None -> map (function (nm, _, _, _, _) -> nm) !instruction_list)
     in print_list (match_list lexbuf);;
 
 let instr_help lexbuf =
@@ -370,10 +371,10 @@ let instr_print lexbuf =
       (function x ->
       	 let (val, typ) = variable x in
            open_box 0;
-      	   output_variable_name std_out x;
-           print_string " :"; print_space();
-           print_one_type typ; print_string " ="; print_space();
-           print_value val typ;
+            output_variable_name std_out x;
+            print_word " :";
+            print_one_type typ; print_word " =";
+            print_value val typ;
            close_box();
            print_newline ())
       variables;;
@@ -391,13 +392,13 @@ let instr_match lexbuf =
 	(function
 	   (name, val, typ) ->
              open_box 0;
-	     print_string name;
-	     print_string " :"; print_space();
-             print_one_type typ;
-             print_string " ="; print_space();
-             print_value val typ;
-            close_box();
-            print_newline ())
+              print_string name;
+              print_word " :";
+              print_one_type typ;
+              print_word " =";
+              print_value val typ;
+             close_box();
+             print_newline ())
       	(pattern_matching pattern val typ);;
 
 let instr_source lexbuf =
@@ -732,13 +733,13 @@ let loading_mode_variable =
 let info_modules lexbuf =
   end_of_line lexbuf;
   print_endline "Used modules :";
-  do_list (function x -> print_string x; print_space()) !modules;
+  do_list print_word !modules;
   print_newline ();
   print_endline "Opened modules :";
   if !opened_modules_names = [] then
     print_endline "(no module opened)."
   else
-    (do_list (function x -> print_string x; print_space) !opened_modules_names;
+    (do_list print_word !opened_modules_names;
      print_newline ());;
 
 let info_checkpoints lexbuf =

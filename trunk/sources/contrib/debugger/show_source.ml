@@ -34,7 +34,7 @@ let show_point module point before selected =
     try
       let buffer = get_buffer module in
         let (beginning, line_number) = line_of_pos buffer point in
-          print_line buffer line_number beginning point before; ()
+          let _ = print_line buffer line_number beginning point before in ()
     with
       Out_of_range ->
         prerr_endline "Position out of range."

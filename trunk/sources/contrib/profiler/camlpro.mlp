@@ -272,8 +272,8 @@ let rec rewrite_impl_phrase impl =
   match impl.im_desc
   with Zexpr e -> rewrite_expr e
      | Zletdef (_, pelist) -> rewrite_patexpr_list pelist
-     | Ztypedef decl -> type_typedecl impl.im_loc decl; ()
-     | Zexcdef decl -> type_excdecl impl.im_loc decl; ()
+     | Ztypedef decl -> let _ = type_typedecl impl.im_loc decl in ()
+     | Zexcdef decl -> let _ = type_excdecl impl.im_loc decl in ()
      | Zimpldirective d -> do_directive impl.im_loc d
 ;;
 

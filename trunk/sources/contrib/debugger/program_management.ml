@@ -33,8 +33,8 @@ let load_information file =
           close_in inchan;
           raise Toplevel);
        seek_in inchan pos);
-    input_binary_int inchan;
-    input_binary_int inchan;
+    skip_binary_int inchan;
+    skip_binary_int inchan;
     let symbol_size = input_binary_int inchan in
       let debug_size = input_binary_int inchan in
       	if input_binary_int inchan <> Exec_magic then

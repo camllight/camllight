@@ -302,7 +302,7 @@ FUNCTION
 /FUNCTION
 *)
 let bind widget eventsequence action =
-  tkEval [| TkToken "bind";
+  tkDo [| TkToken "bind";
       	    TkToken (widget_name widget);
 	    cCAMLtoTKeventSequence eventsequence;
   begin match action with
@@ -334,7 +334,7 @@ FUNCTION
  class arg is not constrained
 *)
 let class_bind clas eventsequence action =
-  tkEval [| TkToken "bind";
+  tkDo [| TkToken "bind";
       	    TkToken clas;
 	    cCAMLtoTKeventSequence eventsequence;
   begin match action with
@@ -376,6 +376,5 @@ FUNCTION
 /FUNCTION
 *)
 let break = function () ->
-  tkEval [| TkToken "set" ; TkToken "BreakBindingsSequence" ; TkToken "1" |];
-  ()
+  tkDo [| TkToken "set" ; TkToken "BreakBindingsSequence" ; TkToken "1" |]
 ;;

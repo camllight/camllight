@@ -1,6 +1,6 @@
 (* The function *must* use tkreturn *)
 let handle_set opts w cmd =
-tkEval [|TkToken"selection";
+tkDo [|TkToken"selection";
 	 TkToken"handle";
 	 TkTokenList 
       	   (map 

@@ -27,7 +27,7 @@ let repeat funct =
   let rec rep =
     function
       1 -> funct ()
-    | n -> funct (); rep (n - 1)
+    | n -> let _ = funct () in rep (n - 1)
   in
     rep;;
 

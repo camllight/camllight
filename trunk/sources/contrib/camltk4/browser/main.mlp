@@ -48,7 +48,7 @@ let module_panel parent selected_paths =
        Command (fun () -> 
                  frx_req__open_list "Open a module" 
       	       	       	   (modlist__modules_of_path (selected_paths ()))
-      	       	       	   add_module 
+      	       	       	   (fun m -> let _ = add_module m in ())
       	       	       	   (fun _ -> ()))]
   and o1 = button__create f
       [Text "Open and View Module"; Relief Raised; 
@@ -221,7 +221,7 @@ let main () =
   path_library := !libpath;
   add_path !path_library;
   reset_opened_modules();
-  do_list add_module !default_used_modules;
+  do_list (fun m -> let _ = add_module m in ()) !default_used_modules;
   do_list add_path !initial_path;
 
   read_tags "."; (* . is implicit in load_path *)

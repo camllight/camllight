@@ -99,7 +99,7 @@ and unify_list = function (a,b) ->
      (try do_list
         (function x -> 
           let saved_var_renaming = !var_renaming in    (* save   renaming for backtracking  *)
-          unify_map (x, b);                            (* try to unify componentwise  ...   *)
+          let _ = unify_map (x, b) in                  (* try to unify componentwise  ...   *)
           var_renaming := saved_var_renaming; ()       (* restore renaming for backtracking *)
          ) (perms a); false
      with Found -> true)

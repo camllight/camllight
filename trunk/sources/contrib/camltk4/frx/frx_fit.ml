@@ -11,7 +11,7 @@ let vert wid =
     pending_resize := false;
     if !debug then (printf__eprintf "Resize %d\n" !newsize; flush stderr);
     text__configure wid [TextHeight !newsize];
-    add_timer 100 (fun () -> frx_after__idle check);
+    let _ = add_timer 100 (fun () -> frx_after__idle check) in
     ()
   and check () = 
     let first, last = text__yview_get wid in 

@@ -710,7 +710,7 @@ value open_connection : sockaddr -> in_channel * out_channel
         (* ``Shut down'' a connection established with [open_connection];
            that is, transmit an end-of-file condition to the server reading
            on the other side of the connection. *)
-  and establish_server : (in_channel -> out_channel -> 'a) -> sockaddr -> unit
+  and establish_server : (in_channel -> out_channel -> unit) -> sockaddr -> unit
         (* Establish a server on the given address.
            The function given as first argument is called for each connection
            with two buffered channels connected to the client. A new process

@@ -6,7 +6,6 @@ let idle f =
     clear_callback id; (* do it first in case f raises exception *)
     f() in
   hashtblc__add callback_naming_table id wrapped;
-    tkEval [| TkToken "after"; TkToken "idle";
-      	      TkToken ("camlcb "^ string_of_cbid id) |];
-    ()
+    tkDo [| TkToken "after"; TkToken "idle";
+      	    TkToken ("camlcb "^ string_of_cbid id) |]
 ;;

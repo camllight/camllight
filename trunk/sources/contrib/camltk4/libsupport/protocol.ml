@@ -8,7 +8,7 @@ let cTKtoCAMLwidget = function
 ;;
 
 let debug = 
- ref (try sys__getenv "CAMLTKDEBUG"; true
+ ref (try let _ = sys__getenv "CAMLTKDEBUG" in true
       with Not_found -> false)
 ;;
 
@@ -40,6 +40,9 @@ let tkEval args =
     end;
   res
 ;;
+
+let tkDo args =
+ let _ = tkEval args in ();;
 
 (*
  * Callbacks
@@ -112,7 +115,9 @@ let install_cleanup () =
   let fid = new_function_id () in
    hashtblc__add callback_naming_table fid call_destroy_hooks;
   (* setup general destroy callback *)
-  tcl_eval ("bind all <Destroy> {camlcb " ^ (string_of_cbid fid) ^" %W}")
+  let _ =
+    tcl_eval ("bind all <Destroy> {camlcb " ^ (string_of_cbid fid) ^" %W}") in
+  ()
 ;;
 
 
@@ -162,7 +167,7 @@ let openTkDisplayClass disp cl =
 
 (* Destroy all widgets, thus cleaning up table and exiting the loop *)
 let closeTk () =
-  tcl_eval "destroy ."; ()
+  let _ = tcl_eval "destroy ." in ()
 ;;
 
 let mainLoop =

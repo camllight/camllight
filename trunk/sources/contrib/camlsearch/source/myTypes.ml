@@ -47,7 +47,7 @@ let rec print_myType =
                                        print_myType ty2;
                                        print_string ")"
   | Iproduct(ty_list)               -> print_string "(PROD ";
-                                       map print_myType ty_list;
+                                       do_list print_myType ty_list;
                                        print_string " DORP)"
   | Iconstr(cstr, args)             -> print_string "(CONST "; 
                                        print_string cstr.Module_name;

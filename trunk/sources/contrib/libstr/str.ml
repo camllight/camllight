@@ -20,12 +20,13 @@ let join sep = function
         it_list (fun l s -> l + string_length s) hdlen tl in
       let res = create_string len in
       blit_string hd 0 res 0 hdlen;
+      let _ = 
       it_list (fun pos s ->
                  blit_string sep 0 res pos seplen;
                  let l = string_length s in
                  blit_string s 0 res (pos+seplen) l;
                  pos+seplen+l)
-              hdlen tl;
+              hdlen tl in
       res;;
 
 let regexp e = compile_regexp e false;;

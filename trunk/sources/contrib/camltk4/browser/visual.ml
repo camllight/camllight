@@ -11,12 +11,13 @@
 #open "tags";;
 
 let error m =
+ let _ =
   dialog__create default_toplevel_widget
-	 "Caml Browser Error"
-	 m
-	 (Predefined "error")
-	 0
-	 ["Ok"];
+	  "Caml Browser Error"
+          m
+	  (Predefined "error")
+	  0
+	  ["Ok"] in
   ()
 ;;
 
@@ -121,7 +122,7 @@ let source_editor m =
   function _ ->
     try
     let m = misc__find_in_path m in
-      sys__system_command ("$EDITOR "^m^"&"); ()
+    let _ = sys__system_command ("$EDITOR "^m^"&") in ()
     with
       _ -> ()
 ;;

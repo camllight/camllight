@@ -155,14 +155,14 @@ let minus_ratio r =
 ;;
 
 let add_int_ratio i r = 
-  cautious_normalize_ratio r;
+  let r = cautious_normalize_ratio r in
   { Numerator = add_big_int (mult_int_big_int i r.Denominator) r.Numerator;
     Denominator = r.Denominator;
     Normalized = r.Normalized }
 ;;
 
 let add_big_int_ratio bi r = 
-  cautious_normalize_ratio r;
+  let r = cautious_normalize_ratio r in
   { Numerator = add_big_int (mult_big_int bi r.Denominator) r.Numerator ;
     Denominator = r.Denominator;
     Normalized = r.Normalized }
@@ -231,7 +231,7 @@ let mult_big_int_ratio bi r =
 ;;
 
 let square_ratio r =
-  cautious_normalize_ratio r;
+  let r = cautious_normalize_ratio r in
   { Numerator = square_big_int r.Numerator;
     Denominator = square_big_int r.Denominator;
     Normalized = r.Normalized }
@@ -261,14 +261,14 @@ let integer_ratio r =
 (* Floor of a rational number *)
 (* Always less or equal to r *)
 let floor_ratio r = 
- verify_null_denominator r;
+ let _ = verify_null_denominator r in
  div_big_int (r.Numerator) r.Denominator
 ;;
 
 (* Round of a rational number *)
 (* Odd function, 1/2 -> 1 *)
 let round_ratio r =
- verify_null_denominator r;
+ let _ = verify_null_denominator r in
   let abs_num = abs_big_int r.Numerator in
    let bi = div_big_int abs_num r.Denominator in
     report_sign_ratio r 
@@ -291,8 +291,8 @@ let ceiling_ratio r =
 
 (* Comparison operators on rational numbers *)
 let eq_ratio r1 r2 =
- normalize_ratio r1; 
- normalize_ratio r2;
+ let r1 = normalize_ratio r1 in
+ let r2 = normalize_ratio r2 in
  eq_big_int (r1.Numerator) r2.Numerator &&
  eq_big_int (r1.Denominator) r2.Denominator 
 ;;
@@ -334,8 +334,8 @@ let eq_big_int_ratio bi r =
  (is_integer_ratio r) && eq_big_int bi r.Numerator;;
 
 let compare_big_int_ratio bi r =
- normalize_ratio r;
- if (verify_null_denominator r)
+ let r = normalize_ratio r in
+ if verify_null_denominator r
  then minus_int (sign_big_int r.Numerator)
  else compare_big_int (mult_big_int bi r.Denominator) r.Numerator
 ;;
@@ -367,7 +367,7 @@ let ratio_of_nat nat =
    Normalized = true }
 
 and nat_of_ratio r =
- normalize_ratio r;
+ let r = normalize_ratio r in
  if not (is_integer_ratio r) then
           failwith "nat_of_ratio"
  else if sign_big_int r.Numerator > -1 then
@@ -380,14 +380,14 @@ let ratio_of_big_int bi =
  { Numerator = bi; Denominator = unit_big_int; Normalized = true }
 
 and big_int_of_ratio r =
- normalize_ratio r;
+ let r = normalize_ratio r in
  if is_integer_ratio r 
   then r.Numerator
  else failwith "big_int_of_ratio"
 ;;
 
 let div_int_ratio i r = 
-  verify_null_denominator r;
+  let _ = verify_null_denominator r in
   mult_int_ratio i (inverse_ratio r)
 ;;
 
@@ -396,7 +396,7 @@ let div_ratio_int r i =
 ;;
 
 let div_big_int_ratio bi r = 
-  verify_null_denominator r;
+  let _ = verify_null_denominator r in
   mult_big_int_ratio bi (inverse_ratio r)
 ;;
 
@@ -421,7 +421,7 @@ let only_zeros s i l =
 (* sigma for k=-P to N of r_k*10^k then msd_ratio r = N            *)
 (* Nota : for a big_int we have msd_ratio = nums_digits_big_int -1 *)
 let msd_ratio r =
- cautious_normalize_ratio r;
+ let r = cautious_normalize_ratio r in
  if null_denominator r then failwith_zero "msd_ratio"
  else if sign_big_int r.Numerator == 0 then 0
  else begin
@@ -451,7 +451,7 @@ let msd_ratio r =
 (* Format integer_part . decimal_part_with_n_digits *)
 let approx_ratio_fix n r =
  (* Don't need to normalize *)
- if (null_denominator r) then failwith_zero "approx_ratio_fix"
+ if null_denominator r then failwith_zero "approx_ratio_fix"
  else
   let sign_r = sign_ratio r in 
    if sign_r == 0
@@ -516,7 +516,7 @@ let num_decimal_digits_int n =
 (* Format (+/-)(0. n_first_digits e msd)/(1. n_zeros e (msd+1) *)
 let approx_ratio_exp n r = 
  (* Don't need to normalize *)
- if (null_denominator r) then failwith_zero "approx_ratio_exp"
+ if null_denominator r then failwith_zero "approx_ratio_exp"
  else if n <= 0 then invalid_arg "approx_ratio_exp"
  else
   let sign_r = sign_ratio r
@@ -576,7 +576,7 @@ let float_of_rational_string r =
 
 (* Coercions with type string *)
 let string_of_ratio r = 
- cautious_normalize_ratio_when_printing r;
+ let r = cautious_normalize_ratio_when_printing r in
  if !approx_printing_flag
     then float_of_rational_string r
     else string_of_big_int r.Numerator ^ "/" ^ string_of_big_int r.Denominator

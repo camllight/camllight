@@ -77,7 +77,7 @@ let remove_breakpoints pos =
           print_string " ";
           print_int (int_of_char instr);
           print_newline ());
-       set_instr pos instr)
+          let _ = set_instr pos instr in ())
     pos;;
 
 (* Set all breakpoints. *)
@@ -88,7 +88,7 @@ let set_breakpoints pos =
     (function (pos, _) ->
        if !debug_breakpoints then
          (print_int pos; print_newline ());
-       set_instr pos Instr_break)
+       let _ = set_instr pos Instr_break in ())
     pos;;
 
 (* Ensure the current version in installed in current checkpoint. *)
@@ -138,7 +138,7 @@ let remove_position pos =
     if !count = 0 then
       (positions := assoc_remove !positions pos;
        new_version ();
-       set_instr pos instr;
+       let _ = set_instr pos instr in
        ());;
 
 (* Insert a new breakpoint in lists. *)
@@ -193,7 +193,7 @@ let exec_with_temporary_breakpoint pc funct =
         decr count;
         if !count = 0 then
           (positions := assoc_remove !positions pc;
-           set_instr pc instr;
+           let _ = set_instr pc instr in
       	   ())
 
     in

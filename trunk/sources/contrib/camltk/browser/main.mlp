@@ -229,7 +229,7 @@ let main () =
   path_library := !libpath;
   add_path !path_library;
   reset_opened_modules();
-  do_list add_module !default_used_modules;
+  do_list (fun m -> let _ = add_module m in ()) !default_used_modules;
   do_list add_path !initial_path;
 
   read_tags "."; (* . is implicit in load_path *)
