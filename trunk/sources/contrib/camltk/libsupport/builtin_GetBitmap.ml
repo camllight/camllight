@@ -5,8 +5,8 @@ type Bitmap =
 ;;
 
 let CAMLtoTKBitmap = function
-  BitmapFile s -> "\"@" ^ s ^ "\""
-| Predefined s -> quote_string s
+  BitmapFile s -> TkToken ("@" ^ s)
+| Predefined s -> TkToken s
 ;;
 
 let TKtoCAMLBitmap s = 

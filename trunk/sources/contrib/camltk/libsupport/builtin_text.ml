@@ -3,7 +3,7 @@
 type TextMark == string
 ;;
 
-let CAMLtoTKTextMark  x =  x
+let CAMLtoTKTextMark  x =  TkToken x
 ;;
 let TKtoCAMLTextMark x = x
 ;;
@@ -11,7 +11,7 @@ let TKtoCAMLTextMark x = x
 type TextTag == string
 ;;
 
-let CAMLtoTKTextTag  x =  x
+let CAMLtoTKTextTag  x =  TkToken x
 ;;
 let TKtoCAMLTextTag x = x
 ;;
@@ -51,7 +51,7 @@ type BaseTextIndex =
  | TI_TagLast of TextTag		(* tk keyword: tag.last *)
 ;;
 
-let CAMLtoTKBaseTextIndex = function
+let ppBaseTextIndex = function
    TI_LineChar (l,c) -> (string_of_int l) ^ "." ^ (string_of_int c)
  | TI_Mark s -> s
  | TI_End -> "end"
@@ -60,6 +60,9 @@ let CAMLtoTKBaseTextIndex = function
  | TI_TagLast s -> s ^ ".last"
 ;;
 
+let CAMLtoTKBaseTextIndex i =
+  TkToken (ppBaseTextIndex i)
+;;
 
 let char_index c s = find 0
   where rec find i =
@@ -77,7 +80,7 @@ let TKtoCAMLBaseTextIndex s =
      TI_LineChar(int_of_string (sub_string s 0 p), 
       	         int_of_string (sub_string s (p+1) (string_length s - p - 1)))
   with 
-    Not_found -> raise (Invalid_argument "TKtoCAMLBaseTextIndex")
+    Not_found -> raise (Invalid_argument ("TKtoCAMLBaseTextIndex: "^s))
 ;;
 
 
@@ -86,29 +89,33 @@ type TextIndex =
  | TextIndexNone
 ;;
 
-let CAMLtoTKTextIndex = function
+let ppTextIndex = function
    TextIndexNone -> ""
  | TextIndex (base, ml) -> 
-     "\"" ^ 
-     it_list (prefix ^) (CAMLtoTKBaseTextIndex base) (map ppTextModifier ml)
-     ^ "\""
+     it_list (prefix ^) (ppBaseTextIndex base) (map ppTextModifier ml)
+;;
+
+let CAMLtoTKTextIndex i = 
+  TkToken (ppTextIndex i)
 ;;
 
 
 let text_tag_bind widget tag eventsequence action =
-  check_widget_class widget "text";
-  let buf = Send2TkStart false in
-  Send2Tk buf (widget_name widget ^ " tag bind " ^ (CAMLtoTKTextTag tag) ^ " " ^
-      	   (CAMLtoTKEventSequence eventsequence));
+  check_widget_class widget Widget_text_table;
+  TkEval [| CAMLtoTKWidget Widget_text_table widget;
+            TkToken "tag";
+            TkToken "bind";
+            CAMLtoTKTextTag tag;
+      	    CAMLtoTKEventSequence eventsequence;
   begin match action with
-     BindRemove -> Send2Tk buf "{}"
+     BindRemove -> TkToken ""
   |  BindSet (what, f) ->
       let CbId = register_callback widget (WrapEventInfo f what) in
-        Send2Tk buf (" {camlcb " ^ CbId ^ (WriteEventField what) ^"}")
+        TkToken ("camlcb " ^ CbId ^ (WriteEventField what))
   |  BindExtend (what, f) ->
       let CbId = register_callback widget (WrapEventInfo f what) in
-        Send2Tk buf (" {+camlcb " ^ CbId ^ (WriteEventField what) ^"}")
-  end;
-  Send2TkEval buf;
+        TkToken ("+camlcb " ^ CbId ^ (WriteEventField what))
+  end
+  |];
   ()
 ;;

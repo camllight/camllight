@@ -9,12 +9,12 @@ type Color =
 ;;
 
 let CAMLtoTKColor = function
-	NamedColor x -> quote_string x
-	| Black -> "black"
-	| White -> "white"
-	| Red -> "red"
-	| Green -> "green"
-	| Blue -> "blue"
+	NamedColor x -> TkToken x
+	| Black -> TkToken "black"
+	| White -> TkToken "white"
+	| Red -> TkToken "red"
+	| Green -> TkToken "green"
+	| Blue -> TkToken "blue"
 ;;
 
 let TKtoCAMLColor = function  s -> NamedColor s
@@ -31,15 +31,15 @@ type Cursor =
 ;;
 
 let CAMLtoTKCursor = function
-   XCursor s -> quote_string s
+   XCursor s -> TkToken s
  | XCursorFg (s,fg) -> 
-    "[list " ^quote_string s^" "^(CAMLtoTKColor fg)^"]"
+    TkQuote(TkTokenList [TkToken s; CAMLtoTKColor fg])
  | XCursortFgBg (s,fg,bg) ->
-    "[list "^quote_string s^" "^(CAMLtoTKColor fg)^" "^(CAMLtoTKColor bg)^"]"
+    TkQuote(TkTokenList [TkToken s; CAMLtoTKColor fg; CAMLtoTKColor bg])
  | CursorFileFg (s,fg) ->
-    "[list @\""^s^"\" "^(CAMLtoTKColor fg)^"]"
+    TkQuote(TkTokenList [TkToken ("@"^s); CAMLtoTKColor fg])
  | CursorMaskFile (s,m,fg,bg) ->
-    "[list @\""^s^"\" \""^m^"\" "^(CAMLtoTKColor fg)^(CAMLtoTKColor bg)^"]"
+    TkQuote(TkTokenList [TkToken ("@"^s); TkToken m; CAMLtoTKColor fg; CAMLtoTKColor bg])
 ;;
 
 

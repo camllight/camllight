@@ -38,19 +38,19 @@ let Index_canvas_table =
 ;;
  
 let CAMLtoTKIndex table = function
-   Number x -> chk_sub "Number" table CNumber; string_of_int x
- | End -> chk_sub "End" table CEnd; "end"
- | Insert -> chk_sub "Insert" table CInsert; "insert"
- | SelFirst -> chk_sub "SelFirst" table CSelFirst; "sel.first"
- | SelLast -> chk_sub "SelLast" table CSelLast; "sel.last"
- | At n -> chk_sub "At" table CAt; "@"^(string_of_int n)
+   Number x -> chk_sub "Number" table CNumber; TkToken (string_of_int x)
+ | End -> chk_sub "End" table CEnd; TkToken "end"
+ | Insert -> chk_sub "Insert" table CInsert; TkToken "insert"
+ | SelFirst -> chk_sub "SelFirst" table CSelFirst; TkToken "sel.first"
+ | SelLast -> chk_sub "SelLast" table CSelLast; TkToken "sel.last"
+ | At n -> chk_sub "At" table CAt; TkToken ("@"^string_of_int n)
  | AtXY (x,y) -> chk_sub "AtXY" table CAtXY; 
-                 "@"^(string_of_int x)^","^(string_of_int y)
+      	     TkToken ("@"^string_of_int x^","^string_of_int y)
 ;;
 
 (* In fact, returned values are probably only numerical indexes *)
 let TKtoCAMLIndex = function
-     "" -> raise (Invalid_argument "TKtoCAMLIndex")
+     "" -> raise (Invalid_argument "TKtoCAMLIndex: empty")
    | "sel.last" -> SelLast
    | "sel.first" -> SelFirst
    | "insert" -> Insert
@@ -59,10 +59,10 @@ let TKtoCAMLIndex = function
        begin try
          At(int_of_string (sub_string s 1 (pred (string_length s))))
        with
-	 _ -> raise (Invalid_argument "TKtoCAMLIndex")
+	 _ -> raise (Invalid_argument ("TKtoCAMLIndex: "^s))
        end
    | s -> 
        begin try Number(int_of_string s)
-       with _ -> raise (Invalid_argument "TKtoCAMLIndex")
+       with _ -> raise (Invalid_argument ("TKtoCAMLIndex: "^s))
        end
 ;;

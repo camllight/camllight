@@ -9,10 +9,10 @@ type MenuIndex =
 
 
 let CAMLtoTKMenuIndex = function
-    MI_Active -> "active"
-  | MI_Last -> "last"
-  | MI_None -> "none"
-  | MI_At (foo) -> "@"^(string_of_int foo)
-  | MI_Number (foo) -> string_of_int foo
-  | MI_Pattern (foo) -> foo
+    MI_Active -> TkToken "active"
+  | MI_Last -> TkToken "last"
+  | MI_None -> TkToken "none"
+  | MI_At (foo) -> TkToken ("@"^string_of_int foo)
+  | MI_Number (foo) -> TkToken (string_of_int foo)
+  | MI_Pattern (foo) -> TkToken foo
 ;;
