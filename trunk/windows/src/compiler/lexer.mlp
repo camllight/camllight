@@ -257,11 +257,11 @@ and comment = parse
         comment lexbuf }
   | "``"
       { comment lexbuf }
-  | [^ `\\` `\``] "`"
+  | "`" [^ `\\` `\``] "`"
       { comment lexbuf }
-  | `\\` [`\\` `\`` `n` `t` `b` `r`] "`"
+  | "`" `\\` [`\\` `\`` `n` `t` `b` `r`] "`"
       { comment lexbuf }
-  | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`] "`"
+  | "`" `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`] "`"
       { comment lexbuf }
   | End_of_file
       { raise(Lexical_error
