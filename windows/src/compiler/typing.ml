@@ -393,7 +393,9 @@ let rec type_expr env expr =
         (fun (lbl, exp) ->
           let (ty_res, ty_arg) =
             type_pair_instance (lbl.info.lbl_res, lbl.info.lbl_arg) in
-          unify (ty, ty_res);
+          begin try unify (ty, ty_res)
+          with Unify -> label_not_belong_err expr lbl ty
+          end;
           type_expect env exp ty_arg)
         lbl_expr_list;
       let label = vect_of_list (labels_of_type ty) in

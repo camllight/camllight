@@ -173,6 +173,14 @@ let label_undefined_err exp lbl =
   raise Toplevel
 ;;
 
+let label_not_belong_err exp lbl ty =
+  eprintf "%aThe label %a does not belong to the type %a.\n"
+    output_location exp.e_loc
+    output_label lbl
+    output_type ty;
+  raise Toplevel
+;;
+
 let label_not_mutable_err exp lbl =
   eprintf "%aThe label %a is not mutable.\n"
     output_location exp.e_loc
