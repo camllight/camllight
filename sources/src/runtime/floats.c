@@ -37,23 +37,28 @@ void Store_double_val(val, dbl)
 value format_float(fmt, arg)    /* ML */
      value fmt, arg;
 {
-  char format_buffer[64];
+#define MAX_DIGITS 350
+/* Max number of decimal digits in a "natural" (not artificially padded)
+   representation of a float. Can be quite big for %f format.
+   Max exponent for IEEE format is 308 decimal digits.
+   Rounded up for good measure. */
+  char format_buffer[MAX_DIGITS + 20];
   int prec, i;
   char * p;
   char * dest;
   value res;
 
-  prec = 64;
+  prec = MAX_DIGITS;
   for (p = String_val(fmt); *p != 0; p++) {
     if (*p >= '0' && *p <= '9') {
-      i = atoi(p) + 15;
+      i = atoi(p) + MAX_DIGITS;
       if (i > prec) prec = i;
       break;
     }
   }
   for( ; *p != 0; p++) {
     if (*p == '.') {
-      i = atoi(p+1) + 15;
+      i = atoi(p+1) + MAX_DIGITS;
       if (i > prec) prec = i;
       break;
     }
