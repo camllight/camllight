@@ -3,21 +3,51 @@
 (***************************************************)
 (* Widgets *)
 (***************************************************)
-type Widget == string * string
+type Widget =
+  Untyped of string
+| Typed of string * string
 ;;
 
-let widget_class (w : Widget) = fst w
-;;
-let widget_name (w : Widget) = snd w
+(* table of widgets *)
+let widget_table = (hashtbl__new 37 : (string,Widget) hashtbl__t)
 ;;
 
-let default_toplevel_widget =  ("toplevel", "." : Widget)
+let widget_name = function
+    Untyped s -> s
+ |  Typed (s,_) -> s
 ;;
-let new_toplevel_widget s = ("toplevel", "." ^ s : Widget)
+
+(* Normally all widgets are known *)
+(* this is a provision for send commands to external tk processes *)
+let widget_class = function
+    Untyped _ -> "unknown"
+  | Typed (_,c) -> c
+;;
+
+let default_toplevel_widget =
+  let wname = "." in
+  let w = Typed (wname, "toplevel") in
+    hashtbl__add widget_table wname w;
+    w
+;;
+
+let new_toplevel_widget s =
+  let wname = "."^s in
+  let w = Typed(wname, "toplevel") in
+    hashtbl__add widget_table wname w;
+    w
 ;;
 
 (* Note: there are subtypes *)
 let CAMLtoTKWidget _ = widget_name
+
+;;
+(* Retype widgets returned from Tk *)
+let TKtoCAMLWidget s =
+  try
+    hashtbl__find widget_table s
+  with
+    Not_found -> Untyped s
 ;;
 
 let widget_naming_scheme = [
@@ -36,40 +66,6 @@ let widget_naming_scheme = [
 	"scrollbar", "sb";
 	"text", "t";
       	"toplevel", "T" ]
-;;
-let widget_typing_scheme = 
-   map (fun (x,y) -> (y,x)) widget_naming_scheme
-;;
-
-let is_digit = function
-   `0`..`9` -> true
- | _ -> false
-;;
-
-let is_point c = 
-   c = `.`
-;;
-
-let type_of_widget path =
-  let rec lastchar n =
-    if is_digit (nth_char path n) then
-      lastchar (pred n)
-    else n
-  and firstchar n =
-    if is_point (nth_char path n) then succ n
-    else firstchar (pred n) 
-  in
-  let l = lastchar (string_length path - 1) in
-  let f = firstchar l in
-   try
-     assoc (sub_string path f (l-f+1)) widget_typing_scheme
-   with
-     Not_found -> raise (Invalid_argument ("invalid widget path :"^path))
-;;
-
-(* Retype widgets returned from Tk *)
-let TKtoCAMLWidget s =
-  (type_of_widget s,s)
 ;;
 
 
@@ -90,25 +86,44 @@ let new_suffix class n =
 ;;
   
 
+(* The function called by generic creation *)
 let new_widget_atom =
   let counter = ref 0 in
-  fun class parent ->
-    if eq_string class "toplevel" then parent
-    else begin
-      incr counter;
-      let parentname = widget_name parent in
-	class,
-	if parentname = "."
-	then "." ^ (new_suffix class !counter)
-	else parentname ^ "." ^ (new_suffix class !counter)
-      end
+  fun 
+    "toplevel" w -> w  (* toplevel widgets are given in argument *)
+  | class parent ->
+      let parentpath = widget_name parent in
+      let path = 
+      	 incr counter;
+	 if parentpath = "."
+	 then "." ^ (new_suffix class !counter)
+	 else parentpath ^ "." ^ (new_suffix class !counter)
+        in
+      let w = Typed(path,class) in
+	hashtbl__add widget_table path w;
+	w
 ;;
+
+let new_named_widget class parent name =
+  let parentpath = widget_name parent in
+  let path =
+    if parentpath = "."
+    then "." ^ name
+    else parentpath ^ "." ^ name in
+  let w = Typed(path,class) in
+	hashtbl__add widget_table path w;
+	w
+;;
+  
+
 
 (* Redundant with subtyping of Widget *)
 (* but used to check types *)
-let check_widget_class w class =
-  if widget_class w = class then ()
-  else raise (IllegalWidgetType (widget_class w))
+let check_widget_class = fun
+    (Untyped _) _ -> () (* assume run-time check by tk*)
+ |  (Typed(_,c)) c' ->
+       	 if eq_string c c' then ()
+      	 else raise (IllegalWidgetType c)
 ;;
 
 
@@ -131,7 +146,7 @@ let cindex p s start = find start
 ;;
 
 let must_quote c = 
-    c == `[` or c == `]` or c == `$`
+    c == `[` or c == `]` or c == `$` or c == `{` or c == `}`
 ;;
 
 let tcl_string_for_read s =
@@ -142,7 +157,10 @@ let tcl_string_for_read s =
 	let repl = match nth_char s n with
 	            `[` -> "\["
 		  | `]` -> "\]"
-		  | `$` -> "\$" in
+		  | `$` -> "\$" 
+      	       	  | `{` -> "\{"
+      	       	  | `}` -> "\}"
+      	       	  |  c ->  failwith "subliminal" (* never happens *) in
 	let res' = res ^ (sub_string s cur (n-cur)) ^ repl in
 	  sfr (succ n) res'
       with Not_found ->
@@ -159,9 +177,6 @@ let quote_string x =
 
 
 (* strings assumed to be atomic (no space, no special char) *)
-type symbol == string
-;;
-
 let CAMLtoTKsymbol x = x
 ;;
 let TKtoCAMLsymbol x = x
