@@ -424,7 +424,7 @@ void FileProc(clientdata, mask)
      ClientData clientdata;
      int mask;
 {
-  camltk_dispatch_callback(Val_int(clientdata),Atom(0));
+  camltk_dispatch_callback((int)clientdata,Atom(0));
 }
 
 value camltk_add_file_input(fd, cbid)    /* ML */
@@ -488,7 +488,7 @@ value camltk_dooneevent(flags) /* ML */
 /* Basically the same thing as FileProc */
 void TimerProc (ClientData clientdata)
 {
-  camltk_dispatch_callback(Val_int(clientdata),Atom(0));
+  camltk_dispatch_callback((int)clientdata,Atom(0));
 }
 
 value camltk_add_timer(milli, cbid) /* ML */
@@ -549,7 +549,7 @@ static char * WaitVariableProc(clientdata, interp, name1, name2, flags)
 		TCL_GLOBAL_ONLY|TCL_TRACE_WRITES|TCL_TRACE_UNSETS,
 		WaitVariableProc, clientdata);
   stat_free(fullvar);
-  camltk_dispatch_callback(Val_int(clientdata),Atom(0));
+  camltk_dispatch_callback((int)clientdata,Atom(0));
   return (char *)NULL;
 }
 
@@ -586,7 +586,7 @@ static void WaitVisibilityProc(clientData, eventPtr)
     XEvent *eventPtr;		/* Information about event (not used). */
 {
   struct WinCBData *vis = clientData;
-  value cbid = Val_int(vis->cbid);
+  int cbid = vis->cbid;
 
   Tk_DeleteEventHandler(vis->win, VisibilityChangeMask,
 	    WaitVisibilityProc, clientData);
@@ -619,7 +619,7 @@ static void WaitWindowProc(clientData, eventPtr)
 {
   if (eventPtr->type == DestroyNotify) {
     struct WinCBData *vis = clientData;
-    value cbid = Val_int(vis->cbid);
+    int cbid = vis->cbid;
     stat_free((char *)clientData);
     /* The handler is destroyed by Tk itself */
     camltk_dispatch_callback(cbid,Atom(0));
