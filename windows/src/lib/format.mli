@@ -290,21 +290,21 @@ value fprintf : formatter -> ('a, formatter, unit) format -> 'a;;
            objects: plain characters and conversion specifications as
            specified in the [printf] module, and pretty-printing
            indications.
-           The pretty-printing indication characters and their meanings are:
--          "[": open a pretty-printing box. The type and offset of the
+           The pretty-printing indication characters are introduced by
+           a [@] character, and their meanings are:
+-          [\[]: open a pretty-printing box. The type and offset of the
            box may be optionally specified with the following syntax:
            the [<] character, followed by an optional box type indication,
            then an optional integer offset, and the closing [>] character. 
            Box type is one of [h], [v], [hv], or [hov],
            which stand respectively for an horizontal, vertical,
            ``horizontal-vertical'' and ``horizontal or vertical'' box.
--          "]": close the most recently opened pretty-printing box.
+-          [\]]: close the most recently opened pretty-printing box.
 -          [,]: output a good break as with [print_cut ()].
--          [;]: output a space, as with [print_space ()].
--          [\\n]: force a newline, as with [force_newline ()].
+-          [ ]: output a space, as with [print_space ()].
+-          [;]: force a newline, as with [force_newline ()].
 -          [.]: flush the pretty printer as with [print_newline ()].
-           The pretty-printing indication characters may be treated
-           as plain characters, if preceded by a backslash character. *)
+-          [@]: a plain [@] character. *)
 value printf : ('a, formatter, unit) format -> 'a
         (* Same as [fprintf], but output on [std_formatter]. *)
   and eprintf: ('a, formatter, unit) format -> 'a;;
