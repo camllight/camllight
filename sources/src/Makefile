@@ -38,26 +38,11 @@ promote:
 	copy linker\camllink camllink
 	mv camllibr camllibr.bak
 	copy librar\camllibr camllibr
-	mv camltop camltop.bak
-	copy toplevel\camltop camltop
 	mv camllex camllex.bak
 	copy lex\camllex camllex
 
 # Recompile all Caml code from scratch
 again:
-	cd lib
-	make clean all
-	cd ..\compiler
-	make clean all
-	cd ..\linker
-	make clean all
-	cd ..\librar
-	make clean all
-	cd ..\lex
-	make clean all
-	cd ..\toplevel
-	make clean all
-	cd ..
 	cd lib
 	make clean all
 	cd ..\compiler
@@ -77,7 +62,6 @@ compare:
 	- tools\cmpcode camlcomp compiler\camlcomp
 	- tools\cmpcode camllink linker\camllink
 	- tools\cmpcode camllibr librar\camllibr
-	- tools\cmpcode camltop toplevel\camltop
 	- tools\cmpcode camllex lex\camllex
 
 # Install the Caml Light system
