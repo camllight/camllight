@@ -471,6 +471,7 @@ value interprete(prog)
       if ((value *) tp >= trap_barrier) {
         Setup_for_gc;
         retsp->pc = pc;
+	extern_rsp = (value *) tp;
         debugger(TRAP_BARRIER);
         Restore_after_gc;
       }
