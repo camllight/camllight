@@ -4,6 +4,6 @@ try
     let result = parser__Main lexer__Token lexbuf in
       print_int result; print_newline(); flush std_out
   done
-with Eof ->
+with _ ->
   ()
 ;;

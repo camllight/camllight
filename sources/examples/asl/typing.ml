@@ -161,8 +161,8 @@ let print_type_scheme (Forall(gv,t)) =
  let names = (names_of (1,gv)
       where rec names_of = function
              (n,[]) -> []
-           | (n,(v1::Lv)) -> (tvar_name n)
-                           ::(names_of (n+1, Lv))) in
+           | (n,(v1::lv)) -> (tvar_name n)
+                           ::(names_of (n+1, lv))) in
  let tvar_names = combine (rev gv,names) in
  let rec print_rec = function
       TypeVar{Index=n; Value=Unknown} ->

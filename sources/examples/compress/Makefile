@@ -2,7 +2,8 @@ CAMLC=camlc
 CAMLLIBR=camllibr
 CAMLLEX=camllex
 CAMLYACC=camlyacc
-CAMLDEP=perl /caml386/src/tools/camldep
+COMPFLAGS=-W
+CAMLDEP=perl /caml/src/tools/camldep
 
 all: compr.exe
 
@@ -24,9 +25,9 @@ clean:
 depend:
 	$(CAMLDEP) >> makefile
 
+compr.zo: huffman.zi 
 decompr.zo: huffman.zi 
 esbit.zo: esbit.zi 
 fileprio.zo: fileprio.zi 
 huffman.zo: huffman.zi esbit.zi fileprio.zi 
 loadall.zo: compr.zo 
-compr.zo: huffman.zi 
