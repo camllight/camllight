@@ -282,8 +282,8 @@ let rec translate_expr env =
       Lconst(SCblock(ConstrRegular(0,0), []))
   | Zvector args ->
       Lprim(Pmakeblock (ConstrRegular(0,0)), map transl args)
-  | Zassign(id, E) ->
-      translate_update id env (transl E)
+  | Zassign(id, e) ->
+      translate_update id env (transl e)
   | Zrecord lbl_expr_list ->
       let v = make_vect (list_length lbl_expr_list) Lstaticfail in
         do_list
@@ -328,7 +328,7 @@ and translate_simple_match loc env failure_code pat_expr_list =
 
 and translate_let env = function
      [] ->  []
-  | a::L -> translate_expr env a :: translate_let (Treserved env) L
+  | a::l -> translate_expr env a :: translate_let (Treserved env) l
 
 and translate_bind env = function
     [] -> []

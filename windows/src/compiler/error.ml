@@ -67,6 +67,12 @@ let non_linear_pattern_err pat name =
   raise Toplevel
 ;;
 
+let upper_case_variable_warning pat name =
+  eprintf "%aWarning: the variable %s starts with an upper case letter in this pattern.\n"
+    output_location pat.p_loc name;
+  flush stderr
+;;
+
 let orpat_should_be_closed_err pat =
   eprintf "%aA pattern with \"|\" must not bind variables.\n"
     output_location pat.p_loc;

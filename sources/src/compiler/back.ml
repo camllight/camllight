@@ -25,49 +25,50 @@ and new_label () =
 (* Add a label to a list of instructions. *)
 
 let label_code = function
-    Kbranch lbl :: _ as C ->
-      (lbl, C)
-  | Klabel lbl :: _ as C ->
-      (lbl, C)
-  | C ->
+    Kbranch lbl :: _ as code ->
+      (lbl, code)
+  | Klabel lbl :: _ as code ->
+      (lbl, code)
+  | code ->
       let lbl = new_label() in
-        (lbl, Klabel lbl :: C)
+        (lbl, Klabel lbl :: code)
 ;;
 
 (* Generate a branch to the given list of instructions. *)
 
 let make_branch = function
-    Kreturn :: _ as C ->
-      (Kreturn, C)
-  | (Kbranch _ as branch) :: _ as C ->
-      (branch, C)
-  | C ->
+    Kreturn :: _ as code ->
+      (Kreturn, code)
+  | (Kbranch _ as branch) :: _ as code ->
+      (branch, code)
+  | code ->
       let lbl = new_label() in
-        (Kbranch lbl, Klabel lbl :: C)
+        (Kbranch lbl, Klabel lbl :: code)
 ;;
 
 (* Discard all instructions up to the next label. *)
 
 let rec discard_dead_code = function
     [] -> []
-  | Klabel _ :: _ as C -> C
+  | Klabel _ :: _ as code -> code
   | _ :: rest -> discard_dead_code rest
 ;;
 
 (* Generate a jump through table, unless unnecessary. *)
 
-let add_switchtable switchtable C =
+let add_switchtable switchtable code =
   try
     for i = 1 to vect_length switchtable - 1 do
       if switchtable.(i) != switchtable.(0) then raise Exit
     done;
-    match C with
-      Klabel lbl :: C1 ->
-        if lbl == switchtable.(0) then C else Kbranch switchtable.(0) :: C
+    match code with
+      Klabel lbl :: code1 ->
+        if lbl == switchtable.(0) then code
+        else Kbranch switchtable.(0) :: code
     | _ ->
-        Kbranch switchtable.(0) :: C
+        Kbranch switchtable.(0) :: code
   with Exit ->
-    Kswitch switchtable :: C
+    Kswitch switchtable :: code
 ;;
 
 (* Compiling N-way integer branches *)
@@ -177,7 +178,7 @@ let still_to_compile  = (stack__new () : (lambda * int) stack__t);;
 
    staticfail : the label where Lstaticfail must branch.
    lambda : the lambda term to compile.
-   C : the continuation, i.e. the code that follows the code for lambda.
+   code : the continuation, i.e. the code that follows the code for lambda.
 
    The tests on the continuation detect tail-calls and avoid jumps to jumps,
    or jumps to function returns.
@@ -185,103 +186,106 @@ let still_to_compile  = (stack__new () : (lambda * int) stack__t);;
 *)
 
 let rec compile_expr staticfail =
-  let rec compexp expr C = match expr with
+  let rec compexp expr code = match expr with
     Lvar n ->
-        Kaccess n :: C
+        Kaccess n :: code
   | Lconst cst ->
-       (match C with
-          (Kquote _ | Kget_global _ | Kaccess _ | Kpushmark) :: _ -> C
-        | _ -> Kquote cst :: C)
+       (match code with
+          (Kquote _ | Kget_global _ | Kaccess _ | Kpushmark) :: _ -> code
+        | _ -> Kquote cst :: code)
   | Lapply(body, args) ->
-       (match C with
-          Kreturn :: C' ->
-            compexplist args (Kpush :: compexp body (Ktermapply :: C'))
+       (match code with
+          Kreturn :: code' ->
+            compexplist args (Kpush :: compexp body (Ktermapply :: code'))
         | _ ->
             Kpushmark ::
-            compexplist args (Kpush :: compexp body (Kapply :: C)))
+            compexplist args (Kpush :: compexp body (Kapply :: code)))
   | Lfunction body ->
-        if is_return C then
-          Kgrab :: compexp body C
+        if is_return code then
+          Kgrab :: compexp body code
         else begin
           let lbl = new_label() in
             stack__push (body, lbl) still_to_compile;
-            Kclosure lbl :: C
+            Kclosure lbl :: code
           end
   | Llet(args, body) ->
-        let C1 = if is_return C then C else Kendlet(list_length args) :: C in
+        let code1 = if is_return code then code
+                    else Kendlet(list_length args) :: code in
         let rec comp_args = function
             [] ->
-              compexp body C1
+              compexp body code1
 	  | exp::rest ->
               compexp exp (Klet :: comp_args rest) in
         comp_args args
   | Lletrec([Lfunction f, _], body) ->
-        let C1 = if is_return C then C else Kendlet 1 :: C in
+        let code1 = if is_return code then code else Kendlet 1 :: code in
         let lbl = new_label() in
           stack__push (f, lbl) still_to_compile;
-          Kletrec1 lbl :: compexp body C1
+          Kletrec1 lbl :: compexp body code1
   | Lletrec(args, body) ->
         let size = list_length args in
-        let C1 = if is_return C then C else Kendlet size :: C in
+        let code1 = if is_return code then code else Kendlet size :: code in
 	let rec comp_args i = function
 	    [] ->
-              compexp body C1
+              compexp body code1
 	  | (exp, sz)::rest ->
               compexp exp (Kpush :: Kaccess i :: Kprim Pupdate ::
                             comp_args (i-1) rest) in
         list_it
-          (fun (e, sz) C -> Kprim(Pdummy sz) :: Klet :: C)
+          (fun (e, sz) code -> Kprim(Pdummy sz) :: Klet :: code)
           args (comp_args (size-1) args)
   | Lprim(Pget_global qualid, []) ->
-        Kget_global qualid :: C
+        Kget_global qualid :: code
   | Lprim(Pset_global qualid, [exp]) ->
-        compexp exp (Kset_global qualid :: C)
+        compexp exp (Kset_global qualid :: code)
   | Lprim(Pmakeblock tag, explist) ->
-        compexplist explist (Kmakeblock(tag, list_length explist) :: C)
+        compexplist explist (Kmakeblock(tag, list_length explist) :: code)
   | Lprim(Pnot, [exp]) ->
-       (match C with
-          Kbranchif lbl :: C' ->
-            compexp exp (Kbranchifnot lbl :: C')
-        | Kbranchifnot lbl :: C' ->
-            compexp exp (Kbranchif lbl :: C')
+       (match code with
+          Kbranchif lbl :: code' ->
+            compexp exp (Kbranchifnot lbl :: code')
+        | Kbranchifnot lbl :: code' ->
+            compexp exp (Kbranchif lbl :: code')
         | _ ->
-            compexp exp (Kprim Pnot :: C))
+            compexp exp (Kprim Pnot :: code))
   | Lprim((Ptest tst as p), explist) ->
-       (match C with
-          Kbranchif lbl :: C' ->
-            compexplist explist (Ktest(tst,lbl) :: C')
-        | Kbranchifnot lbl :: C' ->
-            compexplist explist (Ktest(invert_bool_test tst,lbl) :: C')
+       (match code with
+          Kbranchif lbl :: code' ->
+            compexplist explist (Ktest(tst,lbl) :: code')
+        | Kbranchifnot lbl :: code' ->
+            compexplist explist (Ktest(invert_bool_test tst,lbl) :: code')
         | _ ->
-            compexplist explist (Kprim p :: C))
+            compexplist explist (Kprim p :: code))
   | Lprim(Praise, explist) ->
-        compexplist explist (Kprim Praise :: discard_dead_code C)
+        compexplist explist (Kprim Praise :: discard_dead_code code)
   | Lprim(p, explist) ->
-        compexplist explist (Kprim p :: C)
+        compexplist explist (Kprim p :: code)
   | Lstatichandle(body, Lstaticfail) ->
-        compexp body C
+        compexp body code
   | Lstatichandle(body, handler) ->
-        let branch1, C1 = make_branch C
+        let branch1, code1 = make_branch code
         and lbl2 = new_label() in
-          compile_expr lbl2 body (branch1 :: Klabel lbl2 :: compexp handler C1)
+          compile_expr lbl2 body
+                       (branch1 :: Klabel lbl2 :: compexp handler code1)
   | Lstaticfail ->
-        Kbranch staticfail :: discard_dead_code C
+        Kbranch staticfail :: discard_dead_code code
   | Lhandle(body, handler) ->
-        let branch1, C1 = make_branch C in
+        let branch1, code1 = make_branch code in
         let lbl2 = new_label() in
-        let C2 = if is_return C1 then C1 else Kendlet 1 :: C1 in
+        let code2 = if is_return code1 then code1 else Kendlet 1 :: code1 in
           Kpushtrap lbl2 ::
             compexp body
-                    (Kpoptrap :: branch1 :: Klabel lbl2 :: compexp handler C2)
+                    (Kpoptrap :: branch1 :: Klabel lbl2 ::
+                       compexp handler code2)
   | Lifthenelse(cond, ifso, ifnot) ->
-        comp_test2 cond ifso ifnot C
+        comp_test2 cond ifso ifnot code
   | Lsequence(exp1, exp2) ->
-        compexp	exp1 (compexp exp2 C)
+        compexp	exp1 (compexp exp2 code)
   | Lwhile(cond, body) ->
         let lbl1 = new_label() and lbl2 = new_label() in
           Kbranch lbl1 :: Klabel lbl2 :: Kcheck_signals ::
           compexp body (Klabel lbl1 :: compexp cond (
-            Kbranchif lbl2 :: Kquote(const_unit) :: C))
+            Kbranchif lbl2 :: Kquote(const_unit) :: code))
   | Lfor(start, stop, up_flag, body) ->
         let lbl_end = new_label()
         and lbl_loop = new_label() in
@@ -295,177 +299,181 @@ let rec compile_expr staticfail =
                 Kaccess 1 :: Kprim(if up_flag then Pincr else Pdecr) ::
                 Kbranch lbl_loop ::
                 Klabel lbl_end :: Kendlet 2 ::
-                Kquote(const_unit) :: C)))
+                Kquote(const_unit) :: code)))
   | Lsequand(exp1, exp2) ->
-       (match C with
+       (match code with
           Kbranch lbl :: _  ->
-            compexp exp1 (Kstrictbranchifnot lbl :: compexp exp2 C)
+            compexp exp1 (Kstrictbranchifnot lbl :: compexp exp2 code)
         | Kbranchifnot lbl :: _ ->
-            compexp exp1 (Kbranchifnot lbl :: compexp exp2 C)
-        | Kbranchif lbl :: C' ->
-            let lbl1, C1 = label_code C' in
+            compexp exp1 (Kbranchifnot lbl :: compexp exp2 code)
+        | Kbranchif lbl :: code' ->
+            let lbl1, code1 = label_code code' in
               compexp exp1 (Kbranchifnot lbl1 ::
-                            compexp exp2 (Kbranchif lbl :: C1))
+                            compexp exp2 (Kbranchif lbl :: code1))
         | _ ->
             let lbl = new_label() in
               compexp exp1 (Kstrictbranchifnot lbl ::
-                            compexp exp2 (Klabel lbl :: C)))
+                            compexp exp2 (Klabel lbl :: code)))
   | Lsequor(exp1, exp2) ->
-       (match C with
+       (match code with
           Kbranch lbl :: _  ->
-            compexp exp1 (Kstrictbranchif lbl :: compexp exp2 C)
+            compexp exp1 (Kstrictbranchif lbl :: compexp exp2 code)
         | Kbranchif lbl :: _  ->
-            compexp exp1 (Kbranchif lbl :: compexp exp2 C)
-        | Kbranchifnot lbl :: C' ->
-            let lbl1, C1 = label_code C' in
+            compexp exp1 (Kbranchif lbl :: compexp exp2 code)
+        | Kbranchifnot lbl :: code' ->
+            let lbl1, code1 = label_code code' in
               compexp exp1 (Kbranchif lbl1 ::
-                            compexp exp2 (Kbranchifnot lbl :: C1))
+                            compexp exp2 (Kbranchifnot lbl :: code1))
         | _ ->
             let lbl = new_label() in
               compexp exp1 (Kstrictbranchif lbl ::
-                            compexp exp2 (Klabel lbl :: C)))
+                            compexp exp2 (Klabel lbl :: code)))
 
   | Lcond(arg, casel) ->
-        let C1 =
+        let code1 =
           if match casel with
             (ACint _, _) :: _ :: _ -> true
           | (ACchar _, _) :: _ :: _ -> true
           | _ -> false
           then
-            comp_decision (compile_nbranch int_of_atom casel) C
+            comp_decision (compile_nbranch int_of_atom casel) code
           else
-            comp_tests (map (fun (cst,act) -> (test_for_atom cst, act)) casel) C
+            comp_tests (map (fun (cst,act) -> (test_for_atom cst, act)) casel)
+                       code
         in
-          compexp arg C1
+          compexp arg code1
 
   | Lswitch(1, arg, [ConstrRegular(_,_), exp]) ->
-        compexp exp C
+        compexp exp code
         (* En supposant que l'argument est toujours du code pur !!!
            (vrai quand c'est le pattern-matcher qui genere le Switch).     *)
   | Lswitch(2, arg, [ConstrRegular(0,_), exp0]) ->
-        compexp arg (Kbranchif staticfail :: compexp exp0 C)
+        compexp arg (Kbranchif staticfail :: compexp exp0 code)
   | Lswitch(2, arg, [ConstrRegular(1,_), exp1]) ->
-        compexp arg (Kbranchifnot staticfail :: compexp exp1 C)
+        compexp arg (Kbranchifnot staticfail :: compexp exp1 code)
   | Lswitch(2, arg, [ConstrRegular(0,_), exp0; ConstrRegular(1,_), exp1]) ->
-        comp_test2 arg exp1 exp0 C
+        comp_test2 arg exp1 exp0 code
   | Lswitch(2, arg, [ConstrRegular(1,_), exp1; ConstrRegular(0,_), exp0]) ->
-        comp_test2 arg exp1 exp0 C
+        comp_test2 arg exp1 exp0 code
   | Lswitch(size, arg, casel) ->
-        let C1 =
+        let code1 =
           if switch_contains_extensibles casel then
             comp_tests
-              (map (fun (tag,act) -> (Pnoteqtag_test tag, act)) casel) C
+              (map (fun (tag,act) -> (Pnoteqtag_test tag, act)) casel) code
           else if list_length casel >= size - 5 then
-            Kprim Ptag_of :: comp_direct_switch size casel C
+            Kprim Ptag_of :: comp_direct_switch size casel code
           else
             Kprim Ptag_of ::
-              comp_decision (compile_nbranch int_of_constr_tag casel) C
+              comp_decision (compile_nbranch int_of_constr_tag casel) code
        in
-         compexp arg C1
+         compexp arg code1
   | Lshared(expr, lbl_ref) ->
        if !lbl_ref == Nolabel then begin
          let lbl = new_label() in
            lbl_ref := lbl;
-           Klabel lbl :: compexp expr C
+           Klabel lbl :: compexp expr code
        end else begin
-         Kbranch !lbl_ref :: discard_dead_code C
+         Kbranch !lbl_ref :: discard_dead_code code
        end
   | Levent(event, expr) ->
        begin match event.ev_kind with
          Lbefore ->
-           Kevent event :: compexp expr C
+           Kevent event :: compexp expr code
        | Lafter ty ->                 (* expr is either raise arg or apply *)
-          match C with
-            Kreturn :: _ -> compexp expr C (* don't destroy tail call opt. *)
-          | _ -> compexp expr (Kevent event :: C)
+          match code with
+            Kreturn :: _ ->
+              compexp expr code (* don't destroy tail call opt. *)
+          | _ -> compexp expr (Kevent event :: code)
        end
 
   and compexplist = fun
-      [] C -> C
-    | [exp] C -> compexp exp C
-    | (exp::rest) C -> compexplist rest (Kpush :: compexp exp C)
+      [] code -> code
+    | [exp] code -> compexp exp code
+    | (exp::rest) code -> compexplist rest (Kpush :: compexp exp code)
 
-  and comp_test2 cond ifso ifnot C =
-    let branch1, C1 = make_branch C
+  and comp_test2 cond ifso ifnot code =
+    let branch1, code1 = make_branch code
     and lbl2 = new_label() in
-      compexp cond (Kbranchifnot lbl2 ::
-                   compexp ifso (branch1 :: Klabel lbl2 :: compexp ifnot C1))
+      compexp cond
+              (Kbranchifnot lbl2 ::
+                 compexp ifso (branch1 :: Klabel lbl2 :: compexp ifnot code1))
 
-  and comp_tests casel C =
-    let branch1, C1 =
-      make_branch C in
+  and comp_tests casel code =
+    let branch1, code1 =
+      make_branch code in
     let rec comp = function
         [] ->
           fatal_error "comp_tests"
       | [test,exp] ->
-          Ktest(test, staticfail) :: compexp exp C1
+          Ktest(test, staticfail) :: compexp exp code1
       | (test,exp)::rest ->
           let lbl = new_label() in
-            Ktest(test, lbl) :: compexp exp (branch1 :: Klabel lbl :: comp rest)
+            Ktest(test, lbl) ::
+              compexp exp (branch1 :: Klabel lbl :: comp rest)
     in comp casel
 
-  and comp_switch v branch1 C =
+  and comp_switch v branch1 code =
       let switchtable =
         make_vect (vect_length v) staticfail in
       let rec comp_cases n =
         if n >= vect_length v then
-          C
+          code
         else begin
-          let (lbl, C1) =
+          let (lbl, code1) =
             label_code (compexp v.(n) (branch1 :: comp_cases (n+1))) in
           switchtable.(n) <- lbl;
-          C1
+          code1
         end in
       add_switchtable switchtable (discard_dead_code(comp_cases 0))
 
-  and comp_decision tree C =
-    let branch1, C1 = make_branch C in
+  and comp_decision tree code =
+    let branch1, code1 = make_branch code in
     let rec comp_dec = fun
-      (DTfail) C ->
-        Kbranch staticfail :: discard_dead_code C
-    | (DTinterval(left, dec, right)) C ->
-        let (lbl_right, Cright) =
+      (DTfail) code ->
+        Kbranch staticfail :: discard_dead_code code
+    | (DTinterval(left, dec, right)) code ->
+        let (lbl_right, coderight) =
           match right with
-            DTfail -> (staticfail, C)
-          | _      -> label_code (comp_dec right C) in
-        let (lbl_left, Cleft) =
+            DTfail -> (staticfail, code)
+          | _      -> label_code (comp_dec right code) in
+        let (lbl_left, codeleft) =
           match left with
-            DTfail -> (staticfail, Cright)
-          | _ ->      label_code (comp_dec left Cright) in
+            DTfail -> (staticfail, coderight)
+          | _ ->      label_code (comp_dec left coderight) in
         Kbranchinterval(dec.low, dec.high, lbl_left, lbl_right) ::
         begin match vect_length dec.act with
-                1 -> compexp dec.act.(0) (branch1 :: Cleft)
-              | _ -> comp_switch dec.act branch1 Cleft
+                1 -> compexp dec.act.(0) (branch1 :: codeleft)
+              | _ -> comp_switch dec.act branch1 codeleft
         end in
-    comp_dec tree C1
+    comp_dec tree code1
 
-  and comp_direct_switch size casel C =
-    let branch1, C1 = make_branch C in
+  and comp_direct_switch size casel code =
+    let branch1, code1 = make_branch code in
     let switchtable = make_vect size staticfail in
     let rec comp_case = function
         [] ->
           fatal_error "comp_switch"
       | [tag, exp] ->
-          let (lbl, C2) = label_code (compexp exp C1) in
+          let (lbl, code2) = label_code (compexp exp code1) in
           switchtable.(int_of_constr_tag tag) <- lbl;
-          C2
+          code2
       | (tag, exp) :: rest ->
-          let (lbl, C2) =
+          let (lbl, code2) =
             label_code (compexp exp (branch1 :: comp_case rest)) in
           switchtable.(int_of_constr_tag tag) <- lbl;
-          C2
+          code2
     in
       add_switchtable switchtable (discard_dead_code(comp_case casel))
 
   in compexp
 ;;
 
-let rec compile_rest C =
+let rec compile_rest code =
   try
     let (exp, lbl) = stack__pop still_to_compile in
-      compile_rest (Klabel lbl :: compile_expr Nolabel exp (Kreturn :: C))
+      compile_rest (Klabel lbl :: compile_expr Nolabel exp (Kreturn :: code))
   with stack__Empty ->
-    C
+    code
 ;;
 
 let compile_lambda (rec_flag : bool) expr =
