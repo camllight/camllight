@@ -92,9 +92,9 @@ do_phr.zo: pr_value.zo ../compiler/typing.zo meta.zi \
     ../compiler/back.zo ../compiler/front.zo fmt_type.zo \
     ../linker/symtable.zo ../compiler/syntax.zo ../compiler/ty_decl.zo 
 expunge.zo: ../linker/symtable.zo ../compiler/const.zo 
-fmt_type.zo: ../compiler/misc.zo ../compiler/pr_type.zo \
-    ../compiler/modules.zo ../compiler/builtins.zo ../compiler/globals.zo \
-    ../compiler/types.zo ../compiler/const.zo 
+fmt_type.zo: ../compiler/misc.zo ../compiler/modules.zo \
+    ../compiler/builtins.zo ../compiler/globals.zo ../compiler/types.zo \
+    ../compiler/const.zo 
 load_phr.zo: pr_value.zo ../compiler/reloc.zo meta.zi ../linker/tr_const.zo \
     ../compiler/labels.zo ../compiler/misc.zo ../linker/symtable.zo \
     ../linker/patch.zo ../compiler/instruct.zo ../compiler/buffcode.zo \
@@ -102,7 +102,16 @@ load_phr.zo: pr_value.zo ../compiler/reloc.zo meta.zi ../linker/tr_const.zo \
 main.zo: meta.zi toplevel.zi ../compiler/location.zi ../compiler/modules.zo \
     ../compiler/config.zi ../compiler/compiler.zo version.zo \
     ../compiler/misc.zo do_phr.zo ../linker/symtable.zo 
+pr_value.debugger.zo: ../compiler/modules.zo ../compiler/const.zo \
+    ../compiler/misc.zo fmt_type.zo ../linker/symtable.zo \
+    ../compiler/globals.zo ../compiler/builtins.zo ../compiler/types.zo 
+pr_value.diff.zo: ../compiler/modules.zo ../compiler/const.zo \
+    ../compiler/misc.zo fmt_type.zo ../linker/symtable.zo \
+    ../compiler/globals.zo ../compiler/builtins.zo ../compiler/types.zo 
 pr_value.zo: ../compiler/modules.zo ../compiler/const.zo \
+    ../compiler/misc.zo fmt_type.zo ../linker/symtable.zo \
+    ../compiler/globals.zo ../compiler/builtins.zo ../compiler/types.zo 
+pr_value.old.zo: ../compiler/modules.zo ../compiler/const.zo \
     ../compiler/misc.zo fmt_type.zo ../linker/symtable.zo \
     ../compiler/globals.zo ../compiler/builtins.zo ../compiler/types.zo 
 provide.zo: ../compiler/prim.zo ../compiler/modules.zo \
