@@ -42,9 +42,10 @@ IMPLEMENT_DYNCREATE(CGraphDoc, CDocument)
 CGraphDoc::CGraphDoc()
 {
 	m_DC = NULL;
-	m_sizeX=GetScreenWidth();
-	m_sizeY=GetScreenHeight();
-	m_sizeDoc=CSize(m_sizeX,m_sizeY);
+
+	m_sizeX=((CMainFrame *)(theApp.m_pMainWnd))->GetDC()->GetDeviceCaps(HORZRES);
+	m_sizeY=((CMainFrame *)(theApp.m_pMainWnd))->GetDC()->GetDeviceCaps(VERTRES);
+	m_sizeDoc=CSize(m_sizeX, m_sizeY);
 
 	m_logBrush = new LOGBRUSH;
 	m_logBrush->lbStyle = BS_SOLID;
@@ -80,9 +81,8 @@ void CGraphDoc::InitDocumentDC(CClientDC *pDC)
 	m_bmp->CreateCompatibleBitmap(pDC,m_sizeX,m_sizeY);
 	m_OffScreenDC->SelectObject(m_bmp);
 
-	int foo=m_OffScreenDC->SetBkColor(BLUE);
+	m_OffScreenDC->SetBkColor(BLUE);
 
-	// bug a partir d'ici !!
 	m_pen=new CPen;
 	ASSERT(m_pen->CreatePen(PS_SOLID, 1, BLACK));
 	m_OffScreenDC->SelectObject(m_pen);	
@@ -304,12 +304,22 @@ GRAPHPRIM( SetColor, gr_set_color, (value col), (col) )
 
 GRAPHPRIM( OpenGraph, gr_open_graph, (value mode), (mode) )
 {
-	POINT bottom;
-		  bottom.x=0;
-		  bottom.y=m_sizeY;
+	POINT bottom = {0, m_sizeY};
+	int x0, y0, width0, height0, nconv;
+
 	m_View->ScrollToPosition(bottom);
 	SetColor(BLACK);
 	gr_clear_graph();
+	nconv = sscanf(String_val(mode), " %d x %d + %d + %d", &width0, &height0, &x0, &y0);
+	if (nconv < 4) {
+		x0 = 10;
+		y0 = 10;
+	}
+	if (nconv < 2) {
+		width0 = 600;
+		height0 = 400;
+	}
+	m_View->GetParent()->MoveWindow(x0, y0, width0, height0);
 	((CMainFrame *)(theApp.m_pMainWnd))->ShowGraphics();
 	m_View->GetParent()->BringWindowToTop();
 	m_View->SetFocus();
