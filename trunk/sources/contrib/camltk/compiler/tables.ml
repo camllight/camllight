@@ -15,13 +15,11 @@ type MLtype =
 ;;
 
 type ComponentType =
-   Option
- | Constructor
+   Constructor
  | Command
- | Unknown of string
 ;;
 
-type Component = {
+type FullComponent = {
   Component : ComponentType;
   MLName : string;
   TkName   : string;
@@ -30,11 +28,14 @@ type Component = {
   }
 ;;
 
-
+type Component = 
+   Full of FullComponent
+ | Abbrev of string
+;;
 
 type TypeDef = {
-  mutable constructors : Component list;
-  mutable subtypes : (string * Component list) list
+  mutable constructors : FullComponent list;
+  mutable subtypes : (string * FullComponent list) list
 }
 ;;
 
@@ -42,6 +43,12 @@ type TypeDef = {
 let types_table = (hashtbl__new 37 : (string, TypeDef) hashtbl__t)
 ;;
 let types_order = (tsort__new () : string tsort__porder)
+;;
+let types_external = ref ([] : string list)
+;;
+
+let enter_external_type s =
+  types_external := s::!types_external
 ;;
 
 (* Types of values returned by Tk functions *)
@@ -102,14 +109,23 @@ let enter_type typname constructors =
   with Not_found ->
     tsort__add_element types_order typname;
     let cs = ref [] in
-    do_list (fun c ->
-      	      if not (check_duplicate_constr false c !cs)
-	      then begin 
-      	       	 cs := c::!cs;
-      	       	 add_dependancies typname c.Arg
-              end)
+    do_list (function c ->
+		if not (check_duplicate_constr false c !cs)
+		then begin 
+		   cs := c::!cs;
+		   add_dependancies typname c.Arg
+		end)
             constructors;
     hashtbl__add types_table typname {constructors = !cs; subtypes = []} 
+;;
+
+(* Retrieve constructor *)
+exception Invalid_implicit_constructor of string
+;;
+let rec find_constructor cname = function
+   [] -> raise (Invalid_implicit_constructor cname)
+ | c::l -> if c.MLName = cname then c
+       	   else find_constructor cname l
 ;;
 
 (* Enter a subtype *)
@@ -126,18 +142,31 @@ let enter_subtype typ subtyp constructors =
     if mem_assoc subtyp typdef.subtypes
     then raise (Duplicate_Definition ("subtype", typ ^" "^subtyp))
     else begin
-       do_list (fun c -> 
-       	       	  if not (check_duplicate_constr true c typdef.constructors)
-		  then begin
-		     add_dependancies typ c.Arg;
-      	       	     typdef.constructors <- c :: typdef.constructors
-      	       	  end)
-	       constructors;
+       let real_constructors = 
+      	 map (function
+      	       	  Full c -> 
+		    if not (check_duplicate_constr true c typdef.constructors)
+		    then begin
+		       add_dependancies typ c.Arg;
+		       typdef.constructors <- c :: typdef.constructors
+		    end;
+                    c
+                | Abbrev name -> find_constructor name typdef.constructors
+                )
+	       constructors in
        (* TODO: duplicate def in subtype are not checked *)
-       typdef.subtypes <- (subtyp , constructors) :: typdef.subtypes
+       typdef.subtypes <- (subtyp , real_constructors) :: typdef.subtypes
     end
 ;;
 
+let retrieve_option optname =
+  let optiontyp =
+    try hashtbl__find types_table "option"
+    with 
+      Not_found -> raise (Invalid_implicit_constructor optname)
+  in find_constructor optname optiontyp.constructors
+;;
+  
 
 let is_subtyped s =
   s = "Widget" or
@@ -171,7 +200,7 @@ type ModuleType =
 
 type ModuleDef = {
   ModuleType : ModuleType;
-  Commands : Component list
+  Commands : FullComponent list
 }
 ;;
 
@@ -202,30 +231,25 @@ let enter_widget name components =
   let sorted_components = separate_components components in
   do_list 
        (function 
-      	 Option, l ->
-	   enter_subtype "option" name l
-       | Command, _ -> ()
-       | Constructor, _ -> failwith "subliminal" (* never build *)
-       | Unknown s, l -> (* never build *)
-       	   enter_subtype s name l
+      	 Constructor, l ->
+	   enter_subtype "option" name (map (function c -> Full c) l)
+       | Command, l -> 
+	       do_list (fun c -> add_return_type c.Result;
+				 enter_argtype c.Result;
+				 enter_argtype c.Arg) 
+		       l
        )
       sorted_components;
   let commands = 
-      try
-      	 assoc Command sorted_components
-      with
-         Not_found -> [] 
+      try assoc Command sorted_components
+      with Not_found -> [] 
   in
-  do_list (fun c -> add_return_type c.Result;
-      	       	    enter_argtype c.Result;
-                    enter_argtype c.Arg) 
-          commands;
   hashtbl__add module_table name {ModuleType = Widget; Commands = commands}
 ;;
   
 (* Functions go in tk.ml *)
 
-let function_table = ref ([] : Component list)
+let function_table = ref ([] : FullComponent list)
 ;;
 
 let enter_function comp =

@@ -27,6 +27,7 @@
 %token SUBTYPE		/* "subtype" */
 %token FUNCTION		/* "function" */
 %token MODULE		/* "module" */
+%token EXTERNAL		/* "external" */
 /* Entry points */
 %start Entry
 %type <unit> Entry
@@ -114,10 +115,24 @@ Constructor :
          Result = Unit }}
 ;
 
+AbbrevConstructor :
+    Constructor
+      { Full $1 }
+ |  IDENT
+      { Abbrev $1 }
+;
+
 Constructors :
   Constructor Constructors
    { $1 :: $2 }
 | Constructor
+   { [$1] }
+;
+
+AbbrevConstructors :
+  AbbrevConstructor AbbrevConstructors
+   { $1 :: $2 }
+| AbbrevConstructor
    { [$1] }
 ;
 
@@ -128,7 +143,10 @@ Command :
 
 Option :
    OPTION IDENT STRING Type
-     {{Component = Option; MLName = $2; TkName = $3; Arg = $4; Result = Unit }}
+     {{Component = Constructor; MLName = $2; TkName = $3; Arg = $4; Result = Unit }}
+   /* Abbreviated */
+|  OPTION IDENT
+     { retrieve_option $2 }
 ;
 
 WidgetComponent :
@@ -161,9 +179,11 @@ Entry :
     { enter_function $1 }
 | TYPE IDENT LBRACE Constructors RBRACE
     { enter_type $2 $4 }
-| SUBTYPE OPTION LPAREN IDENT RPAREN LBRACE Constructors RBRACE
+| TYPE IDENT EXTERNAL
+    { enter_external_type $2 }
+| SUBTYPE OPTION LPAREN IDENT RPAREN LBRACE AbbrevConstructors RBRACE
     { enter_subtype "option" $4 $7 }
-| SUBTYPE IDENT LPAREN IDENT RPAREN LBRACE Constructors RBRACE
+| SUBTYPE IDENT LPAREN IDENT RPAREN LBRACE AbbrevConstructors RBRACE
     { enter_subtype $2 $4 $7 }
 | MODULE IDENT LBRACE ModuleComponents RBRACE
     { enter_module $2 $4 }
