@@ -135,6 +135,18 @@ value sys_getenv(var)           /* ML */
   return copy_string(res);
 }
 
+value sys_system_command(command)   /* ML */
+     value command;
+{
+#ifdef macintosh
+  invalid_arg("system_command unavailable");
+#else
+  int retcode = system(String_val(command));
+  if (retcode == -1) sys_error();
+  return Val_int(retcode & 0xFF);
+#endif
+}
+
 static int sys_var_init[] = {
 #ifdef __TURBOC__
   S_IREAD, S_IWRITE, S_IEXEC,
