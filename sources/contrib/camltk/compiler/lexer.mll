@@ -21,10 +21,10 @@ do_list (fun (str,tok) -> hashtbl__add keyword_table str tok) [
   "list", LIST;
   "widget", WIDGET;
   "option", OPTION;
-  "command", COMMAND;
   "type", TYPE;
   "subtype", SUBTYPE;
-  "function", FUNCTION
+  "function", FUNCTION;
+  "module", MODULE
 ];;
 
 
