@@ -272,7 +272,7 @@ let rec conquer_matching =
             and lambda2, partial2 = conquer_matching vars in
               Lstatichandle(Lcond(path, condlist1), lambda2),
               partial2
-      | {p_desc = Zrecordpat _; p_typ = ty} (* } as p *) ->
+      | {p_desc = Zrecordpat _; p_typ = ty} ->
           conquer_matching (divide_record_matching ty matching)
       | _ ->
           fatal_error "conquer_matching 2"
