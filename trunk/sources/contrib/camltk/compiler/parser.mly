@@ -23,11 +23,10 @@
 
 %token WIDGET		/* "widget" */
 %token OPTION		/* "option" */
-%token COMMAND		/* "command" */
 %token TYPE		/* "type" */
 %token SUBTYPE		/* "subtype" */
 %token FUNCTION		/* "function" */
-
+%token MODULE		/* "module" */
 /* Entry points */
 %start Entry
 %type <unit> Entry
@@ -122,33 +121,52 @@ Constructors :
    { [$1] }
 ;
 
-Component :
-   OPTION IDENT STRING Type
-     {{Component = Option; MLName = $2; TkName = $3; Arg = $4; Result = Unit }}
- | COMMAND Typearg IDENT STRING Type
+Command :
+  FUNCTION Typearg IDENT STRING Type
      {{Component = Command; MLName = $3; TkName = $4; Arg = $5; Result = $2 }}
 ;
 
-Components :
+Option :
+   OPTION IDENT STRING Type
+     {{Component = Option; MLName = $2; TkName = $3; Arg = $4; Result = Unit }}
+;
+
+WidgetComponent :
+   Command
+      { $1 }
+ | Option
+      { $1 }
+;
+
+WidgetComponents :
   /* */
   { [] }
- | Component Components
+ | WidgetComponent WidgetComponents
+  { $1 :: $2 }
+;
+
+ModuleComponents : 
+  /* */
+  { [] }
+ | Command ModuleComponents
   { $1 :: $2 }
 ;
 
 
 
 Entry :
-  WIDGET IDENT LBRACE Components RBRACE
+  WIDGET IDENT LBRACE WidgetComponents RBRACE
     { enter_widget $2 $4 }
-| FUNCTION Typearg IDENT STRING Type
-    { enter_function $3 $4 $2 $5 }
+| Command 
+    { enter_function $1 }
 | TYPE IDENT LBRACE Constructors RBRACE
     { enter_type $2 $4 }
 | SUBTYPE OPTION LPAREN IDENT RPAREN LBRACE Constructors RBRACE
     { enter_subtype "option" $4 $7 }
 | SUBTYPE IDENT LPAREN IDENT RPAREN LBRACE Constructors RBRACE
     { enter_subtype $2 $4 $7 }
+| MODULE IDENT LBRACE ModuleComponents RBRACE
+    { enter_module $2 $4 }
 | EOF
     { raise End_of_file }
 ;

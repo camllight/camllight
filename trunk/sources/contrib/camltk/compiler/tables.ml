@@ -164,13 +164,18 @@ let rec enter_argtype = function
 ;;
    
 
+type ModuleType =
+    Widget
+  | Family
+;;
 
-type WidgetDef = {
+type ModuleDef = {
+  ModuleType : ModuleType;
   Commands : Component list
 }
 ;;
 
-let widget_table = (hashtbl__new 37 : (string, WidgetDef) hashtbl__t)
+let module_table = (hashtbl__new 37 : (string, ModuleDef) hashtbl__t)
 ;;
 
 
@@ -191,8 +196,8 @@ let separate_components =  it_list add_sort []
 
 let enter_widget name components =
   try 
-    hashtbl__find widget_table name;
-    raise (Duplicate_Definition ("widget", name))
+    hashtbl__find module_table name;
+    raise (Duplicate_Definition ("widget/module", name))
   with Not_found ->
   let sorted_components = separate_components components in
   do_list 
@@ -215,26 +220,31 @@ let enter_widget name components =
       	       	    enter_argtype c.Result;
                     enter_argtype c.Arg) 
           commands;
-  hashtbl__add widget_table name {Commands = commands}
+  hashtbl__add module_table name {ModuleType = Widget; Commands = commands}
 ;;
   
-
+(* Functions go in tk.ml *)
 
 let function_table = ref ([] : Component list)
 ;;
 
-let enter_function mlname tkstring restyp argtyp =
-  add_return_type restyp;
-  enter_argtype restyp;
-  enter_argtype argtyp;
-  function_table := {Component = Command;
-      	       	     MLName = mlname;
-      	       	     TkName = tkstring;
-      	       	     Arg = argtyp;
-      	       	     Result = restyp} :: !function_table
+let enter_function comp =
+  add_return_type comp.Result;
+  enter_argtype comp.Result;
+  enter_argtype comp.Arg;
+  function_table := comp :: !function_table
 ;;
 
-      	       	     
 
+let enter_module name components = 
+  try 
+    hashtbl__find module_table name;
+    raise (Duplicate_Definition ("widget/module", name))
+  with Not_found ->
+    do_list (fun c -> add_return_type c.Result;
+      	       	    enter_argtype c.Result;
+                    enter_argtype c.Arg) 
+            components;
+    hashtbl__add module_table name {ModuleType = Family; Commands = components}
+;;
 
-    
