@@ -68,19 +68,20 @@
 
 (if camldebug-mode-map
    nil
-  (cond (camldebug-emacs-19
-	 (setq camldebug-mode-map (cons 'keymap comint-mode-map)))
-	(t
-	 (setq camldebug-mode-map (copy-keymap comint-mode-map))))
+  (setq camldebug-mode-map
+        (if camldebug-emacs-19
+            (cons 'keymap comint-mode-map)
+            (copy-keymap comint-mode-map)))
   (define-key camldebug-mode-map "\C-l" 'camldebug-refresh)
   (define-key camldebug-mode-map "\C-c\C-c" 'camldebug-control-c-subjob)
   (define-key camldebug-mode-map "\t" 'comint-dynamic-complete)
-  (define-key camldebug-mode-map "\M-?" 'comint-dynamic-list-completions))
+  (define-key camldebug-mode-map "\M-?" 'comint-dynamic-list-completions)
+  (if camldebug-emacs-19
+      (define-key camldebug-mode-map [double-mouse-1] 'camldebug-more)))
 
 (if caml-mode-map
     (progn
-      (define-key caml-mode-map "\C-x " 'camldebug-break)
-      (define-key caml-mode-map "\C-x&" 'send-camldebug-command)))
+      (define-key caml-mode-map "\C-x " 'camldebug-break)))
 
 ;;Of course you may use `def-camldebug' with any other camldebug command.
 
@@ -119,8 +120,8 @@ The following commands are available:
 \\[camldebug-display-frame] displays in the other window
 the last line referred to in the camldebug buffer.
 
-\\[camldebug-step],\\[camldebug-next], and \\[camldebug-nexti] in the camldebug window,
-call camldebug to step,next or nexti and then update the other window
+\\[camldebug-step], \\[camldebug-back] and \\[camldebug-next], in the camldebug window,
+call camldebug to step, backstep or next and then update the other window
 with the current file and position.
 
 If you are in a source file, you may select a point to break
@@ -132,7 +133,6 @@ Additionally we have:
 
 \\[camldebug-display-frame] display frames file in other window
 \\[camldebug-step] advance one line in program
-\\[send-camldebug-command] used for special printing of an arg at the current point.
 C-x SPACE sets break point at current line."
   (interactive)
   (comint-mode)
@@ -353,6 +353,11 @@ Obeying it means displaying in another window the specified file and line."
 (defun camldebug-set-current-event (pos buffer before)
   (if (and camldebug-emacs-19 window-system)
       (progn
+        (if (save-excursion
+              (set-buffer before)
+              (goto-char (1+ pos))
+              (looking-at "\n"))
+            (setq pos (1- pos)))
         (move-overlay camldebug-overlay-event pos (1+ pos) buffer)
         (if before
             (move-overlay camldebug-overlay-under (+ pos 1) (+ pos 3) buffer)
@@ -414,62 +419,29 @@ Obeying it means displaying in another window the specified file and line."
   "Set CDB breakpoint at this source line."
   (interactive)
   (let ((file-name (file-name-nondirectory buffer-file-name))
-	(line (save-restriction
-		(widen)
-		(beginning-of-line)
-		(1+ (count-lines 1 (point))))))
+        (pos (point)))
     (process-send-string (get-buffer-process current-camldebug-buffer)
-			 (concat "break @ "
-				 (camldebug-module-name file-name)
-				 " "
-				 line
-				 "\n"))))
+			 (format "break @ %s # %d\n"
+                                 (camldebug-module-name file-name)
+				 (1- pos)))))
 
-(defun camldebug-read-address ()
-  "Return a string containing the core-address found in the buffer at point."
-  (save-excursion
-   (let ((pt (point)) found begin)
-     (setq found (if (search-backward "0x" (- pt 7) t)(point)))
-     (cond (found (forward-char 2)
-		  (buffer-substring found
-				    (progn (re-search-forward "[^0-9a-f]")
-					   (forward-char -1)
-					   (point))))
-	   (t (setq begin (progn (re-search-backward "[^0-9]") (forward-char 1)
-				 (point)))
-	      (forward-char 1)
-	      (re-search-forward "[^0-9]")
-	      (forward-char -1)
-	      (buffer-substring begin (point)))))))
-
-
-(defvar camldebug-commands nil
-  "List of strings or functions used by send-camldebug-command.
-It is for customization by you.")
-
-(defun send-camldebug-command (arg)
-
-  "This command reads the number where the cursor is positioned.  It
- then inserts this ADDR at the end of the camldebug buffer.  A numeric arg
- selects the ARG'th member COMMAND of the list camldebug-print-command.  If
- COMMAND is a string, (format COMMAND ADDR) is inserted, otherwise
- (funcall COMMAND ADDR) is inserted.  eg. \"p (rtx)%s->fld[0].rtint\"
- is a possible string to be a member of camldebug-commands.  "
-
-
-  (interactive "P")
-  (let (comm addr)
-    (if arg (setq comm (nth arg camldebug-commands)))
-    (setq addr (camldebug-read-address))
-    (if (eq (current-buffer) current-camldebug-buffer)
-	(set-mark (point)))
-    (cond (comm
-	   (setq comm
-		 (if (stringp comm) (format comm addr) (funcall comm addr))))
-	  (t (setq comm addr)))
-    (switch-to-buffer current-camldebug-buffer)
-    (goto-char (point-max))
-    (insert comm)))
+(defun camldebug-more (ev)
+  "Print ellipsed value."
+  (interactive "e")
+  (let* ((click-posn (event-start click))
+         (click-point (posn-point click-posn))
+         (click-window (posn-window click-posn)))
+    (select-window click-window)
+    (save-excursion
+      (goto-char click-point)
+      (skip-chars-backward "^<")
+      (if (and (> (point) (point-min))
+               (forward-char -1)
+               (looking-at "<\\([0-9]+\\)>"))
+          (process-send-string
+           (get-buffer-process current-camldebug-buffer)
+           (format "more %s\n"
+                   (buffer-substring (match-beginning 1) (match-end 1))))))))
 
 (defun camldebug-control-c-subjob ()
   "Send a Control-C to the subprocess."
