@@ -212,13 +212,19 @@ widget radiobutton {
    function () select "select" ()
    }
 
-subtype Index(entry) {
-   Number (int)
-   End "end"
-   Insert "insert"
-   SelFirst "sel.first"
-   SelLast "sel.last" 
-}
+type Index external   # builtin_index
+# Almost equal to
+#   Number (int)
+#   End "end"
+#   Insert "insert"
+#   SelFirst "sel.first"
+#   SelLast "sel.last" 
+#   At "@" (int)
+
+# Defined internally
+# subtype Index(entry) {
+#    Number End Insert SelFirst SelLast At
+# }
 
 widget entry {
    option Background
@@ -247,7 +253,7 @@ widget entry {
    function () delete "delete" (Index(entry), Index(entry))
    function (string) get "get" ()
    function () icursor "icursor" (Index(entry))
-   function () index "index" (Index(entry))
+   function (int) index "index" (Index(entry))
    function () insert "insert" (Index(entry), string)
    function () scan_mark "scanmark" (int)
    function () scan_dragto "scandragto" (int)
@@ -256,7 +262,10 @@ widget entry {
    function () select_from "selectfrom" (Index(entry))
    function () select_to "selectto" (Index(entry))
    function () view "view" (Index(entry))
+   # this one is a tcl program in the standard tk library 3.6
    }
+
+function () entry_see_caret "tk_entrySeeCaret" (widget(entry))
 
 
 ######################### Canvases
@@ -499,11 +508,10 @@ widget label {
    function (string) configure_get "configure" ()
    }
 
-
-subtype Index(listbox) {
-   Number End Insert 
-}
-subtype Index(listboxget) { Number End}
+# Defined internally
+# subtype Index(listbox) {
+#   Number End  
+#}
 
 widget listbox {
    option Background
@@ -527,7 +535,7 @@ widget listbox {
    # TODO: pb with returning empty list ?
    function (Index list) curselection "curselection" ()
    function () delete "delete" (Index(listbox), Index(listbox))
-   function (string) get "get" (Index(listboxget))
+   function (string) get "get" (Index(listbox))
    function () insert "insert" (Index(listbox), string list)
    function (Index) nearest "nearest" (int)
    function () scan_mark "scanmark" (int, int)
