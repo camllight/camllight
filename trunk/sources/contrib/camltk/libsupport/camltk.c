@@ -96,6 +96,25 @@ void tk_error(errmsg)
   raise_with_string(TCL_ERROR_EXN, errmsg);
 }
 
+/* 
+   Dealing with signals: when a signal handler is defined in Caml,
+   the actual execution of the signal handler upon reception of the
+   signal is delayed until we are sure we are out of the GC.
+   If a signal occurs during the MainLoop, we would have to wait
+   the next event for the handler to be invoked.
+*/
+
+/* The following function will invoke a pending signal handler if any */
+void invoke_pending_caml_signals (clientdata) 
+     ClientData clientdata;
+{
+  enter_blocking_section();
+  /* Rearm timer */
+  Tk_CreateTimerHandler(100, invoke_pending_caml_signals, NULL);
+  leave_blocking_section();
+}
+
+
 static Tcl_Interp *tclinterp;
 static Tk_Window mainWindow;
 
@@ -143,6 +162,8 @@ value camltk_opentk(name) /* ML */
 	  tk_error(tclinterp->result);
     }
   }
+
+ Tk_CreateTimerHandler(100, invoke_pending_caml_signals, NULL);
   
  finish:
   return Atom(0);
