@@ -22,6 +22,8 @@ Caml Light 0.74:
   Module nat: now performs sanity checks.
   New module fnat: the same functionality as module nat, without
   sanity checks.
+  The toplevel "camlnum" now comes with printers installed for the
+  num types.
   Assembly code for pentium processors is now supported (on average
   this implementation is approximately 3 times faster than the pure C
   implementation) (set the variable BIGNUM_ARCH to pentium in the
