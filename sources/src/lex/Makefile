@@ -50,7 +50,6 @@ depend: scanner.ml grammar.ml grammar.mli
 grammar.zi: syntax.zo 
 gram_aux.zo: syntax.zo 
 grammar.zo: grammar.zi gram_aux.zo syntax.zo 
-iset.zo: iset.zi 
 lexgen.zo: syntax.zo 
 main.zo: lexgen.zo output.zo grammar.zi scanner.zo syntax.zo scan_aux.zo 
 output.zo: syntax.zo 
