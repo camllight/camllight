@@ -1,4 +1,6 @@
-(* Read an emacs TAG file *)
+(* Emacs TAGS file support *)
+let use_tags = ref false;;
+
 let reverse_pos s c =
   let rec pos i =
     if i < 0 then raise Not_found
@@ -66,6 +68,7 @@ let read_tag_file ic =
 
 
 let read_tags dir =
+  if !use_tags then 
    let tagfile = filename__concat dir "TAGS" in
     try
      let ic = open_in tagfile in
@@ -75,4 +78,9 @@ let read_tags dir =
      sys__Sys_error _ -> 
        printf__fprintf stderr "Cannot open %s\n" tagfile;
        flush stderr
+;;
+
+let clear_tags () =
+  hashtbl__clear dotml_emacs_tags;
+  hashtbl__clear dotmli_emacs_tags
 ;;

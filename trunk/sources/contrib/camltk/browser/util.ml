@@ -213,6 +213,7 @@ let open_req title action =
 (******************** Simple list requester ********************)
 let open_list_req title elements action =
   let t = toplevelw__create (support__new_toplevel_widget "openlist") [] in
+  update_idletasks();
   grab__set_local t;
   let tit = label__create t [Text title] in
 
@@ -224,14 +225,12 @@ let open_list_req title elements action =
   let activate _ =
     do_list (fun s -> action (listbox__get lb s))
       	    (listbox__curselection lb);
-    destroy t 
-  and cfeedback p = label__configure tit [Text (title ^ " [" ^ p ^ "]")] in
+    destroy t  in
 
   bind lb [[Double], WhatButton 1] (BindSet ([], activate));
 
-  let cupdate = complete__add_completion lb activate cfeedback in
-     (* It's delicate to extend "internal" <1> *)
-     bind lb [[Any], ButtonRelease] (BindSet ([],cupdate));
+  complete__add_completion lb activate; 
+
   let f = frame__create t [] in
   let bok = button__create f [Text "Ok"; Command activate] in
   let bcancel = button__create f 
