@@ -73,9 +73,10 @@ prefix-op:
 ;
 infix-op:
     '+' || '-' || '*' || '/' || 'mod' || '+.' || '-.' || '*.' || '/.'
+               || '**'
                                          || '@' || '^' || '!' || ':=' 
-  | '=' || '<>' || '==' || '!=' || '<' || '<=' || '>' || '<=' 
-                                     || '<.' || '<=.' || '>.' || '<=.'
+  | '=' || '<>' || '==' || '!=' || '<' || '<=' || '>' || '>=' 
+                    || '<.' || '<=.' || '>.' || '>=.'
 \end{syntax}
 
 The table below shows the relative precedences and associativity of
@@ -96,6 +97,7 @@ precedence come first.
 \entree{function application}{left}
 \entree{constructor application}{--}
 \entree{"-   -." (prefix)}{--}
+\entree{"**"}{right}
 \entree{"mod"}{left}
 \entree{"*   *.   /   /."}{left}
 \entree{"+   +.   -   -."}{left}
@@ -552,6 +554,7 @@ the @'#open'@ and @'#close'@ directives.
 \entreeoperateur{"*."}{"prefix *."}{Floating-point multiplication.}
 \entreeoperateur{"/."}{"prefix /."}{Floating-point division.
         Raise "Division_by_zero" if second argument is zero.}
+\entreeoperateur{"**"}{"prefix **"}{Floating-point exponentiation.}
 \entreeoperateur{{\tt\char64} }{"prefix "{\tt\char64}}{List concatenation.}
 \entreeoperateur{"^" }{"prefix ^"}{String concatenation.}
 \entreeoperateur{"!" }{"prefix !"}{Dereferencing (return the current
