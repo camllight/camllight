@@ -1,13 +1,17 @@
 #!/bin/sh
 
-mods=`sed -e 's/WIDGETOBJS=//' -e 's/\([a-z_]*\)\.zo/\1/g' \
-                  $CAMLTKDIR/modules`
+mods=`grep WIDGETOBJS $CAMLTKDIR/modules | \
+      sed -e 's/WIDGETOBJS=//' -e 's/\([a-z_]*\)\.zo/\1/g'`
+
+[ -d library ] || mkdir library
 
 for m in `echo $mods | tr ' ' '\012' | sort`
 do
-echo "\\section*{Module {\\tt $m}}"
-echo "\\addcontentsline{toc}{section}{Module {\\tt $m}}"
-echo "\\begin{alltt}"
-echo "\\input{$CAMLTKDIR/$m.mli}"
-echo "\\end{alltt}"
+# echo "\\section*{Module {\\tt $m}}"
+# echo "\\addcontentsline{toc}{section}{Module {\\tt $m}}"
+# echo "\\begin{alltt}"
+# echo "\\input $CAMLTKDIR/$m.mli"
+# echo "\\end{alltt}"
+../tools/format-intf $m < $CAMLTKDIR/$m.mli > library/$m.tex
+echo "\\input library/$m.tex"
 done

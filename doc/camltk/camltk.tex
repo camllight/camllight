@@ -1,4 +1,9 @@
-\documentstyle[11pt,alltt,html,fullpage]{report}
+\documentstyle[11pt,html,fullpage]{book}
+
+\newif\ifplaintext
+\plaintextfalse
+
+\input ../manual/macros.tex
 
 % Various notations
 \newcommand{\tcl}	{{\sf Tcl}}
@@ -6,107 +11,6 @@
 \newcommand{\caml}	{{\sf Caml Light}}
 \newcommand{\camltk}	{{\sf CamlTk}}
 \newcommand{\wish}	{{\sf wish}}
-\newcommand{\thisrelease}{{\tt beta1 (for 0.7)}}
+\newcommand{\thisrelease}{{\tt beta2 (for 0.7)}}
 
-
-\title{The \camltk\ interface \\
-       Release \thisrelease}
-
-\author{Fran\c{c}ois Pessaux and Fran\c{c}ois Rouaix \\
-           Projet Cristal, INRIA Rocquencourt \\
-        {\small Francois.Pessaux@inria.fr, Francois.Rouaix@inria.fr}
-        }
-\date{December 1994}
-
-\begin{document}
-\maketitle
-\tableofcontents
-\newpage
-
-\section*{Introduction}
-\addcontentsline{toc}{section}{Introduction}
-
-\tk\ is a GUI (graphical user-interface) library for the \tcl\ language.
-Normally, \tk\ is controlled from \tcl. The purpose of the \camltk\
-interface is to provide a \caml\ library to control \tk\ from \caml\
-programs. Thus, \tk\ can be used to program user-interfaces in \caml\
-without knowledge of the \tcl\ language.
-
-\section*{Installation}
-\addcontentsline{toc}{section}{Installation}
-
-\begin{itemize}
-\item This release runs only on Unix systems.
-\item You need Caml Light 0.7.
-\item You need to have \tcl\ and \tk\ installed. This release requires that
-you have installed the includes and libraries, and \wish.
-This release has been tested with \tcl\ 7.3 and \tk\ 3.6, but {\bf not} with
-beta versions of \tk\ 4.0.
-\end{itemize} 
-
-\begin{htmlonly}
-Check 
-\htmladdnormallink{here}
-                  {http://pauillac.inria.fr/\%7Erouaix/camltk-porting.html}
-for problems reported since the distribution.
-\end{htmlonly}
-
-\section*{This documentation}
-\addcontentsline{toc}{section}{This documentation}
-
-{\bf The present documentation is still sketchy, and some basic background
-about toolkits, event-driven programming, and \tk\ is assumed.}
-Documentation for \tk\ is currently available in \cite{ouster94},
-\cite{welch94}, and in the {\tt man} pages of the \tk\ distribution.
-What you will find here is:
-\begin{description}
-\item[The user's manual] : a short tutorial describing how to write \caml\
-programs using the \tk\ interface and how to compile them. 
-\item[The implementor's manual] : describing how the interface library is
-generated from a high-level description. This part is of interest mainly for
-expert \tk\ users who wish to extend the interface to support more
-functions, more widgets, or simply to fix bugs in test versions.
-\item[The Tentative reference manual] : the collection of interface files
-from the library.
-\end{description}
-
-The \camltk\ distribution also includes a first shot at a \caml\ browser,
-an {\em hypertext} tool that may help in finding out the types of functions
-available in the library as well as the type definitions, 
-
-\section*{Bug reports}
-\addcontentsline{toc}{section}{Bug reports}
-
-Before reporting a bug, please check the \verb|KnownBugs| file in the
-\verb|doc| directory of the distribution.
-Please report problems and bugs directly to \verb|Francois.Rouaix@inria.fr|
-instead of \caml\ mailing lists.
-Don't hesitate to make comments and suggestions, or ask questions.
-Contributions (description of missing stuff) are welcome.
-
-\section*{Acknowledgments}
-Thanks to Loic Prylli \verb|<Loic.Prylli@lip.ens-lyon.fr>| \newline
-      and Christophe Raffalli \verb|<raffalli@cs.chalmers.se>|
-for bug reports.
-
-\include{user}
-\include{impl}
-
-% Not included in html version, by command line option
-\include{reference}
-
-\begin{htmlonly}
-\chapter{Reference manual}
-{\Large WARNING: The on-line reference manual corresponds to the version
-being developped NOW. It may not be accurate for the last released version}
-
-\htmladdnormallink{This}{/bin/psearch/doc-camltk/library}
-is the on-line version.
-\end{htmlonly}
-
-\bibliography{tk}
-\bibliographystyle{plain}
-\appendix
-\include{bnf}
-\end{document}
-
+\input chapeau.tex
