@@ -25,7 +25,7 @@ value regexp: string -> regexp
 -          [\1    ] the text matched by the first [\(...\)] expression
                     ([\2] for the second expression, etc)
 -          [\b    ] matches word boundaries
--          [\^, \$] quotes special characters. *)
+-          [\     ] quotes special characters. *)
   and regexp_case_fold: string -> regexp;;
         (* Same as [regexp], but the compiled expression will match text
            in a case-insensitive way: uppercase and lowercase letters will
@@ -35,7 +35,8 @@ value regexp: string -> regexp
 
 value string_match: regexp -> string -> int -> bool = 3 "str_string_match"
         (* [string_match r s start] tests whether the characters in [s]
-           starting at position [start] match the regular expression [r]. *)
+           starting at position [start] match the regular expression [r].
+           The first character of a string has position [0], as usual. *)
   and search_forward: regexp -> string -> int -> int = 3 "str_search_forward"
         (* [search_forward r s start] searchs the string [s] for a substring
            matching the regular expression [r]. The search starts at position
