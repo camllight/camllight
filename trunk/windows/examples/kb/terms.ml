@@ -5,7 +5,7 @@ type term = Var of int
 
 let rec vars = function
     Var n -> [n]
-  | Term(_,L) -> vars_of_list L
+  | Term(_,l) -> vars_of_list l
 and vars_of_list = function
     [] -> []
   | t::r -> union (vars t) (vars_of_list r)
@@ -21,23 +21,23 @@ let change f = change_rec where rec change_rec =
    |    _    _ -> failwith "change"
 ;;
 
-(* Term replacement replace M u N => M[u<-N] *)
-let replace M u N = reprec(M,u)
+(* Term replacement replace m u n => m[u<-n] *)
+let replace m u n = reprec(m,u)
   where rec reprec = function
-    _, [] -> N
+    _, [] -> n
   | Term(oper,sons), (n::u) ->
-             Term(oper, change (fun P -> reprec(P,u)) sons n)
+             Term(oper, change (fun p -> reprec(p,u)) sons n)
   | _ -> failwith "replace"
 ;;
 
 (* matching = - : (term -> term -> subst) *)
 let matching term1 term2 =
   let rec match_rec subst = fun
-      (Var v) M ->
+      (Var v) m ->
         if mem_assoc v subst then
-          if M = assoc v subst then subst else failwith "matching"
+          if m = assoc v subst then subst else failwith "matching"
         else
-          (v,M) :: subst
+          (v,m) :: subst
     | (Term(op1,sons1)) (Term(op2,sons2)) ->
 	if op1 = op2 then it_list2 match_rec subst sons1 sons2
                      else failwith "matching"
@@ -97,10 +97,10 @@ let rec pretty_term = function
                      do_list (fun t -> print_string ","; pretty_term t) lt;
                      print_string ")")
 and pretty_close = function
-    Term(oper, _) as M ->
+    Term(oper, _) as m ->
       if mem oper INFIXES then
-        (print_string "("; pretty_term M; print_string ")")
-      else pretty_term M
-  | M -> pretty_term M
+        (print_string "("; pretty_term m; print_string ")")
+      else pretty_term m
+  | m -> pretty_term m
 ;;
 

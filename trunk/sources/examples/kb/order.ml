@@ -32,7 +32,7 @@ let mult_ext order = function
       begin match diff_eq (eq_ord order) (sons1,sons2) with
            ([],[]) -> Equal
          | (l1,l2) ->
-              if for_all (fun N -> exists (fun M -> order(M,N)=Greater) l1) l2
+              if for_all (fun n -> exists (fun m -> order(m,n)=Greater) l1) l2
               then Greater else NotGE
       end
   | _ -> failwith "mult_ext"
@@ -40,17 +40,17 @@ let mult_ext order = function
 
 (* lexicographic extension of order *)
 let lex_ext order = function
-    (Term(_,sons1) as M), (Term(_,sons2) as N) ->
+    (Term(_,sons1) as m), (Term(_,sons2) as n) ->
       let rec lexrec = function
         ([] , []) -> Equal
       | ([] , _ ) -> NotGE
       | ( _ , []) -> Greater
       | (x1::l1, x2::l2) ->
           match order (x1,x2) with
-            Greater -> if for_all (fun N' -> gt_ord order (M,N')) l2 
+            Greater -> if for_all (fun n' -> gt_ord order (m,n')) l2 
                        then Greater else NotGE
           | Equal -> lexrec (l1,l2)
-          | NotGE -> if exists (fun M' -> ge_ord order (M',N)) l1 
+          | NotGE -> if exists (fun m' -> ge_ord order (m',n)) l1 
                      then Greater else NotGE in
       lexrec (sons1, sons2)
   | _ -> failwith "lex_ext"
@@ -58,22 +58,22 @@ let lex_ext order = function
 
 (* recursive path ordering *)
 let rpo op_order ext = rporec
-  where rec rporec (M,N) =
-    if M=N then Equal else 
-      match M with
+  where rec rporec (m,n) =
+    if m=n then Equal else 
+      match m with
           Var m -> NotGE
         | Term(op1,sons1) ->
-            match N with
+            match n with
                 Var n ->
-                  if occurs n M then Greater else NotGE
+                  if occurs n m then Greater else NotGE
               | Term(op2,sons2) ->
                   match (op_order op1 op2) with
                       Greater ->
-                        if for_all (fun N' -> gt_ord rporec (M,N')) sons2
+                        if for_all (fun n' -> gt_ord rporec (m,n')) sons2
                         then Greater else NotGE
                     | Equal ->
-                        ext rporec (M,N)
+                        ext rporec (m,n)
                     | NotGE ->
-                        if exists (fun M' -> ge_ord rporec (M',N)) sons1
+                        if exists (fun m' -> ge_ord rporec (m',n)) sons1
                         then Greater else NotGE
 ;;

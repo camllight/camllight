@@ -10,12 +10,12 @@ let fold f = fold_rec where rec fold_rec a1 = function
 
 let try_find f = try_find_rec where rec try_find_rec = function
      []  -> failwith "try_find"
-  | a::L -> try f a with Failure _ -> try_find_rec L
+  | a::l -> try f a with Failure _ -> try_find_rec l
 ;;
 
 let partition p = part_rec where rec part_rec = function
      []  -> [],[]
-  | a::L -> let (pos,neg) = part_rec L in
+  | a::l -> let (pos,neg) = part_rec l in
               if p a then  a::pos, neg else pos, a::neg
 ;;
 
