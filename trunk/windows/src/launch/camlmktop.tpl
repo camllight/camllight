@@ -11,8 +11,9 @@ ccopt=""
 output=camltop.out
 
 perv="baltree bool char eq exc fchar filename float fstring fvect \
-    genlex hashtbl int io iparsing lexing list map obj pair parsing printexc \
-    printf queue random ref set sort stack stream string toplevel vect"
+    gc genlex hashtbl int io iparsing lexing list map obj pair parsing \
+    printexc printf queue random ref set sort stack stream string \
+    toplevel vect"
 
 while :; do
   case $1 in
