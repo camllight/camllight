@@ -89,7 +89,7 @@ let get_num_of_exn (name, stamp) =
         make_vect (2 * vect_length !tag_exn_table) unknown_exn_name in
       blit_vect !tag_exn_table 0
                 new_tag_exn_table 0
-                (vect_length !tag_exn_table - 1);
+                (vect_length !tag_exn_table);
       tag_exn_table := new_tag_exn_table
     end;
     (!tag_exn_table).(c) <- (name, stamp);
