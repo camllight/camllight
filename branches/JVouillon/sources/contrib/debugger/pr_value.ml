@@ -129,16 +129,16 @@ and print_concrete_type prio obj cstr ty ty_list =
         filter (ty_res, ty);
         match constr.info.cs_kind with
           Constr_constant ->
-            output_constr std_out constr
+            print_constr constr
         | Constr_regular ->
             if prio > 1 then print_string "(";
-            output_constr std_out constr;
+            print_constr constr;
             print_string " ";
             print_val 2 (value_nth_field obj 0) ty_arg;
             if prio > 1 then print_string ")"
         | Constr_superfluous n ->
             if prio > 1 then print_string "(";
-            output_constr std_out constr;
+            print_constr constr;
             print_string " (";
             print_val_list 1 obj (filter_product n ty_arg);
             print_string ")";
@@ -152,7 +152,7 @@ and print_concrete_type prio obj cstr ty ty_list =
   | Record_type label_list ->
       print_string "{";
       let print_field lbl =
-        output_label std_out lbl;
+        print_label lbl;
         print_string "=";
         let (ty_res, ty_arg) =
           type_pair_instance (lbl.info.lbl_res, lbl.info.lbl_arg) in

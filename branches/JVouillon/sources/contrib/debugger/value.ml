@@ -29,7 +29,7 @@ let float_of_value v =
     let f = copy_obj v in
       if (obj_tag f) != Double_tag then
       	invalid_arg "float_of_value";
-      (magic_obj f: float)
+      f
   with
     Invalid_argument _ -> invalid_arg "float_of_value";;
 
@@ -38,6 +38,6 @@ let string_of_value v =
     let f = copy_obj v in
       if (obj_tag f) != String_tag then
       	invalid_arg "string_of_value";
-      (magic_obj f: string)
+      f
   with
     Invalid_argument _ -> invalid_arg "string_of_value";;

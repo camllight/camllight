@@ -1,6 +1,6 @@
 (****************** Low level communication with the runtime ***************)
 
-#open "obj";;
+
 #open "value";;
 #open "unix";;
 #open "primitives";;
@@ -83,9 +83,6 @@ value get_local : int -> VALUE;;
 (* Get a global variable. *)
 value get_global : int -> VALUE;;
 
-(* Set a global variable to the invalid value, to flag it as uninitialized *)
-value mark_global_uninitialized : int -> unit;;
-
 (* Get the value of the accumulator. *)
 value get_accu : unit -> VALUE;;
 
@@ -94,7 +91,7 @@ value get_obj : VALUE -> OBJECT;;
 
 (* Copy an object from the program memory space to the debugger one. *)
 (* The object must be unstructured (so as not be traversed by the garbage collector). *)
-value copy_obj : VALUE -> obj;;
+value copy_obj : VALUE -> 'a;;
 
 (* Return the adress of the code of the given closure. *)
 value get_closure_code : VALUE -> int;;
