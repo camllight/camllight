@@ -4,11 +4,31 @@ let version = "$Id$"
 ;;
 
 (* 
+ * convert an integer to an absolute index 
+*)
+let abs_index n =
+  TextIndex (LineChar(0,0), [CharOffset n])
+;;
+
+let InsertMark =
+  TextIndex(Mark "insert", [])
+;;
+
+let CurrentMark =
+  TextIndex(Mark "current", [])
+;;
+
+let TextEnd =
+  TextIndex(End, [])
+;;
+
+
+(* 
  * Link a scrollbar and a text widget 
 *)
 let scroll_link sb tx =
   text__configure tx [YScrollCommand (scrollbar__set sb)];
-  scrollbar__configure sb [ScrollCommand (text__yview_scroll tx)]
+  scrollbar__configure sb [ScrollCommand (text__yview tx)]
 ;;
 
 
@@ -17,11 +37,15 @@ let scroll_link sb tx =
  * sometimes using the insertion mark. It is a pain to add more
  * compatible bindings. We do our own.
  *)
-let page_up tx   =  text__yview_scroll tx (ScrollPage (-1))
-and page_down tx =  text__yview_scroll tx (ScrollPage 1)
-and line_up tx   =  text__yview_scroll tx (ScrollUnit (-1))
-and line_down tx =  text__yview_scroll tx (ScrollUnit 1)
+let page_up tx   =  text__yview tx (ScrollPage (-1))
+and page_down tx =  text__yview tx (ScrollPage 1)
+and line_up tx   =  text__yview tx (ScrollUnit (-1))
+and line_down tx =  text__yview tx (ScrollUnit 1)
+and top tx = text__yview_index tx (TextIndex (LineChar(0,0),[]))
+and bottom tx = text__yview_index tx TextEnd
 ;;
+
+(* We use Mod1 instead of Meta or Alt *)
 
 let init () = 
   do_list (function ev ->
@@ -29,37 +53,56 @@ let init () =
       	       	  (BindSetBreakable ([Ev_Widget], 
       	       	       	       	 (fun ei -> page_up ei.Ev_Widget; break()))))
 	   [
-	    [[], XKey "BackSpace"];
-	    [[], XKey "Delete"];
-	    [[], XKey "Prior"];
-	    [[], XKey "b"];
-	    [[Meta], XKey "v"]
+	    [[], KeyPressDetail "BackSpace"];
+	    [[], KeyPressDetail "Delete"];
+	    [[], KeyPressDetail "Prior"];
+	    [[], KeyPressDetail "b"];
+	    [[Mod1], KeyPressDetail "v"]
 	   ];
   do_list (function ev ->
       	     tag_bind "TEXT_RO" ev 
       	       	  (BindSetBreakable ([Ev_Widget], 
       	       	       	       	 (fun ei -> page_down ei.Ev_Widget; break()))))
 	   [
-	    [[], XKey "space"];
-	    [[], XKey "Next"];
-	    [[Control], XKey "v"]
+	    [[], KeyPressDetail "space"];
+	    [[], KeyPressDetail "Next"];
+	    [[Control], KeyPressDetail "v"]
 	   ];
   do_list (function ev ->
       	     tag_bind "TEXT_RO" ev 
       	       	  (BindSetBreakable ([Ev_Widget], 
       	       	       	       	 (fun ei -> line_up ei.Ev_Widget; break()))))
 	   [
-	    [[], XKey "Up"];
-	    [[Meta], XKey "z"]
+	    [[], KeyPressDetail "Up"];
+	    [[Mod1], KeyPressDetail "z"]
 	   ];
   do_list (function ev ->
       	     tag_bind "TEXT_RO" ev 
       	       	  (BindSetBreakable ([Ev_Widget], 
       	       	       	       	 (fun ei -> line_down ei.Ev_Widget; break()))))
 	   [
-	    [[], XKey "Down"];
-	    [[Control], XKey "z"]
+	    [[], KeyPressDetail "Down"];
+	    [[Control], KeyPressDetail "z"]
+	   ];
+
+  do_list (function ev ->
+      	     tag_bind "TEXT_RO" ev 
+      	       	  (BindSetBreakable ([Ev_Widget], 
+      	       	       	       	 (fun ei -> top ei.Ev_Widget; break()))))
+	   [
+	    [[], KeyPressDetail "Home"];
+	    [[Mod1], KeyPressDetail "less"];
+	   ];
+
+  do_list (function ev ->
+      	     tag_bind "TEXT_RO" ev 
+      	       	  (BindSetBreakable ([Ev_Widget], 
+      	       	       	       	 (fun ei -> bottom ei.Ev_Widget; break()))))
+	   [
+	    [[], KeyPressDetail "End"];
+	    [[Mod1], KeyPressDetail "greater"];
 	   ]
+
 ;;
 
 let navigation_keys tx =
@@ -78,17 +121,86 @@ let new_scrollable_text top options navigation =
     f, tx
 ;;
 
-(* 
- * convert an integer to an absolute index 
-*)
-let abs_index n =
-  TextIndex (TI_LineChar(0,0), [CharOffset n])
+(*
+ * Searching
+ *)
+
+let topsearch =
+  let newid =
+    let cnter = ref 0 in
+    (fun () -> incr cnter; "search"^string_of_int !cnter) in
+  function t ->
+    let current_index = ref (TextIndex(LineChar(0,0), [])) in
+    let top = toplevelw__create (support__new_toplevel_widget (newid())) [] in
+    let f = frame__create top [] in
+      let m = label__create f [Text "Search pattern"]
+      and e = entry__create f [Relief Sunken] in
+    let hgroup = frame__create top []
+    and bgroup = frame__create top [] in
+    let fdir = frame__create hgroup [] 
+    and fmisc = frame__create hgroup [] 
+    and direction = textvariable__new ()
+    and exactv = textvariable__new ()
+    and casev = textvariable__new () in
+    let forw = radiobutton__create fdir 
+      	   [Text "Forward"; Variable direction; Value "f"]
+    and backw = radiobutton__create fdir
+      	   [Text "Backward"; Variable direction; Value "b"]
+    and exact = checkbutton__create fmisc
+      	   [Text "Exact match"; Variable exactv]
+    and case = checkbutton__create fmisc
+      	   [Text "Fold Case"; Variable casev] 
+    and searchb = button__create bgroup [Text "Search"]
+    and contb = button__create bgroup [Text "Continue"]
+    and dismissb = button__create bgroup 
+      	[Text "Dismiss"; 
+         Command (fun () -> text__tag_delete t ["search"]; destroy top)] in
+
+      radiobutton__invoke forw;
+      pack [m][Side Side_Left];
+      pack [e][Side Side_Right; Fill Fill_X; Expand true];
+      pack [forw; backw] [Anchor W];
+      pack [exact; case] [Anchor W];
+      pack [fdir; fmisc] [Side Side_Left; Anchor Center];
+      pack [searchb; contb; dismissb] [Side Side_Left; Fill Fill_X];
+      pack [f;hgroup;bgroup] [Fill Fill_X; Expand true];
+   let search cont = fun () ->
+     let opts = ref [] in
+     if textvariable__get direction = "f" then
+      	opts := Forwards :: !opts
+     else opts := Backwards :: !opts ;
+     if textvariable__get exactv = "1" then
+       opts := Exact :: !opts;
+     if textvariable__get casev = "1" then
+       opts := Nocase :: !opts;
+     try
+       let i = text__search t !opts (entry__get e)
+      	  (if cont then !current_index else 
+      	   if textvariable__get direction = "f" then
+      	      TextIndex(LineChar(0,0), [])
+	   else TextEnd)
+	  (if textvariable__get direction = "f" then TextEnd 
+      	   else TextIndex(LineChar(0,0), [])) in
+       let found = TextIndex (i, []) in
+       	 current_index := TextIndex(i, [CharOffset 1]);
+	 text__tag_delete t ["search"];
+	 text__tag_add t "search" found (TextIndex (i, [WordEnd]));
+	 text__tag_configure t "search" 
+      	       	[Relief Raised; BorderWidth (Pixels 1);
+      	       	 Background Red];
+	 text__see t found;
+     with
+       Invalid_argument _ -> bell__ring() in
+    
+   bind e [[], KeyPressDetail "Return"] 
+      	 (BindSet ([], fun _ -> search false ()));
+   button__configure searchb [Command (search false)];
+   button__configure contb [Command (search true)];
+   focus__set e
 ;;
 
-let InsertMark =
-  TextIndex(TI_Mark "insert", [])
-;;
-
-let CurrentMark =
-  TextIndex(TI_Mark "current", [])
+let addsearch t =
+  bind t
+    [[Control], KeyPressDetail "s"]
+    (BindSet ([], (fun _ -> topsearch t)))
 ;;

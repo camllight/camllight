@@ -14,16 +14,15 @@ TKLIBDIR=/usr/local/lib/tk/lib
 TKLIBS=-ltk -ltcl -lX11
 
 TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
-	   -lcaml -lcamltk $(TKLIBS)
+	   -lcamltk4 $(TKLIBS)
 
 # Use 4.0
-COMPFLAGS=-W -g -I ../lib
+COMPFLAGS=-W -i -g -I ../lib
 LINKFLAGS= -custom $(PROFILING)
 
 OBJS= frx_widget.zo frx_font.zo frx_entry.zo frx_text.zo \
-      frx_listbox.zo frx_req.zo frx_toplevel.zo frx_lbutton.zo \
-      frx_fillbox.zo frx_focus.zo
-
+      frx_listbox.zo frx_req.zo frx_fillbox.zo frx_focus.zo
+UNUSED=frx_toplevel.zo frx_lbutton.zo
 
 all: libfrx.zo
 
@@ -53,6 +52,7 @@ depend:
 ### DO NOT DELETE THIS LINE
 frx_font.zo: frx_font.zi 
 frx_lbutton.zo: frx_lbutton.zi 
-frx_req.zo: frx_listbox.zo frx_entry.zo frx_widget.zi 
+frx_req.zo: frx_listbox.zo frx_widget.zi 
+frx_text.zo: frx_entry.zo 
 frx_toplevel.zo: frx_toplevel.zi 
 frx_widget.zo: frx_widget.zi 
