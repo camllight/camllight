@@ -1,6 +1,8 @@
 Caml Light 0.71:
 ---------------
 
+* French version for the Macintosh (thanks to Jerome Kasparian).
+
 * Port to MS Windows (3.1, 95, NT).
 
 * Parsing: better handling of optional ";", concatenations (@, ^) now
