@@ -7,7 +7,7 @@ CAMLYACC=camlyacc -v
 CAMLLEX=camllex
 CAMLDEP=../../../src/tools/camldep
 
-all: support.zo textvariable.zo camltk.zi camltk.o protocol1.zo protocol2.zo
+all: support.zo textvariable.zo camltk.zi libcamltk.a protocol1.zo protocol2.zo
 
 protocol1.zo: protocol1.ml
 	rm -f protocol.ml
