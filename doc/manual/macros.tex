@@ -6,6 +6,7 @@
 \def\nmth#1#2#3{${\it#1}_{#2}^{#3}$}
 \def\optvar#1{[\var{#1}\/]}
 \def\event{$\bowtie$}
+\def\fromoneto#1#2{$#1 = 1, \ldots, #2$}
 
 % Pour avoir les exposants sur la ligne au-dessus (???)
 
@@ -61,17 +62,32 @@
 \def\troubleshooting{\trivlist \item[\hskip\labelsep {\bf Troubleshooting.}]}
 \def\endtroubleshooting{\endtrivlist}
 
+\newtheorem{gcrule}{Rule}
+
 % Pour les tables de priorites et autres tableaux a deux colonnes, encadres
 
-\def\tableau#1#2{%
+\def\tableau#1#2#3{%
 \begin{center}
-\begin{tabular}{|l|l|}
+\begin{tabular}{#1}
 \hline
-#1 & #2 \\
+#2 & #3 \\
 \hline
 }
 \def\endtableau{\hline\end{tabular}\end{center}}
 \def\entree#1#2{#1 & #2 \\}
+
+% Pour la table des operateurs (trois colonnes, la troisieme verbeuse)
+
+\def\tableauoperateurs{%
+\begin{center}
+\begin{tabular}{|l|l|p{10cm}|}
+\hline
+Operator & Associated & Behavior in the default environment \\
+         & identifier &                                     \\
+\hline
+}
+\def\endtableauoperateurs{\hline\end{tabular}\end{center}}
+\def\entreeoperateur#1#2#3{#1 & #2 & #3 \\}
 
 % L'environnement option
 

@@ -104,8 +104,8 @@ has evolved. Some familiarity with Lisp is assumed.
 The manual for the original Caml system, from which Caml Light
 has evolved.  
 
-\item Michael J.\ Gordon, Arthur J.\ Milner and Christopher P.\
-Wadsworth. {\em Edinburgh LCF.} Lecture Notes in Computer Science
+\item Michael J.\ Gordon, Arthur J.\ Milner and Christopher P.\ Wadsworth.
+{\em Edinburgh LCF.} Lecture Notes in Computer Science
 volume~78, Springer-Verlag, 1979.
 
 This is the first published description of the ML language, at the

@@ -49,6 +49,7 @@ the conditions given in the "COPYRIGHT" file.
 
 The complete Caml Light distribution resides on the machine
 "ftp.inria.fr". The distribution files can be transferred by anonymous FTP:
+\begin{latexonly}
 \begin{center}
 \begin{tabular}{ll}
 Host:       & "ftp.inria.fr" (Internet address "192.93.2.54") \\
@@ -58,3 +59,13 @@ Directory:  & "lang/caml-light" \\
 Files:      & see the index in file "README"
 \end{tabular}
 \end{center}
+\end{latexonly}
+\begin{rawhtml}
+<blockquote>
+<b>Host:</b> <tt>ftp.inria.fr</tt> (Internet address <tt>192.93.2.54</tt>)<br>
+<b>Login name:</b> <tt>anonymous</tt> <br>
+<b>Password:</b> your e-mail address <br>
+<b>Directory:</b> <tt>lang/caml-light</tt><br>
+<b>Files:</b> see the index in file <tt>README</tt>
+</blockquote>
+\end{rawhtml}
