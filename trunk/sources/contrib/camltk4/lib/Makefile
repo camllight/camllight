@@ -4,7 +4,7 @@ UNIXDIR=../../libunix
 CAMLC=camlc
 CAMLCOMP=$(CAMLC) -c
 CPP=/lib/cpp -P -Dunix
-COMPFLAGS=-W -O fast -g -I $(UNIXDIR) -I $(SUPPORTDIR) $(PROFILING)
+COMPFLAGS=-O fast -g -I $(UNIXDIR) -I $(SUPPORTDIR) $(PROFILING)
 LINKFLAGS=-g $(PROFILING)
 CAMLYACC=camlyacc -v
 CAMLLEX=camllex
@@ -19,8 +19,10 @@ TKLIBS=-ltk -ltcl -lX11
 TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
 	   $(SUPPORTDIR)/camltk.o $(TKLIBS)
 
-SUPPORT=../libsupport/support.zo ../libsupport/protocol.zo \
-   ../libsupport/textvariable.zo
+SUPPORT=../libsupport/hashtblc.zo \
+        ../libsupport/support.zo ../libsupport/protocol.zo \
+        ../libsupport/textvariable.zo \
+	../libsupport/optionmenu.zo
 
 # two-process protocol not supported anymore
 all : tklib.zo toplevels
@@ -75,7 +77,6 @@ depend: tk.ml
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
 bell.zi: tk.zo 
-bitmapeditor.zi: tk.zo 
 button.zi: tk.zo 
 canvas.zi: tk.zo 
 checkbutton.zi: tk.zo 
@@ -102,12 +103,11 @@ scale.zi: tk.zo
 scrollbar.zi: tk.zo 
 selection.zi: tk.zo 
 text.zi: tk.zo 
+tkwait.zi: tk.zo 
 toplevelw.zi: tk.zo 
-wait.zi: tk.zo 
 winfo.zi: tk.zo 
 wm.zi: tk.zo 
 bell.zo: bell.zi tk.zo 
-bitmapeditor.zo: bitmapeditor.zi tk.zo 
 button.zo: button.zi tk.zo 
 canvas.zo: canvas.zi tk.zo 
 checkbutton.zo: checkbutton.zi tk.zo 
@@ -135,7 +135,7 @@ scrollbar.zo: scrollbar.zi tk.zo
 selection.zo: selection.zi tk.zo 
 text.zo: text.zi tk.zo 
 tkgen.zo: tkgen.zi 
+tkwait.zo: tkwait.zi tk.zo 
 toplevelw.zo: toplevelw.zi tk.zo 
-wait.zo: wait.zi tk.zo 
 winfo.zo: winfo.zi tk.zo 
 wm.zo: wm.zi tk.zo 
