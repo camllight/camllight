@@ -96,7 +96,7 @@ SHELL=/bin/sh
 ### End of configuration section
 
 SUBDIRS=libunix libgraph debugger libnum libstr mletags \
-  caml-tex camlmode lorder profiler camltk camltk4 camlsearch
+  caml-tex camlmode lorder profiler camltk4 camlsearch
 
 DEFINES=\
   CC='$(CC)' \
