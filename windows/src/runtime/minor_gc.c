@@ -132,11 +132,11 @@ void realloc_ref_table ()
   if (ref_table_limit == ref_table_threshold){
     gc_message ("ref_table threshold crossed\n", 0);
     ref_table_limit = ref_table_end;
-    force_minor_gc ();
+    urge_major_slice ();
   }else{                                       /* This will never happen. */
     asize_t sz;
     asize_t cur_ptr = ref_table_ptr - ref_table;
-                                                  Assert (force_minor_flag);
+                                                 Assert (force_major_slice);
                                                    Assert (something_to_do);
     ref_table_reserve += 1024;
     sz = (ref_table_size + ref_table_reserve) * sizeof (value *);

@@ -238,6 +238,7 @@ void major_collection_slice ()
   stat_major_words += allocated_words;
   allocated_words = 0;
   extra_heap_memory = 0;
+  force_major_slice = 0;
 }
 
 /* The minor heap must be empty when this function is called. */
