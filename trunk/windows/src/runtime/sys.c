@@ -218,6 +218,11 @@ void sys_init(argv)
   Field(global_data, SYS__MAX_VECT_LENGTH) = Val_long(Max_wosize);
   Field(global_data, SYS__MAX_STRING_LENGTH) =
     Val_long(Bsize_wsize (Max_wosize) - 1);
+#ifdef CAML_SIXTYFOUR
+  Field(global_data, SYS__WORD_SIZE) = Val_long (64);
+#else
+  Field(global_data, SYS__WORD_SIZE) = Val_long (32);
+#endif
 }
 
 /* Handling of user interrupts */
