@@ -1,4 +1,4 @@
-\mysection{Expressions}
+\section{Expressions}
 \ikwd{in\@\verb`in`|see{\verb`let`}}
 \ikwd{and\@\verb`and`|see{\verb`let`, \verb`type`, \verb`exception`, \verb`value`}}
 \ikwd{rec\@\verb`rec`|see{\verb`let`}}
@@ -89,27 +89,27 @@ precedence come first.
 \ikwd{try\@\verb`try`}%
 \ikwd{let\@\verb`let`}%
 \ikwd{prefix\@\verb`prefix`}%
-\begin{precedences}
-\prec{"!"}{--}
-\prec{".   .("}{--}
-\prec{function application}{right}
-\prec{constructor application}{--}
-\prec{"-   -." (prefix)}{--}
-\prec{"mod"}{left}
-\prec{"*   *.   /   /."}{left}
-\prec{"+   +.   -   -."}{left}
-\prec{"::"}{right}
-\prec{{\tt \char64} "^"}{right}
-\prec{comparisons ("=  ==  < " etc.)}{left}
-\prec{"not"}{--}
-\prec{"&"}{left}
-\prec{"or"}{left}
-\prec{","}{--}
-\prec{"<-   :="}{right}
-\prec{"if"}{--}
-\prec{";"}{right}
-\prec{"let" "match" "fun" "function" "try"}{--}
-\end{precedences}
+\begin{tableau}{Construction or operator}{Associativity}
+\entree{"!"}{--}
+\entree{".   .("}{--}
+\entree{function application}{right}
+\entree{constructor application}{--}
+\entree{"-   -." (prefix)}{--}
+\entree{"mod"}{left}
+\entree{"*   *.   /   /."}{left}
+\entree{"+   +.   -   -."}{left}
+\entree{"::"}{right}
+\entree{{\tt \char64} "^"}{right}
+\entree{comparisons ("=  ==  < " etc.)}{left}
+\entree{"not"}{--}
+\entree{"&"}{left}
+\entree{"or"}{left}
+\entree{","}{--}
+\entree{"<-   :="}{right}
+\entree{"if"}{--}
+\entree{";"}{right}
+\entree{"let" "match" "fun" "function" "try"}{--}
+\end{tableau}
 
 \subsection{Simple expressions}
 
@@ -134,9 +134,9 @@ identifier, as described in section~\ref{s:names}.
 The expressions @'(' expr ')'@ and @'begin' expr 'end'@ have the same
 value as @expr@. Both constructs are semantically equivalent, but it
 is good style to use @'begin' \ldots 'end'@ inside control structures:
-$$
-\tt if~ \ldots ~then~begin~\ldots~;~\ldots~end~else~begin~\ldots~;~\ldots~end
-$$
+\begin{alltt}
+        if \ldots then begin \ldots ; \ldots end else begin \ldots ; \ldots end
+\end{alltt}
 and @'(' \ldots ')'@ for the other grouping situations.
 
 Parenthesized expressions can contain a type constraint, as in @'('

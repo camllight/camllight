@@ -1,4 +1,4 @@
-\mysection{Patterns}
+\section{Patterns}
 \ikwd{as\@\verb`as`}
 
 \begin{syntax}
@@ -22,19 +22,13 @@ The table below shows the relative precedences and associativity of
 operators and non-closed pattern constructions. The constructions with
 higher precedences come first.
 \ikwd{as\@\verb`as`}
-\begin{center}
-\begin{tabular}{|l|l|}
-\hline
-Operator & Associativity \\
-\hline
-Constructor application & -- \\
-\verb"::" & right \\
-\verb","  & -- \\
-\verb"|"  & left \\
-\verb"as" & -- \\
-\hline
-\end{tabular}
-\end{center}
+\begin{tableau}{Operator}{Associativity}
+\entree{Constructor application}{--}
+\entree{"::"}{right}
+\entree{","}{--}
+\entree{"|"}{left}
+\entree{"as"}{--}
+\end{tableau}
 
 Patterns are templates that allow selecting data structures of a
 given shape, and binding identifiers to components of the data

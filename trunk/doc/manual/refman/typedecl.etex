@@ -1,4 +1,4 @@
-\mysection{Global definitions}
+\section{Global definitions}
 
 This section describes the constructs that bind global identifiers
 (value variables, value constructors, type constructors, record

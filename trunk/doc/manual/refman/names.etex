@@ -1,4 +1,4 @@
-\mysection{Global names} \label{s:names}
+\section{Global names} \label{s:names}
 
 Global names are used to denote value variables, value constructors
 (constant or non-constant), type constructors, and record labels.
