@@ -1,12 +1,27 @@
 # WARNING: 
 
-MKF=-f ../../Makefile.conf -f Makefile LIBDIR=$(LIBDIR) BINDIR=$(BINDIR)
+MKF=\
+  CC='$(CC)' \
+  OPTS='$(OPTS)' \
+  CPP='$(CPP)' \
+  RANLIBTEST='$(RANLIBTEST)' \
+  RANLIB='$(RANLIB)' \
+  BINDIR='$(BINDIR)' \
+  LIBDIR='$(LIBDIR)' \
+  MANDIR='$(MANDIR)' \
+  X11_INCLUDES='$(X11_INCLUDES)' \
+  TCLINCLDIR='$(TCLINCLDIR)' \
+  TKINCLDIR='$(TKINCLDIR)' \
+  TKLIBDIR='$(TKLIBDIR)' \
+  TCLLIBDIR='$(TCLLIBDIR)'
 
-all: 
+LIBMKF=-f modules -f Makefile $(MKF)
+
+all:
 	cd libsupport; $(MAKE) $(MKF)
 	cd compiler; $(MAKE) $(MKF)
 	compiler/tkcompiler
-	cd lib; $(MAKE) -f modules $(MKF) depend; $(MAKE) -f modules $(MKF) 
+	cd lib; $(MAKE) $(LIBMKF) depend; $(MAKE) $(LIBMKF) 
 	cd browser; $(MAKE) $(MKF)
 
 EXDIRS=test tktop browser
@@ -19,11 +34,11 @@ examples:
 
 lib: Widgets.src
 	compiler/tkcompiler
-	cd lib; $(MAKE) -f modules $(MKF) depend; $(MAKE) -f modules $(MKF)
+	cd lib; $(MAKE) $(LIBMKF) depend; $(MAKE) $(LIBMKF)
 
 
 install: 
-	cd lib; $(MAKE) -f modules $(MKF) install
+	cd lib; $(MAKE) $(LIBMKF) install
 	cd libsupport; $(MAKE) $(MKF) install
 	cd compiler; $(MAKE) $(MKF) install
 #	cp -p Widgets.src $(LIBDIR)
