@@ -41,6 +41,5 @@ let iter f m =
   | Node(l, b, r, _) ->
       iter l;
       f b.key b.data;
-      do_list (f b.key) b.prev;
       iter r
   in iter m.tree;;
