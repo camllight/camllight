@@ -124,7 +124,7 @@ let char_for_decimal_code lexbuf i =
 #define ACCENTED `\128`-`\159` `\174`-`\175` `\190`-`\191` `\203`-`\207` `\216`-`\217` `\222`-`\223` `\229`-`\239` `\241`-`\244`
 #endif
 #ifdef msdos
-#define ACCENTED `\128`-`\154` `\160`-`\165`
+#define ACCENTED `\128`-`\154` `\160`-`\165` `\192`-`\214` `\216`-`\246` `\248`-`\255`
 #endif
 
 #define SYMBOLS \
