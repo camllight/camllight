@@ -75,58 +75,58 @@ version.ml: version.mlp ../version.h
 ### DO NOT DELETE THIS LINE
 lexer.zi: parser.zi 
 parser.zi: syntax.zo 
-back.zo: prim.zo lambda.zo instruct.zo misc.zo const.zo 
+back.zo: prim.zo lambda.zo const.zo misc.zo instruct.zo 
 buffcode.zo: error.zo 
 builtins.zo: modules.zo globals.zo const.zo 
-clauses.zo: lambda.zo globals.zo types.zo syntax.zo const.zo location.zi \
-    error.zo misc.zo 
-compiler.zo: lexer.zi ty_decl.zo syntax.zo front.zo error.zo misc.zo \
-    parser.zi interntl.zo back.zo emit_phr.zo modules.zo location.zi \
-    pr_decl.zo typing.zo ty_intf.zo 
+clauses.zo: lambda.zo error.zo location.zi const.zo misc.zo syntax.zo \
+    globals.zo types.zo 
+compiler.zo: pr_decl.zo typing.zo parser.zi error.zo modules.zo location.zi \
+    interntl.zo emit_phr.zo misc.zo back.zo front.zo ty_intf.zo syntax.zo \
+    lexer.zi ty_decl.zo 
 config.zo: config.zi 
 const.zo: misc.zo 
-emit_phr.zo: lambda.zo event.zo emitcode.zo labels.zo instruct.zo reloc.zo \
-    buffcode.zo 
-emitcode.zo: lambda.zo event.zo labels.zo reloc.zo config.zi const.zo \
-    prim.zo prim_opc.zo misc.zo instruct.zo opcodes.zo buffcode.zo 
-error.zo: interntl.zo pr_type.zo globals.zo types.zo syntax.zo const.zo \
-    location.zi misc.zo 
-event.zo: modules.zo location.zi lambda.zo syntax.zo 
-front.zo: lambda.zo event.zo trstream.zo globals.zo types.zo syntax.zo \
-    const.zo prim.zo modules.zo error.zo builtins.zo matching.zo misc.zo \
-    tr_env.zo 
+emit_phr.zo: event.zo reloc.zo lambda.zo emitcode.zo buffcode.zo \
+    instruct.zo labels.zo 
+emitcode.zo: prim.zo reloc.zo prim_opc.zo lambda.zo config.zi labels.zo \
+    const.zo misc.zo event.zo instruct.zo buffcode.zo opcodes.zo 
+error.zo: misc.zo syntax.zo pr_type.zo location.zi interntl.zo globals.zo \
+    types.zo const.zo 
+event.zo: syntax.zo lambda.zo modules.zo location.zi 
+front.zo: trstream.zo prim.zo lambda.zo error.zo tr_env.zo matching.zo \
+    modules.zo const.zo misc.zo event.zo syntax.zo globals.zo builtins.zo \
+    types.zo 
 globals.zo: prim.zo const.zo 
 instruct.zo: prim.zo lambda.zo const.zo 
 interntl.zo: misc.zo 
-labels.zo: instruct.zo misc.zo buffcode.zo 
+labels.zo: misc.zo buffcode.zo instruct.zo 
 lambda.zo: prim.zo globals.zo const.zo 
 lexer.zo: lexer.zi parser.zi 
 location.zo: location.zi interntl.zo config.zi 
-main.zo: interntl.zo event.zo version.zo config.zi modules.zo typing.zo \
-    compiler.zo misc.zo 
-matching.zo: clauses.zo lambda.zo globals.zo types.zo syntax.zo const.zo \
-    prim.zo location.zi builtins.zo error.zo misc.zo 
-modules.zo: interntl.zo globals.zo misc.zo const.zo 
-par_aux.zo: modules.zo location.zi error.zo builtins.zo globals.zo misc.zo \
-    syntax.zo const.zo 
-parser.zo: parser.zi primdecl.zo par_aux.zo builtins.zo globals.zo \
-    syntax.zo const.zo 
-pr_decl.zo: pr_type.zo globals.zo misc.zo const.zo 
+main.zo: typing.zo modules.zo interntl.zo config.zi compiler.zo misc.zo \
+    version.zo event.zo 
+matching.zo: clauses.zo prim.zo lambda.zo error.zo location.zi const.zo \
+    misc.zo syntax.zo globals.zo builtins.zo types.zo 
+modules.zo: misc.zo interntl.zo globals.zo const.zo 
+par_aux.zo: error.zo modules.zo location.zi const.zo misc.zo syntax.zo \
+    globals.zo builtins.zo 
+parser.zo: parser.zi primdecl.zo par_aux.zo syntax.zo builtins.zo \
+    globals.zo const.zo 
+pr_decl.zo: misc.zo pr_type.zo globals.zo const.zo 
 pr_type.zo: modules.zo globals.zo types.zo const.zo 
 prim.zo: const.zo 
-prim_opc.zo: prim.zo misc.zo opcodes.zo 
+prim_opc.zo: misc.zo prim.zo opcodes.zo 
 primdecl.zo: prim.zo globals.zo 
 reloc.zo: buffcode.zo const.zo 
 syntax.zo: location.zi globals.zo const.zo 
-tr_env.zo: prim.zo lambda.zo builtins.zo error.zo globals.zo misc.zo \
-    syntax.zo const.zo 
-trstream.zo: prim.zo lambda.zo matching.zo tr_env.zo syntax.zo const.zo 
-ty_decl.zo: globals.zo types.zo syntax.zo const.zo modules.zo builtins.zo \
-    error.zo typing.zo 
-ty_intf.zo: modules.zo error.zo ty_decl.zo globals.zo types.zo const.zo 
-types.zo: modules.zo globals.zo misc.zo const.zo 
-typing.zo: modules.zo error.zo builtins.zo globals.zo misc.zo types.zo \
-    syntax.zo const.zo 
-typing.old.zo: modules.zo error.zo builtins.zo globals.zo misc.zo types.zo \
-    syntax.zo const.zo 
+tr_env.zo: prim.zo lambda.zo error.zo const.zo misc.zo syntax.zo \
+    builtins.zo globals.zo 
+trstream.zo: prim.zo lambda.zo syntax.zo tr_env.zo matching.zo const.zo 
+ty_decl.zo: typing.zo syntax.zo error.zo modules.zo builtins.zo globals.zo \
+    types.zo const.zo 
+ty_intf.zo: ty_decl.zo error.zo modules.zo globals.zo types.zo const.zo 
+types.zo: misc.zo modules.zo globals.zo const.zo 
+typing.zo: error.zo modules.zo const.zo misc.zo syntax.zo globals.zo \
+    builtins.zo types.zo 
+typing.old.zo: error.zo modules.zo const.zo misc.zo syntax.zo globals.zo \
+    builtins.zo types.zo 
 version.zo: interntl.zo 
