@@ -75,30 +75,33 @@ let rec visual_meta visual silent sym =
     util__resizeable t
    with   
     Toplevel -> begin
-	 dialog (new_toplevel_widget "error")
+	 let _ = 
+           dialog (new_toplevel_widget "error")
 	     "Caml Browser Error"
 	     ( "Cannot open module :" ^ sym)
 	     (Predefined "error")
 	     0
-	     ["Ok"];
+	     ["Ok"] in
 	 ()
 	end
    | Desc_not_found -> 
       	if not silent then begin
-	  dialog (new_toplevel_widget "error")
+	  let _ = 
+           dialog (new_toplevel_widget "error")
 	      "Caml Browser Error"
 	      ( sym ^ " is undefined")
 	      (Predefined "error")
 	      0
-	      ["Ok"]; 
+	      ["Ok"]; in
          ()
          end
    | Cannot_find_file filename ->
       begin 
-       dialog (support__new_toplevel_widget "error")
+       let _ = 
+         dialog (support__new_toplevel_widget "error")
       	      "Caml Browser Error"
 	      ("Cannot open " ^ filename )
-	      (Predefined "error") 0 ["Ok"]; 
+	      (Predefined "error") 0 ["Ok"]; in
        ()
       end
 ;;
@@ -139,7 +142,7 @@ let source_editor m =
   function _ ->
     try
     let m = misc__find_in_path m in
-      sys__system_command ("$EDITOR "^m^"&"); ()
+    let _ = sys__system_command ("$EDITOR "^m^"&") in ()
     with
       _ -> ()
 ;;

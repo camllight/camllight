@@ -102,6 +102,7 @@ let CAMLtoTKTextIndex i =
 
 let text_tag_bind widget tag eventsequence action =
   check_widget_class widget Widget_text_table;
+  let _ =
   TkEval [| CAMLtoTKWidget Widget_text_table widget;
             TkToken "tag";
             TkToken "bind";
@@ -116,6 +117,6 @@ let text_tag_bind widget tag eventsequence action =
       let CbId = register_callback widget (WrapEventInfo f what) in
         TkToken ("+camlcb " ^ CbId ^ (WriteEventField what))
   end
-  |];
+  |] in
   ()
 ;;

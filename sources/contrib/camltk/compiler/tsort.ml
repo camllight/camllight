@@ -42,8 +42,7 @@ let add_relation order (succ,pred) =
 
 (* Just add it *)
 let add_element order e =
-  find_entry order e;
-  ()
+  let _ = find_entry order e in ()
 ;;
 
 let sort order =

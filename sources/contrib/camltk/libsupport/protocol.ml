@@ -2,7 +2,7 @@
 #open "camltk";;
 
 let debug = 
- ref (try sys__getenv "CAMLTKDEBUG"; true
+ ref (try let _ = sys__getenv "CAMLTKDEBUG" in true
       with Not_found -> false)
 ;;
 
@@ -89,7 +89,7 @@ let install_cleanup () =
     | _ -> raise (TkError "bad cleanup callback") in
   hashtbl__add callback_naming_table "0" wrapped_remove;
   (* setup general destroy callback *)
-  tcl_eval "bind all <Destroy> {camlcb 0 %W}"
+  let _ = tcl_eval "bind all <Destroy> {camlcb 0 %W}" in ()
 ;;
 
 (* The callback dispatch function *)
@@ -124,7 +124,7 @@ let OpenTkDisplayClass disp cl =
 
 (* Destroy all widgets, thus cleaning up table and exiting the loop *)
 let CloseTk () =
-  tcl_eval "destroy ."; ()
+  let _ = tcl_eval "destroy ." in ()
 ;;
 
 let MainLoop =

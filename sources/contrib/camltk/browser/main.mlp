@@ -31,14 +31,17 @@ let module_panel parent selected_paths =
       true
     with
       Toplevel -> begin
-	 dialog (support__new_toplevel_widget "error")
+	 let _ = dialog (support__new_toplevel_widget "error")
 	     "Caml Browser Error"
 	     ( "Cannot open module: " ^ n)
 	     (Predefined "error")
 	     0
-	     ["Ok"];
+	     ["Ok"] in
          false
-	end
+	end in
+
+  let set_add_module n =
+    let _ = add_module n in ()
 
   and close_module () =
    let sels = listbox__curselection lb in
@@ -54,7 +57,7 @@ let module_panel parent selected_paths =
        Command (fun () -> 
                  open_list_req "Open a module" 
       	       	       	   (modlist__modules_of_path (selected_paths ()))
-      	       	       	   add_module)]
+      	       	       	   set_add_module)]
   and o1 = button__create f
       [Text "Open and View Module"; Relief Raised; 
        Command (fun () -> 
@@ -92,13 +95,15 @@ let path_panel parent =
 	 listbox__insert lb (Number 0) [n];
 	 read_tags n
     with
-      _ -> dialog (support__new_toplevel_widget "error")
+      _ ->
+       let _ =
+         dialog (support__new_toplevel_widget "error")
 	     "Caml Browser Error"
 	     ( "Cannot open directory: " ^ n)
 	     (Predefined "error")
 	     0
-	     ["Ok"];
-	     ()
+	     ["Ok"] in
+       ()
     end in
 
   let selected () =

@@ -332,39 +332,42 @@ type BindAction =
 (* bind: Widget -> (Modifier list * XEvent) list -> BindAction -> unit *)
 
 let bind widget eventsequence action =
-  TkEval [| TkToken "bind";
-      	    TkToken (widget_name widget);
-	    CAMLtoTKEventSequence eventsequence;
-  begin match action with
-     BindRemove -> TkToken ""
-  |  BindSet (what, f) ->
-      let CbId = register_callback widget (WrapEventInfo f what) in
-        TkToken ("camlcb " ^ CbId ^ (WriteEventField what))
-  |  BindExtend (what, f) ->
-      let CbId = register_callback widget (WrapEventInfo f what) in
-        TkToken ("+camlcb " ^ CbId ^ (WriteEventField what))
+  let _ = 
+   TkEval
+     [| TkToken "bind";
+        TkToken (widget_name widget);
+	CAMLtoTKEventSequence eventsequence;
+        begin match action with
+        | BindRemove -> TkToken ""
+        | BindSet (what, f) ->
+            let CbId = register_callback widget (WrapEventInfo f what) in
+            TkToken ("camlcb " ^ CbId ^ (WriteEventField what))
+        | BindExtend (what, f) ->
+            let CbId = register_callback widget (WrapEventInfo f what) in
+            TkToken ("+camlcb " ^ CbId ^ (WriteEventField what))
       
-  end
-  |];
+        end
+     |] in
   ()
 ;;
 
 (* class_bind : string -> (Modifier list * XEvent) list -> BindAction -> unit 
       class arg is not constrained *)
 let class_bind class eventsequence action =
-  TkEval [| TkToken "bind";
-      	    TkToken class;
-	    CAMLtoTKEventSequence eventsequence;
-  begin match action with
-     BindRemove -> TkToken ""
-  |  BindSet (what, f) ->
-      let CbId = register_callback dummy_widget (WrapEventInfo f what) in
-        TkToken ("camlcb " ^ CbId ^ (WriteEventField what))
-  |  BindExtend (what, f) ->
-      let CbId = register_callback dummy_widget (WrapEventInfo f what) in
-        TkToken ("+camlcb " ^ CbId ^ (WriteEventField what))
-      
-  end
- |];
+  let _ = 
+   TkEval
+    [| TkToken "bind";
+       TkToken class;
+       CAMLtoTKEventSequence eventsequence;
+       begin match action with
+       | BindRemove -> TkToken ""
+       | BindSet (what, f) ->
+           let CbId = register_callback dummy_widget (WrapEventInfo f what) in
+             TkToken ("camlcb " ^ CbId ^ (WriteEventField what))
+       | BindExtend (what, f) ->
+           let CbId = register_callback dummy_widget (WrapEventInfo f what) in
+             TkToken ("+camlcb " ^ CbId ^ (WriteEventField what))
+       end
+    |] in
   ()
 ;;
