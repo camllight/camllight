@@ -14,6 +14,7 @@ value int_of_string(s)          /* ML */
   int c, d;
 
   p = String_val(s);
+  if (*p == 0) failwith("int_of_string");
   sign = 1;
   if (*p == '-') {
     sign = -1;
