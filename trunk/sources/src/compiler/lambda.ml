@@ -74,6 +74,7 @@ let rec has_guard = function
     Lifthenelse(l1, l2, Lstaticfail) -> true
   | Levent(ev, l) -> has_guard l
   | Lshared(l, lbl) -> has_guard l
+  | Llet(l1, l2) -> has_guard l2
   | _ -> false;;
 
 let guard_expression l1 l2 =  Lifthenelse(l1, l2, Lstaticfail);;
