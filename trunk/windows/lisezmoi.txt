@@ -1,179 +1,107 @@
-                Caml Light 0.71 pour Windows
-                Instructions d'installation
+                Caml Light 0.72 pour Windows
 
 
-MATERIEL NECESSAIRE
+COPYRIGHT
 
-Un PC avec processeur 80386, 80486 ou Pentium, tournant sous Windows 3.x, 
-Windows 95 ou Windows NT. 4M de memoire devraient suffire, mais 8M ou
-plus sont recommandes. Environ 3M d'espace libre sur le disque.
+  Tous les fichiers de la distribution Caml Light, à l'exception de
+  BIN\CWSDPMI.EXE et BIN\EMU387.DXE, sont copyright INRIA,
+  et couverts par les termes de la license qui figure dans le fichier
+  COPYRGHT.TXT
 
-
-POUR WINDOWS 3.x UNIQUEMENT: INSTALLATION DE WIN32S
-
-L'utilisation de Caml Light sous Windows 3.x necessite l'installation
-du systeme Win32s, qui est fourni sur la seconde disquette de la
-distribution Caml Light. Les utilisateurs de Windows 95 ou NT n'ont
-pas besoin d'installer Win32s.
-
-1- Copier le fichier w32s120.exe de la disquette dans un repertoire
-temporaire du disque dur:
-
-        COPY A:W32S120.EXE C:\TEMP
-
-2- Se placer dans le repertoire temporaire et executer w32s120.exe
-pour decompresser la distribution:
-
-        C:
-        CD \TEMP
-        W32S120
-
-3- Lancer Windows 3.1, demarrer le gestionnaire de fichiers, et
-double-cliquer sur le fichier C:\TEMP\SETUP.EXE. Ce programme installe
-Win32s et reboote la machine apres installation.
-
-4- Effacer les fichiers du repertoire temporaire:
-
-        DEL C:\TEMP\*.*
+  Les fichiers BIN\CWSDPMI.EXE et BIN\EMU387.DXE sont copyright 1995
+  Charles W Sandmann (sandmann@clio.rice.edu), 102 Hurst Ct, Destrehan,
+  LA 70047. Les sources et des mises à jour des binaires sont disponibles
+  sur ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/
 
 
-INSTALLATION DE CAML LIGHT POUR WINDOWS
+MATÉRIEL ET LOGICIEL NÉCESSAIRES
 
-1- Inserer la premiere disquette de la distribution dans le lecteur.
-Nous supposerons par la suite que ce lecteur est A:
+  L'environnement interactif sous Windows nécessite Microsoft Windows
+  3.1, 95, ou NT. L'utilisation sous Windows 3.1 nécessite la boîte de
+  compatibilité Win32s (distribuée avec Caml Light). Nous recommandons
+  d'utiliser NT ou 95 de préférence à 3.1.
 
-2- Placez-vous dans un repertoire du disque dur ou Caml Light sera
-installe. L'installation va y creer un sous-repertoire CAML contenant
-tous les fichiers de la distribution. Par exemple, pour installer tous
-les fichiers dans C:\CAML, placez-vous dans C:\
+  Les compilateurs "batch" peuvent également tourner sous MS-DOS (sans
+  Windows) pourvu que le processeur soit au moins un 80386. Au moins 8M
+  de mémoire vive sont recommandés.
 
-        C:
-        CD \
-
-3- Decompresser la distribution comme suit:
-
-        A:PKUNZIP -d A:CL71WIN.ZIP
-
-Prenez soin de bien mettre l'option -d pour PKUNZIP.
-
-Le repertoire C:\CAML doit maintenant contenir les fichiers suivants:
-
-        repertoires BIN, LIB, EXAMPLES, DOC
-        fichiers CAMLWIN.EXE, CAMLWIN.INI, README.TXT, INSTALL.TXT,
-                 COPYRGHT.TXT
-
-4- Editez le fichier CAMLWIN.INI pour remplacer les lignes suivantes de la
-section [General]:
-
-	CmdLine=camlrun c:\caml\lib\camltop -stdlib c:\caml\lib
-	HelpFile=c:\caml\doc\refman71.hlp
-
-par
-
-	CmdLine=camlrun <rep_caml>\lib\camltop -stdlib <rep_caml> -lang fr
-	HelpFile=<rep_caml>\doc\refman71.hlp
-
-ou <rep_caml> est le nom du repertoire contenant la distribution,
-p.ex. C:\CAML. L'option "-lang fr" selectionne les messages d'erreur
-en francais.
-
-5- Copiez CAMLWIN.INI dans votre repertoire Windows (generalement, C:\WINDOWS):
-
-        COPY CAML\CAMLWIN.INI C:\WINDOWS
-
-6- Vous pouvez maintenant demarrer le systeme interactif Caml en
-lancant <rep_caml>\CAMLWIN.EXE depuis le gestionnaire de fichiers de
-Windows.
-
-Les utilisateurs de Windows 3.1 voudront sans doute creer un nouveau
-groupe de programmes pour Caml et y mettre une entree pour Caml.
-
-7- Les outils de compilation non-interactive de Caml (le compilateur
-camlc, les generateurs d'analyseurs camllex et camlyacc, etc)
-se trouvent dans le sous-repertoire BIN de la distribution.
-
-Pour disposer de ces outils, editez le fichier C:\AUTOEXEC.BAT pour
-
-- ajouter <rep_caml>\BIN a la variable PATH:
-        SET PATH=...;<rep_caml>\BIN
-- ajouter la ligne
-        SET CAMLLIB=<rep_caml>\LIB
-
-Puis rebooter pour que ces modifications soient prises en compte.
-
-Les compilateurs non-interactifs fonctionnent non seulement avec Windows,
-mais egalement avec MSDOS de base et avec tout systeme d'exploitation
-qui fournit le service DPMI, comme par exemple OS/2 (non teste).
-
-L'interface avec des fonctions C (l'option "-custom" de camlc et camlmktop)
-necessite le compilateur DJGPP version 2, distribue gratuitement a
-l'adresse ftp://ftp.coast.net//pub/systems/pc/simtel/vendors/djgpp/
-
-8- Le sous-repertoire DOC de la distribution contient le manuel de
-reference de Caml Light (en anglais) au format d'aide Windows, ainsi
-qu'en texte pur. Le fichier au format d'aide peut etre lu avec l'outil
-"Aide Windows".
+  Lier du code Caml avec du code C (l'option "-custom" de camlc et
+  camlmktop) nécessite le compilateur DJGPP version 2, distribué
+  gratuitement sur ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/
 
 
-POUR PLUS D'INFORMATION
+DOCUMENTATION, RESSOURCES SUR LE RESEAU, LIVRES
 
-D'autres informations sur Caml Light sont disponibles sur le reseau
-Internet:
+  Le manuel de référence de Caml Light en anglais est disponible sous
+  forme de fichier d'aide Windows, accessible à partir de
+  l'environnement interactif Camlwin.exe, ou bien directement avec
+  l'utilitaire "Aide Windows".
 
-        par le Web:         http://pauillac.inria.fr/caml/
-        par FTP anonyme:    machine ftp.inria.fr, repertoire lang/caml-light
+  Ce manuel de référence, ainsi qu'un texte d'introduction à la
+  programmation en Caml Light ("Functional programming in Caml Light",
+  par Michel Mauny) sont également disponibles dans divers formats
+  sur le réseau Internet:
 
-Vous y trouverez le manuel de reference et un texte d'introduction a
-la programmation en Caml Light (en anglais, sous plusieurs formats de
-fichiers), ainsi que les distributions de Caml Light pour d'autres
-machines (Unix, Macintosh).
+          par le Web:         http://pauillac.inria.fr/caml/
+          par FTP anonyme:    machine ftp.inria.fr, repertoire lang/caml-light
 
-Le site Web contient egalement des reponses aux questions les plus
-frequemment posees sur Caml.
+  Vous y trouverez également les distributions de Caml Light pour d'autres
+  machines (Unix, Macintosh).
 
-Les livres suivants, en francais, sont disponibles en librairie:
+  Le site Web contient de plus des réponses aux questions les plus
+  fréquemment posées sur Caml.
 
-P. Weis et X. Leroy, _Le_langage_Caml_, InterEditions, 1993
-X. Leroy et P.Weis, _Manuel_de_reference_du_langage_Caml_, InterEditions, 1993
+  Les livres suivants, en francais, sont disponibles en librairie:
 
-Le _Manuel_de_reference_ correspond a la version 0.6 de Caml Light,
-d'ou de legeres differences avec la presente version 0.71.
+  P. Weis et X. Leroy, _Le_langage_Caml_, InterEditions, 1993
+
+  X. Leroy et P.Weis, _Manuel_de_référence_du_langage_Caml_,
+          InterEditions, 1993
+
+  G.Cousineau et M.Mauny, _Approche_fonctionnelle_de_la_programmation_,
+          Ediscience, 1995
+
+  D.Monasse, _Option_informatique_ (des classes préparatoires scientifiques),
+          Vuibert, 1996
+
+  Le _Manuel_de_référence_ correspond a la version 0.6 de Caml Light,
+  d'ou de légères différences avec la présente version 0.72.
 
 
 ENTRER EN CONTACT AVEC LA COMMUNAUTE CAML
 
-Une tribune de discussion par courrier electronique regroupe plusieurs
-centaines d'utilisateurs de Caml, leur permettant de partager leurs
-experiences, d'echanger des idees, et d'etre tenu au courant des
-nouvelles versions de Caml. Les discussions ont lieu en anglais et en
-francais.
+  Une tribune de discussion par courrier électronique regroupe plusieurs
+  centaines d'utilisateurs de Caml, leur permettant de partager leurs
+  expériences, d'échanger des idées, et d'être tenus au courant des
+  nouvelles versions de Caml. Les discussions ont lieu en anglais et en
+  francais.
 
-Pour vous abonner a cette liste, envoyez un courrier electronique a
-l'adresse suivante:
+  Pour vous abonner à cette liste, envoyez un courrier électronique à
+  l'adresse suivante:
 
-                caml-list-request@pauillac.inria.fr
+                  caml-list-request@inria.fr
 
-Pour envoyer un message a tous les abonnes de la liste, adressez-le a:
+  Pour envoyer un message à tous les abonnés de la liste, adressez-le à:
 
-                caml-list@pauillac.inria.fr
+                  caml-list@inria.fr
 
 
 RAPPORTS D'ANOMALIE
 
-Veuillez signaler les anomalies rencontrees lors de l'utilisation de
-Caml Light par courrier electronique a l'adresse suivante:
+  Veuillez signaler les anomalies rencontrées lors de l'utilisation de
+  Caml Light par courrier électronique à l'adresse suivante:
 
-                caml-light@pauillac.inria.fr
+                  caml-light@inria.fr
 
-Vous pouvez aussi les envoyer sur papier a
+  Vous pouvez aussi les envoyer sur papier à
 
-                Caml Light, projet Cristal
-                INRIA Rocquencourt
-                B.P. 105
-                78153 Le Chesnay Cedex
+                  Caml Light, projet Cristal
+                  INRIA Rocquencourt
+                  B.P. 105
+                  78153 Le Chesnay Cedex
 
-Veuillez inclure suffisamment d'information pour pouvoir reproduire
-l'anomalie a coup sur. Precisez egalement le type de machine que vous
-utilisez (version de Windows, etc).
+  Veuillez inclure suffisamment d'information pour pouvoir reproduire
+  l'anomalie à coup sûr. Précisez également le type de machine que vous
+  utilisez (version de Windows, etc).
 
-Nous ne souhaitons pas etre joints par telephone.
+  Nous ne souhaitons pas être joints par téléphone.

@@ -15,8 +15,8 @@ CONTENTS
 
 COPYRIGHT
 
-  All files in this archive except CAML\BIN\CWSDPMI.EXE and
-  CAML\BIN\EMU387.DXE are copyright INRIA,
+  All files in this archive except BIN\CWSDPMI.EXE and
+  BIN\EMU387.DXE are copyright INRIA,
   and covered by the copyright notice in file COPYRGHT.TXT.
 
   The files CAML\BIN\CWSDPMI.EXE and CAML\BIN\EMU387.DXE
@@ -79,7 +79,7 @@ DOCUMENTATION
   The Caml Light reference manual is included in this distribution,
   in Windows Help format. Other formats as well as a tutorial
   ("Functional programming in Caml Light", by Michel Mauny)
-  are available from archive site from which you obtained Caml Light.
+  are available from the archive site from which you obtained Caml Light.
   They can also be obtained by anonymous FTP from
   ftp.inria.fr as described below, or from the Web site.
 
