@@ -103,8 +103,8 @@ version.ml: version.mlp ../../src/version.h
 depend: $(GENFILES)
 	mv Makefile Makefile.bak
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
-         (camldep *.mli *.ml; gcc -MM $(OPTS) -I../../src/runtime *.c)) \
-        > Makefile
+         ../../src/tools/camldep *.mli *.ml; \
+         gcc -MM $(OPTS) -I../../src/runtime *.c) > Makefile
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE

@@ -59,7 +59,7 @@ TAGS:
 depend: $(GENFILES)
 	mv Makefile Makefile.bak
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
-         camldep *.mli *.ml) > Makefile
+         ../../src/tools/camldep *.mli *.ml) > Makefile
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
