@@ -75,6 +75,12 @@ let toplevel_loop () =
 	       flush std_out;
       	       kill_program ());
           loop ()
+      | Cannot_find_file name ->
+          print_string "Cannot find file "; print_endline name;
+          flush std_out;
+          rollback ();
+          stop_user_input ();
+          loop ()
       | x ->
       	  kill_program ();
           raise x
