@@ -351,7 +351,9 @@ type dir_handle
 value opendir : string -> dir_handle = 1 "unix_opendir"
         (* Open a descriptor on a directory *)
   and readdir : dir_handle -> string = 1 "unix_readdir"
-        (* Return the next entry in a directory *)
+        (* Return the next entry in a directory.
+           Raise [End_of_file] when the end of the directory has been 
+           reached. *)
   and rewinddir : dir_handle -> unit = 1 "unix_rewinddir"
         (* Reposition the descriptor to the beginning of the directory *)
   and closedir : dir_handle -> unit = 1 "unix_closedir"
