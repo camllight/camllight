@@ -7,7 +7,7 @@ CAMLRUN=../camlrun
 INCLUDES=-stdlib ../lib -I ../compiler -I ../linker
 COMPFLAGS=-W -O fast $(INCLUDES)
 LINKFLAGS=-g $(INCLUDES)
-CPP=/lib/cpp -P
+CPP=/lib/cpp -P -Dunix
 
 EXTERNOBJS=config.zo misc.zo interntl.zo \
     const.zo prim.zo instruct.zo lambda.zo \
@@ -73,7 +73,7 @@ install:
 
 .mlp.ml:
 	@rm -f $@
-	$(CPP) -Dunix $< > $@
+	$(CPP) $< > $@
 	@chmod a-w $@
 
 depend: $(GENSOURCES)

@@ -5,7 +5,7 @@ CAMLLINK=../camlrun ../camllink
 INCLUDES=-stdlib ../lib -I ../compiler
 COMPFLAGS=-W -O fast $(INCLUDES)
 LINKFLAGS=-g $(INCLUDES)
-CPP=/lib/cpp -P
+CPP=/lib/cpp -P -Dunix
 
 EXTERNOBJS=config.zo misc.zo interntl.zo opcodes.zo
 
@@ -55,7 +55,7 @@ predef.ml : ../runtime/globals.h ../runtime/fail.h
 
 .mlp.ml:
 	@rm -f $@
-	$(CPP) -Dunix $< > $@
+	$(CPP) $< > $@
 	@chmod a-w $@
 
 depend: $(GENSOURCES)
