@@ -12,7 +12,8 @@ void access_double(p)
 
 jmp_buf failure;
 
-void sig_handler()
+void sig_handler(sig)
+     int sig;
 {
   longjmp(failure, 1);
 }
