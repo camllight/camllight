@@ -26,7 +26,8 @@ value gr_wait_event(eventlist)
   Bool poll;
   int mouse_x, mouse_y, button, key;
   Window rootwin, childwin;
-  int root_x, root_y, win_x, win_y, modifiers;
+  int root_x, root_y, win_x, win_y;
+  unsigned int modifiers;
   sighandler_return_type (*oldsig)();
   XEvent event;
 
