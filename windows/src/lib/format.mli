@@ -120,7 +120,7 @@ value set_margin : int -> unit;;
         (* [set_margin d] sets the value of the right margin
            to [d] (in characters): this value is used to detect line
            overflows that leads to split lines.
-           Nothing happens if [d] is not greater than 1. *)
+           Nothing happens if [d] is smaller than 2 or bigger than 999999999. *)
 value get_margin : unit -> int;;
         (* Return the position of the right margin. *)
 
@@ -130,7 +130,7 @@ value set_max_indent : int -> unit;;
            indentation limit to [d] (in characters):
            once this limit is reached, boxes are rejected to the left,
            if they do not fit on the current line.
-           Nothing happens if [d] is not greater than 1. *)
+           Nothing happens if [d] is smaller than 2 or bigger than 999999999. *)
 value get_max_indent : unit -> int;;
         (* Return the value of the maximum indentation limit (in
            characters). *)
