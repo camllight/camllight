@@ -58,6 +58,6 @@ depend:
 	rm -f Makefile.bak
 
 ### DO NOT DELETE THIS LINE
-strstubs.o : strstubs.c 
+strstubs.o: strstubs.c
 istr.zi: str.zi 
 str.zo: str.zi istr.zi 
