@@ -83,7 +83,7 @@ int attempt_open(name, trail, do_open_script)
 {
   char * truename;
   int fd;
-  int err;
+  int err, n;
   char buf [2];
 
   truename = searchpath(*name);
@@ -91,9 +91,9 @@ int attempt_open(name, trail, do_open_script)
   fd = open(truename, O_RDONLY | O_BINARY);
   if (fd == -1) return FILE_NOT_FOUND;
   if (!do_open_script){
-    err = read (fd, buf, 2);
-    if (err < 2) return TRUNCATED_FILE;
-    if (buf [0] == '#' && buf [1] == '!') return BAD_MAGIC_NUM;
+    n = read (fd, buf, 2);
+    if (n < 2) { close(fd); return TRUNCATED_FILE; }
+    if (buf [0] == '#' && buf [1] == '!') { close(fd); return BAD_MAGIC_NUM; }
   }
   err = read_trailer(fd, trail);
   if (err != 0) { close(fd); return err; }
