@@ -7,7 +7,7 @@ CAMLYACC=camlyacc
 CAMLLEX=camllex
 CAMLDEP=../../../src/tools/camldep
 
-OBJS=tsort.zo tables.zo lexer.zo parser.zo  compile.zo intf.zo maincompile.zo
+OBJS=tsort.zo tables.zo lexer.zo parser.zo compile.zo intf.zo maincompile.zo
 
 tkcompiler : $(OBJS)
 	$(CAMLC) $(LINKFLAGS) -o tkcompiler $(OBJS)

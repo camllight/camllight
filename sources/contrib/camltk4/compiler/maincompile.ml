@@ -123,13 +123,35 @@ let compile () =
 	  Widget -> output_string oc' ("(* The "^wname^" widget *)\n")
 	| Family -> output_string oc' ("(* The "^wname^" commands  *)\n")
 	end;
-      	output_string oc "#open\"protocol\";;\n";
-      	output_string oc "#open\"tk\";;\n";
-      	output_string oc' "#open\"tk\";;\n";
-      	output_string oc "#open\"support\";;\n";
-      	output_string oc' "#open\"support\";;\n";
-      	output_string oc "#open\"textvariable\";;\n";
-      	output_string oc' "#open\"textvariable\";;\n";
+
+        output_string oc "#open\"protocol\";;\n";
+
+        let open_dir name =
+          printf__sprintf "#open\"%s\";;\n" name in
+
+        let open_module_for_impl name =
+          let open_dir = open_dir name in
+          output_string oc open_dir in
+
+        let open_module name =
+          let open_dir = open_dir name in
+          output_string oc open_dir;
+          output_string oc' open_dir in
+        let add_tk () = open_module "tk" in
+        let add_tk_for_impl () = open_module_for_impl "tk" in
+        let add_support () = open_module "support" in
+        let add_support_for_impl () = open_module_for_impl "support" in
+        let add_textvariable () = open_module "textvariable" in
+        begin match modname with
+        | "imagephoto" |
+          "imagebitmap" -> add_tk (); add_support_for_impl ()
+        | "bell" -> add_tk_for_impl (); add_support ()
+        | "tkwait" -> add_tk_for_impl (); add_support (); add_textvariable ()
+        | "palette" -> add_tk ()
+        | "focus" -> add_tk_for_impl (); add_support ()
+        | "clipboard" -> add_tk (); add_support_for_impl ()
+        | _ -> add_tk (); add_support ()
+        end;
 	begin match wdef.module_type with
 	  Widget ->
             write_create (output_string oc) wname;
