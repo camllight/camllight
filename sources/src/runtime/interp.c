@@ -297,6 +297,7 @@ value interprete(prog)
           periodic_action_count = PERIODIC_ACTION_FREQ;
           ui_periodic_action();
         }
+      }
 #endif
       if (something_to_do) goto process_signal;
       Next;

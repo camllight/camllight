@@ -67,8 +67,8 @@ struct extern_obj {
   byteoffset_t ofs;
 };
 
-struct extern_obj * extern_table;
-asize_t extern_table_size, extern_table_used;
+extern struct extern_obj * extern_table;
+extern asize_t extern_table_size, extern_table_used;
 
 #ifdef SIXTYFOUR
 #define Hash(v) (((asize_t) ((v) >> 3)) % extern_table_size)

@@ -8,6 +8,9 @@
 #include "memory.h"
 #include "mlvalues.h"
 
+struct extern_obj * extern_table;
+asize_t extern_table_size, extern_table_used;
+
 void alloc_extern_table()
 {
   asize_t i;

@@ -188,14 +188,14 @@ int main(argc, argv)
 
     code_size = trail.code_size;
     start_code = (code_t) stat_alloc(code_size);
-    if ((unsigned) read(fd, start_code, (unsigned) code_size) != code_size)
+    if (read(fd, (char *) start_code, code_size) != code_size)
       fatal_error("Fatal error: truncated bytecode file.\n");
 
 #if defined(BIG_ENDIAN) && !defined(ALIGNMENT)
     fixup_endianness(start_code, code_size);
 #endif
 
-    chan = open_descriptor(Val_long(fd));
+    chan = open_descr(fd);
     global_data = intern_val(chan);
     modify(&Field(global_data, GLOBAL_DATA), global_data);
     close_in(chan);

@@ -4,10 +4,7 @@
 CC=cc
 OPTS=#-fno-defer-pop
 CFLAGS=-O $(OPTS) -I..
-
-# This is the list of libraries that have to be linked with the runtime
-# system. On most machines, all you need is the math library "-lm" 
-LIBS=-lm
+LIBS=
 
 # Test to see whether ranlib exists on the machine
 RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
@@ -33,10 +30,10 @@ PRIMS=compare.c extern.c externcp.c floats.c gc_ctrl.c hash.c \
 all: camlrun libcaml.a
 
 camlrun: $(OBJS) prims.o
-	$(CC) $(CFLAGS) -o camlrun prims.o $(OBJS) $(LIBS)
+	$(CC) $(CFLAGS) -o camlrun prims.o $(OBJS) $(LIBS) -lm
 
 camlrund: $(DOBJS) prims.o
-	$(CC) -g $(OPTS) -o camlrund prims.o $(DOBJS) $(LIBS)
+	$(CC) -g $(OPTS) -o camlrund prims.o $(DOBJS) $(LIBS) -lm
 
 libcaml.a: $(OBJS)
 	rm -f libcaml.a

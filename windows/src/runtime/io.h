@@ -36,7 +36,7 @@ struct channel {
    ? refill(channel)                                                          \
    : (unsigned char) *((channel))->curr++)
 
-struct channel * open_descriptor P((value));
+struct channel * open_descr P((int));
 value flush P((struct channel *));
 void putword P((struct channel *, uint32));
 void putblock P((struct channel *, char *, unsigned));
