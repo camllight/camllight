@@ -1,40 +1,68 @@
 (* System functions for interactive use *)
 
 value quit : unit -> unit
-        (* Exit the toplevel loop. *)
+        (* Exit the toplevel loop and terminate the [camllight] command. *)
   and include : string -> unit
         (* Read, compile and execute source phrases from the given file.
-           Definitions are entered in module [top], as if they were
-           read from the keyboard.
            The [.ml] extension is automatically added to the file name,
-           if not present. *)
+           if not present.
+           This is textual inclusion: phrases are processed just as if
+           they were typed on standard input. In particular, global
+           identifiers defined by these phrases are entered in the
+           module named [top], not in a new module. *)
   and load : string -> unit
-        (* Load in core the source for a module.
-           Read, compile and execute source phrases from the given file.
-           Definitions are entered in a new module with the given name.
-           The [.ml] extension is automatically added to the file name,
-           if not present. *)
+        (* Load in memory the source code for a module
+           implementation. Read, compile and execute source phrases
+           from the given file. The [.ml] extension is automatically
+           added if not present.  The [load] function behaves much
+           like [include], except that a new module is created, with
+           name the base name of the source file name. Global
+           identifiers defined in the source file are entered in this
+           module, instead of the [top] module as in the case of
+           [include]. For instance, assuming file [foo.ml] contains
+           the single phrase
+           [
+           let bar = 1;;
+           ] 
+           executing [load "foo"] defines the identifier [foo__bar]
+           with value [1].  Caveat: the loaded module is not
+           automatically opened: the identifier [bar] does not
+           automatically complete to [foo__bar]. To achieve this, you
+           must execute the directive [#open "foo"] afterwards. *)
   and compile : string -> unit
-        (* Compile a module implementation ([.ml] file) or module
-           interface ([.mli] file), as with the batch compiler [camlc].
-           The filename must end with either the [.ml] or the [.mli]
-           extension.
-           The outcome of the compilation is left in [.zo] and [.zi]
-           files, and not loaded in core in any way. *)
+        (* Compile the source code for a module implementation or
+           interface ([.ml] or [.mli] file). Compilation proceeds as
+           with the batch compiler, and produces the same results as
+           [camlc -c].  If the toplevel system is in debugging mode
+           (option [-g] or function [debug_mode] below), the
+           compilation is also performed in debugging mode, as when
+           giving the [-g] option to the batch compiler. The result of
+           the compilation is left in files ([.zo], [.zi],
+           [.zix]). The compiled code is not loaded in memory. Use
+           [load_object] to load a [.zo] file produced by [compile]. *)
+  and load_object : string -> unit
+        (* Load in memory the compiled bytecode contained in the given
+           file.  The [.zo] extension is automatically added to the
+           file name, if not present. The bytecode file has been
+           produced either by the standalone compiler [camlc] or by
+           the [compile] function. Global identifiers defined in the
+           file being loaded are entered in their own module, not in
+           the [top] module, just as with the [load] function. *)
+  and trace : string -> unit
+        (* After the execution of [trace "foo"], all calls to the
+           global function named [foo] will be ``traced''. That is,
+           the argument and the result are displayed for each call, as
+           well as the exceptions escaping out of [foo], either raised
+           by [foo] itself, or raised by one of the functions called
+           from [foo]. If [foo] is a curried function, each argument
+           is printed as it is passed to the function. *)
+  and untrace : string -> unit
+        (* Executing [untrace "foo"] stops all tracing over the global
+           function named [foo]. *)
   and verbose_mode: bool -> unit
         (* [verbose_mode true] causes the [compile] function to print
            the inferred types and other information. [verbose_mode false]
            reverts to the default silent behavior. *)
-  and load_object : string -> unit
-        (* Load in core a compiled bytecode file.
-           The [.zo] extension is automatically added, if not present. *)
-  and trace : string -> unit
-        (* After [trace "foo"], all calls to the global function named [foo]
-           will be traced.
-           That is, the argument and the result are displayed for each call,
-           as well as exceptions escaping out of [foo]. *)
-  and untrace : string -> unit
-        (* [untrace "foo"] stops tracing function [foo]. *)
   and install_printer : string -> unit
         (* [install_printer "printername"] registers the function named
            [printername] as a printer for objects whose types match
@@ -71,4 +99,4 @@ value quit : unit -> unit
   and directory : string -> unit
         (* Add the given directory to the search path for files.
            Same behavior as the [-I] option or the [#directory] directive. *)
-;;    
+;;

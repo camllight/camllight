@@ -79,7 +79,7 @@ install:
 depend: $(GENSOURCES)
 	mv Makefile Makefile.bak
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
-         ../tools/camldep -I ../compiler -I ../linker *.mli *.ml) > Makefile
+         ../tools/camldep -I ../compiler -I ../linker meta.mli *.ml) > Makefile
 	rm Makefile.bak
 
 version.ml: version.mlp ../version.h
