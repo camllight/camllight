@@ -21,11 +21,10 @@ LIBMKF=-f modules -f Makefile $(MKF)
 all:
 	cd libsupport; $(MAKE) $(MKF)
 	cd compiler; $(MAKE) $(MKF)
-	compiler/tkcompiler
-	cd lib; $(MAKE) $(LIBMKF) 
+	cd lib; $(MAKE) $(LIBMKF) all
 	cd browser; $(MAKE) $(MKF)
 
-EXDIRS=test browser books-examples
+EXDIRS=test browser
 
 examples:
 	for d in $(EXDIRS); do \
