@@ -7,13 +7,13 @@ care has been taken not to use too many BSD-isms.
 
 DOCUMENTATION
 
-The documentation and some examples are in ../../contrib/libunix.
+See chapter 16 of the Caml Light documentation.
 
 For those of you who read French, this library is documented in
 "Programmation du systeme Unix en Caml Light" by Xavier Leroy,
 technical report 147, INRIA, 1992, available by anonymous FTP from
 ftp.inria.fr, directory INRIA/publications/RT, file RT-0147.ps.Z.
-The examples in ../../contrib/libunix/Examples/ come from this report.
+The examples in ./Examples/ come from this report.
 
 INSTALLATION
 
@@ -33,10 +33,5 @@ To use the Unix library from your programs, just do
 for the linking phase.
 
 If you'd like to have the Unix functions available at toplevel, just do
-
-        camlmktop -custom -o camlunix unix.zo -lunix
-
-to build a special toplevel named "camlunix" that includes the
-Unix functions.  To run this toplevel, do
 
         camllight camlunix
