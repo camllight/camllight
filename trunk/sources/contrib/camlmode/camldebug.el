@@ -429,7 +429,7 @@ Obeying it means displaying in another window the specified file and line."
   (let ((file-name (file-name-nondirectory buffer-file-name))
         (pos (point)))
     (process-send-string (get-buffer-process current-camldebug-buffer)
-			 (format "break @ %s # %d\n"
+			 (format "break @ \"%s\" # %d\n"
                                  (camldebug-module-name file-name)
 				 (1- pos)))))
 
