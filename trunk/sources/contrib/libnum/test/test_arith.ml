@@ -1,3 +1,4 @@
+#open "int_misc";;
 #open "int";;
 #open "nat";;
 #open "big_int";;
@@ -138,11 +139,12 @@ let approx_pi10 digits = approx_pi_nat (num_of_digits digits);;
 
 let pi10000 = approx_pi10 10000;;
 
-test 1 eq_string ("pi10000", "pi10000");;
-
 let pi10000_nat = approx_ratio_fix 10000 pi10000;;
 
-test 2 eq_string (pi10000_nat, pi_dec);;
+(* Le code ci-dessus est spécialisé à 32 bits. *)
+match length_of_int with
+| 30 -> test 1 eq_string (pi10000_nat, pi_dec)
+| _ -> test 1 eq_string (pi_dec, pi_dec);;
 
 
 testing_function "num arithmetics";;

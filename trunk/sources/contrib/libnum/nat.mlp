@@ -1,6 +1,7 @@
 (* nat: fonctions auxiliaires et d impression pour le type nat.
    Derive de nats.ml de Caml V3.1, Valerie Menissier.
-   Adapte a Caml Light par Xavier Leroy & Pierre Weis. *)
+   Adapte a Caml Light par Xavier Leroy & Pierre Weis.
+   Portage 64 bits: Pierre Weis. *)
 
 (*
 #include "../../config/m.h"
