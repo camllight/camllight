@@ -9,7 +9,7 @@ CC=gcc
 # This option circumvents a gcc bug on some platforms (680x0, 80386).
 # If you are using Linux with libc6 (RedHat 5, Debian 2), add -D__FAVOR_BSD
 # This option avoids signal-related problems.
-OPTS=-fno-defer-pop -D__FAVOR_BSD
+OPTS=
 
 # Extra libraries that have to be linked with the runtime system.
 # The math library "-lm" is linked by default.
@@ -25,21 +25,22 @@ LIBS=
 # The -Dunix option ensures that the symbol "unix" is defined --
 # not all Unix C preprocessors define it.
 # If your cpp is too fussy, make tools/clprepro and use this:
-# CPP=../../src/tools/clprepro -Dunix
+CPP=../../src/tools/clprepro -Dunix
 #CPP=/lib/cpp -P -traditional -Dunix
-CPP=/usr/bin/cpp -P -traditional -Dunix
+#CPP=/usr/bin/cpp -P -traditional -Dunix
 
 # The directory where public executables will be installed
-BINDIR=/usr/local/bin
+VBINDIR=/usr/local/bin
+BINDIR=${INSTROOT}${VBINDIR}
 
 # The directory where the Caml Light standard library will be installed
-LIBDIR=/usr/local/lib/caml-light
+LIBDIR=${INSTROOT}/usr/local/lib/caml-light
 
 # The manual section where the manual pages will be installed
 MANEXT=1
 
 # The directory where the manual pages will be installed
-MANDIR=/usr/local/man/man$(MANEXT)
+MANDIR=${INSTROOT}/usr/local/man/man$(MANEXT)
 
 # Some "make"s need this to ensure that they call the Bourne shell,
 # not the C shell. Seems harmless on most other "make"s.
@@ -125,7 +126,8 @@ install:
 	if test -d $(LIBDIR); then : ; else mkdir -p $(LIBDIR); fi
 	if test -d $(MANDIR); then : ; else mkdir -p $(MANDIR); fi
 	cd runtime; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
-	cd launch; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
+	cd launch; make BINDIR=$(BINDIR) VBINDIR=$(VBINDIR) \
+                        LIBDIR=$(LIBDIR) install
 	cd lib; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
 	cd compiler; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
 	cd linker; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
@@ -156,12 +158,10 @@ depend:
 
 # Make MacOS X package
 
-package-macosx: FORCE
-	make BINDIR="`pwd`"/package-macosx/root$(BINDIR) \
-	     LIBDIR="`pwd`"/package-macosx/root$(LIBDIR) \
-	     MANDIR="`pwd`"/package-macosx/root$(MANDIR) install
+package-macosx:
+	make INSTROOT="`pwd`"/package-macosx/root install
 	tools/make-package-macosx
 
-FORCE:
+.PHONY: package-macosx
 
 #
