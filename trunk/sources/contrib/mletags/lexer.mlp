@@ -4,8 +4,25 @@
 (**) #open "parser";;
 
 let input_chan = ref std_in;;
-let current_line = ref 0;;            (* current line number in file *)
-let current_beg = ref 0;;             (* offset of previous newline  *)
+let current_line = ref 1;;            (* current line number in file *)
+let current_beg = ref 0;;             (* offset of first char of line *)
+let last_line = ref 0;;
+let last_beg = ref 0;;
+
+let init_mem ch =
+  input_chan := ch;
+  current_line := 1;
+  current_beg := 0;
+  last_line := 1;
+  last_beg := 0
+;;
+
+let newline lexbuf =
+  last_line := !current_line;
+  last_beg := !current_beg;
+  incr current_line;
+  current_beg := 1 + get_lexeme_start lexbuf
+;;
 
 (* For nested comments *)
 
@@ -134,8 +151,7 @@ let char_for_decimal_code lexbuf i =
 
 rule main = parse
     `\010`
-      { incr current_line; current_beg := get_lexeme_start lexbuf; 
-        main lexbuf }
+      { newline lexbuf; main lexbuf }
   | [` ` `\013` `\009` `\026` `\012`] +
       { main lexbuf }
   | [`A`-`Z` `a`-`z` ACCENTED ]
@@ -227,8 +243,7 @@ and comment = parse
   | eof
       { raise (Lexical_error(Unterminated_comment, -1, -1)) }
   | `\010`
-      { incr current_line; current_beg := get_lexeme_start lexbuf;
-        comment lexbuf }
+      { newline lexbuf; comment lexbuf }
   | _
       { comment lexbuf }
 
@@ -257,9 +272,8 @@ and string = parse
   | eof
       { raise (Lexical_error(Unterminated_string, -1, -1)) }
   | `\010`
-      { incr current_line; 
+      { newline lexbuf;
         store_string_char(get_lexeme_char lexbuf 0);
-        current_beg := get_lexeme_start lexbuf;
         string lexbuf }
   | _
       { store_string_char(get_lexeme_char lexbuf 0);

@@ -1,7 +1,7 @@
 # Configuration
 CPP=/lib/cpp -P
 CAMLC=camlc
-CAMLCOMP=$(CAMLC) -c
+CAMLCOMP=$(CAMLC) -c -g
 CAMLLEX=camllex
 CAMLYACC=camlyacc
 
@@ -14,7 +14,7 @@ GENFILES=lexer.ml parser.ml parser.mli lexer.mll
 all: mletags
 
 mletags: $(OBJS)
-	camlc -o mletags  $(OBJS)
+	camlc -o mletags $(LINKFLAGS) $(OBJS)
 
 lexer.mll: lexer.mlp
 	$(CPP) -Dunix lexer.mlp > lexer.mll

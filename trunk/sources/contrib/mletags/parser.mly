@@ -4,14 +4,17 @@
 #open "tags";;
 
 let loc() = 
-  let save = pos_in !lexer__input_chan 
-  and debut = !lexer__current_beg + 1 in
+  let save = pos_in !lexer__input_chan  in
+  let debut,line =
+    if symbol_end () <= !lexer__current_beg	
+    then !lexer__last_beg, !lexer__last_line
+    else !lexer__current_beg, !lexer__current_line in
   let n = symbol_end() - debut in
     let buffer = create_string n in
         seek_in !lexer__input_chan debut;
         input !lexer__input_chan buffer 0 n;
         seek_in !lexer__input_chan save;
-        Tag(buffer, !lexer__current_line, debut)
+        Tag(buffer, line, debut)
 ;;
 
 let do_directive =
