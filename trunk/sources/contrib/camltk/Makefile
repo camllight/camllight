@@ -13,7 +13,8 @@ MKF=\
   TCLINCLDIR='$(TCLINCLDIR)' \
   TKINCLDIR='$(TKINCLDIR)' \
   TKLIBDIR='$(TKLIBDIR)' \
-  TCLLIBDIR='$(TCLLIBDIR)'
+  TCLLIBDIR='$(TCLLIBDIR)' \
+  TKLIBS='$(TKLIBS)'
 
 LIBMKF=-f modules -f Makefile $(MKF)
 
@@ -21,10 +22,10 @@ all:
 	cd libsupport; $(MAKE) $(MKF)
 	cd compiler; $(MAKE) $(MKF)
 	compiler/tkcompiler
-	cd lib; $(MAKE) $(LIBMKF) depend; $(MAKE) $(LIBMKF) 
+	cd lib; $(MAKE) $(LIBMKF) 
 	cd browser; $(MAKE) $(MKF)
 
-EXDIRS=test browser
+EXDIRS=test browser books-examples
 
 examples:
 	for d in $(EXDIRS); do \
@@ -32,10 +33,11 @@ examples:
 	done
 	
 
+# If Widgets.src is modified locally, then one should also do
+# $(MAKE) $(LIBMKF) depend
 lib: Widgets.src
 	compiler/tkcompiler
-	cd lib; $(MAKE) $(LIBMKF) depend; $(MAKE) $(LIBMKF)
-
+	cd lib; $(MAKE) $(LIBMKF)
 
 install: 
 	cd lib; $(MAKE) $(LIBMKF) install
