@@ -82,13 +82,16 @@ esac
 
 # Determine alignment constraints
 
-volatile=""
-while true; do
-  sh runtest $volatile align.c
-  case $? in
-  100) echo "Your compiler chokes on the \"volatile\" modifier."
+sh runtest align.c
+status=$?
+case $status in
+  100) echo "Your compiler seems to choke on the \"volatile\" modifier."
        echo "Never mind, we'll do without it."
-       volatile="-Dvolatile=";;
+       sh runtest -Dvolatile= align.c
+       status=$?
+       ;;
+esac
+case $status in
     0) echo "This architecture has no alignment constraints."
        echo "#undef ALIGNMENT" >> m.h
        break;;
@@ -101,8 +104,7 @@ while true; do
        echo "this architecture actually has no alignment constraints."
        echo "#define ALIGNMENT" >> m.h
        break;;
-  esac
-done
+esac
 
 sh runtest dblalign.c
 case $? in
