@@ -9,6 +9,6 @@ To compile: either "make", or, by hand:
 
 To run:
 
-    camlrun fib 10              # or some other number
-    camlrun wc fib.ml           # or some other files
-    camlrun sieve 1000          # or some other number
+    fib 10              # or some other number
+    wc fib.ml           # or some other files
+    sieve 1000          # or some other number
