@@ -146,6 +146,8 @@ let define_new_type loc (ty_desc, params, def) =
     let extdef = assoc ty_desc.qualid.id !external_types in
     if extdef.et_manifest or extdef.et_defined then
       illegal_type_redefinition loc extdef.et_descr;
+    if extdef.et_descr.info.ty_arity <> ty_desc.info.ty_arity then
+      type_decl_arity_err loc extdef.et_descr ty_desc;
     extdef.et_defined <- true;
     let extconstr = extdef.et_descr.info.ty_constr
     and intconstr = ty_desc.info.ty_constr in

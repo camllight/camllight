@@ -33,8 +33,7 @@ let resize h =
     blit_vect h.data 0 newdata 0 n;
     blit_vect h.data 0 newdata n n;
     h.data <- newdata;
-    h.max_len <- 2 * h.max_len;
-    ()
+    h.max_len <- 2 * h.max_len
 ;;
 
 let rec bucket_too_long n bucket =
@@ -58,7 +57,7 @@ let remove h key =
     | Cons(k, i, next) ->
         if k = key then next else Cons(k, i, remove_bucket next) in
   let i = (hash_param 10 100 key) mod (vect_length h.data) in
-    h.data.(i) <- remove_bucket h.data.(i); ()
+    h.data.(i) <- remove_bucket h.data.(i)
 ;;
 
 let find h key =

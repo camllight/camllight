@@ -45,11 +45,8 @@ value fprintf: out_channel -> ('a, out_channel, unit) format -> 'a
 -          Refer to the C library [printf] function for the meaning of
            flags and field width specifiers.
 
-           The exception [Invalid_argument] is raised if the types of the
-           provided arguments do not match the format. The exception is
-           also raised if too many arguments are provided. If too few
-           arguments are provided, printing stops just before converting
-           the first missing argument. *)
+           If too few arguments are provided, printing stops just
+           before converting the first missing argument. *)
 
   and printf: ('a, out_channel, unit) format -> 'a
         (* Same as [fprintf], but output on [std_out]. *)

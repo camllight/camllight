@@ -23,8 +23,7 @@ let output_globalref oc = function
       %a value_desc global      output_value
       %a constr_desc global     output_constr
       %a label_desc global      output_label
-      %a typ                    output_type
-      %a typ                    output_one_type
+      %a typ                    output_type, output_one_type, output_schema
       %a global_reference       output_globalref *)
 
 (* The error messages themselves *)
@@ -144,8 +143,8 @@ let type_mismatch_err val_desc val_desc' =
            but defined with type %a.\n"
     output_input_name
     output_value val_desc
-    output_one_type (type_instance val_desc.info.val_typ)
-    output_type (type_instance val_desc'.info.val_typ);
+    output_schema val_desc.info.val_typ
+    output_schema val_desc'.info.val_typ;
   raise Toplevel
 ;;
 
@@ -155,7 +154,7 @@ let cannot_generalize_err val_desc =
            contains type variables that cannot be generalized.\n"
     output_input_name
     output_value val_desc
-    output_one_type (type_instance val_desc.info.val_typ);
+    output_schema val_desc.info.val_typ;
   raise Toplevel
 ;;
 
@@ -229,6 +228,16 @@ let illegal_type_redefinition loc ty_desc =
            Please define it only once.\n"
     output_location loc
     output_type_constr ty_desc;
+  raise Toplevel
+;;
+
+let type_decl_arity_err loc ty_desc1 ty_desc2 =
+  eprintf "%aThe type %a has been declared with %d parameter(s)\n\
+           but is here defined with %d parameter(s).\n"
+    output_location loc
+    output_type_constr ty_desc1
+    ty_desc1.info.ty_arity
+    ty_desc2.info.ty_arity;
   raise Toplevel
 ;;
 

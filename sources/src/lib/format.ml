@@ -1,5 +1,4 @@
 #open "exc";;
-#open "fchar";;
 #open "ref";;
 #open "int";;
 #open "fstring";;
@@ -378,7 +377,8 @@ let print_float f = print_string (float__string_of_float f);;
 let print_bool b = print_string (string_of_bool b);;
 
 (* To format a char *)
-let print_char c = print_string (char_for_read c);;
+let print_char c =
+  let s = create_string 1 in s.[0] <- c; print_as 1 s;;
 
 let open_hbox () = pp_open_box (0, Pp_hbox)
 and open_vbox indent = pp_open_box (indent, Pp_vbox)

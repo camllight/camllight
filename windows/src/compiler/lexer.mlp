@@ -223,6 +223,10 @@ and comment = parse
   | "*)"
       { comment_depth := pred !comment_depth;
         if !comment_depth > 0 then comment lexbuf }
+  | "\""
+      { reset_string_buffer();
+        string lexbuf;
+        comment lexbuf }
   | End_of_file
       { raise (Lexical_error(Unterminated_comment, -1, -1)) }
   | _
@@ -242,7 +246,7 @@ and char = parse
 and string = parse
     `"`
       { () }
-  | `\\` [` ` `\010` `\013` `\009` `\026` `\012`] +
+  | `\\` ("\010" | "\013" | "\013\010") [` ` `\009`] *
       { string lexbuf }
   | `\\` [`\\` `"` `n` `t` `b` `r`]
       { store_string_char(char_for_backslash(get_lexeme_char lexbuf 1));
