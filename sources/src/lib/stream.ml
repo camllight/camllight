@@ -1,3 +1,4 @@
+#open "eq";;
 #open "io";;
 #open "exc";;
 #open "obj";;

@@ -2,7 +2,9 @@
 
 #open "io";;
 
-value fprintf: out_channel -> string -> 'a
+type ('a, 'b, 'c) format;;
+
+value fprintf: out_channel -> ('a, out_channel, unit) format -> 'a
         (* [fprintf outchan format arg1 ... argN] formats the arguments
            [arg1] to [argN] according to the format string [format],
            and outputs the resulting string on the channel [outchan].
@@ -42,10 +44,10 @@ value fprintf: out_channel -> string -> 'a
            static type ['a]. It is recommended to use always [fprintf]
            in a sequence, as in: [fprintf chan "%d" n; ()]. *)
 
-  and printf: string -> 'a
+  and printf: ('a, out_channel, unit) format -> 'a
         (* Same as [fprintf], but output on [std_out]. *)
 
-  and eprintf: string -> 'a
+  and eprintf: ('a, out_channel, unit) format -> 'a
         (* Same as [fprintf], but output on [std_err]. *)
 
   and fprint: out_channel -> string -> unit
@@ -59,11 +61,4 @@ value fprintf: out_channel -> string -> 'a
   and eprint: string -> unit
         (* Print the given string on [std_err], without any formatting.
 	   This is the same function as [prerr_string] of module [io]. *)
-;;
-
-(*--*)
-
-value add_integer_format: char -> (out_channel -> int -> unit) -> unit
-  and add_string_format: char -> (out_channel -> string -> unit) -> unit
-  and add_format: char -> (out_channel -> 'a -> unit) -> unit
 ;;

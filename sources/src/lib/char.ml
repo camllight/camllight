@@ -1,6 +1,6 @@
 (* Character operations, with sanity checks *)
 
-#open "int";;
+#open "eq";;
 #open "exc";;
 
 let char_of_int i =
