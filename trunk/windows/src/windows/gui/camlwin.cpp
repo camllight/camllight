@@ -468,6 +468,7 @@ int CCAMLWinApp::DoExit()
 	delete m_Font;
 	delete m_PrefsDlg;
 	delete m_CmdLine;
+	free((char *) m_pszHelpFilePath);
 
 	// It's time now to call DestroyWindow, since OnClose can't.
 	m_pMainWnd->DestroyWindow();
