@@ -22,8 +22,7 @@ elements of the interface work as follows :
 .B Opened Modules
 displays the list of 
 .I opened
-modules.
-Clicking on the
+modules. Clicking on the
 .I Open Module
 button will display the list of compiled module interfaces available
 in the 
@@ -32,6 +31,11 @@ After clicking on the
 .I Ok
 button, the selected modules will be added to the list of 
 .I Opened Modules.
+Opening a module in
+.B camlbrowser
+is essentially the same operation as the
+.B #open
+directive in the Caml Light toplevel.
 
 .TP
 .B Load Path
@@ -41,6 +45,11 @@ Clicking on the
 .I Add Directory
 button allows the extension of the
 .I Load Path.
+Adding a directory in
+.B camlbrowser
+is essentially the same operation as the
+.B #directory
+directive in the Caml Light toplevel.
 
 .SH FEATURES
 .TP
@@ -72,10 +81,10 @@ is qualified (module__symbol).
 .TP
 .B Source display
 .I Open source file
-allows the display of Caml Light source files, that is implementation (.ml)
-or interfaces (.mli). The given file will be looked for in the current
-directory as well as in the
-.I Load path.
+allows the display of Caml Light source files, that is implementations (.ml)
+or interfaces (.mli). The given file will be looked for in the
+.I Load path
+(where the current directory is always first and implicit).
 Caml Light keywords are underlined, comments are displayed in red.
 
 .TP
@@ -83,13 +92,13 @@ Caml Light keywords are underlined, comments are displayed in red.
 Double clicking in displayed source files is equivalent to
 .I Symbol definition search.
 Note however that this search does not follow the semantics of the compiler,
-since neither local bindings or #open directives in the source file are
+since neither local bindings nor #open directives in the source file are
 taken into account.
 
 .TP
 .B Library source lookup with TAGS
 For a value description displayed from a compiled module interface, the
-value's symbol is displayed in red. If the module sources (.ml and .mli) 
+value's symbol is displayed in red. If the module sources (.ml or .mli) 
 are available, and a Gnu-Emacs compatible TAGS file has been generated 
 for them with
 .B mletags,
@@ -123,3 +132,7 @@ An initial list of modules to be displayed.
 
 .SH AUTHOR
 Francois Rouaix (Francois.Rouaix@inria.fr)
+
+.SH BUGS
+Positioning a displayed source file on a given symbol according to a TAGS
+file does not always work (it doesn't work exactly like in Gnu-Emacs anyway).
