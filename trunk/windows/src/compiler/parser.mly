@@ -106,7 +106,7 @@
 %left  AS
 %left  BAR
 %left  COMMA
-%right OR BACKSLASHSLASH
+%left  OR BACKSLASHSLASH
 %left  AMPERSAND SLASHBACKSLASH
 %left  NOT
 %left  INFIX1 EQUAL EQUALEQUAL          /* comparisons, concatenations */

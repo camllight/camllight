@@ -370,3 +370,28 @@ let rec labels_of_type ty =
       fatal_error "labels_of_type"
 ;;
 
+(* Check whether a type constructor is a recursive abbrev *)
+
+exception Recursive_abbrev;;
+
+let check_recursive_abbrev cstr =
+  match cstr.info.ty_abbr with
+    Tnotabbrev -> ()
+  | Tabbrev(params, body) ->
+      let rec check_abbrev ty =
+        match (type_repr ty).typ_desc with
+          Tvar _ -> ()
+        | Tarrow(t1, t2) -> check_abbrev t1; check_abbrev t2
+        | Tproduct tlist -> do_list check_abbrev tlist
+        | Tconstr(c, tlist) ->
+            if c == cstr then
+              raise Recursive_abbrev
+            else begin
+              do_list check_abbrev tlist;
+              begin match c.info.ty_abbr with
+                Tnotabbrev -> ()
+              | Tabbrev(params, body) -> check_abbrev body
+              end
+            end
+      in check_abbrev body
+;;

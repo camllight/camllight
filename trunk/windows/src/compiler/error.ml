@@ -218,6 +218,13 @@ let illegal_type_redefinition loc ty_desc =
   raise Toplevel
 ;;
 
+let recursive_abbrev_err loc ty_cstr =
+  eprintf "%aThe type abbreviation %a is a cyclic (infinite) type.\n"
+    output_location loc 
+    output_type_constr ty_cstr;
+  raise Toplevel
+;;
+
 let partial_apply_warning loc =
   eprintf "%aWarning: this function application is partial,\n\
            maybe some arguments are missing.\n"
@@ -248,3 +255,4 @@ let displacement_overflow () =
     output_input_name;
   raise Toplevel
 ;;
+

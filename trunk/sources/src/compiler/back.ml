@@ -328,8 +328,8 @@ let rec compile_expr staticfail =
   | Lcond(arg, casel) ->
         let C1 =
           if match casel with
-            (ACint _, _) :: _ -> true
-          | (ACchar _, _) :: _ -> true
+            (ACint _, _) :: _ :: _ -> true
+          | (ACchar _, _) :: _ :: _ -> true
           | _ -> false
           then
             comp_decision (compile_nbranch int_of_atom casel) C
