@@ -1,0 +1,8 @@
+#ifdef macintosh
+#include "::version.h"
+#else
+#include "../version.h"
+#endif
+
+let print_banner() =
+  interntl__printf ">       Caml Light version %s\n" VERSION; ();;

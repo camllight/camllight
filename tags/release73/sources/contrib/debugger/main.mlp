@@ -1,0 +1,129 @@
+(**) #open "misc";;
+(**) #open "unix";;
+(**) #open "interruption";;
+(**) #open "input_handling";;
+(**) #open "lexing";;
+(**) #open "command_line_interpreter";;
+(**) #open "debugger_config";;
+(**) #open "checkpoints";;
+(**) #open "time_travel";;
+(**) #open "parameters";;
+(**) #open "program_management";;
+(**) #open "modules";;
+(**) #open "frames";;
+(**) #open "show_information";;
+
+let toplevel_loop () =
+  let line_buffer = create_lexer read_user_input in
+    let rec loop () =
+      try
+      	let rec loop2 () =
+	  (try
+             line_loop line_buffer
+	   with
+             End_of_file ->
+      	       forget_process
+                 !current_checkpoint.C_fd
+                 !current_checkpoint.C_pid;
+               flush std_out;
+               rollback ();
+	       stop_user_input ();
+               loop2 ());
+      	  if !loaded && (not (yes_or_no "The program is running. Quit anyway")) then
+	    loop2 ()
+	in
+	  loop2 ()
+      with
+        Toplevel ->
+          flush std_out;
+          rollback ();
+	  stop_user_input ();
+          loop ()
+      | sys__Break ->
+      	  (try
+      	     print_endline "Interrupted.";
+	     exec_protected
+	       (function () ->
+                  flush std_out;
+                  rollback ();
+	          stop_user_input ();
+	          if !loaded then
+	            ((try select_frame 0 with Not_found -> ());
+	             show_current_event ()))
+	   with sys__Break -> ());
+	  loop ()
+      | Current_checkpoint_lost ->
+          (try
+	     print_endline "Trying to recover...";
+             flush std_out;
+             rollback ();
+	     stop_user_input ();
+	     recover ();
+	     (try select_frame 0 with Not_found -> ());
+	     show_current_event ()
+           with
+	     x ->
+	       if x = sys__Break then
+      	       	 print_endline "Interrupted";
+	       print_endline "Can't recover; killing program...";
+	       flush std_out;
+      	       kill_program ());
+          loop ()
+      | Cannot_find_file name ->
+          print_string "Cannot find file "; print_endline name;
+          flush std_out;
+          rollback ();
+          stop_user_input ();
+          loop ()
+      | x ->
+      	  kill_program ();
+          raise x
+    in
+      loop ();;
+
+let stdlib = ref "LIBDIR";;
+
+let anonymous s =
+  program_name := s
+and set_stdlib p =
+  stdlib := p
+and set_socket s =
+  socket_name := s
+and set_checkpoints n =
+  checkpoint_max_count := n
+and set_directory dir =
+  sys__chdir dir
+and set_emacs () =
+  emacs := true;;
+
+let main () =
+  try
+					(* Initializations. *)
+    socket_name := "/tmp/camldebug" ^ (string_of_int (getpid ()));
+    arg__parse
+      ["-stdlib", arg__String set_stdlib;
+       "-s", arg__String set_socket;
+       "-c", arg__Int set_checkpoints;
+       "-cd", arg__String set_directory;
+       "-emacs", arg__Unit set_emacs]
+      anonymous;
+    toplevel := true;
+    use_extended_interfaces := true;
+    default_load_path := ["."; !stdlib];
+    load_path := !default_load_path;
+    reset_opened_modules();
+    initialize_interpreter ();
+    current_prompt := debugger_prompt;
+
+    version__print_banner();	(* Banner. *)
+    print_newline();
+
+    initialize_interruptions ();
+    toplevel_loop ();			(* Toplevel. *)
+    kill_program ();
+    io__exit 0
+  with
+    Toplevel -> exit 2
+  | Zinc s -> prerr_string "# Internal error: "; prerr_endline s; exit 4;;
+
+printexc__f (handle_unix_error main) ();;

@@ -1,0 +1,185 @@
+.TH CAMLBROWSER 1
+
+.SH NAME
+camlbrowser \- A Caml Light environment browser
+
+.SH SYNOPSIS
+.B camlbrowser
+[
+.B \-d|-display display
+]
+[
+.B \-mono
+]
+[
+.B \-stdlib stdlib-dir
+]
+[
+.B \-I lib-dir
+]
+[
+.B \-O module-set
+]
+[
+.B \-tags
+]
+.I module ...
+
+.SH DESCRIPTION
+.B camlbrowser
+is an hypertext tool to browse library and program modules.
+The various elements of the interface work as follows :
+
+.TP
+.B Opened Modules
+displays the list of 
+.I opened
+modules. Clicking on the
+.I Open Module
+button will display the list of compiled module interfaces available
+in the 
+.I Load path.
+If a directory is highlighted in the 
+.I Load path
+display, only modules in that directory are prooposed.
+After clicking on the
+.I Ok
+button, the selected modules will be added to the list of 
+.I Opened Modules.
+Opening a module in
+.B camlbrowser
+is essentially the same operation as the
+.B #open
+directive in the Caml Light toplevel.
+
+.TP
+.B Load Path
+displays the list of directories in the load path. The current directory (.)
+is implicit and always first in the load path.
+Clicking on the
+.I Add Directory
+button allows the extension of the
+.I Load Path.
+Adding a directory in
+.B camlbrowser
+is essentially the same operation as the
+.B #directory
+directive in the Caml Light toplevel.
+
+.SH FEATURES
+.TP
+.B Compiled interface (.zi) display
+Double-clicking on an entry of the 
+.I Opened Modules
+list will open a window displaying the values, types and exceptions defined
+in this module. 
+
+.TP
+.B Type navigation
+Double-clicking on a 
+.I type constructor
+(symbols displayed in blue) will open a window displaying the corresponding
+type definition, from its compiled module interface.
+
+.TP
+.B Symbol definition search
+After typing a symbol in the
+.I Enter a global symbol
+entry widget, pressing return will open windows displaying definitions for
+this symbol in all name spaces (types, values, constructors, labels). If the
+symbol is not defined, no window will appear. Naturally, the definitions
+are searched in the 
+.I Opened modules
+if the symbol is not qualified, or in its definition module if the symbol
+is qualified (module__symbol).
+
+.TP
+.B Source display
+.I View source file
+allows the display of Caml Light source files, that is implementations (.ml)
+or interfaces (.mli). The given file will be looked for in the
+.I Load path
+(where the current directory is always first and implicit).
+Caml Light keywords are underlined, comments are displayed in red.
+Double-clicking on a directory in the
+.I Load path
+display proposes sources in that directory only.
+
+
+.TP
+.B Source navigation
+Double clicking in displayed source files is equivalent to
+.I Symbol definition search.
+Note however that this search does not follow the semantics of the compiler,
+since neither local bindings nor #open directives in the source file are
+taken into account.
+
+.TP
+.B Library source lookup with TAGS
+For a value description displayed from a compiled module interface, the
+value's symbol is displayed in red. If the module sources (.ml or .mli) 
+are available, and a Gnu-Emacs compatible TAGS file has been generated 
+for them with
+.B mletags,
+then the sources of this module will be displayed, an positionned to the
+definition of the value.
+.B TAGS
+file are loaded when a directory is added to the
+.I Load path.
+
+.TP
+.B Module selection
+Module selection features keyboard completion, and selection of all modules
+(Meta-A).
+
+.SH OPTIONS
+.TP
+.B \-d|\-display \ display
+sets the display.
+
+.TP
+.B \-mono
+forces monochrome settings on color screens.
+
+.TP
+.B \-stdlib \ stdlib-dir
+Sets the standard library directory.
+
+.TP
+.B \-I \ lib-dir
+Adds
+.I lib-dir 
+to the path of directories searched for compiled interface files .zi
+and source files .ml and .mli. The default is to search in the current
+directory first, then in the Caml Light library.
+
+.TP
+.B \-O \ module_set
+selects the set of modules of the standard library to be loaded. Should be
+one of cautious, fast, none.
+
+.TP
+.B \-tags
+sets the source navigation mode at startup.
+
+.TP
+.B modules ...
+An initial list of modules to be displayed.
+
+.SH SEE ALSO
+
+.B mletags
+(1)
+
+.SH AUTHOR
+Francois Rouaix (Francois.Rouaix@inria.fr)
+
+.SH BUGS
+Positioning a displayed source file on a given symbol according to a TAGS
+file does not always work (it doesn't work exactly like in Gnu-Emacs anyway).
+
+Special characters (anything except alphanumeric and underscore) will defeat
+the anchor mechanism.
+
+.B camlbrowser
+being the main test program for CamlTk, it is subject to creeping featurism.

@@ -1,0 +1,37 @@
+The "libunix" library makes many Unix system calls and system-related
+library functions available to Caml Light programs. See the interface
+file unix.mli for a complete listing.
+
+The "libunix" library has been tested mostly on BSD machines, but some
+care has been taken not to use too many BSD-isms.
+
+DOCUMENTATION
+
+See chapter 16 of the Caml Light documentation.
+
+For those of you who read French, this library is documented in
+"Programmation du systeme Unix en Caml Light" by Xavier Leroy,
+technical report 147, INRIA, 1992, available by anonymous FTP from
+ftp.inria.fr, directory INRIA/publications/RT, file RT-0147.ps.Z.
+The examples in ./Examples/ come from this report.
+
+INSTALLATION
+
+This library is automatically compiled and installed with the
+remainder of the Caml Light system (see ../Makefile).
+
+During compilation, ranlib might emit warnings about .o files that
+have no table of contents.  These warnings can safely be ignored: the
+files in question are actually empty.
+
+USAGE
+
+To use the Unix library from your programs, just do
+
+        camlc -custom <other options> unix.zo <other .zo and .ml files> -lunix
+
+for the linking phase.
+
+If you'd like to have the Unix functions available at toplevel, just do
+
+        camllight camlunix
