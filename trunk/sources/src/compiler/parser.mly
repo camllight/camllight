@@ -256,14 +256,16 @@ Expr :
           { make_expr(Zcondition($2, $4, $6)) }
       | IF Expr THEN Expr  %prec prec_if
           { make_expr(Zcondition($2, $4, make_expr(Zconstruct0(constr_void)))) }
-      | WHILE Expr DO Expr DONE
+      | WHILE Expr DO Expr Opt_semi DONE
           { make_expr(Zwhile($2, $4)) }
-      | FOR Ide EQUAL Expr TO Expr DO Expr DONE
+      | FOR Ide EQUAL Expr TO Expr DO Expr Opt_semi DONE
           { make_expr(Zfor($2, $4, $6, true, $8)) }
-      | FOR Ide EQUAL Expr DOWNTO Expr DO Expr DONE
+      | FOR Ide EQUAL Expr DOWNTO Expr DO Expr Opt_semi DONE
           { make_expr(Zfor($2, $4, $6, false, $8)) }
       | Expr SEMI Expr
-          { make_expr(Zsequence($1, $3)) }
+          { make_expr(Zsequence($1,$3)) }
+      | Expr SEMI Expr SEMI
+          { make_expr(Zsequence($1,$3)) }
       | MATCH Expr WITH Opt_bar Function_match
           { make_expr(Zapply(make_expr(Zfunction $5), [$2])) }
       | MATCH Expr WITH Opt_bar Parser_match
