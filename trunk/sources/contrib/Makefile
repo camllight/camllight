@@ -4,8 +4,8 @@
 # See the file README for a description of the packages and their requirements.
 # Remember that "libunix" is required for
 # "debugger", "libgraph", "camltk",  and "search_isos".
-PACKAGES=libunix libgraph debugger libnum libstr mletags search_isos \
-  caml-tex camlmode lorder profiler camltk
+PACKAGES=libunix libgraph debugger libnum libstr mletags \
+  caml-tex camlmode lorder profiler camltk camlsearch
 
 # Which C compiler to use.
 # Should be the same compiler used to compile the main system (../src).
@@ -83,8 +83,8 @@ SHELL=/bin/sh
 
 ### End of configuration section
 
-SUBDIRS=libunix libgraph debugger libnum libstr mletags search_isos \
-  caml-tex camlmode lorder profiler camltk
+SUBDIRS=libunix libgraph debugger libnum libstr mletags \
+  caml-tex camlmode lorder profiler camltk camlsearch
 
 DEFINES=\
   CC='$(CC)' \
