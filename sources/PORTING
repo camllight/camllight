@@ -62,7 +62,7 @@ library) to the host machine.
 - You should now be able to bootstrap the system on the host machine
 if you wish.
 
-Finally, you will have to write the driver programs camlc and
-camllight. You can either translate the shell scripts from the Unix
-version, or start with the C implementation of camlc and camllight
-found in the PC version.
+Finally, you will have to write the driver programs camlc, camllight
+and camlmktop. You can either translate the shell scripts from the
+Unix version, or start with the C implementations found in the PC
+version.
