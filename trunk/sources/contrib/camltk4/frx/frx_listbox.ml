@@ -10,7 +10,7 @@ let scroll_link sb lb =
   listbox__configure lb 
       	[YScrollCommand (scrollbar__set sb)];
   scrollbar__configure sb 
-        [ScrollCommand (listbox__yview_scroll lb)]
+        [ScrollCommand (listbox__yview lb)]
 ;;
 
 (* 
@@ -64,7 +64,7 @@ let add_completion lb action =
               *)
       	     if ev.Ev_Char <> "" then complete ev.Ev_Time ev.Ev_Char)));
   (* Key specific bindings override KeyPress *)
-  bind lb [[], XKey "Return"] (BindSet([], action));
+  bind lb [[], KeyPressDetail "Return"] (BindSet([], action));
   (* Finally, we have to set focus, otherwise events dont get through *)
   focus__set lb;
   recenter()   (* so that first item is selected *)

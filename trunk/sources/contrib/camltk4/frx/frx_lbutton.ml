@@ -21,7 +21,7 @@ let create parent options =
   let b = button__create f (but@com)
   and l = label__create f (lab@com) in
     pack [b;l][];
-    bind l [[],WhatButton 1] (BindSet ([],(function _ -> button__invoke b)));
+    bind l [[],ButtonPressDetail 1] (BindSet ([],(function _ -> button__invoke b)));
     f
 ;;
 

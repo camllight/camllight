@@ -17,13 +17,14 @@ let version = "$Id$"
  * toplevel windows.
 *)
 
-let open_simple title action memory =
+let open_simple title action notaction memory =
   let t = toplevelw__create (support__new_toplevel_widget "simpleReq") [] in
   focus__set t;
-  grab__set_local t;
   wm__title_set t title;
   let tit = label__create t [Text title] in
-  let e = entry__create t [Relief Sunken; TextVariable memory] in
+  let len = max 40 (string_length (textvariable__get memory)) in
+  let e =
+    entry__create t [Relief Sunken; TextVariable memory; TextWidth len] in
 
   let activate _ =
     let v = entry__get e in
@@ -31,24 +32,23 @@ let open_simple title action memory =
      destroy t;				(* so action can call open_simple *)
      action v in
 
-  bind e [[], XKey "Return"] (BindSet ([], activate));
+  bind e [[], KeyPressDetail "Return"] (BindSet ([], activate));
 
   let f = frame__create t [] in
   let bok = button__create f [Text "Ok"; Command activate] in
   let bcancel = button__create f
-      	    [Text "Cancel"; Command (fun () -> grab__release t; destroy t)] in
+      	    [Text "Cancel"; 
+             Command (fun () -> notaction(); grab__release t; destroy t)] in
 
-    bind t [[], XKey "Return"]
-      	 (BindSet ([], (fun _ -> button__invoke bok)));
-    bind t [[], XKey "Escape"]
-      	 (BindSet ([], (fun _ -> button__invoke bcancel)));
-    bind e [[], XKey "Escape"]
+    bind e [[], KeyPressDetail "Escape"]
       	 (BindSet ([], (fun _ -> button__invoke bcancel)));
     pack [bok; bcancel] [Side Side_Left; Fill Fill_X; Expand true];
     pack [tit;e] [Fill Fill_X];
     pack [f] [Side Side_Bottom; Fill Fill_X];
     frx_widget__resizeable t;
-    focus__set e
+    focus__set e;
+    tkwait__visibility t;
+    grab__set t
 ;;
 
 (*
@@ -56,13 +56,12 @@ let open_simple title action memory =
  * Same remarks as in open_simple.
  * focus seems to be in the listbox automatically
  *)
-let open_list title elements action =
+let open_list title elements action notaction =
   let t = toplevelw__create (support__new_toplevel_widget "openlist") [] in
-  grab__set_local t;
   wm__title_set t title;
 
   let tit = label__create t [Text title] in
-  let fls = frame__create t [Relief Sunken; Borderwidth (Pixels 2)] in 
+  let fls = frame__create t [Relief Sunken; BorderWidth (Pixels 2)] in 
   let lb = listbox__create fls [SelectMode Extended] in
   let sb = scrollbar__create fls [] in
     frx_listbox__scroll_link sb lb;
@@ -77,14 +76,15 @@ let open_list title elements action =
     break() in
 
 
-  bind lb [[Double], WhatButton 1] (BindSetBreakable ([], activate));
+  bind lb [[Double], ButtonPressDetail 1] (BindSetBreakable ([], activate));
 
   frx_listbox__add_completion lb activate; 
 
   let f = frame__create t [] in
   let bok = button__create f [Text "Ok"; Command activate] in
   let bcancel = button__create f 
-      	    [Text "Cancel"; Command (fun () -> grab__release t; destroy t)] in
+      	    [Text "Cancel"; 
+             Command (fun () -> notaction(); grab__release t; destroy t)] in
 
     pack [bok; bcancel] [Side Side_Left; Fill Fill_X; Expand true];
     pack [lb] [Side Side_Left; Fill Fill_Both; Expand true];
@@ -92,5 +92,45 @@ let open_list title elements action =
     pack [tit] [Fill Fill_X];
     pack [fls] [Fill Fill_Both; Expand true];
     pack [f] [Side Side_Bottom; Fill Fill_X];
-    frx_widget__resizeable t
+    frx_widget__resizeable t;
+    tkwait__visibility t;
+    grab__set t
+;;
+
+
+(* Synchronous *)
+let open_passwd title =
+  let username = ref ""
+  and password = ref ""
+  and cancelled = ref false in
+  let t = toplevelw__create (support__new_toplevel_widget "passwReq") [] in
+  focus__set t;
+  wm__title_set t title;
+  let tit = label__create t [Text title]
+  and fu,eu = frx_entry__new_label_entry t "Username" (fun s -> ())
+  and fp,ep = frx_entry__new_label_entry t "Password" (fun s -> ())
+  in
+  let fb = frame__create t [] in
+   let bok = button__create fb 
+      	      [Text "Ok"; Command (fun _ -> 
+	                            username := entry__get eu;
+				    password := entry__get ep;
+                                    grab__release t; (* because of wm *)
+                                    destroy t)] (* will return from tkwait *)
+   and bcancel = button__create fb
+              [Text "Cancel"; Command (fun _ ->
+	                            cancelled := true;
+                                    grab__release t; (* because of wm *)
+                                    destroy t)] (* will return from tkwait *)
+  in
+    entry__configure ep [Show `*`];
+    pack [bok; bcancel] [Side Side_Left; Fill Fill_X];
+    pack [tit;fu;fp;fb] [Fill Fill_X];
+    frx_widget__resizeable t;
+    focus__set eu;
+    tkwait__visibility t;
+    grab__set t;
+    tkwait__window t;
+    if !cancelled then failwith "cancelled"
+    else (!username, !password)
 ;;
