@@ -112,5 +112,5 @@ Error recovery is not implemented.
 Type checking is performed when compiling the `.ml' output file, not
 when compiling the grammar. This does not break type safety, since the
 `.ml' output file is well-typed iff the input grammar is well-typed.
-However, this results in type error messages that are somehow hard to
+However, this results in type error messages that are somewhat hard to
 relate to the input grammar.
