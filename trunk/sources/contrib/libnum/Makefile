@@ -80,14 +80,20 @@ depend: nat.ml int_misc.ml
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
 big_int.zi: nat.zi 
-num.zi: nat.zi big_int.zi ratio.zi 
+format_latex_numbers.zi: ratio.zi num.zi nat.zi big_int.zi 
+format_num.zi: ratio.zi num.zi nat.zi big_int.zi 
+num.zi: ratio.zi nat.zi big_int.zi 
 ratio.zi: nat.zi big_int.zi 
 arith_flags.zo: arith_flags.zi 
 arith_status.zo: arith_status.zi arith_flags.zi 
-big_int.zo: big_int.zi string_misc.zi nat.zi int_misc.zi 
+big_int.zo: big_int.zi int_misc.zi nat.zi 
+format_latex_numbers.zo: format_latex_numbers.zi num.zi int_misc.zi nat.zi \
+    big_int.zi ratio.zi 
+format_num.zo: format_num.zi string_misc.zi num.zi int_misc.zi nat.zi \
+    big_int.zi ratio.zi 
 int_misc.zo: int_misc.zi 
-nat.zo: nat.zi int_misc.zi 
-num.zo: num.zi nat.zi arith_flags.zi int_misc.zi big_int.zi ratio.zi 
-ratio.zo: ratio.zi string_misc.zi nat.zi arith_flags.zi int_misc.zi \
-    big_int.zi 
+nat.zo: nat.zi string_misc.zi int_misc.zi 
+num.zo: num.zi int_misc.zi nat.zi big_int.zi ratio.zi arith_flags.zi 
+ratio.zo: ratio.zi string_misc.zi int_misc.zi nat.zi big_int.zi \
+    arith_flags.zi 
 string_misc.zo: string_misc.zi 
