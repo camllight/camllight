@@ -3,11 +3,14 @@
 type TextVariable == string
 ;;
 
+(* Initialize the variable to avoid error *)
 let new =
   let counter = ref 0 in
   function () ->
     incr counter;
-    "textv"^ string_of_int !counter
+    let v = "textv"^ string_of_int !counter in
+      TkEval [| TkToken "set"; TkToken v; TkToken "" |];
+      v
 ;;
 
 let set v x =
