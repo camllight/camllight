@@ -33,6 +33,7 @@ $y$ increases from the bottom of the screen to the top of the screen,
 and angles are measured counterclockwise (in degrees).
 Drawing is clipped to the screen.
 %
+\begin{latexonly}
 \begin{center}
 \setlength{\unitlength}{0.5mm}
 \begin{picture}(130,100)(-10,-10)
@@ -55,6 +56,7 @@ Drawing is clipped to the screen.
 \put(-10,40){\makebox(0,0)[r]{$y$}}
 \end{picture}
 \end{center}
+\end{latexonly}
 %
 Here are the graphics mode specifications supported by "open_graph" on
 the various implementations of this library.
@@ -95,18 +97,15 @@ or any DPMI-compliant memory manager.
 
 The argument to "open_graph" is interpreted as follows:
 
-\begin{tabular}{|r|p{8cm}|}
-\hline
-Argument to "open_graph" & Graphic mode \\
-\hline
-\verb|"highest"| & highest possible resolution \\
-\verb|"noninterlaced"| & highest possible resolution, non-interlaced mode \\
-\verb|"320x200"| & standard 320x200 VGA mode \\
-\verb|"|$w$\verb"x"$h$\verb|"| & at least $w$ by $h$ pixels, if possible \\
-anything else & default resolution, as set in the "GO32" variable
-(see the installation instructions). \\
-\hline
-\end{tabular}
+\begin{tableau}{|l|p{8cm}|}{Argument to "open_graph"}{Graphic mode}
+\entree{"\"highest\""}{highest possible resolution}
+\entree{"\"noninterlaced\""}{highest possible resolution, non-interlaced mode}
+\entree{"\"320x200\""}{standard 320x200 VGA mode}
+\entree{"\""\var{w}"x"\var{h}"\""}{at least \var{w} by \var{h} pixels,
+if possible}
+\entree{anything else}{default resolution, as set in the "GO32" variable
+(see the installation instructions).}
+\end{tableau}
 
 \end{pc}
 

@@ -14,7 +14,7 @@ typexpr:
 The table below shows the relative precedences and associativity of
 operators and non-closed type constructions. The constructions with
 higher precedences come first.
-\begin{tableau}{Operator}{Associativity}
+\begin{tableau}{|l|l|}{Operator}{Associativity}
 \entree{Type constructor application}{--}
 \entree{"*"}{--}
 \entree{"->"}{right}

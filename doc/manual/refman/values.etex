@@ -62,14 +62,12 @@ to be the argument of the non-constant constructor $ncconstr$.
 
 The following constants are treated like built-in constant
 constructors:
-\begin{center}
-\begin{tabular}{ll}
-\verb"false" & the boolean false \\
-\verb"true"  & the boolean true \\
-\verb"()"    & the ``unit'' value \\
-\verb"[]"    & the empty list
-\end{tabular}
-\end{center}
+\begin{tableau}{ll}{Constant}{Constructor}
+\entree{"false"}{the boolean false}
+\entree{"true"}{the boolean true}
+\entree{"()"}{the ``unit'' value}
+\entree{"[]"}{the empty list}
+\end{tableau}
 
 \subsection{Functions}
 
