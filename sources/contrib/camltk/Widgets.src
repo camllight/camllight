@@ -1,4 +1,5 @@
 ############## Standard Tk Widgets and functions ##############
+## $Id$
 type Widget external
 type symbol external
 
@@ -907,6 +908,31 @@ module pack {
     function (widget list) slaves "pack slaves" (widget)
     }
 
+
+type BorderMode {
+  BorderInside "inside"
+  BorderOutside "outide"
+  BorderIgnore "ignore"
+}
+
+subtype option(place) {
+	In X Y Anchor Width Height
+	RelX "-relx" (Units)
+	RelY "-rely" (Units)
+	RelWidth "-relwidth" (float)
+	RelHeigth "-relheight" (float)
+	BorderMode "-bordermode" (BorderMode)
+}
+
+function () place "place" (widget, option(place) list)
+module place {
+    function ()	configure "place configure" (widget, option(place) list)
+    function () forget "place forget" (widget)
+    function (string) info "place info" (widget)
+    function (widget list) slaves "place slaves" (widget)
+}
+
+
 module selection {
    function () clear "selection clear" (widget)
    function (string) get "selection get" ()
@@ -948,7 +974,7 @@ module winfo {
    function (string) geometry "winfo geometry" (widget)
    function (int) height "winfo height" (widget)
    function (string) id "winfo id" (widget)
-   function (symbol) interps "winfo interps" ()
+   function (symbol list) interps "winfo interps" ()
    function (bool) ismapped "winfo ismapped" (widget)
    function (string) name "winfo name" (widget)
    function (widget) parent "winfo parent" (widget)        # bogus for top
@@ -978,13 +1004,77 @@ module winfo {
    function (int) y "winfo y" (widget)
 }
 
+type FocusModel {
+   FocusActive "active"
+   FocusPassive "passive"
+}
+
 module wm {
+### Aspect
+   function () aspect_set "wm aspect" (widget,int,int,int,int)
+   # aspect: problem with empty return
+   function (int,int,int,int) aspect_get "wm aspect" (widget)
+   # clear missing
+### WM_CLIENT_MACHINE
+   function () client_set "wm client" (widget,string)
+   function (string) client_get "wm client" (widget)
+   # clear missing
+### WM_COMMAND
+   # command requires lists
+
    function () deiconify "wm deiconify" (widget)
+
+### Focus model
+   function () focusmodel_set "wm focusmodel" (widget,FocusModel)
+   function (FocusModel) focusmodel_get "wm focusmodel" (widget)
+
+   function (string) frame "wm frame" (widget)
+
+### Geometry
+   # geometry should be a type
+   function () geometry_set "wm geometry" (widget,string)
+   function (string) geometry_get "wm geometry" (widget)
+
+   # grid is missing
+
+### Groups
+   function () group_set "wm group" (widget,widget)
+   # group: problem with empty return
+   function (string) group_get "wm group" (widget)
+### Icon bitmap
+   function () iconbitmap_set "wm iconbitmap" (widget,Bitmap)
+   # iconbitmap: problem with empty return
+   function (Bitmap) iconbitmap_get "wm iconbitmap" (widget)
+   # clear missing
+
    function () iconify "wm iconify" (widget)
-   function () minsize_set "wm minsize" (widget,int,int)
-   function (int,int) minsize_get "wm minsize" (widget)
+
+### Icon mask
+   function () iconmask_set "wm iconmask" (widget,Bitmap)
+   # iconmask: problem with empty return
+   function (Bitmap) iconmask_get "wm iconmask" (widget)
+   # clear missing
+### Icon name
+   function () iconname_set "wm iconname" (widget,string)
+   function (string) iconname_get "wm iconname" (widget)
+### Icon position
+   function () iconposition_set "wm iconposition" (widget,int,int)
+   # iconposition: problem with empty return
+   function (int,int) iconposition_get "wm iconposition" (widget)
+### Icon window
+   function () iconwindow_set "wm iconwindow" (widget,widget)
+   # iconwindow: problem with empty return
+   function (widget) iconwindow_get "wm iconwindow" (widget)
+   # clear missing
+### Sizes
    function () maxsize_set "wm maxsize" (widget,int,int)
    function (int,int) maxsize_get "wm maxsize" (widget)
+   # clear missing
+   function () minsize_set "wm minsize" (widget,int,int)
+   function (int,int) minsize_get "wm minsize" (widget)
+### Override
+   function () overrideredirect_set "wm overrideredirect" (widget,bool)
+   function (bool) overrideredirect_get "wm overrideredirect" (widget)
    function (string) state "wm state" (widget)
    function (string) title_get "wm title" (widget)
    function () title_set "wm title" (widget,string)
@@ -994,9 +1084,9 @@ module wm {
 ################ This stuff is not native Tk
 # The corresponding source must have been installed in $tk_library
 # and the auto_load index must have been updated
-# Alternatively, you can add in your .wishrc a line
+# Alternatively, you can add in your .wishrc or .camltkrc a line
 # lappend auto_path /path/to/contrib
-# also, run a tclsh or wish and type 
+# Don't forget to run a tclsh or wish and type 
 # auto_mkindex /path/to/contrib *.tcl
 # or something equivalent (man library(n) in tcl docs)
 module contrib {
