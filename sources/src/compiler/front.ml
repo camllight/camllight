@@ -82,7 +82,7 @@ let rec size_of_expr expr =
 (* Default cases for partial matches *) 
 
 let partial_fun (Loc(start,stop) as loc) tsb =
-  if tsb == True then not_exhaustive_warning loc;
+  if tsb then not_exhaustive_warning loc;
   Lprim(Praise,
        [Lconst(SCblock(match_failure_tag,
                        [SCatom(ACstring !input_name);
@@ -90,7 +90,7 @@ let partial_fun (Loc(start,stop) as loc) tsb =
                         SCatom(ACint stop)]))])
 ;;
 
-let partial_try (tsb : tristate_logic) =
+let partial_try (tsb : bool) =
   Lprim(Praise, [Lvar 0])
 ;;
 
@@ -263,7 +263,7 @@ and translate_match loc env failure_code casel =
     let (new_env, add_lets) = add_pat_list_to_env env patlist in
       (patlist,
        add_lets(event__before new_env expr (translate_expr new_env expr))) in
-  translate_matching failure_code loc (map transl_action casel)
+  translate_matching_check_failure failure_code loc (map transl_action casel)
 
 and translate_simple_match loc env failure_code pat_expr_list =
   let transl_action (pat, expr) =
