@@ -44,7 +44,6 @@ typedef unsigned long mlsize_t;
 #endif
 typedef unsigned int tag_t;             /* Actually, an unsigned char */
 typedef unsigned long color_t;
-typedef unsigned long mark_t;
 
 #ifdef SIXTYFOUR
 typedef int int32;            /* Not portable, but checked by autoconf. */
@@ -91,9 +90,9 @@ bits  63    10 9     8 7   0
 #define Hd_op(op) (Hd_val (op))                        /* Also an l-value. */
 #define Hd_bp(bp) (Hd_val (bp))                        /* Also an l-value. */
 #define Hd_hp(hp) (* ((header_t *) (hp)))              /* Also an l-value. */
-#define Hp_val(val) ((char *) (((header_t *) (val)) - 1))
-#define Hp_op(op) (Hp_val (op))
-#define Hp_bp(bp) (Hp_val (bp))
+#define Hp_val(val) (& Hd_val (val))
+#define Hp_op(op) (& Hd_op (op))
+#define Hp_bp(bp) (& Hd_bp (bp))
 #define Val_op(op) ((value) (op))
 #define Val_hp(hp) ((value) (((header_t *) (hp)) + 1))
 #define Op_hp(hp) ((value *) Val_hp (hp))
@@ -113,7 +112,11 @@ bits  63    10 9     8 7   0
 #define Wosize_val(val) (Wosize_hd (Hd_val (val)))
 #define Wosize_op(op) (Wosize_val (op))
 #define Wosize_bp(bp) (Wosize_val (bp))
-#define Wosize_hp(hp) (Wosize_hd (Hd_hp (hp)))
+
+/* [Hd_hp] is inlined in the following to avoid problems with "recursive"
+   macro invocation on some broken compilers (ie  Hd_hp (...Hd_hp (...))) */
+#define Wosize_hp(hp) (Wosize_hd (* (header_t *) (hp)))
+
 #define Whsize_wosize(sz) ((sz) + 1)
 #define Wosize_whsize(sz) ((sz) - 1)
 #define Wosize_bhsize(sz) ((sz) / sizeof (value) - 1)
