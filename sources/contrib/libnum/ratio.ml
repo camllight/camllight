@@ -626,9 +626,7 @@ let string_of_ratio r =
            r.Denominator ""
 ;;
 
-(* PW: Supprime
 let string_for_read_of_ratio r = sys_string_of_ratio 10 "#[" r "]";;
-*)
 
 let sys_ratio_of_string base s off_set length = 
  let n = index_char s `/` off_set in

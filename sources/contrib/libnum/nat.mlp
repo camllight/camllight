@@ -219,7 +219,7 @@ let max_superscript_10_power_in_int = 9;;
 let max_power_10_power_in_int = nat_of_int 1000000000;;
 #endif
 
-let raw_string_of_digit nat off =
+let sys_string_of_digit nat off =
   if is_nat_int nat off 1 then string_of_int (nth_digit_nat nat off) else
    begin
     blit_nat B_2 0 nat off 1;
@@ -239,17 +239,6 @@ let raw_string_of_digit nat off =
          result
     end
    end
-;;
-
-(* XL: suppression de string_of_digit et de sys_string_of_digit.
-   La copie est de toute facon faite dans string_of_nat, qui est le
-   seul point d entree public dans ce code. *)
-
-let sys_string_of_digit nat off =
-    let s = raw_string_of_digit nat off in
-    let result = create_string (string_length s) in
-    blit_string s 0 result 0 (string_length s);
-    s
 ;;
 
 let string_of_digit nat =
@@ -275,8 +264,6 @@ let make_power_base base power_base =
   while !j <= !i && is_digit_int power_base !j do incr j done;
   (!i - 1, min !i !j);;
 
-(* XL: suppression de adjust_string *)
-(* PW: ajout de adjust_string *)
 (* /*
    on compte les zéros placés au début de la chaine, 
    on en déduit la longueur réelle de la chaine 
@@ -344,8 +331,6 @@ let power_base_int base i =
   end
 ;;
 
-(* XL: ai specialise le code d origine a length_of_digit = 32. *)
-(* Puis suppression (inutile?) *)
 (* /* PW: rajoute avec 32 et 64 bits */ *)
 
 (* the base-th element (base >= 2) of num_digits_max_vector is :
@@ -374,8 +359,6 @@ let num_digits_max_vector =
    machine word (length_of_digit or size_word).)
 *)
 
-(* XL: suppression de string_list_of_nat *)
-(* PW: ajout de string_list_of_nat *)
 let zero_nat = make_nat 1;;
 
 let power_max_map = make_vect 17 zero_nat;;
@@ -513,7 +496,7 @@ let pmax = 9;;
 
 let unadjusted_string_of_nat nat off len_nat =
   let len = num_digits_nat nat off len_nat in
-  if len == 1 then raw_string_of_digit nat off else
+  if len == 1 then sys_string_of_digit nat off else
   let len_copy = ref (succ len) in
   let copy1 = create_nat !len_copy
   and copy2 = make_nat !len_copy
@@ -531,7 +514,7 @@ let unadjusted_string_of_nat nat off len_nat =
                                 rest_digit 0 
                                 copy1 0 (succ !len_copy) 
                                 power_base_max 0;
-                 let str = raw_string_of_digit rest_digit 0 in
+                 let str = sys_string_of_digit rest_digit 0 in
                  blit_string str 0 
                              s (!pos_ref - string_length str)
                              (string_length str);
@@ -557,8 +540,6 @@ let string_of_nat nat =
  sub_string s !index (string_length s - !index)
 ;;
 
-(* XL: suppression de sys_string_of_nat *)
-(* PW: ajout de sys_string_of_nat *)
 let sys_string_of_nat base before nat off len after =
   if base == 10 then 
     if num_digits_nat nat off len == 1 &&
@@ -576,8 +557,6 @@ let sys_string_of_nat base before nat off len after =
 ;;
 
 
-(* XL: suppression de debug_string_nat *)
-(* PW: ajout de debug_string_nat *)
 let power_debug = nat_of_int 256;;
 
 (*
@@ -683,9 +662,6 @@ let simple_sys_nat_of_string base s off len =
     nat
 ;;
 
-(********************
-added: PW
-*)
 (* base_power_nat base n nat compute nat*base^n *)
 let base_power_nat base n nat =
   match sign_int n with

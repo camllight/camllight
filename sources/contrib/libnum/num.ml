@@ -127,9 +127,6 @@ let mult_num = fun
 
  | (Big_int bi1) (Big_int bi2) -> 
      Big_int (mult_big_int bi1 bi2)
-(* Was
-     num_of_big_int (mult_big_int bi1 bi2)
-*)
  | (Big_int bi) (Ratio r) ->
      num_of_ratio (mult_big_int_ratio bi r)
  | (Ratio r) (Big_int bi) ->
@@ -393,8 +390,6 @@ let string_of_big_int_for_num bi =
 
 (* Coercion with string type *)
 
-(* XL: suppression de sys_string_of_num *)
-(* PW: ajout de sys_string_of_num *)
 let sys_string_of_num base before n after = 
   match (cautious_normalize_num_when_printing n) with 
   | Int i -> sys_string_of_int base before i after
@@ -412,7 +407,6 @@ let string_of_num n =
     string_of_normalized_num (cautious_normalize_num_when_printing n)
 ;;
 
-(* PW: Readded *)
 let string_for_read_of_num n = sys_string_of_num 10 "#{" n "}"
 ;;
 
@@ -431,10 +425,7 @@ let float_of_num = function
 | Ratio r -> float_of_ratio r
 ;;
 
-(* XL: suppression de num_of_float, float_num *)
-(* PW: ajout de num_of_float, float_num *)
-let num_of_float f = num_of_ratio (ratio_of_float f)
-;;
+let num_of_float f = num_of_ratio (ratio_of_float f);;
 
 let float_num n = num_of_float (float_of_num n);;
 
