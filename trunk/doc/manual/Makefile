@@ -2,7 +2,7 @@ FILES=allfiles.tex biblio.tex foreword.tex
 DVI2TXT=../tools/dvi2txt
 TEXINPUTS=.:..:../refman:../library:../cmds:../../styles:/usr/local/lib/tex/inputs
 TEXFONTS=../../styles:/usr/local/lib/tex/fonts
-RELEASE=../../rel6/cl6
+RELEASE=$$HOME/release/cl7
 
 manual: files
 	cd texstuff; \
@@ -46,8 +46,8 @@ clean:
 	rm -f texstuff/*
 
 release:
-	compress < texstuff/manual.dvi > $(RELEASE)refman.dvi.Z
-	dvips -Plw -o '!compress > $(RELEASE)refman.ps.Z' texstuff/manual.dvi
+	gzip < texstuff/manual.dvi > $(RELEASE)refman.dvi.gz
+	dvips -Pps -o '!gzip > $(RELEASE)refman.ps.gz' texstuff/manual.dvi
 	cp texstuff/plaintext.txt $(RELEASE)refman.txt
 	cp texstuff/plaintext.ipr $(RELEASE)refman.prn
 

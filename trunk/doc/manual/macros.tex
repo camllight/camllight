@@ -182,6 +182,13 @@ Operator & Associated & Behavior in the default environment \\
 
 \let\mysection=\section
 
+%%% Augmenter l'espace entre numero de section
+%   et nom de section dans la table des matieres.
+
+\ifplaintext\else
+\def\l@section{\@dottedtocline{1}{1.5em}{2.8em}}  % D'origine: 2.3
+\fi
+
 %%% Fin des hacks
 
 \makeatother
