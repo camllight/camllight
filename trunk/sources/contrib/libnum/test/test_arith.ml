@@ -16,135 +16,142 @@ testing_function "nat arithmetics";;
 let sqrt640320 digits =
   let len = 2 * digits in
   let real_len = succ len in
-  let nat = create_nat real_len in
-    set_digit_nat nat len 10005;
-    shift_left_nat nat 0 real_len (create_nat 1) 0 6;
-    (* now nat = 10005*2^6*2^(32*digits) *)
-    sqrt_nat nat 0 real_len;;
+  let nat = make_nat real_len in
+    (set_digit_nat nat len 640320);
+    (* now nat = 640320*2^(32(or 64)*digits) *)
+    (sqrt_nat nat 0 real_len)
+;;
 
 let exchange r1 r2 = let tmp = !r1 in r1 := !r2; r2 := tmp;;
 
-let approx_pi_nat digits =
-  (* Number of digits *)
-  let iter = 
-    int_of_big_int (
-      ceiling_ratio (
-        add_ratio (ratio_of_string "-114/100") 
-                   (mult_int_ratio digits (ratio_of_string "68/100")))) in
-  (* Sizes *)
-  let size_sum = if iter <= 7 then 1 else 2
-  and max_size_prod = 
-    int_of_big_int (
-      ceiling_ratio (
-        add_ratio (ratio_of_string "1625117/100000000") 
-                   (mult_int_ratio iter (ratio_of_string "123061/100000"))))
-  and common = mult_int_ratio iter (ratio_of_string "2613/1000") in
-  let max_sized = 
-    succ (digits + (int_of_big_int (
-          ceiling_ratio (add_ratio (ratio_of_string "1168/1000") common))))
-  and max_sizen = 
-    digits + (int_of_big_int (
-            ceiling_ratio (add_ratio (ratio_of_string "1418/1000") common))) in
-  (* Creations *)
-  let prod = make_nat max_size_prod 
-  and sum = make_nat size_sum
-  and n = ref (make_nat max_sizen)
-  and d = ref (make_nat max_sized)
-  and incr_den = make_nat 3
-  and binom = make_nat 3
-  and monom = make_nat 3
-  and six_pow3 = nat_of_string "65634353160192000"
-  and sixn = make_nat 1 
-  and twon = make_nat 1
-  and incr_sum = nat_of_string "545140134" 
-  and aux1 = ref (make_nat max_sizen) (* aux1 and aux2 are auxiliary *)
-  and aux2 = ref (make_nat max_sizen) (* variables for computing n and d *)
-  and size_aux1 = ref 1
-  and size_aux2 = ref 1
-  and size_prod = ref 1
-  and new_size_prod = ref 1
-  and sizen = ref 1
-  and sized = ref 1
-  in 
-    (* Initialisation *)
-    set_digit_nat prod 0 1; 
-    blit_nat sum 0 (nat_of_string "13591409") 0 1;
-    blit_nat !n 0 (nat_of_string "13591409") 0 1;    
-    blit_nat !d 0 (nat_of_string "53360") 0 1;
-    blit_nat incr_den 0 (nat_of_string "10939058860032000") 0 2;
-    blit_nat binom 0 (nat_of_string "10939058860032000") 0 2;
-    (* Treatment *)
-    for i = 1 to iter do
-        (* Treatment of prod *)
-        new_size_prod := min max_size_prod (succ !size_prod);
-        set_mult_digit_nat prod 0 !new_size_prod
-                        prod 0 !new_size_prod sixn 0;
-        set_incr_nat sixn 0 1 1;
-        set_incr_nat sixn 0 1 1;
-        set_incr_nat sixn 0 1 1;
-        set_incr_nat sixn 0 1 1;
-        set_mult_digit_nat prod 0 !new_size_prod prod 0 !new_size_prod sixn 0;
-        set_incr_nat sixn 0 1 1;
-        set_incr_nat sixn 0 1 1;
-        set_mult_digit_nat prod 0 (min max_size_prod (succ !new_size_prod)) 
-                       prod 0 !new_size_prod twon 0;
-        set_incr_nat twon 0 1 1;
-        set_incr_nat twon 0 1 1;   
-        size_prod := 
-          num_digits_nat prod 0 (min max_size_prod (succ !new_size_prod));
-        (* Treatment of sum *)
-        set_add_nat sum 0 size_sum incr_sum 0 1 0;
-        (* Treatment of n *)
-       set_mult_nat !aux1 0 (!size_prod + size_sum) 
-                 prod 0 !size_prod sum 0 size_sum;
-       size_aux1 := num_digits_nat !aux1 0 (!size_prod + size_sum);
-       exchange n aux2;
-       exchange sizen size_aux2;
-       set_mult_nat !n 0 (!size_aux2 + 3) 
-                 !aux2 0 !size_aux2 incr_den 0 3;
-       sizen := num_digits_nat !n 0 (!size_aux2 + 3);
-       if (i mod 2 = 0)
-          then set_add_nat !n 0 (succ (max !sizen !size_aux1))
-                           !aux1 0 !size_aux1 0
-          else set_sub_nat !n 0 !sizen !aux1 0 !size_aux1 1;
-       sizen := num_digits_nat !n 0 (succ (max !sizen !size_aux1));
-       (* Treatment of d *)
-       set_to_zero_nat !aux1 0 !size_aux1;
-       size_aux1 := 1;
-       set_to_zero_nat !aux2 0 !size_aux2;
-       size_aux2 := 1;
-       exchange d aux2;
-       exchange sized size_aux2;
-       set_mult_nat !d 0 (!size_aux2 + 3)
-                  !aux2 0 !size_aux2 incr_den 0 3;
-       sized := num_digits_nat !d 0 (!size_aux2 + 3);
-       set_to_zero_nat !aux2 0 !size_aux2;     
-       size_aux2 := 1;
-       (* Treatment of incr_den *)
-       set_add_nat monom 0 3 six_pow3 0 2 0;
-       set_add_nat binom 0 3 monom 0 3 0;
-       set_add_nat incr_den 0 3 binom 0 3 0
-   done;
-   let sq = sqrt640320 digits in
-     exchange d aux2;
-     exchange sized size_aux2;
-     set_mult_nat !d 0 (min (!size_aux2 + (succ digits)) max_sized) 
+let sizes digits =
+ (* Number of digits *)
+ let c2 = mult_int_ratio length_of_digit (ratio_of_string "0.02122673") in
+ let c1 = sub_ratio (ratio_of_string "0.21008") c2 in
+ let c3 = div_ratio_int (ratio_of_string "39.38") length_of_digit in
+ let c4 = div_ratio_int (ratio_of_string "0.52004") length_of_digit in
+ let c5 = div_ratio_int (ratio_of_string "83.6045") length_of_digit in
+ let c6 = div_ratio_int (ratio_of_string "37.36751") length_of_digit in
+ let c7 = div_ratio_int (ratio_of_string "45.36023") length_of_digit in
+ let iter = 
+   int_of_big_int (ceiling_ratio (add_ratio c1 (mult_int_ratio digits c2))) in
+ (* Sizes *)
+ (* Compte tenu qu'au plus 3.10^18 e'tapes *)
+ let size_sum = 
+  num_digits_big_int (mult_int_big_int iter (big_int_of_string "545140134")) 
+ and max_size_prod =
+   int_of_big_int (ceiling_ratio (add_ratio c4 (mult_int_ratio iter c3))) 
+ and common = mult_int_ratio iter c5 in
+ let max_sized = 
+   succ (digits + (int_of_big_int (ceiling_ratio (add_ratio c6 common))))
+ and max_sizen = 
+   digits + (int_of_big_int (ceiling_ratio (add_ratio c7 common))) in
+ iter, size_sum, max_size_prod, max_sized, max_sizen;;
+
+let approx_pi_nat make_sizes digits =
+ let iter, size_sum, max_size_prod, max_sized, max_sizen = make_sizes digits in
+ (* Creations *)
+ let prod = make_nat max_size_prod 
+ and sum = make_nat size_sum
+ and n = ref (make_nat max_sizen)
+ and d = ref (make_nat max_sized)
+ and incr_den = make_nat 3
+ and binom = make_nat 3
+ and monom = make_nat 3
+ and six_pow3 = nat_of_string "65634353160192000" in
+ let size_six_pow3 = length_nat six_pow3
+ and sixn = make_nat 1 
+ and twon = make_nat 1
+ and incr_sum = nat_of_string "545140134"
+ and aux1 = ref (make_nat max_sizen) (* aux1 and aux2 are auxiliary *)
+ and aux2 = ref (make_nat max_sizen) (* variables for computing n and d *)
+ and size_aux1 = ref 1
+ and size_aux2 = ref 1
+ and size_prod = ref 1
+ and new_size_prod = ref 1
+ and sizen = ref 1
+ and sized = ref 1
+ and size_big = length_nat (nat_of_string "10939058860032000") in
+ (* Initialisation *)
+ set_digit_nat prod 0 1;
+ blit_nat sum 0 (nat_of_string "13591409") 0 1;
+ blit_nat !n 0 (nat_of_string "13591409") 0 1;
+ blit_nat !d 0 (nat_of_string "53360") 0 1;
+ blit_nat incr_den 0 (nat_of_string "10939058860032000") 0 size_big;
+ blit_nat binom 0 (nat_of_string "10939058860032000") 0 size_big;
+ (* Treatment *)
+ for i = 1 to iter do
+  (* Treatment of prod *)
+  new_size_prod := min max_size_prod (succ !size_prod);
+  set_mult_digit_nat prod 0 !new_size_prod prod 0 !new_size_prod sixn 0;
+  set_incr_nat sixn 0 1 1;
+  set_incr_nat sixn 0 1 1;
+  set_incr_nat sixn 0 1 1;
+  set_incr_nat sixn 0 1 1;
+  set_mult_digit_nat prod 0 !new_size_prod prod 0 !new_size_prod sixn 0;
+  set_incr_nat sixn 0 1 1;
+  set_incr_nat sixn 0 1 1;
+  set_mult_digit_nat prod 0 (min max_size_prod (succ !new_size_prod))
+                 prod 0 !new_size_prod twon 0;
+  set_incr_nat twon 0 1 1;
+  set_incr_nat twon 0 1 1;   
+  size_prod := 
+    num_digits_nat prod 0 (min max_size_prod (succ !new_size_prod));
+  (* Treatment of sum *)
+  set_add_nat sum 0 size_sum incr_sum 0 1 0;
+  (* Treatment of n *)
+  set_mult_nat !aux1 0 (!size_prod + size_sum)
+               prod 0 !size_prod sum 0 size_sum;
+  size_aux1 := num_digits_nat !aux1 0 (!size_prod + size_sum);
+  exchange n aux2;
+  exchange sizen size_aux2;
+  set_mult_nat !n 0 (!size_aux2 + 3)
+               !aux2 0 !size_aux2 incr_den 0 3;
+  sizen := num_digits_nat !n 0 (!size_aux2 + 3);
+  if i mod 2 = 0
+  then set_add_nat !n 0 (succ (max !sizen !size_aux1))
+                   !aux1 0 !size_aux1 0
+  else set_sub_nat !n 0 !sizen !aux1 0 !size_aux1 1;
+  sizen := num_digits_nat !n 0 (succ (max !sizen !size_aux1));
+  (* Treatment of d *)
+  set_to_zero_nat !aux1 0 !size_aux1;
+  size_aux1 := 1;
+  set_to_zero_nat !aux2 0 !size_aux2;
+  size_aux2 := 1;
+  exchange d aux2;
+  exchange sized size_aux2;
+  set_mult_nat !d 0 (!size_aux2 + 3)
+               !aux2 0 !size_aux2 incr_den 0 3;
+  sized := num_digits_nat !d 0 (!size_aux2 + 3);
+  set_to_zero_nat !aux2 0 !size_aux2;
+  size_aux2 := 1;
+  (* Treatment of incr_den *)
+  set_add_nat monom 0 3 six_pow3 0 size_six_pow3 0;
+  set_add_nat binom 0 3 monom 0 3 0;
+  set_add_nat incr_den 0 3 binom 0 3 0
+ done;
+ let sq = sqrt640320 digits in
+ exchange d aux2;
+ exchange sized size_aux2;
+ set_mult_nat !d 0 (min (!size_aux2 + (succ digits)) max_sized)
               !aux2 0 !size_aux2 sq 0 (succ digits);
-     blit_nat !n digits !n 0 !sizen; 
-     create_ratio (big_int_of_nat !d) (big_int_of_nat !n);;
+ blit_nat !n digits !n 0 !sizen;
+ create_ratio (big_int_of_nat !d) (big_int_of_nat !n);;
 
 let num_of_digits digits = 
-  int_of_big_int (ceiling_ratio (mult_int_ratio digits 
-    (ratio_of_string "1038103/10000000")));;
+  let c = div_ratio_int (ratio_of_string "3.322") length_of_digit in
+  int_of_big_int (ceiling_ratio (mult_int_ratio digits c));;
 
-let approx_pi10 digits = approx_pi_nat (num_of_digits digits);;
+let approx_pi10 digits =
+ approx_pi_nat sizes (num_of_digits digits);;
 
-(* Le code ci-dessus est spécialisé à 32 bits. *)
-let pi10000_nat =
- match length_of_int with
- | 30 -> approx_ratio_fix 10000 (approx_pi10 10000)
- | _ -> pi_dec;;
+let approx_pi10_fix digits =
+  approx_ratio_fix digits (approx_pi10 digits);;
 
+
+let pi10000_nat = approx_pi10_fix 10000;;
+
+test 0 eq_string (approx_pi10_fix 1000, pi_dec_1000);;
 test 1 eq_string (pi10000_nat, pi_dec);;
 
 
@@ -152,6 +159,7 @@ testing_function "num arithmetics";;
 
 let num_digits_of_num x = num_of_int (num_digits_big_int (big_int_of_num x))
 ;;
+
 let test_nums x y z t = 
   (num_digits_of_num x) +/ (num_digits_of_num y) +/ z >/ (num_digits_of_num t)
 and sqrt640320 digits = 
