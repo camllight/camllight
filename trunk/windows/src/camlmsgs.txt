@@ -349,3 +349,8 @@ es:     <Imposible imprimir la excepción>
 src:    %tWarning: useless #open on module "%s".\n
 fr:     %tRemarque: directive #open inutile pour le module "%s".\n
 es:     %tAviso: directiva #open inútil para el módulo "%s".\n
+
+src:    %aThe type %a has been declared with %d parameter(s)\n\
+        but is here defined with %d parameter(s).\n
+fr:     %aLe type %a, qui a été déclaré avec %d paramètre(s),\n\
+        est ici défini avec %d paramètres(s).\n
