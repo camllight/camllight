@@ -116,5 +116,7 @@ def "\\entreeoperateur"
 def "\\fromoneto"
   [Print "<i>"; Print_arg; Print "</i> = 1, ..., <i>";
    Print_arg; Print "</i>"];
+def "\\event"  [Print "\164"];
+def "\\optvar" [Print "[<i>"; Print_arg; Print "</i>]"];
 ();;
 
