@@ -35,7 +35,7 @@ stdlibp.zo: profiler.ml profiler.mli io.ml
 	camlc -c -O none profiler.mli
 	camlc -c -O none profiler.ml
 	/bin/rm -f io.mli
-	-ln -s ../../src/lib/io.mli
+	-ln -s ../../src/lib/io.mli ./io.mli
 	camlc -c -O none io.mli
 	camlc -c -O none io.ml
 	camllibr -stdlib ../../src/lib -o stdlibp.zo $(PRO_IMPL)
