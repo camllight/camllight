@@ -9,6 +9,8 @@ TEXINPUTDIR=/usr/lib/texmf/tex/latex/etc
 
 ### End of configuration section
 
+all: caml
+
 caml: caml.sty
 
 example: example.dvi
