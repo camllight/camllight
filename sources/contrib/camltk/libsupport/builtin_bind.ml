@@ -134,7 +134,7 @@ type EventInfo = {
   mutable Ev_OverrideRedirect : bool;   (* tk: %o *)
   mutable Ev_Place : string;            (* tk: %p *)
   mutable Ev_State : string;            (* tk: %s *)
-  mutable Ev_Time : string;             (* tk: %t *)
+  mutable Ev_Time : int;                (* tk: %t *)
   mutable Ev_ValueMask : int;           (* tk: %v *)
   mutable Ev_Width : int;               (* tk: %w *)
   mutable Ev_MouseX : int;              (* tk: %x *)
@@ -212,7 +212,7 @@ let FillEventInfo ev args = function
   | Ev_State -> 
       ev.Ev_State <- arg_GetTkToken args
   | Ev_Time -> 
-      ev.Ev_Time <- arg_GetTkToken args
+      ev.Ev_Time <- int_of_string (arg_GetTkToken args)
   | Ev_ValueMask -> 
       ev.Ev_ValueMask <- int_of_string (arg_GetTkToken args)
   | Ev_Width -> 
@@ -260,7 +260,7 @@ let WrapEventInfo f what =
     Ev_OverrideRedirect = false;
     Ev_Place = "";
     Ev_State = "";
-    Ev_Time = "";
+    Ev_Time = 0;
     Ev_ValueMask = 0;
     Ev_Width = 0;
     Ev_MouseX = 0;
