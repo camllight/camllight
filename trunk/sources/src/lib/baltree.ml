@@ -30,30 +30,42 @@ let new l x r =
 let bal l x r =
   let sl = match l with Empty -> 0 | Node(_,_,_,s) -> s in
   let sr = match r with Empty -> 0 | Node(_,_,_,s) -> s in
-  if sl > 3 * sr then
-    let (Node(ll, lv, lr, _)) = l in
-    if size ll >= size lr then
-      new ll lv (new lr x r)
-    else
-      let (Node(lrl, lrv, lrr, _)) = lr in
-      new (new ll lv lrl) lrv (new lrr x r)
-  else if sr > 3 * sl then
-    let (Node(rl, rv, rr, _)) = r in
-    if size rr >= size rl then
-      new (new l x rl) rv rr
-    else
-      let (Node(rll, rlv, rlr, _)) = rl in
-      new (new l x rll) rlv (new rlr rv rr)
-  else
+  if sl > 3 * sr then begin
+    match l with
+      Empty -> invalid_arg "baltree__bal"
+    | Node(ll, lv, lr, _) ->
+        if size ll >= size lr then
+          new ll lv (new lr x r)
+        else begin
+          match lr with
+            Empty -> invalid_arg "baltree__bal"
+          | Node(lrl, lrv, lrr, _)->
+              new (new ll lv lrl) lrv (new lrr x r)
+        end
+  end else if sr > 3 * sl then begin
+    match r with
+      Empty -> invalid_arg "baltree__bal"
+    | Node(rl, rv, rr, _) ->
+        if size rr >= size rl then
+          new (new l x rl) rv rr
+        else begin
+          match rl with
+            Empty -> invalid_arg "baltree__bal"
+          | Node(rll, rlv, rlr, _) ->
+              new (new l x rll) rlv (new rlr rv rr)
+        end
+  end else
     Node(l, x, r, sl + sr + 1);;
 
 (* Same as bal, but rebalance regardless of the original ratio
    size l / size r *)
 
 let rec join l x r =
-  let (Node(l', x', r', _) as t') = bal l x r in
-  let sl = size l' and sr = size r' in
-  if sl > 3 * sr or sr > 3 * sl then join l' x' r' else t'
+  match bal l x r with
+    Empty -> invalid_arg "baltree__join"
+  | Node(l', x', r', _) as t' ->
+      let sl = size l' and sr = size r' in
+      if sl > 3 * sr or sr > 3 * sl then join l' x' r' else t'
 ;;
 
 (* Merge two trees l and r into one.

@@ -21,7 +21,7 @@ let clear q =
 ;;
 
 let add x = function
-    { head = Nil as h; tail = Nil as t } ->
+    { head = h; tail = Nil as t } ->    (* if tail = Nil then head = Nil *)
       let c = Cons(x, ref Nil) in
         h <- c; t <- c
   | { tail = Cons(_, ref newtail) as oldtail } ->
