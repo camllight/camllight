@@ -747,7 +747,7 @@ widget scrollbar {
    option Width
 
    function () configure [widget(scrollbar); "configure"; option(scrollbar) list]
-   function (string) configure_get ["configure"]
+   function (string) configure_get [widget(scrollbar); "configure"]
    function (int, int, int, int) get [widget(scrollbar); "get"]
    function () set [widget(scrollbar); "set"; int; int; int; int]
    }
