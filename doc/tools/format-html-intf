@@ -1,0 +1,111 @@
+#!/usr/local/bin/perl
+
+$modname = $ARGV[0];
+shift;
+
+$_ = <>;
+s/^\s*\(\*//;
+s/\*\)\s*$//;
+s/\.\s*$//;
+m/^\s*(.)(.*)/;
+$head = $1;
+$head =~ tr/A-Z/a-z/;
+$_ = $head . $2;
+print "\\section{{\\tt $modname}: $_}\n\n";
+$label = $modname; $label =~ s/[^A-Za-z0-9]//g;
+print "\\label{s:$label}\n";
+print "\\index{$modname (module)@\\verb`$modname` (module)}%\n\n";
+
+$incomment = 0;
+$inverbatim = 0;
+
+line:
+while(<>) {
+  chop;
+  next line if /^$/;
+  last line if /^\s*\(\*-+/;
+  if (m/^\s*\(\*\*+\s*(.*)\*\)\s*$/) {
+    if ($inverbatim) {
+      do end_verbatim();
+    }
+    print "\\subsection*{", $1, "}";
+    next line;
+  }
+  if (s/^\s*\(\*//) {
+    if ($inverbatim) {
+      do end_verbatim();
+    }
+    print "\\begin{comment}\n";
+    $incomment = 1;
+  }
+  if ($incomment) {
+    $endcomment = s/\*\)\s*$//;
+    if (m/^\s*\[\s*$/) {
+      print "\\begin{verbatim}\n";
+      while (($_ = <>) && ! m/^\s*\]\s*$/) {
+        print $_;
+      }
+      print "\\end{verbatim}\n\n";
+    } else {
+      if (s/^-//) { print "\\\\"; }
+      $count = 0;
+      foreach $part (split(/([\[\]])/, $_)) {
+        if ($part eq "[") {
+          print ($count == 0 ? "\\verb\001" : "[");
+          $count++;
+        } elsif ($part eq "]") {
+          $count--;
+          print ($count == 0 ? "\001" : "]");
+        } else {
+          print $part;
+        }
+      }
+    }
+    if ($endcomment) {
+      print "\n\\end{comment}";
+      $incomment = 0;
+      $inverbatim = 0;
+    }
+  } else {
+    next line if /^;;$/;
+    next line if /^#/;
+    s/;;$//;
+    if (! $inverbatim) {
+      print "\\begin{verbatim}\n";
+      $inverbatim = 1;
+    }
+    s/^\s*and/value/;
+    s/ = [0-9] "[^"]*"\s*$//;
+    next line if /^\s*$/;
+    {
+      do indexentry($1, " (infix)"), last
+        if (m/^value prefix ([^ :]*)/);
+      do indexentry($1, ""), last
+        if (m/^value ([a-zA-Z0-9_']*)/);
+      do indexentry($1, " (type)"), last
+        if (m/^type\s.*([a-zA-Z0-9_']*)\s*=/);
+      do indexentry($1, " (exception)"), last
+        if (m/^exception ([a-zA-Z0-9_']*)/);
+    }
+    print $_;
+  }
+  print "\n";
+}
+do end_verbatim() if $inverbatim;
+print "\\end{comment}\n" if $incomment;
+
+sub indexentry {
+  local ($_, $comment) = @_;
+  return if m/^$/ || m/^[a-z]$/;
+  s/([@|!])/"$1/g;
+  push (@index, "\\index{$_$comment@\\verb`$_`$comment}");
+}
+
+sub end_verbatim {
+  print "\\end{verbatim}\n";
+  foreach $idx (@index) {
+    print $idx, "%\n";
+  }
+  undef(@index);
+  $inverbatim = 0;
+}
