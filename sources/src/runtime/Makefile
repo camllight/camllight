@@ -20,13 +20,15 @@ RANLIB=ranlib
 
 OBJS=interp.o misc.o stacks.o fix_code.o main.o fail.o signals.o debugcom.o \
   freelist.o major_gc.o minor_gc.o memory.o alloc.o roots.o \
-  equal.o ints.o floats.o str.o io.o extern.o externcp.o intern.o interncp.o \
+  compare.o ints.o floats.o str.o io.o \
+  extern.o externcp.o intern.o interncp.o \
   hash.o sys.o meta.o parsing.o lexing.o gc_ctrl.o
 
 DOBJS=$(OBJS:.o=.d.o) debugger.d.o
 
-PRIMS=equal.c extern.c externcp.c floats.c gc_ctrl.c hash.c intern.c \
-  interncp.c interp.c ints.c io.c lexing.c meta.c parsing.c str.c sys.c
+PRIMS=compare.c extern.c externcp.c floats.c gc_ctrl.c hash.c \
+  intern.c interncp.c interp.c ints.c io.c lexing.c meta.c parsing.c \
+  str.c sys.c
 
 all: camlrun libcaml.a
 
@@ -108,12 +110,12 @@ depend : prims.c opnames.h jumptbl.h
 ### DO NOT DELETE THIS LINE
 alloc.o : alloc.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
   misc.h debugger.h major_gc.h freelist.h memory.h gc.h minor_gc.h stacks.h 
+compare.o : compare.c fail.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h memory.h gc.h major_gc.h freelist.h minor_gc.h str.h 
 debugcom.o : debugcom.c misc.h config.h ../../config/m.h ../../config/s.h debugger.h \
   mlvalues.h fail.h stacks.h memory.h gc.h major_gc.h freelist.h minor_gc.h io.h \
   debugcom.h 
 debugger.o : debugger.c 
-equal.o : equal.c fail.h misc.h config.h ../../config/m.h ../../config/s.h mlvalues.h \
-  memory.h gc.h major_gc.h freelist.h minor_gc.h str.h 
 extern.o : extern.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
   mlvalues.h fail.h gc.h intext.h io.h memory.h major_gc.h freelist.h minor_gc.h 
 externcp.o : externcp.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
@@ -177,14 +179,14 @@ sys.o : sys.c config.h ../../config/m.h ../../config/s.h alloc.h mlvalues.h \
   major_gc.h freelist.h minor_gc.h 
 alloc.d.o : alloc.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
   misc.h debugger.h major_gc.h freelist.h memory.h gc.h minor_gc.h stacks.h 
+compare.d.o : compare.c fail.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h memory.h gc.h major_gc.h freelist.h minor_gc.h str.h 
 debugcom.d.o : debugcom.c misc.h config.h ../../config/m.h ../../config/s.h debugger.h \
   mlvalues.h fail.h stacks.h memory.h gc.h major_gc.h freelist.h minor_gc.h io.h \
   debugcom.h 
 debugger.d.o : debugger.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
   mlvalues.h instruct.h memory.h gc.h major_gc.h freelist.h minor_gc.h opnames.h \
   stacks.h unalignd.h 
-equal.d.o : equal.c fail.h misc.h config.h ../../config/m.h ../../config/s.h mlvalues.h \
-  memory.h gc.h major_gc.h freelist.h minor_gc.h str.h 
 extern.d.o : extern.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
   mlvalues.h fail.h gc.h intext.h io.h memory.h major_gc.h freelist.h minor_gc.h 
 externcp.d.o : externcp.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
