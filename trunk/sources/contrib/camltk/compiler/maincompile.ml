@@ -90,6 +90,10 @@ let compile () =
       let modname = rename_module wname in
       let oc = open_out_bin ("lib/" ^ modname ^ ".ml") 
       and oc' = open_out_bin ("lib/" ^ modname ^ ".mli") in
+      	begin match wdef.ModuleType with
+	  Widget -> output_string oc' ("(* The "^wname^" widget *)\n")
+	| Family -> output_string oc' ("(* The "^wname^" commands  *)\n")
+	end;
       	output_string oc "#open\"protocol\";;\n";
       	output_string oc "#open\"tk\";;\n";
       	output_string oc' "#open\"tk\";;\n";
@@ -98,7 +102,9 @@ let compile () =
 	begin match wdef.ModuleType with
 	  Widget ->
             write_create (output_string oc) wname;
+            write_named_create (output_string oc) wname;
 	    write_create_p (output_string oc') wname;
+	    write_named_create_p (output_string oc') wname;
       	    do_list (write_command wname (output_string oc)) wdef.Commands;
 	    do_list (write_command_p wname (output_string oc')) wdef.Commands
         | Family ->
