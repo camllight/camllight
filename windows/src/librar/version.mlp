@@ -1,5 +1,0 @@
-#include "../version.h"
-
-let print_banner () =
-  printf__eprintf "The Caml Light librarian, version %s\n" VERSION
-;;
