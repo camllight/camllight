@@ -1,6 +1,5 @@
 (* Association tables over ordered types *)
 
-#open "list";;
 #open "baltree";;
 
 type ('a, 'b) binding =
