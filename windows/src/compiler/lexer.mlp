@@ -128,6 +128,12 @@ let char_for_decimal_code lexbuf i =
 #define SYMBOLS \
     `!` `%` `&` `*` `+` `-` `.` `/` `:` `<` `=` `>` `?` `@` `^` `|` `~`
 
+#ifdef msdos
+#define End_of_file (eof | `\026`)
+#else
+#define End_of_file eof
+#endif
+
 rule main = parse
     [` ` `\010` `\013` `\009` `\012`] +
       { main lexbuf }
@@ -206,7 +212,7 @@ rule main = parse
             { INFIX4(get_lexeme lexbuf) }
   | [ `*` `/` `%` ] [ SYMBOLS ] *
             { INFIX3(get_lexeme lexbuf) }
-  | eof { EOF }
+  | End_of_file { EOF }
   | _
       { raise (Lexical_error(Illegal_character,
                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
@@ -217,7 +223,7 @@ and comment = parse
   | "*)"
       { comment_depth := pred !comment_depth;
         if !comment_depth > 0 then comment lexbuf }
-  | eof
+  | End_of_file
       { raise (Lexical_error(Unterminated_comment, -1, -1)) }
   | _
       { comment lexbuf }
@@ -229,7 +235,7 @@ and char = parse
       { char_for_backslash (get_lexeme_char lexbuf 1) }
   | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`] "`"
       { char_for_decimal_code lexbuf 1 }
-  | [^ `\``] * ("`" | eof)
+  | [^ `\``] * ("`" | End_of_file)
       { raise (Lexical_error(Bad_char_constant,
                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
 
@@ -244,7 +250,7 @@ and string = parse
   | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`]
       { store_string_char(char_for_decimal_code lexbuf 1);
          string lexbuf }
-  | eof
+  | End_of_file
       { raise (Lexical_error(Unterminated_string, -1, -1)) }
   | _
       { store_string_char(get_lexeme_char lexbuf 0);

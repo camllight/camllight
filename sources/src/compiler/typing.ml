@@ -103,10 +103,10 @@ let rec tpat new_env (pat, ty, mut_flag) =
       if mem_assoc v new_env then
         non_linear_pattern_err pat v
       else begin
-        if !warnings then begin
-         if (not !typing_let) & v.[0] >= `A` & v.[0] <= `Z` then
-          upper_case_variable_warning pat v end;
-         (v, (ty, mut_flag)) :: new_env end
+        if !warnings & (not !typing_let) & v.[0] >= `A` & v.[0] <= `Z` then
+          upper_case_variable_warning pat v;
+        (v, (ty, mut_flag)) :: new_env
+      end
   | Zaliaspat(pat, v) ->
       if mem_assoc v new_env then
         non_linear_pattern_err pat v

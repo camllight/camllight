@@ -98,7 +98,15 @@ let kill_module name =
 (* The table of all opened modules. Associate to each unqualified name
    the corresponding descriptor from the right opened module. *)
 
-let opened_modules = ref (new_module "");;
+let opened_modules = ref
+  { mod_name = "";
+    mod_values = hashtbl__new 0;
+    mod_constrs = hashtbl__new 0;
+    mod_labels = hashtbl__new 0;
+    mod_types = hashtbl__new 0;
+    mod_type_stamp = 0;
+    mod_exc_stamp = 0;
+    mod_persistent = false };;
 let opened_modules_names = ref ([]: string list);;
 let used_opened_modules = (hashtbl__new 13 : (string, bool ref) hashtbl__t);;
 
