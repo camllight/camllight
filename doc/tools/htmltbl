@@ -72,10 +72,10 @@ sub format_table {
     $maxwidth = 65 / $numcols;
     for ($x = 0; $x < $numcols; $x++) {
       if ($width[$x] > $maxwidth) {
-        if ($x < $numcols + 1) {
+        if ($x < $numcols - 1) {
           $width[$x] = $maxwidth;
         } else {
-          $width[$x] = 65 - $totalwidth;
+          $width[$x] = 70 - $totalwidth;
         }
       }
       $totalwidth += $width[$x];
