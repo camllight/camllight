@@ -43,12 +43,12 @@ int test(fct, p)
   return res;
 }
 
-jmp_buf timer;
+volatile int timeout;
 
 void alarm_handler(dummy)
      int dummy;
 {
-  longjmp(timer, 1);
+  timeout = 1;
 }
 
 void use(n)
@@ -67,14 +67,12 @@ int speedtest(p)
 
   signal(SIGALRM, alarm_handler);
   sum = 0;
-  if (setjmp(timer) == 0) {
-    alarm(1);
-    total = 0;
-    while(1) {
-      for (q = (int *) p, i = 1000; i > 0; q++, i--)
-        sum += *q;
-      total++;
-    }
+  timeout = 0;
+  total = 0;
+  alarm(1);
+  while(! timeout) {
+    for (q = (int *) p, i = 1000; i > 0; q++, i--) sum += *q;
+    total++;
   }
   use(sum);
   signal(SIGALRM, SIG_DFL);
