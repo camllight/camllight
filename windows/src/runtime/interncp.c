@@ -92,7 +92,7 @@ static void read_compact(chan, dest)
         v = Val_long(input_bytes(chan, 4, 1));
         break;
       case CODE_INT64:
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
         v = Val_long(input_bytes(chan, 8, 1));
         break;
 #else
@@ -135,7 +135,7 @@ static void read_compact(chan, dest)
         *intern_ptr = Make_header(Double_wosize, Double_tag, intern_color);
         intern_ptr += 1 + Double_wosize;
         really_getblock(chan, (char *) v, 8);
-#ifndef BIG_ENDIAN
+#ifndef CAML_BIG_ENDIAN
         Reverse_double(v);
 #endif
         break;
@@ -154,7 +154,7 @@ value intern_compact_val(chan)
   num_objects = getword(chan);
   size_32 = getword(chan);
   size_64 = getword(chan);
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
   whsize = size_64;
 #else
   whsize = size_32;

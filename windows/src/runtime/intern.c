@@ -86,7 +86,7 @@ void rev_pointers(p, size)
   }
 }
 
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
 
 /* Routines to convert 32-bit externed objects to 64-bit memory blocks. */
 
@@ -253,12 +253,12 @@ static void expand_block(source, dest, source_len, dest_len, color)
   }
 }
 
-#else /* !SIXTYFOUR */
+#else /* !CAML_SIXTYFOUR */
 
 /* Routines to convert 64-bit externed objects to 32-bit memory blocks. */
 
 struct value64_struct {
-#ifdef BIG_ENDIAN
+#ifdef CAML_BIG_ENDIAN
   value msw, lsw;
 #else
   value lsw, msw;
@@ -441,9 +441,9 @@ static int shrink_block(source, dest, source_len, dest_len, color)
   return 0;
 }
 
-#endif /* SIXTYFOUR */
+#endif /* CAML_SIXTYFOUR */
 
-#ifdef BIG_ENDIAN
+#ifdef CAML_BIG_ENDIAN
 #define Wrong_endian_32_magic_number Little_endian_32_magic_number
 #define Wrong_endian_64_magic_number Little_endian_64_magic_number
 #else
@@ -471,7 +471,7 @@ static value intern_fast_val(chan, magic)
   }
   bhsize = Bsize_wsize (whsize);
   wosize = Wosize_whsize (whsize);
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
   if (magic == Little_endian_32_magic_number ||
       magic == Big_endian_32_magic_number) {
     /* Expansion 32 -> 64 required */
@@ -508,7 +508,7 @@ static value intern_fast_val(chan, magic)
       rev_pointers(Hp_val (res), whsize);
     adjust_pointers(Hp_val (res), whsize, color);
   }
-#else /* !SIXTYFOUR */
+#else /* !CAML_SIXTYFOUR */
   if (magic == Little_endian_64_magic_number ||
       magic == Big_endian_64_magic_number) {
     /* Shrinkage 64 -> 32 required */
@@ -561,7 +561,7 @@ static value intern_fast_val(chan, magic)
       rev_pointers(Hp_val (res), whsize);
     adjust_pointers(Hp_val (res), whsize, color);
   }
-#endif /* !SIXTYFOUR */
+#endif /* !CAML_SIXTYFOUR */
   return res;
 }
 

@@ -7,7 +7,7 @@
 #include "misc.h"
 #include "mlvalues.h"
 
-#ifdef ALIGN_DOUBLE
+#ifdef CAML_ALIGN_DOUBLE
 
 double Double_val(val)
      value val;

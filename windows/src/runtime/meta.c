@@ -13,7 +13,7 @@ extern value interprete();
 value start_interp(prog, offset, len) /* ML */
      value prog, offset, len;
 {
-#if defined(BIG_ENDIAN) && !defined(ALIGNMENT)
+#if defined(CAML_BIG_ENDIAN) && !defined(CAML_ALIGNMENT)
   fixup_endianness(&Byte(prog, 0), (asize_t) Long_val(len));
 #endif
   return interprete(&Byte(prog, Long_val(offset)));

@@ -43,7 +43,7 @@
   _p[4] = _a;                                                                 \
 }
 
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
 #define Reverse_word Reverse_int64
 #else
 #define Reverse_word Reverse_int32

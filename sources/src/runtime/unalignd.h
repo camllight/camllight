@@ -4,7 +4,7 @@
 #define _unaligned_
 
 
-#ifdef ALIGNMENT
+#ifdef CAML_ALIGNMENT
 
 #define s16(p) (int) ((((schar *) (p))[1] << 8) + ((unsigned char *) (p))[0])
 #define u16(p) (unsigned int) ((((unsigned char *) (p))[1] << 8) \

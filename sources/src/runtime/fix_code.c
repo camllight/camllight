@@ -12,7 +12,7 @@
    native endianness.
 */
 
-#if defined(BIG_ENDIAN) && !defined(ALIGNMENT)
+#if defined(CAML_BIG_ENDIAN) && !defined(CAML_ALIGNMENT)
 
 void fixup_endianness(p, len)
      register code_t p;

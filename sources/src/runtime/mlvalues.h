@@ -45,7 +45,7 @@ typedef unsigned long mlsize_t;
 typedef unsigned int tag_t;             /* Actually, an unsigned char */
 typedef unsigned long color_t;
 
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
 typedef int int32;            /* Not portable, but checked by autoconf. */
 typedef unsigned int uint32;  /* Seems like a reasonable assumption anyway. */
 #else
@@ -99,7 +99,7 @@ bits  63    10 9     8 7   0
 #define Bp_hp(hp) ((char *) Val_hp (hp))
 
 #define Num_tags (1 << 8)
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
 #define Max_wosize ((1L << 54) - 1)
 #else
 #ifdef SIXTEEN
@@ -135,7 +135,7 @@ bits  63    10 9     8 7   0
 #define Bhsize_hp(hp) (Bsize_wsize (Whsize_hp (hp)))
 #define Bhsize_hd(hd) (Bsize_wsize (Whsize_hd (hd)))
 
-#ifdef BIG_ENDIAN
+#ifdef CAML_BIG_ENDIAN
 #define Tag_val(val) (((unsigned char *) (val)) [-1])
                                                  /* Also an l-value. */
 #define Tag_hp(hp) (((unsigned char *) (hp)) [sizeof(value)-1])
@@ -187,7 +187,7 @@ typedef unsigned char *code_t;
 /* Floating-point numbers. */
 #define Double_tag (No_scan_tag + 2)
 #define Double_wosize ((sizeof(double) / sizeof(value)))
-#ifndef ALIGN_DOUBLE
+#ifndef CAML_ALIGN_DOUBLE
 #define Double_val(v) (* (double *) (v))
 #define Store_double_val(v,d) (* (double *) (v) = (d))
 #else

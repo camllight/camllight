@@ -18,14 +18,14 @@
 #define First_valid_magic_number Base_magic_number
 #define Last_valid_magic_number (Base_magic_number + 4)
 
-#ifdef SIXTYFOUR
-# ifdef BIG_ENDIAN
+#ifdef CAML_SIXTYFOUR
+# ifdef CAML_BIG_ENDIAN
 #  define Extern_magic_number Big_endian_64_magic_number
 # else
 #  define Extern_magic_number Little_endian_64_magic_number
 # endif
 #else
-# ifdef BIG_ENDIAN
+# ifdef CAML_BIG_ENDIAN
 #  define Extern_magic_number Big_endian_32_magic_number
 # else
 #  define Extern_magic_number Little_endian_32_magic_number
@@ -70,7 +70,7 @@ struct extern_obj {
 extern struct extern_obj * extern_table;
 extern unsigned long extern_table_size, extern_table_used;
 
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
 #define Hash(v) (((unsigned long) ((v) >> 3)) % extern_table_size)
 #else
 #define Hash(v) (((unsigned long) ((v) >> 2)) % extern_table_size)

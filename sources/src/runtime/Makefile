@@ -3,7 +3,7 @@
 # These options are overriden when called from ../Makefile.
 CC=cc
 OPTS=#-fno-defer-pop
-CFLAGS=-O $(OPTS) -I..
+CFLAGS=-O2 $(OPTS) -I..
 LIBS=
 
 # Test to see whether ranlib exists on the machine

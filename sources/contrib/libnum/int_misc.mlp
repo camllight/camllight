@@ -18,7 +18,7 @@ let num_bits_int n = num_bits_int_aux (abs n);;
 
 let sign_int i = if i == 0 then 0 else if i > 0 then 1 else -1;;
 
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
 let length_of_int = 62;;
 #else
 let length_of_int = 30;;
