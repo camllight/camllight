@@ -1,0 +1,58 @@
+## The WWW Documentation
+## REQUIRES our custom psearch cgi script
+## There are still absolute paths in
+##   camltk.tex
+##   library-header.html
+DIR=../../cl/contrib/camltk
+CAMLTKDIR= $(DIR)/lib
+TKSUPDIR=$(DIR)/libsupport
+
+SUPPORT=$(TKSUPDIR)/protocol.mli $(TKSUPDIR)/support.mli \
+        $(TKSUPDIR)/textvariable.mli
+
+# The top page will be "$DESTDIR/camltk/camltk.html"
+# DESTDIR=/home/pauillac/cristal/rouaix/public_html
+DESTDIR=/net/pauillac/infosystems/www
+# This has to be the url root corresponding to DESTDIR/camltk
+# URLROOT=~rouaix/camltk
+URLROOT=/camltk
+
+GENFILES=tk.mli
+
+GENERATED=`sed -e 's/WIDGETOBJS=//' -e 's,\([a-z_]*\)\.zo,\$(CAMLTKDIR)/\1.mli,g' \
+                      $(CAMLTKDIR)/modules | sort`
+
+all: $(DESTDIR)/camltk/camltk.html $(DESTDIR)/camltk/library/tk.html
+
+
+tk.mli: tkbuiltin.mli $(CAMLTKDIR)/tkgen.mli $(CAMLTKDIR)/tk.ml
+	(cat tkbuiltin.mli; \
+	 cat $(CAMLTKDIR)/tkgen.mli; \
+         sed -n -e '/^type/,/^;;$$/p' $(CAMLTKDIR)/tk.ml \
+	 ) > tk.mli
+
+TKMODULE=tk.mli
+
+INTERFACES=\
+   '%Tk' $(TKMODULE) \
+   '%Widgets' $(GENERATED) \
+   '%Support' $(SUPPORT)
+
+
+$(DESTDIR)/camltk/library/tk.html: tk.mli library-header.html
+	[ -d $(DESTDIR)/camltk ] || mkdir camltk
+	[ -d $(DESTDIR)/camltk/library ] || mkdir $(DESTDIR)/camltk/library
+	cp library-header.html $(DESTDIR)/camltk/library-header.html
+	DESTDIR=$(DESTDIR); URLROOT=$(URLROOT); export DESTDIR URLROOT; \
+        perl format-mli-files $(INTERFACES)
+
+$(DESTDIR)/camltk/camltk.html: camltk.tex
+	latex2html -split 1  -dont_include reference -dir $(DESTDIR) \
+		 camltk.tex
+
+install: all
+	-cp *.gif $(DESTDIR)/camltk
+	cd $(DESTDIR)/camltk; ln -s camltk.html index.html
+
+clean:
+	rm -rf camltk
