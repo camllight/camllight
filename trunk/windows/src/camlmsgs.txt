@@ -180,6 +180,21 @@ fr:	Le fichier %s est introuvable.\n
 src:	The Caml Light librarian, version %s\n
 fr:	Le bibliothécaire Caml Light, version %s\n
 
+src:	The global value %s__%s is referenced (from %s) \
+        before being defined.\n\
+        Please link %s.zo before %s.\n
+fr:	La valeur globale %s__%s est référencée (depuis %s) \
+        avant d'être définie.\n\
+        Veuillez charger %s.zo avant %s.\n
+
+src:	The global value %s__%s is referenced before being defined.\n\
+        Please load an implementation of module %s first.\n
+fr:	La valeur globale %s__%s est référencée avant d'être définie.\n\
+        Veuillez charger une implémentation du module %s d'abord.\n
+
+src:	The C primitive "%s" is not available.\n
+fr:	La primitive C "%s" n'est pas disponible.\n
+
 src:	Error while linking file %s.\n
 fr:	Erreur pendant l'édition des liens du fichier %s.\n
 
