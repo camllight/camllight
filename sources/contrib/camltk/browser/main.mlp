@@ -70,7 +70,7 @@ let module_panel parent =
                                      (listbox__curselection lb)));
   let add_module n =
     try 
-      used_modules := find_module n :: !used_modules; 
+      modules__open_module n;
       listbox__insert lb End [n]
     with
       Toplevel -> begin
@@ -86,7 +86,7 @@ let module_panel parent =
   and close_module () =
     do_list (fun s -> 
 	       let name = (listbox__get lb s) in
-		 used_modules := exceptq (find_module name) !used_modules;
+	         modules__close_module name;
 		 listbox__delete lb s s)
 	    (listbox__curselection lb) in
 
@@ -168,7 +168,7 @@ let main () =
      signal SIGINT (Signal_handle bye);
      signal SIGTERM (Signal_handle bye);
   (* Resources *)
-  resource__add "*library_path" "/usr/local/lib/caml-light"
+  resource__add "*library_path" "LIBDIR"
       WidgetDefault;
   resource__add "*module_set" "cautious"
       WidgetDefault;

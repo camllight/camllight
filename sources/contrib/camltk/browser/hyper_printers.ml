@@ -27,19 +27,11 @@ let print_string s =
    curpos := !curpos + (string_length s)
 ;;
 
-let print_type_constructor {qualid = {qual=m; id = s}} = 
-  let rec can_omit_qualifier = function
-      [] -> false
-    | md1::mdl ->
-        try
-          hashtbl__find (types_of_module md1) s;
-          m = md1.mod_name
-        with Not_found ->
-          can_omit_qualifier mdl in
+let print_type_constructor gl = 
   let beg = !curpos in
-    if not (can_omit_qualifier !used_modules) then
-      (print_string m; print_string "__");
-    print_string s;
+    if not (can_omit_qualifier types_of_module gl) then
+      (print_string gl.qualid.qual; print_string "__");
+    print_string gl.qualid.id;
     tags := (beg, !curpos)::!tags
 ;;
 
