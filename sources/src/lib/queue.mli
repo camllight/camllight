@@ -2,7 +2,7 @@
 
 (* This module implements queues (FIFOs), with in-place modification. *)
 
-type 'a t mutable;;
+type 'a t;;
         (* The type of queues containing elements of type ['a]. *)
 
 exception Empty;;

@@ -92,3 +92,11 @@ value catch_break : bool -> unit = 1 "sys_catch_break"
 	   raising [Break], and [catch_break false] to let the system
 	   terminate the program on user interrupt. *)
 ;;
+
+(*--*)
+
+value max_vect_length : int
+  and max_string_length : int
+        (* Max length for arrays and strings, as imposed by the
+           runtime system. *)
+;;
