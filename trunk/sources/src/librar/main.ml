@@ -12,7 +12,7 @@ let anonymous s =
 let set_output s =
   lib_name := s
 and show_version () =
-  prerr_string version__banner; prerr_endline ""
+  version__print_banner(); exit 0
 and process_include filename =
   do_list anonymous (readword__from_file filename)
 and set_stdlib p =
@@ -32,13 +32,18 @@ let main() =
                 "-v", arg__Unit show_version;
                 "-version", arg__Unit show_version;
                 "-files", arg__String process_include;
-              "-", arg__String anonymous]
+                "-", arg__String anonymous]
              anonymous;
     librar__make_library (rev !lib_files) !lib_name;
     exit 0
   with Toplevel ->
-    exit 2
+        exit 2
+     | sys__Sys_error msg ->
+        printf__eprintf "Input/output error: %s.\n" msg;
+        exit 2
+     | Zinc s ->
+        printf__eprintf "Internal error: %s.\nPlease report it.\n" s;
+        exit 100
 ;;
 
-printexc__f main ()
-;;
+printexc__f main ();;
