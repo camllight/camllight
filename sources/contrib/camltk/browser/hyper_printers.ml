@@ -9,7 +9,9 @@
 
 
 
-let buffer = ref ""
+let buffer = ref (create_string 1024)
+;;
+let buffer_len = ref 1024
 ;;
 let curpos = ref 0
 ;;
@@ -17,14 +19,24 @@ let tags = ref ([] : (int * int) list)
 ;;
 
 let reset_state () =
-  buffer := ""; curpos := 0; tags := []
+  curpos := 0; 
+  tags := []
 ;;
 
 
 (* Basic printing function *)
 let print_string s =
-   buffer := !buffer ^ s;
-   curpos := !curpos + (string_length s)
+  let sl = string_length s in
+  if sl + !curpos > !buffer_len then begin
+      buffer:= !buffer ^ (create_string (1024 + sl));
+      buffer_len := !buffer_len + 1024 + sl;
+      end;
+   blit_string s 0 !buffer !curpos sl;
+   curpos := !curpos + sl
+;;
+
+let get_print_buffer () = 
+  sub_string !buffer 0 !curpos
 ;;
 
 let print_type_constructor gl = 
@@ -119,6 +131,7 @@ let print_type_desc
    |  Variant_type (x::l) -> x.info.cs_res
    |  Variant_type ([]) -> type_exn  (* puke *)
    |  Record_type (x::l)  -> x.info.lbl_res
+   |  Record_type []  -> fatal_error "empty record type"
    |  Abbrev_type (l,body) -> {typ_desc = Tconstr(tcg.info.ty_constr,l);
        	       	       	       typ_level = generic} in
       
@@ -258,7 +271,7 @@ let abs_index n =
   TextIndex (TI_LineChar(0,0), [CharOffset n])
 ;;
 
-(* Back hack due to non-polymorphic letrec... *)
+(* Bad hack due to non-polymorphic letrec... *)
 (* I cannot have a visual_meta abstraction depending on
    one of its instance and still keep visual_meta polymorphic 
 *)
@@ -272,7 +285,8 @@ let hypertext top f arg =
   reset_state ();
   f arg;
   let t = text__create top []  in
-  text__insert t (TextIndex (TI_End, [])) !buffer;
+  text__insert t (TextIndex (TI_End, [])) (get_print_buffer());
+      	       	 
   do_list (function (b,e ) ->
       	    text__tag_add t "hyper" (abs_index b) (abs_index e))
           !tags;
