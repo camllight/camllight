@@ -7,6 +7,7 @@ let boucle() =
   let flux_d'entrée = stream_of_channel std_in in
   let flux_lexèmes = analyseur_lexical flux_d'entrée in
   try
+    crayon__vide_écran();
     while true do
       print_string "? "; flush std_out;
       try
