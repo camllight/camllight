@@ -13,21 +13,26 @@ type num = Int of int | Big_int of big_int | Ratio of ratio;;
 
 (*** Arithmetic operations *)
 
-value add_num : num -> num -> num
+value prefix +/ : num -> num -> num
+  and add_num : num -> num -> num
         (* Addition *)
   and minus_num : num -> num
         (* Unary negation. *)
+  and prefix -/ : num -> num -> num
   and sub_num : num -> num -> num
         (* Subtraction *)
+  and prefix */ : num -> num -> num
   and mult_num : num -> num -> num
         (* Multiplication *)
   and square_num : num -> num
         (* Squaring *)
+  and prefix // : num -> num -> num
   and div_num : num -> num -> num
         (* Division *)
   and quo_num : num -> num -> num
   and mod_num : num -> num -> num
         (* Euclidean division: quotient and remainder *)
+  and prefix **/ : num -> num -> num
   and power_num : num -> num -> num
         (* Exponentiation *)
   and is_integer_num : num -> bool
@@ -45,6 +50,12 @@ value add_num : num -> num -> num
            rounds off zero. *)
   and sign_num : num -> int
         (* Return [-1], [0] or [1] according to the sign of the argument. *)
+  and prefix =/ : num -> num -> bool
+  and prefix </ : num -> num -> bool
+  and prefix >/ : num -> num -> bool
+  and prefix <=/ : num -> num -> bool
+  and prefix >=/ : num -> num -> bool
+  and prefix <>/ : num -> num -> bool
   and eq_num : num -> num -> bool
   and lt_num : num -> num -> bool
   and le_num : num -> num -> bool

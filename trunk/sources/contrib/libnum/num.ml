@@ -84,6 +84,8 @@ let add_num = fun
   | (Ratio r1) (Ratio r2) -> Ratio (add_ratio r1 r2)
 ;;
 
+let prefix +/ = add_num;;
+
 let minus_num = function 
   Int i -> if i == monster_int
               then Big_int (minus_big_int (big_int_of_int i))
@@ -93,6 +95,8 @@ let minus_num = function
 ;;
 
 let sub_num n1 n2 = add_num n1 (minus_num n2);;
+
+let prefix -/ = sub_num;;
 
 let mult_num = fun
    (Int int1) (Int int2) ->
@@ -122,6 +126,8 @@ let mult_num = fun
  | (Ratio r1) (Ratio r2) ->
      Ratio (mult_ratio r1 r2)
 ;;
+
+let prefix */ = mult_num;;
 
 let square_num = function
    Int i -> if 2 * num_bits_int i < length_of_int 
@@ -157,6 +163,8 @@ let div_num = fun
  | (Ratio r1) (Ratio r2) -> 
      Ratio (div_ratio r1 r2)
 ;;
+
+let prefix // = div_num;;
 
 let floor_num = function
   Int i as n -> n
@@ -220,6 +228,8 @@ let power_num = fun
 | _ _ -> invalid_arg "power_num"
 ;;
 
+let prefix **/ = power_num;;
+
 let is_integer_num = function
   Int _     -> true
 | Big_int _ -> true
@@ -268,6 +278,10 @@ let eq_num = fun
 | (Ratio r1) (Ratio r2) -> eq_ratio r1 r2
 ;;
 
+let prefix =/ = eq_num;;
+
+let prefix <>/ a b = not(eq_num a b);;
+
 let compare_num = fun
   (Int int1) (Int int2) -> compare_int int1 int2
 
@@ -289,6 +303,12 @@ let lt_num num1 num2 = compare_num num1 num2 < 0
 and le_num num1 num2 = compare_num num1 num2 <= 0
 and gt_num num1 num2 = compare_num num1 num2 > 0
 and ge_num num1 num2 = compare_num num1 num2 >= 0
+;;
+
+let prefix </ = lt_num
+and prefix <=/ = le_num
+and prefix >/ = gt_num
+and prefix >=/ = ge_num
 ;;
 
 let max_num num1 num2 = if lt_num num1 num2 then num2 else num1
