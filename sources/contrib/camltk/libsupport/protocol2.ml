@@ -2,7 +2,7 @@
 #open "unix";;
 #open "support";;
 
-let debug_protocol = 
+let debug = 
  ref (try sys__getenv "CAMLTKDEBUG"; true
       with Not_found -> false)
 ;;
@@ -15,7 +15,7 @@ and PipeTkResult = ref stdout
 
 
 let Send2TkStart chan  =
-  if !debug_protocol then begin
+  if !debug then begin
       prerr_string "safeeval ";
       prerr_string chan;
       prerr_string " { "; 
@@ -28,7 +28,7 @@ let Send2TkStart chan  =
 
 (* use "safe_write" instead ? *)
 let Send2Tk s = 
-  if !debug_protocol then begin
+  if !debug then begin
       prerr_string s; prerr_string " "; flush std_err
       end;
   write !PipeCaml2Tk s 0 (string_length s);
@@ -37,7 +37,7 @@ let Send2Tk s =
 ;;
 
 let Send2TkEval () = 
-  if !debug_protocol then begin
+  if !debug then begin
       prerr_string " }\n"; flush std_err
       end;
   write !PipeCaml2Tk " }\n" 0 3;
@@ -72,7 +72,7 @@ let newline c = c = `\n`
 
 let read_token port =
   let str = read_string token_sep port in
-  if !debug_protocol then begin
+  if !debug then begin
      prerr_string "Received: ";
      prerr_string str;
      prerr_string "\n"
@@ -85,7 +85,7 @@ let read_token port =
 
 let read_line port = 
   let str = read_string newline port in
-  if !debug_protocol then begin
+  if !debug then begin
      prerr_string "Received: ";
      prerr_string str;
      prerr_string "\n"
@@ -169,7 +169,7 @@ let OpenTk = function () ->
   (* fork our slave Tk interpreter *)
     match fork() with
       0 -> (* the child *)
-      	let Argv = [|"wish";"-display";":0.0"|] in
+      	let Argv = [|"wish"|] in
       	(* connect stdin to emission pipe *)
 	  dup2 !PipeCaml2Tk stdin;
       	  execvp "wish" Argv;	
@@ -189,8 +189,8 @@ let OpenTk = function () ->
 ;;
 
 let CloseTk = function () ->
-  (* terminate the slave Tk *)
-  Send2Tk "exit\n";
+  (* Don't use Send2Tk because last space prevents wish from exiting *)
+  write !PipeCaml2Tk "exit\n" 0 5;
   (* cleanup *)
   close !PipeTkCallB;
   close !PipeCaml2Tk;
