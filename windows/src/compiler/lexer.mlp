@@ -223,6 +223,10 @@ and comment = parse
   | "*)"
       { comment_depth := pred !comment_depth;
         if !comment_depth > 0 then comment lexbuf }
+  | "\""
+      { reset_string_buffer();
+        string lexbuf;
+        comment lexbuf }
   | End_of_file
       { raise (Lexical_error(Unterminated_comment, -1, -1)) }
   | _
