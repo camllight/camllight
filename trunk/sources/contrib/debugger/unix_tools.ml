@@ -1,6 +1,7 @@
 (****************** Tools for Unix *****************************************)
 
 
+#open "misc";;
 #open "unix";;
 #open "primitives";;
 
@@ -24,16 +25,18 @@ let convert_adress address =
       (PF_UNIX, ADDR_UNIX address);;
 
 (*** Report an unix error. ***)
-let report_error (Unix_error (err, fun_name, arg)) =
-  prerr_string "Unix error : '";
-  prerr_string fun_name;
-  prerr_string "' failed";
-  if string_length arg > 0 then
-    (prerr_string " on '";
-     prerr_string arg;
-     prerr_string "'");
-  prerr_string " : ";
-  prerr_endline (error_message err);;
+let report_error = function
+    Unix_error (err, fun_name, arg) ->
+     prerr_string "Unix error : '";
+     prerr_string fun_name;
+     prerr_string "' failed";
+     if string_length arg > 0 then
+       (prerr_string " on '";
+        prerr_string arg;
+        prerr_string "'");
+     prerr_string " : ";
+     prerr_endline (error_message err)
+  | _ -> fatal_error "report_error: not an Unix error";;
 
 (* Find program `name' in `PATH'. *)
 (* Return the full path if found. *)
@@ -107,7 +110,7 @@ let rec expand_path ch =
     let ch = subst_variable ch in
       let concat_root nom ch2 =
         try filename__concat (getpwnam nom).pw_dir ch2
-        with Failure "Not found" ->
+        with Not_found ->
           raise (Invalid_argument "expand_path")
       in
         if (nth_char ch 0) = `~` then
@@ -117,7 +120,7 @@ let rec expand_path ch =
                 (let tail = sub_string ch 2 (string_length ch - 2)
                  in
                    try filename__concat (sys__getenv "HOME") tail
-                   with Failure "Not found" ->
+                   with Not_found ->
                      concat_root (sys__getenv "LOGNAME") tail)
             |  n -> concat_root
                       (sub_string ch 1 (n - 1))
