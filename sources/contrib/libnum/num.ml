@@ -8,7 +8,7 @@
 #open "int";;
 #open "ref";;
 #open "int_misc";;
-#open "nat";;
+#open "fnat";;
 #open "big_int";;
 #open "arith_flags";;
 #open "ratio";;

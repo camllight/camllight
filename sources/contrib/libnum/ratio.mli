@@ -1,7 +1,6 @@
 (* Operation on rationals *)
 
 #open "ref";;
-#open "nat";;
 #open "big_int";;
 
 (* Rationals (type [ratio]) are arbitrary-precision rational numbers,
@@ -55,8 +54,8 @@ value null_denominator : ratio -> bool
   and ge_big_int_ratio : big_int -> ratio -> bool
   and int_of_ratio : ratio -> int
   and ratio_of_int : int -> ratio
-  and ratio_of_nat : nat -> ratio
-  and nat_of_ratio : ratio -> nat
+  and ratio_of_nat : fnat__nat -> ratio
+  and nat_of_ratio : ratio -> fnat__nat
   and ratio_of_big_int : big_int -> ratio
   and big_int_of_ratio : ratio -> big_int
   and div_int_ratio : int -> ratio -> ratio
