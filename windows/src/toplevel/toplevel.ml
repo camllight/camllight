@@ -117,7 +117,7 @@ let loadfile filename =
       while true do
         do_toplevel_phrase(parse_impl_phrase lexbuf)
       done)
-  with End_of_file | Toplevel -> close_in ic
+  with End_of_file | Toplevel -> flush stderr; close_in ic
      | x -> close_in ic; raise x
 ;;
 
