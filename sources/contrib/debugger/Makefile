@@ -53,18 +53,18 @@ COBJS=communication.o value.o
 
 GENFILES=constants.ml lexer.ml parser.ml parser.mli main.ml version.ml
 
-all: camldebug
+all: camldbg
 
-camldebug: $(OBJS) $(COBJS)
-	$(CAMLC) $(LINKFLAGS) -custom -o camldebug \
+camldbg: $(OBJS) $(COBJS)
+	$(CAMLC) $(LINKFLAGS) -custom -o camldbg \
           unix.zo $(EXTERNOBJS) $(OBJS) $(COBJS) ../libunix/libunix.a
 
 clean:
-	rm -f camldebug *.zi *.zo *.o
+	rm -f camldbg *.zi *.zo *.o
 	rm -f $(GENFILES)
 
 install:
-	cp camldebug $(BINDIR)/camldebug
+	cp camldbg $(BINDIR)/camldbg
 
 .SUFFIXES :
 .SUFFIXES : .mli .ml .zi .zo .c .o

@@ -668,10 +668,10 @@ let info_modules lexbuf =
   do_list (function x -> print_string (x ^ " ")) !modules;
   print_newline ();
   print_endline "Opened modules :";
-  if !opened_modules_names = [] then
+  if !used_modules = [] then
     print_endline "(no module opened)."
   else
-    (do_list (function x -> print_string (x ^ " ")) !opened_modules_names;
+    (do_list (function x -> print_string (x.mod_name ^ " ")) !used_modules;
      print_newline ());;
 
 let info_checkpoints lexbuf =

@@ -16,9 +16,9 @@ let always_opened_modules =
 
 (* Modules opened if there are events in them. *)
 let default_modules =
-      ["builtin"; "stream"; "exc"; "bool"; "string"; "char"; "vect";
-       "fstring"; "fchar"; "fvect"; "list"; "pair"; "ref"; "float"; "int";
-       "eq"; "io"];;
+      ["io"; "eq"; "int"; "float"; "ref"; "pair"; "list";
+       "vect"; "char"; "string"; "fvect"; "fchar"; "fstring";
+       "bool"; "exc"; "stream"];;
 
 (*** Time travel parameters. ***)
 
