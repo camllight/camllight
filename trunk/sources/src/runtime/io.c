@@ -1,7 +1,11 @@
 /* Buffered input/output. */
 
 #include <errno.h>
+#ifdef __MWERKS__
+#include "myfcntl.h"
+#else
 #include <fcntl.h>
+#endif
 #include "alloc.h"
 #include "fail.h"
 #include "io.h"

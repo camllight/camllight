@@ -18,6 +18,11 @@
 #ifdef HAS_UI
 #include "ui.h"
 #endif
+#if defined (macintosh) && !defined (HAS_UI)
+#include <CursorCtl.h>
+#define PERIODIC_ACTION_FREQ 2000
+#define ui_periodic_action() SpinCursor ((short) 32)
+#endif
 
 #ifdef DEBUG
 static long icount = 0;
