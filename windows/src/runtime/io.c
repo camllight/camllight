@@ -1,5 +1,9 @@
 /* Buffered input/output. */
 
+#include "../../config/s.h"
+#ifdef HAS_UNISTD
+#include <unistd.h>
+#endif
 #include <errno.h>
 #ifdef __MWERKS__
 #include "myfcntl.h"
