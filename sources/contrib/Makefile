@@ -3,7 +3,7 @@
 # Which packages to compile and install.
 # See the file INDEX for a description of the packages and their requirements.
 # Remember that "libunix" is required for
-# "debugger", "libgraph", "camltk",  and "search_isos".
+# "debugger", "libgraph", "camltk", "camltk4", and "search_isos".
 PACKAGES=libunix libgraph debugger libnum libstr mletags \
   camlmode lorder profiler camltk4 camlsearch
 # caml-tex
