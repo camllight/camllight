@@ -402,7 +402,7 @@ Pattern_sm_list :
         Pattern SEMI Pattern_sm_list
           { make_pat(Zconstruct1pat(constr_cons,
               make_pat(Ztuplepat[$1; $3]))) }
-      | Pattern
+      | Pattern Opt_semi
           { make_pat(Zconstruct1pat(constr_cons,
               make_pat(Ztuplepat [$1;
                 make_pat(Zconstruct0pat(constr_nil))]))) }
@@ -411,9 +411,9 @@ Pattern_sm_list :
 Pattern_label_list :
         Pattern_label SEMI Pattern_label_list
           { $1 :: $3 }
-      | Pattern_label
+      | Pattern_label Opt_semi
           { [$1] }
-      | UNDERSCORE
+      | UNDERSCORE Opt_semi
           { [] }
 ;
 
@@ -469,11 +469,11 @@ Simple_pattern :
           { make_pat(Zconstruct0pat(constr_void)) }
       | LBRACKET RBRACKET
           { make_pat(Zconstruct0pat(constr_nil)) }
-      | LBRACKET Pattern_sm_list Opt_semi RBRACKET
+      | LBRACKET Pattern_sm_list RBRACKET
           { $2 }
       | LPAREN Pattern COLON Type RPAREN
           { make_pat(Zconstraintpat($2, $4)) }
-      | LBRACE Pattern_label_list Opt_semi RBRACE
+      | LBRACE Pattern_label_list RBRACE
           { make_pat(Zrecordpat $2) }
       | LPAREN Pattern RPAREN
           { $2 }
@@ -633,7 +633,7 @@ Constr_decl :
 Label_decl :
         Label1_decl SEMI Label_decl
           { $1 :: $3 }
-      | Label1_decl
+      | Label1_decl Opt_semi
           { [$1] }
 ;
 
@@ -659,7 +659,7 @@ Type1_def :
           { Zabstract_type }
       | EQUAL Opt_bar Constr_decl
           { Zvariant_type $3 }
-      | EQUAL LBRACE Label_decl Opt_semi RBRACE
+      | EQUAL LBRACE Label_decl RBRACE
           { Zrecord_type $3 }
       | EQUALEQUAL Type
           { Zabbrev_type $2 }
