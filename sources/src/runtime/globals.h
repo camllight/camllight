@@ -27,5 +27,6 @@ extern value global_data;
 #define SYS__INTERACTIVE 16     /* "sys","interactive" */
 #define SYS__MAX_STRING_LENGTH 17 /* "sys","max_string_length" */
 #define SYS__MAX_VECT_LENGTH 18   /* "sys","max_vect_length" */
+#define SYS__WORD_SIZE 19       /* "sys","word_size" */
 
 #endif /* _globals_ */

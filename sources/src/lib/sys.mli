@@ -102,3 +102,6 @@ value max_vect_length : int
         (* Max length for arrays and strings, as imposed by the
            runtime system. *)
 ;;
+value word_size : int
+        (* Size of a machine word (in bits). *)
+;;
