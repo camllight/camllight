@@ -216,5 +216,10 @@ let type_letdef loc rec_flag pat_expr_list =
 ;;
   
 let type_expression loc expr =
-  type_expr [] expr
+  push_type_level();
+  let ty =
+    type_expr [] expr in
+  pop_type_level();
+  if is_nonexpansive expr then generalize_type ty;
+  ty
 ;;
