@@ -60,7 +60,7 @@ let num_of_ratio r =
 (* Operations on num *)
 
 let add_num = fun
-    (Int int1) (Int int2) ->
+  | (Int int1) (Int int2) ->
       let r = add_int int1 int2 in
        if sign_int int1 == sign_int int2
         then if int1 >= 0
@@ -109,7 +109,7 @@ let sub_num n1 n2 = add_num n1 (minus_num n2);;
 let prefix -/ = sub_num;;
 
 let mult_num = fun
-   (Int int1) (Int int2) ->
+ | (Int int1) (Int int2) ->
     if num_bits_int int1 + num_bits_int int2 < length_of_int
        then Int (int1 * int2)
        else num_of_big_int (mult_big_int (big_int_of_int int1) 
@@ -147,7 +147,7 @@ let square_num = function
 ;;
 
 let div_num = fun
-   (Int int1) (Int int2) -> 
+ | (Int int1) (Int int2) -> 
      num_of_ratio (create_ratio (big_int_of_int int1) (big_int_of_int int2))
 
  | (Int i) (Big_int bi) ->
@@ -296,7 +296,7 @@ let prefix =/ = eq_num;;
 let prefix <>/ a b = not(eq_num a b);;
 
 let compare_num = fun
-  (Int int1) (Int int2) -> compare_int int1 int2
+| (Int int1) (Int int2) -> compare_int int1 int2
 
 | (Int i) (Big_int bi) -> compare_big_int (big_int_of_int i) bi
 | (Big_int bi) (Int i) -> compare_big_int bi (big_int_of_int i)

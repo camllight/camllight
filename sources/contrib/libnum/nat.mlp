@@ -27,13 +27,6 @@ let word_size = 32;;
 
 let length_of_digit = word_size;;
 
-(* Taille maximum d une chai^ne de caractères en octets *)
-let biggest_string_length =
- (word_size asr 3)          (* Number of characters in a word *)
- * (1 lsl (word_size - 10) - 1) (* Available number of bits to count the *)
-                            (* length of a string in words *)
- - 1                        (* The trailing zero - 1 *);;
-
 let make_nat len =
   if len <= 0 then invalid_arg "make_nat" else
     let res = create_nat len in set_to_zero_nat res 0 len; res
@@ -64,9 +57,10 @@ let int_of_nat nat =
 ;;
 
 let nat_of_int i =
-  if i < 0 then invalid_arg "nat_of_int" else
-    let res = make_nat 1 in
-    if i == 0 then res else begin set_digit_nat res 0 i; res end
+ if i < 0 then invalid_arg "nat_of_int" else
+ let res = create_nat 1 in
+ set_digit_nat res 0 i;
+ res
 ;;
 
 let eq_nat nat1 off1 len1 nat2 off2 len2 =
@@ -251,6 +245,9 @@ let string_of_digit nat =
    A la fin de la boucle i-1 est la plus grande puissance de la base qui tient 
    sur un seul digit et j est la plus grande puissance de la base qui tient 
    sur un int.
+   Attention base n''est pas forcément une base valide (utilisé en
+   particulier dans big_int avec un entier quelconque).
+
 *)
 let make_power_base base power_base = 
   let i = ref 1
@@ -334,11 +331,11 @@ let power_base_int base i =
 (* /* PW: rajoute avec 32 et 64 bits */ *)
 
 (* the base-th element (base >= 2) of num_digits_max_vector is :
-    |                                    |
-    | biggest_string_length * log (base) |
-    | ---------------------------------- | + 1
-    |      length_of_digit * log (2)     |
-    --                                  --
+    |                                     |
+    | sys__max_string_length * log (base) |
+    | ----------------------------------- | + 1
+    |      length_of_digit * log (2)      |
+    --                                   --
 La base la plus grande possible pour l impression est 16. *)
 
 #ifdef CAML_SIXTYFOUR
@@ -366,20 +363,21 @@ let power_max_map = make_vect 17 zero_nat;;
 let power_max base =
  let v = power_max_map.(base) in
  if v != zero_nat then v else begin
-   let v = power_base_int base biggest_string_length in
+   let v = power_base_int base sys__max_string_length in
    power_max_map.(base) <- v; v
   end
 ;;
 
 let sys_string_list_of_nat base nat off len =
   if is_nat_int nat off len 
-  then [sys_string_of_int base "" (nth_digit_nat nat off) ""] else 
+  then [sys_string_of_int base "" (nth_digit_nat nat off) ""] else begin
   (* /* 
      pmax : L indice de la plus grande puissance de base qui soit un digit 
      pint : La plus grande puissance de base qui soit un int 
      power_base : nat de (length_of_digit + 1) digits dont le i-eme digit 
      contient base^(i+1)
   */ *)
+  check_base base;
   let power_base = make_nat (succ length_of_digit) in
   let (pmax, pint) = make_power_base base power_base in
   (* /* 
@@ -418,8 +416,8 @@ let sys_string_list_of_nat base nat off len =
        let len_s = 
          if !len_new_nat <= length_block
             then let cand = real_pmax * !len_new_nat in
-                   (if cand <= 0 then biggest_string_length else cand)
-            else biggest_string_length in
+                   (if cand <= 0 then sys__max_string_length else cand)
+            else sys__max_string_length in
        (if !len_new_nat > length_block
           then (let power_max_base = power_max base in
                 div_nat new_nat 0 !len_new_nat power_max_base 0 length_block; 
@@ -479,6 +477,7 @@ let sys_string_list_of_nat base nat off len =
           then l := adjust_string s "" "" :: !l
           else l := s :: !l
     done; !l
+  end
 ;;
 
 (* Power_base_max is used *)
@@ -565,7 +564,7 @@ let power_debug = nat_of_int 256;;
 *)
 let debug_string_vect_nat nat =
   let len = length_nat nat in
-  let max_digits = biggest_string_length / max_superscript_10_power_in_int in
+  let max_digits = sys__max_string_length / max_superscript_10_power_in_int in
   let blocks = len / max_digits
   and rest = len mod max_digits in
   let length = max_superscript_10_power_in_int * max_digits
@@ -611,6 +610,8 @@ let debug_string_nat nat =
    on détermine ici 
 *)
 let simple_sys_nat_of_string base s off len = 
+  (* check_base base; : inutile la base est vérifiée par
+   base_digit_of_char *)
   let power_base = make_nat (succ length_of_digit) in
   let (pmax, pint) = make_power_base base power_base in
   let new_len = ref (1 + len / (pmax + 1))
