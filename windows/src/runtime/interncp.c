@@ -96,7 +96,7 @@ static void read_compact(chan, dest)
         v = Val_long(input_bytes(chan, 8, 1));
         break;
 #else
-        stat_free(intern_obj_table);
+        stat_free((char *) intern_obj_table);
         Hd_val(intern_block) = intern_header; /* Don't confuse the GC */
         failwith("input_value: integer too large");
         break;
@@ -126,7 +126,7 @@ static void read_compact(chan, dest)
         goto read_string;
       case CODE_DOUBLE:
         if (sizeof(double) != 8) {
-          stat_free(intern_obj_table);
+          stat_free((char *) intern_obj_table);
           Hd_val(intern_block) = intern_header; /* Don't confuse the GC */
           invalid_argument("input_value: non-standard floats");
         }
@@ -172,7 +172,7 @@ value intern_compact_val(chan)
     obj_counter = 0;
     intern_obj_table = (value *) stat_alloc(num_objects * sizeof(value));
     read_compact(chan, &res);
-    stat_free(intern_obj_table);
+    stat_free((char *) intern_obj_table);
   }
   return res;
 }

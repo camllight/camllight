@@ -164,7 +164,7 @@ void sys_init(argv)
   Field(global_data, SYS__INTERACTIVE) = Val_false;
   Field(global_data, SYS__MAX_VECT_LENGTH) = Val_long(Max_wosize);
   Field(global_data, SYS__MAX_STRING_LENGTH) =
-    Val_long((Max_wosize + 1) * sizeof(value) - 2);
+    Val_long(Max_wosize * sizeof(value) - 2);
 }
 
 /* Handling of user interrupts */

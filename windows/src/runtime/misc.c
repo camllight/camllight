@@ -54,7 +54,7 @@ void memmov (dst, src, length)
       i = (unsigned long) dst % sizeof (long);
       if (i != 0){
 	i = sizeof (long) - i;              /* Number of bytes to copy. */
-	if (i > length) i = length;         /* Never copy more thant length.*/
+	if (i > length) i = length;         /* Never copy more than length.*/
 	for (; i != 0; i--){
 	  *dst++ = *src++; --length;
 	}
