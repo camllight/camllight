@@ -1,5 +1,6 @@
 CAMLLATEX=../tools/caml-tex -n 80
 DVI2TXT=../tools/dvi2txt
+RELEASE=$$HOME/release/cl7
 
 CHAPTERS = Gen.mltex Fund.mltex Basic.mltex Lists.mltex \
   Types.mltex Annot.mltex Exc.mltex IO.mltex Streams.mltex \
@@ -30,8 +31,8 @@ clean:
 	rm -f *.txt *.ps *.ipr
 
 release:
-	compress < fpcl.dvi > $(RELEASE)tutorial.dvi.Z
-	dvips -Plw -o '!compress > $(RELEASE)tutorial.ps.Z' fpcl.dvi
+	gzip < fpcl.dvi > $(RELEASE)tutorial.dvi.gz
+	dvips -Pps -o '!gzip > $(RELEASE)tutorial.ps.gz' fpcl.dvi
 	cp plaintext.txt $(RELEASE)tutorial.txt
 	cp plaintext.ipr $(RELEASE)tutorial.prn
 
