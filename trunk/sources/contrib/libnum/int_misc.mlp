@@ -114,41 +114,6 @@ let sys_string_of_int base before i after =
   (* Calcul du résultat final comprenant before et after *)
   catenate before i_string off written after;;
 
-(******
-let sys_string_of_int base before i after =
-  (* Écriture de la valeur absolue de i dans une chaîne *)
-  let n = abs i in
-  (* Taille approximative de la chaîne nécessaire *)
-  let size =
-   (if i < 0 then 1 else 0) +
-   (if n < base then 1 else biggest_pow base) in
-  let i_string = create_string size in
-  (* Écriture dans cette chaîne à partir de la fin *)
-  let rec write n p =
-   i_string.[p] <- digits.[n mod base];
-   let m = n quo base in
-   if m = 0 then p else write (n quo base) (p - 1) in
-  let lim = write n (size - 1) in
-  let off =
-   if i < 0 then (i_string.[lim - 1] <- `-`; lim - 1) else lim in
-  (* Nombre de caractères réellement écrits *)
-  let written = size - off in
-
-  (* Calcul du résultat final comprenant before et after *)
-  let len_before = string_length before
-  and len_after = string_length after in
-  let l1 = len_before + written in
-  let ok_len = l1 + len_after in
-
-  if ok_len = size then i_string else begin
-  let ok_s = create_string ok_len in
-  blit_string before 0 ok_s 0 len_before;
-  blit_string i_string off ok_s len_before written;
-  blit_string after 0 ok_s l1 len_after;
-  ok_s end
-;;
-*******)
-
 (* Calcul la valeur d' 'un caractère en base base *)
 let base_digit_of_char base c =
  let c_val = int_of_char c in

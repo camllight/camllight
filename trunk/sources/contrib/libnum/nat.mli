@@ -86,6 +86,7 @@ value create_nat : int -> nat = 1 "create_nat"
   and sys_string_list_of_nat : int -> nat -> int -> int -> string list
 
   and string_of_digit : nat -> string
+  and sys_string_of_digit : nat -> int -> string
   and adjust_string : string -> string -> string -> string
   and decimal_of_string : int -> string -> int -> int -> string * int
   and unadjusted_string_of_nat : nat -> int -> int -> string
@@ -93,9 +94,9 @@ value create_nat : int -> nat = 1 "create_nat"
   and sys_string_of_digit : nat -> int -> string
   and sys_string_of_nat :
       int -> string -> nat -> int -> int -> string -> string
-  and debug_string_nat : nat__nat -> string
-  and sys_float_of_nat : nat__nat -> int -> int -> float
-  and float_of_nat : nat__nat -> float
+  and debug_string_nat : nat -> string
+  and sys_float_of_nat : nat -> int -> int -> float
+  and float_of_nat : nat -> float
   and nat_of_float : float -> nat
 
   and sys_print_nat : int -> string -> nat -> int -> int -> string -> unit

@@ -336,9 +336,6 @@ let is_int_big_int =
  || (bi.Sign == -1 && num_digits_big_int bi == 1 &&
      num_leading_zero_bits_in_digit (bi.Abs_Value) 0 >= pdmi);;
 
-(* XL: le "1" provient de "pred (length_of_digit - length_of_int))" *)
-(* PW: was num_leading_zero_bits_in_digit (bi.Abs_Value) 0 >= 1 *)
-
 (* Coercion with nat type *)
 let nat_of_big_int bi = 
  if bi.Sign == -1
@@ -367,42 +364,8 @@ let sys_string_of_big_int base before bi after =
 let string_of_big_int bi =
  sys_string_of_big_int 10 "" bi ""
 ;;
-(* Was:
-let string_of_big_int bi =
-  if bi.Sign == -1
-  then "-" ^ string_of_nat bi.Abs_Value
-  else string_of_nat bi.Abs_Value
-;;
-*)
 
-(* PW: supprimé. 
-let string_for_read_of_big_int bi = 
- sys_string_of_big_int 10 "#(" bi ")"
-;; *)
-
-(********
-(* XL: j'ai puissamment simplifie "big_int_of_string", en virant
-   la notation scientifique (123e6 ou 123.456e12). *)
-
-let sys_big_int_of_string s ofs len =
-  let (sign, nat) =
-    match s.[ofs] with
-    | `-` -> if len > 1
-                then (-1, sys_nat_of_string 10 s (ofs+1) (len-1))
-                else failwith "sys_big_int_of_string"
-    | `+` -> if len > 1
-                then (1, sys_nat_of_string 10 s (ofs+1) (len-1))
-                else failwith "sys_big_int_of_string"
-    | _ -> if len > 0
-              then (1, sys_nat_of_string 10 s ofs len)
-              else failwith "sys_big_int_of_string" in
-  { Sign = if is_zero_nat nat 0 (length_nat nat) then 0 else sign;
-    Abs_Value = nat };;
-
-let big_int_of_string s =
-  sys_big_int_of_string s 0 (string_length s)
-;;
-***********)
+let string_for_read_of_big_int bi = sys_string_of_big_int 10 "#(" bi ")";;
 
 let power_base_nat base nat off len =
   if is_zero_nat nat off len then nat_of_int 1 else
@@ -561,118 +524,16 @@ let sys_big_int_of_string = big_int_of_string_gen sys_nat_of_string;;
 (* Spécialisé à la base 10. *)
 let big_int_of_string s = sys_big_int_of_string 10 s 0 (string_length s);;
 
-(**********
-(* base_power_big_int compute bi*base^n *)
-let base_power_big_int base n bi =
-  match sign_int n with
-    0 -> bi
-  | -1 -> let nat = power_base_int base (minus_int n) in
-          let len_nat = num_digits_nat nat 0 (length_nat nat) 
-          and len_bi = num_digits_big_int bi in
-          if len_bi < len_nat then invalid_arg "base_power_big_int" else
-          if len_bi == len_nat &&
-             compare_digits_nat (bi.Abs_Value) len_bi nat len_nat == -1
-          then invalid_arg "base_power_big_int"
-          else
-           let copy = create_nat (succ len_bi) in
-           blit_nat copy 0 (bi.Abs_Value) 0 len_bi;
-           set_digit_nat copy len_bi 0;
-           div_nat copy 0 (succ len_bi) nat 0 len_nat;
-           if not (is_zero_nat copy 0 len_nat)
-           then invalid_arg "base_power_big_int"
-           else { Sign = bi.Sign;
-                  Abs_Value = copy_nat copy len_nat 1 }
-  | _ -> let nat = power_base_int base n in
-         let len_nat = num_digits_nat nat 0 (length_nat nat) 
-         and len_bi = num_digits_big_int bi in
-         let new_len = len_bi + len_nat in
-         let res = make_nat new_len in
-          if len_bi > len_nat
-             then set_mult_nat res 0 new_len 
-                           (bi.Abs_Value) 0 len_bi 
-                           nat 0 len_nat
-             else set_mult_nat res 0 new_len 
-                           nat 0 len_nat 
-                           (bi.Abs_Value) 0 len_bi;
-         if is_zero_nat res 0 new_len then zero_big_int
-         else create_big_int (bi.Sign) res
-;;
-
-let simple_big_int_of_string base s off_set length =
- if s.[off_set] == `-`
-  then 
-   let nat = (sys_nat_of_string base s (succ off_set) (pred length)) 
-    in
-    if is_zero_nat nat 0 (length_nat nat) 
-     then 
-      { Sign = 0; 
-        Abs_Value = nat }
-    else 
-     { Sign = -1; 
-       Abs_Value = nat }
- else
-  let nat = 
-   if s.[off_set] == `+`
-    then
-     sys_nat_of_string base s (succ off_set) (pred length)
-   else sys_nat_of_string base s off_set length
-  in
-   if is_zero_nat nat 0 (length_nat nat)
-    then
-     { Sign = 0;
-       Abs_Value = nat}
-   else
-    { Sign = 1;
-      Abs_Value = nat}
-;;
-
-let sys_big_int_of_string base s off len = 
-  let (sbi, k) = decimal_of_string base s off len in
-  let len_sbi = string_length sbi in
-  if k < 0 then begin
-    for i = len_sbi + k to pred len_sbi do
-     if sbi.[i] != `0` then failwith "sys_big_int_of_string"
-    done;
-    simple_big_int_of_string base sbi 0 (len_sbi + k)
-   end
-  else base_power_big_int base k (simple_big_int_of_string base sbi 0 len_sbi)
-;;
-
-***********)
-
-(*
-(* La chaîne s contient un entier en notation scientifique. *)
-let sys_big_int_of_string base s off_set length =
- let c = s.[off_set] in 
- let abs_val =
-  match c with
-  | `-` | `+` -> sys_nat_of_string base s (succ off_set) (pred length)
-  | _ -> sys_nat_of_string base s off_set length in
- let sgn =
-  if is_zero_nat abs_val 0 (length_nat abs_val) then 0 else
-  if c == `-` then -1 else 1 in
-  { Sign = sgn;
-    Abs_Value = abs_val};;
-
-let big_int_of_string s = 
- sys_big_int_of_string 10 s 0 (string_length s);;
-*)
-
 (* Coercion with float type *)
 
 let float_of_big_int bi = 
   float__float_of_string (string_of_big_int bi)
 ;;
 
-(* XL: suppression de big_int_of_float et nat_of_float. *)
-
 let big_int_of_float f = big_int_of_string (float__string_of_float f)
 ;;
 
 (* Other functions needed *)
-
-(* XL: on verra si elles sont vraiment necessaires. *)
-(* PW: ??? *)
 
 let nth_digit_big_int bi n = nth_digit_nat (bi.Abs_Value) n;;
 
