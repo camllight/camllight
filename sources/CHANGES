@@ -45,7 +45,7 @@ Caml Light 0.7:
   - Initial | permitted in pattern matchings and type definitions
     (e.g. function | pat -> expr | ...
      or type t = | Cstr1 | ...)
-  - "\/" and "/\" synonymous for "&" and "or".
+  - "&&" and "||" synonymous for "&" and "or".
 
 * Optimized access to unqualified identifiers in symbol tables.
 
