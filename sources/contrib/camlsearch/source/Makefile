@@ -38,8 +38,6 @@ install: $(NAME)
 clean:
 	rm -f $(NAME)
 	rm -f *.zi *.zix *.zo *.f.tex *~
-	rm -f `echo *.mli.tex | sed 's/.tex$///'`
-	rm -f `echo *.ml.tex | sed 's/.tex$///'`
 
 #					Tags pour Emacs
 tags:
@@ -129,9 +127,6 @@ comparisons.zo: comparisons.zi
 compiler_dependant_stuff.zo: compiler_dependant_stuff.zi external_type.zi 
 directory_and_file.zo: directory_and_file.zi 
 general.zo: general.zi 
-main.zo: compiler_dependant_stuff.zi normalization.zi \
-    operations_on_types.zi primitives.zi type_for_matching.zi general.zi \
-    comparisons.zi output.zi matching.zi external_type.zi command_line.zi 
 matching.zo: matching.zi operations_on_types.zi type_for_matching.zi \
     primitives.zi general.zi matching_on_bases.zi comparisons.zi 
 matching_on_bases.zo: matching_on_bases.zi operations_on_types.zi \
@@ -143,5 +138,4 @@ operations_on_types.zo: operations_on_types.zi type_for_matching.zi \
     comparisons.zi 
 output.zo: output.zi external_type.zi 
 primitives.zo: primitives.zi 
-print_types.zo: type_for_matching.zi 
 type_for_matching.zo: type_for_matching.zi 
