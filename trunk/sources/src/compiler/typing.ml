@@ -81,6 +81,8 @@ let rec type_of_structured_constant = function
 
 (* Typing of patterns *)
 
+let typing_let = ref false;;
+
 let unify_pat pat expected_ty actual_ty =
   try
     unify (expected_ty, actual_ty)
@@ -96,8 +98,11 @@ let rec tpat new_env (pat, ty, mut_flag) =
   | Zvarpat v ->
       if mem_assoc v new_env then
         non_linear_pattern_err pat v
-      else
-        (v, (ty, mut_flag)) :: new_env
+      else begin
+(*if !typing_let then upper_case_variable_warning pat "typage d'un let";*)
+        if (not !typing_let) & v.[0] >= `A` & v.[0] <= `Z` then
+         upper_case_variable_warning pat v;
+         (v, (ty, mut_flag)) :: new_env end
   | Zaliaspat(pat, v) ->
       if mem_assoc v new_env then
         non_linear_pattern_err pat v
@@ -484,8 +489,10 @@ and type_let_decl env rec_flag pat_expr_list =
   push_type_level();
   let ty_list =
     map (fun (pat, expr) -> new_type_var()) pat_expr_list in
+  typing_let := true;
   let add_env =
     type_pattern_list (map (fun (pat, expr) -> pat) pat_expr_list) ty_list in
+  typing_let := false;
   let new_env =
     add_env @ env in
   do_list2

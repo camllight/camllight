@@ -30,13 +30,13 @@ let define_label lbl =
   match (!label_table).(lbl) with
     Label_defined _ ->
       fatal_error "define_label : already defined"
-  | Label_undefined L ->
+  | Label_undefined l ->
       let currpos = !out_position in
         (!label_table).(lbl) <- (Label_defined currpos);
-        match L with
+        match l with
             [] -> ()
           |  _ -> do_list (fun (pos,orig) -> out_position := pos;
-                                             out_short (currpos - orig)) L;
+                                             out_short (currpos - orig)) l;
                   out_position := currpos
 ;;
 
@@ -46,9 +46,9 @@ let out_label_with_orig orig lbl =
   match (!label_table).(lbl) with
     Label_defined def ->
       out_short (def - orig)
-  | Label_undefined L ->
+  | Label_undefined l ->
       (!label_table).(lbl) <-
-        Label_undefined((!out_position, orig) :: L);
+        Label_undefined((!out_position, orig) :: l);
       out_short 0
 ;;
 

@@ -195,8 +195,10 @@ let type_letdef loc rec_flag pat_expr_list =
   push_type_level();
   let ty_list =
     map (fun (pat, expr) -> new_type_var()) pat_expr_list in
+  typing_let := true;
   let env =
     type_pattern_list (map (fun (pat, expr) -> pat) pat_expr_list) ty_list in
+  typing_let := false;
   let enter_val =
     do_list
       (fun (name,(ty,mut_flag)) ->

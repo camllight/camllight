@@ -151,7 +151,7 @@ let intersect l1 l2 =
 let index a =
   index_rec 0 where rec index_rec i = function
      []  -> raise Not_found
-  | b::L -> if a = b then i else index_rec (succ i) L
+  | b::l -> if a = b then i else index_rec (succ i) l
 ;;
 
 let assoc name = assoc_rec where rec assoc_rec =

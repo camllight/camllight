@@ -47,44 +47,44 @@ let out_header (n, tag) =
 
 let rec emit = function
       [] -> ()
-    | Kquote(SCatom(ACint i)) :: C ->
+    | Kquote(SCatom(ACint i)) :: code ->
         out_int_const i;
-        emit C
-    | Kquote(SCatom(ACchar c)) :: C ->
+        emit code
+    | Kquote(SCatom(ACchar c)) :: code ->
         out_int_const (int_of_char c);
-        emit C
-    | Kquote(SCblock(tag,[])) :: C ->
+        emit code
+    | Kquote(SCblock(tag,[])) :: code ->
         begin match tag with
           ConstrRegular(t, _) ->
             if t < 10 then out (ATOM0 + t) else (out ATOM; out t)
         | ConstrExtensible(name, stamp) ->
             out ATOM; reloc__slot_for_tag name stamp
         end;
-        emit C
-    | Kquote(sc) :: C ->
+        emit code
+    | Kquote(sc) :: code ->
         out GETGLOBAL;
         reloc__slot_for_literal sc;
-        emit C
-    | Kget_global qualid :: C ->
+        emit code
+    | Kget_global qualid :: code ->
         out GETGLOBAL;
         reloc__slot_for_get_global qualid;
-        emit C
-    | Kset_global qualid :: C ->
+        emit code
+    | Kset_global qualid :: code ->
         out SETGLOBAL;
         reloc__slot_for_set_global qualid;
-        emit C
-    | Kaccess n :: C ->
+        emit code
+    | Kaccess n :: code ->
         if n < 6 then out(ACC0 + n) else (out ACCESS; out n);
-        emit C
-    | Kendlet n :: Kendlet p :: C ->
-        emit(Kendlet(n+p) :: C)
-    | Kendlet 1 :: C ->
-        out ENDLET1; emit C
-    | Kendlet n :: C ->
-        out ENDLET; out n; emit C
-    | Kletrec1 lbl :: C ->
-        out LETREC1; out_label lbl; emit C
-    | Kmakeblock(tag,n) :: C ->
+        emit code
+    | Kendlet n :: Kendlet p :: code ->
+        emit(Kendlet(n+p) :: code)
+    | Kendlet 1 :: code ->
+        out ENDLET1; emit code
+    | Kendlet n :: code ->
+        out ENDLET; out n; emit code
+    | Kletrec1 lbl :: code ->
+        out LETREC1; out_label lbl; emit code
+    | Kmakeblock(tag,n) :: code ->
         if n <= 0 then
           fatal_error "emit : Kmakeblock"
         else if n < 5 then begin
@@ -94,31 +94,31 @@ let rec emit = function
           out MAKEBLOCK;
           out_header(n, tag)
         end;
-        emit C
-    | Klabel lbl :: C ->
+        emit code
+    | Klabel lbl :: code ->
         if lbl == Nolabel then fatal_error "emit: undefined label" else
-          (define_label lbl; emit C)
-    | Kclosure lbl :: C ->
-        out CUR; out_label lbl; emit C
-    | Kpushtrap lbl :: C ->
-        out PUSHTRAP; out_label lbl; emit C
-    | Kbranch lbl :: C ->
-        out BRANCH; out_label lbl; emit C
-    | Kbranchif lbl :: C ->
-        out BRANCHIF; out_label lbl; emit C
-    | Kbranchifnot lbl :: C ->
-        out BRANCHIFNOT; out_label lbl; emit C
-    | Kstrictbranchif lbl :: C ->
-        out BRANCHIF; out_label lbl; emit C
-    | Kstrictbranchifnot lbl :: C ->
-        out BRANCHIFNOT; out_label lbl; emit C
-    | Kswitch lblvect :: C ->
+          (define_label lbl; emit code)
+    | Kclosure lbl :: code ->
+        out CUR; out_label lbl; emit code
+    | Kpushtrap lbl :: code ->
+        out PUSHTRAP; out_label lbl; emit code
+    | Kbranch lbl :: code ->
+        out BRANCH; out_label lbl; emit code
+    | Kbranchif lbl :: code ->
+        out BRANCHIF; out_label lbl; emit code
+    | Kbranchifnot lbl :: code ->
+        out BRANCHIFNOT; out_label lbl; emit code
+    | Kstrictbranchif lbl :: code ->
+        out BRANCHIF; out_label lbl; emit code
+    | Kstrictbranchifnot lbl :: code ->
+        out BRANCHIFNOT; out_label lbl; emit code
+    | Kswitch lblvect :: code ->
         out SWITCH;
         out (vect_length lblvect);
         let orig = !out_position in
         do_vect (out_label_with_orig orig) lblvect;
-        emit C
-    | Ktest(tst,lbl) :: C ->
+        emit code
+    | Ktest(tst,lbl) :: code ->
         begin match tst with
             Peq_test ->
               out BRANCHIFEQ; out_label lbl
@@ -144,17 +144,17 @@ let rec emit = function
           | Pnoteqtag_test tag ->
               out BRANCHIFNEQTAG; out_tag tag; out_label lbl
         end;
-        emit C
-    | Kbranchinterval(low, high, lbl_low, lbl_high) :: C ->
+        emit code
+    | Kbranchinterval(low, high, lbl_low, lbl_high) :: code ->
         out PUSH; out_int_const low; out PUSH;
         if low != high then out_int_const high;
         out BRANCHINTERVAL;
         out_label lbl_low;
         out_label lbl_high;
-        emit C
-    | Kprim Pidentity :: C ->
-        emit C
-    | Kprim p :: C ->
+        emit code
+    | Kprim Pidentity :: code ->
+        emit code
+    | Kprim p :: code ->
         (match p with
             Pdummy n ->
               out DUMMY; out n
@@ -181,20 +181,20 @@ let rec emit = function
               out(opcode_for_float_primitive p)
           | p ->
               out(opcode_for_primitive p));
-        emit C
-    | Kpush :: Kget_global qualid :: Kapply :: C ->
+        emit code
+    | Kpush :: Kget_global qualid :: Kapply :: code ->
         out PUSH_GETGLOBAL_APPLY;
         reloc__slot_for_get_global qualid;
-        emit C
-    | Kpush :: Kget_global qualid :: Ktermapply :: C ->
+        emit code
+    | Kpush :: Kget_global qualid :: Ktermapply :: code ->
         out PUSH_GETGLOBAL_APPTERM;
         reloc__slot_for_get_global qualid;
-        emit C
-    | Kevent ev :: C ->
+        emit code
+    | Kevent ev :: code ->
         ev.ev_pos <- !out_position;
         event__enter ev;
-        emit C
-    | instr :: C ->
+        emit code
+    | instr :: code ->
         out(match instr with
            Kreturn -> RETURN
         |  Kgrab -> GRAB
@@ -206,6 +206,6 @@ let rec emit = function
         |  Kpoptrap -> POPTRAP
         |  Kcheck_signals -> CHECK_SIGNALS
         |  _  -> fatal_error "emit: should not happen");
-        emit C
+        emit code
 ;;
 
