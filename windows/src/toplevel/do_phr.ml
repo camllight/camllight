@@ -5,6 +5,7 @@
 #open "const";;
 #open "modules";;
 #open "syntax";;
+#open "types";;
 #open "typing";;
 #open "ty_decl";;
 #open "front";;
@@ -19,6 +20,7 @@
 (* Executing phrases *)
 
 let do_toplevel_phrase phr =
+  reset_type_var();
   reset_type_expression_vars ();
   begin match phr.im_desc with
     Zexpr expr ->
