@@ -6,9 +6,9 @@
 
 #ifdef __STDC__
 #include <stdlib.h>
+#else
+char *malloc ();
 #endif
-
-#define trace(s) /*(fprintf (stderr, "%s\n", s), fflush (stderr))*/
 
 /************************** errors are fatal. */
 void fatal (msg)
@@ -137,8 +137,6 @@ void ident_add (name, value)
   el->name = name;
   el->value = value;
   ident_head = el;
-trace ("ident_add");
-trace (el->name);
 }
 
 /* get the value of an identifier, or NULL if not defined */
@@ -146,9 +144,7 @@ char *ident_get (name)
   char *name;
 {
   listelem *cur = ident_head;
-trace ("ident_get");
   while (cur != NULL){
-trace (cur->name);
     if (!strcmp (cur->name, name)) return cur->value;
     cur = cur->next;
   }
