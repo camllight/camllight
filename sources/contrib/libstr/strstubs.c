@@ -128,11 +128,6 @@ value str_end_group(ngroup)
   return Val_int(end_regs[Int_val(ngroup)]);
 }
 
-value str_remains_args()
-{
-  return Val_bool(*extern_asp != MARK);
-}
-
 value str_replacement_text(repl, orig)
      value repl, orig;
 {

@@ -133,7 +133,7 @@ value string_before: string -> int -> string
 
 (*** Formatting *)
 
-value format: string -> 'a;;
+value format: ('a, unit, string) printf__format -> 'a;;
         (* Same as [fprintf] and [printf] from the [printf] module,
            except that the result of the formatting is returned as a
            string instead of being written on a channel. The structure
