@@ -2,10 +2,10 @@
 
 (* Builtin types *)
 type XEvent =
-    XKey of string      (* /usr/include/X11/keysymdef.h *)
-  | ButtonPress
-  | Button
+    ButtonPress (* also Button, but we omit it *)
+  | ButtonPressDetail of int
   | ButtonRelease
+  | ButtonReleaseDetail of int
   | Circulate
   | ColorMap
   | Configure
@@ -15,9 +15,10 @@ type XEvent =
   | FocusIn
   | FocusOut
   | Gravity
-  | KeyPress
-  | Key
+  | KeyPress (* also Key, but we omit it *)
+  | KeyPressDetail of string      (* /usr/include/X11/keysymdef.h *)
   | KeyRelease
+  | KeyReleaseDetail of string
   | Leave
   | Map
   | Motion
@@ -25,14 +26,13 @@ type XEvent =
   | Reparent
   | Unmap
   | Visibility 
-  | WhatButton of int
 ;;
 
 let CAMLtoTKXEvent = function
-    XKey a -> a
-  | ButtonPress -> "ButtonPress"
-  | Button -> "Button"
+    ButtonPress -> "ButtonPress"
+  | ButtonPressDetail n -> "ButtonPress-"^string_of_int n
   | ButtonRelease -> "ButtonRelease"
+  | ButtonReleaseDetail n -> "ButtonRelease-"^string_of_int n
   | Circulate -> "Circulate"
   | ColorMap -> "ColorMap"
   | Configure -> "Configure"
@@ -43,8 +43,9 @@ let CAMLtoTKXEvent = function
   | FocusOut -> "FocusOut"
   | Gravity -> "Gravity"
   | KeyPress -> "KeyPress"
-  | Key -> "Key"
+  | KeyPressDetail s -> "KeyPress-"^s
   | KeyRelease -> "KeyRelease"
+  | KeyReleaseDetail s -> "KeyRelease-"^s
   | Leave -> "Leave"
   | Map -> "Map"
   | Motion -> "Motion"
@@ -52,8 +53,6 @@ let CAMLtoTKXEvent = function
   | Reparent -> "Reparent"
   | Unmap -> "Unmap"
   | Visibility -> "Visibility" 
-  | WhatButton n -> string_of_int n
-
 ;;
 
 type Modifier =
