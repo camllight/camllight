@@ -176,6 +176,14 @@ Apparently, asynchronous I/O are severely buggy in the 3.0 kernel.
 Fix: comment out lines 286-289 in config/autoconf and run "make configure"
 again.
 
+* On some versions of Linux, it has been reported that sed has a
+non-standard syntax for scripts that causes some of the sed-scripts in
+src/runtime/Makefile and src/linker/Makefile to fail during "make world".
+(We did not experience this problem with the versions of Linux we
+use.) You'll have to adapt the sed scripts, then do "make clean", then
+do "make world" again. It is crucial to do "make clean", otherwise
+incorrectly generated files will remain.
+
 * On MIPS machines from MIPS Co.  Add "-systype bsd43" to OPTS.
 Also, some versions of the cc compiler are reportedly unable to
 compile src/runtime/interp.c ("as1: internal: unexpected opcode bcond06").
