@@ -250,8 +250,6 @@ Expr :
           { () }
       | MATCH Expr WITH Opt_bar Parser_match
           { () }
-      | WHEN Opt_bar When_match
-          { () }
       | LET Binding_list IN Expr  %prec prec_let
           { () }
       | LET REC Binding_list IN Expr  %prec prec_let
@@ -393,15 +391,6 @@ Try_match :
           { () }
       | Pattern Action
           { () }
-;
-
-When_match :
-        Expr MINUSGREATER Expr BAR When_match
-          { () }
-      | UNDERSCORE MINUSGREATER Expr
-	  { () }
-      | Expr MINUSGREATER Expr
-          { ()}
 ;
 
 Binding_list :
