@@ -1,9 +1,13 @@
 Caml Light 0.73:
 ---------------
 
-* Fixed a bug with hasthbl__do_table_rev, causing #open of a module
-  with multiply defined identifiers to behave incorrectly.
+* Standard library:
+  - Fixed a bug with hasthbl__do_table_rev, causing #open of a module
+    with multiply defined identifiers to behave incorrectly.
+  - map__iter now conforms to the documentation w.r.t. old bindings.
 
+* MS Windows port: fixed several bugs in the interactive application
+  that showed up only under Win 3.1.
 
 Caml Light 0.72:
 ---------------
@@ -30,7 +34,7 @@ Caml Light 0.72:
   units (e.g. let x = raise Foo;;).
 
 * Run-time system: allocation bug for the Sys_error exception fixed;
-  fixed heap assignement bug in the parsing engine.
+  fixed pointer assignment bug in the parsing engine.
 
 * MS Windows port: numerous fixes in the interactive toplevel application;
   fully automatic installation procedure.
@@ -48,7 +52,7 @@ Caml Light 0.72:
 * MS Windows graphics primitives: blit_image, draw_image, get_image
   now working properly; drawing area no longer limited to 600x400.
 
-* libnum: bug in suqare root fixed.
+* libnum: bug in square root fixed.
 
 * libstr: fixed bug in string_before when length = 0.
 
