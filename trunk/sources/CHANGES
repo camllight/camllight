@@ -1,3 +1,9 @@
+Caml Light 0.71:
+
+* Syntactic sugar:
+  conditionals introduced by when (when expr -> expr | ... | _ -> expr)
+  
+
 Caml Light 0.7:
 --------------
 
