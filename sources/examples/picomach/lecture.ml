@@ -3,20 +3,20 @@
 #open "lexuniv";;
 
 let registre = function
-    [< 'MC "r"; 'Entier nbr >] -> nbr
+  | [< 'MC "r"; 'Entier nbr >] -> nbr
   | [< 'MC "sp" >] -> sp
   | [< 'MC "ra" >] -> ra;;
 
 let constante = function
-    [< 'Entier nbr >] -> nbr
+  | [< 'Entier nbr >] -> nbr
   | [< 'Ident nom_étiq >] -> valeur_étiquette nom_étiq;;
 
 let opérande = function
-    [< registre r >] -> Reg r
+  | [< registre r >] -> Reg r
   | [< constante c >] -> Imm c;;
 
 let rec instruction = function
-    [< opération op; reg_op_reg (r1, o, r2) >] ->
+  | [< opération op; reg_op_reg (r1, o, r2) >] ->
           assemble(Op(op, r1, o, r2))
   | [< test_inversé test; reg_op_reg (r1, o, r2) >] ->
           assemble(Op(test, r1, o, r2));
@@ -33,11 +33,11 @@ let rec instruction = function
   | [< 'MC "stop" >] -> assemble Stop
 
 and reg_op_reg = function
-    [< registre r1; 'MC ","; opérande o; 'MC ","; registre r2 >] ->
+  | [< registre r1; 'MC ","; opérande o; 'MC ","; registre r2 >] ->
       (r1, o, r2)
 
 and opération = function
-    [< 'MC "load" >] -> Load    | [< 'MC "store" >] -> Store
+  | [< 'MC "load" >] -> Load    | [< 'MC "store" >] -> Store
   | [< 'MC "add" >]  -> Add     | [< 'MC "mult" >]  -> Mult
   | [< 'MC "sub" >]  -> Sub     | [< 'MC "div" >]   -> Div
   | [< 'MC "and" >]  -> And     | [< 'MC "or" >]    -> Or
@@ -46,20 +46,20 @@ and opération = function
   | [< 'MC "sle" >]  -> Sle     | [< 'MC "seq" >]   -> Seq
 
 and test_inversé = function
-    [< 'MC "sgt" >] -> Sle
+  | [< 'MC "sgt" >] -> Sle
   | [< 'MC "sge" >] -> Slt
   | [< 'MC "sne" >] -> Seq;;
 
 let définition_d'étiquette = function
-    [< 'Ident nom_étiq; 'MC ":" >] -> poser_étiquette nom_étiq;;
+  | [< 'Ident nom_étiq; 'MC ":" >] -> poser_étiquette nom_étiq;;
 
 let rec instruction_étiq = function
-    [< définition_d'étiquette (); instruction_étiq () >] -> ()
+  | [< définition_d'étiquette (); instruction_étiq () >] -> ()
   | [< instruction () >] -> ();;
 
 let rec suite_d'instructions flux =
   match flux with
-    [< instruction_étiq () >] -> suite_d'instructions flux
+  | [< instruction_étiq () >] -> suite_d'instructions flux
   | [< >] -> ();;
 
 let analyseur_lexical =

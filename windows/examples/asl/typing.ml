@@ -3,7 +3,7 @@
 #open "parser";;
 
 let rec nth n = function
-     []  -> raise (Failure "nth")
+  | []  -> raise (Failure "nth")
   | x::l -> if n=1 then x else nth (n-1) l;;
 
 type asl_type =
@@ -29,7 +29,7 @@ let new_vartype, reset_vartypes =
 
 let rec shorten t =
     match t with
-     TypeVar {Index=_; Value=Unknown} -> t
+   | TypeVar {Index=_; Value=Unknown} -> t
    | TypeVar ({Index=_;
                 Value=TypeVar {Index=_;
                                Value=Unknown} as tv}) -> tv
@@ -52,7 +52,7 @@ let occurs {Index=n;Value=_} = occrec
 let rec unify (tau1,tau2) =
   match (shorten tau1, shorten tau2)
   with (* type variable n and type variable m *)
-       (TypeVar({Index=n; Value=Unknown} as tv1) as t1),
+     | (TypeVar({Index=n; Value=Unknown} as tv1) as t1),
        (TypeVar({Index=m; Value=Unknown} as tv2) as t2)
            -> if n=m then () else tv1.Value <- t2
      | (* type t1 and type variable *)
@@ -93,7 +93,7 @@ let unknowns_of_type_env env =
 ;;
 
 let rec make_set = function
-     []  -> []
+  | []  -> []
   | x::l -> if mem x l then make_set l else x::make_set l
 ;;
 
@@ -110,7 +110,7 @@ let gen_instance (Forall(gv,tau)) =
           gv
   in ginstance tau
   where rec ginstance = function
-        (TypeVar {Index=n; Value=Unknown} as t) ->
+      | (TypeVar {Index=n; Value=Unknown} as t) ->
                     (try assoc n unknowns
                      with Not_found -> t)
       | TypeVar {Index=_; Value= t} -> ginstance t
@@ -160,12 +160,12 @@ let print_type_scheme (Forall(gv,t)) =
  (* Fails when it encounters an unknown *)
  let names = (names_of (1,gv)
       where rec names_of = function
-             (n,[]) -> []
+           | (n,[]) -> []
            | (n,(v1::lv)) -> (tvar_name n)
                            ::(names_of (n+1, lv))) in
  let tvar_names = combine (rev gv,names) in
  let rec print_rec = function
-      TypeVar{Index=n; Value=Unknown} ->
+    | TypeVar{Index=n; Value=Unknown} ->
          let name =
              try assoc n tvar_names
              with Not_found ->

@@ -68,7 +68,7 @@ let rec loop dist angle_incr =
   reset();
   spir dist 0.0 angle_incr;
   match read_key() with
-    `-` -> loop (dist -. 2.0) angle_incr
+  | `-` -> loop (dist -. 2.0) angle_incr
   | `+` -> loop (dist +. 2.0) angle_incr
   | `d` -> loop dist (angle_incr -. 0.05)
   | `D` -> loop dist (angle_incr -. 5.0)

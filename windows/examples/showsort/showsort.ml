@@ -73,6 +73,8 @@ let initialize name funct array maxval x y w h =
 
 (* Main animation function *)
 
+let skip_key () = let _ = read_key () in ();;
+
 let display functs nelts maxval =
   let a = make_vect nelts 0 in
   for i = 0 to nelts - 1 do
@@ -88,7 +90,7 @@ let display functs nelts maxval =
     while true do
       let gc = queue__take q in
         begin match gc.action with
-          Finished -> ()
+        | Finished -> ()
         | Pause f ->
             gc.action <- f ();
             for i = 0 to !delay do () done;
@@ -96,7 +98,7 @@ let display functs nelts maxval =
         end;
       if key_pressed() then begin
         match read_key() with
-          `q`|`Q` ->
+        | `q`|`Q` ->
             raise Exit
         | `0`..`9` as c ->
             delay := (int_of_char c - 48) * 500
@@ -105,7 +107,7 @@ let display functs nelts maxval =
       end
     done
   with Exit -> ()
-     | queue__Empty -> read_key(); ()
+     | queue__Empty -> skip_key ()
 ;;
 
 (* The sorting functions.
@@ -303,7 +305,7 @@ let heap_sort gc =
 let merge_sort gc =
   let rec merge i l1 l2 cont =
     match (l1, l2) with
-      ([], []) ->
+    | ([], []) ->
         cont()
     | ([], v2::r2) ->
         assign gc i v2; merge (i+1) l1 r2 cont
@@ -334,7 +336,7 @@ let animate() =
   moveto 0 0; draw_string "Press a key to start...";
   let seed = ref 0 in
   while not (key_pressed()) do incr seed done;
-  read_key();
+  skip_key ();
   random__init !seed;
   clear_graph();
   let prompt = "0: fastest ... 9: slowest, press 'q' to quit" in

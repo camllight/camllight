@@ -14,14 +14,14 @@ let encode entrée sortie codage =
     do_list (esbit__écrire_bit sortie) codage.fin;
     esbit__finir sortie;;
 type arbre_de_huffman =
-    Lettre of char
+  | Lettre of char
   | Fin
   | Noeud of arbre_de_huffman * arbre_de_huffman;;
 
 let décode entrée sortie arbre =
   esbit__initialise();
   let rec parcours = function
-    Fin -> ()
+  | Fin -> ()
   | Lettre c ->
       output_char sortie c; parcours arbre
   | Noeud(gauche, droite) ->
@@ -59,7 +59,7 @@ let construire_arbre fréquences =
 let arbre_vers_codage arbre =
   let codage = { caractère = make_vect 256 []; fin = [] } in
   let rec remplir_codage préfixe = function
-    Lettre c ->
+  | Lettre c ->
       codage.caractère.(int_of_char c) <- rev préfixe
   | Fin ->
       codage.fin <- rev préfixe

@@ -4,9 +4,9 @@ let reconnaît automate chaîne =
   let état_courant = ref automate in 
   try
     for i = 0 to string_length chaîne - 1 do
-    match !état_courant.dtransitions.(int_of_char(nth_char chaîne i))
-    with Rejet  -> raise Échec
-       | Vers e -> état_courant := e
+    match !état_courant.dtransitions.(int_of_char(nth_char chaîne i)) with
+    | Rejet  -> raise Échec
+    | Vers e -> état_courant := e
     done;
     !état_courant.dterminal
   with Échec -> false;;

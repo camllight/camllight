@@ -7,21 +7,21 @@ let caractère_dans_chaîne chaîne car =
       false
     with Trouvé -> true;;
 let rec membre elem = function
-    [] -> false
+  | [] -> false
   | x :: reste -> x = elem or membre elem reste;;
 exception Pas_trouvé;;
 let rec associé_de x = function
-    [] -> raise Pas_trouvé
+  | [] -> raise Pas_trouvé
   | (clé, valeur) :: l ->
       if x = clé then valeur else associé_de x l;;
 let rec associé_dans_liste clé = function
-    [] -> raise Pas_trouvé
+  | [] -> raise Pas_trouvé
   | (liste_de_clés, valeur) :: reste ->
       if membre clé liste_de_clés then valeur
       else associé_dans_liste clé reste;;
 let rec associé_d'un_élément_de liste_de_clés liste_d'association =
     match liste_de_clés with
-      [] -> raise Pas_trouvé
+    | [] -> raise Pas_trouvé
     | clé :: reste ->
        try
          associé_dans_liste clé liste_d'association
@@ -49,7 +49,7 @@ let simplifie_mot mot =
     let nouveau_mot = create_string (string_length mot) in
     let i = ref 0 and j = ref 0 in
     let rec cherche_traduction = function
-      [] -> raise Pas_trouvé
+    | [] -> raise Pas_trouvé
     | (original, traduction) :: reste ->
         let longueur = string_length original in
         if !i + longueur <= string_length mot
@@ -78,7 +78,7 @@ let divise_en_mots chaîne =
         mots := simplifie_mot (sous_chaîne chaîne i j) :: !mots in
     for i =  string_length chaîne - 1 downto 0 do
       match nth_char chaîne i with
-        (` ` | `\n` | `.` | `,` | `;` | `-` | `!` | `?`) ->
+      | (` ` | `\n` | `.` | `,` | `;` | `-` | `!` | `?`) ->
          ajoute_mot (i+1) !j; j := i-1
       | _ -> ()
    done;
@@ -509,7 +509,7 @@ let écoute_le_patient () =
     print_string ">> ";
     réponse_du_patient := read_line();;
 let rec synonyme_de_phrase = function
-    ["comment"] -> ["quoi"]
+  | ["comment"] -> ["quoi"]
   | ["bien";"sur"] -> ["oui"]
   | "bien"::"sur"::"que"::suite -> synonyme_de_phrase suite
   | (["evidemment"] | ["certainement"]) -> ["oui"]

@@ -8,23 +8,23 @@
 let code_nombre n =
     Val_nombre n
 and décode_nombre = function
-    Val_nombre n -> n
+  | Val_nombre n -> n
   | _ -> raise(Erreur "entier attendu")
 and code_booléen b =
     Val_booléenne b
 and décode_booléen = function
-    Val_booléenne b -> b
+  | Val_booléenne b -> b
   | _ -> raise(Erreur "booléen attendu");;
 
 (* Pour transformer une fonction Caml en valeur fonctionnelle *)
 
 let prim1 codeur calcul décodeur =
-  Val_primitive(function val -> codeur(calcul(décodeur val)))
+  Val_primitive(function val -> codeur (calcul (décodeur val)))
 and prim2 codeur calcul décodeur1 décodeur2 =
   Val_primitive(function
-    Val_paire(v1, v2) ->
-      codeur(calcul (décodeur1 v1) (décodeur2 v2))
-  | _ -> raise(Erreur "paire attendue"));;
+   | Val_paire (v1, v2) ->
+      codeur (calcul (décodeur1 v1) (décodeur2 v2))
+   | _ -> raise (Erreur "paire attendue"));;
 
 (* L'environnement initial *)
 
@@ -72,7 +72,7 @@ let boucle () =
     print_string "# "; flush std_out;
     try
       match lire_phrase flux_d'entrée with
-        Expression expr ->
+      | Expression expr ->
           let ty = type_exp !env_typage expr in
           let rés = évalue !env_éval expr in
           print_string "- : "; imprime_type ty;
@@ -82,11 +82,12 @@ let boucle () =
           let nouvel_env_typage = type_déf !env_typage déf in
           let nouvel_env_éval = évalue_définition !env_éval déf in
           begin match (nouvel_env_typage, nouvel_env_éval) with
-            (nom, schéma) :: _, (_, val) :: _ ->
+          | (nom, schéma) :: _, (_, val) :: _ ->
               print_string nom; print_string " : ";
               imprime_schéma schéma;
               print_string " = "; imprime_valeur val;
               print_newline()
+          | _ -> failwith "incorrect traitement des définitions"
           end;
           env_typage := nouvel_env_typage;
           env_éval := nouvel_env_éval

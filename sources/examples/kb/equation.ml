@@ -41,10 +41,11 @@ let reduce l m =
 let reducible l = redrec
   where rec redrec m =
     try
-      matching l m; true
+      let _ = matching l m in true
     with Failure _ ->
-      match m with Term(_,sons) -> exists redrec sons
-                |         _     -> false
+      match m with
+      | Term(_,sons) -> exists redrec sons
+      |        _     -> false
 ;;
 
 (* mreduce : rules -> term -> term *)
@@ -61,15 +62,15 @@ let mrewrite1 rules = rewrec
       mreduce rules m
     with Failure _ ->
       let rec tryrec = function
-          [] -> failwith "mrewrite1"
+        | [] -> failwith "mrewrite1"
         | son::rest ->
             try
               rewrec son :: rest
             with Failure _ ->
               son :: tryrec rest in
       match m with
-          Term(f, sons) -> Term(f, tryrec sons)
-        | _ -> failwith "mrewrite1"
+      | Term (f, sons) -> Term (f, tryrec sons)
+      | _ -> failwith "mrewrite1"
 ;;
 
 (* Iterating rewrite1. Returns a normal form. May loop forever *)

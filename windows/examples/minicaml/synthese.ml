@@ -2,7 +2,7 @@
 #open "types";;
 
 let rec type_motif env = function
-    Motif_variable id ->
+  | Motif_variable id ->
       let ty = nouvelle_inconnue() in
       (ty, (id, schéma_trivial ty) :: env)
   | Motif_booléen b ->
@@ -21,7 +21,7 @@ let rec type_motif env = function
       unifie (type_liste ty1) ty2;
       (ty2, env2);;
 let rec type_exp env = function
-    Variable id ->
+  | Variable id ->
       begin try spécialisation (assoc id env)
       with Not_found -> raise(Erreur(id ^ " est inconnu"))
       end
@@ -56,7 +56,7 @@ and type_déf env déf =
   début_de_définition();
   let type_expr =
     match déf.Récursive with
-      false -> type_exp env déf.Expr
+    | false -> type_exp env déf.Expr
     | true ->
         let type_provisoire = nouvelle_inconnue() in
         let type_expr =

@@ -45,6 +45,8 @@ let replace_decl (Decl(s, _)) sm sigma =
 
 exception Break;;
 
+let stream_skip strm = let _ = stream_next strm in ();;
+
 let go() =
   try
     let cstrm = stream_from read_fun in
@@ -72,7 +74,7 @@ let go() =
       | Parse_error ->
           print_newline();
           print_string "*** Syntax error."; print_newline();
-          reset_lexer cstrm; stream_next strm; ()
+          reset_lexer cstrm; stream_skip strm
       | Unbound s ->
           print_newline();
           print_string "*** Unbound ASL identifier: ";

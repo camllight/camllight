@@ -1,6 +1,6 @@
 let rec lire_entier accumulateur flux =
   match flux with
-    [< '(`0`..`9` as c) >] ->
+  | [< '(`0`..`9` as c) >] ->
       lire_entier (10 * accumulateur + int_of_char c - 48) flux
   | [< >] ->
       accumulateur;;
@@ -9,7 +9,7 @@ let tampon = "----------------";;
 
 let rec lire_mot position flux =
   match flux with
-    [< '(`A`..`Z` | `a`..`z` | `0`..`9` | `_` | `'` | 
+  | [< '(`A`..`Z` | `a`..`z` | `0`..`9` | `_` | `'` | 
          `é`|`à`|`è`|`ù`|`â`|`ê`|`î`|`ô`|`û`|`ë`|`ï`|`ü`|`ç`|
          `É`|`À`|`È`|`Ù`|`Â`|`Ê`|`Î`|`Ô`|`Û`|`À`|`Ï`|`Ü`|`Ç`
          as c) >] ->
@@ -20,7 +20,7 @@ let rec lire_mot position flux =
       sub_string tampon 0 (min position (string_length tampon));;
 let rec lire_symbole position flux =
   match flux with
-    [< '(`!`|`$`|`%`|`&`|`*`|`+`|`-`|`.`|`/`|`:`|
+  | [< '(`!`|`$`|`%`|`&`|`*`|`+`|`-`|`.`|`/`|`:`|
          `;`|`<`|`=`|`>`|`?`|`@`|`^`|`|`|`~` as c) >] ->
       if position < string_length tampon then
         set_nth_char tampon position c;
@@ -29,7 +29,7 @@ let rec lire_symbole position flux =
       sub_string tampon 0 (min position (string_length tampon));;
 let rec lire_commentaire flux =
   match flux with
-    [< '`\n` >] -> ()
+  | [< '`\n` >] -> ()
   | [< 'c >] -> lire_commentaire flux;;
 let mc_ou_ident table_des_mots_clés ident =
     try hashtbl__find table_des_mots_clés ident
@@ -40,7 +40,7 @@ let mc_ou_erreur table_des_mots_clés caractère =
     with Not_found -> raise Parse_error;;
 let rec lire_lexème table flux =
   match flux with
-    [< '(` `|`\n`|`\r`|`\t`) >] ->
+  | [< '(` `|`\n`|`\r`|`\t`) >] ->
       lire_lexème table flux
   | [< '`#` >] ->
       lire_commentaire flux; lire_lexème table flux
@@ -58,7 +58,7 @@ let rec lire_lexème table flux =
       Entier(lire_entier (int_of_char c - 48) flux)
   | [< '`-` >] ->
       begin match flux with
-        [< '(`0`..`9` as c) >] ->
+      | [< '(`0`..`9` as c) >] ->
           Entier(- (lire_entier  (int_of_char c - 48) flux))
       | [< >] ->
           set_nth_char tampon 0 `-`;
@@ -69,8 +69,8 @@ let rec lire_lexème table flux =
 let rec analyseur table flux =
     stream_from (function () -> 
       match flux with
-       [< (lire_lexème table) lexème >] -> lexème
-     | [< >] -> raise Parse_failure);;
+      | [< (lire_lexème table) lexème >] -> lexème
+      | [< >] -> raise Parse_failure);;
 let construire_analyseur mots_clés =
     let table_des_mots_clés = hashtbl__new 17 in
     do_list

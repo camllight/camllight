@@ -1,27 +1,27 @@
 #open "crayon";;
 
 let flottant = function
-    Entier i -> float_of_int i
+  | Entier i -> float_of_int i
   | Flottant f -> f;;
 
 let ajoute_nombres = function
-    (Entier i, Entier j) -> Entier (i + j)
+  | (Entier i, Entier j) -> Entier (i + j)
   | (n1, n2) -> Flottant (flottant n1 +. flottant n2)
 and soustrais_nombres = function
-    (Entier i, Entier j) -> Entier (i - j)
+  | (Entier i, Entier j) -> Entier (i - j)
   | (n1, n2) -> Flottant (flottant n1 -. flottant n2)
 and multiplie_nombres = function
-    (Entier i, Entier j) -> Entier (i * j)
+  | (Entier i, Entier j) -> Entier (i * j)
   | (n1, n2) -> Flottant (flottant n1 *. flottant n2)
 and divise_nombres = function
-    (Entier i, Entier j) -> Entier (i / j)
+  | (Entier i, Entier j) -> Entier (i / j)
   | (n1, n2) -> Flottant (flottant n1 /. flottant n2)
 and compare_nombres = function
-    (Entier i, Entier j) -> i >= j
+  | (Entier i, Entier j) -> i >= j
   | (n1, n2) -> (flottant n1 >=. flottant n2);;
 
 let rec valeur_expr env = function
-    Constante n -> n
+  | Constante n -> n
   | Somme (e1, e2) ->
      ajoute_nombres (valeur_expr env e1, valeur_expr env e2)
   | Produit (e1, e2) ->
@@ -41,11 +41,11 @@ and définition_de nom_de_procédure =
     with Not_found ->
       failwith ("procédure inconnue: " ^ nom_de_procédure);;
 let valeur_entière = function
-    Entier i -> i
+  | Entier i -> i
   | Flottant f -> failwith "entier attendu";;
 exception Fin_de_procédure;;
 let rec exécute_ordre env = function
-    Av e -> avance (flottant (valeur_expr env e))
+  | Av e -> avance (flottant (valeur_expr env e))
   | Re e -> avance (-. (flottant (valeur_expr env e)))
   | Tg a -> tourne (flottant (valeur_expr env a))
   | Td a -> tourne (-. (flottant (valeur_expr env a)))
@@ -65,7 +65,7 @@ let rec exécute_ordre env = function
      let variables = définition.Paramètres
      and corps = définition.Corps in
      let rec augmente_env = function
-         [],[] -> env
+       | [],[] -> env
        | variable::vars, expr::exprs ->
           (variable, valeur_expr env expr) ::
           augmente_env (vars, exprs)
@@ -77,7 +77,7 @@ let rec exécute_ordre env = function
      with Fin_de_procédure -> ();;
 
 let rec exécute_phrase = function
-    Ordre ord -> exécute_ordre [] ord
+  | Ordre ord -> exécute_ordre [] ord
   | Pour (nom, proc as liaison) -> définit_procédure liaison
 and exécute_programme = function
-    Programme phs -> do_list exécute_phrase phs;;
+  | Programme phs -> do_list exécute_phrase phs;;

@@ -1,5 +1,5 @@
 let rec évalue_dans liaisons = function
-    Vrai -> true
+  | Vrai -> true
   | Faux -> false
   | Non p -> not (évalue_dans liaisons p)
   | Et (p, q) -> (évalue_dans liaisons p) &  (évalue_dans liaisons q)
@@ -11,7 +11,7 @@ let rec évalue_dans liaisons = function
   | Variable v -> assoc v liaisons;;
 let rec vérifie_lignes proposition liaisons variables =
   match variables with
-    [] ->
+  | [] ->
      if not évalue_dans liaisons proposition
      then raise (Réfutation liaisons)
   | var :: autres ->
@@ -22,7 +22,7 @@ let vérifie_tautologie proposition variables =
   vérifie_lignes proposition [] variables;;
 let rec variables accu proposition =
   match proposition with
-    Variable v -> if mem v accu then accu else v::accu
+  | Variable v -> if mem v accu then accu else v::accu
   | Non p -> variables accu p
   | Et (p, q) -> variables (variables accu p) q
   | Ou (p, q) -> variables (variables accu p) q

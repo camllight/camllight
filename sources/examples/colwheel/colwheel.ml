@@ -16,15 +16,15 @@ let rgb_of_hsb h s v =
   graphics__rgb
     (nround (max*(
       match i/max with
-        0 | 6 -> v | 1 -> n | 2 -> m | 3 -> m | 4 -> k | _ -> v
+      | 0 | 6 -> v | 1 -> n | 2 -> m | 3 -> m | 4 -> k | _ -> v
     )) max)
     (nround (max*(
       match i/max with
-        0 | 6 -> k | 1 -> v | 2 -> v | 3 -> n | 4 -> m | _ -> m
+      | 0 | 6 -> k | 1 -> v | 2 -> v | 3 -> n | 4 -> m | _ -> m
     )) max)
     (nround (max*(
       match i/max with
-        0 | 6 -> m | 1 -> m | 2 -> k | 3 -> v | 4 -> v | _ -> n
+      | 0 | 6 -> m | 1 -> m | 2 -> k | 3 -> v | 4 -> v | _ -> n
     )) max)
 ;;
 
@@ -54,7 +54,7 @@ let main() =
       let e = wait_next_event [Button_down; Key_pressed] in
         if e.keypressed then begin
           match e.key with
-            `0` .. `9` ->
+          | `0` .. `9` ->
               clear_graph();
               wheels ((int_of_char e.key - 48) * max / 9)
           | `q` | `Q` ->

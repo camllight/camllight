@@ -10,7 +10,7 @@ let rec interval min max =
    that satisfy predicate p *)
 
 let rec filter p = function
-     []  -> []
+  | []  -> []
   | a::r -> if p a then a :: filter p r else filter p r
 ;;
 
@@ -24,7 +24,7 @@ let remove_multiples_of n =
 
 let sieve max =
   let rec filter_again = function
-     [] -> []
+  | [] -> []
   | n::r as l ->
       if n*n > max then l else n :: filter_again (remove_multiples_of n r)
   in
