@@ -153,11 +153,12 @@ let write_wrapper_code W fname argtys =
 (* they will be returned as list of strings                  *)
 
 (* Can we generate a "parser" ?
-   -> all constructors are unit and at most one int
+   -> all constructors are unit and at most one int and one string, with null constr
 *)
 type ParserPieces =
-    { mutable zeroary : Component list ;
-      mutable intpar : Component list (* one at most *)
+    { mutable zeroary : FullComponent list ;
+      mutable intpar : FullComponent list; (* one at most *)
+      mutable stringpar : FullComponent list (* idem *)
     }
 ;;
 
@@ -167,7 +168,7 @@ type MiniParser =
 ;;
 
 let can_generate_parser constructors =
-  let pp = {zeroary = []; intpar = []} in
+  let pp = {zeroary = []; intpar = []; stringpar = []} in
   if (for_all (function c ->
       	    match c.Arg with
 	      Unit -> pp.zeroary <- c:: pp.zeroary; true
@@ -176,6 +177,12 @@ let can_generate_parser constructors =
       	       	if pp.intpar <> [] then false
 	        else begin
 		   pp.intpar <- [c]; true
+		end
+            | String ->
+	      c.TkName = "" &
+      	       	if pp.stringpar <> [] then false
+	        else begin
+		   pp.stringpar <- [c]; true
 		end
             | _ -> false)
            constructors)
@@ -189,21 +196,26 @@ let write_TKtoCAML W name typdef =
   match can_generate_parser typdef.constructors with
     NoParser ->    prerr_string ("You must write TKtoCAML" ^ name ^"\n")
   | ParserPieces pp -> begin
-      W ("let TKtoCAML"^name^" = function\n\t");
+      W ("let TKtoCAML"^name^" n =\n");
+      (* First check integer *)
+       if pp.intpar <> [] then begin
+      	 W ("   try " ^ (hd pp.intpar).MLName ^ "(int_of_string n)\n");
+         W ("   with _ ->\n")
+         end;
+       W ("\tmatch n with\n");
       let first = ref true in
        do_list (fun c -> 
-      	 if not !first then W ("\t| ");
+      	 if not !first then W "\t| " else W "\t";
 	 first := false;
       	 W "\""; W c.TkName; W "\" -> "; W c.MLName; W "\n")
 	 pp.zeroary ;
       let failcase = "raise (Invalid_argument \"TKtoCAML" ^ name ^ "\")"  in
-      let final = if pp.intpar <> [] then
-      	 "n -> try " ^ (hd pp.intpar).MLName ^ "(int_of_string n)
-               with _ -> " ^ failcase
-         else " _ -> " ^ failcase in
-       if not !first then W ("\t| ");
-       W final;
-       W "\n;;\n"
+      let final = if pp.stringpar <> [] then
+            "n -> " ^ (hd pp.stringpar).MLName ^ " n"
+         else " _ -> " ^ failcase   in
+      if not !first then W "\t| " else W "\t";
+      W final;
+      W "\n;;\n"
      end
 ;;
 
@@ -319,11 +331,14 @@ let write_function_body W def names =
   | Product tyl ->
       W "\tSend2Tk \"]; flush $PipeTkResult\";\n";
       W "\tSend2TkEval();\n";
-      W (catenate_sep ",\n\t"
-      	   (map (function ty ->
-	           "(" ^ converterTKtoCAML "(GetTkToken !PipeTkResult)" ty
-		       ^ ")")
-                tyl))
+      let rnames = varnames "r" (list_length tyl) in
+       do_list2 (fun r ty ->
+                  W ("\tlet " ^ r ^ " = ");
+                  W (converterTKtoCAML "(GetTkToken !PipeTkResult)" ty);
+       	       	  W (" in\n"))
+                rnames
+                tyl;
+       W (catenate_sep "," rnames)
   | String ->
       W "\tSend2Tk \"]; flush $PipeTkResult\";\n";
       W "\tSend2TkEval();\n";
@@ -337,7 +352,7 @@ let write_function_body W def names =
   W (";;\n\n")
 ;;
 
-let write_command W def =
+let write_command wclass W def =
   W ("let "^def.MLName^" w ");
   let names = 
     match def.Arg with
@@ -351,6 +366,7 @@ let write_command W def =
   | l -> W (catenate_sep " " l); W " =\n"
   end;
   (* Beginning of command *)
+  W ("\tcheck_widget_class w \""^ wclass ^ "\";\n");
   begin match def.Result with
     Unit -> 
         W  "\tSend2TkStart \"$PipeTkCallB\";\n";
