@@ -143,6 +143,9 @@ value camltk_opentk(name) /* ML */
   if (Tk_Init(tclinterp) != TCL_OK)
     tk_error(tclinterp->result);
 
+  /* This is required by "unknown" */
+  Tcl_SetVar(tclinterp, "tcl_interactive", "0", TCL_GLOBAL_ONLY);
+	     
   {
     char *home = getenv("HOME");
     if (home != NULL) {
