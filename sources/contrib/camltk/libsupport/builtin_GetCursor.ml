@@ -32,13 +32,14 @@ type Cursor =
 
 let CAMLtoTKCursor = function
    XCursor s -> quote_string s
- | XCursorFg (s,fg) -> quote_string s ^" "^(CAMLtoTKColor fg)
+ | XCursorFg (s,fg) -> 
+    "[list " ^quote_string s^" "^(CAMLtoTKColor fg)^"]"
  | XCursortFgBg (s,fg,bg) ->
-     quote_string s ^" "^(CAMLtoTKColor fg)^" "^(CAMLtoTKColor bg)
+    "[list "^quote_string s^" "^(CAMLtoTKColor fg)^" "^(CAMLtoTKColor bg)^"]"
  | CursorFileFg (s,fg) ->
-     "@\""^s^"\" "^(CAMLtoTKColor fg)
+    "[list @\""^s^"\" "^(CAMLtoTKColor fg)^"]"
  | CursorMaskFile (s,m,fg,bg) ->
-     "@\""^s^"\" \""^m^"\" "^(CAMLtoTKColor fg)^(CAMLtoTKColor bg)
+    "[list @\""^s^"\" \""^m^"\" "^(CAMLtoTKColor fg)^(CAMLtoTKColor bg)^"]"
 ;;
 
 
