@@ -19,21 +19,22 @@ let get_current_location () =
   Loc(symbol_start(), symbol_end())
 ;;
 
+let output_lines oc char1 char2 charline1 line1 line2 =
 #ifdef macintosh
-let output_lines oc char1 char2 charline1 line1 line2 =
-  fprintf oc "; Line \165!%d:\165!%d\n" char1 char2; ()
-;;
-#else
-let output_lines oc char1 char2 charline1 line1 line2 =
-  let n1 = char1 - charline1
-  and n2 = char2 - charline1 in
-  if line2 > line1 then
-    fprintf oc ", line %d-%d, characters %d-%d:\n" line1 line2 n1 n2
-  else
-    fprintf oc ", line %d, characters %d-%d:\n" line1 n1 n2;
-  ()
-;;
+  if not sys__interactive then begin
+    fprintf oc "; Line \165!%d:\165!%d\n" char1 char2; ()
+  end else
 #endif
+  begin
+	let n1 = char1 - charline1
+	and n2 = char2 - charline1 in
+	if line2 > line1 then
+	  fprintf oc ", line %d-%d, characters %d-%d:\n" line1 line2 n1 n2
+	else
+	  fprintf oc ", line %d, characters %d-%d:\n" line1 n1 n2;
+	()
+  end
+;;
 
 let output_loc oc input seek line_flag (Loc(pos1, pos2)) =
   let pr_chars n c =
