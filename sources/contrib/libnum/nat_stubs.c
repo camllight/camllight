@@ -122,6 +122,15 @@ value incr_nat(nat, ofs, len, carry_in)	/* ML */
                              Long_val(len), Long_val(carry_in)));
 }
 
+value set_incr_nat(nat, ofs, len, carry_in)	/* ML */
+     value nat, ofs, len, carry_in;
+{
+  Check (nat, ofs, len, "incr_nat");
+  BnAddCarry(Bignum_val(nat), Long_val(ofs),
+                             Long_val(len), Long_val(carry_in));
+  return Val_unit;
+}
+
 value add_nat(argv, argn)	/* ML */
      value * argv;
      int argn;
@@ -142,6 +151,14 @@ value add_nat(argv, argn)	/* ML */
                         Long_val(carry_in)));
 }
 
+value set_add_nat(argv, argn)	/* ML */
+     value * argv;
+     int argn;
+{
+  add_nat(argv, argn);
+  return Val_unit;
+}
+
 value complement_nat(nat, ofs, len)	/* ML */
      value nat, ofs, len;
 {
@@ -158,6 +175,16 @@ value decr_nat(nat, ofs, len, carry_in)	/* ML */
 
   return Val_long(BnSubtractBorrow(Bignum_val(nat), Long_val(ofs),
                                    Long_val(len), Long_val(carry_in)));
+}
+
+value set_decr_nat(nat, ofs, len, carry_in)	/* ML */
+     value nat, ofs, len, carry_in;
+{
+  Check (nat, ofs, len, "set_decr_nat");
+
+  BnSubtractBorrow(Bignum_val(nat), Long_val(ofs),
+                                   Long_val(len), Long_val(carry_in));
+  return Val_unit;
 }
 
 value sub_nat(argv, argn)	/* ML */
@@ -178,6 +205,14 @@ value sub_nat(argv, argn)	/* ML */
   return Val_long(BnSubtract(Bignum_val(nat1), Long_val(ofs1), Long_val(len1),
                              Bignum_val(nat2), Long_val(ofs2), Long_val(len2),
                              Long_val(carry_in)));
+}
+
+value set_sub_nat(argv, argn)	/* ML */
+     value * argv;
+     int argn;
+{
+  sub_nat(argv, argn);
+  return Val_unit;
 }
 
 value mult_digit_nat(argv, argn)	/* ML */

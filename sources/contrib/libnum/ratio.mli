@@ -69,6 +69,18 @@ value null_denominator : ratio -> bool
   and string_of_ratio : ratio -> string
   and ratio_of_string : string -> ratio
   and float_of_ratio : ratio -> float
+  and ratio_of_float : float -> ratio
   and power_ratio_positive_int : ratio -> int -> ratio
   and power_ratio_positive_big_int : ratio -> big_int -> ratio
+  and sys_string_of_ratio : int -> string -> ratio -> string -> string
+  and sys_ratio_of_string : int -> string -> int -> int -> ratio
+
+  and verify_null_denominator : ratio -> bool
+  and msd_ratio : ratio -> int
 ;;
+
+value sys_print_ratio : int -> string -> ratio -> string -> unit;;
+value print_ratio : ratio -> unit;;
+value set_ratio_normalized : ratio -> unit;;
+value cautious_set_ratio_normalized : ratio -> unit;;
+value cautious_set_ratio_normalized_when_printing : ratio -> unit;;

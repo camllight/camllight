@@ -105,4 +105,8 @@ value prefix +/ : num -> num -> num
   and ratio_of_num : num -> ratio
   and num_of_ratio : ratio -> num
   and float_of_num : num -> float
+  and num_of_float : float -> num
 ;;
+
+value sys_print_num : int -> string -> num -> string -> unit;;
+value print_num : num -> unit;;
