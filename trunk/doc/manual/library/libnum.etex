@@ -6,7 +6,7 @@ state-of-the-art BigNum arbitrary-precision integer arithmetic
 package, and therefore achieves very high performance.
 
 The functions provided in this library are fully documented in
-{\em The CAML Numbers Reference Manual} by 
+{\em The CAML Numbers Reference Manual\/} by 
 Valérie Menissié-Morain, technical report 141, INRIA, july 1992
 (available by anonymous FTP from "ftp.inria.fr", directory
 "INRIA/publications/RT", file "RT-0141.ps.Z"). A summary of the
