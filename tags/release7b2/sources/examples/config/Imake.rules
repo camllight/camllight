@@ -1,0 +1,102 @@
+#ifndef TOPDIR
+#define TOPDIR .
+#endif
+
+#ifdef __STDC__
+#define concat(a,b) a##b
+#else
+#define concat(a,b) a/**/b
+#endif
+
+#define CamlProg(name,objs,others)                                         @@\
+all::name                                                                  @@\
+                                                                           @@\
+name: objs                                                                 @@\
+	$(CAMLC) $(LINKFLAGS) others objs -o name                          @@\
+                                                                           @@\
+clean::                                                                    @@\
+	$(RM) name                                                         @@\
+                                                                           @@\
+
+#define CamlCustomProg(name,objs,others,clibs)                             @@\
+all::name                                                                  @@\
+                                                                           @@\
+name: objs                                                                 @@\
+	$(CAMLC) $(LINKFLAGS) -custom others objs clibs -o name            @@\
+                                                                           @@\
+clean::                                                                    @@\
+	$(RM) name                                                         @@\
+                                                                           @@\
+
+#define CamlGraphProg(name,objs,others) \
+  CamlCustomProg(name,objs,unix.zo graphics.zo others,-lgraph -lunix -lX11)
+
+#define CamlLibrary(name,objs,others)                                      @@\
+all::name                                                                  @@\
+                                                                           @@\
+name: objs                                                                 @@\
+	$(CAMLLIBR) others objs -o name                                    @@\
+                                                                           @@\
+clean::                                                                    @@\
+	$(RM) name                                                         @@\
+                                                                           @@\
+
+#define CamlYaccFile(basename)                                             @@\
+basename.ml basename.mli: basename.mly                                     @@\
+	@$(RM) basename.ml basename.mli                                    @@\
+	$(CAMLYACC) basename.mly                                           @@\
+	@chmod a-w basename.ml basename.mli                                @@\
+                                                                           @@\
+clean::                                                                    @@\
+	$(RM) basename.ml basename.mli                                     @@\
+                                                                           @@\
+beforedepend:: basename.ml basename.mli                                    @@\
+                                                                           @@\
+
+#define CamlLexFile(basename)                                              @@\
+basename.ml: basename.mll                                                  @@\
+	@$(RM) basename.ml                                                 @@\
+	$(CAMLLEX) basename.mll                                            @@\
+	@chmod a-w basename.ml                                             @@\
+                                                                           @@\
+clean::                                                                    @@\
+	$(RM) basename.ml                                                  @@\
+                                                                           @@\
+beforedepend:: basename.ml                                                 @@\
+                                                                           @@\
+
+#define CamlPreproFile(target)                                             @@\
+target: concat(target,p)                                                   @@\
+	@$(RM) target                                                      @@\
+	@echo '(* GENERATED FILE --- DO NOT EDIT. *)' > target             @@\
+	$(CPP) < concat(target,p) >> target                                @@\
+	@chmod a-w target                                                  @@\
+                                                                           @@\
+clean::                                                                    @@\
+	$(RM) target                                                       @@\
+                                                                           @@\
+beforedepend:: target                                                      @@\
+                                                                           @@\
+
+#define SubDir(dir)                                                        @@\
+all::                                                                      @@\
+	@-echo "-- Making all in" dir; cd dir; make all                    @@\
+                                                                           @@\
+clean::                                                                    @@\
+	@-echo "-- Making clean in" dir; cd dir; make clean                @@\
+                                                                           @@\
+makefiles::                                                                @@\
+	@-echo "-- Making makefiles in" dir; cd dir; make TOP=../$(TOP) makefiles @@\
+                                                                           @@\
+
+#define SubGraphDir(dir)                                                   @@\
+all::                                                                      @@\
+	@-echo "-- Making all in" dir; echo "(This program requires the libgraph library;"; echo " if you haven't installed it, compilation will fail.)"; cd dir; make all                    @@\
+                                                                           @@\
+clean::                                                                    @@\
+	@-echo "-- Making clean in" dir; cd dir; make clean                @@\
+                                                                           @@\
+makefiles::                                                                @@\
+	@-echo "-- Making makefiles in" dir; cd dir; make TOP=../$(TOP) makefiles @@\
+                                                                           @@\
+
