@@ -10,6 +10,8 @@ Caml Light 0.71:
   now, all type variables in type constraints are considered bound at
   the outermost "let".
 
+* Compilation: bug fix in "when" clauses in pattern-matchings on mutables.
+
 * Standard library: fixed bug in parsing engine that generated wrong symbol
   positions for epsilon-productions; various fixes in "format".
 
