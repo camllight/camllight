@@ -1,5 +1,6 @@
 FILES=foreword.tex biblio.tex 
 VPATH=..
+RELEASE=$$HOME/release/$${RELEASENAME}
 
 all: $(FILES) FORCE
 	@$(MAKE) -f Makefile.refman
@@ -21,7 +22,7 @@ clean:
 	cd man-caml; rm -f index.html node*.html
 
 release:
-	tar cf - man-caml/*.* | gzip > $$HOME/release/cl7refman.html.tar.gz
+	tar cf - man-caml/*.* | gzip > $(RELEASE)refman.html.tar.gz
 
 .SUFFIXES:
 .SUFFIXES: .tex .etex
