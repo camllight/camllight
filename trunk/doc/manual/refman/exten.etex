@@ -159,6 +159,20 @@ definitions where the defined variables occur only inside function
 bodies or as a field of a data structure. Moreover, the patterns in
 the left-hand sides must be identifiers, nothing more complex.
 
+\section{Local definitions using "where"}
+
+\ikwd{where\@\verb`where`}
+A postfix syntax for local definitions is provided:
+\begin{syntax}
+expr:
+        \ldots
+      | expr 'where' ['rec'] let-binding
+;
+\end{syntax}
+The expression @expr 'where' let-binding@ behaves exactly as
+@'let' let-binding 'in' expr@, and similarly for "where rec" and "let
+rec".
+
 \section{Mutable variant types}
 
 \ikwd{mutable\@\verb`mutable`}
