@@ -11,6 +11,18 @@
 #open "ty_decl";;
 #open "ty_intf";;
 
+
+(* Errors specific to the profiler *)
+exception Profiler
+;;
+
+let profiler_failwith s =
+  eprintf "Profiler error: %s" s;
+  flush stderr;
+  raise Profiler
+;;
+
+
 (* Modes *)
 let instr_fun    = ref false
 and instr_match  = ref false
@@ -24,6 +36,7 @@ and infile = ref stdin
 and outfile = ref stdout
 ;;
 
+(* In case we forgot something *)
 exception Inversion of int * int;;
 
 let copy next =
@@ -50,9 +63,14 @@ let add_incr_counter mod_name prof_counter =
 
 let counters = ref (make_vect 0 0)
 ;;
+
+(* User defined marker *)
+let special_id = ref ""
+;;
+
 (* Producing results of profile run *)
 let add_val_counter prof_counter =
-   fprintf !outfile "(* %d *) " !counters.(prof_counter); 
+   fprintf !outfile "(* %s%d *) " !special_id !counters.(prof_counter); 
    ()
 ;;
 
@@ -93,7 +111,7 @@ let final_rewrite () =
   copy (in_channel_length !infile);
   if !instr_mode then begin
   let len = string_of_int !profile_counter
-  in if string_length len > 6 then failwith "too many functions";
+  in if string_length len > 6 then profiler_failwith "too many functions";
      seek_out !outfile (30 - string_length len);
      fprint !outfile len
    end;
@@ -113,7 +131,7 @@ let do_directive loc = function
   | Zdir("directory", dirname) ->
       load_path := dirname :: !load_path
   | Zdir(d, name) ->
-      printf__eprintf 
+      eprintf 
         "%aWarning: unknown directive \"#%s\", ignored.\n"
         output_location loc d;
       flush stderr
@@ -251,6 +269,34 @@ let rec rewrite_impl_phrase impl =
      | Zimpldirective d -> do_directive impl.im_loc d
 ;;
 
+(* Stolen from compiler. We don't need skip (no toplevel) *)
+let parse_phrase parsing_fun lexing_fun lexbuf =
+  try
+    parsing_fun lexing_fun lexbuf
+  with parsing__Parse_error _ ->
+         let pos1 = lexing__get_lexeme_start lexbuf in
+         let pos2 = lexing__get_lexeme_end lexbuf in
+         eprintf "%aSyntax error.\n" output_location (Loc(pos1, pos2));
+	 flush stderr;
+         raise Profiler
+     | lexer__Lexical_error(errcode, pos1, pos2) ->
+         let l = Loc(pos1, pos2) in
+         begin match errcode with
+           lexer__Illegal_character ->
+             eprintf "%aIllegal character.\n" output_location l
+         | lexer__Unterminated_comment ->
+             eprintf "%tComment not terminated.\n" output_input_name
+         | lexer__Bad_char_constant ->
+             eprintf "%aIll-formed character literal.\n"
+                             output_location l
+         | lexer__Unterminated_string ->
+             eprintf "%tString literal not terminated.\n"
+                             output_input_name
+         end;
+	 flush stderr;
+         raise Profiler
+;;
+
 (* Common rewrite function *)
 (* filename: path/base  modname: base *)
 let rewrite_file filename modname =
@@ -271,12 +317,9 @@ let rewrite_file filename modname =
       input_lexbuf := lexbuf;
       try
         while true do
-          rewrite_impl_phrase (Implementation lexer__main lexbuf)
+          rewrite_impl_phrase (parse_phrase Implementation lexer__main lexbuf)
         done
       with End_of_file -> final_rewrite ()
-        |  Inversion (pos,next)
-             -> fprintf stderr "internal error: inversion at char %d (%d)\n" pos next;
-                flush stderr; flush !outfile; exit 2
 ;;
 
 
@@ -321,7 +364,10 @@ let std_options = [
   "-O", arg__String open_set;
   "-open", arg__String open_set;
   "-g", arg__Unit (function () ->
-      	fprintf stderr "Warning: -p option incompatible with debugger\n";
+      	eprintf "Warning: -p option incompatible with debugger\n";
+	flush stderr);
+  "-debug", arg__Unit (function () ->
+        eprintf "Warning: -p option incompatible with debugger\n";
 	flush stderr);
   "-i", arg__Unit (function () -> ()); (* ignored *)
   "-lang", arg__String (function lang -> ()) (* ignored *)
@@ -337,6 +383,7 @@ let main () =
 
   (* Check which mode *)
   instr_mode := (basename sys__command_line.(0)) = "camlinstr";
+
   let filename = ref ""
   and modname = ref "" in
     if !instr_mode then begin (* Instrumentation mode *)
@@ -351,17 +398,17 @@ let main () =
 		   modname := basename !filename
 		   end
 		else
-      	       	   failwith "first argument must end in .ml"
+      	       	   profiler_failwith "first argument must end in .ml"
 	| 2 -> outfile := open_out s
 	| _ -> 
-          failwith "usage: camlinstr [-m [afilmt]+] infile.ml outfile.ml"
+          profiler_failwith "camlinstr [-m [afilmt]+] infile.ml outfile.ml"
 
       in
       	arg__parse 
       	  (("-m", arg__String (fun s -> modes := s))::std_options)
 	 anon;
         if !anonargs < 2 then
-      	  failwith "usage: camlinstr [-m [afilmt]+] infile.ml outfile.ml";
+      	 profiler_failwith "camlinstr [-m [afilmt]+] [std options] infile.ml outfile.ml";
         insert_action := add_incr_counter !modname;
         set_flags !modes;
 	init_rewrite !modes !modname;
@@ -379,16 +426,18 @@ let main () =
 	      modname := basename !filename
 	      end
 	   else
-      	      failwith "first argument must end in .ml"
+      	      profiler_failwith "first argument must end in .ml"
            end
         else 
 	   outfile := open_out s 
       in
       arg__parse 
-      	(("-f", arg__String (fun s -> dumpfile := s))::std_options) 
+      	(["-f", arg__String (fun s -> dumpfile := s);
+          "-F", arg__String (fun s -> special_id := s)]
+         @std_options) 
       	anon;
       if !firstarg then
-      	failwith "usage: camlpro [-f dumpfile] infile.ml [outfile]";
+      	profiler_failwith "camlpro [-f dumpfile] [-F keystring] [stdoptions] infile.ml [outfile]";
 
       insert_action := add_val_counter;
 
@@ -396,7 +445,7 @@ let main () =
       let allcounters = input_value ic in
       let modes,cv = 
       	 try assoc !modname allcounters 
-      	 with Not_found -> failwith ("Module " ^ !modname ^ " not used.")
+      	 with Not_found -> profiler_failwith ("Module " ^ !modname ^ " not used in this profile.")
       in
       	counters := cv;
 	set_flags modes;
@@ -406,5 +455,19 @@ let main () =
 	
 ;;
 
-printexc__f main ()
+(* Catch at least our own errors *)
+let protected_main () =
+  try 
+    main ()
+  with 
+    Profiler -> exit 2
+ |  Toplevel -> exit 2
+ |  Inversion (pos,next)
+       -> eprintf 
+           "Profiler internal error: inversion at char %d (%d).\nPlease report it.\n" pos next;
+          flush stderr;
+      	  exit 2
 ;;
+
+printexc__f protected_main (); exit 0;;
+
