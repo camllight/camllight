@@ -45,8 +45,7 @@ Caml Light 0.7:
     (e.g. begin ...; ...; end or [1;2;]).
   - "\/" and "/\" synonymous for "&" and "or".
 
-* Optimized access to unqualified identifiers, makes the compiler run
-  noticeably faster.
+* Optimized access to unqualified identifiers in symbol tables.
 
 * Parser cleaned up a little, reduce/reduce conflicts eliminated.
 
