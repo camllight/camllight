@@ -79,7 +79,7 @@ es:     %aEl identificador %s se ha definido varias veces en este patrón.\n
 
 src:	%aWarning: the variable %s starts with an upper case letter in this pattern.\n
 fr:	%aAttention: dans ce motif l'identificateur %s commence par une majuscule.\n
-es:     %a¡Cuidado!:: en este patrón el identificador %s comienza con una mayúscula.\n
+es:     %a¡Cuidado!: en este patrón el identificador %s comienza con una mayúscula.\n
 
 src:	%aA pattern with "|" must not bind variables.\n
 fr:	%aUn motif avec "|" ne doit pas lier d'identificateurs.\n
@@ -208,16 +208,16 @@ src:	%aWarning: this function application is partial,\n\
 	maybe some arguments are missing.\n
 fr:	%aAttention: cette application de fonction est partielle,\n\
         il manque peut-être des arguments.\n
-es:     %a¡Cuidado!:: esta aplicación de función es parcial,\n\
+es:     %a¡Cuidado!: esta aplicación de función es parcial,\n\
         puede que falte algún argumento.\n
 
 src:	%aWarning: this matching case is unused.\n
 fr:	%aAttention: ce cas de filtrage est inutile.\n
-es:     %a¡Cuidado!:: este caso de la filtración es inútil.\n
+es:     %a¡Cuidado!: este caso de la filtración es inútil.\n
 
 src:	%aWarning: this matching is not exhaustive.\n
 fr:	%aAttention: ce filtrage n'est pas exhaustif.\n
-es:     %a¡Cuidado!:: esta filtración no es exhaustiva.\n
+es:     %a¡Cuidado!: esta filtración no es exhaustiva.\n
 
 src:	%aBad format letter `%c'.\n
 fr:	%aLe format `%c' n'existe pas.\n
