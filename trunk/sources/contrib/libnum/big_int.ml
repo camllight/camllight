@@ -27,7 +27,7 @@ let create_big_int sign nat =
      is_zero_nat nat 0 (num_digits_nat nat 0 (length_nat nat)))
  then { Sign = sign; 
         Abs_Value = nat }
-  else invalid_arg "create_big_int"
+ else invalid_arg "create_big_int"
 ;;
 
 let zero_big_int =
@@ -46,14 +46,14 @@ let num_digits_big_int bi =
 
 (* Opposite of a big_int *)
 let minus_big_int bi = 
- { Sign = minus_int bi.Sign;
+ { Sign = - bi.Sign;
    Abs_Value = copy_nat (bi.Abs_Value) 0 (num_digits_big_int bi)}
 ;;
 
 (* Absolute value of a big_int *)
 let abs_big_int bi = 
-    { Sign = if bi.Sign == 0 then 0 else 1;
-      Abs_Value = copy_nat (bi.Abs_Value) 0 (num_digits_big_int bi)}
+ { Sign = if bi.Sign == 0 then 0 else 1;
+   Abs_Value = copy_nat (bi.Abs_Value) 0 (num_digits_big_int bi)}
 ;;
 
 (* Comparison operators on big_int *)
@@ -69,11 +69,11 @@ let compare_big_int bi1 bi2 =
   if bi1.Sign < bi2.Sign then -1 else
   if bi1.Sign > bi2.Sign then 1 else
   if bi1.Sign == 1 then
-            compare_nat (bi1.Abs_Value) 0 (num_digits_big_int bi1) 
-                        (bi2.Abs_Value) 0 (num_digits_big_int bi2)
+     compare_nat (bi1.Abs_Value) 0 (num_digits_big_int bi1) 
+                 (bi2.Abs_Value) 0 (num_digits_big_int bi2)
   else
-            compare_nat (bi2.Abs_Value) 0 (num_digits_big_int bi2) 
-                        (bi1.Abs_Value) 0 (num_digits_big_int bi1)
+     compare_nat (bi2.Abs_Value) 0 (num_digits_big_int bi2) 
+                 (bi1.Abs_Value) 0 (num_digits_big_int bi1)
 ;;
 
 let eq_big_int bi1 bi2 = compare_big_int bi1 bi2 == 0
@@ -595,7 +595,7 @@ let approx_big_int prec bi =
     max 0
         (int_of_big_int (
           add_int_big_int 
-            (minus_int prec) 
+            (- prec) 
             (div_big_int (mult_big_int (big_int_of_int (pred len_bi)) 
                                       (big_int_of_string "963295986")) 
                         (big_int_of_string "100000000")))) in
@@ -605,12 +605,12 @@ let approx_big_int prec bi =
     if s.[0] == `-`
        then ("-", 1, succ prec)
        else ("", 0, prec) in
-  if (round_futur_last_digit s off (succ prec))
-       then (sign^"1."^(make_string prec `0`)^"e"^
-             (string_of_int (n + 1 - off + string_length s)))
-       else (sign^(sub_string s off 1)^"."^
-             (sub_string s (succ off) (pred prec))
-             ^"e"^(string_of_int (n - succ off + string_length s)))
+  if round_futur_last_digit s off (succ prec)
+       then (sign ^ "1." ^ make_string prec `0` ^ "e" ^
+             string_of_int (n + 1 - off + string_length s))
+       else (sign ^ sub_string s off 1 ^ "." ^
+             sub_string s (succ off) (pred prec) ^ "e" ^
+             string_of_int (n - succ off + string_length s))
 ;;
 
 (* Big_int printing *)

@@ -518,9 +518,6 @@ let unadjusted_string_of_nat nat off len_nat =
                  blit_string str 0 
                              s (!pos_ref - string_length str)
                              (string_length str);
-                 (* XL: il y avait pmax a la place de string_length str
-                    mais ca ne marche pas avec le blit de Caml Light,
-                    qui ne verifie pas les debordements *)
                  pos_ref := !pos_ref - pmax;
                  len_copy := num_digits_nat copy2 0 !len_copy; 
                  blit_nat copy1 0 copy2 0 !len_copy;
