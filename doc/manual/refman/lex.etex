@@ -45,13 +45,11 @@ integer-literal:
 An integer literal is a sequence of one or more digits, optionally
 preceded by a minus sign. By default, integer literals are in decimal
 (radix 10). The following prefixes select a different radix:
-\begin{center}
-\begin{tabular}{ll}
-"0x", "0X" & hexadecimal (radix 16) \\
-"0o", "0O" & octal (radix 8) \\
-"0b", "0B" & binary (radix 2).
-\end{tabular}
-\end{center}
+\begin{tableau}{Prefix}{Radix}
+\entree{"0x", "0X"}{hexadecimal (radix 16)}
+\entree{"0o", "0O"}{octal (radix 8)}
+\entree{"0b", "0B"}{binary (radix 2)}
+\end{tableau}
 (The initial "0" is the digit zero; the "O" for octal is the letter O.)
 
 \subsubsection*{Floating-point literals}
@@ -84,21 +82,15 @@ char-literal:
 Character literals are delimited by "`" (backquote) characters.
 The two backquotes enclose either one character different from
 "`" and "\\", or one of the escape sequences below:
-\begin{center}
-\begin{tabular}{|l|l|}
-\hline
-Sequence        & Character denoted \\
-\hline
-"\\\\"       & backslash ("\\") \\
-"\\`"       & backquote ("`") \\
-"\\n"       & newline (LF) \\
-"\\r"       & return (CR) \\
-"\\t"       & horizontal tabulation (TAB) \\
-"\\b"       & backspace (BS) \\
-"\\"$ddd$  & the character with ASCII code $ddd$ in decimal \\
-\hline
-\end{tabular}
-\end{center}
+\begin{tableau}{Sequence}{Character denoted}
+\entree{"\\\\"}{backslash ("\\")}
+\entree{"\\`"}{backquote ("`")}
+\entree{"\\n"}{newline (LF)}
+\entree{"\\r"}{return (CR)}
+\entree{"\\t"}{horizontal tabulation (TAB)}
+\entree{"\\b"}{backspace (BS)}
+\entree{"\\"\var{ddd}}{the character with ASCII code \var{ddd} in decimal}
+\end{tableau}
 
 \subsubsection*{String literals}
 \label{s:stringliteral}
@@ -117,21 +109,15 @@ String literals are delimited by "\"" (double quote) characters.
 The two double quotes enclose a sequence of either characters
 different from "\"" and "\\", or escape sequences from the
 table below:
-\begin{center}
-\begin{tabular}{|l|l|}
-\hline
-Sequence        & Character denoted \\
-\hline
-"\\\\"     & backslash ("\\") \\
-"\\\""     & double quote ("\"") \\
-"\\n"       & newline (LF) \\
-"\\r"       & return (CR) \\
-"\\t"       & horizontal tabulation (TAB) \\
-"\\b"       & backspace (BS) \\
-"\\"$ddd$   & the character with ASCII code $ddd$ in decimal \\
-\hline
-\end{tabular}
-\end{center}
+\begin{tableau}{Sequence}{Character denoted}
+\entree{"\\\\"}{backslash ("\\")}
+\entree{"\\\""}{double quote ("\"")}
+\entree{"\\n"}{newline (LF)}
+\entree{"\\r"}{return (CR)}
+\entree{"\\t"}{horizontal tabulation (TAB)}
+\entree{"\\b"}{backspace (BS)}
+\entree{"\\"\var{ddd}}{the character with ASCII code \var{ddd} in decimal}
+\end{tableau}
 
 Implementations must support string literals up to $2^{16}-1$ characters in
 length (65535 characters).
@@ -140,96 +126,23 @@ length (65535 characters).
 
 The identifiers below are reserved as keywords, and cannot be employed
 otherwise:
-\begin{center}
-\begin{tabular}{llllll}
-"and" &
-"as" &
-"begin" &
-"do" &
-"done" &
-"downto" \\
-"else" &
-"end" &
-"exception" &
-"for" &
-"fun" &
-"function" \\
-"if" &
-"in" &
-"let" &
-"match" &
-"mutable" &
-"not" \\
-"of" &
-"or" &
-"prefix" &
-"rec" &
-"then" &
-"to" \\
-"try" &
-"type" &
-"value" &
-"where" &
-"while" &
-"with"
-\end{tabular}
-\end{center}
+\begin{verbatim}
+        and    as     begin       do      done      downto 
+        else   end    exception   for     fun       function 
+        if     in     let         match   mutable   not 
+        of     or     prefix      rec     then      to 
+        try    type   value       where   while     with
+\end{verbatim}
 %
 The following character sequences are also keywords:
 %
-\begin{center}
-\begin{tabular}{llllllllll}
-"#" &
-"!" &
-"!=" &
-"&" &
-"(" &
-")" &
-"*" &
-"*." &
-"+" &
-"+." \\
-"," &
-"-" &
-"-." &
-"->" &
-"." &
-".(" &
-"/" &
-"/." &
-":" &
-"::" \\
-":=" &
-";" &
-";;" &
-"<" &
-"<." &
-"<-" &
-"<=" &
-"<=." &
-"<>" &
-"<>." \\
-"=" &
-"=." &
-"==" &
-">" &
-">." &
-">=" &
-">=." &
-{\tt\char64} &
-"[" &
-"[|" \\
-"]" &
-"^" &
-"_" &
-"__" &
-"{" &
-"|" &
-"|]" &
-"}" &
-"'"
-\end{tabular}
-\end{center}
+\begin{verbatim}
+        #    !    !=   &    (    )    *    *.   +    +. 
+        ,    -    -.   ->   .    .(   /    /.   :    :: 
+        :=   ;    ;;   <    <.   <-   <=   <=.  <>   <>. 
+        =    =.   ==   >    >.   >=   >=.  \@    [    [| 
+        ]    ^    _    __   {    |    |]   }    '
+\end{verbatim}
 
 \subsubsection*{Ambiguities}
 

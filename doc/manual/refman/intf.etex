@@ -1,4 +1,4 @@
-\mysection{Module interfaces}
+\section{Module interfaces}
 \ikwd{value\@\verb`value`}
 \ikwd{type\@\verb`type`}
 \ikwd{exception\@\verb`exception`}

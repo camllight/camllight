@@ -1,4 +1,4 @@
-\mysection{Directives} \label{s:directives}
+\section{Directives} \label{s:directives}
 
 \begin{syntax}
 directive:

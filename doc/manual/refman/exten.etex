@@ -228,6 +228,9 @@ expression. For instance, @'function' '|' pat_1 '->' expr_1 '|' \ldots@
 is syntactically correct and synonymous with
 @'function' pat_1 '->' expr_1 '|' \ldots@.
 
+\item The tokens "/\\" and "\\/" are recognized as synonymous for "&"
+(sequential ``and'') and "or" (sequential ``or''), respectively.
+
 \end{itemize}
 
 \section{Infix symbols}
@@ -273,27 +276,27 @@ precedence (exponentiation), followed by symbols beginning with "*",
 "/" or "%" (multiplication), then "+" and "-" (addition), then all
 others symbols (comparisons). The updated precedence table for
 expressions is ("*"\ldots\ means ``any infix symbol starting with "*"''):
-\begin{precedences}
-\prec{"!"\ldots"   ?"\ldots}{--}
-\prec{".   .(   .["}{--}
-\prec{function application}{right}
-\prec{constructor application}{--}
-\prec{"-   -." (prefix)}{--}
-\prec{"**"\ldots}{right}
-\prec{"*"\ldots"   /"\ldots"   %"\ldots"   mod"}{left}
-\prec{"+"\ldots"   -"\ldots}{left}
-\prec{"::"}{right}
-\prec{{\tt \char64} "^"}{right}
-\prec{comparisons ("=  ==  < " etc.), all other infix symbols}{left}
-\prec{"not"}{--}
-\prec{"&"}{left}
-\prec{"or"}{left}
-\prec{","}{--}
-\prec{"<-   :="}{right}
-\prec{"if"}{--}
-\prec{";"}{right}
-\prec{"let" "match" "fun" "function" "try"}{--}
-\end{precedences}
+\begin{tableau}{Construction or operator}{Associativity}
+\entree{"!"\ldots"   ?"\ldots}{--}
+\entree{".   .(   .["}{--}
+\entree{function application}{right}
+\entree{constructor application}{--}
+\entree{"-   -." (prefix)}{--}
+\entree{"**"\ldots}{right}
+\entree{"*"\ldots"   /"\ldots"   %"\ldots"   mod"}{left}
+\entree{"+"\ldots"   -"\ldots}{left}
+\entree{"::"}{right}
+\entree{{\tt \char64} "^"}{right}
+\entree{comparisons ("=  ==  < " etc.), all other infix symbols}{left}
+\entree{"not"}{--}
+\entree{"&"}{left}
+\entree{"or"}{left}
+\entree{","}{--}
+\entree{"<-   :="}{right}
+\entree{"if"}{--}
+\entree{";"}{right}
+\entree{"let" "match" "fun" "function" "try"}{--}
+\end{tableau}
 Some infix and prefix symbols are predefined in the default
 environment (see chapters~\ref{c:refman}~and~\ref{c:stdlib} for a
 description of their behavior). The others are initially unbound and

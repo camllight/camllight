@@ -1,4 +1,4 @@
-\mysection{Type expressions}
+\section{Type expressions}
 
 \begin{syntax}
 typexpr:
@@ -14,17 +14,11 @@ typexpr:
 The table below shows the relative precedences and associativity of
 operators and non-closed type constructions. The constructions with
 higher precedences come first.
-\begin{center}
-\begin{tabular}{|l|l|}
-\hline
-Operator & Associativity \\
-\hline
-Type constructor application & -- \\
-\verb"*"  & -- \\
-\verb"->" & right \\
-\hline
-\end{tabular}
-\end{center}
+\begin{tableau}{Operator}{Associativity}
+\entree{Type constructor application}{--}
+\entree{"*"}{--}
+\entree{"->"}{right}
+\end{tableau}
 
 Type expressions denote types in definitions of data types as well as
 in type constraints over patterns and expressions.
