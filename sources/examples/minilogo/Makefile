@@ -25,3 +25,10 @@ clean:
 depend:
 	$(CAMLDEP) >> makefile
 
+alex.zo: alex.zi 
+asynt.zo: asynt.zi langage.zi alex.zi 
+asynt.zi: langage.zi alex.zi 
+crayon.zo: crayon.zi 
+langage.zo: langage.zi crayon.zi 
+loadall.zo: logo.zo 
+logo.zo: asynt.zi langage.zi alex.zi 
