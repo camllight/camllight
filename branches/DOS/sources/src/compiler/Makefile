@@ -14,7 +14,7 @@ OBJS=config.zo misc.zo interntl.zo const.zo prim.zo lambda.zo globals.zo \
  primdecl.zo lexer.zo par_aux.zo parser.zo compiler.zo \
  version.zo main.zo
 
-GENSOURCES=lexer.mll lexer.ml parser.ml parser.mli opcodes.ml config.ml \
+GENSOURCES=lexer.ml lexer.mll parser.ml parser.mli opcodes.ml config.ml \
   location.ml version.ml
 
 all: camlcomp
@@ -30,6 +30,10 @@ install:
 opcodes.ml: ../runtime/instruct.h
 	perl ../tools/mkopcode ../runtime/instruct.h > opcodes.ml
 
+lexer.ml: lexer.mlp
+	$(CPP) lexer.mlp > lexer.mll
+	$(CAMLLEX) lexer.mll
+
 lexer.mll: lexer.mlp
 	$(CPP) lexer.mlp > lexer.mll
 
@@ -37,10 +41,6 @@ lexer.mll: lexer.mlp
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
-lexer.zi: parser.zi 
-parser.zi: syntax.zo 
-all.zo: lambda.zo modules.zo config.zi compiler.zo misc.zo syntax.zo \
-    globals.zo 
 back.zo: prim.zo lambda.zo const.zo misc.zo instruct.zo 
 buffcode.zo: error.zo 
 builtins.zo: modules.zo globals.zo const.zo 
@@ -49,7 +49,6 @@ clauses.zo: lambda.zo error.zo location.zi const.zo misc.zo syntax.zo \
 compiler.zo: pr_decl.zo typing.zo parser.zi error.zo modules.zo location.zi \
     interntl.zo emit_phr.zo misc.zo back.zo front.zo ty_intf.zo syntax.zo \
     lexer.zi ty_decl.zo 
-config.zo: config.zi 
 const.zo: misc.zo 
 emit_phr.zo: event.zo reloc.zo lambda.zo emitcode.zo buffcode.zo \
     instruct.zo labels.zo 
@@ -66,17 +65,14 @@ instruct.zo: prim.zo lambda.zo const.zo
 interntl.zo: misc.zo 
 labels.zo: misc.zo buffcode.zo instruct.zo 
 lambda.zo: prim.zo globals.zo const.zo 
-lexer.zo: lexer.zi parser.zi 
-location.zo: location.zi interntl.zo config.zi 
-main.zo: modules.zo interntl.zo config.zi compiler.zo misc.zo version.zo \
-    event.zo 
+lexer.zi: parser.zi 
+main.zo: typing.zo modules.zo interntl.zo config.zi compiler.zo misc.zo \
+    version.zo event.zo 
 matching.zo: clauses.zo prim.zo lambda.zo location.zi const.zo misc.zo \
     syntax.zo globals.zo types.zo 
 modules.zo: misc.zo interntl.zo globals.zo const.zo 
 par_aux.zo: error.zo modules.zo location.zi const.zo misc.zo syntax.zo \
     globals.zo builtins.zo 
-parser.zo: parser.zi primdecl.zo par_aux.zo syntax.zo builtins.zo \
-    globals.zo const.zo 
 pr_decl.zo: misc.zo pr_type.zo globals.zo const.zo 
 pr_type.zo: modules.zo globals.zo types.zo const.zo 
 prim.zo: const.zo 
@@ -93,4 +89,10 @@ ty_intf.zo: ty_decl.zo error.zo modules.zo globals.zo types.zo const.zo
 types.zo: misc.zo modules.zo globals.zo const.zo 
 typing.zo: error.zo modules.zo const.zo misc.zo syntax.zo globals.zo \
     builtins.zo types.zo 
+config.zo: config.zi 
+location.zo: location.zi interntl.zo config.zi 
+parser.zo: parser.zi primdecl.zo par_aux.zo syntax.zo builtins.zo \
+    globals.zo const.zo 
+parser.zi: syntax.zo 
+lexer.zo: lexer.zi parser.zi 
 version.zo: interntl.zo 
