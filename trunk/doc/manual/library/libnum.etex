@@ -15,7 +15,7 @@ functions is given below.
 Programs that use the "num" library must be linked in ``custom
 runtime'' mode, as follows:
 \begin{alltt}
-        camlc -custom \var{other options} num.zo \var{other files} -lnum
+        camlc -custom \var{other options} nums.zo \var{other files} -lnums
 \end{alltt}
 For interactive use of the "num" library, run "camllight camlnum".
 
