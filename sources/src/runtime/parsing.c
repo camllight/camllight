@@ -102,7 +102,7 @@ value parse_engine(tables, env, cmd, arg) /* ML */
     env->curr_char = Field(tables->transl, Tag_val(arg));
     switch (Wosize_val(arg)) {
     case 0:
-      env->lval = Val_long(0); break;
+      modify(&env->lval, Val_long(0)); break;
     case 1:
       modify(&env->lval, Field(arg, 0)); break;
     default: {
