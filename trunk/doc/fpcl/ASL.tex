@@ -1046,9 +1046,9 @@ global counter (a local reference) is reset by \verb"reset_vartypes".
 let new_vartype, reset_vartypes =
 (* Generating and resetting unknowns *)
     let counter = ref 0
-    in (function () -> counter:=!counter+1;
-                       {Index=!counter; Value=Unknown}),
-       (function () -> counter:=0; ());;
+    in (function () -> counter := !counter + 1;
+                       {Index = !counter; Value = Unknown}),
+       (function () -> counter := 0);;
 \end{caml_example}
 
 \subsection{Destructive unification of ASL types}

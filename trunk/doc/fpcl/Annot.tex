@@ -188,15 +188,15 @@ end}, as in:\ikwd{begin@\verb`begin`}\ikwd{end@\verb`end`}
 \begin{caml_example}
 let x = ref 1 in
   begin
-     x:=!x+1;
-     x:=!x*!x
+     x := !x + 1;
+     x := !x * !x
   end;;
 \end{caml_example}
 The keywords {\tt begin} and {\tt end} are equivalent to opening and
 closing parentheses. The program above could be written as:
 \begin{caml_example}
 let x = ref 1 in
-  (x:=!x+1; x:=!x*!x);;
+  (x := !x + 1; x := !x * !x);;
 \end{caml_example}
 
 Explicit loops are not strictly necessary {\em per se}: a recursive
