@@ -280,6 +280,8 @@ unsigned getblock(channel, p, n)
     channel->curr = channel->buff + n;
     return n;
   } else {
+    channel->curr = channel->buff;
+    channel->max = channel->buff;
     l = really_read(channel->fd, p, n);
     channel->offset += l;
     return l;
