@@ -338,10 +338,7 @@ value camltk_splitlist (v) /* ML */
   switch(result) {
   case TCL_OK:
    { value res = copy_string_list(argc,argv);
-     int i;
-     /* we now have a copy */
-     for (i=0; i<argc;i++)
-       free((char *)argv);
+     free((char *)argv);	/* only one large block was allocated */
      return res;
    }
   case TCL_ERROR:
