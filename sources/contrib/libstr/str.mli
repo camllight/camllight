@@ -78,7 +78,7 @@ value matched_string: string -> string
 (*** Replacement *)
 
 value global_replace: regexp -> string -> string -> string
-        (* [global_replace regexp s repl] returns a string identical to [s],
+        (* [global_replace regexp repl s] returns a string identical to [s],
            except that all substrings of [s] that match [regexp] have been
            replaced by [repl]. The replacement text [repl] can contain
            [\1], [\2], etc; these sequences will be replaced by the text
