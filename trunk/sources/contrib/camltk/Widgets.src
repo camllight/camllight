@@ -857,6 +857,8 @@ widget toplevel {
 function ()    destroy "destroy" (widget)
 # use Predefined "" for empty bitmap
 function (int) dialog  "tk_dialog" (widget, string, string, Bitmap, int, string list)
+function () listboxSingleSelect "tk_listboxSingleSelect" (widget(listbox) list)
+
 	
 ##### focus variations
 module focus {
