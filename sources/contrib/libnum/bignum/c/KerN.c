@@ -1,3 +1,6 @@
+/* */
+
+
 /* Copyright     Digital Equipment Corporation & INRIA     1988, 1989 */
 /* Last modified_on Thu Feb 20 18:18:12 GMT+1:00 1992 by shand */
 /*      modified_on Tue Jan 15 19:32:53 GMT+1:00 1991 by herve */
@@ -230,7 +233,7 @@ BigNumDigit d;
 {
     /* The C compiler must evaluate the predicate at compile time */
     if (BN_DIGIT_SIZE > BN_WORD_SIZE)
-        return (d >= ((BigNumDigit)1) << BN_WORD_SIZE ? FALSE : TRUE);
+        return ((d >> BN_WORD_SIZE) != 0 ? FALSE : TRUE);
     else
 	return (TRUE);
 }
