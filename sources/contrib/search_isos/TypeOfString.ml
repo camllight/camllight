@@ -27,7 +27,7 @@
 #open "const";;
 #open "globals";;
 #open "types";;
-#open "ty_error";;
+#open "error";;
 #open "syntax";;
 #open "myTypes";;
 #open "lexer";;
@@ -42,6 +42,7 @@ let parse_phrase parsing_fun lexing_fun lexbuf =
     try
       match lexing_fun lexbuf with
         EOF -> ()
+      | SEMISEMI -> ()
       | _ -> skip()
     with lexer__Lexical_error(_,_,_) ->
       skip() in
@@ -50,17 +51,29 @@ let parse_phrase parsing_fun lexing_fun lexbuf =
   with parsing__Parse_error f ->
          let pos1 = lexing__get_lexeme_start lexbuf in
          let pos2 = lexing__get_lexeme_end lexbuf in
-         if f (obj__repr EOF) then () else skip();     
-         location__prerr_location (Loc(pos1, pos2));   
-         print_int pos1;print_newline();print_int pos2;
-         misc__prerr_begline " Syntax error.";
-         prerr_endline "";
+         if f (obj__repr EOF) or f (obj__repr SEMISEMI) then () else skip();
+         printf__eprintf "%lSyntax error.\n" (Loc(pos1, pos2));
          raise misc__Toplevel
-     | lexer__Lexical_error(msg, pos1, pos2) ->
-         if pos1 >= 0 & pos2 >= 0 then prerr_location (Loc(pos1, pos2));
-         misc__prerr_begline " Lexical error: ";
-         prerr_string msg;
-         prerr_endline ".";
+     | lexer__Lexical_error(errcode, pos1, pos2) ->
+         let l = Loc(pos1, pos2) in
+         begin match errcode with
+           lexer__Illegal_character ->
+             printf__eprintf "%lIllegal character.\n" l
+         | lexer__Unterminated_comment ->
+             printf__eprintf "%IComment not terminated.\n" ()
+         | lexer__Bad_char_constant ->
+             printf__eprintf "%lIll-formed character literal.\n" l
+         | lexer__No_comment_start_in_string ->
+             printf__eprintf
+               "%lNo start-of-comment sequence in string literals.\n\
+                Please write (\\* instead.\n" l
+         | lexer__No_comment_end_in_string ->
+             printf__eprintf
+               "%lNo end-of-comment sequence in string literals.\n\
+                Please write *\\) instead.\n" l
+         | lexer__Unterminated_string ->
+             printf__eprintf "%IString literal not terminated.\n" ()
+         end;
          skip();
          raise misc__Toplevel
      | misc__Toplevel ->
@@ -96,20 +109,18 @@ let dummy_type_desc =
   function
     GRname s  -> {qualid = {qual = "*"; id = s};
          info   = {ty_stamp = 0 (* valeur bidon *);
-                   ty_dang = false (* valeur bidon *);
                    ty_abbr = Tnotabbrev (* valeur bidon *)
 }}
 
   | GRmodname qual_id  -> {qualid = {qual = qual_id.qual; id = qual_id.id};
          info   = {ty_stamp = 0 (* valeur bidon *);
-                   ty_dang = false (* valeur bidon *);
                    ty_abbr = Tnotabbrev (* valeur bidon *)
 }}
 ;;
 
 let my_type_of_type_expression strict_flag typexp =
   let rec type_of = function
-    Typexp(Ztypevar v, _) ->
+    {te_desc = Ztypevar v} ->
       (try
         assoc v !type_expr_vars
        with Not_found ->
@@ -118,11 +129,11 @@ let my_type_of_type_expression strict_flag typexp =
         else
          (let t = new_type_var() in
             type_expr_vars := (v,t) :: !type_expr_vars; t))
-  | Typexp(Ztypearrow(arg1, arg2), loc) ->
+  | {te_desc = Ztypearrow(arg1, arg2)} ->
       type_arrow(type_of arg1, type_of arg2)
-  | Typexp(Ztypetuple argl, loc) ->
+  | {te_desc = Ztypetuple argl} ->
       type_product(map type_of argl)
-  | Typexp(Ztypeconstr(cstr_name, args), loc) as texp ->
+  | {te_desc = Ztypeconstr(cstr_name, args)} as texp ->
             { typ_desc=Tconstr(dummy_type_desc cstr_name, map type_of args);
               typ_level=notgeneric }
   in type_of typexp

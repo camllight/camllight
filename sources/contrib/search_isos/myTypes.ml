@@ -12,16 +12,19 @@ type skel_typ =
   | Unit                                           (* The special constructor Unit *)
 ;;
 
-let reset_type_var_number, number_of_type_var =
-  let vars = ref []
-  and var_number = ref 0 in
-    (fun () -> vars := []; var_number := 0; ()),
-    (fun var ->
-       try
-         assq var !vars
-       with Not_found ->
-         incr var_number;
-         vars := (var, !var_number) :: !vars; !var_number)
+let variable_numbers = ref ([] : (typ * int) list);;
+let variable_counter = ref 0;;
+
+let reset_type_var_number () =
+  variable_numbers := []; variable_counter := 0;;
+
+let number_of_type_var var =
+  try
+    assq var !variable_numbers
+  with Not_found ->
+    incr variable_counter;
+    variable_numbers := (var, !variable_counter) :: !variable_numbers;
+    !variable_counter
 ;;
 
 let fake_unit_constr =
