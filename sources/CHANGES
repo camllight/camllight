@@ -1,3 +1,14 @@
+Caml Light 0.74:
+---------------
+
+* Standard library:
+  - module string: added index_char, rindex_char, index_char_from,
+    rindex_char_from.
+  - module vect: added init_vect.
+  - module format: added a printf facility to control the pretty-printer.
+
+* MS Windows port: fixed image routines bugs.
+
 Caml Light 0.73:
 ---------------
 
