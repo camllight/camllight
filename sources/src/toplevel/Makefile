@@ -13,7 +13,7 @@ EXTERNOBJS=config.zo misc.zo \
     const.zo prim.zo instruct.zo lambda.zo \
     globals.zo location.zo syntax.zo modules.zo builtins.zo \
     types.zo pr_type.zo error.zo typing.zo ty_decl.zo pr_decl.zo \
-    ty_intf.zo tr_env.zo event.zo clauses.zo match.zo trstream.zo front.zo \
+    ty_intf.zo tr_env.zo event.zo clauses.zo matching.zo trstream.zo front.zo \
     back.zo opcodes.zo prim_opc.zo buffcode.zo labels.zo \
     reloc.zo emitcode.zo emit_phr.zo \
     primdecl.zo lexer.zo par_aux.zo parser.zo compiler.zo \
