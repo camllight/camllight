@@ -10,7 +10,7 @@ CAMLLEX=camllex
 CAMLDEP=../../../src/tools/camldep
 
 TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
-	   $(SUPPORTDIR)/camltk.o -lcaml -ltk -ltcl -lX11
+	   $(SUPPORTDIR)/camltk.o -lcaml $(TKLIBS)
 
 
 SUPPORT1=$(SUPPORTDIR)/support.zo $(SUPPORTDIR)/protocol1.zo \
