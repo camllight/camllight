@@ -730,7 +730,20 @@ let fprintf ppf format =
           | c ->
               invalid_arg ("fprintf: unknown format")
           end
-       |  c  -> pp_print_char ppf c; doprn (succ i)
+       | c -> pp_print_char ppf c; doprn (succ i)
+
+  and doint i j n =
+    let len = j - i in
+    let fmt = create_string (len + 2) in
+    blit_string format i fmt 0 len;
+    fmt.[len] <- `l`;
+    fmt.[len + 1] <- format.[j];
+    pp_print_string ppf (format_int fmt n);
+    doprn (succ j)
+
+  and dofloat i j f =
+    pp_print_string ppf (format_float (sub_string format i (j-i+1)) f);
+    doprn (succ j)
 
   and skip_args j =
     match format.[j] with
@@ -752,19 +765,6 @@ let fprintf ppf format =
           with Failure _ -> invalid_arg s end
        | c -> invalid_arg s in
        get i
-
-  and doint i j n =
-    let len = j - i in
-    let fmt = create_string (len + 2) in
-    blit_string format i fmt 0 len;
-    fmt.[len] <- `l`;
-    fmt.[len + 1] <- format.[j];
-    pp_print_string ppf (format_int fmt n);
-    doprn (succ j)
-
-  and dofloat i j f =
-    pp_print_string ppf (format_float (sub_string format i (j-i+1)) f);
-    doprn (succ j)
 
   and get_box_kind j =
    if j >= limit then Pp_box, j else

@@ -33,6 +33,9 @@ value make_vect : int -> 'a -> 'a vect
            The element ([x,y]) of a matrix [m] is accessed
            with the notation [m.(x).(y)]. *)  
 ;;
+value init_vect : int -> (int -> 'a) -> 'a vect;;
+        (* [init_vect n f] returns a fresh array of length [n],
+           with element number [i] equal to [f i]. *)
 value concat_vect : 'a vect -> 'a vect -> 'a vect
         (* [concat_vect v1 v2] returns a fresh vector containing the
            concatenation of vectors [v1] and [v2]. *)

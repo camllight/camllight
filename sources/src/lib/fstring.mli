@@ -38,3 +38,7 @@ value eq_string : string -> string -> bool = 2 "=string"
 ;;
 value string_for_read : string -> string
 ;;
+value index_char: string -> char -> int;;
+value rindex_char: string -> char -> int;;
+value index_char_from: string -> int -> char -> int;;
+value rindex_char_from: string -> int -> char -> int;;

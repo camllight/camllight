@@ -82,21 +82,18 @@ value string_for_read : string -> string
            Caml Light. *)
 ;;
 
-value index_char : string -> int -> int -> char -> int
-        (* [index_char s start len c] returns the number of character [c] in
-           the string [s], searching from character number [start] for
-           [len] characters towards the end of string [s]. 
-           Raise [Not_found] if [c] has not been found.
-           Raise [Invalid_argument "index_char"] if [start] and [len] do not
-           designate a valid substring of [s]. *)
-;;
-
-value rev_index_char : string -> int -> int -> char -> int
-        (* [rev_index_char s start len c] returns the number of
-           character [c] in the string [s], searching from character
-           number [start] for [len] characters towards the beginning
-           of string [s].
-           Raise [Not_found] if [c] has not been found.
-           Raise [Invalid_argument "rev_index_char"] if [start - len + 1]
-           and [len] do not designate a valid substring of [s]. *)
-;;
+value index_char: string -> char -> int;;
+        (* [index_char s c] returns the position of the leftmost occurrence of
+           character [c] in string [s].  Raise [Not_found] if [c] does not
+           occur in [s]. *)
+value rindex_char: string -> char -> int;;
+        (* [rindex_char s c] returns the position of the rightmost
+           occurrence of character [c] in string [s].  Raise
+           [Not_found] if [c] does not occur in [s]. *)
+value index_char_from: string -> int -> char -> int;;
+value rindex_char_from: string -> int -> char -> int;;
+        (* Same as [index_char] and [rindex_char], but start searching
+           at the character position given as second argument.
+           [index_char s c] is equivalent to [index_char_from s 0 c], and
+           [rindex_char s c] to
+           [rindex_char_from s (string_length s - 1) c]. *)
