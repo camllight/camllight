@@ -22,6 +22,8 @@ LIBS=
 # which are not understood by Caml Light.
 # The -Dunix option ensures that the symbol "unix" is defined --
 # not all Unix C preprocessors define it.
+# If your cpp is too fussy, make tools/clprepro and use this:
+# CPP=../../src/tools/clprepro -Dunix
 CPP=/lib/cpp -P -Dunix
 
 # The directory where public executables will be installed
