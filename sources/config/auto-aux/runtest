@@ -1,3 +1,0 @@
-#!/bin/sh
-$cc -o tst $* || exit 100
-exec ./tst
