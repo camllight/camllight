@@ -13,6 +13,8 @@ let widget_name (w : Widget) = snd w
 
 let default_toplevel_widget =  ("toplevel", "." : Widget)
 ;;
+let new_toplevel_widget s = ("toplevel", "." ^ s : Widget)
+;;
 
 (* Note: there are subtypes *)
 let CAMLtoTKWidget _ = widget_name
@@ -91,12 +93,15 @@ let new_suffix class n =
 let new_widget_atom =
   let counter = ref 0 in
   fun class parent ->
-    incr counter;
-    let parentname = widget_name parent in
-      class,
-      if parentname = "."
-      then "." ^ (new_suffix class !counter)
-      else parentname ^ "." ^ (new_suffix class !counter)
+    if eq_string class "toplevel" then parent
+    else begin
+      incr counter;
+      let parentname = widget_name parent in
+	class,
+	if parentname = "."
+	then "." ^ (new_suffix class !counter)
+	else parentname ^ "." ^ (new_suffix class !counter)
+      end
 ;;
 
 (* Redundant with subtyping of Widget *)
