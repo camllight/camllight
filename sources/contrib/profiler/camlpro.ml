@@ -230,7 +230,8 @@ and rewrite_expr e =
      | Zrecord_update (e1, _, e2) -> rewrite_expr e1; rewrite_expr e2
      | Zstream l -> rewrite_str_comp_list l
      | Zparser l -> rewrite_str_pat_l_expr_l l
-     | Zwhen(e1, e2) -> rewrite_expr e1; rewrite_expr e2
+     | Zwhen(e1, e2) ->  (* used only when not !instr_fun  *)
+      	 rewrite_expr e1; rewrite_expr e2
 
 and rewrite_str_comp_list l =
   do_list (
@@ -249,8 +250,16 @@ and rewrite_str_pat_l l =
       | _ -> ()
   ) l
 
-and rewrite_annotate_expr_list l
-   = do_list (fun e -> insert_profile e; rewrite_expr e) l
+(* called only when !instr_fun *)
+and rewrite_annotate_expr_list l =
+  do_list (function 
+      	    {e_desc = Zwhen(e1,e2)} ->
+      	       	      insert_profile e1;
+      	       	      rewrite_expr e1; 
+      	       	      insert_profile e2;
+		      rewrite_expr e2
+           | e -> insert_profile e; rewrite_expr e)
+          l
 
 and rewrite_funmatching l = rewrite_annotate_expr_list (map snd l)
 
