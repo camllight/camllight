@@ -2,7 +2,7 @@
 
 CAMLCOMP=../camlrun ../camlcomp
 CAMLLIBR=../camlrun ../camllibr
-CPP=/lib/cpp -P
+CPP=/lib/cpp -P -Dunix
 COMPFLAGS=-stdlib . -O none -g -W
 
 # The list of all interfaces. Order irrelevant.
@@ -43,7 +43,7 @@ install:
 	$(CAMLCOMP) $(COMPFLAGS) $<
 .mlp.ml:
 	@rm -f $@
-	$(CPP) -Dunix $< > $@
+	$(CPP) $< > $@
 	@chmod a-w $@
 
 depend: filename.ml genlex.ml

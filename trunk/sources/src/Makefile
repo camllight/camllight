@@ -21,7 +21,9 @@ LIBS=
 # and /usr/ccs/lib/cpp under Solaris.
 # The -P option suppresses the generation of "# linenum" directives,
 # which are not understood by Caml Light.
-CPP=/lib/cpp -P
+# The -Dunix option ensures that the symbol "unix" is defined -- not all Unix
+# C preprocessors define it.
+CPP=/lib/cpp -P -Dunix
 
 # The directory where public executables will be installed
 BINDIR=/usr/local/bin

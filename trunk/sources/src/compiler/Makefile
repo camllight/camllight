@@ -4,7 +4,7 @@ CAMLCOMP=../camlrun ../camlcomp -stdlib ../lib
 CAMLLINK=../camlrun ../camllink -stdlib ../lib
 CAMLLEX=../camlrun ../camllex
 CAMLYACC=../camlyacc -s
-CPP=/lib/cpp -P
+CPP=/lib/cpp -P -Dunix
 
 COMPFLAGS=-W -O fast
 LINKFLAGS=-g
@@ -39,7 +39,7 @@ opcodes.ml: ../runtime/instruct.h
         awk -f ../tools/make-opcodes > opcodes.ml
 
 lexer.mll: lexer.mlp
-	$(CPP) -Dunix lexer.mlp > lexer.mll
+	$(CPP) lexer.mlp > lexer.mll
 
 lexer.ml: lexer.mll
 	$(CAMLLEX) lexer.mll
@@ -58,7 +58,7 @@ parser.ml parser.mli: parser.mly
 
 .mlp.ml:
 	@rm -f $@
-	$(CPP) -Dunix $< > $@
+	$(CPP) $< > $@
 	@chmod a-w $@
 
 depend: $(GENSOURCES)
