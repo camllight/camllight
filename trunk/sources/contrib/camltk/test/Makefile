@@ -1,10 +1,5 @@
 CAMLTKDIR=../lib
 SUPPORTDIR=../libsupport
-TCLLIBDIR=/usr/local/lib/tcl/lib
-TKLIBDIR=/usr/local/lib/tk/lib
-X11_LIB=/usr/lib
-
-
 CAMLC=camlc
 CAMLCOMP=$(CAMLC) -c
 CPP=/lib/cpp -P -Dunix
@@ -15,8 +10,7 @@ CAMLLEX=camllex
 CAMLDEP=../../../src/tools/camldep
 
 TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
-	  -ccopt -L$(SUPPORTDIR) \
-	   -lcaml -lcamltk -ltk -ltcl -lX11
+	  -ccopt -L$(SUPPORTDIR) -lcaml -lcamltk $(TKLIBS)
 
 
 # Programs in the two-process architecture
