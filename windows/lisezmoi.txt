@@ -1,4 +1,4 @@
-                Caml Light 0.72 pour Windows
+                Caml Light 0.73 pour Windows
 
 
 COPYRIGHT
@@ -65,7 +65,7 @@ DOCUMENTATION, RESSOURCES SUR LE RESEAU, LIVRES
           Vuibert, 1996
 
   Le _Manuel_de_référence_ correspond a la version 0.6 de Caml Light,
-  d'ou de légères différences avec la présente version 0.72.
+  d'ou de légères différences avec la présente version 0.73.
 
 
 ENTRER EN CONTACT AVEC LA COMMUNAUTE CAML
