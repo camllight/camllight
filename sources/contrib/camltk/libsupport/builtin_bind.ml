@@ -2,7 +2,7 @@
 
 (* Builtin types *)
 type XEvent =
-    XKey of string	(* /usr/include/X11/keysymdef.h *)
+    XKey of string      (* /usr/include/X11/keysymdef.h *)
   | ButtonPress
   | Button
   | ButtonRelease
@@ -84,8 +84,8 @@ type Modifier =
   | Mod4
   | Mod5
   | Meta
-  | Alt ;;
-
+  | Alt 
+;;
 
 let CAMLtoTKModifier = function
    Control ->"Control-"
@@ -123,99 +123,129 @@ let CAMLtoTKEventSequence l =
 (* Event structure, passed to bounded functions *)
 
 type EventInfo = {
-  mutable Ev_Above : int;
-  mutable Ev_ButtonNumber : int;
-  mutable Ev_Count : int;
-  mutable Ev_Detail : string;
-  mutable Ev_Focus : bool;
-  mutable Ev_Height : int;
-  mutable Ev_KeyCode : int;
-  mutable Ev_Mode : string;
-  mutable Ev_EventState : string; (* Collision with State option *)
-  mutable Ev_ValueMask : int;
-  mutable Ev_Width : int;
-  mutable Ev_MouseX : int;
-  mutable Ev_MouseY : int;
-  mutable Ev_WidgetName : string;
-  mutable Ev_Time : string;
-  mutable Ev_OverrideRedirect : string;
-  mutable Ev_Place : string;
-  mutable Ev_Char : string;
-  mutable Ev_BorderWidth : int;
-  mutable Ev_Display : int;
-  mutable Ev_SendEvent : int;
-  mutable Ev_KeySymString : string;
-  mutable Ev_KeySymInt : int;
-  mutable Ev_RootWindow : int;
-  mutable Ev_SubWindow : int;
-  mutable Ev_Type : int;
-  mutable Ev_RootX : int;
-  mutable Ev_RootY : int };;
-
-
-type EventField =
-    Above
-  | ButtonNumber
-  | Count
-  | Detail
-  | Focus
-  | Height
-  | KeyCode
-  | Mode
-  | EventState
-  | ValueMask
-  | Width
-  | MouseX
-  | MouseY
-  | WidgetName
-  | Time 
-  | OverrideRedirect
-  | Place
-  | Char
-  | BorderWidth
-  | Display
-  | SendEvent
-  | KeySymString
-  | KeySymInt
-  | RootWindow
-  | SubWindow
-  | Type
-  | RootX
-  | RootY;;
-
-(* TODO: check types ! *)
-
-let FillEventInfo ev args = function 
-    Above 	-> ev.Ev_Above 		<- int_of_string (arg_GetTkToken args)
-  | ButtonNumber -> ev.Ev_ButtonNumber 	<- int_of_string (arg_GetTkToken args)
-  | Count 	-> ev.Ev_Count 		<- int_of_string (arg_GetTkToken args)
-  | Detail 	-> ev.Ev_Detail 	<- arg_GetTkToken args
-  | Focus 	-> ev.Ev_Focus 		<- arg_GetTkToken args = "1"
-  | Height 	-> ev.Ev_Height 	<- int_of_string (arg_GetTkToken args)
-  | KeyCode 	-> ev.Ev_KeyCode 	<- int_of_string (arg_GetTkToken args)
-  | Mode 	-> ev.Ev_Mode 		<- arg_GetTkToken args
-  | EventState 	-> ev.Ev_EventState 		<- arg_GetTkToken args
-  | ValueMask	-> ev.Ev_ValueMask 	<- int_of_string (arg_GetTkToken args)
-  | Width 	-> ev.Ev_Width 		<- int_of_string (arg_GetTkToken args)
-  | MouseX 	-> ev.Ev_MouseX 	<- int_of_string (arg_GetTkToken args)
-  | MouseY 	-> ev.Ev_MouseY 	<- int_of_string (arg_GetTkToken args)
-  | WidgetName 	-> ev.Ev_WidgetName 	<- arg_GetTkToken args
-  | Time 	-> ev.Ev_Time  		<- arg_GetTkToken args
-  | OverrideRedirect -> ev.Ev_OverrideRedirect <- arg_GetTkToken args
-  | Place 	-> ev.Ev_Place 		<- arg_GetTkToken args
-  | Char 	-> ev.Ev_Char 		<- arg_GetTkToken args (* WARNING *)
-  | BorderWidth -> ev.Ev_BorderWidth 	<- int_of_string (arg_GetTkToken args)
-  | Display 	-> ev.Ev_Display 	<- int_of_string (arg_GetTkToken args)
-  | SendEvent 	-> ev.Ev_SendEvent 	<- int_of_string (arg_GetTkToken args)
-  | KeySymString -> ev.Ev_KeySymString 	<- arg_GetTkToken args
-  | KeySymInt 	-> ev.Ev_KeySymInt 	<- int_of_string (arg_GetTkToken args)
-  | RootWindow 	-> ev.Ev_RootWindow 	<- int_of_string (arg_GetTkToken args)
-  | SubWindow 	-> ev.Ev_SubWindow 	<- int_of_string (arg_GetTkToken args)
-  | Type 	-> ev.Ev_Type 		<- int_of_string (arg_GetTkToken args)
-  | RootX 	-> ev.Ev_RootX 		<- int_of_string (arg_GetTkToken args)
-  | RootY 	-> ev.Ev_RootY 		<- int_of_string (arg_GetTkToken args)
+  mutable Ev_Above : int;               (* tk: %a *)
+  mutable Ev_ButtonNumber : int;        (* tk: %b *)
+  mutable Ev_Count : int;               (* tk: %c *)
+  mutable Ev_Detail : string;           (* tk: %d *)
+  mutable Ev_Focus : bool;              (* tk: %f *)
+  mutable Ev_Height : int;              (* tk: %h *)
+  mutable Ev_KeyCode : int;             (* tk: %k *)
+  mutable Ev_Mode : string;             (* tk: %m *)
+  mutable Ev_OverrideRedirect : bool;   (* tk: %o *)
+  mutable Ev_Place : string;            (* tk: %p *)
+  mutable Ev_State : string;            (* tk: %s *)
+  mutable Ev_Time : string;             (* tk: %t *)
+  mutable Ev_ValueMask : int;           (* tk: %v *)
+  mutable Ev_Width : int;               (* tk: %w *)
+  mutable Ev_MouseX : int;              (* tk: %x *)
+  mutable Ev_MouseY : int;              (* tk: %y *)
+  mutable Ev_Char : string;             (* tk: %A *)
+  mutable Ev_BorderWidth : int;         (* tk: %B *)
+  mutable Ev_Display : int;             (* tk: %D *)
+  mutable Ev_SendEvent : bool;          (* tk: %E *)
+  mutable Ev_KeySymString : string;     (* tk: %K *)
+  mutable Ev_KeySymInt : int;           (* tk: %N *)
+  mutable Ev_RootWindow : int;          (* tk: %R *)
+  mutable Ev_SubWindow : int;           (* tk: %S *)
+  mutable Ev_Type : int;                (* tk: %T *)
+  mutable Ev_Widget : Widget;           (* tk: %W *)
+  mutable Ev_RootX : int;               (* tk: %X *)
+  mutable Ev_RootY : int                (* tk: %Y *)
+  }
 ;;
 
+
+(* To avoid collision with other constructors (Width, State), 
+   use Ev_ prefix *)
+type EventField =
+    Ev_Above
+  | Ev_ButtonNumber
+  | Ev_Count
+  | Ev_Detail
+  | Ev_Focus
+  | Ev_Height
+  | Ev_KeyCode
+  | Ev_Mode
+  | Ev_OverrideRedirect
+  | Ev_Place
+  | Ev_State
+  | Ev_Time 
+  | Ev_ValueMask
+  | Ev_Width
+  | Ev_MouseX
+  | Ev_MouseY
+  | Ev_Char
+  | Ev_BorderWidth
+  | Ev_Display
+  | Ev_SendEvent
+  | Ev_KeySymString
+  | Ev_KeySymInt
+  | Ev_RootWindow
+  | Ev_SubWindow
+  | Ev_Type
+  | Ev_Widget
+  | Ev_RootX
+  | Ev_RootY
+;;
+
+let FillEventInfo ev args = function 
+    Ev_Above    -> 
+      ev.Ev_Above <- int_of_string (arg_GetTkToken args)
+  | Ev_ButtonNumber ->
+      ev.Ev_ButtonNumber <- int_of_string (arg_GetTkToken args)
+  | Ev_Count -> 
+      ev.Ev_Count <- int_of_string (arg_GetTkToken args)
+  | Ev_Detail -> 
+      ev.Ev_Detail <- arg_GetTkToken args
+  | Ev_Focus -> 
+      ev.Ev_Focus <- arg_GetTkToken args = "1"
+  | Ev_Height -> 
+      ev.Ev_Height <- int_of_string (arg_GetTkToken args)
+  | Ev_KeyCode -> 
+      ev.Ev_KeyCode <- int_of_string (arg_GetTkToken args)
+  | Ev_Mode -> 
+      ev.Ev_Mode <- arg_GetTkToken args
+  | Ev_OverrideRedirect -> 
+      ev.Ev_OverrideRedirect <- arg_GetTkToken args = "1"
+  | Ev_Place -> 
+      ev.Ev_Place <- arg_GetTkToken args
+  | Ev_State -> 
+      ev.Ev_State <- arg_GetTkToken args
+  | Ev_Time -> 
+      ev.Ev_Time <- arg_GetTkToken args
+  | Ev_ValueMask -> 
+      ev.Ev_ValueMask <- int_of_string (arg_GetTkToken args)
+  | Ev_Width -> 
+      ev.Ev_Width <- int_of_string (arg_GetTkToken args)
+  | Ev_MouseX -> 
+      ev.Ev_MouseX <- int_of_string (arg_GetTkToken args)
+  | Ev_MouseY -> 
+      ev.Ev_MouseY <- int_of_string (arg_GetTkToken args)
+  | Ev_Char -> 
+      ev.Ev_Char <- arg_GetTkToken args
+  | Ev_BorderWidth -> 
+      ev.Ev_BorderWidth <- int_of_string (arg_GetTkToken args)
+  | Ev_Display -> 
+      ev.Ev_Display <- int_of_string (arg_GetTkToken args)
+  | Ev_SendEvent -> 
+      ev.Ev_SendEvent <- arg_GetTkToken args = "1"
+  | Ev_KeySymString -> 
+      ev.Ev_KeySymString <- arg_GetTkToken args
+  | Ev_KeySymInt -> 
+      ev.Ev_KeySymInt <- int_of_string (arg_GetTkToken args)
+  | Ev_RootWindow -> 
+      ev.Ev_RootWindow <- int_of_string (arg_GetTkToken args)
+  | Ev_SubWindow -> 
+      ev.Ev_SubWindow <- int_of_string (arg_GetTkToken args)
+  | Ev_Type -> 
+      ev.Ev_Type <- int_of_string (arg_GetTkToken args)
+  | Ev_Widget -> 
+      ev.Ev_Widget <- TKtoCAMLWidget (arg_GetTkToken args)
+  | Ev_RootX -> 
+      ev.Ev_RootX <- int_of_string (arg_GetTkToken args)
+  | Ev_RootY -> 
+      ev.Ev_RootY <- int_of_string (arg_GetTkToken args)
+;;
 
 let WrapEventInfo f what =
   let ev = {
@@ -227,24 +257,24 @@ let WrapEventInfo f what =
     Ev_Height = 0;
     Ev_KeyCode = 0;
     Ev_Mode = "";
-    Ev_EventState = "";
+    Ev_OverrideRedirect = false;
+    Ev_Place = "";
+    Ev_State = "";
+    Ev_Time = "";
     Ev_ValueMask = 0;
     Ev_Width = 0;
     Ev_MouseX = 0;
     Ev_MouseY = 0;
-    Ev_WidgetName = "";
-    Ev_Time = "";
-    Ev_OverrideRedirect = "";
-    Ev_Place = "";
     Ev_Char = "";
     Ev_BorderWidth = 0;
     Ev_Display = 0;
-    Ev_SendEvent = 0;
+    Ev_SendEvent = false;
     Ev_KeySymString = "";
     Ev_KeySymInt = 0;
     Ev_RootWindow = 0;
     Ev_SubWindow = 0;
     Ev_Type = 0;
+    Ev_Widget = default_toplevel_widget;
     Ev_RootX = 0;
     Ev_RootY = 0 } in
      function args ->
@@ -259,35 +289,35 @@ let rec WriteEventField = function
   | H::q ->
     begin
     match H with
-        Above -> 	" %a"
-      | ButtonNumber -> " %b"
-      | Count -> 	" %c"
-      | Detail -> 	" %d"
-      | Focus -> 	" %f"
-      | Height -> 	" %h"
-      | KeyCode -> 	" %k"
-      | Mode -> 	" %m"
-      | EventState -> 	" %s"
-      | ValueMask -> 	" %v"
-      | Width -> 	" %w"
-      | MouseX -> 	" %x"
-      | MouseY -> 	" %y"
-      | WidgetName -> 	" %W"
-      | Time -> 	" %t"
-      | OverrideRedirect -> " %o"
-      | Place -> 	" %p"
+      | Ev_Above ->     " %a"
+      | Ev_ButtonNumber ->" %b"
+      | Ev_Count ->     " %c"
+      | Ev_Detail ->    " %d"
+      | Ev_Focus ->     " %f"
+      | Ev_Height ->    " %h"
+      | Ev_KeyCode ->   " %k"
+      | Ev_Mode ->      " %m"
+      | Ev_OverrideRedirect -> " %o"
+      | Ev_Place ->     " %p"
+      | Ev_State ->     " %s"
+      | Ev_Time ->      " %t"
+      | Ev_ValueMask -> " %v"
+      | Ev_Width ->     " %w"
+      | Ev_MouseX ->    " %x"
+      | Ev_MouseY ->    " %y"
       (* Quoting is done by Tk *)
-      | Char -> 	" %A"
-      | BorderWidth -> 	" %B"
-      | Display -> 	" %D"
-      | SendEvent -> 	" %E"
-      | KeySymString -> " %K"
-      | KeySymInt -> 	" %N"
-      | RootWindow -> 	" %R"
-      | SubWindow -> 	" %S"
-      | Type -> 	" %T"
-      | RootX -> 	" %X"
-      | RootY -> 	" %Y"
+      | Ev_Char ->      " %A"
+      | Ev_BorderWidth -> " %B"
+      | Ev_Display ->   " %D"
+      | Ev_SendEvent -> " %E"
+      | Ev_KeySymString -> " %K"
+      | Ev_KeySymInt -> " %N"
+      | Ev_RootWindow ->" %R"
+      | Ev_SubWindow -> " %S"
+      | Ev_Type ->      " %T"
+      | Ev_Widget ->" %W"
+      | Ev_RootX ->     " %X"
+      | Ev_RootY ->     " %Y"
     end 
     ^ WriteEventField q;;
 
@@ -304,7 +334,7 @@ type BindAction =
 let bind widget eventsequence action =
   let buf = Send2TkStart false in
   Send2Tk buf ("bind "^ widget_name widget^" "
-      	              ^ (CAMLtoTKEventSequence eventsequence));
+                      ^ (CAMLtoTKEventSequence eventsequence));
   begin match action with
      BindRemove -> Send2Tk buf "{}"
   |  BindSet (what, f) ->
@@ -323,7 +353,7 @@ let bind widget eventsequence action =
 let class_bind class eventsequence action =
   let buf = Send2TkStart false in
   Send2Tk buf ("bind "^ class ^" "
-      	              ^ (CAMLtoTKEventSequence eventsequence));
+                      ^ (CAMLtoTKEventSequence eventsequence));
   begin match action with
      BindRemove -> Send2Tk buf "{}"
   |  BindSet (what, f) ->

@@ -28,16 +28,21 @@ camltk.o : camltk.c
 		 -I$(TKINCLDIR) \
 		 camltk.c
 
-install: camltk.o support.zi textvariable.zi protocol.zi
+libcamltk.a : camltk.o
+	rm -f libcamltk.a
+	ar rc libcamltk.a camltk.o
+	if $(RANLIBTEST); then $(RANLIB) libcamltk.a; else true; fi
+
+install: libcamltk.a support.zi textvariable.zi protocol.zi
 	if test -d $(LIBDIR); then : ; else mkdir $(LIBDIR); fi
 	cp -p support.zi $(LIBDIR)
 	cp -p textvariable.zi $(LIBDIR)
 	cp -p protocol.zi $(LIBDIR)
-	cp -p camltk.o $(LIBDIR)
-	chmod 644 $(LIBDIR)/*.zi $(LIBDIR)/camltk.o
+	cp -p libcamltk.a $(LIBDIR)
+	chmod 644 $(LIBDIR)/*.zi $(LIBDIR)/libcamltk.a
 
 clean : 
-	rm -f *.z* *.o protocol.ml
+	rm -f *.z* *.o *.a protocol.ml
 
 .SUFFIXES :
 .SUFFIXES : .mli .ml .zi .zo .mlp
