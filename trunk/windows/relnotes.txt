@@ -1,0 +1,36 @@
+			CAML LIGHT 0.71 FOR WINDOWS
+			 ---- RELEASE NOTES ----
+
+
+# Beta 1.0:
+
+	This is still a limited version without graphics primitives. Only the
+interactive toplevel is provided. It doesn't allow to generate stand-alone 
+executables. 
+
+# 0.0:
+
+	Graphics primitives are implemented. Some particularities:
+
+	- the argument of open_graph is ignored;
+	- mouse_pos returns the position of the mouse in the graphic window's 
+	coordinate system;
+	- read_key and key_pressed return only when the event occurs into the 
+	graphics window. 
+
+
+	Please go on sending any suggestions and remarks concerning the 
+Windows interface itself to:
+
+	Jean-Marie.Geffroy@inria.fr
+
+or:
+
+	Jean-Marie GEFFROY
+	Projet Cristal
+	INRIA-Rocquencourt
+	B.P. 105
+	78153 Le Chesnay cedex
+	France
+
+   Thanks for the numerous encouragements, bug reports and suggestions !

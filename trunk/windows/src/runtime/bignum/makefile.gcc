@@ -1,0 +1,47 @@
+CC = gcc
+LIB = libbignum.a
+OBJECT = o\KerN.o o\bnInit.o o\bnMult.o o\bnDivide.o o\bnCmp.o o\bzf.o o\bz.o 
+KERNH = h\BigNum.h 
+CFLAGS = -c -I./h -O -DCAML_LIGHT
+
+all: $(LIB)
+
+scratch:
+	del o\*.o
+	del libbignum.a
+
+# build the BigNum library
+$(LIB): $(OBJECT)
+	ar rc $(LIB) $(OBJECT)
+
+o\KerN.o: c\KerN.c 
+	$(CC) $(CFLAGS) c\KerN.c
+	mv KerN.o o
+
+o\bnInit.o: c\bn\bnInit.c $(KERNH)
+	$(CC) $(CFLAGS) c\bn\bnInit.c
+	mv bnInit.o o
+
+o\bnMult.o: c\bn\bnMult.c $(KERNH)
+	$(CC) $(CFLAGS) c\bn\bnMult.c
+	mv bnMult.o o
+
+o\bnDivide.o: c\bn\bnDivide.c $(KERNH)
+	$(CC) $(CFLAGS) c\bn\bnDivide.c
+	mv bnDivide.o o
+
+o\bnCmp.o: c\bn\bnCmp.c $(KERNH)
+	$(CC) $(CFLAGS) c\bn\bnCmp.c
+	mv bnCmp.o o
+
+o\bz.o: c\bz.c h/BigZ.h $(KERNH)
+	$(CC) $(CFLAGS) c\bz.c
+	mv bz.o o
+
+o\br.o: c\br.c h/BigR.h h/BigZ.h $(KERNH)
+	$(CC) $(CFLAGS) c\br.c
+	mv br.o o
+
+o\bzf.o: c\bzf.c h/BigZ.h $(KERNH)
+	$(CC) $(CFLAGS) c\bzf.c
+	mv bzf.o o
