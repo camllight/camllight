@@ -7,20 +7,19 @@ chapter~\ref{chap:impl}) since it describes the mappings between
 \tk\ and \caml\ for functions and data. 
 
 \section{Modules}
-All modules required by the \tk\ interface are in the \verb|tklib.zo| 
-library archive. These modules are
+The modules provided by \caml\tk\ are
+
 \begin{itemize}
 \item \verb|tk|, containing the initialisation functions, some frequently
 used functions, and all types manipulated by the library.
 
 \item a module for each widget class (e.g. \verb|button|). The creation
 function and the commands specific to this class are contained in the
-module.
+module. The module bears the same name as the widget class, except for
+\verb|toplevel| widgets which are defined in module \verb|toplevelw|.
 
 \item various other modules grouping functions of a same family
-(\verb|focus|, \verb|winfo|). In general, you should not \verb|#open| these
-files since many functions bear the same names in different modules.
-Instead, you should use the \verb|modulename__symbol| syntax.
+(\verb|focus|, \verb|winfo|). 
 
 \item the \verb|textvariable| module, for the \verb|-textvariable| option
 support.
@@ -29,26 +28,39 @@ support.
 of the interface, and are of no interest to the programmer.
 \end{itemize} 
 
+In general, you should \verb|#open| only the \verb|tk| module, and for the
+rest of the functions use the \verb|modulename__symbol| syntax.
+This is because some functions (such as \verb|create| and \verb|configure|)
+exist in many different modules. Thus it is more practical to refer to the
+function with its exact name.
+
+All modules required by the \tk\ interface are in the \verb|tklib1.zo| or
+\verb|tklib2.zo| library archives (only one of them is required, depending
+on the architecture you choose, cf \ref{sec:compiling}).
+
 \section{Basics}
 As usual with toolkits, the simplest way to learn how to write programs is
 by copy-paste-ing from available source code. In general, a \caml\ program
 using the \tk\ toolkit will have the following structure :
 \begin{verbatim}
-(* Initialisation of the interface )
-let top = tk__OpenTk ();;
+#open "tk";;
+(* Initialisation of the interface *)
+let top = OpenTk ();;
 (* top is now the toplevel widget *)
 (* Widget initialisation *)
-let b = button__create top ...
-;;
+let b = button__create top 
+          [Text "foobar"; 
+           Command (function () -> print_string "foobar\n"; flush stdout)];;
+pack [b][];;
 (* Mainloop for events *)
-tk__MainLoop()
-;;
+MainLoop();;
 \end{verbatim} 
 
-The first step is to initialize the interface with \verb|OpenTk|.
-Then, the program creates some widgets, forming the user interface of your
-application. Finally, the program enters the \verb|MainLoop|, and
-user-interaction takes place.
+The first step is to initialize the interface with \verb|OpenTk|, and this
+returns the {\em toplevel} widget.
+Then, the program creates some widgets, as child of the {\em toplevel},
+forming the user interface of your application. Finally, the program enters
+the \verb|MainLoop|, and user-interaction takes place.
 
 \section{Example}
 Here is a complete working example with a few widgets and callbacks.
@@ -100,14 +112,13 @@ printexc__f main () ;;
 
 \section{Widgets}
 The full description of widgets, their creation options, their commands, is
-out of the scope of this document. The reader should refer to the \verb|man|
-pages of the distribution. The commands for a given widget class are in 
-a module bearing the same name as the class (i.e. \verb|button|), except
-for {\em toplevel} widgets, which are defined is \verb|toplevelw| (due to a 
-technical problem with the Caml Light toplevel).
+out of the scope of this document. An incomplete reference manual can be
+found in chapter~\ref{chap:ref}.
+The reader should also refer to the \verb|man| pages of the \tk\
+distribution. 
 As of this release, all widgets of \tk\ 3.6 are supported, although some
-commands might not be implemented. The most glaring omission is the {\tt
-placer} geometry manager.
+commands might not be implemented. Remember also that only few of them have
+been tested.
 
 \section{Bindings}
 \tk\ offers, in addition to widget-specific callbacks, a general facility
@@ -140,7 +151,7 @@ type Modifier =
 ;;
 
 type XEvent =
-    XKey of string	(* /usr/include/X11/keysymdef.h *)
+    XKey of string      (* /usr/include/X11/keysymdef.h *)
   | ButtonPress
   | Button
   | ButtonRelease
@@ -236,16 +247,18 @@ type EventInfo = {
 type BindAction =
    BindSet of EventField list *  (EventInfo -> unit)
  | BindRemove
+ | BindExtend of EventField list *  (EventInfo -> unit)
 ;;
 \end{verbatim} 
 The first argument of type \verb|Widget| is naturally the widget for which
-this binding is defined (there is no support yet for bindings on whole
-widget classes).
+this binding is defined.
 The second argument of type \verb|(Modifier list * XEvent) list| is the 
 succession of events that will trigger the callback.
-The last argument is the action : \verb|BindRemove| will remove a binding.
-\verb|BindSet| will set a binding.
-The argument of \verb|BindSet| are an \verb|EventField list| and the
+The last argument is the action : \verb|BindRemove| will remove a binding,
+\verb|BindSet| will set a binding, and \verb|BindExtend| will extend a
+binding.
+The argument of \verb|BindSet| and \verb|BindExtend| are an \verb|EventField
+list| and the 
 callback itself. 
 In bindings, the callback needs some information about the event that
 triggered it. This information is contained in the \verb|EventInfo| passed
@@ -276,10 +289,18 @@ tk__canvas_bind : Widget -> TagOrId ->
 Additional arguments are respectively the {\tt tag} and the {\tt tag or id}
 for which the binding is defined.
 
+Binding for classes of widgets are managed with
+\begin{verbatim}
+tk__class_bind : string -> 
+      (Modifier list * XEvent) list -> BindAction -> unit
+\end{verbatim} 
+The first argument should be a widget class name (e.g. \verb|"Button"|).
+
 \section{Exiting properly}
-You should always try to call \verb|CloseTk| before exiting. Otherwise, the
-slave {\tt wish} may stay around for a while, as well as named pipes created
-by the communication protocol in \verb|/tmp|. In particular, something like 
+You should always try to call \verb|CloseTk| before exiting. Otherwise, in
+the {\em two-process} architecture, the slave {\tt wish} may stay around for
+a while, as well as named pipes created by the communication protocol in
+\verb|/tmp|. In particular, something like  
 \begin{verbatim}
 signal SIGINT (Signal_handle (function _ -> CloseTk(); exit 0))
 \end{verbatim} 
@@ -290,7 +311,7 @@ should be inserted also.
 The \verb|test| directory of the distribution contains several other
 examples. Read them to learn more about \caml\tk\ programming.
 The \verb|tktop| directory contains a more advanced example, although
-nor very robust.
+not very robust.
 
 {\bf All examples included in this distribution  should not be considered as
 working applications. They are provided for documentation purposes only}.
@@ -302,28 +323,63 @@ Light toplevel behaviour: you can add open and close modules ({\tt \#open} and
 {\tt \#close} directives), or add a library path ({\tt \#directory} directive).
 You can enter a symbol (value, type constructor, value constructor,
 exception), and see its definition. You can also see the complete interface
-of a module by double-clicking on it.
-The browser works on compiled interfaces ({\tt .zi} files) only, not on
-source files.
+of a module by double-clicking on it. 
+Remember that the browser will show you a pretty-printed version
+of compiled interfaces ({\tt .zi} files), so you will not see the comments
+that were in the source file.
+
+The browser can also display source files, although hypertext is not
+implemented for them.
 
 \section{Compilation}
-The usual commands for compiling programs using the \caml\tk interface are
+\label{sec:compiling}
+\subsection{Architecture}
+In this release, there are two possible architectures for the \caml\tk\
+interface. As in previous versions, there is a {\em two-process}
+architecture, where \caml\ communicates to a slave \wish\ interpreter.
+There is now a {\em single-process} architecture, where both \caml\ and \tk\
+coexist in a single process.
+
+In the following, we refer to \verb|CAMLTKDIR| as an environment variable
+pointing to the directory where the interface library has been
+installed, that is normally \verb|/usr/local/lib/caml-light/tk|.
+\subsection{Compilation for Single-process architecture}
+The library is named \verb|tklib1.zo|.
+The usual commands for compiling and linking are:
 \begin{verbatim}
 $ camlc -c -I $CAMLTKDIR addition.ml
-$ camlc -custom -I $CAMLTKDIR -o addition unix.zo tklib.zo addition.zo -lunix
+$ camlc -custom -I $CAMLTKDIR -o addition tklib1.zo addition.zo \
+        -ccopt -L$TCLLIBDIR -ccopt -L$TKLIBDIR \
+        $CAMLTKDIR/camltk.o -lcaml -ltk -ltcl -lX11
+\end{verbatim}
+Linking is a bit complex, because we need to tell the C compiler/linker
+where to find the libtk.a and libtcl.a libraries, and to link with all
+required pieces. Your linker might complain about \verb|main| being defined
+twice. It this produces an error, you cannot use this architecture.
+We will try to provide a bug-fix if this turns out to be a problem.
+
+\subsection{Compilation for Two-process architecture}
+The library is named \verb|tklib2.zo|.
+The usual commands for compiling and linking are:
+\begin{verbatim}
+$ camlc -c -I $CAMLTKDIR addition.ml
+$ camlc -custom -I $CAMLTKDIR -o addition unix.zo tklib2.zo addition.zo -lunix
 \end{verbatim} 
-The \verb|CAMLTKDIR| environment variable should point to the directory where
-the interface library has been installed, that is normally
-\verb|/usr/local/lib/caml-light/tk|. \verb|unix.zo| comes from the
+ \verb|unix.zo| comes from the
 \verb|libunix| contrib, and is normally installed in the same directory as
 standard \caml\ libraries. 
 
-The distribution \verb|Makefile| also contains an entry to produce a \caml\
-toplevel featuring the \tk\ interface : \verb|camltktop|.
-This toplevel may be run with: 
+\subsection{Toplevels}
+The distribution also contains two toplevels featuring the \caml\tk\
+interface: \verb|camltktop1| and \verb|camltktop2|.
+These toplevels may be run with: 
 \begin{verbatim}
-$ camllight -I $CAMLTKDIR $CAMLTKDIR/camltktop
+$ camllight -I $CAMLTKDIR $CAMLTKDIR/camltktop1
+$ camllight -I $CAMLTKDIR $CAMLTKDIR/camltktop2
 \end{verbatim} 
+Note however that the usage of the toplevels is awkward (for the time
+being), because callbacks cannot be executed until you enter MainLoop, and
+you cannot easily leave MainLoop.
 
 \section{Extensions}
 The alpha versions have already one extension (i.e. a feature not
@@ -359,12 +415,11 @@ For example,
 \begin{verbatim}
 button .myf.bok -title "Ok" -relief raised
 \end{verbatim} 
-is translated by
+is translated by (assuming that \verb|myf| is the parent widget \verb|.myf|)
 \begin{verbatim}
 let b = button__create myf [Title "Ok"; Relief Raised] in
 ...
 \end{verbatim} 
-assuming that \verb|myf| is the parent widget \verb|.myf|.
 Then, 
 \begin{verbatim}
 .myf.bok configure -state disabled
@@ -375,10 +430,16 @@ button__configure b [State Disabled]
 \end{verbatim} 
 
 This is more in the spirit of ML, but unfortunately eliminates the
-possibility to specify configuration of widgets by resources based on widget
-names.
-
-
+possibility to specify configuration of widgets by resources based on widget 
+names. It you absolutely want to you resources then you may call the
+alternate \verb|create_named| function:
+\begin{verbatim}
+let b = button__create_named myf "bok" [Title "Ok"; Relief Raised] in
+...
+\end{verbatim} 
+Assuming that \verb|myf| is the widget of path \verb|.myf|, then \verb|b|
+will have path \verb|.myf.bok|. As in \tk, it is your responsibility to use
+valid identifiers for path elements.
 
 When widgets are mutually recursive (through callbacks, for example when
 linking a scrollbar to a text widget), one should first create the widgets,
@@ -421,5 +482,3 @@ essentially \tcl\tk\ code, you need a basic knowledge of this language to
 understand what is going on.
 It is also possible to trigger debugging by setting the boolean reference
 \verb|protocol__debug| to true (or false to remove debugging).
-
-
