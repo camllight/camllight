@@ -9,7 +9,6 @@
 #open "fstring";;
 #open "fchar";;
 #open "int_misc";;
-#open "string_misc";;
 #open "nat";;
 #open "big_int";;
 #open "arith_flags";;
@@ -413,10 +412,6 @@ let div_ratio_big_int r bi =
 (* Functions on type string                                 *)
 (* giving floating point approximations of rational numbers *)
 
-(* Tests if s has only zeros characters from index i to index i + l *)
-let rec only_zeros s i lim =
- i >= lim || s.[i] == `0` && only_zeros s (succ i) lim;;
-
 (* Compares strings that contains only digits, have the same length,
    from index i to index i + l *)
 let rec compare_num_string s1 s2 i len =
@@ -431,6 +426,11 @@ let rec compare_num_string s1 s2 i len =
 (* of a strictly positive rational number                          *)
 (* if the decimal expansion of a non null rational r is equal to   *)
 (* sigma for k=-P to N of r_k*10^k then msd_ratio r = N            *)
+
+(* Tests if s has only zeros characters from index i to index lim *)
+let rec only_zeros s i lim =
+ i >= lim || s.[i] == `0` && only_zeros s (succ i) lim;;
+
 (* Nota : for a big_int we have msd_ratio = nums_digits_big_int -1 *)
 let msd_ratio r =
  cautious_set_ratio_normalized r;
@@ -606,10 +606,34 @@ let string_of_ratio r =
 let string_for_read_of_ratio r = sys_string_of_ratio 10 "#[" r "]";;
 
 let sys_ratio_of_string base s off_set length = 
- let n = index_char s `/` off_set in
- if n >= off_set + length || n == -1 then
+ try
+  let n = index_char s off_set length `/` in
+  let (snum, k1) = decimal_of_string base s off_set (n - off_set)
+  and (sden, k2) = decimal_of_string base s (succ n)
+                    (pred (length + off_set - n)) in
+  if !error_when_null_denominator_flag && 
+     sign_big_int 
+       (sys_big_int_of_string base sden 0 (string_length sden)) == 0
+     then failwith_zero "sys_ratio_of_string"
+  else match compare_int k1 k2 with
+       |  0 -> create_ratio (sys_big_int_of_string 
+                                 base snum 0 (string_length snum))
+                            (sys_big_int_of_string 
+                                 base sden 0 (string_length sden))
+       | -1 -> create_ratio 
+                (sys_big_int_of_string 
+                  base snum 0 (string_length snum))
+                (let new_s = sden ^ "e" ^ string_of_int (k2 - k1) in 
+                 sys_big_int_of_string 
+                  base new_s 0 (string_length new_s))
+       | _ -> create_ratio  
+              (let new_s = snum ^ "e" ^ string_of_int (k1 - k2) in
+               sys_big_int_of_string
+                base new_s 0 (string_length new_s))
+                (big_int_of_string sden)
+ with Not_found ->
    let (snum, k) = decimal_of_string base s off_set length in
-   begin match sign_int k with 
+   match sign_int k with 
    | 0 -> {Numerator = simple_big_int_of_string 
                           base snum 0 (string_length snum);
            Denominator = unit_big_int;
@@ -624,32 +648,6 @@ let sys_ratio_of_string base s off_set length =
            base k (simple_big_int_of_string base snum 0 (string_length snum));
        Denominator = unit_big_int;
        Normalized = true}
-   end 
-  else
-    let (snum, k1) = decimal_of_string base s off_set (n - off_set)
-    and (sden, k2) = decimal_of_string base s (succ n)
-                      (pred (length + off_set - n)) in
-    if !error_when_null_denominator_flag && 
-       sign_big_int 
-         (sys_big_int_of_string base sden 0 (string_length sden)) == 0
-       then failwith_zero "sys_ratio_of_string"
-    else begin match compare_int k1 k2 with
-         |  0 -> create_ratio (sys_big_int_of_string 
-                                   base snum 0 (string_length snum))
-                              (sys_big_int_of_string 
-                                   base sden 0 (string_length sden))
-           | -1 -> create_ratio 
-                    (sys_big_int_of_string 
-                      base snum 0 (string_length snum))
-                    (let new_s = sden ^ "e" ^ string_of_int (k2 - k1) in 
-                     sys_big_int_of_string 
-                      base new_s 0 (string_length new_s))
-           | _ -> create_ratio  
-                  (let new_s = snum ^ "e" ^ string_of_int (k1 - k2) in
-                   sys_big_int_of_string
-                    base new_s 0 (string_length new_s))
-                    (big_int_of_string sden)
-        end
 ;;
 
 let ratio_of_string s = sys_ratio_of_string 10 s 0 (string_length s);;

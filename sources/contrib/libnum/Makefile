@@ -4,7 +4,6 @@
 
 BIGNUM_ARCH=C
 CC=cc
-CPP=/lib/cpp -P
 
 # Test to see whether ranlib exists on the machine
 RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
@@ -20,14 +19,14 @@ COMPFLAGS=-W #-O fast
 CAMLLIBR=camllibr
 CAMLMKTOP=camlmktop
 
-ZOFILES=int_misc.zo string_misc.zo nat.zo big_int.zo arith_flags.zo ratio.zo \
+ZOFILES=int_misc.zo nat.zo big_int.zo arith_flags.zo ratio.zo \
         num.zo arith_status.zo
 
-ZIFILES=big_int.zi nat.zi num.zi ratio.zi arith_status.zi
+ZIFILES=big_int.zi nat.zi num.zi ratio.zi arith_status.zi ltx_num.zi fmt_num.zi
 
 OBJFILES=nat_stubs.o
 
-all: libnums.a nums.zo $(ZIFILES) camlnum
+all: libnums.a nums.zo ltx_num.zo fmt_num.zo $(ZIFILES) camlnum
 
 camlnum: libnums.a $(ZOFILES)
 	$(CAMLMKTOP) -o camlnum -custom $(ZOFILES) libnums.a
@@ -79,13 +78,10 @@ ratio.zi: nat.zi big_int.zi
 arith_flags.zo: arith_flags.zi 
 arith_status.zo: arith_status.zi arith_flags.zi 
 big_int.zo: big_int.zi int_misc.zi nat.zi 
-fmt_num.zo: fmt_num.zi string_misc.zi num.zi int_misc.zi nat.zi big_int.zi \
-    ratio.zi 
+fmt_num.zo: fmt_num.zi ratio.zi num.zi int_misc.zi nat.zi big_int.zi 
 int_misc.zo: int_misc.zi 
 load_all.zo: int_misc.zi nat.zi 
 ltx_num.zo: ltx_num.zi num.zi int_misc.zi nat.zi big_int.zi ratio.zi 
-nat.zo: nat.zi string_misc.zi int_misc.zi 
+nat.zo: nat.zi int_misc.zi 
 num.zo: num.zi int_misc.zi nat.zi big_int.zi ratio.zi arith_flags.zi 
-ratio.zo: ratio.zi string_misc.zi int_misc.zi nat.zi big_int.zi \
-    arith_flags.zi 
-string_misc.zo: string_misc.zi 
+ratio.zo: ratio.zi int_misc.zi nat.zi big_int.zi arith_flags.zi 
