@@ -44,14 +44,16 @@ let output_loc oc input seek line_flag (Loc(pos1, pos2)) =
       while input() != `\n` do () done
     with End_of_file -> () in
   let copy_line () =
+    output_string oc error_prompt;
     let c = ref ` ` in
       begin try
         while c := input(); !c != `\n` do output_char oc !c done
       with End_of_file ->
-        prerr_string "<EOF>"
+        output_string oc "<EOF>"
       end;
       output_char oc `\n` in
   let pr_line first len ch =
+    output_string oc error_prompt;
     let c = ref ` `
     and f = ref first
     and l = ref len in
@@ -109,7 +111,7 @@ let output_loc oc input seek line_flag (Loc(pos1, pos2)) =
     else
       begin
         for i = !line1 + 1 to !line1 + 3 do copy_line() done;
-        output_string oc "..........\n";
+        output_string oc error_prompt; output_string oc "..........\n";
         for i = !line1 + 4 to !line2 - 4 do skip_line() done;
         for i = !line2 - 3 to !line2 - 1 do copy_line() done
       end;

@@ -9,8 +9,5 @@ value default_used_interfaces : (string * string list) list
   and default_exec_name: string
 ;;
 value toplevel_input_prompt : string
-  and toplevel_output_prompt : string
-  and toplevel_error_prompt : string
-  and batch_output_prompt : string
-  and batch_error_prompt : string
+  and error_prompt : string
 ;;

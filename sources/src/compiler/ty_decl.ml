@@ -159,8 +159,20 @@ let define_new_type loc (ty_desc, params, def) =
   (ty_res, type_comp)
 ;;
 
+(* Check if an abbreviation is recursive *)
+
+let check_recursive_abbrev loc (ty, params, def) =
+  try
+    check_recursive_abbrev ty.info.ty_constr
+  with Recursive_abbrev ->
+    recursive_abbrev_err loc ty
+;;
+
 let type_typedecl loc decl =
-  map (define_new_type loc) (map enter_new_type decl)
+  let newdecl = map enter_new_type decl in
+  let res = map (define_new_type loc) newdecl in
+  do_list (check_recursive_abbrev loc) newdecl;
+  res
 ;;
 
 let type_excdecl loc decl =

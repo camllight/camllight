@@ -38,15 +38,8 @@ let default_exec_name = "camlout.exe";;
 
 (* Prompts.
  * toplevel_input_prompt: Printed before user input.
- * toplevel_output_prompt: Printed before compiler ouput in the toplevel syst.
- * toplevel_error_prompt: Printed before compiler error and warning messages.
- * batch_output_prompt: Printed before compiler output in the batch system.
- * batch_error_prompt: Printed before error and warning messages.
+ * error_prompt: Printed before compiler error and warning messages.
  *)
 
 let toplevel_input_prompt = "#";;
-let toplevel_output_prompt = "";;
-let toplevel_error_prompt = ">";;
-let batch_output_prompt = "";;
-let batch_error_prompt = "#";;
-
+let error_prompt = ">";;
