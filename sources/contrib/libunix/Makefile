@@ -18,7 +18,7 @@ CAMLMKTOP=camlmktop
 OBJS=accept.o access.o addrofstr.o alarm.o bind.o chdir.o chmod.o \
   chown.o chroot.o close.o closedir.o connect.o cst2constr.o cstringv.o \
   dup.o dup2.o envir.o errmsg.o execv.o execve.o execvp.o exit.o \
-  fchmod.o fchown.o fcntl.o fork.o ftruncate.o getegid.o getenv.o \
+  fchmod.o fchown.o fcntl.o fork.o ftruncate.o getcwd.o getegid.o getenv.o \
   geteuid.o getgid.o getgr.o getgroups.o gethost.o gethostname.o \
   getlogin.o getpid.o getppid.o getproto.o getpw.o getserv.o getuid.o \
   gmtime.o ioctl.o kill.o link.o listen.o lockf.o lseek.o mkdir.o \

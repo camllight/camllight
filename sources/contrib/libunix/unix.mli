@@ -336,10 +336,12 @@ value fcntl_int : file_descr -> int -> int -> int = 3 "unix_fcntl_int"
 
 value mkdir : string -> file_perm -> unit = 2 "unix_mkdir"
         (* Create a directory with the given permissions. *)
-  and chdir : string -> unit = 1 "unix_chdir"
-        (* Change the process working directory. *)
   and rmdir : string -> unit = 1 "unix_rmdir"
         (* Remove an empty directory. *)
+  and chdir : string -> unit = 1 "unix_chdir"
+        (* Change the process working directory. *)
+  and getcwd : unit -> string = 1 "unix_getcwd"
+        (* Return the name of the current working directory. *)
 ;;
 
 type dir_handle
