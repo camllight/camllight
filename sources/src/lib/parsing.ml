@@ -60,7 +60,6 @@ let yyparse tables start lexer lexbuf =
         env.symb_end   <- lexbuf.lex_abs_pos + lexbuf.lex_curr_pos;
         loop Token_read t
     | Raise_parse_error ->
-        let c = env.curr_char in
         raise Parse_error
     | Compute_semantic_action ->
         loop Semantic_action_computed (tables.actions.(env.rule_number) ())
