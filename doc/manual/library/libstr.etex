@@ -1,4 +1,4 @@
-\chapter{The "str" library: regular expressions and string processing}
+\chapter{The str library: regular expressions and string processing}
 
 The "str" library (distributed in "contrib/libstr") provides
 high-level string processing functions, some based on regular
