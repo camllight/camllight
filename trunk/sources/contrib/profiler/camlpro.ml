@@ -52,7 +52,7 @@ let counters = ref (make_vect 0 0)
 ;;
 (* Producing results of profile run *)
 let add_val_counter prof_counter =
-   fprintf !outfile "(\* %d *\) " !counters.(prof_counter); 
+   fprintf !outfile "(* %d *) " !counters.(prof_counter); 
    ()
 ;;
 
