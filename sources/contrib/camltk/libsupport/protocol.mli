@@ -41,6 +41,12 @@ value register_callback : Widget -> (callback_buffer -> unit) -> string
       (* Callback support *)
 ;;
 
+value remove_callbacks: Widget -> unit
+      (* Clean up callbacks associated to widget. Must be used only when
+      	 the Destroy event is bind by the user and masks the default
+	 Destroy event binding *)
+;;
+
 value result_header : string
 and   result_string_header: string
 and   result_footer : string
@@ -49,6 +55,7 @@ and   result_footer : string
 
 value OpenTk : unit -> Widget
 and   OpenTkClass: string -> Widget
+and   OpenTkDisplayClass: string -> string -> Widget
 and   CloseTk : unit -> unit
 and   MainLoop : unit -> unit
 and   add_fileinput : file_descr -> (unit -> unit) -> unit

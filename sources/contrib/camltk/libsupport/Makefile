@@ -9,7 +9,7 @@ CAMLYACC=camlyacc -v
 CAMLLEX=camllex
 CAMLDEP=../../../src/tools/camldep
 
-all: support.zo textvariable.zo camltk.zi libcamltk.a protocol1.zo protocol2.zo
+all: support.zo textvariable.zo camltk.zi libcamltk.a protocol1.zo
 
 protocol1.zo: protocol1.ml
 	rm -f protocol.ml
@@ -17,11 +17,12 @@ protocol1.zo: protocol1.ml
 	$(CAMLCOMP) $(COMPFLAGS) protocol.ml
 	mv protocol.zo protocol1.zo
 
-protocol2.zo: protocol2.ml
-	rm -f protocol.ml
-	cp -p protocol2.ml protocol.ml
-	$(CAMLCOMP) $(COMPFLAGS) protocol.ml
-	mv protocol.zo protocol2.zo
+# Not supported anymore
+# protocol2.zo: protocol2.ml
+#	rm -f protocol.ml
+#	cp -p protocol2.ml protocol.ml
+#	$(CAMLCOMP) $(COMPFLAGS) protocol.ml
+#	mv protocol.zo protocol2.zo
 
 
 camltk.o : camltk.c

@@ -134,14 +134,21 @@ let dispatch_callback = function
 
 let OpenTk () =
   install_callback_handler dispatch_callback;
-  opentk "CamlTk";
+  opentk "" "CamlTk";
   install_cleanup();
   default_toplevel_widget
 ;;
 
 let OpenTkClass s =
   install_callback_handler dispatch_callback;
-  opentk s;
+  opentk "" s;
+  install_cleanup();
+  default_toplevel_widget
+;;
+
+let OpenTkDisplayClass disp cl =
+  install_callback_handler dispatch_callback;
+  opentk disp cl;
   install_cleanup();
   default_toplevel_widget
 ;;

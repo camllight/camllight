@@ -3,8 +3,8 @@
 
 value install_callback_handler : (string list -> unit) -> unit
       	= 1 "camltk_install_callback_handler"
-  and opentk : string -> unit
-        = 1 "camltk_opentk"
+  and opentk : string -> string -> unit
+        = 2 "camltk_opentk"
   and tcl_eval : string -> string
       	= 1 "camltk_tcl_eval"
   and add_file_input : file_descr -> string -> unit
