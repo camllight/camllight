@@ -6,8 +6,7 @@ all: $(FILES) FORCE
 	@$(MAKE) -f Makefile.library
 	@$(MAKE) -f Makefile.cmds
 	../../tools/texexpand manual.tex \
-        | ../../tools/htmlgen \
-        | ../../tools/htmltbl > manual.html
+        | ../../tools/htmlgen > manual.html
 	cd man-caml; \
         ../../../tools/htmlcut -3 -4 -11 -12 ../manual.html > index.html
 	cd man-caml; ../../../tools/htmlthread node*.html
