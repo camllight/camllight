@@ -1,5 +1,9 @@
 /* Start-up code */
 
+#include "../../config/s.h"
+#ifdef HAS_UNISTD
+#include <unistd.h>
+#endif
 #include <stdio.h>
 #ifdef __MWERKS__
 #include "myfcntl.h"
