@@ -125,6 +125,72 @@ eq_num (div_num (Ratio (ratio_of_string "1/2"))
                  (Ratio (ratio_of_string "3/4")),
         Ratio (ratio_of_string "2/3"));;
 
+testing_function "compare_num";;
+
+test 1
+eq (compare_num (Int 1) (Int 2), -1) &&
+test 2
+eq (compare_num (Int 2) (Int 0), 1) &&
+test 3
+eq (compare_num (Int 3) (Int 3), 0);;
+
+test 4
+eq (compare_num (Int 1) (Big_int (big_int_of_string "2")), -1) &&
+test 5
+eq (compare_num (Int 2) (Big_int (big_int_of_string "0")), 1) &&
+test 6
+eq (compare_num (Int 3) (Big_int (big_int_of_string "3")), 0);;
+
+test 7
+eq (compare_num (Big_int (big_int_of_string "2")) (Int 1), 1) &&
+test 8
+eq (compare_num (Big_int (big_int_of_string "0")) (Int 2), -1) &&
+test 9
+eq (compare_num (Big_int (big_int_of_string "3")) (Int 3), 0);;
+
+test 10
+eq (compare_num (Int 1) (Ratio (ratio_of_string "2")), -1) &&
+test 11
+eq (compare_num (Int 2) (Ratio (ratio_of_string "0")), 1) &&
+test 12
+eq (compare_num (Int 3) (Ratio (ratio_of_string "3")), 0);;
+
+test 13
+eq (compare_num (Ratio (ratio_of_string "2")) (Int 1), 1) &&
+test 14
+eq (compare_num (Ratio (ratio_of_string "0")) (Int 2), -1) &&
+test 15
+eq (compare_num (Ratio (ratio_of_string "3")) (Int 3), 0);;
+
+(* Big_int x big_int *)
+test 16
+eq (compare_num (Big_int (big_int_of_string "1")) (Big_int (big_int_of_string "2")), -1) &&
+test 17
+eq (compare_num (Big_int (big_int_of_string "2")) (Big_int (big_int_of_string "0")), 1) &&
+test 18
+eq (compare_num (Big_int (big_int_of_string "3")) (Big_int (big_int_of_string "3")), 0);;
+
+test 19
+eq (compare_num (Ratio (ratio_of_string "2")) (Big_int (big_int_of_string "1")), 1) &&
+test 20
+eq (compare_num (Ratio (ratio_of_string "0")) (Big_int (big_int_of_string "2")), -1) &&
+test 21
+eq (compare_num (Ratio (ratio_of_string "3")) (Big_int (big_int_of_string "3")), 0);;
+
+test 22
+eq (compare_num (Big_int (big_int_of_string "2")) (Ratio (ratio_of_string "1")), 1) &&
+test 23
+eq (compare_num (Big_int (big_int_of_string "0")) (Ratio (ratio_of_string "2")), -1) &&
+test 24
+eq (compare_num (Big_int (big_int_of_string "3")) (Ratio (ratio_of_string "3")), 0);;
+
+test 25
+eq (compare_num (Ratio (ratio_of_string "1")) (Ratio (ratio_of_string "2")), -1) &&
+test 26
+eq (compare_num (Ratio (ratio_of_string "2")) (Ratio (ratio_of_string "0")), 1) &&
+test 27
+eq (compare_num (Ratio (ratio_of_string "3")) (Ratio (ratio_of_string "3")), 0);;
+
 testing_function "is_integer_num";;
 
 test 1
