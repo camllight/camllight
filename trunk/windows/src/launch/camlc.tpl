@@ -56,7 +56,7 @@ while : ; do
       stdlib=$2
       shift;;
     -v|-version)
-      echo "The Caml Light system, version 0.7"
+      echo "The Caml Light system, version" VERSION
       echo "  (standard library from $stdlib)"
       camlrun -V
       camlrun $stdlib/camlcomp -version
