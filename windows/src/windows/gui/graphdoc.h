@@ -17,13 +17,14 @@ protected:
 // Attributes
 public:
 	CGraphView	*m_View;
-	CBitmap		*m_bmp;		// the bitmap that stores the current image
+	CBitmap		*m_bmp,		// the bitmap that stores the current image
+				*m_oldbmp;
 	CPen		*m_pen, 
-				*m_dummyPen;
+				*m_oldpen;
 	CBrush		*m_brush,
-				*m_dummyBrush;
+				*m_oldbrush;
 	CFont		*m_font, 
-				*m_dummyFont;
+				*m_oldfont;
 	CClientDC	*m_DC;
 	CDC			*m_OffScreenDC, 
 			    *m_tempDC;

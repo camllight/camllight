@@ -287,11 +287,9 @@ BOOL CCAMLWinApp::LoadSettings()
 
 BOOL CCAMLWinApp::SaveSettings()
 {
-// void GetWindowRect( LPRECT lpRect ) const;
-
 	BOOL saveOK = WriteProfileInt("Window sizes","SaveWorkspace",m_bSaveWorkspace);
 
-	if (m_bSaveWorkspace){
+	if (saveOK && m_bSaveWorkspace){
 		m_pMainWnd->GetWindowRect(&m_mainRect);
 
 		// Preferences: we just need to save the current values
@@ -363,26 +361,16 @@ void CCAMLWinApp::SetStdProportions()
     m_pMainWnd->GetClientRect(&rect);                
 							  
 	if(CAMLHistory->GetParent()->IsIconic())
-    	pTermDoc->m_View->GetParent()->GetParent()->SetWindowPos(NULL,
-    									5,
-    									5,
-    									rect.right,
-    									rect.bottom,
-									    SWP_NOZORDER);
+    	pTermDoc->m_View->GetParentFrame()
+			->SetWindowPos(NULL,5,5,rect.right,rect.bottom,SWP_NOZORDER);
 	else{
-    	CAMLHistory->GetParent()->SetWindowPos(NULL,
-    										rect.right*2/3+5,
-	    									5,
-	    									rect.right/3-10,
-	    									rect.bottom-55,
-	    									SWP_NOZORDER);
+    	CAMLHistory->GetParentFrame()
+			->SetWindowPos(NULL,rect.right*2/3+5,5,
+	    						rect.right/3-10,rect.bottom-55,
+	    						SWP_NOZORDER);
 
-	    pTermDoc->m_View->GetParent()->GetParent()->SetWindowPos(NULL,
-	    									5,
-	    									5,
-	    									rect.right*2/3-5,
-	    									rect.bottom-55,
-										    SWP_NOZORDER);
+	    pTermDoc->m_View->GetParentFrame()
+			->SetWindowPos(NULL,5,5,rect.right*2/3-5,rect.bottom-55,SWP_NOZORDER);
 	}
 #define RECT_WIDTH(r)  (r.right  - r.left)
 #define RECT_HEIGHT(r) (r.bottom - r.top)
@@ -392,8 +380,6 @@ void CCAMLWinApp::SetStdProportions()
 	CAMLGraph->m_View->GetParent()->SetWindowPos(NULL,25,25,
 	   CAMLGraph->m_sizeX+RECT_WIDTH(frRect)-(cliRect.right),
 	   CAMLGraph->m_sizeY+RECT_HEIGHT(frRect)-(cliRect.bottom),
-//	   min(rect.right-50,CAMLGraph->m_sizeX),
-//	   min(rect.bottom-50,CAMLGraph->m_sizeY),
 	   SWP_NOZORDER);	 
 	CAMLGraph->m_View->ScrollToPosition(CPoint(0,CAMLGraph->m_sizeY));
 }
@@ -470,7 +456,7 @@ int CCAMLWinApp::DoExit()
 	m_Font->DeleteObject();
 	delete m_Font;
 	delete m_PrefsDlg;
-	delete m_CmdLine;
+	delete [] m_CmdLine;
 	free((char *) m_pszHelpFilePath);
 
 	// It's time now to call DestroyWindow, since OnClose can't.
