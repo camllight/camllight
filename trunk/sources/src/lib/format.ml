@@ -353,7 +353,7 @@ let scan_push state b tok =
   the user may set the depth bound pp_max_boxes
   any text nested deeper is printed as the character the ellipsis
 *)
-let pp_open_box state indent br_ty =
+let pp_open_box_gen state indent br_ty =
     state.pp_curr_depth <- state.pp_curr_depth + 1;
     if state.pp_curr_depth < state.pp_max_boxes then
       (scan_push state false
@@ -429,12 +429,12 @@ let pp_print_char state c =
   let s = create_string 1 in s.[0] <- c; pp_print_as state 1 s;;
 
 (* Opening boxes *)
-let pp_open_hbox state () = pp_open_box state 0 Pp_hbox
-and pp_open_vbox state indent = pp_open_box state indent Pp_vbox
+let pp_open_hbox state () = pp_open_box_gen state 0 Pp_hbox
+and pp_open_vbox state indent = pp_open_box_gen state indent Pp_vbox
 
-and pp_open_hvbox state indent = pp_open_box state indent Pp_hvbox
-and pp_open_hovbox state indent = pp_open_box state indent Pp_hovbox
-and pp_open_box state indent = pp_open_box state indent Pp_box;;
+and pp_open_hvbox state indent = pp_open_box_gen state indent Pp_hvbox
+and pp_open_hovbox state indent = pp_open_box_gen state indent Pp_hovbox
+and pp_open_box state indent = pp_open_box_gen state indent Pp_box;;
 
 (* Print a new line after printing all queued text
    (same for print_flush but without a newline)    *)
@@ -625,3 +625,167 @@ and set_formatter_output_functions =
     pp_set_formatter_output_functions std_formatter
 and get_formatter_output_functions =
     pp_get_formatter_output_functions std_formatter;;
+
+#open "obj";;
+#open "float";;
+#open "int";;
+let fprintf ppf format =
+  let format = (magic format : string) in
+  let rec doprn i =
+    if i >= string_length format then
+      magic ()
+    else
+      match nth_char format i with
+      | `[` ->
+          let j = do_pp_open ppf (succ i) in
+          doprn j
+      | `]` ->
+          pp_close_box ppf ();
+          doprn (succ i)
+      | `;` ->
+          pp_print_space ppf ();
+          doprn (succ i)
+      | `,` ->
+          pp_print_cut ppf ();
+          doprn (succ i)
+      | `.` ->
+          pp_print_newline ppf ();
+          doprn (succ i)
+      | `\\` ->
+          let j = do_force_newline (i + 1) in
+          doprn j
+      | `%` ->
+          let j = skip_args (succ i) in
+          begin match nth_char format j with
+            `%` ->
+              pp_print_char ppf `%`;
+              doprn (succ j)
+          | `s` ->
+              magic(fun s ->
+                if j <= i+1 then
+                  pp_print_string ppf s
+                else begin
+                  let p =
+                    try
+                      int_of_string (sub_string format (i+1) (j-i-1))
+                    with _ ->
+                      invalid_arg "fprintf: bad %s format" in
+                  if p > 0 && string_length s < p then begin
+                    pp_print_string ppf
+                                  (make_string (p - string_length s) ` `);
+                    pp_print_string ppf s
+                  end else if p < 0 && string_length s < -p then begin
+                    pp_print_string ppf s;
+                    pp_print_string ppf
+                                  (make_string (-p - string_length s) ` `)
+                  end else
+                    pp_print_string ppf s
+                end;
+                doprn (succ j))
+          | `c` ->
+              magic(fun c ->
+                pp_print_char ppf c;
+                doprn (succ j))
+          | `d` | `o` | `x` | `X` | `u` ->
+              magic(doint i j)
+          | `f` | `e` | `E` | `g` | `G` ->
+              magic(dofloat i j)
+          | `b` ->
+              magic(fun b ->
+                pp_print_string ppf (string_of_bool b);
+                doprn (succ j))
+          | `a` ->
+              magic(fun printer arg ->
+                printer ppf arg;
+                doprn(succ j))
+          | `t` ->
+              magic(fun printer ->
+                printer ppf;
+                doprn(succ j))
+          | c ->
+              invalid_arg ("fprintf: unknown format")
+          end
+       |  c  -> pp_print_char ppf c; doprn (succ i)
+
+  and skip_args j =
+    match nth_char format j with
+      `0` | `1` | `2` | `3` | `4` | `5` | `6` | `7` | `8` | `9` |
+      ` ` | `.` | `-` ->
+        skip_args (succ j)
+    | c ->
+        j
+    
+  and doint i j n =
+    let len = j-i in
+    let fmt = create_string (len+2) in
+    blit_string format i fmt 0 len;
+    set_nth_char fmt len `l`;
+    set_nth_char fmt (len+1) (nth_char format j);
+    pp_print_string ppf (format_int fmt n);
+    doprn (succ j)
+
+  and dofloat i j f =
+    pp_print_string ppf (format_float (sub_string format i (j-i+1)) f);
+    doprn (succ j)
+
+  and do_force_newline i =
+   if i = string_length format
+   then begin pp_print_char ppf `\\`; i end else
+   match format.[i] with
+   | `n` -> pp_force_newline ppf (); succ i
+   | `[` | `]` | `;` | `,` | `.` as c  -> pp_print_char ppf c; succ i
+   | _ -> pp_print_char ppf `\\`; i
+
+  and get_box_size i =
+   match nth_char format i with
+   | ` ` -> get_box_size (i + 1)
+   | c ->
+      let rec get_size j =
+       match nth_char format j with
+       | `0` | `1` | `2` | `3` | `4` | `5` | `6` | `7` | `8` | `9` |
+         `-` ->
+         get_size (succ j)
+       | `>` ->
+         if j = i then 0, succ j else
+          begin try int_of_string (sub_string format i (j-i)), succ j
+          with Failure _ -> invalid_arg "printf: bad box format" end
+       | c -> invalid_arg "printf: bad box size format" in
+       get_size i
+
+  and get_box_kind j =
+   if j >= string_length format then Pp_box, j else
+   match nth_char format j with
+   | `h` ->
+      let j = succ j in
+      if j >= string_length format then Pp_hbox, j else
+      begin match nth_char format j with
+      | `o` -> 
+         let j = succ j in
+         if j >= string_length format
+          then invalid_arg "printf: bad box format" else
+         begin match nth_char format j with
+         | `v` -> Pp_hovbox, succ j
+         | _ ->  invalid_arg "printf: bad box format" end
+      | `v` -> Pp_hvbox, succ j
+      | c -> Pp_hbox, j
+      end
+   | `b` -> Pp_box, succ j
+   | `v` -> Pp_vbox, succ j
+   | _ -> Pp_box, j
+
+  and do_pp_open ppf i =
+   if i >= string_length format
+   then begin pp_open_box_gen ppf 0 Pp_box; i end else
+   match nth_char format i with
+   | `<` ->
+     let k,j = get_box_kind (succ i) in
+     let size,j = get_box_size j in
+     pp_open_box_gen ppf size k;
+     j
+   | c ->  pp_open_box_gen ppf 0 Pp_box; i
+
+  in doprn 0
+;;
+
+let printf f = fprintf std_formatter f;;
+let eprintf f = fprintf err_formatter f;;
