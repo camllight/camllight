@@ -80,7 +80,11 @@ geometry.
 \end{options}
 \end{unix}
 
-\begin{mac} The argument to "open_graph" is ignored.
+\begin{mac} The argument to "open_graph" has the format
+"\""\var{width}"x"\var{height}"\"",
+where \var{width} and \var{height} are the initial dimensions of the
+graphics window. If the argument is the empty string,
+(\var{width},\var{height}) defaults to (600,400).
 \end{mac}
 
 \begin{pc} The argument to "open_graph" has the format
