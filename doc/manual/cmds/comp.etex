@@ -124,13 +124,6 @@ option.
 to be installed.
 \end{pc}
 
-\item["-files" \var{response-file}]
-Process the files whose names are listed in file
-\var{response-file}, just as if these names appeared on the command line.
-File names in \var{response-file} are separated by blanks (spaces,
-tabs, newlines). This option allows to overcome silly limitations on
-the length of the command line.
-
 \item["-g"]
 Cause the compiler to produce additional debugging information.
 During the linking phase, this option add information at the end of
@@ -239,7 +232,16 @@ compiler messages (see the "-lang" command-line option).
 \end{options}
 \end{unix}
 
-\begin{pc} The following environment variables are also consulted:
+\begin{pc} The following option is also supported:
+\begin{options}
+\item["@"\var{response-file}]
+Process the files whose names are listed in file
+\var{response-file}, just as if these names appeared on the command line.
+File names in \var{response-file} are separated by blanks (spaces,
+tabs, newlines). This option allows to overcome silly limitations on
+the length of the command line.
+\end{options}
+The following environment variables are also consulted:
 \begin{options}
 \item["CAMLLIB"] Contain the path to the standard library directory.
 
