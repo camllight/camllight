@@ -13,5 +13,4 @@ extern long
 
 void init_gc P((long, long, int, int));
 
-
 #endif /* _gc_ctrl_ */

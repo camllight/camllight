@@ -145,7 +145,7 @@ void realloc_ref_table ()
     if (sz > MAX_MALLOC_SIZE) ref_table = NULL;
     else
 #endif
-    ref_table = (value **) realloc ((char *) ref_table, sz);
+    ref_table = (value **) xrealloc ((char *) ref_table, sz);
     if (ref_table == NULL) fatal_error ("Fatal error: ref_table overflow\n");
     ref_table_end = ref_table + ref_table_size + ref_table_reserve;
     ref_table_threshold = ref_table + ref_table_size;

@@ -50,8 +50,8 @@ static void realloc_gray_vals ()
   if (gray_vals_size < stat_heap_size / 128){
     gc_message ("Growing gray_vals to %ldk\n",
 		(long) gray_vals_size * sizeof (value) / 512);
-    new = (value *) realloc ((char *) gray_vals,
-                             2 * gray_vals_size * sizeof (value));
+    new = (value *) xrealloc ((char *) gray_vals,
+                              2 * gray_vals_size * sizeof (value));
     if (new == NULL){
       gc_message ("No room for growing gray_vals\n", 0);
       gray_vals_cur = gray_vals;
@@ -286,7 +286,7 @@ void init_major_heap (heap_size)
 #else
   page_table_size = 4 * stat_heap_size / Page_size;
 #endif
-  page_table = (char *) malloc (page_table_size);
+  page_table = (char *) xmalloc (page_table_size);
   if (page_table == NULL){
     fatal_error ("Fatal error: not enough memory for the initial heap.\n");
   }
@@ -303,7 +303,7 @@ void init_major_heap (heap_size)
      darkened. (Since there are no roots, we don't have to darken anything.) */
   gc_phase = Phase_mark;
   gray_vals_size = 2048;
-  gray_vals = (value *) malloc (gray_vals_size * sizeof (value));
+  gray_vals = (value *) xmalloc (gray_vals_size * sizeof (value));
   if (gray_vals == NULL)
     fatal_error ("Fatal error: not enough memory for the initial heap.\n");
   gray_vals_cur = gray_vals;

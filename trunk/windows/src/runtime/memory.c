@@ -50,10 +50,10 @@ static char *expand_heap (request)
 
   if (more_pages != 0){
     new_page_table_size = page_table_size + more_pages;
-    new_page_table = (char *) malloc (new_page_table_size);
+    new_page_table = (char *) xmalloc (new_page_table_size);
     if (new_page_table == NULL){
       gc_message ("No room for growing page table\n", 0);
-      free (mem);
+      xfree (mem);
       return NULL;
     }
   }
@@ -88,7 +88,7 @@ static char *expand_heap (request)
   }
 
   if (more_pages != 0){
-    free (page_table);
+    xfree (page_table);
     page_table = new_page_table;
     page_table_size = new_page_table_size;
   }
@@ -198,7 +198,7 @@ void modify (fp, val)
 char *stat_alloc (sz)
      asize_t sz;
 {
-  char *result = (char *) malloc (sz);
+  char *result = (char *) xmalloc (sz);
 
   if (result == NULL) raise_out_of_memory ();
   return result;
@@ -207,14 +207,14 @@ char *stat_alloc (sz)
 void stat_free (blk)
      char * blk;
 {
-  free (blk);
+  xfree (blk);
 }
 
 char *stat_resize (blk, sz)
      char *blk;
      asize_t sz;
 {
-  char *result = (char *) realloc (blk, sz);
+  char *result = (char *) xrealloc (blk, sz);
 
   if (result == NULL) raise_out_of_memory ();
   return result;

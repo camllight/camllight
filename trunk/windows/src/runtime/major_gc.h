@@ -44,5 +44,4 @@ void major_collection_slice P((void));
 void major_collection P((void));
 void finish_major_cycle P((void));
 
-
 #endif /* _major_gc_ */

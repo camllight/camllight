@@ -50,6 +50,16 @@ void fatal_error_arg P((char *, char *));
 #ifdef USING_MEMMOV
 void memmov P((char *, char *, unsigned long));
 #endif
+#ifdef NEED_FREE_ALL
+char * xmalloc P((asize_t));
+void xfree P((char *));
+char * xrealloc P((char *, asize_t));
+void xfree_all P((void));
+#else
+#define xmalloc malloc
+#define xfree free
+#define xrealloc realloc
+#endif
 char * aligned_malloc P((asize_t, int));
 
 
