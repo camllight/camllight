@@ -37,6 +37,11 @@ and constr_type_format =
   {qualid = {qual="printf"; id="format"};
    info   = {ty_stamp=1; ty_abbr=Tnotabbrev}}
     (* This assumes that "format" is the first type defined in "printf". *)
+and constr_type_num =
+  (* This is needed only for the Windows port. *)
+  {qualid = {qual="num"; id="num"};
+   info   = {ty_stamp=1; ty_abbr=Tnotabbrev}}
+    (* This assumes that "num" is the first type defined in "num". *)
 ;;
 
 let type_arrow (t1,t2) =
@@ -63,6 +68,8 @@ and type_stream t =
   {typ_desc=Tconstr(constr_type_stream, [t]); typ_level=notgeneric}
 and type_format t1 t2 t3 =
   {typ_desc=Tconstr(constr_type_format, [t1;t2;t3]); typ_level=notgeneric}
+and type_num =
+  {typ_desc=Tconstr(constr_type_num, []); typ_level=notgeneric}
 ;;
 
 (* Some constructors that must be known to the parser *)

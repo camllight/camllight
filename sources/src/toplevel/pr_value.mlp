@@ -1,15 +1,15 @@
 (* To print values *)
 
-#open "obj";;
-#open "misc";;
-#open "const";;
-#open "globals";;
-#open "builtins";;
-#open "modules";;
-#open "types";;
-#open "format";;
-#open "fmt_type";;
-#open "symtable";;
+(**) #open "obj";;
+(**) #open "misc";;
+(**) #open "const";;
+(**) #open "globals";;
+(**) #open "builtins";;
+(**) #open "modules";;
+(**) #open "types";;
+(**) #open "format";;
+(**) #open "fmt_type";;
+(**) #open "symtable";;
 
 exception Constr_not_found;;
 
@@ -53,6 +53,11 @@ let printers = ref [
    (fun x -> print_string "\"";
              print_string (string_for_read (magic_obj x : string));
              print_string "\"")
+#ifdef PRINT_NUMS
+  ;
+  "", type_num,
+   (fun x -> print_string (num__string_of_num (magic_obj x : num__num)))
+#endif
 ];;
 
 let find_printer ty =

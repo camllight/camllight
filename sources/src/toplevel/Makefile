@@ -8,6 +8,7 @@ INCLUDES=-stdlib ../lib -I ../compiler -I ../linker
 COMPFLAGS=-W -O fast $(INCLUDES)
 LINKFLAGS=-g $(INCLUDES)
 CPP=/lib/cpp -P -Dunix
+CPPFLAGS=-UPRINT_NUMS
 
 EXTERNOBJS=config.zo misc.zo interntl.zo \
     const.zo prim.zo instruct.zo lambda.zo \
@@ -29,7 +30,7 @@ PERVASIVES=baltree bool char eq exc fchar filename float format fstring fvect \
 
 SPECIALS=sys
 
-GENSOURCES=version.ml
+GENSOURCES=version.ml pr_value.ml
 
 all: camltop
 
@@ -73,7 +74,7 @@ install:
 
 .mlp.ml:
 	@rm -f $@
-	$(CPP) $< > $@
+	$(CPP) $(CPPFLAGS) $< > $@
 	@chmod a-w $@
 
 depend: $(GENSOURCES)
@@ -83,6 +84,7 @@ depend: $(GENSOURCES)
 	rm Makefile.bak
 
 version.ml: version.mlp ../version.h
+pr_value.ml: pr_value.mlp
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
