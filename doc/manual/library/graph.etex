@@ -83,7 +83,14 @@ geometry.
 \begin{mac} The argument to "open_graph" is ignored.
 \end{mac}
 
-\begin{pc} The argument to "open_graph" is ignored.
+\begin{pc} The argument to "open_graph" has the format
+"\""\var{width}"x"\var{height}"\"" or
+"\""\var{width}"x"\var{height}"+"\var{x}"+"\var{y}"\"",
+where \var{width} and \var{height} are the initial dimensions of the
+graphics windows, and \var{x} and \var{y} are the position of the
+upper-left corner of the graphics window. If omitted,
+(\var{width},\var{height}) default to (600,400) and
+(\var{x},\var{y}) default to (10, 10).
 \end{pc}
 
 \begin{library}
