@@ -62,9 +62,9 @@ def "\\geq" [Print "&gt;="];
 def "\\hbox" [Print_arg];
 def "\\copyright" [Print "(c)"];
 def "\\noindent" [];
-def "\\\\" [Print "<br>"];
 def "\\begin{flushleft}" [Print "<blockquote>"];
 def "\\end{flushleft}" [Print "</blockquote>"];
+def "\\\\" [Print "<br>"];
 ();;
 
 (* Macros specific to the Caml manual *)
@@ -95,20 +95,26 @@ def "\\end{library}" [];
 def "\\begin{comment}" [Print "<dl><dd>"];
 def "\\end{comment}" [Print "</dl>"];
 def "\\begin{tableau}"
-  [Skip_arg; Print "<tbl border>\n<th>"; Print_arg;
-   Print "<th>"; Print_arg; Print "<tr>"];
+  [Skip_arg;
+   Print "<table border>\n<tr><th>";
+   Print_arg;
+   Print "</th><th>";
+   Print_arg;
+   Print "</th></tr>"];
 def "\\entree"
-  [Print "<td>"; Print_arg; Print "<td>"; Print_arg; Print "<tr>"];
-def "\\end{tableau}" [Print "</tbl>\n"];
+  [Print "<tr><td>"; Print_arg;
+   Print "</td><td>"; Print_arg; Print "</td></tr>"];
+def "\\end{tableau}" [Print "</table>"];
 def "\\begin{gcrule}" [Print "<dl><dt><b>Rule:</b><dd>"];
 def "\\end{gcrule}" [Print "</dl>"];
 def "\\begin{tableauoperateurs}"
-  [Print "<tbl border>\n<th>Operator<th>Associated ident<th>Behavior in the default environment<tr>"];
-def "\\end{tableauoperateurs}" [Print "</tbl>\n"];
+  [Print "<table border>\n<tr><th>Operator</th><th>Associated ident</th><th>Behavior in the default environment</th></tr>"];
+def "\\end{tableauoperateurs}" [Print "</table>\n"];
 def "\\entreeoperateur"
-  [Print "<td>"; Print_arg; Print "<td>"; Print_arg;
-   Print "<td>"; Print_arg; Print "<tr>"];
+  [Print "<tr><td>"; Print_arg; Print "</td><td>"; Print_arg;
+   Print "</td><td>"; Print_arg; Print "</td></tr>"];
 def "\\fromoneto"
   [Print "<i>"; Print_arg; Print "</i> = 1, ..., <i>";
    Print_arg; Print "</i>"];
 ();;
+

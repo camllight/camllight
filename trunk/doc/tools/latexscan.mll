@@ -18,15 +18,15 @@ rule main = parse
   | "\n\n" `\n` *
                 { print_string "<P>\n"; main lexbuf }
 (* Font changes *)
-  | "{\\it" | "{\\em"
-                { print_string "<i>"; upto `}` main lexbuf;
-                  print_string "</i>"; main lexbuf }
-  | "{\\bf"     { print_string "<b>"; upto `}` main lexbuf;
-                  print_string "</b>"; main lexbuf }
-  | "{\\tt"     { print_string "<tt>"; upto `}` main lexbuf;
-                  print_string "</tt>"; main lexbuf }
-  | `"`         { print_string "<tt>"; indoublequote lexbuf;
-                  print_string "</tt>"; main lexbuf }
+  | "{\\it" " "* | "{\\em" " "*
+                  { print_string "<i>"; upto `}` main lexbuf;
+                    print_string "</i>"; main lexbuf }
+  | "{\\bf" " "*  { print_string "<b>"; upto `}` main lexbuf;
+                    print_string "</b>"; main lexbuf }
+  | "{\\tt" " "*  { print_string "<tt>"; upto `}` main lexbuf;
+                    print_string "</tt>"; main lexbuf }
+  | `"`           { print_string "<tt>"; indoublequote lexbuf;
+                    print_string "</tt>"; main lexbuf }
 (* Verb, verbatim *)
   | "\\verb" _  { verb_delim := get_lexeme_char lexbuf 5;
                   print_string "<tt>"; inverb lexbuf; print_string "</tt>";
@@ -53,7 +53,6 @@ rule main = parse
                   main lexbuf }
   | "<"         { print_string "&lt;"; main lexbuf }
   | ">"         { print_string "&gt;"; main lexbuf }
-  | "&"         { print_string "&amp;"; main lexbuf }
   | "~"         { print_string " "; main lexbuf }
 (* General case for environments and commands *)
   | ("\\begin{" | "\\end{") [`A`-`Z` `a`-`z`]+ "}" |
