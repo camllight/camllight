@@ -199,7 +199,7 @@ The interface description source is compiled with
 \begin{verbatim}
 $ tkcompiler filename
 \end{verbatim}
-(the file compiled defaults to \verb|Widgets.src| if \verb|file| is
+(the file compiled defaults to \verb|Widgets.src| if \verb|filename| is
 omitted).
 The compiler requires the existence of a \verb|lib| subdirectory, where it
 will produce \verb|tkgen.ml|, \verb|modules|, and various \caml\ files
@@ -235,6 +235,6 @@ The support layer is implemented in the \verb|protocol2.ml|.
 \subsection{Single-process architecture}
 \caml\ has been extended with a new primitive for
 evaluating \tcl\ source phrases, and \tcl\ has been extended to call \caml\
-(or more precisely a precise \caml function). 
-The support layer is implemented in the \verb|protocol2.ml|, and the
+(or more precisely a given \caml function). 
+The support layer is implemented in the \verb|protocol1.ml|, and the
 extensions are defined in \verb|camltk.c|.

@@ -40,7 +40,8 @@ without knowledge of the \tcl\ language.
 \item You need Caml Light 0.7.
 \item You need to have \tcl\ and \tk\ installed. This release requires that
 you have installed the includes and libraries, and \wish.
-This release has been mostly tested with \tk\ 3.6.
+This release has been tested with \tcl\ 7.3 and \tk\ 3.6, but {\bf not} with
+beta versions of \tk\ 4.0.
 \end{itemize} 
 
 \begin{htmlonly}
@@ -57,9 +58,6 @@ for problems reported since the distribution.
 about toolkits, event-driven programming, and \tk\ is assumed.}
 Documentation for \tk\ is currently available in \cite{ouster94},
 \cite{welch94}, and in the {\tt man} pages of the \tk\ distribution.
-The distribution also includes a first shot at a \caml\ browser, which may
-help in finding out the types of functions available in the library as well as
-the type definitions, all this in an {\em hypertext} tool.
 What you will find here is:
 \begin{description}
 \item[The user's manual] : a short tutorial describing how to write \caml\
@@ -68,22 +66,28 @@ programs using the \tk\ interface and how to compile them.
 generated from a high-level description. This part is of interest mainly for
 expert \tk\ users who wish to extend the interface to support more
 functions, more widgets, or simply to fix bugs in test versions.
-\item[The Tentative reference manual] : the collection of
-interface files from the library, restricted to functions (i.e. type
-descriptions do not appear). 
+\item[The Tentative reference manual] : the collection of interface files
+from the library.
 \end{description}
+
+The \camltk\ distribution also includes a first shot at a \caml\ browser,
+an {\em hypertext} tool that may help in finding out the types of functions
+available in the library as well as the type definitions, 
 
 \section*{Bug reports}
 \addcontentsline{toc}{section}{Bug reports}
 
 Before reporting a bug, please check the \verb|KnownBugs| file in the
-distribution directory.
-For the time being, please report problems and bugs directly to
-\verb|Francois.Rouaix@inria.fr| instead of \caml\ mailing lists.
+\verb|doc| directory of the distribution.
+Please report problems and bugs directly to \verb|Francois.Rouaix@inria.fr|
+instead of \caml\ mailing lists.
 Don't hesitate to make comments and suggestions, or ask questions.
 Contributions (description of missing stuff) are welcome.
 
-%\section*{Thanks}
+\section*{Acknowledgments}
+Thanks to Loic Prylli \verb|<Loic.Prylli@lip.ens-lyon.fr>| \newline
+      and Christophe Raffalli \verb|<raffalli@cs.chalmers.se>|
+for bug reports.
 
 \include{user}
 \include{impl}
