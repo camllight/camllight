@@ -1,7 +1,8 @@
 \section{Expressions}
 \ikwd{in\@\verb`in`|see{\verb`let`}}
-\ikwd{and\@\verb`and`|see{\verb`let`, \verb`type`, \verb`exception`, \verb`value`}}
-\ikwd{rec\@\verb`rec`|see{\verb`let`}}
+\ikwd{and\@\verb`and`|see{\verb`let`, \verb`type`, \verb`exception`,
+\verb`value`, \verb'where'}}
+\ikwd{rec\@\verb`rec`|see{\verb`let`, \verb'where'}}
 \ikwd{let\@\verb`let`}
 \ikwd{try\@\verb`try`}
 \ikwd{function\@\verb`function`}

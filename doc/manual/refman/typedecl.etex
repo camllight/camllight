@@ -99,7 +99,6 @@ module implementation.
 
 \subsection{Exception definitions} \label{s:excdef}
 \ikwd{exception\@\verb`exception`}
-\ikwd{exception\@\verb`exception`|see{{\em also} \pageref{s:exc}}}
 
 \begin{syntax}
 exception-definition:
