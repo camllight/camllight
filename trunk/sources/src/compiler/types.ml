@@ -218,16 +218,14 @@ let occur_check level0 v =
   occurs_rec where rec occurs_rec ty =
     match type_repr ty with
       {typ_desc = Tvar _; typ_level = level} as ty' ->
-        if ty' == v then raise Unify
-        else if level > level0 then level <- level0
-        else ()
+        if level > level0 then level <- level0;
+        ty' == v
     | {typ_desc = Tarrow(t1,t2)} ->
-        occurs_rec t1;
-        occurs_rec t2
+        occurs_rec t1 or occurs_rec t2
     | {typ_desc = Tproduct(ty_list)} ->
-        do_list occurs_rec ty_list
+        exists occurs_rec ty_list
     | {typ_desc = Tconstr(_, ty_list)} ->
-        do_list occurs_rec ty_list
+        exists occurs_rec ty_list
 ;;
 
 (* Unification *)
@@ -245,24 +243,29 @@ let rec unify (ty1, ty2) =
             end else begin
               ty1.typ_level <- ty2.typ_level; link1 <- Tlinkto ty2
             end
-        | Tvar link1, _ ->
-            occur_check ty1.typ_level ty1 ty2;
+        | Tvar link1, _ when not (occur_check ty1.typ_level ty1 ty2) ->
             link1 <- Tlinkto ty2
-        | _, Tvar link2 ->
-            occur_check ty2.typ_level ty2 ty1;
+        | _, Tvar link2 when not (occur_check ty2.typ_level ty2 ty1) ->
             link2 <- Tlinkto ty1
         | Tarrow(t1arg, t1res), Tarrow(t2arg, t2res) ->
             unify (t1arg, t2arg);
             unify (t1res, t2res)
         | Tproduct tyl1, Tproduct tyl2 ->
             unify_list (tyl1, tyl2)
-        | Tconstr(cstr1, tyl1), Tconstr(cstr2, tyl2) ->
-            if cstr1.info.ty_stamp == cstr2.info.ty_stamp &  (* inline exp. *)
-               cstr1.qualid.qual = cstr2.qualid.qual (* of same_type_constr *)
-            then unify_list (tyl1, tyl2)
-            else unify_expand ty1 ty2
-        | _ ->
-            unify_expand ty1 ty2
+        | Tconstr(cstr1, []), Tconstr(cstr2, [])
+          when cstr1.info.ty_stamp == cstr2.info.ty_stamp (* inline exp. of *)
+             & cstr1.qualid.qual = cstr2.qualid.qual -> (* same_type_constr *)
+            ()
+        | Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args), _ ->
+            unify (expand_abbrev params body args, ty2)
+        | _, Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args) ->
+            unify (ty1, expand_abbrev params body args)
+        | Tconstr(cstr1, tyl1), Tconstr(cstr2, tyl2)
+          when cstr1.info.ty_stamp == cstr2.info.ty_stamp (* inline exp. of *)
+             & cstr1.qualid.qual = cstr2.qualid.qual -> (* same_type_constr *)
+            unify_list (tyl1, tyl2)
+        | _, _ ->
+            raise Unify
       end
   end
 
@@ -270,15 +273,6 @@ and unify_list = function
     [], [] -> ()
   | ty1::rest1, ty2::rest2 -> unify(ty1,ty2); unify_list(rest1,rest2)
   | _ -> raise Unify
-
-and unify_expand ty1 ty2 =
-  match (ty1.typ_desc, ty2.typ_desc) with
-    (Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args), _) ->
-      unify (expand_abbrev params body args, ty2)
-  | (_, Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args)) ->
-      unify (ty1, expand_abbrev params body args)
-  | (_, _) ->
-      raise Unify
 ;;
 
 (* Two special cases of unification *)
