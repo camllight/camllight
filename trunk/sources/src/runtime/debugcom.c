@@ -19,7 +19,6 @@ void debugger_init(address)
 int debugger(event)
      int event;
 {
-  Assert(0);
   return 0;
 }
 

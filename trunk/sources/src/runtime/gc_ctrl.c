@@ -188,7 +188,7 @@ void init_gc (minor_size, major_incr, percent_fr, verb)
      int verb;
 {
 #ifdef DEBUG
-  gc_message ("Debug mode.\n");
+  gc_message ("Debug mode.\n", 0);
 #endif
   verb_gc = verb;
   set_minor_heap_size (norm_minsize (Bsize_wsize (minor_size)));
