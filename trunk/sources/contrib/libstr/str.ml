@@ -105,18 +105,14 @@ let split expr text = bounded_split expr text 0;;
 #open "obj";;
 
 let format format =
-
+  let format = (magic format : string) in
   let res = ref [] in
 
   let rec doprn start i =
-    if i >= string_length format then
-      if remains_args() then
-        invalid_arg "format: too many arguments"
-      else begin
-        if i > start then res := sub_string format start (i-start) :: !res;
-        magic(concat(rev !res))
-      end
-    else
+    if i >= string_length format then begin
+      if i > start then res := sub_string format start (i-start) :: !res;
+      magic(concat(rev !res))
+    end else
       if nth_char format i != `%` then
         doprn start (i+1)
       else begin
@@ -129,22 +125,23 @@ let format format =
             magic(dostring i j)
         | `c` ->
             magic(fun c ->
-              if is_block (repr c) then
-                invalid_arg "format: char argument expected"
-              else begin
                 res := make_string 1 c :: !res;
-                doprn (succ j) (succ j)
-              end)
+                doprn (succ j) (succ j))
         | `d` | `i` | `o` | `x` | `X` | `u` ->
             magic(doint i j)
         | `f` | `e` | `E` | `g` | `G` ->
             magic(dofloat i j)
         | `b` ->
             magic(fun b ->
-              if is_block (repr b) then
-                res := (if b then "true" else "false") :: !res
-              else
-                invalid_arg "format: boolean argument expected";
+                res := string_of_bool b :: !res;
+                doprn (succ j) (succ j))
+        | `a` ->
+            magic(fun printer arg ->
+              res := printer () arg :: !res;
+              doprn (succ j) (succ j))
+        | `t` ->
+            magic(fun printer ->
+              res := printer () :: !res;
               doprn (succ j) (succ j))
         | c ->
             invalid_arg ("format: unknown format " ^ char_for_read c)
@@ -159,9 +156,7 @@ let format format =
         j
     
   and dostring i j s =
-    if (not is_block (repr s)) or obj_tag (repr s) != 253 then
-      invalid_arg "format: string argument expected"
-    else if j <= i+1 then
+    if j <= i+1 then
       res := s :: !res
     else begin
       let p =
@@ -181,25 +176,17 @@ let format format =
     doprn (succ j) (succ j)
 
   and doint i j n =
-    if is_block (repr n) then
-      invalid_arg "format: int argument expected"
-    else begin
-      let len = j-i in
-      let fmt = create_string (len+2) in
-      blit_string format i fmt 0 len;
-      set_nth_char fmt len `l`;
-      set_nth_char fmt (len+1) (nth_char format j);
-      res := format_int fmt n :: !res;
-      doprn (succ j) (succ j)
-    end
+    let len = j-i in
+    let fmt = create_string (len+2) in
+    blit_string format i fmt 0 len;
+    set_nth_char fmt len `l`;
+    set_nth_char fmt (len+1) (nth_char format j);
+    res := format_int fmt n :: !res;
+    doprn (succ j) (succ j)
 
   and dofloat i j f =
-    if (not is_block (repr f)) or obj_tag (repr f) != 254 then
-      invalid_arg "format: float argument expected"
-    else begin
-      res := format_float (sub_string format i (j-i+1)) f :: !res;
-      doprn (succ j) (succ j)
-    end
+    res := format_float (sub_string format i (j-i+1)) f :: !res;
+    doprn (succ j) (succ j)
 
   in doprn 0 0
 ;;
