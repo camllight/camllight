@@ -1,0 +1,2676 @@
+                   DJGPP Frequently-Asked Questions List
+                   =====================================
+			$Revision$
+			$Date$
+
+          [The latest version  of this  FAQ  list  can  always  be found]
+          [as faqXXX.zip on SimTel mirrors in the msdos/djgpp directory.]
+
+Table of Contents:
+
+0. If You Are In a Hurry
+1. What is DJGPP?
+2. Hardware and Software Requirements
+3. Where and What to Download?
+4. Where is the Documentation?
+5. What Are All Those Go32 Parameters?
+6. What Can I Do If the Compiler (or Make, or Info, or ...) Crashes?
+7. Compiler Performance
+8. Compile-time and Link-time Problems
+9. Running Compiled Programs
+10. Graphics Under DJGPP
+11. Floating-Point Emulation
+12. Debugging DJGPP Programs
+13. Profiling
+14. Run-time Performance of DJGPP Programs
+15. Run-Time Memory Issues
+16. Command-line Arguments
+17. Converting DOS Programs/Libraries to DJGPP
+18. Low-level DOS/BIOS and Hardware-oriented Programming
+19. Legal Aspects
+20. Getting Help
+21. DJGPP Version 2.0
+22. Miscellaneous
+23. About this FAQ
+
+
+   0. If You Are In a Hurry
+      ---------------------
+      Q: Do you really mean I have to read this looongish FAQ list to get
+         my answers?
+      Q: I have this problem which I absolutely MUST solve NOW!  What do I
+         do? 
+      A: The questions in this documents are listed, as much as possible,
+         in the order they appear when one goes through getting DJGPP,
+         installing it and using it.  Here are some pointers to the most
+         important topics in this FAQ list, in case this order and the
+         contents table above won't do their job for you:
+
+          * How to ask experienced DJGPP users for help?
+
+            Use the DJGPP mailing list.  For most questions, you will have
+            your answer in a day or two.  See chapter 20.
+
+          * What is the best configuration of my system for DJGPP?
+
+            This depends on your hardware and software.  See the
+            guidelines in chapter 2.
+
+          * Some files I need seem to be missing.  Where do I find them?
+
+            Check out the list of required and optional packages in
+            chapter 3. 
+
+          * How do I subscribe to or unsubscribe from the DJGPP mailing
+            list? 
+
+            Read chapter 20.
+
+          * How can I search previous mailing list traffic for some info?
+
+            Read the description of the server set up by Stephen Turnbull
+            in chapter 6.
+
+
+
+        1. What is DJGPP?
+           --------------
+
+1.1   Q: What is DJGPP?
+      A: DJGPP is a port of GNU C/C++ compiler and development tools to
+         32-bit, protected-mode environment under MS-DOS and compatible
+         systems, by DJ Delorie <dj@ctron.com> and friends.
+
+
+         2. Hardware and Software Requirements
+            ----------------------------------
+
+2.1   Q: What are the minimum system requirements for using DJGPP?
+      Q: Will DJGPP run on my brand-new Acme i986DX7-200 PC with a
+         SCSI-III 10 Terabyte disk drive under MulticOS/42 v7.4 operating
+         system?
+      A: DJGPP requires at least 386SX CPU and between 12 and 25 MB of
+         free disk space (see chapter 3 for more details on this),
+         including space for the software installation.  At least 2.5MB of
+         free extended RAM is recommended for reasonably fast compilation
+         of large source files (4MB for compiling large C++ programs); you
+         might see painfully slow compiles for large sources, if you don't
+         have at least that much.  If your machine doesn't have a numeric
+         co-processor, you will need to install an emulator (DJGPP
+         provides such an emulator).
+
+         DJGPP will run under native DOS; any other operating system is OK
+         if it includes a DPMI server (but graphics and floating-point
+         emulation currently don't work under DPMI).  Environments known
+         to run DJGPP besides native DOS: Windows 3.1 and 3.11 DOS box,
+         OS/2 (including Warp) DOS box, Windows 95/DOS 7, Novell NWDOS
+         7.x.
+
+2.2   Q: I'm experiencing strange crashes after several compilations under
+         OS/2...
+      A: There is a bug in OS/2's DPMI server which is triggered by
+         spawning child processes (like GCC does when it invokes the
+         various compiler passes).  If this problem really hurts, switch
+         to real-mode GCC.EXE (get the file gccXXXrm.zip).  Better still,
+         yell at IBM to fix this, as Charles Sandmann, our DPMI wizard,
+         tried in vain to convince them and gave up.
+
+2.3   Q: What about Windows NT?
+      A: Windows NT currently cannot spawn DPMI programs, so you should
+         use real-mode gcc.exe (get gcc260rm.zip) and a real-mode Make
+         program (e.g., in the gnuish directory on SimTel).  Also, any
+         DJGPP program which calls any function from the spawnXXX family
+         to run another DJGPP program, won't run under NT.
+
+2.4   Q: Why can't I run DJGPP on my 286?  It has protected mode also...
+      A: True, but the protected mode isn't an issue here.  Gcc doesn't
+         care much about memory protection, but it does care to run on a
+         32-bit processor, which 286 isn't.  A 386 or better CPU really
+         *is* required.
+
+2.5   Q: Can I write MS-Windows applications with DJGPP?
+      A: Currently, you can only run DJGPP programs under Windows as DOS
+         apps (i.e. in DOS Box).  If you need to write true Windows apps,
+         try RSX extender with EMX port of GCC and RSXWDK kit for Windows.
+         RSX may be found by anonymous ftp to ftp.uni-bielefeld.de, in the
+         directory /pub/systems/msdos/misc.
+
+2.6   Q: What is the optimal system configuration for running DJGPP?
+      A: Here is the description of your dream machine (at least for the
+         next 6 months :-):
+
+         Hardware:
+
+           the fastest CPU you can find (90 MHz Pentium as of this
+             writing); 
+           at least 256KB second-level (off-chip) cache memory;
+           32 MByte RAM;
+           motherboard built around fast 32-byte-wide bus (VLB or PCI);
+           SCSI-II hard disk with bus-mastering controller;
+
+         Software:
+
+           DOS, device drivers and TSRs all loaded HIGH, leaving only 5K
+             DOS footprint in lower (under 640K) memory;
+           2 MByte RAM disk installed, TMPDIR environment variable points
+             to it (e.g., ``set TMPDIR=e:'', if E: is the RAM drive
+             letter);
+           8 MByte of disk cache, set to delayed-write operation;
+
+2.7   Q: OK, I don't have this much money.  What is the _reasonable_
+         configuration?
+      A: If you have the following machine, you should be able to stop
+         worrying about memory and compilation performance:
+
+               CPU: 486DX2-66 with 256 KB off-chip cache;
+               RAM: 16 MByte;
+               Disk: 12 ms IDE with VLB controller, or SCSI;
+               4 MByte RAM disk;
+               3 MByte disk cache;
+
+         This will leave you with about 8 MBytes of free extended RAM.
+         Note that the RAM disk must be 4 MBytes to hold the output of the
+         preprocessor for some exceedingly large source files (notably,
+         some GCC source files).  If you don't have that much RAM to spare
+         and still want to compile _very_ large source files, either
+         reduce the disk cache so you can give more to RAM disk, or point
+         TMPDIR to your hard disk.
+
+2.8   Q: How do I configure my system to get optimal performance under
+         DJGPP? 
+      A: That depends on the amount of RAM you have installed in your
+         machine.  Below are some guidelines to help you.
+
+          1) If you have 4 MBytes or less RAM installed:
+
+             * Don't use *any* memory manager.
+             * Remove any TSR and device driver you don't absolutely need
+               (like SETVER.EXE, HIMEM.SYS) from your CONFIG.SYS and
+               AUTOEXEC.BAT.
+             * Get a disk cache which works from conventional memory and
+               configure it to 256K size at most, or don't use a cache at
+               all. 
+             * Do *not* install RAM disk; point you TMPDIR environment
+               variable to a directory on your hard disk.
+             * Stubedit gcc.exe and change the "Maximum amount of virtual
+               memory to keep when spawning" to zero.
+
+             With this configuration, GCC will still run out of free
+             physical RAM and page when compiling large C programs and
+             most C++ programs.  Also, you most probably won't be able to
+             run recursive Makefiles.  Plan to buy more RAM as soon as you
+             can.
+
+          2) If you have 5-8 MBytes of RAM installed:
+
+             * Use memory manager such as EMM386 or QEMM386.  Try using
+               the FRAME=NONE parameter of the memory manager.  This will
+               disable Expanded Memory (EMS) services; if you must use
+               DJGPP together with any program which needs EMS, try to
+               configure that program to use Extended Memory (XMS)
+               instead.
+             * Load DOS, device drivers and TSRs HIGH.
+             * Give your disk cache 1 MByte of RAM.  Enable its
+               delayed-write (aka write-back) feature. 
+             * Do *not* install RAM disk; point you TMPDIR environment
+               variable to a directory on your hard disk.
+             * Stubedit gcc.exe and change the "Maximum amount of virtual
+               memory to keep when spawning" to zero.
+             * If you have more than 2.5 MBytes of free RAM left (4
+               MBytes, if you plan to program in C++ a lot), enlarge the
+               disk cache size.
+
+          3) If you have more than 8 MBytes of RAM:
+
+             * Use memory manager to load DOS, TSRs and device drivers
+               HIGH. 
+             * Install at least 2-MByte-large disk cache, configured to
+               use delayed-write feature.
+             * If you have more than 5 MBytes left, install RAM disk with
+               size of at least 1.5 MBytes and point your TMPDIR
+               environment variable to it.  If your RAM disk is less than
+               4 MBytes, GCC might run out of space there for *very* large
+               source files (e.g., cccp.c file from the GCC source
+               distribution), but this shouldn't happen unless the size of
+               the source file you are compiling approaches 1 MByte.
+
+
+            3. Where and What to Download
+            --------------------------
+
+3.1   Q: Where can I get DJGPP?
+      A: Look on any SimTel mirror in the djgpp subdirectory.  The primary
+         mirror is oak.oakland.edu, in SimTel/msdos/djgpp directory.  Here
+         is a list of additional mirror sites:
+
+       St. Louis, MO:  wuarchive.wustl.edu   /systems/msdos/simtel/djgpp
+       Corvalis, OR:   archive.orst.edu      /pub/mirrors/simtel/msdos/djgpp
+       Australia:      archie.au             /micros/pc/oak/djgpp
+       England:        src.doc.ic.ac.uk      /pub/packages/simtel/djgpp
+       Finland:        ftp.funet.fi          /pub/msdos/SimTel/djgpp
+       France:         ftp.ibp.fr            /pub/pc/SimTel/msdos/djgpp
+       Germany:        ftp.uni-paderborn.de  /SimTel/msdos/djgpp
+       Hong Kong:      ftp.cs.cuhk.hk        /pub/simtel/msdos/djgpp
+       Israel:         ftp.technion.ac.il    /pub/unsupported/dos/simtel/djgpp
+       Poland:         ftp.cyf-kr.edu.pl     /pub/mirror/msdos/djgpp
+       Sweden:         ftp.sunet.se          /pub/pc/mirror/SimTel/msdos/djgpp
+       Switzerland:    ftp.switch.ch         /mirror/msdos/djgpp
+       Taiwan:         nctuccca.edu.tw       /PC/simtel/djgpp
+       Thailand:       ftp.nectec.or.th      /pub/mirrors/SimTel/msdos/djgpp
+
+3.2   Q: How do I download files from these sites?
+      A: FTP to the nearest site, log in as anonymous, give your full
+         e-mail address as password, chdir to the djgpp subdirectory (the
+         exact path to it might be different on different mirrors, see
+         above), issue the ``binary'' command and download files you need
+         (see below) with the ``get'' command.
+
+3.3   Q: What is ``FTP''?  I only use Mosaic/Netscape for Internet access.
+      A: OK, here are some URLs for your Web browser:
+
+           http://www.acs.oakland.edu/oak/SimTel/SimTel-msdos.html
+           http://wuarchive.wustl.edu/systems/msdos/simtel/
+
+         You can also convert any of the above mirrors' addresses to a
+         valid URL by prepending ``ftp://'' to it, e.g., for the primary
+         SimTel mirror point your browser to this URL:
+
+              ftp://oak.oakland.edu/SimTel/msdos/djgpp/
+
+3.4   Q: What's the minimum set of .zip files I need to download?
+      A: This depends on what you are planning to use DJGPP for.
+
+         To only run DJGPP-compiled programs, you MUST download all of
+         these:
+
+          djeoeXXX.zip -- execution-only environment
+          wmemuXXX.zip -- an FP emulator alternative to emu387 (in
+                           djeoe112.zip).  You don't need an FP emulator
+                           at all, unless you have a 386 without a 387, or
+                           a 486SX.
+          djXXXm?.zip  -- maintenance releases for DJGPP programs
+          cbgrxXXX.zip -- graphics drivers for various SVGA cards
+          grxXXXm?.zip -- maintenance releases for GRX library
+          readme.dj    -- explains how to install DJGPP; look out for
+                           those environment variables you have to define
+
+         For developing C programs (no C++), you MUST download all of the
+         above, plus the following:
+
+          bnuXXbn.zip  -- GNU Binutils, including as, the GNU assembler,
+                           and ld, the GNU linker
+          bnuXXdc.zip  -- docs for the above
+          djdevXXX.zip -- C header files and minimal development
+                           environment 
+          djdocXXX.zip -- docs for DJGPP-specific utilities, including
+                           some documentation of the GO32 DOS extender,
+                           and of the C library functions
+          djtstXXX.zip -- set of example programs to test your
+                           installation 
+          gccXXXbn.zip -- GNU C Compiler
+          gccXXXdc.zip -- docs for the above
+          txiXXXbn.zip -- Info, a stand-alone program to read GNU
+                           hypertext documentation files, and an
+                           environment to produce such files
+          txiXXXdc.zip -- docs for the above
+
+         For developing C++ programs, you will need all of the above, plus the
+         following:
+
+          gppXXX.zip   -- GNU C++ compiler
+          lgpXXXbn.zip -- C++ header files and the GNU classes library
+          lgpXXXdc.zip -- docs for the above
+
+         If you want to develop Objective-C programs, you will need the file
+         objcXXX.zip, which includes the Objective-C compiler and header files.
+
+         The following are some optional packages which you might want:
+
+           Debugging:
+
+            gdbXXXbn.zip -- GDB, the GNU Debugger
+            gdbXXXdc.zip -- docs for the above
+            fsdbXXX.zip  -- an alternative, full-screen debugger like
+                             Borland's TD (but NOT a source-level one),
+                             supports DPMI, doesn't support 80x87
+            ldbgXXX.zip  -- yet another debugger, similar to fsdb,
+                             supports 80x87, but doesn't support DPMI.
+
+           Additional development tools (consider getting at least the
+           Make distribution):
+
+            flxXXXbn.zip -- Flex, a Lex-like lexical analyzer generator
+            flxXXXdc.zip -- docs for the above
+            bsnXXXbn.zip -- Bison, a Yacc-like parser generator
+            bsnXXXdc.zip -- docs for the above
+            difXXbn.zip  -- GNU Diffutils (diff, cmp, diff3, sdiff)
+            difXXdc.zip  -- docs for the above
+            makXXXbn.zip -- GNU Make program
+            makXXXdc.zip -- docs for the above
+            patXXbn.zip  -- GNU Patch program
+            patXXdc.zip  -- docs for the above
+            sedXXXbn.zip -- GNU Sed program
+
+           Developing text-mode and graphics GUI applications:
+
+            cbgrdXXX.zip -- graphics drivers
+            cbgrfXXX.zip -- fonts
+            bccgrxXX.zip -- interface library to convert Borland graphics
+                             calls to GRX library calls
+            pdcursXX.zip -- public-domain Curses library
+
+         For description of additional files not mentioned here, get the
+         file 00_index.txt, it contains a full list of the distribution
+         files and a short description of every file.
+
+3.5   Q: That's a lot of files.  How much disk storage will I need?
+      A: The following lists the approximate disk space required for
+         several major configurations, and additional storage required for
+         some optional packages:
+
+           Execution-only environment..................330 KBytes
+           Developing C programs.......................8.3 MBytes
+           Developing C++ programs.....................12 MBytes
+           Developing Objective-C programs.............9.6 MBytes
+           Additional storage for GDB..................1.8 MBytes
+           Additional storage for FSDB/LadyBUG.........600 KBytes
+           Additional storage for Flex.................340 KBytes
+           Additional storage for Bison................400 KBytes
+           Additional storage for Diffutils............280 KBytes
+           Additional storage for Make.................430 KBytes
+           Additional storage for Patch................80 KBytes
+           Additional storage for Sed..................57 KBytes
+           Additional storage for Graphics libraries...5.8 MBytes
+
+         Note that you can save some storage by deleting unnecessary files
+         after installing each package.  Files which you generally won't
+         need are in the src/ subdirectories, and the diffs/ subdirectory.
+         For example, my DJGPP directory, which includes all of the above
+         packages except most of the Graphics libraries, takes about 12
+         MBytes of disk space instead of about 17 MBytes suggested by the
+         above table.
+
+3.6   Q: I need maintenance release 3 for DJGPP 1.13.  Where do I get it?
+      A: Look for files called dj113mX.zip, where X is a single digit.  If
+         you already installed all the maintenance releases prior to what
+         you are looking for (in this case, 1.13m1 and 1.13m2), then only
+         download the latest one (dj113m3.zip, in this case).  Otherwise,
+         download all the maintenance releases that you didn't install.
+         For example, if you only have 1.13m1 installed, get both
+         dj113m2.zip and dj113m3.zip.  (If you aren't sure what release do
+         you have, read the following question.)  Unzip the first
+         maintenance release which you downloaded, from the directory
+         which starts DJGPP installation tree, like this:
+
+              C:\DJGPP> unzip -o dj113m2.zip
+
+           or, if you prefer to use PKUNZIP:
+
+              C:\DJGPP> pkunzip -d -o dj113m2.zip
+
+         Then read the file dj113m2.doc and do whatever it tells you to
+         finish the installation of the maintenance release (usually, you
+         will have to run some batch file included with the release).
+         Then unzip the next maintenance release in the same manner, etc.
+
+3.7   Q: I don't know what is the last maintenance release installed on my
+         machine.
+      A: Run go32 with no arguments, it will tell you its version, like
+         this: 
+
+           C:\DJGPP> go32
+           go32 version 1.12.maint2 Copyright (C) 1994 DJ Delorie
+           Lowest version I can run is 1.08
+           go32.exe usage: go32 [-d {debugger}] [{program} [{options} . . . ]]
+           go32.exe build time was Sun Sep 11 21:30:28 1994
+           VCPI (Expanded) memory available: 9092 Kb
+           Swap space available: 104360 Kb
+           C:\DJGPP>
+
+         In this case, your last installed maintenance release is 1.12m2.
+
+
+         4. Documentation
+            -------------
+
+4.1   Q: I don't see any documentation files...
+      A: Probably because you didn't download them in the first place.
+         Look at the above list of suggested files and download docs for
+         every package you have.  These are usually called *dc.zip (``dc''
+         for ``docs'').  You will also need a program to read the docs,
+         which are hypertext structured files.  You have several choices:
+
+            1) Use the stand-alone Info reader.
+               Get the file txiXXXbn.zip, which includes INFO.EXE, and
+               txiXXXdc.zip, which includes docs for INFO.EXE.  Unzip them
+               and run "info".  It will bring up a (hopefully)
+               self-explanatory online help system.  Confused?  Press
+               ``?'' to see the list of all Info commands.  Still
+               confused?  Press ``h'' to have Info take you on a guided
+               tour through its commands. 
+
+            2) Use the Info command of your Emacs-like editor.
+               If you use Emacs, you already know about Info.  (What's
+               that?  You don't?  Type ``C-h i'' and you will get the
+               top-level menu of all the Info topics.)
+
+4.2   Q: I'm too old/lazy/busy to learn yet another browser, and I despise
+         uGNUsable programs like Emacs.  How in the world can I read the
+         DJGPP docs??
+      A: Info files are almost plain ASCII files, so you should be able to
+         browse them with your favorite text file browser or editor.  You
+         will lose the hypertext structure and you might have hard time
+         finding the next chapter (hint: look up the name of the Next node
+         at the beginning of this node, then use Grep to find that name),
+         but other than that you will see all the text.
+
+         Anthony Appleyard <A.APPLEYARD@fs1.metallurgy.umist.ac.uk> has
+         translated the Info files for GNU C/C++ Compiler (gcc.iNN) and
+         GNU C Preprocessor (cpp.iNN) into ISO-8859 (aka plain ASCII), and
+         Stephen Turnbull <turnbull@shako.sk.tsukuba.ac.jp> has made them
+         available on his anonymous ftp and WWW server.  You can get them
+         by anonymous ftp to turnbull.sk.tsukuba.ac.jp, directory
+         pub/djgpp/doc, files gcc.txt and preprocessor.txt; or point your
+         Web browser to this URL:
+
+              http://turnbull.sk.tsukuba.ac.jp/public-ftp/djgpp/doc/
+
+         and get the files gcc.txt and preprocessor.txt.
+
+4.3   Q: I like my docs the old way: printed on paper, stacked near my
+         workplace.  How can I print the documentation files which come
+         with DJGPP?
+      A: You will need to get and install a program called TeX, or its
+         work-alike, like LaTeX or emTeX.  (They are NOT part of DJGPP.)
+         Then run your TeX work-alike on the docs' _source_ files (called
+         *.txi or *.tex) which you get with every *dc.zip file you
+         download.  Alternatively, you can get two programs: TEXI2DVI and
+         DVI2PS, then run them in sequence on the same *.txi files to
+         produce a PostScript file which then can be printed on a
+         PostScript printer.
+
+         Note that some docs files (notably, those for GCC) will produce
+         voluminous print-outs.  You HAVE been warned!
+
+4.4   Q: I don't have all these fancy packages, and I don't have disk
+         space to install them in the first place.  Can't you guys just
+         include with DJGPP a set of ready-to-print PostScript files? 
+      A: They are VERY large and would eat up too much storage.  Most of
+         the people read the docs on-line and never print them anyway.
+         Sorry.
+
+         However, PostScript versions of some of the docs can be
+         downloaded from omnigate.clarkson.edu, directory
+         /pub/msdos/djgpp/pub; these usually lag behind current versions
+         quite a bit.  Other places to look for PostScript versions of GNU
+         documentation are:
+
+            ftp://liasun.epfl.ch:/pub/gnu/ps-doc/  (European A4 format)
+            ftp://primus.com:/pub/gnu-ps/          (US letter format)
+
+4.5   Q: I downloaded all the *dc.zip files I could find, but I can't find
+         docs for some of the utilities, like Sed or Gprof.
+      A: Download the source file (*sr.zip) for that package and look
+         inside it, usually in the directory called ``man'' or ``doc''.
+
+4.6   Q: Some docs files are called foo.1 or bar.man or baz.nroff, and
+         they seem to be written in some weird format which is very
+         difficult to read.  How can I convert them to readable text files?
+      A: That weird format is the troff format which is used for
+         formatting Unix manual pages.  The Unix command ``man'' converts
+         them to formatted text files which are usually displayed with a
+         program like ``more'' or ``less'' (and here ``less'' is
+         considered to be more than ``more'' :-).  The formatted file
+         includes bold and underlined letters produced by overtyping using
+         Backspace characters.  To format these files, you can choose one
+         of these methods:
+
+          * Get and install a DOS port of the groff package, or port it
+            yourself (a very difficult task).  One port of Groff to DJGPP
+            can be found on omnigate.clarkson.edu:/pub/msdos/djgpp/pub.
+            The latest Groff distribution can be found on the GNU ftp
+            archive and any of its mirrors.
+
+          * Get and install CAWF, a DOS program which knows about most of
+            the troff formatting commands.  CAWF can be found on any
+            SimTel mirror.
+
+          * Format the file on any Unix machine, and download the results
+            to your PC.  Under Unix, typing ``catman -p'' will print the
+            commands which are required to do this; you can then run those
+            commands on your .1 troff source files.
+
+         No matter which of the above methods you chose, you will need
+         some kind of browser which understands how to show bold and
+         underlined letters instead of backspace-overtyped characters.  I
+         suggest to download a DOS port of GNU Less, which uses colors to
+         show bold and underlined letters.  You can find it as
+         LESS177E.ZIP on any SimTel mirror in the textutil directory.
+         Another possibility is to get the latest official GNU Less
+         distribution which can be compiled out of the box with the
+         Microsoft C compiler (but I didn't try to do so).
+
+         Another possibility to read formatted man pages would be with an
+         Emacs editor, if you use one.
+
+4.7   Q: OK, I've got the docs and have read it, but I still can't figure
+         out some details.
+      A: Download the sources and look there, or ask on the net--either
+         the DJGPP mailing list or an appropriate GNU Newsgroup.
+
+
+         5. Go32 Parameters
+            ---------------
+
+5.1   Q: What's that about GO32 environment variable?
+      Q: What options can I give to go32 extender to modify its behavior?
+      A: go32 takes most of its options from the GO32 environment
+         variable.  The syntax of this variable is:
+
+           SET GO32=[parm [value]] [parm [value]] . . .
+
+           Parameters:
+
+           ansi           Use ANSI commands to control the color in
+                           edebug32. 
+           mono           Use the Monochrome monitor for debugging -
+                           useful when debugging graphics applications.
+           topline        Display status information on the top line of
+                           the screen (or the top of the mono monitor).
+           1rm            Redirect stdout to the monochrome monitor.
+           2rm            Redirect stderr to the monochrome monitor.
+           1r2            Redirect stdout (file #1) to stderr (file #2).
+           2r1            Redirect stderr (file #2) to stdout (file #1).
+           nodpmi         Don't use DPMI even if you find it available.
+           core file      Append exception traceback and stack contents to
+                           the named file. 
+           glob           Enable globbing of program arguments (default). 
+           noglob         Disable globbing of program arguments.
+           emu [path]     Use the specified file as the 80387 emulator.
+           driver [path]  Use the specified file as the graphics driver.
+           gw [width]     Default graphics width.
+           gh [height]    Default graphics height.
+           tw [width]     Default text width.
+           th [height]    Default text height.
+           nc [colors]    Number of colors (for new-style .grn and .vdr
+                           drivers only - see cbgrx*.zip).
+           meminfo        Show amount of available physical memory and
+                           swap space at program start-up (useful for
+                           tracing available RAM when spawning child
+                           programs, like in recursive Makefiles).
+           dpmistack val  Use the value given as DPMI stack size.  (This
+                           parameter is obsolete now, use stubedit
+                           instead.)
+
+
+         These parameters may occur in any order.
+
+         The graphics driver must be set in order for the SVGA
+         bank-switching to work correctly.
+
+         Note that "1rm" and "2rm" are done before "1r2" and "2r1", so
+         "1rm 2r1" sends stdout to the mono monitor and stderr to any
+         redirection used.
+
+         Examples:
+
+         C:\> set GO32=driver c:\djgpp\drv\ati.grd gw 1024 gh 768 tw 132 th 43 nc 256
+         C:\> set GO32=ansi
+         C:\> set GO32=driver c:\djgpp\drivers\tseng4k.grd ansi
+         C:\> set GO32=mono 1rm 2rm nodpmi topline
+
+5.2   Q: How do I find out what go32 is doing when my program runs?
+      A: The first thing to do is run "go32".  It will give you some
+         information about what it knows about your system and itself.
+         Next, set the "topline" flag in the GO32 environment variable
+         (see README.DJ) and watch the top line of your screen.  The info
+         there tells you something about what the program is doing. 
+
+5.3   Q: I put ``topline'' in the GO32 environment variable, but I can't
+         find a description of all those funny things that go32 shows on
+         the top screen line.
+      A: When go32 finds ``topline'' in its environment variable, the top
+         screen line will show the following info, from left to right:
+
+         R or P (Real or Protected mode)
+         full path of application program
+         address of last syscall/page fault
+         page space used (red)
+         used physical memory
+         remaining physical memory
+         paging reason:
+            `t'=text `d'=data `b'=bss `m'=malloc `s'=stack `<'=in `>'=out
+
+         In DPMI mode, the last 4 items are not shown, as these chores are
+         performed by the DPMI server, not by go32.
+
+
+         6. When the Compiler (or Make, or Info, or ...) Crashes...
+            -------------------------------------------------------
+
+6.1   Q: When I try to compile anything, my computer either reboots or
+         hangs so hard it needs a cold reboot...
+      A: If you use DJGPP 1.12m3, get and install 1.12m4 maintenance
+         release.  1.12m3 had a bug in one of the library routines which
+         would cause these problems under XMS driver (such as HIMEM).
+         Alternatively, you could install a VCPI server like EMM386 or
+         QEMM386, or work under DPMI (like Windows), because that problem
+         doesn't appear in these environments.
+
+6.2   Q: When I compile my program, the compiler crashes, but the problem
+         seems to go away if I compile without optimization.
+      A: GCC 2.6.0 is known to have such bugs, especially when compiling
+         C++ programs, but it can also happen for later versions.  (This
+         is usually a genuine gcc bug, not something special to DJGPP.)
+         Using #if 0 ... #endif paradigm, narrow the offending code
+         fragment.  If this fragment is syntactically and semantically
+         correct, then rewrite it as equivalent, but syntactically
+         different one.  As an extreme measure, don't optimize.
+
+6.3   Q: I get "fatal signal 2" when I run gcc.
+      A: When gcc reports a "signal", it really means that an error
+         occurred trying to run the given program.  The "signal" number is
+         the DOS error code, and 2 means "file not found" (dig out your
+         DOS reference for other error codes).  This means gcc couldn't
+         find some program it needs to run to compile your source.  Check
+         the COMPILER_PATH environment variable or what the COMPILER_PATH
+         line in the DJGPP.ENV file says, and make sure they point to the
+         directory where DJGPP programs reside.  Also check that that
+         directory has all the required programs: cpp.exe, cc1.exe,
+         cc1plus.exe, cxxfilt.exe, gasp.exe, as.exe, ld.exe, and (for
+         Objective-C) cc1obj.exe.
+
+6.4   Q: I get error messages saying ``Unknown filetype'' from gcc.
+      Q: When I run gcc or any other DJGPP program, it says: ``Invalid
+         go32 usage running c:/djgpp/bin/gcc''.
+      A: You may have an old version of go32 somewhere on your PATH,
+         before the directory where the latest version is.
+
+         Another cause might be that your stub.exe and/or coff2exe.exe are
+         infected by a virus.  (This is NOT a joke!  It did happen to a
+         few of us and can happen even to you.)
+
+6.5   Q: When I run gcc or any other DJGPP program, it says: ``CPU must be
+         in REAL mode (not V86 mode) to run this program without VCPI''.
+      A: Most probably, you run in Windows DOS box, and you put ``nodpmi''
+         into your GO32 environment variable.  DPMI mode is the only way
+         to run DJGPP programs under Windows.  It can also be that you
+         have an old go32 somewhere along your PATH.
+
+         More generally, this error message is printed when go32 finds the
+         CPU in Virtual-8086 (V86) mode, but can't find any services it
+         needs to get to protected mode.  Sometimes, removing NOEMS
+         parameter from the line in CONFIG.SYS which invokes your memory
+         manager, will solve the problem.
+
+6.6   Q: Why do I get error message from go32 if I keep QEMM in auto/off
+         mode and run DJGPP? 
+      A: When QEMM is in auto/off mode and there isn't anything in the
+         system that is using any of QEMM's features, the CPU remains in
+         "real" mode.  Normally, when Go32 finds the CPU in real mode, it
+         will try to use raw XMS services to access the extended memory.
+         Unfortunately, when some program requests XMS services, it will
+         cause QEMM to turn on.  So if go32 tries to switch into protected
+         mode, QEMM will trap it and give a protection violation warning.
+         To avoid this unfortunate event (which requires a system reboot
+         to fix), go32 first checks to see if enabling XMS caused the CPU
+         to switch into v86 mode (meaning QEMM just turned on).  If so,
+         go32 gracefully exits after telling you it can't work in this
+         set-up, like this:
+
+           "Go32 error: Using XMS switches the CPU into V86 mode.
+            If you are using QEMM, add the `on' parameter to the entry
+            in your CONFIG.SYS file.  See the FAQ for details."
+
+         All you have to do to work around this is force QEMM to be ON
+         whenever go32 runs so that go32 will know how to work with it
+         properly.  To do this, just turn QEMM on before running any DJGPP
+         program, with this command:
+
+              c:\qemm\qemm on
+
+         (that assumes your QEMM directory is c:\qemm).
+
+6.7   Q: I've installed DJGPP just like explained in README files, but
+         when I run gcc, my machine crashes/hangs/needs cold boot.
+      Q: When I compile my program, gcc says ``Segmentation violation''
+         and prints all kinds of funny numbers and registers.
+      Q: I get errors I can't figure out when I try to compile something.
+      A: Add the ``-v'' switch to the gcc command line, add ``topline'' to
+         your GO32 environment variable and run it again.  It will print
+         all the programs it is running, and the topline will show you
+         some more info on what's going on.  Then you can see which
+         program caused the error, or where does your machine crash.  This
+         might give you a clue on what's wrong.
+
+6.8   Q: OK, I have all this voluminous output of ``gcc -v'', I also
+         looked at the topline display at the moment of crash, but I still
+         have no clue.
+      A: Your problem might be one which already have been solved on the
+         DJGPP mailing list.  The complete DJGPP mailing list traffic
+         archive is available by anonymous ftp to sun.soe.clarkson.edu, in
+         directory /pub/msdos/djgpp.
+
+         Stephen Turnbull <turnbull@shako.sk.tsukuba.ac.jp> has set up an
+         anonymous ftp server which holds gzip'ed copies of DJGPP mailing
+         list correspondence split up by months (the most recent month
+         might not be up-to-date).  Ftp to turnbull.sk.tsukuba.ac.jp,
+         login as "anonymous" or "ftp", give your email address as
+         password, chdir to directory /pub/djgpp/list-archive/ and look
+         for files named djgpp.YYMM.gz (they are around 250K bytes each),
+         where YY is the year and MM is the month number.  E.g., for
+         February 1994 traffic get the file djgpp.9402.gz.  Alternatively,
+         point your Web browser at the following URL:
+
+           http://turnbull.sk.tsukuba.ac.jp/public-ftp/djgpp/list-archive/
+
+         and look for the file which holds list traffic for the year and
+         the month you need.
+
+         Once you have the list archives, search for your problem by using
+         some keywords specific to your problem, like ``crash'',
+         ``violation'', etc.  The archive is just a huge text file, so any
+         text file viewer/editor with search capability can do it.
+
+6.9   Q: I don't have a clue if and when there was a discussion on the
+         list of a problem I have.  Does this mean I have to download all
+         of the traffic archive?
+      A: No.  Stephen Turnbull has set up a search engine which you can
+         use to search the entire mailing list archive for an arbitrary
+         regular expression.  Point your Web browser to this URL:
+
+              http://turnbull.sk.tsukuba.ac.jp/cgi-bin/search
+
+         and do whatever the instructions you get tell you.  You will
+         receive a list of lines in the archive which contain your regexp,
+         with a two-line surrounding context.  You can use this to decide
+         which parts of the archive you need to download.
+
+6.10  Q: I've searched the list archives, but didn't find anything
+         helpful.  I am totally lost.  Help!!!
+      Q: I don't have time to download all these huge files, not to
+         mention looking through them.  Can't you DJGPP gurus help me?
+         Please??
+      A: To get fast and effective solution to your problem, you will have
+         to supply the relevant info about your system, and exactly how it
+         crashes.  To gather this info, do the following:
+
+         At the DOS command prompt, type ``set > environ.lst'', then press
+         [Enter].  Then type ``go32'' and press [Enter], and write down or
+         otherwise save what go32 printed in response.  Write to the DJGPP
+         mailing list by sending mail to djgpp@sun.soe.clarkson.edu and
+         put into your message the contents of the file ENVIRON.LST, what
+         go32 printed when called with no arguments, the contents of your
+         AUTOEXEC.BAT and CONFIG.SYS, what gcc printed during compilation
+         with the ``-v'' switch, and what was shown by go32 on the top
+         line at the moment of crash.  Allow for upto 2 days (more on
+         weekends) for all the reply messages to come in, then act
+         according to what they recommend.
+
+         Be warned that you might get several dozens of messages in reply
+         to your request; this is not meant to overflow your mailbox or
+         sabotage your relationship with your system manager, it's just
+         the usual friendly response of fellow DJGPP'ers to your lonely
+         cry for help.  Some of the replies might suggest what you already
+         checked and reported in your original message, or even miss the
+         point altogether.  Be ready for this and don't flame us for
+         trying to help you as much as we can.
+
+6.11  Q: My machine just hangs when I run go32 with no arguments.
+      A: You might have an old go32.exe lurking on your PATH.  Old
+         versions of go32 used to crash if given no arguments, it's only
+         more recent ones that print version and memory info.
+
+6.12  Q: I want to read all the error messages that gcc throws on me, but
+         they are so many that I can't keep up.  How can I redirect them
+         to a file?
+      Q: When I add ``-v'' to the gcc command line, how can I put all the
+         voluminous output into a file, so I don't miss anything when
+         reporting a problem?
+      Q: I have this nitty-gritty graphics program which bombs from time
+         to time, but the registers and traceback info is hidden by the
+         graphics display.  How can I see it?
+      A: There are several alternatives:
+
+           1) You can put ``2r1'' into your GO32 environment variable,
+              which will redirect stderr to stdout, and redirect stdout to
+              a file by appending ``> file''to your command line.  See
+              question 5.1 above.
+
+           2) You can use a shell smarter then COMMAND.COM, such as 4DOS,
+              which knows how to redirect standard error stream to a file.
+              4DOS is shareware and can be found, e.g., on SimTel mirrors.
+
+           3) You can add ``core file'' to your GO32 environment variable,
+              to have your traceback written to the named file.  This only
+              works for the exception traceback redirection (useful when
+              running graphics applications).
+
+           4) You can run your program under any one of the programs which
+              save the output of programs they spawn in a file.  I suggest
+              using a program called SCRIPT, which is similar to its Unix
+              namesake.  It has an advantage of saving everything which
+              goes to screen AND showing it on the screen at the same
+              time.  SCRIPT can be found on SimTel mirrors as SCRIPT11.ZIP
+              (e.g., oak.oakland.edu:/SimTel/msdos/screen/script11.zip).
+
+6.13  Q: My compiles run OK from the command line, but hang when I invoke
+         Make. 
+      A: Be sure you are invoking the correct Make program.  Borland Make
+         was reported to cause trouble when you invoke gcc with it.  It
+         might be that another program called Make is found earlier on
+         your PATH than the Make which came with DJGPP.  To see which Make
+         you run, add ``topline'' to your GO32 environment variable, it
+         will show you the full path of the DJGPP Make program if you
+         indeed run it. 
+
+6.14  Q: When I run the Info browser, it tells me it cannot find the node
+         "Top". 
+      A: Check your installation of info files.  The file DJGPP.ENV in the
+         root of your DJGPP installation mentions the variable INFOPATH
+         which should point to the directory where Info looks for its
+         files.  It must find there a file named ``dir'' and other files
+         with .iNN extension, where NN is a number.
+
+         Assuming the above checks OK, and all the necessary info files
+         are indeed installed in those directories (did you remember to
+         give that -d switch to PKUNZIP?), it might be that some of the
+         files were edited with a DOS-based editor, which converted the
+         Newline characters to the CR/LF pairs.  The DOS port of Info
+         doesn't like this, because this invalidates the tag tables
+         included with the files, which Info uses to quickly find the
+         various nodes.
+
+         To work around this, run DTOU.EXE on the offending files, it will
+         strip the extra CR characters to make Info happy.  DTOU is in
+         your bin/ subdirectory of the main DJGPP directory.
+
+
+         7. Compiler Performance
+            --------------------
+
+7.1   Q: Why gcc is compiling sooo slooowww?
+      A: That depends on what you mean by ``slow''.  The following table
+         gives ``normal'' gcc compilation speed, in source lines per
+         second, on a 486DX2-66:
+
+                          |  Without optimization  |  With -O2
+               -----------+------------------------+------------
+               C++ source |        150             |   100
+               -----------+------------------------+------------
+               C   source |        350             |   250
+
+         (Btw, these numbers are about 20% faster than you will get on a
+         40MHz Sparc2 box.)  On machines faster or slower than 486DX2-66,
+         scale these numbers appropriately.  When comparing to this table,
+         don't forget to count header files your program #include's in the
+         total line count.
+
+         If your results are close to these (deviations of few percents
+         are considered ``close'' here), then that's as fast as you can
+         get with gcc.  If they are significantly lower, you may indeed
+         have a problem; read on.
+
+         First, check to see if gcc pages to disk when it compiles.  To
+         this end, put ``topline'' into your GO32 environment variable and
+         look at the used physical RAM numbers.  Compare this to what go32
+         reports as available memory when run with no arguments.  Do you
+         seem to use all the available physical RAM?  If so, you need to
+         free more extended memory.  If you have a RAM disk, make it
+         smaller, or don't use it at all (it only makes compiles to run
+         about 10% faster), or make your disk cache smaller (but don't
+         discard the disk cache altogether); if you have other programs
+         which use extended RAM, make them use less of it.  Failing all of
+         the above, buy more RAM (see the description of reasonable
+         configuration in chapter 2 of this FAQ).  See also the
+         recommendations for optimal software configuration, question 2.8
+         above.
+
+         If gcc doesn't come close to the amount of free extended RAM,
+         check settings of your disk cache.  If you don't use a cache,
+         install one--this can slash your compilation times by as much as
+         20%, more so when compiling a large number of small files.  If
+         you already have a cache, enable its delayed-write (aka
+         write-back, aka staggered-write) operation.
+
+         If you have HIMEM installed and/or use NOEMS parameter to your
+         memory manager, you should stubedit gcc and change the "Maximum
+         amount of virtual memory to keep when spawning" from 1024K to 0.
+
+         It is also worthwhile to check the settings of your system BIOS.
+         In particular, the following items should be checked against your
+         motherboard vendor recommendations:
+
+          Internal and external CPU cache....set to Enable
+          CPU cache scheme...................set to Write-back, if possible
+          DRAM and SRAM wait states..........vendor-recommended optimal values
+
+         Incorrect or suboptimal settings of the above items can explain
+         as much as 30% performance degradation.
+
+         DJ reports that his well-tuned 90 MHz Pentium system with 32
+         MBytes of RAM and 4 MBytes of RAM disk compiles the entire GCC
+         source in about 20 minutes.
+
+         For very large (several MBytes) executables which are built from
+         a large number of small source files, the link stage might be the
+         one which needs more RAM than you have free.  Check that the size
+         of the executable isn't larger than the amount of free RAM
+         reported by go32.  If it is, then it might make sense to use a
+         smaller (or even no) disk cache, and allow the linker as much
+         physical RAM as it needs.
+
+
+         8. Compile-time and Link-time Problems
+            -----------------------------------
+
+8.1   Q: When I run the compiler it says it couldn't find header files
+         and/or libraries.  But the headers and libraries are all there,
+         so why won't it find them?
+      A: In order for the compiler to find its include files, libraries
+         and other stuff it can't do without, you should have the
+         following variable set in your environment:
+
+              DJGPP=c:/djgpp/djgpp.env
+
+         and it should point to the correct path of the file DJGPP.ENV on
+         your system (the file itself comes with djeoeXXX.zip file in the
+         DJGPP distribution).  In the above example it is assumed to be in
+         the C:\DJGPP directory, but you should set it as appropriate for
+         your installation.
+
+         If the DJGPP variable is set correctly, then check the following
+         possible causes of this misbehavior:
+
+          * You renamed the gcc.exe driver to some other name.  For
+            example, you might be using the real-mode gcc and call it
+            something like gcc-rm.exe, so you could use the protected-mode
+            version also.  In this case, you should edit the file
+            DJGPP.ENV to add a section called [gcc-rm] (in our example)
+            which is an exact duplicate of the section called [gcc].  Go32
+            (and real-mode Gcc) use this file to find environment
+            variables which it should put into environment at program
+            start-up, but they search for the relevant variables using the
+            actual name of the program, so when you rename the executable,
+            they don't find its section and don't put the necessary
+            variables into the environment.
+
+          * Your FILES= setting in CONFIG.SYS is insufficient, so Gcc runs
+            out of available handles.
+
+            You should have at least FILE=15 in your CONFIG.SYS.
+
+          * Your DJGPP directory is on a networked drive, and the network
+            redirector doesn't have enough available handles in its
+            configuration.
+
+            Presumably, there should be a parameter in some configuration
+            file which sets the number of files which can be open
+            simultaneously on a networked drive; you should set it to be
+            at least 15.
+
+8.2   Q: My C program compiles OK with Borland's C, but gcc complains
+         about "parse error before `/'" at a line where I have a
+         ``//''-style comment.
+      A: That's because // isn't a comment neither in ANSI C nor in K&R C.
+         Borland and Microsoft C compilers support it as an extension.
+         You've just learned it's a bad practice to use this extension in
+         a portable program.  If it's a C++ program, then rename it to
+         have a suffix which will cause gcc to compile it as such, or use
+         ``-x c++' switch.  If it's a C program, but you want to compile
+         it as C++ anyway, try ``-x c++''; it can help, but can also get
+         you in more trouble, because C++ has its own rules.  You can also
+         use ``-lang-c-c++-comments'' preprocessor switch, but that
+         requires to run cpp separately, as gcc doesn't accept the
+         -lang-XXX switches on its command line.  It's best to change
+         those comments to C-style ones, if you really mean to write a C
+         program.
+
+8.3   Q: I installed all the packages, but gcc complains it can't find
+         iostream.h, _string.h and other C++ headers.  Where can I find
+         those header files?
+      A: C++ include files are in the lgpXXXbn.zip file.
+
+8.4   Q: I type "GCC PROG.CC" and it complains that it can't recognize
+         PROG.CC's file format.  How come a C++ compiler doesn't recognize
+         a C++ source??
+      Q: I type "GCC PROG.C" to compile a C program which I already
+         remember to pass compilation without a single warning, and
+         suddenly it gives all kinds of strange error messages and
+         unresolved externals.
+      A: That's because you typed your source file extension in UPPER
+         case.  Gcc is *not* case insensitive about filenames like DOS is,
+         and it uses the file's extension to determine how to compile a
+         file.  Valid extensions are:
+           .cc, .C, .cxx, .cpp = C++ source (passed through cpp)
+           .c   = C source that must be passed through cpp first
+           .i   = raw C source (no cpp pass)
+           .ii  = raw C++ source (not to be preprocessed)
+           .m   = Objective-C source.
+           .S   = assembler that must be passed through cpp first
+           .s   = raw assembler source (no cpp pass)
+         any other file is passed to the linker, under the assumption that
+         it's an object file.
+
+         In the examples above, PROG.C is taken as C++ program, not a C
+         one, and PROG.CC is passed to the linker as if it were an object
+         file.
+
+         You can override the default rules gcc uses to decide how each
+         input file should be treated, with the help of ``-x LANGUAGE''
+         switch.  For instance, the command
+
+                      gcc -x c++ prog.c
+
+         compiles prog.c as a C++ source.  See gcc docs for more info on
+         -x options.
+
+8.5   Q: How do I tell gcc my .cc file is to be compiled as Objective-C
+         source?
+      A: Give it .m extension, or use ``-x objective-c'' switch.
+
+8.6   Q: I compile an Objective-C program, but get unresolved symbols.
+      Q: I can't compile the Objective-C test program which came with
+         DJGPP. 
+      A: Objective-C is broken in gcc 2.6.0.  If you use that version,
+         you'll have to upgrade to version 2.6.3 or higher.
+
+8.7   Q: I must put a DJGPP-specific code fragment into my program.  What
+         symbol should I use in the #ifdef directive to make it only
+         visible under DJGPP?
+      A: Use __GO32__, like this:
+
+               #ifdef __GO32__
+               ... DJGPP-specific code ...
+               #else
+               ....
+               #endif
+
+8.8   Q: When I compile my program, the linker complains about mathematical
+         functions, although I did #include <math.h>.
+      Q: The linker complains it cannot find cprintf function.
+      Q: Why do I get so many unresolved symbols when linking C++ programs?
+      A: By default, gcc instructs the linker to only look in two libraries:
+         libgcc.a and libc.a.  Some functions aren't included there, so the
+         linker can't find them.  For math functions, like sin() and exp(),
+         append ``-lm'' to the gcc command line; for pc-specific
+         functions, like cputs() and cprintf() append ``-lpc''; to use C++
+         classes append ``-lgpp''.  GPL library routines, like obstack and
+         regex packages are in libgpl.a library; append ``-lgpl'' to use
+         them.
+
+         You can use the ``nm'' program to check what functions are
+         included in a library.  Run it with -C option and with the
+         library as its argument and look in the output for the name of
+         your function (the -C, or --demangle option makes the function
+         names to look closer to what they are called in the source file).
+         Functions which have their code included in the library have a
+         capital `T' before their name.  For example, the following is a
+         fragment from the listing produced by nm:
+
+            c:\djgpp\lib> nm --demangle libc.a
+            .
+            .
+            .
+            stdio.o:
+            000000e4 b .bss
+            000000e4 d .data
+            00000000 t .text
+            00000098 t L12
+            0000001e t L3
+            00000042 t L6
+            0000004d t L7
+            0000006a t L9
+            00000000 t __gnu_compiled_c
+                     U _filbuf
+                     U _flsbuf
+                     U _iob
+            00000000 T clearerr
+            000000ac T feof
+            000000c2 T ferror
+            000000d8 T fileno
+            0000000c T getc
+            00000052 T getchar
+            0000002a T putc
+            0000007c T putchar
+            00000000 t gcc2_compiled.
+            .
+            .
+            .
+
+         Here we see that the module stdio.o defines the functions
+         clearerr(), feof(), ferror(), fileno() getc(), getchar(), putc()
+         and putchar(), and calls functions _filbuf(), _flsbuf() and
+         _iob() which aren't defined on this module.
+
+         Alternatively, you can call nm with the -s or --print-armap,
+         which will print an index of what symbols are included in what
+         modules.  For instance, for libc.a, we will see:
+
+            c:\djgpp\lib> nm --print-armap libc.a
+            .
+            .
+            .
+            _feof in stdio.o
+            _ferror in stdio.o
+            _fileno in stdio.o
+            .
+            .
+            .
+
+         which tells us that the functions feof(), ferror() and fileno()
+         are defined in the module stdio.o.
+
+         Note that some C++ classes use math routines, so the -lm should
+         be given after the -lgplus.
+
+8.9   Q: I give all the libraries to gcc, but I still get unresolved
+         externals when I link.  What gives?
+      A: Ld is a one-pass linker, it only scans each library once looking
+         for unresolved externals it saw UNTIL THAT POINT.  This means the
+         relative position of object files and library names on the
+         command line is significant.  First, you should put all the
+         libraries AFTER all the object files.  Second, put them in this
+         order:
+
+                      -lgpp -lgpl -lm -lpc
+
+         If you have any libraries of your own, put them BEFORE the above
+         system libraries.
+
+8.10  Q: I put all the libraries in the above order, but the linker still
+         can't find some C++ functions from complex.h and iostream.
+      A: These functions are declared inline.  However, GCC won't inline
+         them unless you compile with optimizations enabled, so it tries
+         to find the compiled version of the functions in the library.
+         Workaround: compile with -O.
+
+8.11  Q: The linker cannot handle very large sets of object files.  How
+         can I link my program?
+      Q: My program compiled and linked OK with DJGPP 1.11maint5, but I
+         can't make it compile under 1.12.
+      A: Stephen Turnbull <turnbull@shako.sk.tsukuba.ac.jp> has set up an
+         anonymous ftp server which holds the previous version of DJGPP
+         (1.11, with maintenance releases upto maint5, which is based on
+         GCC 2.5.7).  Mixing programs from different versions of the
+         compiler can cause problems, but if you absolutely can't avoid
+         it, then anonymous FTP to turnbull.sk.tsukuba.ac.jp
+         [130.158.99.4], chdir to directory /pub/djgpp/1.11 and get the
+         files there.  You can also reach this site by pointing your Web
+         browser to the following URL:
+
+             http://turnbull.sk.tsukuba.ac.jp/public-ftp/djgpp/1.11/
+
+         Once you download the appropriate files (for the linker you will
+         have to get the bnuXXXbn.zip), unzip the file ld.exe and use it
+         to link your program.
+
+
+         9. Running Compiled Programs
+            -------------------------
+
+9.1   Q: I compile my program, but can't run the file built by the linker.
+      A: DOS doesn't know how to run unix-style COFF files which GNU
+         linker produces.  That's what the extender is for.  To run a COFF
+         file called myprog, type
+
+                      go32 myprog args...
+
+         Alternatively, you can produce an .exe file by running coff2exe:
+
+                      coff2exe myprog
+
+         This appends a short (if you can call 30+ KB program ``short'')
+         real-mode stub to your program, which will call go32.exe
+         automatically.  Then you can run your program as any other DOS
+         program.
+
+9.2   Q: I compile my program, but when I run the .exe it hangs.
+      A: Most likely, you did this: "gcc foo.c -o foo.exe".  This doesn't
+         create a real .EXE file.  That's like renaming your phone
+         directory file to an .EXE and expecting it to run.  You must use
+         the COFF2EXE program to convert the output of gcc to a real
+         executable:
+
+                      coff2exe foo
+
+         This produces foo.exe you can run like any other DOS program.
+
+9.3   Q: The binaries I get with the distribution are .exe files, but gcc
+         creates files with no extension.  I rename the files gcc produces
+         to .EXE's, but they don't work.
+      A: To get an .EXE from an COFF, you must *prepend* either go32.exe
+         or stub.exe to the file.  A program called "coff2exe" is provided
+         to do this.  Just run "coff2exe myprog".
+
+9.4   Q: When I run my program under Windows or another DPMI server, it
+         crashes, but not outside of Windows, or when I add ``nodpmi'' to
+         the GO32 environment variable. 
+      A: You may have used the "-fomit-frame-pointer" option to GCC.  This
+         tells gcc that it can use EBP as a general register.  However, the
+         selector used for the stack is protected against access outside of
+         calculated stack range, and EBP causes the stack selector to be
+         used.  If you use this to access memory in the regular data area,
+         you get a protection fault.  This mechanism is present to prevent
+         you from using so much stack that you begin corrupting data.
+         Outside of Windows, or in non-DPMI mode, a different method is
+         used to detect stack overrun, so you don't see this fault.
+
+         As a general rule, don't use "-fomit-frame-pointer" when compiling
+         DJGPP programs.  If you must, you will have to tweak crt0.s to
+         produce a custom crt0.o which under DPMI sets SS=DS.
+
+9.5   Q: When I run OEmacs, it dies with ``Unsupported DOS request''.
+      A: OEmacs needs a special version of go32.  Make sure it is
+         accessible to OEmacs before it finds the stock go32 on your PATH.
+
+9.6   Q: I'm reading/writing data files, but the data gets corrupted.
+      Q: When I read a file I get only a small portion of it.
+      A: Are your data files binary?  The default file type in DOS is
+         text, even for read() and write().  Text files get their Newlines
+         converted to CR-LF pairs on write and vice versa on read; reading
+         in text mode stops at the first ^Z character.  You must tell the
+         system that a file is binary through the "b" flag in fopen(), or
+         O_BINARY in open(), or use setmode() library function.
+
+9.7   Q: My program prompts the user to enter data from the keyboard, then
+         reads its response.  When compiled with a 16-bit compiler like
+         BCC or MSC it works as expected, but with gcc the prompt doesn't
+         show, or is printed much later in the program.
+      A: Do you write to screen using buffered I/O (fprintf(), fputs() and
+         the like) functions?  Under most DOS-based compilers, the
+         standard streams stderr and stdout are buffered one line at a
+         time.  This means that as soon as you write a Newline `\n' to
+         these streams, they are actually written to the screen.  In
+         contrast, in DJGPP those streams are buffered with 4KB-long
+         buffer (the size of the transfer buffer), as any other open file
+         would.  (That's because DJGPP tries to minimize the number of
+         switches to real mode required to actually write the buffered
+         characters.)  The buffer is not written to screen until it's
+         full, which might produce very unpleasant and unexpected behavior
+         when used in interactive programs.
+
+         It is usually bad idea to use buffered I/O in interactive
+         programs; you should instead use screen-oriented functions like
+         cprintf() and cputs().  If you must use buffered I/O, you should
+         explicitly change the buffering of stdout and stderr by calling
+         setvbuf(); another solution would be to fflush() the output
+         stream before calling any input function, which will ensure all
+         pending output is written to the operating system.  While this
+         will work under DOS and DJGPP, note that some operating systems
+         (including some DOS extenders) might further buffer your output,
+         so sometimes a call like sync() would be needed to actually cause
+         the output be delivered to the screen.
+
+9.8   Q: Some programs distributed with DJGPP report incorrect creation
+         time for files on my system, and I can't seem to make it right by
+         setting the value of TZ variable.
+      A: Library time routines prior to DJGPP 1.12maint2 were broken for
+         any time zone except GMT0 and EST5.  You should relink these
+         programs with the library version 1.12m2 or later.
+
+9.9   Q: Where can I find documentation of the format of TZ variable?
+      A: It is documented in the Unix man page for the function ctime().
+
+
+         10. Graphics
+             --------
+
+10.1  Q: When I run graphics programs, I get General Protection Fault.
+      A: Currently, graphics doesn't work in DPMI mode.  If you can use
+         ``nodpmi'' in your GO32 environment variable and still run DJGPP,
+         that's your answer; if not, you can't do graphics until GRX v2.0
+         (which will work in DPMI) arrives.
+
+10.2  Q: When I run graphics test program which came with DJGPP, my screen
+         is all messed.
+      A: You should put the name of the graphics driver which corresponds
+         to your graphics card into the GO32 environment variable.  Get
+         the file cbgrdXXX.zip and find the driver suitable for your card,
+         then put its full path into GO32, like this:
+
+                 set GO32=driver c:/djgpp/drivers/atipro.grd
+
+10.3  Q: I looked into cbgrx103.zip, but couldn't find the driver for my
+         Mucho Extra Perfectum SVGA card.
+      Q: The driver for my SVGA doesn't seem to work.
+      A: Most current SVGA adapters are VESA-compatible, so try the VESA
+         driver built into go32 first.  Do not define any driver in the
+         GO32 environment variable (so that go32 will use its internal
+         driver) and try to run some graphics program.  (You might want to
+         run it first with the VGA.GRD standard VGA driver, so you will
+         know how the ``correct'' display should look like.)
+
+         For some cards the updated versions of their drivers are in
+         grx103m1.zip maintenance release of GRX, so if the above doesn't
+         work, download that file and look for a driver suitable for your
+         card.
+
+         If the driver you need cannot be found neither in cbgrdXXX.zip
+         nor in its maintenance releases, or don't work right, try
+         anonymous ftp to omnigate.clarkson.edu, directory
+         /pub/msdos/djgpp/pub.  There are some contributed drivers there.
+
+         There is also a program called DISPLAY which includes some
+         additional graphics drivers.  DISPLAY is available as
+         dispNNN.zip on SimTel mirrors in the graphics/ directory.
+
+10.4  Q: I've heard that the built-in graphics driver is a VESA driver,
+         but it doesn't seem to work on my Acme SVGA/DeLuxe with on-board
+         VESA BIOS Extensions.
+      A: With some SVGAs, the built-in VESA driver in DJGPP 1.12 will work
+         reliably only if you explicitly set the number of colors to 256,
+         like this:
+
+                      set GO32=nc 256
+
+         If you want non-default resolution, you can set it too, like this:
+
+                      set GO32=gw 1024 gh 768 nc 256
+
+10.5  Q: I try to access the video memory at 0xa0000, but get Segmentation
+         violation...
+      A: Absolute addresses of certain memory-mapped devices are mapped
+         differently under DJGPP, which is protected-mode environment.
+         You can't just poke any address, that's what protected mode is
+         all about.  In non-DPMI mode, the entire graphics video memory is
+         mapped 1:1 starting at 0xD0000000 in the program's address space;
+         the DJGPP paging mechanism  understands how SuperVGA's map their
+         memory onto the AT bus and automatically swaps pages as the
+         program tries to access them.  The program sees a linear range
+         from 0xD0000000 to 0xD0100000 that corresponds to each pixel in
+         the 256-color modes of SuperVGAs.  For this to work correctly,
+         you will have to set the GO32 environment variable to the
+         graphics driver suitable for your SupeVGA card, like this:
+
+          SET GO32=driver c:\djgpp\drivers\ati.grd gw 640 gh 480 tw 132 th 43
+
+         In DPMI mode this won't work.  As DJGPP v2.0 will be DPMI-only
+         environment, this means that, after GRX 2.0 arrives, the above
+         method should be used only as last resort.  If you want to write
+         a program which will compile and run unchanged in v2.0, use
+         functions described in <sys/farptr.h> (see chapter 18 below for
+         details).
+
+10.6  Q: When I use 0xD0000000 as the starting address to access the video
+         RAM in graphics mode, nothing appears on the screen.  What am I
+         doing wrong?
+      A: You have to call GrSetMode() function to initialize the
+         0xD0000000 area manager which takes care of the mapping described
+         above.
+
+10.7  Q: How can I access the text-mode video memory of my VGA?
+      A: Add 0xE0000000 to its 20-bit linear address.  In text mode, the
+         entire video memory is mapped to virtual address range
+         0xE00B8000..0xE00BFFFF.  This also works only in non-DPMI mode.
+         In DPMI mode, you must use _go32_conventional_mem_selector() and
+         the functions  dosmemget(), dosmemput(), movedata() and
+         _farpeekX()/_farpokeX() functions to access any absolute address
+         in the lower memory.  It is advisable to also use this method in
+         non-DPMI mode, for portability reasons (e.g., v2.0 will only use
+         DPMI methods).  Using _farpeekX()/_farpokeX() paradigm to access
+         memory isn't slower than direct access (they compile into 2
+         machine instructions when optimizations are enabled).
+
+10.8  Q: How would one use farptr functions to access video RAM?
+      A: This is described in detail in chapter 18 below.
+
+
+         11. Floating-Point Emulation
+             ------------------------
+
+11.1  Q: I don't have an 80387.  How do I compile and run floating point
+         programs? 
+      A: Add "emu c:\djgpp\bin\emu387" to the GO32 environment variable
+         (see go32 section in readme).  This tells go32 to use the given
+         file as an 80387 emulator.  If you don't load this emulator, and
+         you try to run floating point without a 387, you will get an
+         error.
+
+11.2  Q: I have an 80387 emulator installed in my AUTOEXEC, but
+         DJGPP-compiled floating point programs still doesn't work.  Why?
+      A: DJGPP switches the CPU to *protected* mode, and the information
+         needed to emulate the 80387 is different.  Not to mention that
+         the exceptions never get to the real-mode handler.  You must use
+         emulators which are designed for go32.
+
+11.3  Q: I installed the emulator as required in the Installation
+         procedure, but I get General Protection Fault when I try running
+         floating-point programs.
+      A: Do you run DJGPP in DPMI mode, like under Windows or in OS/2 DOS
+         box?  The emulator currently doesn't work under DPMI.  If you can
+         put the ``nodpmi'' parameter into your GO32 environment variable
+         and still run DJGPP, that's what you should do; if not, you will
+         have to wait until v2.0 of DJGPP is available, or try running
+         DJGPP with the RSX extender instead of go32.
+
+11.4  Q: Where can I get this RSX extender?
+      A: RSX is available by anonymous ftp from ftp.uni-bielefeld.de in
+         the directory /pub/systems/msdos/misc.  The RSX extender includes
+         its own FP emulator and can run DJGPP programs in DPMI mode.
+
+
+         12. Debugging DJGPP Programs
+             ------------------------
+
+12.1  Q: How do I debug my programs?
+      A: First, remember to use the -g switch when you compile.  This puts
+         debugging information into your executable.  Then, to debug the
+         program, use a command line like this:
+
+                      go32 -d edebug32 myprog
+
+         "Edebug32" is the external debugger.  See the file "edebug32.doc"
+         for information on the debugger commands.  Note: if you are
+         running in a DPMI environment, you must use "ed32-dpmi" instead
+         of "edebug32".  Go32 normally searches relative to the current
+         directory, then from it's own directory, then the PATH, for the
+         external debugger program.
+
+         You can use two alternative debuggers:
+
+           1) The full-screen debugger (get the file fsdbXXX.zip).  This
+              presents a user interface like that of Borland's Turbo
+              Debugger, but unlike TD, it isn't a source-level debugger
+              (although it will show the source code together with the
+              machine instructions).  It also doesn't support 80x87 (you
+              can't see it's register stack and control word).
+
+           2) LadyBUG (get the file ldbgXXX.zip).  It is similar to FSDB,
+              but Emacs aficionados will feel right at home with its
+              commands keys.  LadyBUG supports 80x87 debugging and remote
+              debugging through a serial link.  Doesn't fully support
+              debugging in DPMI environments.
+
+           3) The GNU Debugger (GDB) (get the files gdbXXXbn.zip and
+              gdbXXXdc.zip).  This is a powerful source-level debugger,
+              but it uses a line-oriented user interface.  Note that it
+              doesn't work exactly like the Unix versions.  For example,
+              you can't pass command line parameters for the debuggee to
+              gdb, and you can only start the program once.
+
+         Both FSDB and GDB have separate DPMI and non-DPMI versions.
+
+         You invoke any debugger like above, like this:
+
+             go32 -d <debugger-name> <program> <args...>
+
+12.2  Q: When I call GDB to debug my program, it crashes.
+      A: Are you running under DPMI (OS/2, Windows, QDPMI, Novell NWDOS)?
+         If so, you should use gdb-dpmi instead of gdb, like this:
+
+             go32 -d gdb-dpmi <program> ...
+
+12.3  Q: I don't know whether I run under DPMI or not, so I can't decide
+         which version of the debugger should I use.
+      A: Run go32 with no arguments.  If it tells you it uses DPMI memory,
+         you're under DPMI, otherwise you're not.
+
+12.4  Q: When I try to invoke the debugger it crashes my machine, or
+         reports an Unsupported DOS request, or Not enough memory.
+      A: Be sure to invoke the debugger correctly:
+
+             go32 -d <debugger-name> <program> <args...>
+
+12.5  Q: My program corrupts files and screen writes, and otherwise
+         behaves strangely when run under a debugger.
+      A: Do you use transfer buffer to move data between your program and
+         conventional (under 1 MByte) memory?  Then it might be that the
+         debugger corrupts your I/O. The debugger itself uses the transfer
+         buffer for disk read requests and screen writes.  If you single
+         step through any of your app routines which use the transfer
+         buffer you may alter the correct behavior.
+
+         To work around this, don't step with the debugger through your
+         functions which use the transfer buffer.
+
+12.6  Q: What's this ``transfer buffer''?  How should I know if I use it
+         in my program??
+      A: Relax.  If you don't know what it is, and you only trace into
+         your own functions, then you don't use it.
+
+12.7  Q: How can I debug a graphics program?  GDB runs my program fine,
+         but when a breakpoint is hit with the screen in a graphics mode I
+         can't read the text printed by the debugger.
+      A: Redirect the output of GDB to another (monochrome) monitor by
+         putting ``mono'' into your GO32 environment variable, like this:
+
+            set GO32=mono
+
+         Alternatively, you can redirect the GDB output to your printer,
+         like this:
+
+            go32 -d gdb myprog > prn
+
+         You might also consider using the LadyBUG debugger which supports
+         remote debugging over a serial link (but it's *not* source-level,
+         and doesn't work under DPMI).
+
+
+         13. Profiling
+             ---------
+
+13.1  Q: How can I profile my program to see where it spends most of its
+         run time?
+      A: DJGPP includes a profiling facility.  To use it, compile and link
+         with -pg, run your program as you usually would, then run a
+         program called gprof:
+
+              gprof myprog
+
+         It will print an execution profile.
+
+13.2  Q: When I run gprof, it complains that it cannot find my program.
+         But I've just run it!!
+      Q: I run gprof on my program, and it says: ``bad format''.
+      A: Gprof needs the original file the linker produced.  If you delete
+         it, or feed gprof with the .exe instead, it will be most unhappy.
+
+13.3  Q: What about all those gprof options?  Where can I find their docs?
+      Q: I can't figure out some of the info in gprof report.
+      A: Gprof is only documented on a man page.  If you don't have one,
+         you will have to look in the Binutils source distribution (get
+         the file bnuXXXsr.zip).
+
+13.4  Q: I've found the routine which takes 99% of the running time and
+         made it 20 times faster.  Now gprof indeed tells me that routine
+         runs much faster, but my program still takes almost the same
+         total time to run...
+      A: Does your program use I/O extensively?  Gprof can only see those
+         parts of your program which run in protected mode.  When you
+         access the disk, the CPU is switched to real mode for the time
+         the disk is accessed.  If your program does this a lot, its
+         elapsed time is governed by the real-mode disk operations which
+         gprof cannot see.
+
+         You can put ``topline'' into your GO32 environment variable to
+         see how much time does your program spend in real mode.  Look at
+         the `R' and `P' letters at the leftmost corner: `R' means real
+         mode.
+
+13.5  Q: I compile my program with -pg, but when I call gprof, it produces
+         a report with all zeros.
+      A: Most probably, you run in DPMI mode (like in Windows DOS box, or
+         under QDPMI ).  Profiling currently doesn't work in DPMI mode.
+         If you don't run under Windows, put ``nodpmi'' into your GO32
+         environment variable to make profiling work (under Windows, DPMI
+         is the *only* way to run DJGPP).
+
+
+         14. Run-time Performance of DJGPP Programs
+             --------------------------------------
+
+14.1  Q: How does DJGPP compare with other DOS-based C compilers in terms of
+         efficiency of generated code?
+      Q: Won't my program run *much* slower when compiled by DJGPP, due to
+         all those CPU cycles wasted in switches between protected- and
+         real-mode?
+      A: The quality of code generated by gcc with optimization turned on
+         (-O2 switch to the compiler) is generally at least as good as
+         what you will get from top commercial products, like Borland,
+         Microsoft and Watcom.  Mode switches indeed have a certain
+         performance hit, but in most programs it is negligibly small,
+         because only DOS and BIOS services require such a switch, and
+         most programs spend most of their time doing other things.
+
+14.2  Q: I measured time required to read a 10 MByte file in DJGPP and in
+         Borland C.  It took DJGPP program 20 seconds to do it, while
+         Borland did it in just 12.  Isn't that HORRIBLY slow
+         performance??
+      Q: I tried to improve DJGPP I/O throughput by defining larger buffer
+         size for buffered I/O with a call to setvbuf(), but that had no
+         effect.  Why is that?
+      A: Doing I/O from protected-mode programs requires that low-level
+         library functions move the data between the extended memory and
+         low memory under 1 MByte mark, where real-mode DOS can get at it.
+         As of version 1.12, DJGPP moves data in chunks of 4 KB, so
+         defining a buffer larger than that won't gain anything.  This
+         rather small size of the transfer buffer is the main (but not the
+         only) reason for relatively low I/O throughput under DJGPP.  In
+         version 2.0, the size of transfer buffer will be customizable
+         upto a maximum of 64 KB.
+
+         That said, I would like to point out that waiting another 8
+         seconds for reading a 10 MByte file isn't that bad: it is indeed
+         almost twice as long as you can do under DOS, but it's only 8
+         seconds...  Besides, most programs read and write files which are
+         only a few hundreds of kilobytes, and those will suffer only a
+         minor slow-down.
+
+14.3  Q: What can I do if my application absolutely must use the fastest
+         possible I/O, and I can't wait until v2.0?
+      A: If you have such an application, you'll have to provide your
+         private transfer buffer and use low-level DOS calls directly.
+         Go32 provides DPMI server calls which you can summon to this end.
+         To implement such a mechanism, one should do at least the
+         following:
+
+          1) Allocate a 64KB transfer buffer in low (under 640K) memory
+             using _go32_dpmi_allocate_dos_memory().
+
+          2) Move data between that buffer and your program using
+             movedata(). 
+
+          3) Call DOS I/O functions using _go32_dpmi_simulate_int().
+
+         In addition, it might be necessary to implement your own
+         buffering mechanism (to provide your application with
+         semi-transparent stream-like I/O).
+
+14.4  Q: How come my program, which I ported from Borland C and which
+         doesn't use much I/O, still runs much slower under DJGPP?
+      A: Explore the following possible causes for this:
+
+          1) Your program extensively calls services other than I/O which
+             require mode switch (like BIOS Int 10h, mouse services,
+             etc.).
+
+             You can tell how much your program switches to real mode by
+             using the ``topline'' parameter in the GO32 environment
+             variable.  If the leftmost symbol is usually ``P'', you are
+             not a victim of the mode switch.  If it shows ``R'' a large
+             proportion of time, try rewriting your program to minimize
+             use of those functions which require a mode switch, even at a
+             price of more computation (mode switch usually eats up many
+             tens of CPU cycles).
+
+          2) Your program uses library functions/classes which are
+             implemented less efficiently by gcc.  Or you might be a heavy
+             user of functions which other compilers convert to inline
+             code, while gcc doesn't inline most library functions.
+
+             If this is the case, you will see those functions as ``hot
+             spots'' on the program histogram produced by the gprof
+             profiler.  If you find this to be the problem, write your
+             own, optimized versions of those functions.  It's best to
+             write those as inline assembly functions, for maximum
+             performance.  If you find library functions which are
+             inefficient, please inform the DJGPP mailing list, so this
+             could be fixed by people who maintain the library.
+
+
+
+         15. Run-Time Memory Issues
+             ----------------------
+
+15.1  Q: How much virtual memory can I use in DJGPP programs?
+      A: Go32 will let you use all available extended memory (up to 128M)
+         and up to 128M of disk space, for a grand total of 256M of
+         virtual memory for your application.  Try a malloc(50*1024*1024)
+         some day.
+
+15.2  Q: I did malloc(50*1024*1024), but didn't see any paging happen, and
+         I only have 8 MBytes of RAM on my machine.  Is this virtual
+         memory thing for real?
+      Q: I malloc()'ed a large chunk of memory, but when I check values
+         returned by _go32_remaining_physical_memory(), I don't see any
+         change...
+      Q: When I free() allocated RAM, _go32_remaining_physical_memory()
+         reports there was no change in available RAM.
+      A: In non-DPMI modes, go32 only pages in memory when it is actually
+         accessed.  If you only malloc() it, but don't access it, it won't
+         grab those pages.  Try calloc() and see the BIG difference.  When
+         you call free(), go32 doesn't return memory to the system, it
+         just adds it to its internal pool of free pages.  So, from the
+         system point of view, these pages are not ``free''.
+
+15.3  Q: When I try to access more memory than the free physical RAM (8.5
+         MByte), I get error message:
+
+            DPMI: Not enough memory (0x00860000 bytes)
+
+      A: This is typical of Quarterdeck's DPMI host called QDPMI.  It
+         fails to resize memory block when the new size is more than
+         available physical RAM, even though virtual memory services are
+         enabled.  If you run under QDPMI, put ``nodpmi'' into your GO32
+         environment variable, which will cause go32 to simulate DPMI
+         services instead of passing them to QDPMI.
+
+         If you use another DPMI host, make sure that virtual memory is
+         enabled.
+
+15.4  Q: I'm running under Windows DOS box, but DJGPP complains about
+         there not being enough DPMI memory, although virtual memory is
+         enabled.
+      A: You must make sure your Windows swap file can be at least 2 times
+         the largest virtual memory size you need.  Check if you have
+         enough free disk space; if you do, run a defragger (Windows needs
+         the swap file to be contiguous).  This size is normally limited
+         by the the ``virtual = 4 times free physical'' rule, but you can
+         change that by inserting the line
+
+              PageOverCommit=n
+
+         in the [386Enh] section of your SYSTEM.INI file.  The parameter n
+         can be set to be as large as 20.
+
+15.5  Q: How much memory is available when I use the system() call?
+      A: Everything which was free before your program started, except
+         what go32 is loaded with.  Your program is completely paged out
+         of memory (including the page tables themselves) before the
+         second program is executed.  Currently, this leaves about 130K
+         less than was available before go32 was executed, since go32
+         itself remains in memory.
+
+15.6  Q: When Make invokes gcc, it complains about ``Not enough memory to
+         run go32''.  But if I invoke gcc manually with the same command
+         line as Make did, it runs OK.  How come?
+      Q: I cannot use recursive Makefiles: go32 keeps complaining about
+         there being not enough memory.  16 MByte of RAM are not enough??!
+      Q: When I compile from Demacs/OEmacs, go32 says it doesn't have
+         enough memory, but it does succeed to run other DJGPP programs.
+      A: When one DJGPP program invokes another, the memory above 1 MByte
+         is paged out, but the conventional memory occupied by go32 itself
+         is not freed.  Therefore, each DJGPP parent program leaves to its
+         children and grand-children 130K less conventional memory.  Even
+         the most memory-optimized systems only have 635K of free
+         conventional RAM, which means even for these cases you cannot
+         invoke more than 4 (= 635 / 130) programs one on top of the
+         other.  When you run gcc, you must have enough conventional RAM
+         for at least 2 instances of go32, because gcc invokes the various
+         compiler passes (cpp, cc1, as, ld, etc.) on top of itself; the
+         third instance is taken by Make, if you invoke gcc from it, or by
+         your Emacs editor.  This leaves you enough RAM for at most one
+         more instance which can be used for another level of recursive
+         Make, or for running Make from Emacs, but that's all.  Many
+         systems have only enough RAM for 3 instances of go32, which means
+         they cannot run recursive Make's at all.  Abundance of free
+         extended RAM (above the 1 MByte mark) won't help here, because
+         go32 runs in conventional memory.
+
+         Sadly, there isn't much you can do to make this problem go away.
+         Go32 can't be easily changed to give up its memory when it
+         invokes another program, because this would break the mechanism
+         by which it passes long command lines to subsidiary programs, and
+         many Makefiles rely on long command lines.  DJGPP v2.0 will bring
+         us salvation (only one instance of the extender--actually, a DPMI
+         host--will be present in memory at any given time), but until
+         then, here is what you can do if you miss another level of go32
+         invocation by a small margin:
+
+           1. Load as much device drivers and TSRs as you can HIGH.
+              Ideally, only 5K of DOS code should be loaded below 640K
+              mark.  A smart memory optimizer, like QEMM's Optimize or DOS
+              6.x Memmaker, can work wonders on your memory configuration.
+
+           2. Use real-mode gcc driver program.  (It's the same gcc code,
+              only compiled with Turbo C.)  It uses about 100K of memory,
+              so you gain about 30K.  To use gcc-rm, you will have to
+              download and unzip the file gccXXXrm.zip which includes
+              real-mode gcc.exe.
+
+           3. If your problem arises when you use Make or call Make
+              recursively, switch to one of the real-mode Make programs.
+              Almost all of them swap themselves out of conventional
+              memory, leaving behind a small (typically, 3-10 KBytes)
+              resident portion.  Here you gain about 120K per Make
+              invocation.  For example, check out a port of GNU Make v3.71
+              which is part of GNUish MS-DOS project; it can be found on
+              SimTel mirrors, in the gnuish/ directory.  Many other free
+              Make clones float around, but it's best to use a port of GNU
+              Make, because Makefiles which you get with FSF software
+              sometimes rely on GNU Make extensions.
+
+15.7  Q: My program bombs when I use very large automatic arrays.
+      Q: How much stack space do I have in my program?
+      A: Under VCPI your stack will dynamically expand as required, so you
+         have virtually unlimited stack.  Unfortunately, this can't be
+         done under DPMI, so there you get a fixed-size stack which
+         defaults to 256K.  If that's not enough, you can change it with
+         STUBEDIT program (change the parameter "Minimum amount of stack
+         space"), or by setting the global variable _stklen in your
+         program.  Example:
+
+                      extern unsigned _stklen = 1048576;
+
+         Setting _stklen makes sure your program always works, but wastes
+         memory, since the 256K stack originally allocated must be
+         discarded.  The best bet is to do both--setting _stklen in your
+         program will ensure it works, but also using STUBEDIT to set a
+         slightly (by a few KB) larger amount than the value of _stklen,
+         will ensure the original stack won't have to be reallocated, and
+         you will save the wasted memory.
+
+
+         16. Command-line Arguments
+             ----------------------
+
+16.1  Q: Can I do filename globbing with DJGPP?
+      Q: I call my program with an argument x*y and it complains about
+         something called ``xyzzy''??...
+      A: The filename globbing in DJGPP is done by the go32 extender,
+         before the program starts running.  This is like under Unix,
+         where the globbing is done by the command shell, only a bit
+         different (see below).  Unlike other DOS-based compilers, where
+         if you want the program to glob its arguments you must link it
+         with a special object module, in DJGPP this is considered normal
+         behavior and performed by default on behalf of every DJGPP
+         program.  The x*y above was expanded to a file called xyzzy which
+         was probably present in the current working directory.
+
+         In DJGPP, filename globbing works like in Unix, which is more
+         general than the usual DOS wildcard expansion.  It understands
+         the following constructs with special meta-characters:
+
+           ?      -- any single character
+           *      -- zero or more arbitrary characters, including a dot `.'
+           [aA_]  -- any one of characters `a', `A', or `_'.
+           [a-d]  -- any one of characters `a', `b', `c', or `d'.
+           [!a-z] -- anything BUT a lowercase letter.
+
+           Unlike DOS, the `*' and `?' meta-characters can appear
+           *anywhere* in the filename pattern, like in [a-z]*[0-9].*pp.
+           you can also use `*' instead directories, like in */*/*.c, but
+           NOT on drive letters (e.g., [a-c]:/ won't work).
+
+         An argument which cannot be expanded (no filenames matching that
+         particular pattern) will be passed to the program verbatim.  This
+         is different from what you'd see under Unix, where the shell
+         would say something like ``No match'' and won't call your program
+         at all.
+
+16.2  Q: OK, but I don't want my program to glob its arguments (they
+         aren't files at all, but they include characters like `*' and
+         `?').  What should I do?
+      A: You have three alternatives:
+
+          * Surround your arguments with single or double quotes (this is
+            what you would do under Unix shell).
+
+          * Put ``noglob'' parameter into your GO32 environment variable,
+            thusly:
+
+              set GO32=noglob
+
+            This has a disadvantage of affecting all DJGPP programs that
+            run while this setting is in effect.
+
+          * Disable globbing for any specific program by editing its
+            real-mode stub with the STUBEDIT program (change the parameter
+            "Enable command-line wildcard expansion" to ``no'').
+
+16.3  Q: I have a file with a single quote in its name, but the quote
+         seems to be stripped away when I pass it to my program...
+      Q: How do I pass a command-line argument which contains double
+         quotes? 
+      A: You should escape-protect the quote characters with a backslash.
+         For example, if you have a file called myfile.c'v, type it as
+         myfile.c\'v when you call your program.  If you have single
+         quotes in your program arguments *and* you don't want those
+         arguments to be expanded, then surround them by double quotes,
+         like this: "*.c\'v".  The program will get the string *.c'v with
+         the double quotes stripped away.
+
+         Note that backslashes are only special if they are in front of a
+         quote, whitespace, or backslash (they also serve as DOS directory
+         separators, remember?).
+
+16.4  Q: Can I invoke my program with a command line longer than 127
+         characters?
+      Q: I have a Makefile of Unix origin which contains some _very_ long
+         command lines.  Will it work with DJGPP?
+      A: Yes and yes.  DJGPP supports several methods of passing
+         command-line arguments which allow to work around the DOS
+         127-character limit.  These are:
+
+          * The !proxy method.  If you invoke the program from within
+            another DJGPP program (like Make or Gcc compilation driver),
+            it gets the address of the memory block where the actual
+            command line is stored.  Go32 which gets control before your
+            program is run will detect this and use that info to retrieve
+            the command-line arguments.
+
+            This method is suitable only for invoking DJGPP programs from
+            other DJGPP programs.  You don't have to do anything special
+            to use this method, it is all done automagically for you by
+            the spawnXX() and execXX() family of library functions on the
+            parent program side, and by go32 on the child side.
+
+          * The GNUish MS-DOS method.  This was invented when some GNU
+            programs were ported to 16-bit MS-DOS compilers as part of
+            GNUish MS-DOS project.  The arguments are passed through the
+            environment variables which are called ``_argc'', ``_argv0'',
+            ``_argv1'', etc.  Note that the variables' names are indeed
+            all-lowercase, which means you cannot use this method from DOS
+            COMMAND.COM prompt.
+
+            This method is suitable for invoking DJGPP programs from
+            GNUish ports of GNU software, like real-mode Make program
+            found on SimTel mirrors, some ports of Unix shells (like
+            ms_sh), etc.  You can also use it in your real-mode programs
+            by creating the above environment variables.
+
+            Note that DJGPP programs can only *use* this method, but they
+            don't *generate* GNUish-style environment variables, so you
+            CANNOT use this method to pass long command lines between
+            DJGPP and non-DJGPP programs, unless your program explicitly
+            creates these variables before calling execXX()/spawnXX().
+
+          * The response file method.  Any argument which starts with a
+            `@' character (like in ``myprog @file'') will cause the named
+            file to be read and its contents used as command-line
+            arguments, like in many DOS-based compilers and linkers.  If
+            you invoke your DJGPP program from DOS command line, this
+            would be the only method available for you to pass long
+            command lines (like when calling GAWK or SED without -f
+            option).
+
+            Note that this method makes `@' special when it is the first
+            (or the only) character of a command-line argument, which
+            should be escape-protected if you want to use it verbatim
+            (next question).
+
+         Of course, if go32 doesn't see any of the above methods, it will use
+         the command line by default.
+
+16.5  Q: How do I pass an argument which begins with the `@' character?
+      A: Surround that argument with single or double quotes.
+
+16.6  Q: What is the longest command line I can pass to gcc when it is
+         invoked by Make?
+      A: The arguments are passed to DOS Exec call (Int 21h function 4Bh)
+         via the transfer buffer which is 4KB-long.  Apart of the command
+         line, it is also used to pass a full path of go32 executable
+         (variable, but should be less than, say, 100 characters), 32
+         characters of !proxy parameters, 1-byte command-line character
+         count and a CR trailing character required by DOS, and the copy
+         of the environment for the child program (let's say, less than
+         2000 bytes in most cases, but your mileage may vary).  This
+         leaves at least 1800 bytes for arguments (including a separating
+         blank between any two arguments).  So unless your arguments span
+         more than 20 screen lines (1600 characters), you shouldn't worry.
+
+         On the other hand, if you run Make to link a VERY large number of
+         object files, it can be that the linker only gets a partial list
+         of them, and fails.  This was reported to happen when linking
+         GhostScript.
+
+16.7  Q: I use Make to compile with Gcc, but gcc gets only the first 127
+         characters of its command line.  Didn't you just explain in so
+         many words that invoking a DJGPP program (Gcc) from another DJGPP
+         program (Make) can safely pass upto 1800 characters of
+         command-line arguments using the !proxy method?
+      A: Check your Makefile for any SHELL= statements, or for commands
+         which include pipe or redirection characters like ">", "|", etc.
+         If Make sees any such statements, it will invoke COMMAND.COM to
+         run Gcc, and COMMAND.COM can't pass more than 127 characters to
+         Gcc.  To work around, comment-out the SHELL= line; if you need
+         such a variable, pass it on the Make command line instead.  And
+         change your commands to work without redirection/pipe characters.
+
+
+
+         17. Converting DOS Programs/Libraries
+             ---------------------------------
+
+17.1  Q: I have some code written in assembly which compiles under MASM
+         and TASM, but gcc gives me a long list of error messages.
+      A: The GNU Assembler (as.exe) called by gcc accepts AT&T syntax
+         which is different from Intel syntax.  Notable differences
+         between the two syntaxes are:
+
+           * AT&T immediate operands are preceded by `$'; Intel immediate
+             operands are undelimited (Intel `push 4' is AT&T `pushl $4').
+             AT&T register operands are preceded by `%'; Intel register
+             operands are undelimited.  AT&T absolute (as opposed to PC
+             relative) jump/call operands are prefixed by `*'; they are
+             undelimited in Intel syntax.
+
+           * AT&T and Intel syntax use the opposite order for source and
+             destination operands.  Intel `add eax, 4' is `addl $4, %eax'.
+             The `source, dest' convention is maintained for compatibility
+             with previous Unix assemblers.
+
+           * In AT&T syntax the size of memory operands is determined from
+             the last character of the opcode name.  Opcode suffixes of
+             `b', `w', and `l' specify byte (8-bit), word (16-bit), and
+             long (32-bit) memory references.  Intel syntax accomplishes
+             this by prefixes memory operands (*not* the opcodes
+             themselves) with `byte ptr', `word ptr', and `dword ptr'.
+             Thus, Intel `mov al, byte ptr FOO' is `movb FOO, %al' in AT&T
+             syntax.
+
+           * Immediate form long jumps and calls are `lcall/ljmp $SECTION,
+             $OFFSET' in AT&T syntax; the Intel syntax is `call/jmp far
+             SECTION:OFFSET'.  Also, the far return instruction is `lret
+             $STACK-ADJUST' in AT&T syntax; Intel syntax is `ret far
+             STACK-ADJUST'.
+
+           * The AT&T assembler does not provide support for multiple
+             section programs.  Unix style systems expect all programs to
+             be single sections.
+
+           * An Intel syntax indirect memory reference of the form
+
+                SECTION:[BASE + INDEX*SCALE + DISP]
+
+             is translated into the AT&T syntax
+
+                SECTION:DISP(BASE, INDEX, SCALE)
+
+             Examples:
+
+                Intel:  [ebp - 4]         AT&T:  -4(%ebp)
+                Intel:  [foo + eax*4]     AT&T:  foo(,%eax,4)
+                Intel:  [foo]             AT&T:  foo(,1)
+                Intel:  gs:foo            AT&T:  %gs:foo
+
+         For a complete description of the differences, get and unzip the
+         files named as.iN (where N is a digit) from the bnuXXXdc.zip
+         archive, then read the chapter ``i386-Dependent'' in the GNU
+         assembler documentation.  If you use the stand-alone Info reader,
+         type at the DOS prompt:
+
+                   info as machine i386
+
+         You will see a menu of Gas features specific to x86 architecture.
+
+17.2  Q: Where can I find an automated conversion tool to convert my
+         Intel-style assembly code into a code acceptable by Gas?
+      A: Unfortunately, such a tool is unknown to us; if you see one, hear
+         about one, or write one yourself, be sure to tell us.  In the
+         meantime, here is what you can do to convert your code:
+
+           * For a small number of relatively short files, consider
+             converting them with a smart editor (like Emacs or its
+             work-alikes).
+
+           * Obtain a copy of Microsoft MASM 6.11. It has ``-coff'' option
+             to generate object code in COFF format which can be submitted
+             to gcc, so you can compile your original source.  You can
+             also use LIB32 librarian from Microsoft C8 to convert object
+             files to COFF by putting them into a .lib library, then
+             extracting them as COFF files.
+
+         Keep in mind that syntax is only one of the aspects of converting
+         code written for DOS to DJGPP.  You should also make sure your
+         code doesn't violate any rules for protected-mode programming
+         (next question).
+
+17.3  Q: OK, I've succeeded to convert and compile my assembly-language
+         program, but when I run it, I get Segmentation Violation and
+         General Protection Faults.  This program works when compiled with
+         MASM, so how can it be?
+      A: In DJGPP, your program runs in protected mode.  There are certain
+         things you can't do in protected-mode programs (that's why it is
+         called protected mode).  This issue is too complex to describe
+         here, so only a few of the more important aspects will be briefly
+         mentioned.  If you are serious about writing assembly language
+         protected-mode code, or have a large body of existing code to
+         convert to protected mode, you should read any of the books about
+         protected-mode programming with 80x86 processors.
+
+         Here is a short list of some of the techniques found in many
+         real-mode programs, which will trigger protection violation or
+         erratic behavior in protected mode:
+
+           * Loading arbitrary values into segment registers, then using
+             them to reference code or data.
+
+           * Referencing code with data segment register, or vice versa.
+
+           * Assuming certain locations (like BIOS area or video memory)
+             will be found at certain absolute addresses.
+
+           * Calling DOS or BIOS services with INT XX instruction.
+
+17.4  Q: I have a set of useful functions in a .obj format, but no source
+         code.  Can I use them with my DJGPP program?
+      Q: I have this ACMELUXE.LIB library of functions which I want to
+         use.  I've extracted all the .obj files, but when I try to link
+         them with my program, gcc complains: ``File format not
+         recognized''.  Can't I use these object files?
+      Q: I've got a bunch of .obj files I want to use.  I've ran AR to
+         make a Unix-style .a object library, but got an error message
+         from gcc saying ``couldn't read symbols: No symbols''.  How can I
+         link them with my code?
+      A: Sorry, you can't.  The GNU linker called by gcc doesn't
+         understand the format of .obj files which other DOS-based
+         compilers/assemblers emit.  Unless you can get the source of
+         those functions and compile them with gcc, you won't be able to
+         use them.  (You can also try using LIB32 librarian from Microsoft
+         C8 to convert object files to COFF.)  But don't feel too bad
+         about it: most probably, they were written for real-mode
+         programs, and without extensive modifications would have crashed
+         your program anyway...
+
+
+         18. Low-level DOS/BIOS and Hardware-oriented Programming
+             ----------------------------------------------------
+
+18.1  Q: Why does my program crash with ``Unsupported DOS request 0xNN''
+         or ``Unsupported INT 0xNN'' when I call int86() or intdos()
+         functions to invoke a software interrupt?
+      A: Calling real-mode DOS or BIOS services from protected-mode
+         program requires a switch to real mode, so go32 catches the INT
+         instruction and tries to reissue it after the mode switch.
+         However, some services require pointers to memory buffers.
+         Real-mode DOS/BIOS functions can only access buffers in
+         conventional memory, so go32 has to move data between your
+         program and low memory to transparently support these services.
+         But this means it should know about all these services to perform
+         these chores correctly.  While Go32 supports many of these
+         services, it doesn't support all of them.  For those it doesn't
+         support, you will have to call the _go32_dpmi_simulate_int()
+         library function instead.  It is documented in the libcref.i Info
+         file (get and unzip the file djdocXXX.zip, then type ``info
+         libc.a alpha _go32_dpmi_simulate_int'').  In fact, it's best to
+         always call _go32_dpmi_simulate_int(): this way you can be sure
+         it will work no matter what services are supported by go32.
+         _go32_dpmi_simulate_int() requires that you set up all the data
+         as required by the service you are calling, including moving the
+         data to and from low memory (see below).
+
+18.2  Q: I want to call a DOS/BIOS function which requires a pointer to a
+         buffer in ES:DI (or any other) register pair.  How do I get the
+         segment to put into the segment register?
+      A: If you use int86x() or intdosx() for a function supported by
+         go32, then just put the address of your buffer into regs.x.di and
+         forget about ES.  These functions are processed by go32, and it
+         will take care of the rest.
+
+         If you call _go32_dpmi_simulate_int(), then you must put into
+         that register pair an address of some buffer in *conventional*
+         memory (in the first 1 MByte).  If the size of that buffer
+         doesn't have to be larger than the size of transfer buffer used
+         by go32, then the easiest way is to use it.  (Go32 doesn't assume
+         the contents of that buffer to be preserved across function
+         calls, so you can use it freely.)  That buffer is used by go32
+         for all DOS/BIOS services it supports, and it resides in
+         conventional memory.  Go32 makes the address and the size of the
+         transfer buffer available for you in the _go32_info_block
+         external variable, which is documented the libcref.i Info file.
+         Check the size of the buffer (usually, 4K bytes), and if it suits
+         you, use its linear address this way:
+
+         dpmi_regs.x.di =
+           _go32_info_block.linear_address_of_transfer_buffer & 0x0f;
+         dpmi_regs.x.es =
+           (_go32_info_block.linear_address_of_transfer_buffer >> 4) & 0xffff;
+
+         If the size of the transfer buffer isn't enough, you will have to
+         allocate your own buffer in conventional memory with a call to
+         the _go32_dpmi_allocate_dos_memory() library function.  It
+         returns you the segment and offset directly in a structure
+         pointed to by its argument.  If you only need a small number of
+         such buffers which can be allocated once, then you don't have to
+         worry about freeing them: they will be freed by DOS when your
+         program exit()'s.
+
+         For bullet-proof code, you should test the size of the transfer
+         buffer at runtime and act accordingly.  This will be more
+         important in DJGPP v2.x, where that size can be dynamically
+         changed.
+
+18.3  Q: My program crashes/doesn't do what it should when I call
+         _go32_dpmi_simulate_int(). 
+      A: You should zero out some of the fields of the
+         _go32_dpmi_registers structure before you call
+         _go32_dpmi_simulate_int().  Random values in these fields can
+         cause your program to behave erratically.  The fields in point
+         are SS, SP and FLAGS.  When SS and SP are zeroed, the DPMI host
+         will provide a 30-word-long stack for the interrupt handler; this
+         is usually enough, but if it isn't, then you should point SS and
+         SP to larger buffer in conventional memory (possibly part of the
+         transfer buffer).
+
+18.4  Q: How can I move data between my program and the transfer buffer?
+      Q: How do I access my peripheral card which is memory-mapped to an
+         address between 640K and 1M?
+      Q: How can I read or change a value of one of the variables in the
+         BIOS data area? 
+      Q: How can I peek at an address whose far pointer I get from an INT
+         21h call?
+      A: Depending on your specific needs, you can use one of three
+         methods: 
+
+           * If you want to access a byte, a 16-bit word, or a 32-bit
+             double word, use the ``far pointer'' functions documented on
+             the sys/farptr.h header file.  You should convert any
+             real-mode far pointer segment:offset pair into a linear
+             address (segment*16 + offset), and use
+             _go32_conventional_mem_selector() to get the selector which
+             allows access to conventional memory, like this:
+
+              u_char value = _farpeekb(_go32_conventional_mem_selector(),
+                                       segment*16 + offset);
+
+             Use _farpeekw() to peek at 16-bit shorts and _farpeekl() to
+             peek at 32-bit longs.  If you need to access several
+             (non-contiguous) values in a loop, use corresponding
+             _farnspeekX() functions which allow you to set the selector
+             only once, as opposed to passing it with every call.
+
+             There is a corresponding set of _farpokeX() and _farnspokeX()
+             functions to poke (change the values of) such memory
+             locations.
+
+             These functions have an advantage of emitting inline assembly
+             code when you compile with optimizations, so they are very
+             fast.
+
+           * If you need to access more than 4 contiguous bytes, use
+             dosmemget() and dosmemput() library functions (documented in
+             libcref.i file).  They also require that you convert the
+             segment:offset pair into a linear address, but they don't
+             need the conventional memory selector.
+
+           * For moving buffers larger than a few tens of bytes, it's best
+             to use movedata() library function (also documented in
+             libcref.i file).  It requires that you pass selector and
+             offset for both the conventional memory address and for the
+             buffer in your program's address space.  Use the function
+             _go32_my_ds() to get the selector of any variable in your
+             program, and its address as its ``offset'' or linear address.
+             Movedata() is faster because it moves by 32-bit longs, but be
+             careful with its use when moving data to and from peripheral
+             cards: many of them only support 8- or 16-bit wide data path,
+             so moving data 4 bytes at a time won't gain you much, and
+             might even get you in trouble with some buggy BIOSes.
+
+18.5  Q: I call movedata() to pass data between my program and the
+         transfer buffer, but get bogus values or General Protection
+         Fault.
+      A: Valid conventional-memory addresses are only 20 bit-wide.
+         However, the value held stored in the variable
+         _go32_info_block.linear_address_of_transfer_buffer is not 
+         guaranteed to have the higher 12 bits zeroed, and movedata()
+         doesn't mask those high bits, because it can also be used to move
+         data between 2 protected-memory locations.  Be sure to mask off
+         the high 12 bits of the value returned by various
+         ...._linear_address_... fields in go32 structures, before you
+         call *any* of the above functions.
+
+18.6  Q: How can I make any real-mode service call my function?  E.g., the
+         mouse driver has a provision (function 0Ch) to call user-defined
+         handler when certain events occur, which expects a far pointer to
+         my function in ES:DX register pair.
+      A: Those services expect a real-mode function, so you should wrap
+         your protected-mode function with a real-mode stub.  To this end,
+         call _go32_dpmi_allocate_real_mode_callback_retf() library
+         function, and pass the rm_segment and rm_offset fields it returns
+         to the service you want (in the above example, Int 33h function
+         0Ch) by calling _go32_dpmi_simulate_int().  See the docs in the
+         libcref.i Info file for further details about allocating wrapper
+         function.
+
+18.7  Q: How do I register my DJGPP function as a hardware interrupt
+         handler?
+      A: The optimal set-up depends on the interrupt and on the
+         environment under which your program will run (VCPI, DPMI, etc.).
+         Therefore, only some basic considerations and techniques are
+         listed below.  What combination of these is best for your
+         application is up to you to decide.
+
+         First, some background.  Hardware interrupts can occur when the
+         processor is either in real mode (like when go32 calls some DOS
+         service) or in protected mode.  When your program runs under a
+         DPMI host, hardware interrupts are always passed to protected
+         mode first, and only if unhandled, they are reflected to real
+         mode.  In non-DPMI environment, this is only true for interrupts
+         which occur in protected mode; an interrupt which occurs in real
+         mode is never passed to protected mode.  So, if your program runs
+         in non-DPMI mode, it *must* at least install a real-mode handler
+         for the interrupt, or else it will lose interrupts; it is best
+         also to install a protected-mode handler, otherwise for an
+         interrupt which occurs in protected mode, the CPU will have to
+         switch mode twice, which will hurt performance.
+         In contrast, in DPMI mode you can get away by installing only a
+         protected-mode handler.  (The tricky one is to write a program
+         which will run in both environments; this is left as an exercise
+         for the reader... ;-)
+
+         To install a protected-mode interrupt handler, you do this:
+
+           * Call _go32_dpmi_get_protected_mode_interrupt_vector() and
+             save the structure it returns (to restore the previous
+             handler address before your program exits).
+
+           * Call _go32_dpmi_allocate_iret_wrapper()  passing it the
+             address of your functions as the pm_offset field.  That field
+             will get replaced with the address of the wrapper function
+             which is a small assembler function that handles everything
+             an interrupt handler should do on entry and before exit (and
+             what the code gcc generates for an ordinary C function
+             doesn't include); the effect is similar to using interrupt or
+             _interrupt keyword in some DOS-based compilers.
+
+           * Call _go32_dpmi_set_protected_mode_interrupt_vector() passing
+             it the value of the pm_offset field as returned from
+             _go32_dpmi_allocate_iret_wrapper() and whatever _go32_my_cs()
+             returns as pm_selector.
+
+           * If you want your handler to chain to the previous handler,
+             call _go32_dpmi_chain_protected_mode_interrupt_vector().
+             This will set up a wrapper function which will automagically
+             jump to the previous handler after your handler returns, and
+             also installs that wrapper as the handler for the interrupt.
+
+         To install a real-mode interrupt handler, you do this:
+
+           * Call _go32_dpmi_get_real_mode_interrupt_vector() and save the
+             structure it returns (to restore the previous handler address
+             before your program exits). 
+
+           * Call _go32_dpmi_allocate_real_mode_callback_iret() passing it
+             the address of your handler function in pm_offset.  This
+             wraps your function with a short real-mode interrupt handler
+             which will switch to protected mode and call your function,
+             then switch back to real mode and do an iret.
+
+           * Call _go32_dpmi_set_real_mode_interrupt_vector() with the
+             structure which _go32_dpmi_allocate_real_mode_callback_iret()
+             returned.
+
+           * If you want your handler to chain to the previous real-mode
+             handler, then issue a _go32_dpmi_simulate_fcall_iret() just
+             before your handler returns, using the rm_segment and
+             rm_offset which were returned when you called
+             _go32_dpmi_get_real_mode_interrupt_vector().
+
+         For examples of installing and using hardware interrupt handlers,
+         see the files sb02.zip (Sound Blaster interrupt-driven functions)
+         and ldbgXXX.zip (interrupt-driven serial communications code),
+         both available in the DJGPP distribution archive.
+
+18.8  Q: I did all the above, but my program occasionally still hangs...
+      A: Unfortunately, hardware interrupt handling in DJGPP v1.1x has a
+         few subtle bugs.  Post your code on the djgpp mailing list, tell
+         us how does it fail and somebody might have a solution for you.
+
+18.9  Q: How can I access memory-mapped peripheral devices (or any other
+         absolute address) above 1 MByte mark?
+      A: Currently, you can do this in one of two ways:
+
+           * Under a true DPMI host (such as Windows or QDPMI) use DPMI
+             function 0x0800 (i.e., Int 31h/AX=0800h).  It returns a
+             linear address which can be used to access a given absolute
+             physical address.  You can then use the functions from
+             <sys/farptr.h> to access that linear address.  This will be
+             the *only* way to access physical memory locations in DJGPP
+             v2.0.
+
+           * In non-DPMI mode, add 0xe0000000 to the physical address and
+             use that as a pointer.  This feature will disappear in v2.0.
+
+
+
+         19. Legal Aspects
+             -------------
+
+19.1  Q: Can you explain in plain English the legal restrictions of
+         distributing programs compiled with DJGPP?
+      A: If you don't use libgpp.a (C++ class library) or libgpl.a
+         (obstack, regexp and other GNU packages) or libgcc.a (long double
+         and long long support), don't use bison or flex, and don't
+         rebuild go32.exe, then you may do whatever you like with your
+         programs.  You may redistribute the binaries of go32, emu387, and
+         the graphics drivers as they are shipped with djgpp as long as
+         you tell your customers how to get djgpp.
+
+         The GNU GPL/LGPL (General Public License/Library General Public
+         License) apply if you link libgpp.a or libgpl.a, or use bison or
+         flex, change go32's sources, or use any other FSF sources which
+         fall under GPL (like gcc's sources) as part of your program
+         (e.g., linking your application with GNU getopt or regex packages
+         which come with many GNU programs).
+
+
+         20. Getting Help
+             ------------
+
+20.1  Q: I post my problem to the help-gcc Newsgroup, but don't get any
+         answers.
+      A: Is your problem likely to be special to the DJGPP port or to DOS
+         environment?  If so, don't post to GNU Usenet groups, but to the
+         DJGPP mailing list.  People who read GNU Newsgroups usually
+         neither know nor care about DOS-specific problems.
+
+20.2  Q: How do I ask questions on the DJGPP mailing list?
+      A: Send mail to djgpp@sun.soe.clarkson.edu.
+
+20.3  Q: How do I subscribe to DJGPP mailing list?
+      A: Send mail to listserv@sun.soe.clarkson.edu (NOT to djgpp!!),
+         leave subject empty and in the body write:
+
+           add <your e-mail address> djgpp
+
+         If you only want to receive announcements of new versions and
+         ported software, but don't want to see any other DJGPP mail
+         traffic, subscribe to djgpp-announce mailing list:
+
+           add <your e-mail address> djgpp-announce
+
+         The announcements which go to djgpp-announce get reflected to
+         djgpp, so you don't have to subscribe to both these lists.
+
+         Note that you don't have to subscribe to djgpp mailing list if
+         you don't want to get all the traffic in your mailbox (typically,
+         about 10-20 messages per day).  You can ask questions on the list
+         even if you are not a subscriber, because people usually answer
+         both to your e-mail address and to the list (well, actually, the
+         mailer program does it automatically and most people don't bother
+         to change that).  If you want to be sure the mail gets to you
+         directly, say in your message that you don't subscribe to the
+         list, and ask people to answer directly.
+
+20.4  Q: Whew!  There's too much traffic on djgpp mailing list (at least
+         the SysAdmin glaring over my shoulder thinks so... ;-).  How do I
+         unsubscribe myself?
+      Q: I've been trying for days to unsubscribe from the djgpp mailing
+         list.  What am I doing wrong?
+      A: You should be sending your unsubscribe messages to
+         listserv@sun.soe.clarkson.edu (not djgpp@sun.soe.clarkson.edu),
+         with the contents being just "unsubscribe".  If you have done
+         that and it didn't help, write to the address
+         djgpp-request@sun.soe.clarkson.edu (a human) and ask him/her to
+         help you.
+
+20.5  Q: I don't get any messages from DJGPP list for several days.  Is
+         the list alive?
+      A: Try sending a message to the list and see if you get it back.  If
+         not, it is possible that your name was inadvertently taken off
+         the list.  This is known to happen sometimes (don't ask me how).
+         Re-subscribe yourself by sending the above subscription message
+         to listserv.
+
+
+20.6  Q: Why am I getting 2 and often more copies of the same message?
+         Don't you people think I can conceive it at the first reading??
+      A: First, check the headers to make sure that all of the duplicate
+         messages have their To: header addressed to the DJGPP list, not
+         to your direct e-mail address.  Often, when people reply to your
+         post, you get the direct message, and a Cc: (the ``carbon copy'')
+         one via djgpp list server.  This is normal behavior.
+
+         If indeed you get more than one copy of a message addressed to
+         the list, it is possible that you have added yourself to the list
+         several times.  (One way for this to happen would be if your site
+         supports a mail exploder which remails DJGPP to you, and you also
+         have subscribed yourself directly.)  The only way to check this
+         would be to unsubscribe and see if you keep getting mail.  You
+         could also write to djgpp-request@sun.soe.clarkson.edu, a person
+         who is in charge of the list server.
+
+         Another thing to do, especially if you think it's not your fault,
+         is to write to a user named POSTMASTER at the address of each of
+         the machines whose names you find in the Received: headers of the
+         bouncing messages (these are people responsible for the operation
+         of the mail software at their sites) and ask them politely to
+         help.
+
+
+         21. DJGPP Version 2.0
+             -----------------
+
+21.1  Q: What's that about v2.0?
+      Q: When will that long-awaited v2.0 be released, and what exciting
+         new features will I find there?
+      A: DJGPP v2.0 will hopefully be released in the first quarter of 95.
+         It will be DPMI-only environment, and will include a free DPMI
+         host for those who don't have other DPMI server installed.  In
+         addition, v2.0 will feature the following major improvements upon
+         v1.1x:
+
+          * much faster extender (the free DPMI host) and library
+            functions; 
+
+          * low memory footprint of the DPMI host below 640KB;
+
+          * the extender is loaded only once: no more problems with
+            spawning child programs (e.g., unlimited recursive Make's);
+
+          * signals support;
+
+          * 387 emulation under DPMI;
+
+          * graphics under DPMI;
+
+          * ANSI- and POSIX-compliant libraries and header files;
+
+          * many bugs in interrupts' and mixed-mode programming support
+            fixed. 
+
+
+
+         22. Miscellaneous
+             -------------
+
+22.1  Q: I want to change cc1.  How do I do this?
+      Q: How do I fix a bug/add a feature to one of the DJGPP programs?
+      A: First, get the sources.  These are called *sr.zip in the DJGPP
+         distribution.  The C Library sources are in djlsrXXX.zip.
+         Sources for GO32 and other utilities written by DJ Delorie are in
+         djsrcXXX.zip.  Some sources are too big, and are split into
+         multiple zips, all of which must be unzipped to get a complete
+         source distribution:
+              gcc263s1.zip
+              gcc263s2.zip
+              gcc263s3.zip
+              gcc263s4.zip
+              gcc263s5.zip
+              gcc263s6.zip
+         All sources are shipped in ready-to-build form.  The diffs in the
+         diffs directory have already been applied.
+
+         Next, try to build the program without changing it.  Some
+         packages will have a CONFIGUR.BAT file; if so, run it first.  If
+         there is a MAKE.BAT file, run it; if not, look for a file named
+         MAKEFILE.DJ or MAKEFILE.DJG.  If there is such a file, say ``make
+         -f makefile.djg'', if not, just say ``make'' and see what
+         happens.  After you've succeeded to build the program, make your
+         fixes and build the program the same way you did before.
+
+         Note that you must have GNU Make program to build these programs
+         (get the file makXXXbn.zip), and some makefiles require that you
+         install additional utilities, like Sed (get sedXXXbn.zip).
+         Sometimes the makefiles won't even run under COMMAND.COM (they
+         require more smart shell).  In that case, either get a better
+         shell, or do the required steps manually.  If the Makefile is too
+         complex for you and you can't figure out what are the necessary
+         commands, invoke make with -n switch and see what it should have
+         done.
+
+22.2  Q: Where can I find an example of XXXX / a package doing YYYY ?
+      A: Here are files you might look into for examples of frequently
+         needed code fragments, or for packages people keep asking about:
+
+          * Interrupt-driven serial communications:
+
+            - serial.c in the fsdbXXX.zip package
+            - download the aeasy102.zip serial communications package
+
+          * Interrupt-driven support of peripheral devices:
+
+            - download the Sound Blaster support package sb02.zip
+
+          * Multitasking:
+
+            - download aetsk102.zip
+
+          * Port of curses library to DJGPP:
+
+            - download pdcursXXX.zip
+
+          * X library:
+
+            - Xlibemu is available as xlib03sr.zip by anon ftp from
+              omnigate.clarkson.edu:/pub/msdos/djgpp/pub and also from
+              asterix.inescn.pt
+            - Xlib and Xt for DV/X are available from where you got DJGPP
+              (get the files qddvxNNN.zip, qdlibNNN.zip and qdtktNNN.zip)
+
+22.3  Q: What is stub.exe?
+      A: Stub.exe is a small real-mode program which coff2exe attaches to
+         the COFF executable code produced by DJGPP.  When you invoke a
+         program compiled with DJGPP, stub.exe is initially run.  It
+         simply calls go32.exe, and passes it information it needs to run
+         the COFF file attached to it.  Stub is much smaller than go32, so
+         less disk space is used.  Also, if you change go32, you don't
+         have to change stub, and all the stub-ized programs will use the
+         new go32 automatically.
+
+22.4  Q: How do I create symbolic links?
+      Q: I have this program that behaves differently depending on the
+         name it's called.  Under Unix, I just create symbolic links to
+         achieve that, but DOS doesn't support them.  Do I have to put
+         several identical programs under different names on my disk??
+      A: Copy bin/stub.exe to the name of the link you want.  For example,
+         let's say the real program is dj1.exe and we want to make a link
+         called dj2.exe that really calls dj1.exe.  First, copy stub.exe
+         to dj2.exe.  Next, run stubedit to modify the new programs' stub
+         info block to change the name of the executable it runs.  In this
+         case, we'd change it to dj1:
+
+              C:\USR\BIN> copy c:\djgpp\bin\stub.exe dj2.exe
+              C:\USR\BIN> stubedit dj2.exe runfile=dj1
+
+         Voila!  Now, when you run dj2, it tells go32 to use the image of
+         dj1.
+
+22.5  Q: I try to recompile the FSDB full-screen debugger, but I find some
+         header files missing, and the makefile references a non-existing
+         directory NOA.  Where can I find the complete source?
+      A: All the missing files are part of go32 source (get the file
+         djsrcXXX.zip).  The NOA directory is not used in the release
+         version, and is not required to build the production version, so
+         you can just remove it from the Makefile.
+
+         Note that the file extdebug.h in the go32 directory needs to be
+         changed as explained in the FSDB manual.
+
+22.6  Q: Where can I find the specifications for the DPMI functions?
+      A: You can find the DPMI spec by anonymous ftp on one of the
+         following sites:
+
+           qdeck.com:/pub/memory/dpmispec.zip
+           x2ftp.oulu.fi:/pub/msdos/programming/specs/dpmispec.arj
+
+
+         23. About this FAQ
+             --------------
+
+    Maintainer: Eli Zaretskii <eliz@is.elta.co.il>.
+
+    This FAQ is Copyright (C) 1995 by Eli Zaretskii <eliz@is.elta.co.il>.
+ It may be freely distributed with the DJGPP package or any part thereof,
+ provided this copyright notice is left intact.
+
+    Comments about, suggestions about or corrections to this FAQ list are
+ welcomed.  Please make sure to include in your mail the version number of
+ the document to which your comments apply (you can find the version at
+ the beginning of this FAQ list).
+
+    Much of the info in this FAQ list was taken from the DJGPP mailing
+ list traffic, so many of you have (unbeknownst to you) contributed to
+ this list.  The following people read this list in its previous versions
+ and provided useful feedback, comments, information and/or suggestions:
+
+
+    Anthony Appleyard <A.APPLEYARD@fs1.metallurgy.umist.ac.uk>
+    John Bodfish <bodfish@austen.notis.com>
+    DJ Delorie <dj@stealth.ctron.com>
+    Gordon Hogenson <ghogenso@u.washington.edu>
+    Charles Sandmann <sandmann@clio.rice.edu>
+    Stephen Turnbull <turnbull@shako.sk.tsukuba.ac.jp>
+    

@@ -1,0 +1,16 @@
+print <<'EOT'
+#open "const";;
+let predef_variables = [
+EOT ;
+
+$first = 1;
+
+while(<>) {
+  if (m|/\* (".*"),(".*") \*/|) {
+    print ";\n" unless $first;
+    print "{qual=$1; id=$2}";
+    $first = 0;
+  }
+}
+
+print "\n];;\n";
