@@ -92,6 +92,7 @@ let add_directory () =
 let main () = 
   let top = OpenTkClass "CamlBrowser" in
      signal SIGINT (Signal_handle bye);
+     signal SIGTERM (Signal_handle bye);
   (* Resources *)
   resource__add "*library_path" "/usr/local/lib/caml-light"
       WidgetDefault;
@@ -189,11 +190,15 @@ let main () =
        	 (BindSet ([], (fun _ -> focus__none ())));
    util__resizeable top;
    focus__set e;
-   tk__MainLoop()
+   try
+     tk__MainLoop()
+   with
+     ex -> begin CloseTk(); raise ex end
 ;;
 
 (* protocol__debug := true;; *)
 
-printexc__f main ()
+
+printexc__f (handle_unix_error main) ()
 ;;
 
