@@ -28,9 +28,9 @@ scrolltext: files
 	$(DVI2TXT) -s -t texstuff/scrolltext.dvi
 
 files: $(FILES)
-	@cd refman; make all
-	@cd library; make all
-	@cd cmds; make all
+	cd refman; make all
+	cd library; make all
+	cd cmds; make all
 
 all:
 	make manual plaintext scrolltext
@@ -40,9 +40,9 @@ all:
 
 clean:
 	rm $(FILES)
-	@cd refman; make clean
-	@cd library; make clean
-	@cd cmds; make clean
+	cd refman; make clean
+	cd library; make clean
+	cd cmds; make clean
 	rm -f texstuff/*
 
 release:
