@@ -1,7 +1,8 @@
 FILES=install.tex comp.tex top.tex runtime.tex librar.tex lexyacc.tex \
   intf-c.tex toplevel.tex debugger.tex profil.tex emacs.tex
 
-VPATH=../cmds
+vpath %.etex ../cmds
+
 TRANSF=../../tools/transf
 FORMAT=../../tools/format-html-intf
 
@@ -26,5 +27,5 @@ TOPLEVELMLI=../../../cl/src/toplevel/toplevel.mli
 toplevel.tex: $(TOPLEVELMLI)
 	$(FORMAT) toplevel $(TOPLEVELMLI) | tail +2 > toplevel.tex
 
-debugger.tex: debugger.etex $(TRANSF)
-	$(TRANSF) -html < debugger.etex > debugger.tex
+debugger.tex: ../cmds/debugger.etex $(TRANSF)
+	$(TRANSF) -html < ../cmds/debugger.etex > debugger.tex

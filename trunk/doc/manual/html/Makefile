@@ -1,6 +1,7 @@
 FILES=foreword.tex biblio.tex 
-VPATH=..
 RELEASE=$$HOME/release/$${RELEASENAME}
+
+vpath %.etex ..
 
 all: $(FILES) FORCE
 	@$(MAKE) -f Makefile.refman
