@@ -219,40 +219,41 @@ test 5 equal_nat (sqrt_nat (nat_of_int 15) 0 1,
                   nat_of_int 3);;
 test 6 equal_nat (sqrt_nat (nat_of_int 17) 0 1,
                   nat_of_int 4);;
+
+let sqrt_biggest_int =
+ let n = make_nat 1 in
+ set_digit_nat n 0 1;
+ shift_left_nat n 0 1 (make_nat 1) 0 (length_of_int / 2);
+ set_decr_nat n 0 1 0;
+ n;;
+
 let nat = make_nat 2 in
 set_digit_nat nat 1 35;
 set_digit_nat nat 0 16;
 test 7 equal_nat (sqrt_nat nat 0 1,
                   nat_of_int 4) &&
 test 8 equal_nat (sqrt_nat nat 1 1,
-                  nat_of_int 5);;
+                  nat_of_int 5) &&
 
-(*************
-(* 64-bit only *)
 test 9 equal_nat
-       (sqrt_nat (nat_of_int biggest_int) 0 1, nat_of_int 2147483647);;
+       (sqrt_nat (nat_of_int biggest_int) 0 1, sqrt_biggest_int);;
 
 let nat = make_nat 3 in
-set_digit_nat nat 2 biggest_int;
-set_digit_nat nat 1 biggest_int;
-set_digit_nat nat 0 0;
+ set_digit_nat nat 2 biggest_int;
+ set_digit_nat nat 1 biggest_int;
+ set_digit_nat nat 0 0;
 test 10 equal_nat
-       (sqrt_nat (nat) 2 1, nat_of_int 2147483647) &&
+       (sqrt_nat (nat) 2 1, sqrt_biggest_int) &&
 test 11 equal_nat
-       (sqrt_nat (nat) 1 1, nat_of_int 2147483647) &&
+       (sqrt_nat (nat) 1 1, sqrt_biggest_int) &&
 test 12 equal_nat
-       (sqrt_nat (nat) 0 1, nat_of_int 0) &&
-test 13 equal_nat
-       (sqrt_nat (nat) 0 2, nat_of_string "9223372036854775806") &&
-test 14 equal_nat
-       (sqrt_nat (nat) 0 3, nat_of_string "39614081257132168793550749695");;
-*****************)
+       (sqrt_nat (nat) 0 1, nat_of_int 0);;
 
 let nat =
  nat_of_string "115792089237316195423570985008687907853269984665640564039457584007913129639935" in
-test 15 equal_nat
+test 13 equal_nat
        (sqrt_nat (nat) 0
-        (4 * (64 / sys__word_size)),
+        (length_nat nat),
         nat_of_string "340282366920938463463374607431768211455");;
 
 
