@@ -11,7 +11,7 @@
 let parse_phrase parsing_fun lexing_fun lexbuf =
   try
     parsing_fun lexing_fun lexbuf
-  with parsing__Parse_error f ->
+  with parsing__Parse_error ->
          failwith "parser"
      | lexer__Lexical_error(msg, pos1, pos2) ->
          failwith "lexer"

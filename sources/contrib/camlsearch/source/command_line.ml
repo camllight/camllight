@@ -24,7 +24,7 @@ let type_of_string string =
       	prerr_endline "Lexical error :";
       	prerr_location string pos1 pos2;
 	raise Error
-    | parsing__Parse_error _ ->
+    | parsing__Parse_error ->
       	prerr_endline "Syntax error";
       	prerr_location 
       	  string

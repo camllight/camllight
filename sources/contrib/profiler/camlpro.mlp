@@ -283,7 +283,7 @@ let rec rewrite_impl_phrase impl =
 let parse_phrase parsing_fun lexing_fun lexbuf =
   try
     parsing_fun lexing_fun lexbuf
-  with parsing__Parse_error _ ->
+  with parsing__Parse_error ->
          let pos1 = lexing__get_lexeme_start lexbuf in
          let pos2 = lexing__get_lexeme_end lexbuf in
          eprintf "%aSyntax error.\n" output_location (Loc(pos1, pos2));
