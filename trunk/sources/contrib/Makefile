@@ -76,6 +76,10 @@ TKINCLDIR=/usr/local/lib/tk/include
 TKLIBDIR=/usr/local/lib/tk/lib
 TCLLIBDIR=/usr/local/lib/tcl/lib
 
+# List of libraries required to link Tcl/Tk. This may help if you have
+# a custom Tcl/Tk with various extensions (such as Xpm)
+TKLIBS=-ltk -ltcl -lX11
+
 # Some "make"s need this to ensure that they call /bin/sh, not /bin/csh
 # Seems harmless on most other "make"s. Try removing this line if you
 # run into trouble.
@@ -104,7 +108,8 @@ DEFINES=\
   TCLINCLDIR='$(TCLINCLDIR)' \
   TKINCLDIR='$(TKINCLDIR)' \
   TKLIBDIR='$(TKLIBDIR)' \
-  TCLLIBDIR='$(TCLLIBDIR)'
+  TCLLIBDIR='$(TCLLIBDIR)' \
+  TKLIBS='$(TKLIBS)'
 
 
 # Compile everything

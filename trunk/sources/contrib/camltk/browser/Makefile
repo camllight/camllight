@@ -17,7 +17,7 @@ UNIXDIR=../../libunix
 
 TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
 	  -ccopt -L$(SUPPORTDIR) \
-	   -lcaml -lcamltk -ltk -ltcl -lX11
+	   -lcaml -lcamltk $(TKLIBS)
 
 CAMLDEP=../../../src/tools/camldep
 
