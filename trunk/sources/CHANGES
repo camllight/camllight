@@ -9,8 +9,16 @@ Caml Light 0.74:
 
 * MS Windows port: fixed bugs in functions over graphics__image.
 
-* libnum: square root rewritten. Many bug fixes to support 64
-  architectures. Lot of functions rewritten or added. More tests added.
+* libnum: square root rewritten. Many bug fixes to support 64 bits
+  architectures. Lot of functions rewritten or added. More tests
+  added.
+  Module nat: now performs sanity checks.
+  New module fnat: the same functionality as module nat, without
+  sanity checks.
+  Assembly code for pentium processors is now supported (on average
+  this implementation is approximately 3 times faster than the pure C
+  implementation) (set the variable BIGNUM_ARCH to pentium in the
+  Makefile of the contrib directory).
 
 Caml Light 0.73:
 ---------------
