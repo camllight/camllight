@@ -24,7 +24,8 @@ do_list (fun (str,tok) -> hashtbl__add keyword_table str tok) [
   "type", TYPE;
   "subtype", SUBTYPE;
   "function", FUNCTION;
-  "module", MODULE
+  "module", MODULE;
+  "external", EXTERNAL
 ];;
 
 
