@@ -2,9 +2,6 @@
 # Check the camlmsg.txt file.
 # (Run this script from the src/ directory)
 
-# List of known languages
-@languages = ("fr");
-
 # Scan the camlmsg.txt file
 
 open(MSG, "camlmsgs.txt") || die("can't open camlmsgs.txt");
@@ -20,6 +17,7 @@ while(<MSG>) {
       $sourcemsg = $';
       push(@sourcemsgs, $sourcemsg);
     } else {
+      $languages{$1} = 1;
       $translations{"$1/$sourcemsg"} = $';
     }
   } else {
@@ -33,7 +31,7 @@ close(MSGS);
 
 foreach $msg (@sourcemsgs) {
   $sourceformats = do formats($msg);
-  foreach $lang (@languages) {
+  foreach $lang (keys(%languages)) {
     $transl = $translations{"$lang/$msg"};
     if (!$transl) {
       print STDERR "No translation in $lang for $msg";
