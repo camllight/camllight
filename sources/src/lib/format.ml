@@ -672,6 +672,9 @@ let fprintf ppf format =
           | `.` ->
               pp_print_newline ppf ();
               doprn (succ j)
+          | `?` ->
+              pp_print_flush ppf ();
+              doprn (succ j)
           | `\n` ->
               pp_force_newline ppf ();
               doprn (succ j)
