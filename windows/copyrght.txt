@@ -1,6 +1,6 @@
 LEGAL NOTICE
 
-Software: CAML Light, version 0.71 of February 1996, hereinafter
+Software: CAML Light, version 0.72 of February 1996, hereinafter
 referred to as "the software".
 
 The software has been designed and produced by Xavier Leroy and
@@ -9,7 +9,7 @@ two research projects of Institut National de Recherche en
 Informatique et en Automatique (INRIA) - Domaine de Voluceau -
 Rocquencourt - 78153 Le Chesnay Cedex - France.
 
-INRIA holds all ownership rights to CAML Light version 0.6.
+INRIA holds all ownership rights to CAML Light version 0.72.
 
 The software has been registered at Agence pour la Protection
 des Programmes (APP).

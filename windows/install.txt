@@ -13,12 +13,11 @@ Win32s is distributed as a separate file win32s.zip, at the same site that
 distributes Caml Light. Unzip the win32s.zip file in a temporary directory,
 then follow the instructions in the file readme.txt.
 
-INSTALLING CAML FOR WINDOWS
+CONFIGURING CAML FOR WINDOWS
 
-I- In the following, we assume that you have unzipped the Caml Light
-for Windows distribution from the C:\ directory, thus putting all Caml
-files in the C:\CAML directory. If this is not the case, replace 
-C:\CAML by the appropriate absolute path name in the following.
+I- In the following, we assume that you have installed the Caml Light
+for Windows distribution in the C:\CAML directory. If this is not the case,
+replace C:\CAML by the appropriate absolute path name in the following.
 
 The directory C:\CAML should contain the following files:
 
@@ -32,20 +31,16 @@ The directory C:\CAML should contain the following files:
 	file INSTALL.TXT
 	file COPYRGHT.TXT
 
-If it contains much more files, you have probably forgotten the "-d" 
-option to "pkunzip". Please erase all extracted files and unzip again
-the distribution file, with the -d option to "pkunzip".
- 
-II- Edit the C:\CAML\CAMLWIN.INI file. Transform the lines in the [General]
+II- Edit the C:\WINDOWS\CAMLWIN.INI file. Transform the lines in the [General]
 section that read
 
 	CmdLine=camlrun c:\caml\lib\camltop -stdlib c:\caml\lib
-	HelpFile=c:\caml\doc\refman71.hlp
+	HelpFile=c:\caml\doc\refman72.hlp
 
 into
 
 	CmdLine=camlrun <CAML_PATH>\lib\camltop -stdlib <CAML_PATH>\lib
-	HelpFile=<CAML_PATH>\doc\refman71.hlp
+	HelpFile=<CAML_PATH>\doc\refman72.hlp
 
 where <CAML_PATH> is of course the directory where you have installed CAML.
 
@@ -56,13 +51,7 @@ If you'd like error messages in another language than English, add the
 
 <YOUR_LANG> can be any of fr, es, de, it.
 
-III- Copy CAMLWIN.INI into your Windows directory (usually, C:\WINDOWS).
-
-IV- You can now start the interactive Caml system by launching
-<CAML_PATH>\Camlwin.exe. Windows 3.x users may want to create a new Group
-for CAML, and add CAML to it.
-
-V- The Caml command-line tools (the batch compiler camlc.exe and other
+III- The Caml command-line tools (the batch compiler camlc.exe and other
 programming tools) are distributed in the BIN subdirectory. To use them:
 
 1- add <CAML_PATH>\BIN to the PATH variable
@@ -74,9 +63,9 @@ In addition to Windows 95, NT and 3.1, the command-line tools also run under
 plain MS-DOS and any operating system that provides DPMI, such as OS/2
 (untested).
 
-VI- The DOC subdirectory contains the Caml Light reference manual in
-Windows Help format and also in plain text format. The former can be
-read with WinHelp.
+IV- The DOC subdirectory contains the Caml Light reference manual in
+Windows Help format. It can be read with WinHelp, or from the toplevel
+application Camlwin.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

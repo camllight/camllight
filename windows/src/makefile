@@ -161,8 +161,3 @@ gui:
 	cd windows
         nmake
 
-# Make the distribution:
-distrib:
-	cd \
-	rm -f cl71win.zip
-	pkzip -r -P -ex cl71win.zip caml\*.*
