@@ -1,17 +1,12 @@
 # The standard library
 
-CAMLCOMP=../camlrun ../camlcomp
-CAMLLIBR=../camlrun ../camllibr
-CPP=cpp -P -Dmsdos -Uunix
-COMPFLAGS=-stdlib . -O none
-
 # The list of all interfaces. Order irrelevant.
 
 STD_INTF= arg.zi bool.zi char.zi string.zi vect.zi eq.zi exc.zi \
     fchar.zi filename.zi float.zi fstring.zi fvect.zi hashtbl.zi \
     int.zi io.zi lexing.zi list.zi obj.zi pair.zi parsing.zi printexc.zi \
     ref.zi sort.zi sys.zi printf.zi stream.zi stack.zi queue.zi random.zi \
-    genlex.zi baltree.zi set.zi map.zi graphics.zi
+    genlex.zi baltree.zi set.zi map.zi gc.zi graphics.zi
 
 # The list of all implementations. In dependency order.
 
@@ -19,23 +14,16 @@ STD_IMPL= eq.zo exc.zo int.zo float.zo fstring.zo string.zo fchar.zo \
     char.zo list.zo fvect.zo vect.zo io.zo pair.zo arg.zo \
     filename.zo hashtbl.zo lexing.zo parsing.zo printexc.zo sort.zo \
     printf.zo stream.zo stack.zo queue.zo random.zo genlex.zo \
-    baltree.zo set.zo map.zo graphics.zo
+    baltree.zo set.zo map.zo gc.zo graphics.zo
+
+GENSOURCES=filename.ml vect.ml string.ml genlex.ml
 
 all: $(STD_INTF) stdlib.zo
 
 stdlib.zo: $(STD_IMPL)
-	$(CAMLLIBR) -o stdlib.zo -files &&!
+	$(CAMLLIBR) -o stdlib.zo @&&!
 $(STD_IMPL)
 !
-
-clean:
-	del *.zi
-	del *.zo
-	del filename.ml
-	del vect.ml
-	del string.ml
-	del genlex.ml
-	del makefile.bak
 
 install:
 	copy stdlib.zo $(LIBDIR)
@@ -43,18 +31,8 @@ install:
 	copy *.mli $(LIBDIR)
 	del $(LIBDIR)\iparsing.mli
 
-.mli.zi:
-	$(CAMLCOMP) $(COMPFLAGS) {$< }
-.ml.zo:
-	$(CAMLCOMP) $(COMPFLAGS) {$< }
-.mlp.ml:
-	$(CPP) $< > $*.ml
-
-depend: filename.ml vect.ml string.ml genlex.ml
-	del makefile.bak
-	ren makefile makefile.bak
-	perl ../tools/cutdeps makefile.bak > makefile
-	perl ../tools/camldep >> makefile
+STDLIB=yes
+!include "../tools/make-ml.inc"
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
@@ -97,3 +75,4 @@ map.zo: map.zi eq.zi baltree.zi list.zi int.zi
 filename.zo: filename.zi exc.zi eq.zi fstring.zi int.zi 
 vect.zo: vect.zi exc.zi fvect.zi int.zi 
 string.zo: string.zi exc.zi fstring.zi int.zi 
+gc.zo: gc.zi
