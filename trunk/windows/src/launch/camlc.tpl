@@ -75,6 +75,8 @@ while : ; do
       compflags="$compflags -lang $2"
       linkflags="$compflags -lang $2"
       shift;;
+    -W)
+      compflags="$compflags -W";;
     *.c)
       $cc -c -I$stdlib $ccopt $1 || exit $?
       ccfiles="$ccfiles `basename $1 .c`.o";;

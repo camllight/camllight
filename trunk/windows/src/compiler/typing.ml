@@ -79,6 +79,10 @@ let rec type_of_structured_constant = function
       fatal_error "type_of_structured_constant" (* to do? *)
 ;;
 
+
+(* Enables warnings *)
+let warnings = ref false;;
+
 (* Typing of patterns *)
 
 let typing_let = ref false;;
@@ -99,9 +103,9 @@ let rec tpat new_env (pat, ty, mut_flag) =
       if mem_assoc v new_env then
         non_linear_pattern_err pat v
       else begin
-(*if !typing_let then upper_case_variable_warning pat "typage d'un let";*)
-        if (not !typing_let) & v.[0] >= `A` & v.[0] <= `Z` then
-         upper_case_variable_warning pat v;
+        if !warnings then begin
+         if (not !typing_let) & v.[0] >= `A` & v.[0] <= `Z` then
+          upper_case_variable_warning pat v end;
          (v, (ty, mut_flag)) :: new_env end
   | Zaliaspat(pat, v) ->
       if mem_assoc v new_env then

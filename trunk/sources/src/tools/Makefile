@@ -1,4 +1,4 @@
-CAMLCOMP=../camlrun ../camlcomp -stdlib ../lib
+CAMLCOMP=../camlrun ../camlcomp -W -stdlib ../lib
 CAMLLINK=../camlrun ../camllink -stdlib ../lib
 CAMLLEX=../camlrun ../camllex
 INCLUDES=-I ../compiler -I ../linker
