@@ -1,6 +1,5 @@
 (*********************** Recursive Path Ordering ****************************)
 
-#open "prelude";;
 #open "terms";;
 
 type ordering = Greater | Equal | NotGE;;

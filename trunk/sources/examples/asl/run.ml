@@ -1,6 +1,5 @@
 (* $Id$ *)
 
-#open "asl";;
 #open "main";;
 
 input_stream := stdin;;

@@ -1,7 +1,5 @@
 (* $Id$ *)
 
-#open "asl";;
-
 let I x = x;;
 
 let keywords =

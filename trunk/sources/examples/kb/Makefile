@@ -47,7 +47,6 @@ makefiles:: makefile
 # Generated dependencies below
 
 equation.zo: prelude.zo terms.zo 
-go.zo: order.zo equation.zo prelude.zo kb.zo terms.zo 
+go.zo: order.zo kb.zo terms.zo 
 kb.zo: equation.zo prelude.zo terms.zo 
-order.zo: prelude.zo terms.zo 
-terms.zo: prelude.zo 
+order.zo: terms.zo 

@@ -1,6 +1,5 @@
 (* $Id$ *)
 
-#open "asl";;
 #open "parser";;
 
 let rec nth n = function

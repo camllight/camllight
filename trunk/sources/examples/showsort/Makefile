@@ -8,7 +8,7 @@ CAMLYACC=camlyacc
 CPP=/lib/cpp -P
 CAMLDEP=camldep
 RM=rm -f
-TOP=..
+TOP=../.
 CONFIG=$(TOP)/config
 
 all::
@@ -46,4 +46,7 @@ makefiles:: makefile
 
 # Generated dependencies below
 
+animation.zo: animation.zi 
+bubble.zo: animation.zi 
+insertion.zo: animation.zi 
 loadall.zo: showsort.zo 

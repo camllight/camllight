@@ -1,7 +1,6 @@
 (* $Id$ *)
 
 #open "stream";;
-#open "asl";;
 #open "token";;
 
 type asl = Const of int

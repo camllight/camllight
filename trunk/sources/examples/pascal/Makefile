@@ -63,7 +63,7 @@ interp.zi: syntaxe.zi
 typage.zi: syntaxe.zi 
 compil.zo: compil.zi envir.zi typage.zi syntaxe.zi 
 cpascal.zo: compil.zi typage.zi syntaxe.zi 
-envir.zo: envir.zi interp.zi syntaxe.zi 
+envir.zo: envir.zi syntaxe.zi 
 interp.zo: interp.zi valeur.zi envir.zi syntaxe.zi 
 ipascal.zo: interp.zi typage.zi syntaxe.zi 
 lexuniv.zo: lexuniv.zi 

@@ -1,6 +1,5 @@
 (* $Id$ *)
 
-#open "asl";;
 #open "parser";;
 
 type semval = Numval of int
