@@ -1,6 +1,7 @@
 (* System functions for interactive use. *)
 
 #open "obj";;
+#open "printf";;
 #open "meta";;
 #open "misc";;
 #open "const";;
@@ -132,92 +133,95 @@ let quit x = io__exit 0; ()
 
 let trace_env = ref ([] : (int * obj) list);;
 
-let rec trace_instr name obj ty =
+let rec trace_instr name val ty =
   match (type_repr ty).typ_desc with
     Tarrow(t1,t2) ->
       let namestar = name ^ "*" in
       repr(fun arg ->
-        print_begline name; print_string " <-- ";
+        print_string name; print_string " <-- ";
         print_value arg t1; print_newline ();
         try
-          let res = (magic_obj obj : obj -> obj) arg in
-            print_begline name; print_string " --> ";
-            print_value res t2; print_newline ();
-            trace_instr namestar res t2
+          let res = (magic_obj val : obj -> obj) arg in
+          print_string name; print_string " --> ";
+          print_value res t2; print_newline ();
+          trace_instr namestar res t2
         with exc ->
-          print_begline name; print_string " raises exception ";
-          print_value (repr exc) builtins__type_exn; print_newline ();
+          print_string name;
+          print_string " raises ";
+          print_value (repr exc) builtins__type_exn;
+          print_newline ();
           raise exc)
-  | _ -> obj
+  | Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args) ->
+      trace_instr name val (expand_abbrev params body args)
+  | _ -> val
 ;;
 
 let trace name =
-  try
+  begin try
     let val_desc = find_value_desc (parse_global name) in
     let pos = get_slot_for_variable val_desc.qualid in
-      if mem_assoc pos !trace_env then begin
-        prerr_begline "> "; prerr_string name;
-        prerr_endline " is already traced."
-      end else begin
-        trace_env := (pos, global_data.(pos)) :: !trace_env;
-        global_data.(pos) <-
-          trace_instr name global_data.(pos) val_desc.info.val_typ;
-        prerr_begline "> "; prerr_string name;
-        prerr_endline " is now traced."
-      end
+    if mem_assoc pos !trace_env then begin
+      eprintf "The function %s is already traced.\n" name        
+    end else begin
+      trace_env := (pos, global_data.(pos)) :: !trace_env;
+      global_data.(pos) <-
+        trace_instr name global_data.(pos) val_desc.info.val_typ;
+      eprintf "The function %s is now traced.\n" name
+    end
   with Desc_not_found ->
-    prerr_begline ">> "; prerr_string name; prerr_endline " is undefined."
+    eprintf "Unknown function %s.\n" name
+  end;
+  flush std_err
 ;;
 
 let untrace name =
-  try
+  begin try
     let val_desc = find_value_desc (parse_global name) in
     let pos = get_slot_for_variable val_desc.qualid in
     let rec except = function
-      [] -> prerr_begline "> "; prerr_string name;
-            prerr_endline " was not traced.";
-            []
+      [] ->
+        eprintf "The function %s was not traced.\n";
+        []
     | (pos',obj as pair)::rest ->
         if pos == pos' then begin
           global_data.(pos) <- obj;
-          prerr_begline "> "; prerr_string name;
-          prerr_endline " is no longer traced.";
+          eprintf "The function %s is no longer traced.\n" name;
           rest
         end else
-          pair :: except rest
-    in
-      trace_env := except !trace_env;
-      ()
+          pair :: except rest in
+    trace_env := except !trace_env
   with Desc_not_found ->
-    prerr_begline ">> "; prerr_string name; prerr_endline " is undefined."
+    eprintf "Unknown function %s.\n" name
+  end;
+  flush std_err
 ;;
 
 (* To define specific printing functions. *)
 
 let new_printer name printer =
-  try
-    let typ_desc =
-      find_type_desc (parse_global name) in
-    printers := (typ_desc.info.ty_constr, magic printer) :: !printers;
-    ()
+  begin try
+    let typ_desc = find_type_desc (parse_global name) in
+    printers := (typ_desc.info.ty_constr, magic printer) :: !printers
   with Not_found ->
-    prerr_begline ">> Type "; prerr_string name;
-    prerr_endline " is undefined."
+    eprintf "Unknown type %s.\n" name
+  end;
+  flush std_err
 ;;
 
 let default_printer name =
-  try
-    let ty_constr =
-      (find_type_desc (parse_global name)).info.ty_constr in
+  begin try
+    let ty_constr = (find_type_desc (parse_global name)).info.ty_constr in
     let rec remove = function
-      [] -> []
-    | (ty,_ as pair)::rest ->
-        if same_type_constr ty ty_constr then rest else pair :: remove rest in
-    printers := remove !printers;
-    ()
+        [] -> []
+      | (ty,_ as pair)::rest ->
+          if same_type_constr ty ty_constr
+          then rest
+          else pair :: remove rest in
+    printers := remove !printers
   with Not_found ->
-    prerr_begline ">> Type "; prerr_string name;
-    prerr_endline " is undefined."
+    eprintf "Unknown type %s.\n" name
+  end;
+  flush std_err
 ;;
 
 (* Trigger a GC *)
@@ -239,8 +243,9 @@ let compile s =
       let filename = filename__chop_suffix s ".mli" in
       compile_interface (filename__basename filename) filename
     else begin
-      prerr_begline ">> Incorrect file name ";
-      prerr_endline s
+      eprintf "Incorrect source file name %s.\n\
+               A source file name must end in \".ml\" or \".mli\".\n" s;
+      flush std_err
     end))
 ;;
 
@@ -248,8 +253,9 @@ let compile s =
    internal definitions. *)
 
 let debug_mode status =
-  use_extended_zi := status;
-  write_extended_zi := status;
+  use_extended_interfaces := status;
+  event__record_events := status;
+  compiler__write_extended_intf := status;
   flush_module_cache()
 ;;
 
