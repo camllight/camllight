@@ -7,24 +7,24 @@ let max = 255;;
 
 let nround x y = (2*x+y)/(2*y);;
 
-let rgb_of_hsb H S V =
-  let H = H*6 in
-  let I = H/max*max in
-  let F = H-I in
-  let M = V*(max-S)/max and N = V*(max-S*F/max)/max
-  and K = V*(max-S*(max-F)/max)/max in
+let rgb_of_hsb h s v =
+  let h = h*6 in
+  let i = h/max*max in
+  let f = h-i in
+  let m = v*(max-s)/max and n = v*(max-s*f/max)/max
+  and k = v*(max-s*(max-f)/max)/max in
   graphics__rgb
     (nround (max*(
-      match I/max with
-        0 | 6 -> V | 1 -> N | 2 -> M | 3 -> M | 4 -> K | 5 -> V
+      match i/max with
+        0 | 6 -> v | 1 -> n | 2 -> m | 3 -> m | 4 -> k | _ -> v
     )) max)
     (nround (max*(
-      match I/max with
-        0 | 6 -> K | 1 -> V | 2 -> V | 3 -> N | 4 -> M | 5 -> M
+      match i/max with
+        0 | 6 -> k | 1 -> v | 2 -> v | 3 -> n | 4 -> m | _ -> m
     )) max)
     (nround (max*(
-      match I/max with
-        0 | 6 -> M | 1 -> M | 2 -> K | 3 -> V | 4 -> V | 5 -> N
+      match i/max with
+        0 | 6 -> m | 1 -> m | 2 -> k | 3 -> v | 4 -> v | _ -> n
     )) max)
 ;;
 
