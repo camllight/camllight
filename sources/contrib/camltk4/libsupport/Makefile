@@ -14,7 +14,8 @@ TKINCLDIR=/usr/local/lib/tk/include
 RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
 RANLIB=ranlib
 
-all: support.zo textvariable.zo optionmenu.zo camltk.zi libcamltk.a protocol.zo
+all: hashtblc.zo support.zo protocol.zo textvariable.zo optionmenu.zo \
+     camltk.zi libcamltk4.a
 
 camltk.o : camltk.c
 	$(CC) -g -c -I../../../src/runtime \
@@ -23,12 +24,12 @@ camltk.o : camltk.c
 		 -I$(TKINCLDIR) \
 		 camltk.c
 
-libcamltk.a : camltk.o
-	rm -f libcamltk.a
-	ar rc libcamltk.a camltk.o
-	if $(RANLIBTEST); then $(RANLIB) libcamltk.a; else true; fi
+libcamltk4.a : camltk.o
+	rm -f libcamltk4.a
+	ar rc libcamltk4.a camltk.o
+	if $(RANLIBTEST); then $(RANLIB) libcamltk4.a; else true; fi
 
-install: libcamltk.a support.zi textvariable.zi protocol.zi
+install: libcamltk4.a support.zi textvariable.zi protocol.zi
 	if test -d $(LIBDIR); then : ; else mkdir $(LIBDIR); fi
 	cp support.zi $(LIBDIR)
 	cp support.zix $(LIBDIR)
@@ -37,8 +38,8 @@ install: libcamltk.a support.zi textvariable.zi protocol.zi
 	cp optionmenu.zi $(LIBDIR)
 	cp optionmenu.zix $(LIBDIR)
 	cp protocol.zi $(LIBDIR)
-	cp libcamltk.a $(LIBDIR)
-	chmod 644 $(LIBDIR)/*.zi $(LIBDIR)/libcamltk.a
+	cp libcamltk4.a $(LIBDIR)
+	chmod 644 $(LIBDIR)/*.zi $(LIBDIR)/libcamltk4.a
 
 clean : 
 	rm -f *.z* *.o *.a
@@ -64,8 +65,9 @@ camltk.zi: protocol.zi
 optionmenu.zi: support.zi textvariable.zi 
 protocol.zi: support.zi 
 textvariable.zi: protocol.zi 
+hashtblc.zo: hashtblc.zi 
 mainloop.zo: protocol.zi 
 optionmenu.zo: optionmenu.zi protocol.zi support.zi textvariable.zi 
-protocol.zo: protocol.zi support.zi camltk.zi 
+protocol.zo: protocol.zi hashtblc.zi support.zi camltk.zi 
 support.zo: support.zi 
 textvariable.zo: textvariable.zi protocol.zi 
