@@ -154,7 +154,7 @@ Interface :
           { make_intf(Zvaluedecl $2) }
       | TYPE Type_decl SEMISEMI
           { make_intf(Ztypedecl $2) }
-      | EXCEPTION Exc_decl  SEMISEMI
+      | EXCEPTION Exc_decl SEMISEMI
           { make_intf(Zexcdecl $2) }
       | SHARP Directive SEMISEMI
           { make_intf(Zintfdirective $2) }
@@ -237,7 +237,11 @@ Expr :
       | Expr EQUALEQUAL Expr
           { make_binop "==" $1 $3 }
       | Expr COLONEQUAL Expr
+<<<<<<< parser.mly
+          { make_assign $1 $3 }
+=======
           { make_assignment $1 $3 }
+>>>>>>> 1.5
       | Expr AMPERSAND Expr 
           { make_expr(Zsequand($1, $3)) }
       | Expr AMPERAMPER Expr 
