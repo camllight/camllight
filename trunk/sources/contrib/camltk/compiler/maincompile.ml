@@ -52,6 +52,14 @@ let parse_file filename =
       close_in ic
 ;;
 
+
+(* Bad hack because of collision *)
+let rename_module = function 
+   "toplevel" -> "toplevelw"
+ | s -> s
+;;
+
+
 let compile () = 
   let oc = open_out_bin "lib/tkgen.ml" in
     let sorted_types = tsort__sort types_order in
@@ -74,8 +82,9 @@ let compile () =
     close_out oc;
   hashtbl__do_table 
     (fun wname wdef ->
-      let oc = open_out_bin ("lib/" ^ wname ^ ".ml") 
-      and oc' = open_out_bin ("lib/" ^ wname ^ ".mli") in
+      let modname = rename_module wname in
+      let oc = open_out_bin ("lib/" ^ modname ^ ".ml") 
+      and oc' = open_out_bin ("lib/" ^ modname ^ ".mli") in
       	output_string oc "#open\"protocol\";;\n";
       	output_string oc "#open\"tk\";;\n";
       	output_string oc' "#open\"tk\";;\n";
@@ -100,7 +109,7 @@ let compile () =
     output_string oc "WIDGETOBJS=";
     hashtbl__do_table
        (fun name _ ->
-	 output_string oc name;
+	 output_string oc (rename_module name);
 	 output_string oc ".zo ")
        module_table;
     output_string oc "\n";
