@@ -14,6 +14,7 @@
 /* Identifiers, prefixes, infixes */
 %token <string> IDENT
 %token <string> PREFIX
+%token <string> INFIX0
 %token <string> INFIX1
 %token <string> INFIX2
 %token <string> SUBTRACTIVE
@@ -110,7 +111,8 @@
 %left  OR BARBAR
 %left  AMPERSAND AMPERAMPER
 %left  NOT
-%left  INFIX1 EQUAL EQUALEQUAL          /* comparisons, concatenations */
+%left  INFIX0 EQUAL EQUALEQUAL          /* comparisons */
+%right INFIX1                           /* concatenations */
 %right COLONCOLON                       /* cons */
 %left  INFIX2 SUBTRACTIVE               /* additives, subtractives */
 %left  STAR INFIX3                      /* multiplicatives */
@@ -188,6 +190,8 @@ Expr :
           { make_binop $2 $1 $3 }
       | Expr INFIX1 Expr
           { make_binop $2 $1 $3 }
+      | Expr INFIX0 Expr
+          { make_binop $2 $1 $3 }
       | Expr STAR Expr
           { make_binop "*" $1 $3 }
       | Expr COLONCOLON Expr
@@ -215,7 +219,8 @@ Expr :
       | IF Expr THEN Expr ELSE Expr  %prec prec_if
           { make_expr(Zcondition($2, $4, $6)) }
       | IF Expr THEN Expr  %prec prec_if
-          { make_expr(Zcondition($2, $4, make_expr(Zconstruct0(constr_void)))) }
+          { make_expr
+             (Zcondition($2, $4, make_expr(Zconstruct0(constr_void)))) }
       | WHILE Expr DO Opt_expr DONE
           { make_expr(Zwhile($2, $4)) }
       | FOR Ide EQUAL Expr TO Expr DO Opt_expr DONE
@@ -259,8 +264,6 @@ Simple_expr :
           { make_expr(Zvector(rev $2)) }
       | LBRACKETLESS Stream_expr GREATERRBRACKET
           { make_expr(Zstream (rev $2)) }
-      | LBRACKETLESS GREATERRBRACKET
-          { make_expr(Zstream []) }
       | LPAREN Expr COLON Type RPAREN
           { make_expr(Zconstraint($2, $4)) }
       | LPAREN Opt_expr RPAREN
@@ -296,17 +299,12 @@ Expr_comma_list :
 Expr_sm_list :
         Expr_sm_list SEMI Expr  %prec prec_list
           { $3 :: $1 }
+      | Expr                    %prec prec_list
+          { [$1] }
       | Expr_sm_list SEMI
           { $1 }
-      | Expr  %prec prec_list
-          { [$1] }
       | /*epsilon*/
           { [] }
-;
-
-Opt_semi :
-        SEMI            { () }
-      | /*epsilon*/     { () }
 ;
 
 Opt_expr :
@@ -319,11 +317,11 @@ Expr_label :
 ;
 
 Expr_label_list :
-        Expr_label_list SEMI Expr_label  %prec prec_list
-          { $3 :: $1 }
-      | Expr_label_list SEMI
-          { $1 }
-      | Expr_label  %prec prec_list
+        Expr_label SEMI Expr_label_list %prec prec_list
+          { $1 :: $3 }
+      | Expr_label %prec prec_list
+          { [$1] }
+      | Expr_label SEMI %prec prec_list
           { [$1] }
 ;
 
@@ -397,23 +395,24 @@ Binding :
 /* Patterns */
 
 Pattern_sm_list :
-        Pattern SEMI Pattern_sm_list
-          { make_pat(Zconstruct1pat(constr_cons,
-              make_pat(Ztuplepat[$1; $3]))) }
+        Pattern_sm_list SEMI Pattern
+          { $3 :: $1 }
       | Pattern
-          { make_pat(Zconstruct1pat(constr_cons,
-              make_pat(Ztuplepat [$1;
-                make_pat(Zconstruct0pat(constr_nil))]))) }
+          { [$1] }
+      | Pattern_sm_list SEMI
+          { $1 }
       | /*epsilon*/
-          { make_pat(Zconstruct0pat(constr_nil)) }
+          { [] }
 ;
 
 Pattern_label_list :
         Pattern_label SEMI Pattern_label_list
           { $1 :: $3 }
-      | Pattern_label Opt_semi
+      | Pattern_label
           { [$1] }
-      | UNDERSCORE Opt_semi
+      | UNDERSCORE
+          { [] }
+      | /*epsilon*/
           { [] }
 ;
 
@@ -468,11 +467,11 @@ Simple_pattern :
       | LPAREN RPAREN
           { make_pat(Zconstruct0pat(constr_void)) }
       | LBRACKET Pattern_sm_list RBRACKET
-          { $2 }
+          { make_listpat($2) }
       | LPAREN Pattern COLON Type RPAREN
           { make_pat(Zconstraintpat($2, $4)) }
       | LBRACE Pattern_label_list RBRACE
-          { make_pat(Zrecordpat $2) }
+          { make_recordpat($2) }
       | LPAREN Pattern RPAREN
           { $2 }
       | CHAR DOTDOT CHAR
@@ -482,12 +481,14 @@ Simple_pattern :
 /* Streams */
 
 Stream_expr :
-        Stream_expr SEMI Stream_expr_component  %prec prec_list
-          { $3 :: $1 }
-      | Stream_expr SEMI
-          { $1 }
+        Stream_expr_component SEMI Stream_expr  %prec prec_list
+          { $1 :: $3 }
       | Stream_expr_component  %prec prec_list
           { [$1] }
+      | Stream_expr SEMI
+          { $1 }
+      | /*epsilon*/
+          { [] }
 ;
 
 Stream_expr_component :
@@ -498,19 +499,21 @@ Stream_expr_component :
 ;
 
 Stream_pattern :
-        LBRACKETLESS GREATERRBRACKET
-          { [] }
-      | LBRACKETLESS Stream_pattern_component_list Opt_semi GREATERRBRACKET
+        LBRACKETLESS Stream_pattern_component_list GREATERRBRACKET
           { $2 }
 ;
 
 Stream_pattern_component_list :
-        Stream_pattern_component
-          { [$1] }
+        Stream_pattern_component SEMI Stream_pattern_component_list
+          { $1 :: $3 }
+      | Stream_pattern_component_list SEMI
+          { $1 }
       | IDENT
           { [Zstreampat $1] }
-      | Stream_pattern_component SEMI Stream_pattern_component_list
-          { $1 :: $3 }
+      | Stream_pattern_component
+          { [$1] }
+      | /*epsilon*/
+          { [] }
 ;
 
 Stream_pattern_component :
@@ -537,7 +540,8 @@ Ide :
 ;
 
 Infx :
-        INFIX1          { $1 }    | INFIX2        { $1 }
+        INFIX0          { $1 }
+      | INFIX1          { $1 }    | INFIX2        { $1 }
       | INFIX3          { $1 }    | INFIX4        { $1 }
       | STAR            { "*" }   | COLONCOLON    { "::" }
       | COLONEQUAL      { ":=" }  | EQUAL         { "=" }
@@ -633,7 +637,9 @@ Constr_decl :
 Label_decl :
         Label1_decl SEMI Label_decl
           { $1 :: $3 }
-      | Label1_decl Opt_semi
+      | Label1_decl SEMI
+          { [$1] }
+      | Label1_decl
           { [$1] }
 ;
 
