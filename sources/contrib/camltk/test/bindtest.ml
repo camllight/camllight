@@ -1,5 +1,13 @@
 #open "tk";;
 
+let int_of_string s =
+  try
+    int_of_string s
+  with
+    _ -> 0
+;;
+
+
 let ActNumber1 = ref 0 ;;
 let ActNumber2 = ref 0 ;;
 
