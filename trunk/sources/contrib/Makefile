@@ -39,10 +39,15 @@ MANEXT=1
 # The directory where the manual pages will be installed
 MANDIR=/usr/local/man/man$(MANEXT)
 
-# The path to the X11 include directory
-# (usually /usr/include/X11; for SunOS, /usr/openwin/include/X11)
+# The path to the include directory containing the X11/*.h includes
+# (usually /usr/include; for SunOS with OpenLook, /usr/openwin/include)
 # Needed only for the "libgraph" package.
-X11_INCLUDES=/usr/include/X11
+X11_INCLUDES=/usr/include
+
+# The path to the directory containing the X11 libraries.
+# (usually /usr/lib; for SunOS with OpenLook, /usr/openwin/lib)
+# Needed for the "libgraph" and "camltk" packages.
+X11_LIB=/usr/lib
 
 # Name of the target architecture.
 # Used only for the libnum library (arbitrary-precision arithmetic), to
@@ -90,6 +95,7 @@ DEFINES=\
   BINDIR='$(BINDIR)' \
   LIBDIR='$(LIBDIR)' \
   MANDIR='$(MANDIR)' \
+  MANEXT='$(MANEXT)' \
   X11_INCLUDES='$(X11_INCLUDES)' \
   BIGNUM_ARCH='$(BIGNUM_ARCH)' \
   TEXINPUTDIR='$(TEXINPUTDIR)' \
