@@ -47,47 +47,50 @@ let new_file_top =
 
 (* Almost like visual/hypertext *)
 let display_file filename =
+  let t = toplevelw__create 
+	     (support__new_toplevel_widget (new_file_top())) [] in
+  let title =
+    label__create t [Text filename; Relief Raised] in
+  pack [title] [Fill Fill_X];
+  (* put in "busy mode" *)
+  label__configure title [Cursor (XCursor "watch")];
+  update_idletasks(); (* would have expected to display title properly *)
   try
+     (* This is the costly operation *)
      let s = load_file filename in
-     let t = toplevelw__create 
-		(support__new_toplevel_widget (new_file_top())) [] in
-     let title =
-       label__create t [Text filename; Relief Raised] in
-     pack [title] [Fill Fill_X];
-     label__configure title [Cursor (XCursor "watch")];
-     update();
+     (* The rest of the interface *)
      let f = frame__create t [] in
      let tx = text__create f [] in
-       display_source tx (TI_LineChar(0,0)) s;      
+       display_source tx (TI_LineChar(0,0)) s;
+       let get_current_anchor () =
+	 let b = text__index tx (TextIndex (TI_Mark "current", [WordStart]))
+	 and e = text__index tx (TextIndex (TI_Mark "current", [WordEnd])) in
+	  text__get tx (TextIndex(b,[]))  (TextIndex(e,[])) in
+
+	 bind tx [[Double], WhatButton 1] 
+	  (BindExtend ([], fun _ -> visual_search_any (get_current_anchor())));
+
      let sb = scrollbar__create f [] in
        util__scroll_text_link sb tx;
        pack [tx] [Side Side_Left; Fill Fill_Both; Expand true];
        pack [sb] [Side Side_Left; Fill Fill_Y];
        util__navigation_keys tx sb;
-     let q = 
-       button__create t [Text "Ok"; Relief Raised; 
-			 Command (fun _ -> destroy t)] in
+     let q = button__create t [Text "Ok"; Relief Raised; 
+			       Command (fun _ -> destroy t)] in
 
        pack [f] [Fill Fill_Both; Expand true];
        pack [q] [Side Side_Bottom; Fill Fill_X];
-       label__configure title [Cursor (XCursor "hand2")];
-       bind tx [[Any],XKey "Escape"] 
+           bind tx [[Any],XKey "Escape"] 
       	     (BindSet([], (fun _ -> button__invoke q)));
-	     
-     let get_current_anchor () =
-       let b = text__index tx (TextIndex (TI_Mark "current", [WordStart]))
-       and e = text__index tx (TextIndex (TI_Mark "current", [WordEnd])) in
-      	text__get tx (TextIndex(b,[]))  (TextIndex(e,[])) in
-
-     bind tx [[Double], WhatButton 1] 
-      (BindExtend ([], fun _ -> visual_search_any (get_current_anchor())));
-
+       label__configure title [Cursor (XCursor "hand2")];
        util__resizeable t
   with 
     Cannot_find_file filename ->
-      begin dialog (support__new_toplevel_widget "error")
-      	"Caml Browser Error"
-	("Cannot open " ^ filename )
-	(Predefined "error") 0 ["Ok"]; ()
+      begin 
+       destroy t;
+       dialog (support__new_toplevel_widget "error")
+      	      "Caml Browser Error"
+	      ("Cannot open " ^ filename )
+	      (Predefined "error") 0 ["Ok"]; ()
       end
 ;;

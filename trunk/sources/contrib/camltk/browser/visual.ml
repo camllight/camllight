@@ -28,7 +28,7 @@ let rec visual_meta visual silent sym =
       label__create t [Text (visual.namer desc); Relief Raised] in
     pack [title] [Fill Fill_X];
     label__configure title [Cursor (XCursor "watch")];
-    update();
+    update_idletasks();
     let f = frame__create t [] in
     let tx = hypertext f visual.hyperprinter desc in
     let sb = scrollbar__create f [] in

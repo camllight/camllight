@@ -2,11 +2,12 @@
 LIBDIR=/usr/local/lib/caml-light
 BINDIR=/usr/local/bin
 
+PROFILING=${CAMLPROF}
 CAMLC=camlc
-CAMLCOMP=$(CAMLC) -c
+CAMLCOMP=$(CAMLC) -c $(PROFILING)
 CPP=/lib/cpp -P -Dunix
 
-LINKFLAGS=-g -custom
+LINKFLAGS=-g -custom $(PROFILING)
 CAMLYACC=camlyacc -v
 CAMLLEX=camllex
 

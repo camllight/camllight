@@ -28,6 +28,7 @@ let open title action =
   grab__set_local t;
   let tit = label__create t [Text title] in
   let e = entry__create t [Relief Sunken] in
+    util__entry_bindings e;
     tk__bind e [[], XKey "Return"]
       	(BindSet ([], fun _ -> action (entry__get e); destroy t));
 
@@ -45,7 +46,6 @@ let open title action =
       	 (BindSet ([], (fun _ -> button__invoke bcancel)));
     tk__bind e [[], XKey "Escape"]
       	 (BindSet ([], (fun _ -> button__invoke bcancel)));
-
     pack [bok; bcancel] [Side Side_Left; Fill Fill_X; Expand true];
     pack [tit;e] [Fill Fill_X];
     pack [f] [Side Side_Bottom; Fill Fill_X];
@@ -142,6 +142,7 @@ let browsing_panel parent =
    let enterf = frame__create f [] in
    let m = label__create enterf [Text "Enter a global symbol:"] in
    let e = entry__create enterf [Relief Sunken] in
+      util__entry_bindings e;
       tk__bind e [[], XKey "Return"]
                  (BindSet ([], (fun _ -> visual_search_any 
       	       	       	       	       	  (entry__get e))));
