@@ -22,6 +22,7 @@ let scroll_listbox_link sb lb =
         [Slidecommand (fun n -> listbox__yview lb (Number n))]
 ;;
 
+(********************* Navigation for Text widgets *******************)
 (* Text scrollers in Disabled mode : we can't use the insertion mark *)
 (* MUST HAVE an associated scrollbar 				     *)
 (* totalUnits = number of lines 
@@ -109,7 +110,7 @@ let navigation_keys tx sb =
    line_up_keys tx sb
 ;;
 
-(********************* Line editor for entry widgets *********************)
+(********************* Line editor for Entry widgets *********************)
 (* tk 3.6 has standard bindings
    - (mouse selection)
    - Delete/BackSpace/Control-h	: backward-delete-char
@@ -151,7 +152,7 @@ let entry_kill_region e _ =
    protocol__TkError "selection isn't in entry" -> ()
 ;;
 
-
+(* Could you bind_class Entry instead *)
 let entry_bindings e =
   (* paste with mouse (already on C-v) *)
   bind e [[], WhatButton 2]
@@ -174,4 +175,70 @@ let entry_bindings e =
   bind e [[Control], XKey "w"] BindRemove;
   bind e [[Control], XKey "d"] (BindSet ([], entry_delete_char e));
   bind e [[Control], XKey "w"] (BindSet ([], entry_kill_region e));
+;;
+
+(**************************** Simple requester ********************)
+(* Note: grabs focus, thus always unique at one given moment      *)
+
+let open_req title action =
+  let t = toplevelw__create (support__new_toplevel_widget "open") [] in
+  focus__set t;
+  grab__set_local t;
+  let tit = label__create t [Text title] in
+  let e = entry__create t [Relief Sunken] in
+    util__entry_bindings e;
+    tk__bind e [[], XKey "Return"]
+      	(BindSet ([], fun _ -> action (entry__get e); destroy t));
+
+  let f = frame__create t [] in
+  let bok = button__create f
+      	    [Text "Ok"; 
+      	     Command (fun () -> action (entry__get e); destroy t)] in
+  let bcancel = button__create f
+      	    [Text "Cancel"; 
+      	     Command (fun () -> destroy t)] in
+
+    tk__bind t [[], XKey "Return"]
+      	 (BindSet ([], (fun _ -> button__invoke bok)));
+    tk__bind t [[], XKey "Escape"]
+      	 (BindSet ([], (fun _ -> button__invoke bcancel)));
+    tk__bind e [[], XKey "Escape"]
+      	 (BindSet ([], (fun _ -> button__invoke bcancel)));
+    pack [bok; bcancel] [Side Side_Left; Fill Fill_X; Expand true];
+    pack [tit;e] [Fill Fill_X];
+    pack [f] [Side Side_Bottom; Fill Fill_X];
+    util__resizeable t;
+    focus__set e
+;;
+
+(******************** Simple list requester ********************)
+let open_list_req title elements action =
+  let t = toplevelw__create (support__new_toplevel_widget "openlist") [] in
+  focus__set t;
+  grab__set_local t;
+  let tit = label__create t [Text title] in
+
+  let fls = frame__create t [Relief Sunken; Borderwidth (Pixels 2)] in 
+  let lb = listbox__create fls [] in
+  let sb = scrollbar__create fls [] in
+    scroll_listbox_link sb lb;
+    listbox__insert lb End elements;
+  let activate _ =
+    do_list (fun s -> action (listbox__get lb s))
+      	    (listbox__curselection lb);
+    destroy t in
+  tk__bind lb [[Double], WhatButton 1] (BindSet ([], activate));
+
+  let f = frame__create t [] in
+  let bok = button__create f [Text "Ok"; Command activate] in
+  let bcancel = button__create f 
+      	       	      [Text "Cancel"; Command (fun () -> destroy t)] in
+
+    pack [bok; bcancel] [Side Side_Left; Fill Fill_X; Expand true];
+    pack [lb] [Side Side_Left; Fill Fill_Both; Expand true];
+    pack [sb] [Side Side_Right; Fill Fill_Y];
+    pack [tit] [Fill Fill_X];
+    pack [fls] [Fill Fill_Both; Expand true];
+    pack [f] [Side Side_Bottom; Fill Fill_X];
+    util__resizeable t
 ;;

@@ -22,13 +22,13 @@ TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
 
 CAMLDEP=../../../src/tools/camldep
 
-COMPFLAGS=-W -g -O fast -I $(CAMLTKDIR) -I $(SUPPORTDIR) -I $(UNIXDIR) \
+COMPFLAGS=-W -g -O cautious -I $(CAMLTKDIR) -I $(SUPPORTDIR) -I $(UNIXDIR) \
           -I ../../../src/compiler
 
 COMPILEROBJS = config.zo misc.zo interntl.zo globals.zo modules.zo \
                location.zo types.zo \
                error.zo const.zo builtins.zo
-OBJS= lexer.zo util.zo hyper_printers.zo visual.zo source.zo main.zo
+OBJS= lexer.zo util.zo modlist.zo hyper_printers.zo visual.zo source.zo main.zo
 
 all: camlbrowser
 
@@ -81,5 +81,5 @@ depend:
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
 main.zo: source.zo util.zo visual.zo hyper_printers.zo 
-source.zo: util.zo visual.zo 
+source.zo: util.zo visual.zo lexer.zo 
 visual.zo: util.zo hyper_printers.zo 
