@@ -28,7 +28,9 @@ COMPFLAGS=-W -g -O cautious -I $(CAMLTKDIR) -I $(SUPPORTDIR) -I $(UNIXDIR) \
 COMPILEROBJS = config.zo misc.zo interntl.zo globals.zo modules.zo \
                location.zo types.zo \
                error.zo const.zo builtins.zo
-OBJS= lexer.zo util.zo modlist.zo hyper_printers.zo visual.zo source.zo main.zo
+OBJS= lexer.zo util.zo modlist.zo tags.zo source.zo \
+      hyper_printers.zo visual.zo main.zo
+
 
 all: camlbrowser
 
@@ -72,7 +74,7 @@ install: camlbrowser
 	$(CAMLCOMP) $(COMPFLAGS) $<
 
 
-depend:
+depend: main.ml lexer.ml
 	mv Makefile Makefile.bak
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
 	 $(CAMLDEP) *.mli *.ml) > Makefile
@@ -80,6 +82,6 @@ depend:
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
-main.zo: source.zo util.zo visual.zo hyper_printers.zo 
-source.zo: util.zo visual.zo lexer.zo 
-visual.zo: util.zo hyper_printers.zo 
+main.zo: util.zo modlist.zo visual.zo tags.zo 
+source.zo: lexer.zo 
+visual.zo: source.zo util.zo hyper_printers.zo tags.zo 

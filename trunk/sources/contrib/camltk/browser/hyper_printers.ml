@@ -8,19 +8,20 @@
 #open "tk";;
 
 
-
+(******* Printing buffer *********)
 let buffer = ref (create_string 1024)
-;;
-let buffer_len = ref 1024
+and buffer_len = ref 1024
 ;;
 let curpos = ref 0
 ;;
-let tags = ref ([] : (int * int) list)
+let tags = ref ([] : (int * int) list)	       (* .zi navigation *)
+and source_tags = ref ([] : (int * int) list)  (* source navigation *)
 ;;
 
 let reset_state () =
   curpos := 0; 
-  tags := []
+  tags := [];
+  source_tags := []
 ;;
 
 
@@ -38,6 +39,13 @@ let print_string s =
 let get_print_buffer () = 
   sub_string !buffer 0 !curpos
 ;;
+
+let print_tag_string s =
+  let beg = !curpos in
+    print_string s;
+    source_tags := (beg,!curpos)::!source_tags
+;;
+
 
 let print_type_constructor gl = 
   let beg = !curpos in
@@ -201,8 +209,12 @@ let print_value_desc
 
   reset_type_var_name ();
   begin match prim with 
-     ValueNotPrim -> print_string ("value "^sym^" : ")
-   | ValuePrim(_,_) -> print_string ("primitive "^sym^" : ")
+     ValueNotPrim -> print_string "value ";
+      	       	     print_tag_string sym;
+      	       	     print_string " : "
+   | ValuePrim(_,_) -> print_string "primitive ";
+      	       	       print_tag_string sym;
+      	       	       print_string " : "
   end;
   print_typ 0 ty;
   print_string "\n;;\n"
@@ -215,23 +227,27 @@ let print_exc_desc
        {qualid = {qual=modname; id=sym};
         info   = {cs_arg = ty; cs_mut=mut}}  =
   reset_type_var_name ();
+  print_string "exception ";
+  print_tag_string sym;
   begin match mut with
-    Mutable -> print_string ("exception "^sym^" of mutable ")
-  | Notmutable -> print_string ("exception "^sym^" of ")
+    Mutable -> print_string " of mutable "
+  | Notmutable -> print_string " of "
   end;
   print_typ 0 ty;
   print_string "\n;;\n"
 ;;
 
 (* Constructors *)
-(* print also result to nagivate to other constructors *)
+(* print also result to navigate to other constructors *)
 let print_constr_desc 
        {qualid = {qual=modname; id=sym};
         info   = {cs_arg = ty; cs_res = ty'; cs_mut=mut}}  =
   reset_type_var_name ();
+  print_string "constructor ";
+  print_tag_string sym;
   begin match mut with
-    Mutable -> print_string ("constructor "^sym^" of mutable ")
-  | Notmutable -> print_string ("constructor "^sym^" of ")
+    Mutable -> print_string " of mutable "
+  | Notmutable -> print_string " of "
   end;
   print_typ 0 ty;
   print_string " : ";
@@ -246,9 +262,11 @@ let print_label_desc
         info   = {lbl_arg = ty; lbl_mut=mut}}  =
   reset_type_var_name ();
   begin match mut with
-    Mutable -> print_string ("mutable "^sym^" : ")
-  | Notmutable -> print_string (sym^" : ")
+    Mutable -> print_string "mutable "
+  | Notmutable -> ()
   end;
+  print_tag_string sym;
+  print_string " : ";
   print_typ 0 ty;
   print_string "\n;;\n"
 ;;
@@ -263,47 +281,91 @@ let print_module m =
       	       	      then print_exc_desc cd ) (constrs_of_module m)
 ;;
 
+
 (**************************************************)
 (* The hypertext widget *)
 (**************************************************)
 
+(* Data *)
+type hypertext = {
+  text : string;			(* text to be displayed *)
+  start_line : int;
+  anchor_indexes :			(* anchor lists *)
+      (string * (int * int) list) list
+}
+;;
+
+(* wrapper for our previous printers *)
+let hyper_print f x =
+  reset_state();
+  f x;
+  let res = {
+    text = get_print_buffer();
+    start_line = 0;
+    anchor_indexes = ["hypertype", !tags; "hypersource", !source_tags]
+    } in
+    (* take it easy on GC *)
+  reset_state ();
+  res
+;;
+
+(* convert an integer to an absolute index *)
 let abs_index n =
   TextIndex (TI_LineChar(0,0), [CharOffset n])
 ;;
 
-(* Bad hack due to non-polymorphic letrec... *)
-(* I cannot have a visual_meta abstraction depending on
-   one of its instance and still keep visual_meta polymorphic 
-*)
 
-let hyper_action = ref print_string;;
-
-let anchor_attrib = ref [Foreground Blue]
+(* Navigation properties *)
+(* we allow several tags with different display and actions *)
+type hypernav = {
+  anchor_attribs : (string * option list) list;    (* chrome *)
+  navigators: (string * (string -> unit)) list     (* hyper actions *)
+  }
 ;;
 
-let hypertext top f arg =
-  reset_state ();
-  f arg;
+(* Build an hypertext widget, given a 
+   top (Widget frame),
+   hn  (hypernav record),
+   ht  (hypertext record)
+*)
+let hypertext top hn ht =
   let t = text__create top []  in
-  text__insert t (TextIndex (TI_End, [])) (get_print_buffer());
-      	       	 
-  do_list (function (b,e ) ->
-      	    text__tag_add t "hyper" (abs_index b) (abs_index e))
-          !tags;
-  reset_state ();
-  text__tag_configure t "hyper" !anchor_attrib;
+  (* Insert the text *)
+  text__insert t (TextIndex (TI_End, [])) ht.text ;
+  (* Define the anchors *)
+  do_list (function (tagname, l) ->
+      	     do_list (function (b,e) -> 
+      	       	       	text__tag_add t tagname (abs_index b) (abs_index e))
+                       l)
+          ht.anchor_indexes;
+  (* Configure the anchors *)
+  do_list (function (tagname, options) ->
+      	       text__tag_configure t tagname options)
+           hn.anchor_attribs;
+
   (* Disable editing *)
   text__configure t [State Disabled];
-
+  text__yview_line t ht.start_line;
   (* Assume mark "current" is in anchor *)
-  let get_current_anchor () =
-    let b,e = text__tag_nextrange t "hyper" 
+  let get_current_anchor tagname =
+    let b,e = match tagname with
+       "" -> text__index t (TextIndex (TI_Mark "current", [WordStart])),
+             text__index t (TextIndex (TI_Mark "current", [WordEnd]))
+    | tagname -> text__tag_nextrange t tagname
       	       	    (TextIndex (TI_Mark "current", [WordStart]))
 		    (TextIndex (TI_End, [])) in
     text__get t (TextIndex(b,[]))  (TextIndex(e,[])) in
+  (* Setup the callbacks *)
+  do_list
+      (function 
+         ("", action) -> 
+           bind t [[Double], WhatButton 1] 
+	     (BindExtend ([], fun _ -> action (get_current_anchor "")))
+       | (tagname, action) ->
+      	   text_tag_bind t tagname [[Double], WhatButton 1]
+	     (BindSet ([], function _ -> action (get_current_anchor tagname))))
+      hn.navigators;
     
-  text_tag_bind t "hyper" [[Double], WhatButton 1] 
-      (BindSet ([], fun _ -> !hyper_action (get_current_anchor())));
   (* Make reasonable size *)
   let i = text__index t (TextIndex(TI_End,[])) in
   let lines = 
@@ -314,4 +376,3 @@ let hypertext top f arg =
 
   t
 ;;
-
