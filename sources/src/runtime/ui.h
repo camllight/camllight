@@ -12,5 +12,6 @@ int ui_write P((int fd, char * data, int len));
 void ui_gc_message P((char * fmt, unsigned long arg));
 void ui_fatal_error P((char * fmt, char * arg));
 int caml_main P((int argc, char ** argv));
+void ui_exit P((int retcode));
 
 #endif

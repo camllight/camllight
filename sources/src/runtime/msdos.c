@@ -99,6 +99,12 @@ void ui_gc_message(fmt, arg)
   fflush(stderr);
 }
 
+void ui_exit(retcode)
+     int retcode;
+{
+  exit(retcode);
+}
+
 /* Search path function */
 
 char * searchpath(name)
