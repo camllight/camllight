@@ -9,7 +9,7 @@ struct canvas {
   GC gc;                        /* The associated graphics context */
 };
 
-Display * grdisplay;            /* The display connection */
+extern Display * grdisplay;     /* The display connection */
 int grscreen;                   /* The screen number */
 Colormap grcolormap;            /* The color map */
 struct canvas grwindow;         /* The graphics window */
