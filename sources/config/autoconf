@@ -34,7 +34,7 @@ esac
 
 # "unix" is not always defined by cpp, so add it here just in case
 
-echo "#define unix" >> s.h
+(echo "#ifndef unix"; echo "#define unix"; echo "#endif") >> s.h
 
 # Are chars signed?
 
