@@ -1,3 +1,10 @@
+Caml Light 0.73:
+---------------
+
+* Fixed a bug with hasthbl__do_table_rev, causing #open of a module
+  with multiply defined identifiers to behave incorrectly.
+
+
 Caml Light 0.72:
 ---------------
 
