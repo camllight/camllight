@@ -12,7 +12,7 @@ rm -f s.h m.h
 # Check the sizes of data types
 
 echo "Checking the sizes of integers and pointers..."
-set `sh runtest sizes.c`
+set `sh ./runtest sizes.c`
 case "$1,$2,$3" in
   4,4,4) echo "OK, this is a regular 32 bit architecture.";;
   4,8,8) echo "Wow! A 64 bit architecture!"
@@ -38,18 +38,18 @@ esac
 
 # Are chars signed?
 
-sh runtest schar.c
+sh ./runtest schar.c
 case $? in
   0) echo "The char type is signed. Good!";;
   1) echo "The char type is not signed. Let's see if 'signed char' works."
-     sh runtest schar2.c
+     sh ./runtest schar2.c
      case $? in
       0) echo "Yes, it works. Good!"
          echo "#define SIGNED_CHAR_WORKS" >> s.h;;
       *) echo "No, it does not work. Let's try some compiler options."
          goodopt=""
          for option in -signed -fsigned-char; do
-           sh runtest $option schar.c
+           sh ./runtest $option schar.c
            case $? in
              0) goodopt=$option; break;;
            esac
@@ -66,7 +66,7 @@ esac
 
 # Determine endianness
 
-sh runtest endian.c
+sh ./runtest endian.c
 case $? in
   0) echo "This is a big-endian architecture."
      echo "#define BIG_ENDIAN" >> m.h;;
@@ -82,12 +82,12 @@ esac
 
 # Determine alignment constraints
 
-sh runtest align.c
+sh ./runtest align.c
 status=$?
 case $status in
   100) echo "Your compiler seems to choke on the \"volatile\" modifier."
        echo "Never mind, we'll do without it."
-       sh runtest -Dvolatile= align.c
+       sh ./runtest -Dvolatile= align.c
        status=$?
        ;;
 esac
@@ -106,7 +106,7 @@ case $status in
        break;;
 esac
 
-sh runtest dblalign.c
+sh ./runtest dblalign.c
 case $? in
   0) echo "Doubles can be word-aligned.";;
   1) echo "Doubles must be doubleword-aligned."
@@ -120,22 +120,22 @@ esac
 
 # To find a good byte copy function
 
-if sh runtest -Dcopy=memmove -Dreverse bytecopy.c; then
+if sh ./runtest -Dcopy=memmove -Dreverse bytecopy.c; then
   echo "Function \"memmove\" is provided and handles overlapping moves correctly."
   echo "#define HAS_MEMMOVE" >> s.h
 fi
-if sh runtest -Dcopy=bcopy bytecopy.c; then
+if sh ./runtest -Dcopy=bcopy bytecopy.c; then
   echo "Function \"bcopy\" is provided and handles overlapping moves correctly."
   echo "#define HAS_BCOPY" >> s.h
 fi
-if sh runtest -Dcopy=memcpy -Dreverse bytecopy.c; then
+if sh ./runtest -Dcopy=memcpy -Dreverse bytecopy.c; then
   echo "Function \"memcpy\" is provided and handles overlapping moves correctly."
   echo "#define HAS_MEMCPY" >> s.h
 fi
 
 # Check for _longjmp and _setjmp
 
-sh runtest setjmp.c
+sh ./runtest setjmp.c
 case $? in
   0) echo "_setjmp and _longjmp appear to work. Good!"
      echo "#define HAS__SETJMP" >> s.h;;
@@ -170,7 +170,7 @@ echo "#define sighandler_return_type $h" >> s.h
 
 # Check the semantics of signal handlers
 
-if sh runtest signals.c; then
+if sh ./runtest signals.c; then
   echo "Signals have the BSD semantics."
   echo "#define BSD_SIGNALS" >> s.h
 else
@@ -271,7 +271,7 @@ if sh hasgot waitpid;  then
   echo "#define HAS_WAITPID" >> s.h
 fi
 
-if test -f /usr/include/sys/param.h && sh runtest getgroups.c; then
+if test -f /usr/include/sys/param.h && sh ./runtest getgroups.c; then
   echo "getgroups() found."
   echo "#define HAS_GETGROUPS" >> s.h
 fi
@@ -282,7 +282,7 @@ if test -f /usr/include/termios.h &&
   echo "#define HAS_TERMIOS" >> s.h
 fi
 
-if sh runtest async_io.c; then
+if sh ./runtest async_io.c; then
   echo "Asynchronous I/O are supported."
   echo "#define HAS_ASYNC_IO" >> s.h
 fi
