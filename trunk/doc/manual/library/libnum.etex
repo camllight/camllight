@@ -24,7 +24,9 @@ This library is not available.
 \end{mac}
 
 \begin{pc}
-This library is not available.
+This library is available by default in the standard runtime system
+and in the toplevel system. Programs that use this library can be linked
+normally, without the "-custom" option. 
 \end{pc}
 
 \begin{library}
