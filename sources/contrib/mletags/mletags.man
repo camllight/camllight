@@ -57,7 +57,14 @@ Explicit name of file for tag table; overrides  default `TAGS'.
 .SH BUGS
 
 Tested only on Unix systems.
+#infix directives will cause problem.
+Suppose that you run 
+ mletags foo.ml bar.ml
+ where foo.ml contains an infix directive. Then this directive will also be
+used when parsing bar.ml which is clearly a bug. To get around this problem
+simply do
+ mletags foo.ml
+ mletags -a bar.ml
 
-There is no sorting of any kind of tags.
 
 
