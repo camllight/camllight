@@ -1,5 +1,6 @@
 (* Operations on vectors, with sanity checks *)
 
+#open "eq";;
 #open "int";;
 #open "exc";;
 

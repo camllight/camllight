@@ -1,6 +1,4 @@
-(* Equality functions *)
+(* Generic comparisons *)
 
-#open "bool";;
-
-let prefix <> x y = not (x = y)
-;;
+let min x y = if x <= y then x else y;;
+let max x y = if x >= y then x else y;;

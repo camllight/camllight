@@ -1,5 +1,6 @@
 (* Operation on strings, with sanity checks *)
 
+#open "eq";;
 #open "int";;
 #open "exc";;
 

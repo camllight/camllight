@@ -18,9 +18,11 @@ let env =
     lval = repr ();
     symb_start = 0;
     symb_end = 0;
-    sp = 0;
+    asp = 0;
     rule_len = 0;
-    rule_number = 0 }
+    rule_number = 0;
+    sp = 0;
+    state = 0 }
 ;;
 
 let grow_stacks() =
@@ -62,25 +64,34 @@ let yyparse tables start lexer lexbuf =
     | Grow_stacks_1 ->
         grow_stacks(); loop Stacks_grown_1 (repr ())
     | Grow_stacks_2 ->
-        grow_stacks(); loop Stacks_grown_2 (repr ())
-  in
-    env.curr_char <- start;
-    env.sp <- 0;
-    try loop Start (repr ()) with yyexit v -> magic_obj v
+        grow_stacks(); loop Stacks_grown_2 (repr ()) in
+  let init_asp = env.asp
+  and init_sp = env.sp
+  and init_state = env.state
+  and init_curr_char = env.curr_char in
+  env.curr_char <- start;
+  try
+    loop Start (repr ())
+  with exn ->
+    env.asp <- init_asp;
+    env.sp <- init_sp;
+    env.state <- init_state;
+    env.curr_char <- init_curr_char;
+    match exn with yyexit v -> magic_obj v | _ -> raise exn
 ;;
 
 let peek_val n =
-  magic_obj env.v_stack.(env.sp - n)
+  magic_obj env.v_stack.(env.asp - n)
 ;;
 
 let symbol_start () =
-  env.symb_start_stack.(env.sp - env.rule_len + 1)
+  env.symb_start_stack.(env.asp - env.rule_len + 1)
 and symbol_end () =
-  env.symb_end_stack.(env.sp)
+  env.symb_end_stack.(env.asp)
 ;;
 
 let rhs_start n =
-  env.symb_start_stack.(env.sp - (env.rule_len - n))
+  env.symb_start_stack.(env.asp - (env.rule_len - n))
 and rhs_end n =
-  env.symb_end_stack.(env.sp - (env.rule_len - n))
+  env.symb_end_stack.(env.asp - (env.rule_len - n))
 ;;

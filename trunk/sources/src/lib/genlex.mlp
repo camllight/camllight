@@ -1,5 +1,6 @@
 (* A generic lexer *)
 
+(**) #open "eq";;
 (**) #open "float";;
 (**) #open "int";;
 (**) #open "ref";;
