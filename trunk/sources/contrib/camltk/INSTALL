@@ -1,4 +1,4 @@
-WARNING: this is early alpha-release, partially tested
+WARNING: this is an alpha-release, partially tested
 
 Prerequisites:
  Works only on Unix
@@ -6,7 +6,6 @@ Prerequisites:
  	(NOTE: if you use Caml Light 0.6, read note below)
  Tk >=3.3 (tested on 3.6). A full installation of Tcl/Tk is required
     (includes, librairies libtcl.a and libtk.a, wish interpreter)
-
 
 Installation steps:
 1 - Check that the prerequisites are available
@@ -21,15 +20,6 @@ Installation steps:
 
 
 Then, type "make install". You're set.
-
-
-
-
-
-
-
-
-
 
 
 
