@@ -60,11 +60,11 @@
 
 /* The hashtable of objects already emitted */
 
-typedef unsigned long offset_t;
+typedef unsigned long byteoffset_t;
 
 struct extern_obj {
   value obj;
-  offset_t ofs;
+  byteoffset_t ofs;
 };
 
 struct extern_obj * extern_table;

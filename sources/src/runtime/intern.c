@@ -40,7 +40,7 @@ static void adjust_pointers(start, size, color)
         switch(v & 3) {
         case 0:                 /* 0 -> A bloc represented by its offset. */
           Assert(v >= 0 && v <= bosize && (v & 3) == 0);
-          *p = (value) ((offset_t) start + v);
+          *p = (value) ((byteoffset_t) start + v);
           break;
         case 2:                 /* 2 -> An atom. */
           v = v >> 2;
@@ -358,8 +358,8 @@ static int shrink_block(source, dest, source_len, dest_len, color)
   header_t hd;
   mlsize_t sz;
   tag_t tag;
-  offset_t * forward_addr;
-  offset_t dest_ofs;
+  byteoffset_t * forward_addr;
+  byteoffset_t dest_ofs;
   value v;
 
   /* First pass: copy the objects and set up forwarding pointers.
@@ -370,7 +370,7 @@ static int shrink_block(source, dest, source_len, dest_len, color)
     p++;
     sz = Wosize_hd(hd);
     tag = Tag_hd(hd);
-    forward_addr = (offset_t *) p;
+    forward_addr = (byteoffset_t *) p;
     dest_ofs = d + 1 - dest;
     switch(tag) {
     case String_tag:
@@ -425,7 +425,7 @@ static int shrink_block(source, dest, source_len, dest_len, color)
         switch(v & 3) {
         case 0:                 /* 0: a block represented by its offset */
           Assert(v >= 0 && v < source_len * sizeof(value64) && (v & 7) == 0);
-          *d = (value) (dest + *((offset_t *)((char *) source + v)));
+          *d = (value) (dest + *((byteoffset_t *)((char *) source + v)));
           break;
         case 2:                 /* 2: an atom */
           v = v >> 2;

@@ -40,27 +40,27 @@ void resize_extern_table()
   stat_free((char *) oldtable);
 }
 
-static offset_t * extern_block;
+static byteoffset_t * extern_block;
 static asize_t extern_size, extern_pos;
 
 static void resize_result()
 {
   extern_size = 2 * extern_size;
-  extern_block = (offset_t *)
-    stat_resize((char *) extern_block, extern_size * sizeof(offset_t));
+  extern_block = (byteoffset_t *)
+    stat_resize((char *) extern_block, extern_size * sizeof(byteoffset_t));
 }
 
-static offset_t emit(v)
+static byteoffset_t emit(v)
      value v;
 {
   mlsize_t size;
   asize_t h;
-  offset_t res;
+  byteoffset_t res;
   value * p;
-  offset_t * q;
+  byteoffset_t * q;
   asize_t end_pos;
 
-  if (Is_long(v)) return (offset_t) v;
+  if (Is_long(v)) return (byteoffset_t) v;
   size = Wosize_val(v);
   if (size == 0) return (Tag_val(v) << 2) + 2;
   if (2 * extern_table_used >= extern_table_size) resize_extern_table();
@@ -73,7 +73,7 @@ static offset_t emit(v)
   end_pos = extern_pos + 1 + size;
   while (end_pos >= extern_size) resize_result();
   extern_block[extern_pos++] = Hd_val(v);
-  res = extern_pos * sizeof(offset_t);
+  res = extern_pos * sizeof(byteoffset_t);
   extern_table[h].obj = v;
   extern_table[h].ofs = res;
   extern_table_used++;
@@ -84,14 +84,14 @@ static offset_t emit(v)
   return res;
 }
 
-static offset_t emit_all(root)
+static byteoffset_t emit_all(root)
      value root;
 {
   asize_t read_pos;
-  offset_t res;
+  byteoffset_t res;
   header_t hd;
   mlsize_t sz;
-  offset_t ofs;
+  byteoffset_t ofs;
 
   read_pos = extern_pos;
   res = emit(root);
@@ -127,11 +127,11 @@ value extern_val(chan, v)       /* ML */
      struct channel * chan;
      value v;
 {
-  offset_t res;
+  byteoffset_t res;
 
   extern_size = INITIAL_EXTERN_SIZE;
   extern_block =
-    (offset_t *) stat_alloc(extern_size * sizeof(unsigned long));
+    (byteoffset_t *) stat_alloc(extern_size * sizeof(unsigned long));
   extern_pos = 0;
   extern_table_size = INITIAL_EXTERN_TABLE_SIZE;
   alloc_extern_table();

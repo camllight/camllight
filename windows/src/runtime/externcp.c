@@ -19,7 +19,7 @@ static void output_number(chan, code, val, nbits)
   for (i = nbits - 8; i >= 0; i -= 8) putch(chan, val >> i);
 }
 
-static offset_t obj_counter;    /* Number of objects emitted so far */
+static byteoffset_t obj_counter;    /* Number of objects emitted so far */
 static unsigned long size_32;  /* Size in words of 32-bit block for struct. */
 static unsigned long size_64;  /* Size in words of 64-bit block for struct. */
 
@@ -61,7 +61,7 @@ static void emit_compact(chan, v)
       h = Hash(v);
       while (extern_table[h].obj != 0) {
         if (extern_table[h].obj == v) {
-          offset_t d = obj_counter - extern_table[h].ofs;
+          byteoffset_t d = obj_counter - extern_table[h].ofs;
           if (d < 0x100) {
             output_number(chan, CODE_SHARED8, d, 8);
           } else if (d < 0x10000) {
