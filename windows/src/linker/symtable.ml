@@ -111,7 +111,7 @@ let get_num_of_tag = function
 
 let custom_runtime = ref false;;
 
-let c_prim_table = ref (new_numtable 0 : string numtable);;
+let c_prim_table = ref (new_numtable 1 : string numtable);;
 
 let set_c_primitives prim_vect =
   c_prim_table := new_numtable 31;
