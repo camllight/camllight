@@ -5,7 +5,10 @@
 # Remember that "libunix" is required for
 # "debugger", "libgraph", "camltk",  and "search_isos".
 PACKAGES=libunix libgraph debugger libnum libstr mletags \
-  caml-tex camlmode lorder profiler camltk camlsearch
+  camlmode lorder profiler camltk4 camlsearch
+# caml-tex
+# caml-latex2e
+
 
 # Which C compiler to use.
 # Should be the same compiler used to compile the main system (../src).
@@ -42,12 +45,12 @@ MANDIR=/usr/local/man/man$(MANEXT)
 # The path to the include directory containing the X11/*.h includes
 # (usually /usr/include; for SunOS with OpenLook, /usr/openwin/include)
 # Needed for the "libgraph" and "camltk" packages.
-X11_INCLUDES=/usr/include
+X11_INCLUDES=/usr/X11R6/include
 
 # The path to the directory containing the X11 libraries.
 # (usually /usr/lib; for SunOS with OpenLook, /usr/openwin/lib)
 # Needed for the "libgraph" and "camltk" packages.
-X11_LIB=/usr/lib
+X11_LIB=/usr/X11R6/lib
 
 # Name of the target architecture.
 # Used only for the libnum library (arbitrary-precision arithmetic), to
@@ -60,23 +63,23 @@ X11_LIB=/usr/lib
 # C implementation of these routines.
 BIGNUM_ARCH=C
 
-# Name of the directory where TeX input files should be installed.
-# Needed only for the "caml-tex" package.
-TEXINPUTDIR=/usr/local/tex/inputs
+# Name of the directory where LaTeX style files should be installed.
+# Needed only for the "caml-tex" and "caml-latex2e" packages.
+TEXINPUTDIR=/usr/lib/texmf/tex/latex/etc
 
 # Name of the directory where Emacs Lisp files should be installed.
 # Needed only for the "camlmode" package.
-EMACSLISPDIR=/usr/local/emacs/site-lisp
+EMACSLISPDIR=/usr/lib/emacs/site-lisp
 
 # Name of the directories where the tcl.h and tk.h includes can be found.
 # Needed only for the "camltk" package.
-TCLINCLDIR=/usr/local/lib/tcl/include
-TKINCLDIR=/usr/local/lib/tk/include
+TCLINCLDIR=/usr/include/tcl
+TKINCLDIR=/usr/include/tk
 
 # Name of the directories where the libtcl.a and libtk.a libraries can be found
 # Needed only for the "camltk" package.
-TKLIBDIR=/usr/local/lib/tk/lib
-TCLLIBDIR=/usr/local/lib/tcl/lib
+TKLIBDIR=/usr/lib
+TCLLIBDIR=/usr/lib
 
 # List of libraries required to link Tcl/Tk. This may help if you have
 # a custom Tcl/Tk with various extensions (such as Xpm)
