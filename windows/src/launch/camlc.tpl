@@ -29,8 +29,8 @@ while : ; do
     *.ml)
       if $profile
       then 
-	$stdlib/camlinstr -m $proflags -stdlib $stdlib $includes $compopt $1 ${1}t || exit $?
-        camlrun $stdlib/camlcomp -stdlib $stdlib $includes $compopt ${1}t || { rm -f ${1}t; exit $?; }
+	$stdlib/camlinstr -m $proflags -stdlib $stdlib $includes $compopt $1 ${1}t || { rc=$?; rm -f ${1}t; exit $rc; }
+        camlrun $stdlib/camlcomp -stdlib $stdlib $includes $compopt ${1}t || { rc=$?; rm -f ${1}t; exit $rc; }
 	rm -f ${1}t
       else
         camlrun $stdlib/camlcomp -stdlib $stdlib $includes $compopt $1 || exit $?
