@@ -51,6 +51,10 @@ value quit : unit -> unit
         (* [set_print_depth n] limits the printing of values to a maximal
            depth of [n]. The parts of values whose depth exceed [n]
            are printed as [...] (ellipsis). *)
+  and set_print_length : int -> unit
+        (* [set_print_length n] limits the number of value nodes
+           printed to at most [n]. Remaining parts of values
+           are printed as [...] (ellipsis). *)
   and debug_mode: bool -> unit
         (* Set whether extended module interfaces must be used
            [debug_mode true] or not [debug_mode false]. Extended
