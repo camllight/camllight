@@ -1,0 +1,149 @@
+\def\Nat{{\bf N}}
+
+\chapter{Functional languages}
+\label{c:gen}
+
+Programming languages are said to be {\em functional} when the basic
+way of structuring programs is the notion of {\em function} and their
+essential control structure is {\em function application}.  For
+example, the Lisp language \cite{MacCarthy}, and more precisely its
+modern successor Scheme \cite{SchemeReport,AbelsonSussman}, has been called
+functional because it possesses these two properties.
+
+However, we want the programming notion of function to be as close
+as possible to the usual mathematical notion of function. In
+mathematics, functions are ``first-class'' objects: they can be
+arbitrarily manipulated. For example, they can be composed, and the
+composition function is itself a function.
+
+In mathematics, one would present the {\em successor} function in the
+following way:
+\[\begin{array}{ll}
+\mbox{\em successor} : & \Nat ~ \longrightarrow ~ \Nat \\
+                       & n ~ \longmapsto ~ n+1
+\end{array}
+\]
+The functional composition could be presented as:
+\[\begin{array}{ll}
+\circ : & (A \Rightarrow B) \times (C \Rightarrow A)
+                        ~ \longrightarrow ~ (C \Rightarrow B) \\
+               & (f,g) ~ \longmapsto ~ (x~\longmapsto~f~(g~x))
+\end{array}
+\]
+where $(A \Rightarrow B)$ denotes the space of functions from $A$ to $B$.
+
+We remark here the importance of:
+\begin{enumerate}
+\item the notion of {\em type}; a mathematical function always possesses a
+{\em domain} and a {\em codomain}. They will correspond to the programming
+notion of type.
+\item lexical binding: when we wrote the mathematical definition of
+{\em successor}, we have assumed that the addition function $+$ had been
+previously defined, mapping a pair of natural numbers to a natural
+number; the meaning of the {\em successor} function is defined using
+the {\em meaning} of the addition: whatever $+$ denotes in the future,
+this {\em successor} function will remain the same.
+\item the notion of {\em functional abstraction}, allowing to express
+the behavior of $f \circ g$ as $(x~\longmapsto~f~(g~x))$, i.e.
+the function which, when given some $x$, returns $f~(g~x)$.
+\end{enumerate}
+ML dialects (cf. below) respect these notions. But they also allow
+non-functional programming styles, and, in this sense, they are
+functional but not {\em purely functional}.
+
+\section{History of functional languages}
+
+Some historical points:
+
+\begin{itemize}
+\item 1930: Alonzo Church developed the $\lambda$-calculus \cite{Church} as an attempt to
+           provide a basis for mathematics. The $\lambda$-calculus is a
+           formal theory for functionality.
+    The three basic constructs of
+           the $\lambda$-calculus are:
+           \begin{itemize}
+              \item variable names (e.g. $x$, $y$,\ldots);
+              \item application ($MN$ if $M$ and $M$ are terms);
+              \item functional abstraction ($\lambda x . M$).
+           \end{itemize}
+           Terms of the $\lambda$-calculus represent functions. The pure
+           $\lambda$-calculus has been proved inconsistent as a logical theory.
+           Some {\em type systems} have been added to it in order to remedy
+           this inconsistency.
+\item 1958: Mac Carthy invented Lisp \cite{MacCarthy} whose programs have some similarities
+           with terms of the $\lambda$-calculus.
+    Lisp dialects have been recently
+           evolving in order to be closer to modern functional languages
+           (Scheme), but they still do not possess a type system.
+\item 1965: P. Landin proposed the ISWIM \cite{ISWIM} language (for ``If You See What I Mean''),
+           which is the precursor of languages of the ML family.
+\item 1978: J. Backus introduced FP: a language of combinators \cite{FP} and a framework
+           in which it is possible to reason about programs.
+The main particularity of FP programs is that they have no variable names.
+\item 1978: R. Milner proposes a language called ML \cite{ML}, intended to be the
+           {\em metalanguage} of the LCF proof assistant (i.e. the language
+           used to program the search of proofs). This language is inspired
+           by ISWIM (close to $\lambda$-calculus) and possesses an original
+           type system.
+\item 1985: D. Turner proposed the Miranda \cite{Miranda85} programming language, which uses
+           Milner's type system but where programs are submitted to {\em
+           lazy evaluation}.
+\end{itemize}
+Currently, the two main families of functional languages are the ML and the
+Miranda families.
+
+\section{The ML family}
+
+ML languages are based on a sugared\footnote{i.e. with a more user-friendly
+syntax.}
+version of $\lambda$-calculus.
+Their evaluation regime is {\em call-by-value} (i.e. the argument is
+evaluated before being passed to a function), and they use Milner's type
+system.
+
+The LCF proof system appeared in 1972 at Stanford (Stanford LCF). It
+has been further developed at Cambridge (Cambridge LCF) where the ML
+language was added to it.
+
+From 1981 to 1986, a version of ML and its compiler was developed
+in a collaboration between INRIA and Cambridge by G. Cousineau, G. Huet
+and L. Paulson.
+
+In 1981, L. Cardelli implemented a version of ML whose compiler generated
+native machine code.
+
+In 1984, a committee of researchers from the universities of Edinburgh
+and Cambridge, Bell Laboratories and INRIA, headed by R. Milner worked
+on a new extended language called Standard ML \cite{ProposalSML}. This core
+language was completed by a module facility designed by D. MacQueen
+\cite{SMLModules}.
+
+Since 1984, the Caml language has been under design in a collaboration
+between INRIA and LIENS\footnote{Laboratoire d'Informatique de l'Ecole
+Normale Sup\'erieure, 45 Rue d'Ulm, 75005 Paris}). Its first release
+appeared in 1987. The main implementors of Caml were Asc\'ander
+Su\'arez, Pierre Weis and Michel Mauny.
+
+In 1989 appeared Standard ML of New-Jersey, developed by Andrew Appel
+(Princeton University) and David MacQueen (Bell Laboratories).
+
+Caml Light is a smaller, more portable implementation of the core Caml
+language, developed by Xavier Leroy since 1990.
+
+\section{The Miranda family}
+
+All languages in this family use {\em lazy evaluation} (i.e. the argument of a
+function is evaluated if and when the function needs its value---arguments
+are passed unevaluated to functions).
+They also use Milner's type system.
+
+Languages belonging to the Miranda family find their origin in the
+SASL language \cite{SASL} (1976) developed by D. Turner. SASL and its
+successors (KRC \cite{KRC} 1981, Miranda \cite{Miranda85} 1985 and
+Haskell \cite{Haskell90} 1990) use {\em sets of mutually recursive
+equations} as programs. These equations are written in a {\em script}
+(collection of declarations) and the user may evaluate expressions
+using values defined in this script.  LML (Lazy ML) has been developed
+in G\"oteborg (Sweeden); its syntax is close to ML's syntax and it
+uses a fast execution model: the G-machine \cite{GMachine}.
+

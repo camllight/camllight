@@ -1,0 +1,71 @@
+\section{{\tt peek}:  to fetch various objects in c format from a string}
+
+\index{peek (module)@\verb`peek` (module)}%
+
+\begin{comment}
+ Arguments: a string and an offset into that string.
+   Result: as follows. 
+\end{comment}
+\begin{verbatim}
+value short : string -> int -> int
+\end{verbatim}
+\index{short@\verb`short`}%
+\begin{comment}
+ A signed short 
+\end{comment}
+\begin{verbatim}
+value ushort : string -> int -> int
+\end{verbatim}
+\index{ushort@\verb`ushort`}%
+\begin{comment}
+ An unsigned short 
+\end{comment}
+\begin{verbatim}
+value int : string -> int -> int
+\end{verbatim}
+\index{int@\verb`int`}%
+\begin{comment}
+ A signed int 
+\end{comment}
+\begin{verbatim}
+value uint : string -> int -> int
+\end{verbatim}
+\index{uint@\verb`uint`}%
+\begin{comment}
+ An unsigned int 
+\end{comment}
+\begin{verbatim}
+value long : string -> int -> int
+\end{verbatim}
+\index{long@\verb`long`}%
+\begin{comment}
+ A signed long (currenty truncated to 31 bits) 
+\end{comment}
+\begin{verbatim}
+value ulong : string -> int -> int
+\end{verbatim}
+\index{ulong@\verb`ulong`}%
+\begin{comment}
+ An unsigned long (currently trucated to 31 bits) 
+\end{comment}
+\begin{verbatim}
+value nshort : string -> int -> int
+\end{verbatim}
+\index{nshort@\verb`nshort`}%
+\begin{comment}
+ An unsigned short in network byte order 
+\end{comment}
+\begin{verbatim}
+value nlong : string -> int -> int
+\end{verbatim}
+\index{nlong@\verb`nlong`}%
+\begin{comment}
+ An unsigned long in network byte order 
+\end{comment}
+\begin{verbatim}
+value cstring : string -> int -> string
+\end{verbatim}
+\index{cstring@\verb`cstring`}%
+\begin{comment}
+ A null-terminated string 
+\end{comment}

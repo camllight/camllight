@@ -1,0 +1,14 @@
+The "libunix" library makes many Unix system calls and system-related
+library functions available to Caml Light programs. See the interface
+file unix.mli for a complete listing.
+
+The "libunix" library has been tested mostly on BSD machines, but some
+care has been taken not to use too many BSD-isms.
+
+This library has been contributed by Xavier Leroy (Xavier.Leroy@inria.fr).
+
+For those of you who read French, this library is documented in
+"Programmation du systeme Unix en Caml Light" by Xavier Leroy,
+technical report 147, INRIA, 1992, available by anonymous FTP from
+ftp.inria.fr, directory INRIA/publications/RT, file RT-0147.ps.Z.
+The examples in the directory Examples/ come from this report.

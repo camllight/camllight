@@ -1,0 +1,62 @@
+DESCRIPTION:
+
+This directory contains files to help editing Caml code and running a
+Caml toplevel under the Gnu Emacs editor (version 18 or 19).
+
+AUTHOR:
+
+Xavier Leroy (Xavier.Leroy@inria.fr).
+
+CONTENTS:
+
+    caml.el         A major mode for editing Caml code in Gnu Emacs
+    inf-caml.el     To run a Caml toplevel under Emacs, with input and
+                    output in an Emacs buffer.    
+    comint.el       A library used by inf-caml.el.
+
+INSTALLATION:
+
+Edit the variables at the beginning of the Makefile and do "make install".
+
+USAGE:
+
+Add the following three lines to your .emacs file:
+
+(setq auto-mode-alist (cons '("\\.ml[iylp]?" . caml-mode) auto-mode-alist))
+(autoload 'caml-mode "caml" "Major mode for editing Caml code." t)
+(autoload 'run-caml "inf-caml" "Run an inferior Caml process." t)
+
+The Caml major mode is triggered by visiting a file with extension .ml,
+.mli, .mly. .mll or .mlp, or manually by M-x caml-mode. It gives you the
+correct syntax table for the Caml language, and also a rudimentary
+indentation facility:
+
+- pressing TAB at the beginning of a line indents the line like the line above
+
+- extra TABs increase the indentation level (by 2 spaces by default)
+
+- M-TAB decreases the indentation level.
+
+This is crude, but a fancy automatic indentation (as in C-mode) is
+very hard to do, because of the complexity of the Caml syntax, and
+because there is no established indentation standard for Caml code.
+
+The Caml mode also allows you to run batch Caml compilations from
+Emacs (using M-x compile) and browse the errors (C-x `). Typing C-x `
+sets the point at the beginning of the erroneous program fragment, and
+the mark at the end. Under Emacs 19, the program fragment is
+temporarily highlighted.
+
+M-x run-caml starts a Caml toplevel with input and output in an Emacs
+buffer named *inferior-caml*. This gives you the full power of Emacs
+to edit the input to the Caml toplevel. An history of input lines is
+maintained:
+
+        RET             send the current line to the toplevel
+        M-n and M-p     move in the history
+        M-r and M-s     regexp search in the history
+        C-c C-c         send a break to the Caml toplevel.
+
+After M-x run-caml, typing C-x C-e or M-C-x in a buffer in Caml mode
+sends the current phrase (containing the point) to the Caml toplevel,
+and evaluates it.

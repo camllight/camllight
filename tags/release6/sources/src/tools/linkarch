@@ -1,0 +1,28 @@
+#!/bin/sh
+# Usage: linkarch <name>
+
+mkdir $1
+cd $1
+mkdir src config
+(cd src
+ for d in compiler launch lex lib librar linker runtime tools toplevel yacc; do
+   echo Building src/$d...
+   mkdir $d
+   (cd $d
+    ln -s ../../../src/$d/* .
+    rm -f *~ \#*\# *.BAK *.CKP .*~ .*.BAK .*.CKP .emacs_[0-9]* .wi_[0-9]*
+    make clean)
+ done
+ for f in runtime/Makefile yacc/Makefile; do
+   mv $f $f.tmp && cp $f.tmp $f && rm $f.tmp
+ done
+ for f in Makefile camlcomp camllex camllibr camllink; do
+   cp ../../src/$f $f
+ done)
+(cd config
+ ln -s ../../config/*.h ../../config/autoconf .
+ rm -f m.h s.h
+ mkdir auto-aux
+ cd auto-aux
+ ln -s ../../../config/auto-aux/* .
+)

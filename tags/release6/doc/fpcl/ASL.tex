@@ -1,0 +1,1711 @@
+\chapter{ASL: A Small Language}
+\label{c:ASL}
+
+
+We present in this chapter a simple language: ASL (A Small Language).
+This language is basically the $\lambda$-calculus (the purely
+functional kernel of Caml) enriched with a conditional construct. The
+conditional must be a special construct, because our language will be
+submitted to call-by-value: thus, the conditional cannot be a
+function.
+%
+
+ASL programs are built up from numbers, variables, functional
+expressions ($\lambda$-abstractions), applications and conditionals.
+An ASL program consists of a global declaration of an identifier
+getting bound to the value of an expression. The primitive functions that
+are available are equality between numbers and arithmetic binary
+operations.
+The concrete syntax of ASL expressions can be described (ambiguously) as:
+\begin{quote}
+\begin{verbatim}
+Expr ::= INT
+       | IDENT
+       | "if" Expr "then" Expr "else" Expr "fi"
+       | "(" Expr ")"
+       | "\" IDENT "." Expr
+\end{verbatim}
+and the syntax of declarations is given as:
+\begin{verbatim}
+Decl ::= "let" IDENT "be" Expr ";"
+       | Expr ";"
+\end{verbatim}
+\end{quote}
+Arithmetic binary operations will be written in prefix position and
+will belong to the class {\tt IDENT}. The \verb|\| symbol will play
+the role of the Caml keyword {\tt function}.
+
+We start by defining the abstract syntax of ASL expressions and of ASL
+toplevel phrases. Then we define a parser in order to produce abstract
+syntax trees from the concrete syntax of ASL programs.
+
+\section{ASL abstract syntax trees}
+
+We encode variable names by numbers. These numbers represent the {\em
+binding depth} of variables. For instance, the function of {\tt x}
+returning {\tt x} (the ASL identity function) will be represented as:
+%
+\begin{verbatim}
+Abs("x", Var 1)
+\end{verbatim}
+And the ASL application function which would be written in Caml:
+\begin{verbatim}
+(function f -> (function x -> f(x)))
+\end{verbatim}
+would be represented as:
+\begin{verbatim}
+Abs("f", Abs("x", App(Var 2, Var 1)))
+\end{verbatim}
+and should be viewed as the tree:
+\begin{center}
+\setlength{\unitlength}{24pt}
+\begin{picture}(4,3)(0,0)
+\put(1,3){\makebox(0,0){\tt Abs}}
+\put(2,2){\makebox(0,0){\tt Abs}}
+\put(0,2){\makebox(0,0){\tt "f"}}
+\put(1,1){\makebox(0,0){\tt "x"}}
+\put(3,1){\makebox(0,0){\tt App}}
+\put(2,0){\makebox(0,0){\tt Var 2}}
+\put(4,0){\makebox(0,0){\tt Var 1}}
+\def\arrows(#1,#2){
+  \put(#1,#2){\vector(-1,-1){0.6}}
+  \put(#1,#2){\vector(1,-1){0.6}}}
+\arrows(1,2.8)
+\arrows(2,1.8)
+\arrows(3,0.8)
+\end{picture}
+\end{center}
+{\tt Var n} should be read as ``an occurrence of the variable bound by
+the {\tt n}th abstraction node encountered when
+going toward the root of the abstract syntax tree''. In our example, when
+going from {\tt Var 2} to the root, the 2nd abstraction node we encounter
+introduces the {\tt "f"} variable.
+
+The numbers encoding variables in abstract syntax trees of functional
+expressions are called ``De Bruijn\footnote{They have been proposed by
+N.G.~De~Bruijn in \cite{DeBruijn} in order to facilitate the mechanical
+treatment of $\lambda$-calculus terms.} numbers''. The characters that we attach
+to abstraction nodes simply serve as documentation: they will not be used by
+any of the semantic analyses that we will perform on the trees. The type of
+ASL abstract syntax trees is defined by:
+%
+%
+\begin{caml_example}
+type asl = Const of int
+         | Var of int
+         | Cond of asl * asl * asl
+         | App of asl * asl
+         | Abs of string * asl
+
+and top_asl = Decl of string * asl;;
+\end{caml_example}
+
+\section{Parsing ASL programs}
+
+Now we come to the problem of defining a concrete syntax for ASL programs
+and declarations.
+%
+
+The choice of the concrete aspect of the programs is
+simply a matter of taste. The one we choose here is close to the syntax of
+$\lambda$-calculus (except that we will use the {\em backslash} character
+because there is no ``$\lambda$'' on our keyboards). We will use the {\em
+curried} versions of equality and arithmetic functions. We will also use
+a {\em prefix} notation (\`a la Lisp) for their application. We will write
+``{\tt + (+ 1 2) 3}'' instead of ``{\tt (1+2)+3}''. The ``{\tt if $e_1$
+then $e_2$ else $e_3$}'' construct will be written ``{\tt if $e_1$
+then $e_2$ else $e_3$ fi}'', and will return the {\tt then} part when
+$e_1$ is different from 0 (0 acts thus as falsity in ASL conditionals).
+
+\subsection{Lexical analysis}
+\label{s:ASLlexing}
+
+The concrete aspect of ASL programs will be either declarations of the
+form:
+\begin{quote}
+{\tt let} {\it identifier} {\tt be} {\it expression}{\tt ;}
+\end{quote}
+or:
+\begin{quote}
+{\it expression}{\tt ;}
+\end{quote}
+which will be understood as:
+\begin{quote}
+{\tt let it} {\tt be} {\it expression}{\tt ;}
+\end{quote}
+The tokens produced by the lexical analyzer will represent the
+keywords {\tt let}, {\tt be}, {\tt if} and {\tt else}, the \verb|\|
+binder, the dot, parentheses, integers, identifiers, arithmetic
+operations and terminating semicolons. We reuse here most of the code
+that we developed in chapter~\ref{c:streams} or in the answers to its
+exercises.
+
+Skipping blank spaces:
+\begin{caml_example}
+let rec spaces = function
+  [< '` `|`\t`|`\n`; spaces _ >] -> ()
+| [< >] -> ();;
+\end{caml_example}
+The type of tokens is given by:
+\begin{caml_example}
+type token = LET | BE | LAMBDA | DOT | LPAR | RPAR
+           | IF | THEN | ELSE | FI | SEMIC
+           | INT of int | IDENT of string;;
+\end{caml_example}
+Integers:
+\begin{caml_example}
+let int_of_digit = function
+  `0`..`9` as c -> (int_of_char c) - (int_of_char `0`)
+| _ -> raise (Failure "not a digit");;
+let rec integer n = function
+  [< ' `0`..`9` as c; (integer (10*n + int_of_digit c)) r >] -> r
+| [< >] -> INT n;;
+\end{caml_example}
+We restrict ASL identifiers to be composed of lowercase letters, the
+eight first being significative. An explanation about the {\tt ident}
+function can be found in the chapter dedicated to the answers to
+exercises (chapter~\ref{c:ans}). The function given here is slightly
+different and tests its result in order to see wether it is a keyword
+({\tt let}, {\tt be}, \ldots) or not:
+\begin{caml_example}
+let ident_buf = make_string 8 ` `;;
+let rec ident len = function
+  [< ' `a`..`z` as c;
+     (if len >= 8 then ident len
+      else begin
+            set_nth_char ident_buf len c;
+            ident (succ len)
+           end) s >] -> s
+| [< >] -> (match sub_string ident_buf 0 len
+            with "let" -> LET
+               | "be" -> BE
+               | "if" -> IF
+               | "then" -> THEN
+               | "else" -> ELSE
+               | "fi" -> FI
+               | s -> IDENT s);;
+\end{caml_example}
+A reasonable lexical analyzer would use a hash table to recognize keywords
+faster.
+
+Primitive operations are recognized by the following function, which
+also detects illegal operators and ends of input:
+\begin{caml_example}
+let oper = function
+  [< '`+`|`-`|`*`|`/`|`=` as c >] -> IDENT(make_string 1 c)
+| [< 'c >] -> prerr_string "Illegal character: ";
+              prerr_endline (char_for_read c);
+              raise (Failure "ASL parsing")
+| [< >] -> prerr_endline "Unexpected end of input";
+           raise (Failure "ASL parsing");;
+\end{caml_example}
+The lexical analyzer has the same structure as the one given in
+chapter~\ref{c:streams} except that leading blanks are skipped.
+\begin{caml_example}
+let rec lexer str = spaces str;
+match str with
+  [< '`(`; spaces _ >]  -> [< 'LPAR; lexer str >]
+| [< '`)`; spaces _ >]  -> [< 'RPAR; lexer str >]
+| [< '`\\`; spaces _ >] -> [< 'LAMBDA; lexer str >]
+| [< '`.`; spaces _ >]  -> [< 'DOT; lexer str >]
+| [< '`;`; spaces _ >]  -> [< 'SEMIC; lexer str >]
+| [< '`0`..`9` as c;
+     (integer (int_of_digit c)) tok;
+      spaces _ >]       -> [< 'tok; lexer str >]
+| [< '`a`..`z` as c;
+     (set_nth_char ident_buf 0 c; ident 1) tok;
+     spaces _ >]        -> [< 'tok; lexer str >]
+| [< oper tok; spaces _ >] -> [< 'tok; lexer str >]
+;;
+\end{caml_example}
+The lexical analyzer returns a stream of tokens that the parser will
+receive as argument.
+
+\subsection{Parsing}
+
+The final output of our parser will be abstract syntax trees of type
+{\tt asl} or \verb"top_asl". This implies that we will detect unbound
+identifiers at parse-time. In this case, we will raise the {\tt Unbound}
+exception defined as:
+\begin{caml_example}
+exception Unbound of string;;
+\end{caml_example}
+We also need a function which will compute the binding depths of variables.
+That function simply looks for the position of the first occurrence of a
+variable name in a list. It will raise {\tt Unbound} if there is no such
+occurrence.
+%
+\begin{caml_example}
+let binding_depth s rho =
+ let rec bind n = function
+     []  -> raise (Unbound s)
+  | t::l -> if s = t then Var n else bind (n+1) l
+  in bind 1 rho
+;;
+\end{caml_example}
+We also need a global environment, containing names of already bound
+identifiers.  The global environment contains predefined names for the
+equality and arithmetic functions. We represent the global environment
+as a reference since each ASL declaration will augment it with a new
+name.
+\begin{caml_example}
+let init_env =  ["+";"-";"*";"/";"="];;
+let global_env = ref init_env;;
+\end{caml_example}
+We now give a parsing function for ASL programs. Blanks at the
+beginning of the string are skipped.
+\begin{caml_example}
+let rec top = function
+    [< 'LET; 'IDENT id; 'BE; expression e; 'SEMIC >] -> Decl(id,e)
+  | [< expression e; 'SEMIC >] -> Decl("it",e)
+
+and expression = function
+    [< (expr !global_env) e >] -> e
+
+and expr rho =
+  let rec rest e1 = function
+          [< (atom rho) e2; (rest (App(e1,e2))) e >] -> e
+        | [< >] -> e1
+  in function
+       [< 'LAMBDA; 'IDENT id; 'DOT; (expr (id::rho)) e >] -> Abs(id,e)
+     | [< (atom rho) e1; (rest e1) e2 >] -> e2
+
+and atom rho = function
+    [< 'IDENT id >] ->
+        (try binding_depth id rho with Unbound s ->
+              print_string "Unbound ASL identifier: ";
+              print_string s; print_newline();
+              raise (Failure "ASL parsing"))
+  | [< 'INT n >] -> Const n
+  | [< 'IF; (expr rho) e1; 'THEN; (expr rho) e2;
+       'ELSE; (expr rho) e3; 'FI >] -> Cond(e1,e2,e3)
+  | [< 'LPAR; (expr rho) e; 'RPAR >] -> e;;
+\end{caml_example}
+The complete parser that we will use reads a string, converts it
+into a stream, and produces the token stream that is parsed:
+\begin{caml_example}
+let parse_top s = top(lexer(stream_of_string s));;
+\end{caml_example}
+Let us try our grammar (we do not augment the global environment at
+each declaration: this will be performed after the semantic treatment
+of ASL programs). We need to write double \verb|\| inside strings,
+since \verb|\| is the string escape character.
+\begin{caml_example}
+parse_top "let f be \\x.x;";;
+parse_top "let x be + 1 ((\\x.x) 2);";;
+\end{caml_example}
+Unbound identifiers and undefined operators are correctly detected:
+\begin{caml_example}
+parse_top "let y be g 3;";;
+parse_top "f (if 0 then + else - fi) 2 3;";;
+parse_top "^ x y;";;
+\end{caml_example}
+
+\chapter{Untyped semantics of ASL programs}
+\label{c:ASLsemantics}
+
+
+In this section, we give a semantic treatment of ASL programs. We will use
+{\em dynamic typechecking}, i.e. we will test the type correctness of
+programs during their interpretation.
+
+\section{Semantic values}
+%
+
+We need a type for ASL semantic values (representing results of computations).
+A semantic value will be either an integer, or a Caml functional value
+from ASL values to ASL values.
+\begin{caml_example}
+type semval = Constval of int
+            | Funval of (semval -> semval);;
+\end{caml_example}
+We now define two exceptions. The first one will be used when we
+encounter an ill-typed program and will represent run-time type
+errors. The other one is helpful  for debugging: it will be raised when
+our interpreter (semantic function) goes into an illegal situation.
+
+
+The following two exceptions will be raised in case of run-time
+ASL type error, and in case of bug of our semantic treatment:
+\begin{caml_example}
+exception Illtyped;;
+exception SemantBug of string;;
+\end{caml_example}
+We must give a semantic value to our basic functions (equality and
+arithmetic operations). The next function transforms a Caml function
+into an ASL value.
+%
+\begin{caml_example}
+let init_semantics caml_fun =
+    Funval
+      (function Constval n ->
+         Funval(function Constval m -> Constval(caml_fun n m)
+                        | _ -> raise Illtyped)
+              | _ -> raise Illtyped);;
+\end{caml_example}
+
+
+Now, associate a Caml Light function to each ASL predefined function:
+\begin{caml_example}
+let caml_function = function
+    "+" -> prefix +
+  | "-" -> prefix -
+  | "*" -> prefix *
+  | "/" -> prefix /
+  | "=" -> (fun n m -> if n=m then 1 else 0)
+  | s -> raise (SemantBug "Unknown primitive");;
+\end{caml_example}
+In the same way as, for parsing, we needed a global environment from
+which the binding depth of identifiers was computed, we need a
+semantic environment from which the interpreter will fetch the value
+represented by identifiers.
+The global semantic environment will be a reference on the list of
+predefined ASL values.
+\begin{caml_example}
+let init_sem =  map (fun x -> init_semantics(caml_function x))
+                    init_env;;
+let global_sem = ref init_sem;;
+\end{caml_example}
+
+\section{Semantic functions}
+
+The semantic function is the interpreter itself. There is one for
+expressions and one for declarations. The one for expressions
+computes the value of an ASL
+expression from an environment {\tt rho}. The environment will contain
+the values of globally defined ASL values or of temporary ASL values.
+It is organized as a list, and the numbers representing variable
+occurrences will be used as indices into the environment.
+%
+\begin{caml_example}
+let rec nth n = function
+     []  -> raise (Failure "nth")
+  | x::l -> if n=1 then x else nth (n-1) l;;
+let rec semant rho =
+  let rec sem = function
+      Const n -> Constval n
+    | Var(n) -> nth n rho
+    | Cond(e1,e2,e3) ->
+        (match sem e1 with Constval 0 -> sem e3
+                         | Constval n -> sem e2
+                         | _ -> raise Illtyped)
+    | Abs(_,e') -> Funval(fun x -> semant (x::rho) e')
+    | App(e1,e2) -> (match sem e1
+                      with Funval(f) -> f (sem e2)
+                         | _ -> raise Illtyped)
+  in sem
+;;
+\end{caml_example}
+%
+The main function must be able to treat an ASL declaration, evaluate it, and
+update the global environments (\verb"global_env" and \verb"global_sem").
+\begin{caml_example}
+let semantics = function Decl(s,e) ->
+    let result = semant !global_sem e
+    in global_env := s::!global_env;
+       global_sem := result::!global_sem;
+       print_string "ASL Value of ";
+       print_string s;
+       print_string " is ";
+       (match result with
+         Constval n -> print_int n
+       | Funval f -> print_string "<fun>");
+       print_newline();;
+\end{caml_example}
+
+\section{Examples}
+
+
+\begin{caml_example}
+semantics (parse_top "let f be \\x. + x 1;");;
+semantics (parse_top "let i be \\x. x;");;
+semantics (parse_top "let x be i (f 2);");;
+semantics (parse_top "let y be if x then (\\x.x) else 2 fi 0;");;
+\end{caml_example}
+
+\chapter{Encoding recursion}
+\label{c:ASLuntypedrecursion}
+
+\section{Fixpoint combinators}
+
+We have seen that we do not have recursion in ASL. However, it is possible to
+encode recursion by defining a {\em fixpoint combinator}.
+A fixpoint combinator is a function $F$ such that:
+\[
+F~M \mbox{ is equivalent to } M~(F~M) \mbox{ modulo the evaluation rules.}
+\]
+for any expression $M$. A consequence of the equivalence given above
+is that fixpoint combinators can encode recursion. Let us note $M
+\equiv N$ if expressions $M$ and $N$ are equivalent modulo the
+evaluation rules. Then, consider {\tt ffact} to be the functional
+obtained from the body of the factorial function by abstracting (i.e.
+using as a parameter) the {\tt fact} identifier, and {\tt fix} an
+arbitrary fixpoint combinator. We have:
+\begin{itemize}
+\item[] \verb|ffact| is \verb|\fact.(\n. if = n 0 then 1 else * n (fact (- n 1)) fi)|
+\end{itemize}
+Now, let us consider the expression $E=\verb|(fix ffact) 3|$. Using our
+intuition about the evaluation rules, and the definition of a fixpoint
+combinator, we obtain:\\
+\hspace{\parindent}\hspace{\parindent}
+{\tt $E \equiv$ ffact (fix ffact) 3}\\
+Replacing {\tt ffact} by its definition, we obtain:\\
+\hspace{\parindent}\hspace{\parindent}
+{\tt $E \equiv$  \verb|(\fact.(\n. if = n 0 then 1 else * n (fact (- n 1)) fi))| (fix ffact) 3}\\
+We can now pass the two arguments to the first abstraction,
+instantiating {\tt fact} and {\tt n} respectively to {\tt fix ffact}
+and {\tt 3}:\\
+\hspace{\parindent}\hspace{\parindent}
+{\tt $E \equiv$  \verb|if = 3 0 then 1 else * 3 (fix ffact (- 3 1)) fi|}\\
+We can now reduce the conditional into its {\tt else} branch:\\
+\hspace{\parindent}\hspace{\parindent}
+{\tt $E \equiv$  \verb|* 3 (fix ffact (- 3 1))|}\\
+Continuing this way, we eventually compute:\\
+\hspace{\parindent}\hspace{\parindent}
+$E\equiv$ {\tt * 3 (* 2 (* 1 1))} $\equiv$ {\tt 6}
+
+This is the expected behavior of the factorial function. Given an
+appropriate fixpoint combinator {\tt fix}, we could define the
+factorial function as {\tt fix ffact}, where {\tt ffact} is the
+expression above.
+
+Unfortunately, when using call-by-value, any application of a fixpoint
+combinator $F$ such that:
+\[
+F~M \mbox{ evaluates to } M~(F~M)
+\]
+leads to non-termination of the evaluation (because evaluation of
+$(F~M)$ leads to evaluating $(M~(F~M))$, and thus $(F~M)$ again).
+
+We will use the $Z$ fixpoint combinator defined by:
+\[
+Z = \lambda f.((\lambda x.~f~(\lambda y.~(x ~x)~y)) (\lambda
+x.~f~(\lambda y.~(x ~x)~y)))
+\]
+The fixpoint combinator $Z$ has the particularity of being usable
+under call-by-value evaluation regime (in order to check that fact, it
+is necessary to know the evaluation rules of $\lambda$-calculus).
+Since the name {\tt z} looks more like an ordinary parameter name, we
+will call {\tt fix} the ASL expression corresponding to the $Z$
+fixpoint combinator.
+%
+\begin{caml_example}
+semantics (parse_top
+        "let fix be \\f.((\\x.f(\\y.(x x) y))(\\x.f(\\y.(x x) y)));");;
+\end{caml_example}
+%
+We are now able to define the ASL factorial function:
+\begin{caml_example}
+semantics (parse_top
+        "let fact be fix (\\f.(\\n. if = n 0 then 1
+                                    else * n (f (- n 1)) fi));");;
+semantics (parse_top "fact 8;");;
+\end{caml_example}
+and the ASL Fibonacci function:
+\begin{caml_example}
+semantics (parse_top
+        "let fib be fix (\\f.(\\n. if = n 1 then 1
+                                   else if = n 2 then 1
+                                        else + (f (- n 1)) (f (- n 2)) fi fi));");;
+semantics (parse_top "fib 9;");;
+\end{caml_example}
+
+\section{Recursion as a primitive construct}
+
+Of course, in a more realistic prototype, we would extend the concrete
+and abstract syntaxes of ASL in order to support recursion as a
+primitive construct. We do not do it here because we want to keep ASL
+simple.  This is an interesting non trivial exercise!
+
+\chapter{Static typing, polymorphism and type synthesis}
+\label{c:ASLtyping}
+%
+
+We now want to perform static typechecking of ASL programs, that is,
+to complete typechecking {\em before} evaluation, making run-time type
+tests unnecessary during evaluation of ASL programs.
+
+Furthermore, we want to have {\em polymorphism} (i.e. allow the
+identity function, for example, to be applicable to any kind of data).
+
+Type synthesis may be seen as a game. When learning a game, we must:
+\begin{itemize}
+\item learn the rules (what is allowed, and what is forbidden);
+\item learn a winning strategy.
+\end{itemize}
+
+In type synthesis, the rules of the game are called a {\em type
+system}, and the winning strategy is the typechecking algorithm.
+
+In the following sections, we give the ASL type system, the algorithm
+and an implementation of that algorithm. Most of this presentation is
+borrowed from
+\cite{MiniML}.
+
+\section{The type system}
+
+We study in this section a type system for the ASL language. Then, we
+present an algorithm performing the type synthesis of ASL programs,
+and its Caml Light implementation. Because of subtle aspects of the
+notation used (inference rules), and since some important mathematical
+notions, such as unification of first-order terms, are not presented
+here, this chapter may seem obscure at first reading.
+
+The type system we will consider for ASL has been first given by
+Milner \cite{Milner78} for a subset of the ML language (in fact, a
+superset of $\lambda$-calculus).
+A {\em type} is either:
+\begin{itemize}
+\item the type Number;
+\item or a type variable ($\alpha$, $\beta$, \ldots);
+\item or $\tau_1 \rightarrow \tau_2$, where $\tau_1$ and $\tau_2$ are types.
+\end{itemize}
+In a type, a type variable is an {\em unknown}, i.e. a type that we
+are computing.  We will use $\tau$, $\tau'$, $\tau_1$, \ldots, as {\em
+metavariables}\footnote{A metavariable should not be confused with a
+{\em variable} or a {\em type variable}.} representing types. This
+notation is important: we shall use other greek letters to denote
+other notions in the following sections.
+
+\Example
+$(\alpha \rightarrow \mbox{Number}) \rightarrow \beta \rightarrow \beta$
+is a type.
+\End
+%
+A {\em type scheme}, is a type where some variables are distinguished as
+being {\em generic}. We can represent type schemes by:
+\[
+\forall \alpha_1,  \ldots, \alpha_n . \tau \mbox{ where } \tau \mbox{ is a
+type.}
+\]
+
+\Example
+$\forall \alpha . (\alpha \rightarrow \mbox{Number}) \rightarrow \beta \rightarrow \beta$
+and
+$(\alpha \rightarrow \mbox{Number}) \rightarrow \beta \rightarrow \beta$
+are type schemes.
+\End
+We will use $\sigma$, $\sigma'$, $\sigma_1$, \ldots, as metavariables
+representing type schemes.
+We may also write type schemes as $\forall
+\vec{\alpha} . \tau$. In this case, $\vec{\alpha}$ represent a (possibly
+empty) set of generic type variables. When the set of generic variables is
+empty, we write $\forall . \tau$ or simply $\tau$.
+
+We will write $FV(\sigma)$ for the set of {\em unknowns} occurring in the type
+scheme $\sigma$. Unknowns are also called {\em free variables} (they are not
+bound by a $\forall$ quantifier).
+%
+%
+
+We also write $BV(\sigma)$ ({\em bound type variables of $\sigma$}) for the
+set of type variables occurring in $\sigma$ which are not free (i.e.
+the set of variables universally quantified). Bound type variables are
+also said to be {\em generic}.
+
+\Example
+If $\sigma$ denotes the type scheme
+$\forall \alpha . (\alpha \rightarrow \mbox{Number}) \rightarrow \beta \rightarrow \beta$,
+then we have:
+\[
+FV(\sigma) = \{\beta\}
+\]
+and
+\[
+BV(\sigma) = \{\alpha\}
+\]
+\End
+%
+A {\em substitution instance} $\sigma'$ of a type scheme $\sigma$ is
+the type scheme $S(\sigma)$ where $S$ is a substitution of types for
+{\em free} type variables appearing in $\sigma$.
+When applying a substitution to a type scheme, a renaming of some
+bound type variables may become necessary, in order to avoid the capture
+of a free type variable by a quantifier.
+
+\Example
+\begin{itemize}
+\item 
+If $\sigma$ denotes $\forall \beta . (\beta \rightarrow \alpha) \rightarrow \alpha$
+and
+$\sigma'$ is $\forall \beta . (\beta \rightarrow (\gamma \rightarrow \gamma))
+                                 \rightarrow (\gamma \rightarrow \gamma)$,
+then $\sigma'$
+is a substitution instance of $\sigma$ because $\sigma' = S(\sigma)$
+where $S=\{\alpha \leftarrow (\gamma \rightarrow \gamma)\}$, i.e. $S$
+substitutes the type $\gamma \rightarrow \gamma$ for the variable $\alpha$.
+\item 
+If $\sigma$ denotes $\forall \beta . (\beta \rightarrow \alpha) \rightarrow \alpha$
+and
+$\sigma'$ is $\forall \delta . (\delta \rightarrow (\beta \rightarrow \beta))
+                                 \rightarrow (\beta \rightarrow \beta)$,
+then $\sigma'$ is a substitution instance of $\sigma$ because $\sigma' = S(\sigma)$
+where $S=\{\alpha \leftarrow (\beta \rightarrow \beta)\}$. In this case,
+the renaming of $\beta$ into $\delta$ was necessary: we did not want the
+variable $\beta$ introduced by $S$ to be captured by the universal
+quantification $\forall \beta$.
+\end{itemize}
+\End
+%
+The type scheme $\sigma' = \forall \beta_1 \ldots \beta_m . \tau'$ is
+said to be a {\em generic instance} of
+$\sigma = \forall \alpha_1 \ldots \alpha_n . \tau$ if there exists a
+substitution $S$ such that:
+\begin{itemize}
+\item the domain of $S$ is included in $\{\alpha_1, \ldots, \alpha_n\}$;
+\item $\tau' = S(\tau)$;
+\item no $\beta_i$ occurs free in $\sigma$.
+\end{itemize}
+In other words, a generic instance of a type scheme is obtained by giving more
+precise values to some generic variables, and (possibly) quantifying some of
+the new type variables introduced.
+
+\Example
+If $\sigma = \forall \beta . (\beta \rightarrow \alpha) \rightarrow \alpha$,
+then $\sigma' = \forall \gamma . ((\gamma \rightarrow \gamma)
+                                      \rightarrow \alpha) \rightarrow \alpha$
+is a generic instance of $\sigma$. We changed
+$\beta$ into $(\gamma \rightarrow \gamma)$, and we universally quantified
+on the newly introduced type variable $\gamma$.
+\End
+%
+We express this type system by means of {\em inference rules}. An
+inference rule is written as a fraction:
+\begin{itemize}
+\item the numerator is called the {\em premisses};
+\item the denominator is called the {\em conclusion}.
+\end{itemize}
+An inference rule:
+\[\frac{P_1~\ldots~P_n}{C}\]
+may be read in two ways:
+\begin{itemize}
+\item ``{\bf If} $P_1$, \ldots {\bf and} $P_n$, {\bf then} $C$''.
+\item ``{\bf In order to prove} $C$, {\bf it is sufficient to prove} $P_1$, \ldots {\bf and} $P_n$''.
+\end{itemize}
+An inference rule may have no premise: such a rule will be called an
+{\em axiom}. A complete proof will be represented by a {\em proof tree}
+of the following form:
+\[
+\begin{array}{ccccc}
+ P_1^m       &   \ldots    &              & \ldots       & P_l^k\\
+ \cline{1-1}                                               \cline{5-5}\\
+             &             & \vdots       &              & \\
+             &             & \ldots       &              &\\
+               \cline{2-2}                  \cline{4-4}  & \\
+             &   P_1^1     &  \ldots      & P_n^1        &\\
+                              \cline{2-4}                 \\
+             &             &     C        &              &
+\end{array}
+\]
+where the leaves of the tree ($P_1^m$, \ldots, $P_l^k$) are instances of axioms.
+
+In the premisses and the conclusions appear {\em judgements} having the form:
+\[
+\Gamma \vdash e:\sigma
+\]
+Such a judgement should be read as ``under the typing environment
+$\Gamma$, the expression $e$ has type scheme $\sigma$''. Typing
+environments are sets of {\em typing hypotheses} of the form $x:\sigma$
+where $x$ is an identifier name and $\sigma$ is a type scheme: typing
+environments give types to the variables occurring free (i.e. unbound)
+in the expression.
+
+When typing $\lambda$-calculus terms, the typing environment is
+managed as a {\em stack} (because identifiers possess local scopes).
+We represent that fact in the presentation of the type system by {\em
+removing} the typing hypothesis concerning an identifier name $x$ (if
+such a typing hypothesis exists) before adding a new typing hypothesis
+concerning $x$.
+
+We write $\Gamma-\Gamma(x)$ for the set ot typing hypotheses obtained from
+$\Gamma$ by removing the typing hypothesis concerning $x$ (if it exists).
+
+%
+\par\noindent
+Any numeric constant is of type Number:
+\[
+\frac{}
+%--------------------------------------------------%
+{\Gamma \vdash \mbox{\tt Const } n : \mbox{Number}}\mbox{\qquad(NUM)}
+\]
+We obtain type schemes for variables from the typing environment 
+$\Gamma$:
+\[
+\frac{}
+%--------------------------------------------------%
+{\Gamma \cup \{x:\sigma\} \vdash \mbox{\tt Var }x:\sigma}\mbox{\qquad(TAUT)}
+\]
+It is possible to instantiate type schemes.
+The ``GenInstance'' relation represents generic instantiation.
+\[
+\frac{\Gamma \vdash e:\sigma\qquad \sigma' = \mbox{GenInstance}(\sigma)}
+%------------------------------------------------------------------%
+{\Gamma \vdash e:\sigma'}\mbox{\qquad(INST)}
+\]
+It is possible to generalize type schemes with respect to variables that do
+not occur free in the set of hypotheses:
+\[
+\frac{ \Gamma \vdash e:\sigma \qquad \alpha \notin FV(\Gamma)}
+%---------------------------------------------------------------- %
+{\Gamma  \vdash e:\forall \alpha . \sigma}\mbox{\qquad(GEN)}
+\]
+Typing a conditional:
+\[\frac{\Gamma \vdash e_1:\mbox{Number} \qquad
+      \Gamma \vdash e_2:\tau \qquad
+      \Gamma \vdash e_3:\tau}
+%------------------------------------------------------------%
+{\Gamma \vdash (\mbox{\tt if}~ e_1 ~\mbox{\tt then}~e_2~
+             \mbox{\tt else}~ e_3~\mbox{\tt fi}) : \tau}\mbox{\qquad(IF)}
+\]
+Typing an application:
+\[
+\frac{\Gamma \vdash e_1: \tau \rightarrow \tau' \qquad
+      \Gamma \vdash e_2: \tau}
+%---------------------------------------------%
+{        \Gamma \vdash (e_1~e_2) : \tau'}\mbox{\qquad(APP)}
+\]
+Typing an abstraction:
+\[
+\frac{(\Gamma-\Gamma(x)) \cup \{x:\tau\} \vdash e : \tau'}
+%------------------------------------------------------------%
+{\Gamma \vdash (\lambda  x~ \mbox{\tt .} e) : \tau \rightarrow \tau'}\mbox{\qquad(ABS)}
+\]
+%
+The special rule below is the one that introduces polymorphism: this
+corresponds to the ML {\tt let} construct.
+\[
+\frac{\Gamma \vdash e:\sigma\qquad
+      (\Gamma-\Gamma(x)) \cup \{x:\sigma\}
+                  \vdash e':\tau}
+%------------------------------------------------------------%
+{\Gamma \vdash (\lambda  x~ \mbox{\tt .} e')~ e : \tau}\mbox{\qquad(LET)}
+\]
+%
+This type system has been proven to be {\em semantically sound}, i.e.
+the semantic value of a well-typed expression (an expression admitting a
+type) cannot be an {\em error value} due to a type error. This is usually expressed as:
+\begin{quote}
+Well-typed programs cannot go wrong.
+\end{quote}
+This fact implies that a clever compiler may produce code without any
+dynamic type test for a well-typed expression.
+
+\def\th{\vdash}
+\def\fun{\rightarrow}
+\def\infrule{\begin{array}[b]{c}}
+\def\endinfrule{\end{array}}
+\def\imply#1{\\[-1.2ex]\hrulefill\hbox to 0pt{~\tiny (#1)\hss}\\}
+\def\topimply#1{\hrulefill\hbox to 0pt{~\tiny (#1)\hss}\\}
+\def\andalso{\qquad\quad}
+
+\Example
+Let us check, using the set of rules above, that the following is true:
+$$ \emptyset \th \tt let~f = \lambda x. x ~ in ~ f ~ f : \beta \fun \beta $$
+In order to do so, we will use the equivalence between the {\tt let}
+construct and an  application of an immediate abstraction (i.e. an 
+expression having the following shape: $(\lambda v . M) N$. The (LET) rule 
+will be crucial: without it, we could not check the judgement above.
+{\small
+$$
+\begin{infrule}
+\begin{infrule}
+\topimply{TAUT}
+\tt \{x:\alpha\} \th x : \alpha
+\imply{ABS}
+\tt \emptyset \th (\lambda x.x) : \alpha \fun \alpha
+\imply{GEN}
+\tt \emptyset \th (\lambda x.x) : \forall \alpha. \alpha \fun \alpha
+\end{infrule}
+\andalso
+\begin{infrule}
+\begin{infrule}
+\topimply{TAUT}
+\tt \Gamma \th f : \forall \alpha. \alpha \fun \alpha
+\imply{INST}
+\tt \Gamma \th f : (\beta \fun \beta) \fun (\beta \fun \beta)
+\end{infrule}
+\andalso
+\begin{infrule}
+\topimply{TAUT}
+\tt \Gamma \th f : \forall \alpha. \alpha \fun \alpha
+\imply{INST}
+\tt \Gamma \th f : \beta \fun \beta
+\end{infrule}
+\imply{APP}
+\tt \Gamma = \{f : \forall \alpha. \alpha \fun \alpha\} \th f~f: \beta \fun \beta
+\end{infrule}
+\imply{LET}
+\tt \emptyset \th \tt let~f = \lambda x. x ~ in ~ f ~ f : \beta \fun \beta
+\end{infrule}
+$$
+}
+\End
+This type system does not tell us how to find the best type for an
+expression. But what is the best type for an expression? It must be such
+that any other possible type for that expression is more specific; in
+other words, the best type is the {\em most general}.
+
+\section{The algorithm}
+%
+
+How do we find the most general type for an expression of our language?
+The problem with the set of rules above, is that we could instantiate and
+generalize types at any time, introducing type schemes, while the most
+important rules (application and abstraction) used only types.
+
+Let us write a new set of inference rules that we will read as an algorithm
+(close to a Prolog program):
+\par\noindent
+Any numeric constant is of type Number:
+\[
+\frac{}
+%--------------------------------------------------%
+{\Gamma \vdash \mbox{\tt Const } n : \mbox{Number}}\mbox{\qquad(NUM)}
+\]
+The types of identifiers are obtained by taking generic instances of
+type schemes appearing in the typing environment. These generic
+instances will be {\em types} and not type schemes: this restriction
+appears in the rule below, where the type $\tau$ is expected to be a
+generic instance of the type scheme $\sigma$.
+
+As it is presented (belonging to a deduction system), the following
+rule will have to anticipate the effect of the equality constraints
+between types in the other rules (multiple occurrences of a type
+metavariable), when choosing the instance $\tau$.
+\[
+\frac{ \tau = \mbox{GenInstance}(\sigma)}
+%---------------------------------------------------------------- %
+{\Gamma \cup \{x :\sigma\} \vdash \mbox{\tt Var } x : \tau}\mbox{\qquad(INST)}
+\]
+When we read
+this set of inference rules as an algorithm, the (INST) rule will be
+implemented by:
+\begin{enumerate}
+\item taking as $\tau$ the ``most general generic instance'' of $\sigma$
+that is a type (the rule requires $\tau$ to be a type and not a type scheme),
+\item making $\tau$ more specific by {\em unification} \cite{Unification}
+when encountering equality constraints.
+\end{enumerate}
+Typing a conditional requires only the test part to be of type Number,
+and both alternatives to be of the same type $\tau$. This is an
+example of equality constraint between the types of two expressions.
+\[\frac{\Gamma \vdash e_1:\mbox{Number} \qquad
+      \Gamma \vdash e_2:\tau \qquad
+      \Gamma \vdash e_3:\tau}
+%------------------------------------------------------------%
+{\Gamma \vdash (\mbox{\tt if}~ e_1 ~\mbox{\tt then}~e_2~
+           \mbox{\tt else}~ e_3~\mbox{\tt fi}) : \tau}\mbox{\qquad(COND)}
+\]
+Typing an application produces also equality constraints that are to
+be solved by unification:
+\[
+\frac{\Gamma \vdash e_1: \tau \rightarrow \tau' \qquad
+      \Gamma \vdash e_2: \tau}
+%---------------------------------------------%
+{        \Gamma \vdash (e_1~e_2) : \tau'}\mbox{\qquad(APP)}
+\]
+Typing an abstraction ``pushes'' a typing hypothesis for the
+abstracted identifier: unification will make it more precise during
+the typing of the abstraction body:
+\[
+\frac{(\Gamma-\Gamma(x)) \cup \{x:\forall.\tau\} \vdash e : \tau'}
+%------------------------------------------------------------%
+{\Gamma \vdash (\lambda  x~ \mbox{\tt .} e) : \tau \rightarrow \tau'}
+                                                             \mbox{\qquad(ABS)}
+\]
+Typing a {\tt let} construct involves a generalization step: we generalize
+as much as possible.
+\[
+\frac{
+        \Gamma \vdash e:\tau' \qquad
+        \{\alpha_1,\ldots,\alpha_n\} = FV(\tau')-FV(\Gamma) \qquad
+      (\Gamma-\Gamma(x)) \cup \{x:\forall \alpha_1\ldots\alpha_n. \tau'\}
+                  \vdash e':\tau}
+%------------------------------------------------------------%
+{\Gamma \vdash (\lambda  x~ \mbox{\tt .} e')~ e : \tau}\mbox{\qquad(LET)}
+\]
+
+%
+This set of inference rules represents an algorithm because there is
+exactly one conclusion for each syntactic ASL construct (giving priority to
+the (LET) rule over the regular application rule). This set of rules
+may be read as a Prolog program.
+
+%
+This algorithm has been proven to be:
+\begin{itemize}
+\item {\em syntactically sound}\/: when the algorithm succeeds on an
+expression $e$ and returns a type $\tau$, then $e:\tau$.
+\item {\em complete}\/: if an expression $e$ possesses a type $\tau$, then the
+algorithm will find a type $\tau'$ such that $\tau$ is an instance of
+$\tau'$. The returned type $\tau'$ is thus the most general type of $e$.
+\end{itemize}
+
+%
+\Example
+We compute the type that we simply checked in our last example. What is drawn
+below is the result of the type synthesis: in fact, we run our algorithm with
+type variables representing unknowns, modifying the previous applications of
+the (INST) rule when necessary (i.e. when encountering an equality
+constraint). This is valid, since it can be proved that the correction of the
+whole deduction tree is preserved by substitution of types for type variables.
+In a real implementation of the algorithm, the data structures representing 
+types will be submitted to a unification mechanism.
+{\small
+$$
+\begin{infrule}
+\begin{infrule}
+\topimply{INST}
+\tt \{x:\alpha\} \th x : \alpha
+\imply{ABS}
+\tt \emptyset \th (\lambda x.x) : \alpha \fun \alpha
+\end{infrule}
+\andalso
+\begin{infrule}
+\begin{infrule}
+\topimply{INST}
+\tt \Gamma \th f : (\beta \fun \beta) \fun (\beta \fun \beta)
+\end{infrule}
+\andalso
+\begin{infrule}
+\topimply{INST}
+\tt \Gamma \th f : \beta \fun \beta
+\end{infrule}
+\imply{APP}
+\tt \Gamma = \{f : \forall \alpha. \alpha \fun \alpha\} \th f~f: \beta \fun \beta
+\end{infrule}
+\imply{LET}
+\tt \emptyset \th \tt let~f = \lambda x. x ~ in ~ f ~ f : \beta \fun \beta
+\end{infrule}
+$$
+}
+Once again, this expression is not typable without the use of the (LET) 
+rule: an error would occur because of the type equality constraints between 
+all occurrences of a variable bound by a ``$\lambda$''. In an effective 
+implementation, a unification error would occur.
+\End
+%
+We may notice from the example above that the algorithm is {\em
+syntax-directed}: since, for a given expression, a type deduction for
+that expression uses exactly one rule per sub-expression, the
+deduction possesses the same structure as the expression.  We can thus
+reconstruct the ASL expression from its type deduction tree. From the
+deduction tree above, if we write upper rules as being ``arguments''
+of the ones below and if we annotate the applications of the (INST)
+and (ABS) rules by the name of the subject variable, we obtain:
+%
+\[
+\mbox{LET}_f(\mbox{ABS}_x(\mbox{INST}_x),
+           ~\mbox{APP}(\mbox{INST}_f,~\mbox{INST}_f))
+\]
+This is an illustration of the ``types-as-propositions and
+programs-as-proofs'' paradigm, also known as the ``Curry-Howard
+isomorphism'' (cf. \cite{CurryHoward}). In this example, we can see
+the type of the considered expression as a proposition and the
+expression itself as the proof, and, indeed, we recognize the
+expression as the deduction tree.
+%
+ 
+\section{The ASL type-synthesizer}
+%
+
+We now implement the set of inference rules given above.
+
+We need:
+\begin{itemize}
+\item a Caml representation of ASL types and type schemes,
+\item a management of type environments,
+\item a unification procedure,
+\item a typing algorithm.
+\end{itemize}
+
+\subsection{Representation of ASL types and type schemes}
+%
+
+We first need to
+define a Caml type for our ASL type data structure:
+\begin{caml_example}
+type asl_type = Unknown
+              | Number
+              | TypeVar of vartype
+              | Arrow of asl_type * asl_type
+and vartype = {Index:int; mutable Value:asl_type}
+and asl_type_scheme = Forall of int list * asl_type ;;
+\end{caml_example}
+The {\tt Unknown} ASL type is not really a type: it is the initial value of
+fresh ASL type variables. We will consider as abnormal a situation where
+{\tt Unknown} appears in place of a regular ASL type. In such situations, we
+will raise the following exception:
+%
+\begin{caml_example}
+exception TypingBug of string;;
+\end{caml_example}
+Type variables are allocated by the \verb"new_vartype" function, and their
+global counter (a local reference) is reset by \verb"reset_vartypes".
+\begin{caml_example}
+let new_vartype, reset_vartypes =
+(* Generating and resetting unknowns *)
+    let counter = ref 0
+    in (function () -> counter:=!counter+1;
+                       {Index=!counter; Value=Unknown}),
+       (function () -> counter:=0; ());;
+\end{caml_example}
+
+\subsection{Destructive unification of ASL types}
+%
+
+We will need to ``shorten'' type variables: since they are indirections to ASL
+types, we need to follow these indirections in order to obtain the
+type that they represent. For the sake of efficiency, we take
+advantage of this operation to replace multiple indirections by single
+indirections (shortening).
+\begin{caml_example}
+let rec shorten t =
+    match t with
+     TypeVar {Index=_; Value=Unknown} -> t
+   | TypeVar ({Index=_;
+                Value=TypeVar {Index=_;
+                               Value=Unknown} as tv}) -> tv
+   | TypeVar ({Index=_; Value=TypeVar tv1} as tv2)
+            -> tv2.Value <- tv1.Value; shorten t
+   | TypeVar {Index=_; Value=t'} -> t'
+   | Unknown -> raise (TypingBug "shorten")
+   | t' -> t';;
+\end{caml_example}
+An ASL type error will be represented by the following exception:
+\begin{caml_example}
+exception TypeClash of asl_type * asl_type;;
+\end{caml_example}
+%
+We will need unification on ASL types with {\em occur-check}.
+The following function implements occur-check:
+\begin{caml_example}
+let occurs {Index=n;Value=_} =
+  let rec occrec = function
+        TypeVar{Index=m;Value=_} -> (n=m)
+      | Number -> false
+      | Arrow(t1,t2) -> (occrec t1) or (occrec t2)
+      | Unknown -> raise (TypingBug "occurs")
+  in occrec
+;;
+\end{caml_example}
+%
+The unification function: implements destructive unification. Instead of
+returning the most general unifier, it returns the unificand of two types
+(their most general common instance). The two arguments are physically
+modified in order to represent the same type. The unification function will
+detect type clashes.
+\begin{caml_example}
+let rec unify (tau1,tau2) =
+  match (shorten tau1, shorten tau2)
+  with (* type variable n and type variable m *)
+       (TypeVar({Index=n; Value=Unknown} as tv1) as t1),
+       (TypeVar({Index=m; Value=Unknown} as tv2) as t2)
+           -> if n <> m then tv1.Value <- t2
+     | (* type t1 and type variable *)
+      t1, (TypeVar ({Index=_;Value=Unknown} as tv) as t2)
+            -> if not(occurs tv t1) then tv.Value <- t1
+               else raise (TypeClash (t1,t2))
+     | (* type variable and type t2 *)
+       (TypeVar ({Index=_;Value=Unknown} as tv) as t1), t2
+            -> if not(occurs tv t2) then tv.Value <- t2
+               else raise (TypeClash (t1,t2))
+     | Number, Number -> ()
+     | Arrow(t1,t2), (Arrow(t'1,t'2) as t)
+            -> unify(t1,t'1); unify(t2,t'2)
+     | (t1,t2) -> raise (TypeClash (t1,t2));;
+\end{caml_example}
+
+\subsection{Representation of typing environments}
+%
+
+We use \verb"asl_type_scheme list" as typing environments, and we will use
+the encoding of variables as indices into the environment.
+
+The initial environment is a list of types %
+\verb"(Number -> (Number -> Number))", which are the types of the ASL
+primitive functions.
+\begin{caml_example*}
+let init_typing_env =
+    map (function s ->
+            Forall([],Arrow(Number,
+                              Arrow(Number,Number))))
+        init_env;;
+\end{caml_example*}
+%
+The global typing environment is initialized to the initial
+typing environment, and will be updated with the type of each ASL
+declaration, after they are type-checked.
+\begin{caml_example*}
+let global_typing_env = ref init_typing_env;;
+\end{caml_example*}
+
+\subsection{From types to type schemes: generalization}
+%
+
+In order to implement generalization, we will need some functions collecting
+types variables occurring in ASL types.
+
+The following function computes the list of type variables of its argument.
+\begin{caml_example}
+let vars_of_type tau =
+ let rec vars vs = function
+       Number -> vs
+     | TypeVar {Index=n; Value=Unknown}
+                 -> if mem n vs then vs else n::vs
+     | TypeVar {Index=_; Value= t} -> vars vs t
+     | Arrow(t1,t2) -> vars (vars vs t1) t2
+     | Unknown -> raise (TypingBug "vars_of_type")
+  in vars [] tau
+;;
+\end{caml_example}
+%
+The \verb"unknowns_of_type(bv,t)" application returns the list of variables
+occurring in {\tt t} that do not appear in {\tt bv}. The {\tt 
+subtract} function returns the difference of two lists.
+\begin{caml_example}
+let unknowns_of_type (bv,t) =
+    subtract (vars_of_type t) bv;;
+\end{caml_example}
+We need to compute the list of unknowns of a type environment for the
+generalization process (unknowns belonging to that list cannot become
+generic).
+The set of unknowns of a  type environment is the union of the unknowns
+of each type. The {\tt flat} function flattens a list of lists.
+\begin{caml_example}
+let flat = it_list (prefix @) [];;
+let unknowns_of_type_env env =
+    flat (map (function Forall(gv,t) -> unknowns_of_type (gv,t)) env);;
+\end{caml_example}
+%
+The generalization of a type is relative to a typing environment.
+The \verb"make_set" function eliminates duplicates in its list argument.
+\begin{caml_example}
+let rec make_set = function
+     []  -> []
+  | x::l -> if mem x l then make_set l else x :: make_set l;;
+let generalise_type (gamma, tau) =
+  let genvars =
+        make_set (subtract (vars_of_type tau)
+                           (unknowns_of_type_env gamma))
+  in Forall(genvars, tau)
+;;
+\end{caml_example}
+
+\subsection{From type schemes to types: generic instantiation}
+%
+
+The following function returns a generic instance of its type scheme argument.
+A generic instance is obtained by replacing all generic type variables by new
+unknowns:
+\begin{caml_example}
+let gen_instance (Forall(gv,tau)) = 
+  (* We associate a new unknown to each generic variable *)
+  let unknowns = map (function n -> n, TypeVar(new_vartype())) gv in
+  let rec ginstance = function
+        (TypeVar {Index=n; Value=Unknown} as t) ->
+                    (try assoc n unknowns
+                     with Not_found -> t)
+      | TypeVar {Index=_; Value= t} -> ginstance t
+      | Number -> Number
+      | Arrow(t1,t2) -> Arrow(ginstance t1, ginstance t2)
+      | Unknown -> raise (TypingBug "gen_instance")
+  in ginstance tau
+;;
+\end{caml_example}
+
+\subsection{The ASL type synthesizer}
+%
+
+The type synthesizer is the \verb"asl_typing_expr" function. Each of its
+match cases corresponds to an inference rule given above.
+\begin{caml_example}
+let rec asl_typing_expr gamma =
+  let rec type_rec = function
+      Const _ -> Number
+    | Var n ->
+        let sigma =
+          try nth n gamma
+          with Failure _ -> raise (TypingBug "Unbound")
+        in gen_instance sigma
+    | Cond (e1,e2,e3) ->
+        unify(Number, type_rec e1);
+        let t2 = type_rec e2 and t3 = type_rec e3
+        in unify(t2, t3); t3
+    | App((Abs(x,e2) as f), e1) -> (* LET case *)
+        let t1 = type_rec e1 in
+          let sigma = generalise_type (gamma,t1)
+        in asl_typing_expr (sigma::gamma) e2
+    | App(e1,e2) ->
+        let u = TypeVar(new_vartype())
+        in unify(type_rec e1,Arrow(type_rec e2,u)); u
+    | Abs(x,e) ->
+        let u = TypeVar(new_vartype()) in
+        let s = Forall([],u)
+        in Arrow(u,asl_typing_expr (s::gamma) e)
+  in type_rec;;
+\end{caml_example}
+
+\subsection{Typing, trapping type clashes and printing ASL types}
+%
+
+Now, we define some auxiliary functions in order to build a ``good-looking''
+type synthesizer. First of all, a printing routine for ASL type schemes is
+defined (using a function \verb"tvar_name" which computes a decent name for
+type variables).
+\begin{caml_example}
+let tvar_name n =
+ (* Computes a name "'a", ... for type variables, *)
+ (* given an integer n representing the position  *)
+ (* of the type variable in the list of generic   *)
+ (* type variables                                *)
+ let rec name_of n =
+    let q,r = (n / 26), (n mod 26) in
+    let s = make_string 1 (char_of_int (96+r)) in
+    if q=0 then s else (name_of q)^s
+ in "'"^(name_of n)
+;;
+\end{caml_example}
+Then a printing function for type schemes.
+%
+\begin{caml_example}
+let print_type_scheme (Forall(gv,t)) =
+ (* Prints a type scheme.               *)
+ (* Fails when it encounters an unknown *)
+ let names = let rec names_of = function
+                   (n,[]) -> []
+                 | (n,(v1::Lv)) -> (tvar_name n)::(names_of (n+1, Lv))
+             in names_of (1,gv) in
+ let tvar_names = combine (rev gv, names) in
+ let rec print_rec = function
+      TypeVar{Index=n; Value=Unknown} ->
+         let name = try assoc n tvar_names
+                    with Not_found ->
+                             raise (TypingBug "Non generic variable")
+         in print_string name
+    | TypeVar{Index=_;Value=t} -> print_rec t
+    | Number -> print_string "Number"
+    | Arrow(t1,t2) ->
+           print_string "("; print_rec t1;
+           print_string " -> "; print_rec t2;
+           print_string ")"
+    | Unknown -> raise (TypingBug "print_type_scheme")
+ in print_rec t
+;;
+\end{caml_example}
+%
+Now, the main function which resets the type variables counter, calls the type
+synthesizer, traps ASL type clashes and prints the resulting types. At the
+end, the global environments are updated.
+\begin{caml_example}
+let typing (Decl(s,e)) =
+ reset_vartypes();
+ let tau = (* TYPING *)
+     try asl_typing_expr !global_typing_env e
+     with TypeClash(t1,t2) -> (* A typing error *)  
+           let vars=vars_of_type(t1)@vars_of_type(t2) in
+           print_string "ASL Type clash between ";
+           print_type_scheme (Forall(vars,t1));
+           print_string " and ";
+           print_type_scheme (Forall(vars,t2));
+           print_newline();
+           raise (Failure "ASL typing") in                    
+ let sigma = generalise_type (!global_typing_env,tau) in
+ (* UPDATING ENVIRONMENTS *)
+ global_env := s::!global_env;
+ global_typing_env := sigma::!global_typing_env;
+ reset_vartypes ();
+ (* PRINTING RESULTING TYPE *)
+ print_string "ASL Type of ";
+ print_string s;
+ print_string " is ";
+ print_type_scheme sigma; print_newline();;
+\end{caml_example}
+
+\subsection{Typing ASL programs}
+%
+
+We reinitialize the parsing environment:
+\begin{caml_example}
+global_env:=init_env; ();;
+\end{caml_example}
+Now, let us run some examples through the ASL type checker:
+\begin{caml_example}
+typing (parse_top "let x be 1;");;
+typing (parse_top "+ 2 ((\\x.x) 3);");;
+typing (parse_top "if + 0 1 then 1 else 0 fi;");;
+typing (parse_top "let id be \\x.x;");;
+typing (parse_top "+ (id 1) (id id 2);");;
+typing (parse_top "let f be (\\x.x x) (\\x.x);");;
+typing (parse_top "+ (\\x.x) 1;");;
+\end{caml_example}
+
+\subsection{Typing and recursion}
+%
+
+The $Z$ fixpoint combinator does not have a type in Milner's type system:
+\begin{caml_example}
+typing (parse_top
+  "let fix be \\f.((\\x.f(\\z.(x x)z)) (\\x.f(\\z.(x x)z)));");;
+\end{caml_example}
+This is because we try to apply {\tt x} to itself, and the type of {\tt x}
+is not polymorphic.
+In fact, no fixpoint combinator is typable in ASL.
+This is why we need a special primitive or syntactic construct in order
+to express recursivity.
+
+If we want to assign types to recursive programs, we have to predefine
+the $Z$ fixpoint combinator. Its type scheme should be
+$\forall \alpha . ((\alpha \rightarrow \alpha) \rightarrow \alpha)$,
+because we take fixpoints of functions.
+\begin{caml_example}
+global_env := "fix"::init_env;
+global_typing_env:=
+    (Forall([1],
+     Arrow(Arrow(TypeVar{Index=1;Value=Unknown},
+                   TypeVar{Index=1;Value=Unknown}),
+            TypeVar{Index=1;Value=Unknown})))
+   ::init_typing_env;
+();;
+\end{caml_example}
+We can now define our favorite functions as:
+\begin{caml_example}
+typing (parse_top
+    "let fact be fix (\\f.(\\n. if = n 0 then 1
+                            else * n (f (- n 1))
+                            fi));");;
+typing (parse_top "fact 8;");;
+typing (parse_top
+  "let fib be fix (\\f.(\\n. if = n 1 then 1
+                             else if = n 2 then 1
+                                  else + (f(- n 1)) (f(- n 2))
+                                  fi
+                             fi));");;
+typing (parse_top "fib 9;");;
+\end{caml_example}
+
+\chapter{Compiling ASL to an abstract machine code}
+\label{c:ASLcompiling}
+%
+
+In order to fully take advantage of the static typing of ASL programs, we have
+to:
+\begin{itemize}
+\item either write a new interpreter without type tests (difficult, because we used pattern-matching in order to realize type tests);
+\item or design an untyped machine and produce code for it.
+\end{itemize}
+We choose here the second solution: it will permit us to give some
+intuition about the compiling process of functional languages, and to
+describe a typical execution model for (strict) functional languages.
+The machine that we will use is a simplified version the {\em
+Categorical Abstract Machine} (CAM, for short).
+
+We will call CAM our abstract machine, despite its differences with
+the original CAM. For more informations on the CAM, see
+\cite{Cousineau,MaunyConfLisp}.
+
+\section{The Abstract Machine}
+%
+
+The execution model is a {\em stack machine} (i.e. a machine using a
+stack).  In this section, we define in Caml the {\em states} of the
+CAM and its instructions.
+%
+
+A state is composed of:
+\begin{itemize}
+\item a {\em register} (holding values and environments),
+\item a {\em program counter}, represented here as a list of instructions
+whose first element is the current instruction being executed,
+\item and a {\em stack} represented as a list of code addresses (instruction
+lists), values and environments.
+\end{itemize}
+The first Caml type that we need is the type for CAM instructions. We
+will study later the effect of each instruction.
+
+%
+\begin{caml_example}
+type instruction =
+  Quote of int               (* Integer constants *)
+| Plus | Minus               (* Arithmetic operations *)
+| Divide | Equal | Times 
+| Nth of int                 (* Variable accesses *)
+| Branch of instruction list * instruction list
+                             (* Conditional execution *)
+| Push                       (* Pushes onto the stack *)
+| Swap                       (* Exch. top of stack and register *)
+| Clos of instruction list   (* Builds a closure with the current environment *)
+| Apply                      (* Function application *)
+;;
+\end{caml_example}
+We need a new type for semantic values since instruction lists have now
+replaced abstract syntax trees. The semantic values are merged in a
+type {\tt object}.  The type {\tt object} behaves as data in a
+computer memory: we need higher-level information (such as type
+information) in order to interpret them. Furthermore, some data do not
+correspond to anything (for example an environment composed of
+environments represents neither an ASL value nor an intermediate
+data in a legal computation process).
+%
+\begin{caml_example}
+type object = Constant of int
+            | Closure of object * object
+            | Address of instruction list
+            | Environment of object list
+;;
+\end{caml_example}
+The type {\tt state} is a product type with mutable components.
+\begin{caml_example}
+type state = {mutable Reg: object;
+              mutable PC: instruction list;
+              mutable Stack: object list}
+;;
+\end{caml_example}
+Now, we give the {\em operational semantics} of CAM instructions. The
+effect of an instruction is to change the state configuration. This is
+what we describe now with the {\tt step} function. Code executions
+will be arbitrary iterations of this function.
+\begin{caml_example}
+exception CAMbug of string;;
+exception CAM_End of object;;
+let step state = match state with
+  {Reg=_; PC=Quote(n)::code; Stack=s} ->
+                state.Reg <- Constant(n); state.PC <- code
+
+| {Reg=Constant(m); PC=Plus::code; Stack=Constant(n)::s} ->
+                state.Reg <- Constant(n+m); state.Stack <- s;
+                state.PC <- code
+
+| {Reg=Constant(m); PC=Minus::code; Stack=Constant(n)::s} ->
+                state.Reg <- Constant(n-m); state.Stack <- s;
+                state.PC <- code
+
+| {Reg=Constant(m); PC=Times::code; Stack=Constant(n)::s} ->
+                state.Reg <- Constant(n*m); state.Stack <- s;
+                state.PC <- code
+
+| {Reg=Constant(m); PC=Divide::code; Stack=Constant(n)::s} ->
+                state.Reg <- Constant(n/m); state.Stack <- s;
+                state.PC <- code
+
+| {Reg=Constant(m); PC=Equal::code; Stack=Constant(n)::s} ->
+                state.Reg <- Constant(if n=m then 1 else 0);
+                state.Stack <- s; state.PC <- code
+
+| {Reg=Constant(m); PC=Branch(code1,code2)::code; Stack=r::s} ->
+                state.Reg <- r;
+                state.Stack <- Address(code)::s;
+                state.PC <- (if m=0 then code2 else code1)
+
+| {Reg=r; PC=Push::code; Stack=s} ->
+                state.Stack <- r::s; state.PC <- code
+
+| {Reg=r1; PC=Swap::code; Stack=r2::s} ->
+                state.Reg <- r2; state.Stack <- r1::s;
+                state.PC <- code
+
+| {Reg=r; PC=Clos(code1)::code; Stack=s} ->
+                state.Reg <- Closure(Address(code1),r);
+                state.PC <- code
+
+| {Reg=_; PC=[]; Stack=Address(code)::s} ->
+                state.Stack <- s; state.PC <- code
+
+| {Reg=v; PC=Apply::code;
+          Stack=Closure(Address(code1),Environment(e))::s} ->
+                state.Reg <- Environment(v::e);
+                state.Stack <- Address(code)::s;
+                state.PC <- code1
+
+| {Reg=v; PC=[]; Stack=[]} ->
+                raise (CAM_End v)
+| {Reg=_; PC=(Plus|Minus|Times|Divide|Equal)::code; Stack=_::_} ->
+                raise (CAMbug "IllTyped")
+
+| {Reg=Environment(e); PC=Nth(n)::code; Stack=_} ->
+                state.Reg <- (try nth n e
+                              with Failure _ -> raise (CAMbug "IllTyped"));
+                state.PC <- code
+| _ -> raise (CAMbug "Wrong configuration")
+;;
+\end{caml_example}
+We may notice that the empty code sequence denotes a (possibly final)
+{\em return} instruction.
+
+We could argue that pattern-matching in the {\tt Camlstep} function
+implements a kind of dynamic typechecking. In fact, in a concrete
+(low-level) implementation of the machine (expansion of the CAM
+instructions in assembly code, for example), these tests would not
+appear. They are useless since we trust the typechecker and the
+compiler.  So, any execution error in a real implementation comes from
+a {\em bug} in one of the above processes and would lead to memory
+errors or illegal instructions (usually detected by the computer's
+operating system).
+
+\section{Compiling ASL programs into CAM code}
+%
+
+We give in this section a compiling function taking the abstract
+syntax tree of an ASL expression and producing CAM code.  The
+compilation scheme is very simple:
+\begin{itemize}
+\item the code of a constant is {\tt Quote};
+\item a variable is compiled as an access to the appropriate component
+of the current environment ({\tt Nth});
+\item the code of a conditional expression will save the current environment
+({\tt Push}),
+evaluate the condition part, and, according to the boolean value obtained,
+select the appropriate code to execute ({\tt Branch});
+\item the code of an application will also save the environment on the
+stack ({\tt Push}), execute the function part of the application, then exchange
+the functional value and the saved environment ({\tt Swap}), evaluate the
+argument and, finally, apply the functional value (which is at the top of the
+stack) to the argument held in the register with the {\tt Apply} instruction;
+\item the code of an abstraction simply consists in building a closure
+representing the functional value: the closure is composed of the code of the
+function and the current environment.
+\end{itemize}
+Here is the compiling function:
+\begin{caml_example}
+let rec code_of = function
+  Const(n) -> [Quote(n)]
+| Var n -> [Nth(n)]
+| Cond(e_test,e_t,e_f) ->
+         Push::(code_of e_test)
+       @[Branch(code_of e_t, code_of e_f)]
+| App(e1,e2) -> Push::(code_of e1)
+               @[Swap]@(code_of e2)
+               @[Apply]
+| Abs(_,e) -> [Clos(code_of e)];;
+\end{caml_example}
+A global environment is needed in order to maintain already defined
+values. Any CAM execution will start in a state whose register part
+contains this global environment.
+%
+\begin{caml_example}
+let init_CAM_env =
+  let basic_instruction = function
+        "+" -> Plus
+      | "-" -> Minus
+      | "*" -> Times
+      | "/" -> Divide
+      | "=" -> Equal
+      | s -> raise (CAMbug "Unknown primitive")
+  in map (function s ->
+           Closure(Address[Clos(Push::Nth(2)
+                                 ::Swap::Nth(1)
+                                 ::[basic_instruction s])],
+                    Environment []))
+         init_env;;
+let global_CAM_env = ref init_CAM_env;;
+\end{caml_example}
+
+%
+As an example, here is the code for some ASL expressions.
+\begin{caml_example}
+code_of (expression(lexer(stream_of_string "1;")));;
+code_of (expression(lexer(stream_of_string "+ 1 2;")));;
+code_of (expression(lexer(stream_of_string "(\\x.x) ((\\x.x) 0);")));;
+code_of (expression(lexer(stream_of_string
+                "+ 1 (if 0 then 2 else 3 fi);")));;
+\end{caml_example}
+
+\section{Execution of CAM code}
+%
+
+The main function for executing compiled ASL manages the global
+environment until execution has succeeded.
+\begin{caml_example}
+let run (Decl(s,e)) =
+  (* TYPING *)
+    reset_vartypes();
+    let tau =
+        try asl_typing_expr !global_typing_env e
+        with TypeClash(t1,t2) ->
+              let vars=vars_of_type(t1) @ vars_of_type(t2) in
+              print_string "ASL Type clash between ";
+              print_type_scheme (Forall(vars,t1));
+              print_string " and ";
+              print_type_scheme (Forall(vars,t2));
+              raise (Failure "ASL typing")
+           | Unbound s -> raise (TypingBug ("Unbound: "^s)) in
+    let sigma = generalise_type (!global_typing_env,tau) in
+  (* PRINTING TYPE INFORMATION *)
+    print_string "ASL Type of ";
+    print_string s; print_string " is ";
+    print_type_scheme sigma; print_newline();
+  (* COMPILING *)
+    let code = code_of e in
+    let state = {Reg=Environment(!global_CAM_env); PC=code; Stack=[]} in
+  (* EXECUTING *)
+    let result = try while true do step state done; state.Reg 
+                 with CAM_End v -> v in
+  (* UPDATING ENVIRONMENTS *)
+    global_env := s::!global_env;
+    global_typing_env := sigma::!global_typing_env;
+    global_CAM_env := result::!global_CAM_env;
+  (* PRINTING RESULT *)
+    (match result
+     with Constant(n) -> print_int n
+        | Closure(_,_) -> print_string "<funval>"
+        | _ -> raise (CAMbug "Wrong state configuration"));
+    print_newline();;
+\end{caml_example}
+Now, let us run some examples:
+%
+\begin{caml_example}
+(* Reinitializing environments *)
+global_env:=init_env;
+global_typing_env:=init_typing_env;
+global_CAM_env:=init_CAM_env;
+();;
+run (parse_top "1;");;
+run (parse_top "+ 1 2;");;
+run (parse_top "(\\f.(\\x.f x)) (\\x. + x 1) 3;");;
+\end{caml_example}
+We may now introduce the $Z$ fixpoint combinator as a predefined 
+function {\tt fix}.
+%
+\begin{caml_example}
+begin
+  global_env:="fix"::init_env;
+  global_typing_env:=
+    (Forall([1],
+            Arrow(Arrow(TypeVar{Index=1;Value=Unknown},
+                        TypeVar{Index=1;Value=Unknown}),
+                  TypeVar{Index=1;Value=Unknown})))
+   ::init_typing_env;
+  global_CAM_env:=
+   (match code_of (expression(lexer(stream_of_string
+           "\\f.((\\x.f(\\z.(x x)z)) (\\x.f(\\z.(x x)z)));")))
+    with [Clos(C)] -> Closure(Address(C), Environment [])
+       | _ -> raise (CAMbug "Wrong code for fix"))
+   ::init_CAM_env
+end;;
+\end{caml_example}
+%
+\begin{caml_example}
+run (parse_top
+    "let fact be fix (\\f.(\\n. if = n 0 then 1
+                           else * n (f (- n 1))
+                           fi));");;
+run (parse_top
+  "let fib be fix (\\f.(\\n. if = n 1 then 1
+                             else if = n 2 then 1
+                                  else + (f(- n 1)) (f(- n 2))
+                                  fi
+                             fi));");;
+run (parse_top "fact 8;");;
+run (parse_top "fib 9;");;
+\end{caml_example}
+
+It is of course possible (and desirable) to introduce recursion by
+using a specific syntactic construct, special instructions and a
+dedicated case to the compiling function. See \cite{MaunyConfLisp} for
+efficient compilation of recursion, data structures etc.
+
+\begin{exo}
+Interesting exercises for which we won't give solutions consist in
+enriching according to your taste the ASL language. Also, building a
+standalone ASL interpreter is a good exercise in modular programming.
+\end{exo}

@@ -1,0 +1,83 @@
+
+Bonjour !
+
+You have ordered our bignum package: you are going to receive NN messages
+(one would be too big for the mailer). These messages are named:
+INCLUDE1
+
+These messages are shell archives built with the tool "makekit" based on
+the tool "shar" (as SHell ARchiver). 
+
+The package bignum is now available on U*ix system, VMS system and MSDOS
+system.
+
+To install the package bignum on your disk, create a directory where
+you want install this package, and go there:
+on U*ix system:
+	mkdir bignum
+        cd bignum
+on VMS system:
+	create /dir [.bignum]
+	set def [.bignum]
+on MSDOS system:
+	md bignum
+	cd bignum
+according to the system you use.
+
+Copy the NN messages from your mail system to this directory.
+For this example, we assume you have copied the messages in files
+INCLUDE2
+
+Use your favorite text editor to strip from each of the NN messages 
+the header due to the mail system; each ends at the line:
+
+    # Remove all text above and including this line. 
+
+In the following, we are going to use the shell archiver shar. You
+can get a copy of a working VMS version of shar on the node prlvms: 
+	copy prlvms::shar.exe []
+	shar := $disk:[dir]shar.exe;
+
+In the directory bignum, invoke the shell on these files:
+INCLUDE3
+or
+INCLUDE4
+according to the system you use.
+
+The order in which you perform these NN commands must be preserved.
+
+When you are finished, the package will have been installed in the
+directory bignum. 
+#include "README"
+
+When you have built a version of the package bignum, you can test it
+by invoking the test programs:
+	testKerN all	- Tests the functions in the kernel
+	bztest		- Tests the generic functions at the Z level
+
+On VMS system, we suppose you have defined:
+	testKerN := $disk:[dir]testKerN.exe
+	bztest := $disk:[dir]bztest.exe
+
+
+We hope all is well !
+Please, let us know if you have any problems. 
+All reported bugs will be corrected. All improvements to the package
+which you send back to us will be included in the successive releases,
+with an author's acknowledgement.
+
+     Merci! and have fun ...
+
+This package was initially developed at INRIA by J. Vuillemin. The
+following people have greatly contributed to bring it to it's present
+state: Patrice Bertin, Hans Boehm, Jerome Chailloux, Michel Gangnet, 
+Jean Claude Herve, Jim Lawton, Francois Morain, David Salesin, Mark Shand,
+Bernard Serpette, Glenn Sills, Jean Vuillemin, Roger Wolff. 
+
+    distribution: 
+        librarian@prl.dec.com
+        decprl::librarian
+
+    installation, use, suggestions:
+        herve@decprl.dec.com
+        serpette@inria.inria.fr
