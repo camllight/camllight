@@ -182,7 +182,9 @@ value str_replacement_text(repl, orig)
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
         c -= '0';
-        bcopy(&Byte(orig, start_regs[c]), q, end_regs[c] - start_regs[c]);
+        len = end_regs[c] - start_regs[c];
+        bcopy(&Byte(orig, start_regs[c]), q, len);
+        q += len;
         break;
       default:
         *q++ = '\\'; *q++ = c; break;

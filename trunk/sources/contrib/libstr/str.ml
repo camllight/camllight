@@ -3,8 +3,7 @@
 let string_before s n =
   if n == 0 then s else sub_string s 0 n;;
 
-let string_after s n =
-  if n == string_length s then s else sub_string s n (string_length s - n);;
+let string_after s n = sub_string s n (string_length s - n);;
 
 let first_chars s n = sub_string s 0 n;;
 
@@ -72,8 +71,9 @@ let global_substitute expr repl_fun text =
   let rec replace start =
     try
       let pos = search_forward expr text start in
+      let repl_text = repl_fun text in
       sub_string text start (pos-start) ::
-      repl_fun text ::
+      repl_text ::
       replace (match_end())
     with Not_found ->
       [string_after text start] in
