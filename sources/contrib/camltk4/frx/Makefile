@@ -17,7 +17,7 @@ TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
 	   -lcamltk4 $(TKLIBS)
 
 # Use 4.0
-COMPFLAGS=-W -i -g -I ../lib
+COMPFLAGS=-W -i -g -I ../lib -I ../libsupport
 LINKFLAGS= -custom $(PROFILING)
 
 OBJS= frx_widget.zo frx_font.zo frx_entry.zo frx_text.zo \
