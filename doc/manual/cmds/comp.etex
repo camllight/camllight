@@ -114,10 +114,6 @@ chapter~\ref{c:intf-c}.
 option.
 \end{unix}
 
-\begin{pc} This option is not implemented. \end{pc}
-
-\begin{mac} This option is not implemented. \end{mac}
-
 \item["-files" \var{response-file}]
 Process the files whose names are listed in file
 \var{response-file}, just as if these names appeared on the command line.
@@ -129,19 +125,21 @@ the length of the command line.
 Cause the compiler to produce additional debugging information.
 During the linking phase, this option add information at the end of
 the executable bytecode file produced. This information is required 
-in particular by the catch-all exceptions handlers provided by the
-module "printexc" in the standard library.
+by the debugger "camldebug" and also by the catch-all exception
+handler from the standard library module "printexc".
 
-During the compilation of an implementation file (".ml" file),
-the compiler writes a ".zix" file when the "-g" option is set. This
-".zix" file describes the full interface of the ".ml" file, that is,
-all types and values defined in the ".ml" file, including those that
-are local to the ".ml" file (i.e. not declared in the ".mli" interface
-file). Used in conjunction with the "-g" option to the toplevel system
-(chapter~\ref{c:camllight}), the ".zix" file gives access to the
-local values of the module, making it possible to print or ``trace'' them. 
+During the compilation of an implementation file (".ml" file),  when
+the "-g" option is set, the compiler adds debugging information to the
+".zo" file. It also writes a ".zix" file that describes the full
+interface of the ".ml" file, that is, all types and values defined in
+the ".ml" file, including those that are local to the ".ml" file
+(i.e. not declared in the ".mli" interface file). Used in conjunction
+with the "-g" option to the toplevel system
+(chapter~\ref{c:camllight}), the ".zix" file gives access to the local
+values of the module, making it possible to print or ``trace'' them.
 The ".zix" file is not produced if the implementation file has no
-explicit interface, since, in this case, the module has no local values.
+explicit interface, since, in this case, the module has no local
+values.
 
 \item["-i"]
 Cause the compiler to print the declared types, exceptions, and global
@@ -173,7 +171,7 @@ Specify the name of the output file produced by the linker.
 tradition.
 \end{unix}
 
-\begin{pc} The default output name is "CAML_OUT.EXE". \end{pc}
+\begin{pc} The default output name is "caml_out.exe". \end{pc}
 
 \begin{mac} The default output name is "Caml.Out". \end{mac}
 
@@ -266,7 +264,7 @@ and so on. This error can also appear if a ".zi" file is modified after
 its creation by the compiler. Fix: remove the corrupted ".zi" file,
 and rebuild it.
 
-\item[Expression of type \nth{t}{1} cannot be used with type \nth{t}{2}]
+\item[This expression has type \nth{t}{1}, but is used with type \nth{t}{2}]
 This is by far the most common type error in programs. Type \nth{t}{1} is
 the type inferred for the expression (the part of the program that is
 displayed in the error message), by looking at the expression itself.
@@ -317,6 +315,57 @@ module \var{mod} are recompiled when the interface \var{mod}".zi"
 changes. To check that the "Makefile" contains the right dependencies,
 remove all ".zi" files and rebuild the whole program; if no ``Cannot
 find file'' error appears, you're all set.
+
+\item[The type inferred for the value \var{name},
+	that is, \var{t},
+	contains type variables that cannot be generalized]
+Type variables ("'a", "'b", \ldots) in a type \var{t} can be in either
+of two states: generalized (which means that the type \var{t} is valid
+for all possible instantiations of the variables) and not generalized
+(which means that the type \var{t} is valid only for one instantiation
+of the variables). In a "let" binding "let "\var{name}" = "\var{expr},
+the type-checker normally generalizes as many type variables as
+possible in the type of \var{expr}. However, this leads to unsoundness
+(a well-typed program can crash) in conjunction with polymorphic
+mutable data structures. To avoid this, generalization is performed at
+"let" bindings only if the bound expression \var{expr} belongs to the
+class of ``syntactic values'', which includes constants, identifiers,
+functions, tuples of syntactic values, etc. In all other cases (for
+instance, \var{expr} is a function application), a polymorphic mutable
+could have been created and generalization is therefore turned off.
+
+Non-generalized type variables in a type cause no difficulties inside
+a given compilation unit (the contents of a ".ml" file,
+or an interactive session), but they cannot be allowed in types
+written in a ".zi" compiled interface file, because they could be used
+inconsistently in other compilation units. Therefore, the compiler
+flags an error when a ".ml" implementation without a ".mli" interface
+defines a global variable \var{name} whose type contains non-generalized type
+variables. There are two solutions to this problem:
+\begin{itemize}
+\item Add a type constraint or a ".mli" interface to give a
+monomorphic type (without type variables) to \var{name}. For instance,
+instead of writing
+\begin{verbatim}
+        let sort_int_list = sort (prefix <);;
+        (* inferred type 'a list -> 'a list, with 'a not generalized *)
+\end{verbatim}
+write
+\begin{verbatim}
+        let sort_int_list = (sort (prefix <) : int list -> int list);;
+\end{verbatim}
+\item If you really need \var{name} to have a polymorphic type, turn
+its defining expression into a function by adding an extra parameter.
+For instance, instead of writing
+\begin{verbatim}
+        let map_length = map vect_length;;
+        (* inferred type 'a vect list -> int list, with 'a not generalized *)
+\end{verbatim}
+write
+\begin{verbatim}
+        let map_length lv = map vect_length lv;;
+\end{verbatim}
+\end{itemize}
 
 \item[\var{mod}"__"\var{name} is referenced before being defined]
 This error appears when trying to link an incomplete or incorrectly

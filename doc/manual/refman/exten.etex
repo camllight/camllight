@@ -18,6 +18,9 @@ approach to the writing of recursive-descent parsers.
 Streams are presented by the following extensions to the syntactic
 classes of expressions:
 
+\ikwd{function\@\verb`function`}
+\ikwd{match\@\verb`match`}
+
 \begin{syntax}
 expr:
           \ldots
@@ -93,14 +96,39 @@ discussion of alternate semantics, can be found in {\em Parsers in ML}
 by Michel Mauny and Daniel de Rauglaudre, in the proceedings of the
 1992 ACM conference on Lisp and Functional Programming.
 
+\section{Guards}
+
+\ikwd{when\@\verb`when`}
+
+Cases of a pattern matching can include guard expressions, which are
+arbitrary boolean expressions that must evaluate to "true" for the
+match case to be selected. Guards occur just before the "->" token and
+are introduced by the "when" keyword:
+$$\begin{array}{rlll}
+\token{match} & {\sl expr} \\
+\token{with} & {\sl pattern}_1 [\token{when} {\sl cond}_1] & \token{->} & {\sl expr}_1 \\
+\token{|}     & \ldots \\
+\token{|}     & {\sl pattern}_n  [\token{when} {\sl cond}_n] & \token{->} & {\sl expr}_n
+\end{array}$$
+(Same syntax for the "fun", "function", and "try" \ldots "with" constructs.)
+During matching, if the value of @expr@ matches some pattern
+@pattern_i@ which has a guard @cond_i@, then the expression @cond_i@
+is evaluated (in an environment enriched by the bindings performed
+during matching). If @cond_i@ evaluates to "true", then @expr_i@ is
+evaluated and its value returned as the result of the matching, as
+usual. But if @cond_i@ evaluates to "false", the matching is resumed
+against the patterns following @pattern_i@.
+
 \section{Range patterns}
 
 In patterns, Caml Light recognizes the form
 @"`" c "`" ".." "`" d "`"@
 (two character constants separated by~\verb|..|) as a shorthand for
 the pattern
-$$\hbox{@"`" c "`" "|" "`" c_1 "`" "|" "`" c_2 "`" "|" \ldots
-        "|" "`" c_n "`" "|" "`" d "`"@} $$
+\begin{center}
+@"`" c "`" "|" "`" c_1 "`" "|" "`" c_2 "`" "|" \ldots
+        "|" "`" c_n "`" "|" "`" d "`"@
+\end{center}
 where $c_1, c_2, \ldots, c_n$ are the characters that occur between
 $c$ and $d$ in the ASCII character set. For instance, 
 the pattern \verb|`0`..`9`| matches all characters that are digits.
@@ -114,15 +142,16 @@ following definition is accepted:
 \begin{verbatim}
         let rec x = 1 :: y and y = 2 :: x;;
 \end{verbatim}
-and correctly binds "x" to the cyclic list $"1::2::1::2::"\ldots$, and
-"y" to the cyclic list $"2::1::2::1::"\ldots$ Informally, the class of
-accepted definitions consists of those definitions where the defined
-variables occur only inside function bodies or as a field of a data
-structure. Moreover, the patterns in the left-hand sides must be
-identifiers, nothing more complex.
+and correctly binds "x" to the cyclic list "1::2::1::2::"\ldots, and
+"y" to the cyclic list "2::1::2::1::"\ldots
+Informally, the class of accepted definitions consists of those
+definitions where the defined variables occur only inside function
+bodies or as a field of a data structure. Moreover, the patterns in
+the left-hand sides must be identifiers, nothing more complex.
 
 \section{Mutable variant types}
 
+\ikwd{mutable\@\verb`mutable`}
 The argument of a value constructor can be declared ``mutable'' when
 the variant type is defined:
 \begin{verbatim}
@@ -152,7 +181,126 @@ mutable field in a record. For instance,
 \end{verbatim}
 returns the value \verb|{lbl = 2}|.
 
-\section{Directives}
+\section{String access}
+
+Extra syntactic constructs are provided to access and modify
+characters in strings:
+\begin{syntax}
+expr:
+    \ldots
+  | expr '.[' expr ']'
+  | expr '.[' expr ']' '<-' expr
+\end{syntax}
+
+The expression @expr_1 '.[' expr_2 ']'@ is equivalent to the
+application @'nth_char' expr_1 expr_2@. In the initial environment,
+the identifier @'nth_char'@ resolves to a built-in function that
+returns the character number @expr_2@ in the string denoted by
+@expr_1@. The first element has number 0; the last element has number
+$n-1$, where $n$ is the length of the string. The exception
+"Invalid_argument" is raised if the access is out of bounds.
+
+The expression @expr_1 '.[' expr_2 ']' '<-' expr_3@ is equivalent to
+@'set_nth_char' expr_1 expr_2 expr_3@. In the initial environment,
+the identifier @'set_nth_char'@ resolves to a built-in function that
+modifies in-place the string denoted by @expr_1@, replacing character
+number @expr_2@ by the value of @expr_3@. The exception
+"Invalid_argument" is raised if the access is out of bounds. The
+built-in function returns @'()'@.
+
+\section{Alternate syntax}
+
+The syntax of some constructs has been slightly relaxed:
+
+\begin{itemize}
+
+\item The symbol ":=" can be used instead of "<-" in assignments to
+record fields, vector elements, or string characters. For instance,
+@expr_1 '.(' expr_2 ')' ':=' expr_3@ is parsed as
+@'vect_assign' expr_1 expr_2 expr_3@. 
+
+\item An optional ";" may terminate a sequence, list expression, or
+record expression. For instance, @'begin' e_1 ';' e_2 ';' 'end'@ is
+syntactically correct and synonymous with @'begin' e_1 ';' e_2 'end'@.
+
+\item Similarly, an optional "|" may begin a pattern-matching
+expression. For instance, @'function' '|' pat_1 '->' expr_1 '|' \ldots@
+is syntactically correct and synonymous with
+@'function' pat_1 '->' expr_1 '|' \ldots@.
+
+\end{itemize}
+
+\section{Infix symbols}
+
+Sequences of ``operator'' characters, such as "<=>" or "!!",
+are read as a single token from the @infix-symbol@ or @prefix-symbol@
+class:
+\begin{syntax}
+infix-symbol:
+        ('=' || '<' || '>' || '@' || '^' || '|' || '&' || '~' ||
+         '+' || '-' || '*' || '/' || '%') 
+        {'!' || '$' || '%' || '&' || '*' || '+' || '-' || '.' ||
+         '/' || ':' || ';' || '<' || '=' || '>' || '?' || '@' ||
+         '^' || '|' || '~'}
+;
+prefix-symbol:
+        ('!' || '?')
+        {'!' || '$' || '%' || '&' || '*' || '+' || '-' || '.' ||
+         '/' || ':' || ';' || '<' || '=' || '>' || '?' || '@' ||
+         '^' || '|' || '~'}
+;
+\end{syntax}
+Tokens from these two classes generalize the built-in infix and prefix
+operators described in chapter~\ref{c:refman}:
+\begin{syntax}
+expr:
+    \ldots
+  | prefix-symbol expr
+  | expr infix-symbol expr
+;
+variable:
+    \ldots
+  | 'prefix' prefix-symbol
+  | 'prefix' infix-symbol
+;
+\end{syntax}
+\ikwd{prefix\@\verb`prefix`}%
+No "#infix" directive (section~\ref{s:exten-directive}) is needed to
+give infix symbols their infix status. The precedences and
+associativities of infix symbols  in expressions are determined by
+their first character(s): symbols beginning with "**" have highest
+precedence (exponentiation), followed by symbols beginning with "*",
+"/" or "%" (multiplication), then "+" and "-" (addition), then all
+others symbols (comparisons). The updated precedence table for
+expressions is ("*"\ldots\ means ``any infix symbol starting with "*"''):
+\begin{precedences}
+\prec{"!"\ldots"   ?"\ldots}{--}
+\prec{".   .(   .["}{--}
+\prec{function application}{right}
+\prec{constructor application}{--}
+\prec{"-   -." (prefix)}{--}
+\prec{"**"\ldots}{right}
+\prec{"*"\ldots"   /"\ldots"   %"\ldots"   mod"}{left}
+\prec{"+"\ldots"   -"\ldots}{left}
+\prec{"::"}{right}
+\prec{{\tt \char64} "^"}{right}
+\prec{comparisons ("=  ==  < " etc.), all other infix symbols}{left}
+\prec{"not"}{--}
+\prec{"&"}{left}
+\prec{"or"}{left}
+\prec{","}{--}
+\prec{"<-   :="}{right}
+\prec{"if"}{--}
+\prec{";"}{right}
+\prec{"let" "match" "fun" "function" "try"}{--}
+\end{precedences}
+Some infix and prefix symbols are predefined in the default
+environment (see chapters~\ref{c:refman}~and~\ref{c:stdlib} for a
+description of their behavior). The others are initially unbound and
+must be bound before use, with a @'let' 'prefix' infix-symbol '=' expr@ 
+or @'let' 'prefix' prefix-symbol '=' expr@ binding.
+
+\section{Directives} \label{s:exten-directives}
 
 In addition to the standard \verb|#open| and \verb|#close| directives,
 Caml Light provides three additional directives.
@@ -183,3 +331,4 @@ compiled module interface files. This is equivalent to the "-I"
 command-line option to the batch compiler and the toplevel system.
 
 \end{options}
+

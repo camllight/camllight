@@ -29,23 +29,20 @@ more adapted to your parsing problem.
 applications.
 \end{mac}
 
-\begin{pcbase} These commands are not available in the 8086 PC
-version.
-\end{pcbase}
-
 \section{Overview of "camllex"}
 
 
 The "camllex" command produces a lexical analyzer from a set of regular
 expressions with attached semantic actions, in the style of
 "lex". Assuming the input file is ${\it lexer}".mll"$, executing
-$$ "camllex " {\it lexer}".mll" $$
-produces Caml Light code for a lexical analyzer in file ${\it
-lexer}".ml"$. This file defines one lexing function per entry
-point in the lexer definition. These functions have the
-same names as the entry points. Lexing functions take as
-argument a lexer buffer, and return the semantic attribute
-of the corresponding entry point.
+\begin{alltt}
+        camllex \var{lexer}.mll
+\end{alltt}
+produces Caml Light code for a lexical analyzer in file \var{lexer}".ml".
+This file defines one lexing function per entry point in the lexer
+definition. These functions have the same names as the entry
+points. Lexing functions take as argument a lexer buffer, and return
+the semantic attribute of the corresponding entry point.
 
 Lexer buffers are an abstract data type implemented in the standard
 library module "lexing". The functions "create_lexer_channel",
@@ -62,17 +59,17 @@ below.)
 \section{Syntax of lexer definitions}
 
 The format of lexer definitions is as follows:
-\begin{flushleft} \it
-\verb"{" header \verb"}"                                                   \\
-"rule" entrypoint \verb"="                                                 \\
-\verb"  parse" regexp \verb"{" action \verb"}"                             \\
-\verb"      |" \ldots                                                      \\
-\verb"      |" regexp \verb"{" action \verb"}"                             \\
-"and" entrypoint \verb"="                                                  \\
-\verb"  parse" \ldots                                                      \\
-"and" \ldots                                                               \\
-\verb";;"
-\end{flushleft}
+\begin{alltt}
+\{ \var{header} \}
+rule \var{entrypoint} =
+  parse \var{regexp} \{ \var{action} \}
+      | \ldots
+      | \var{regexp} \{ \var{action} \}
+and \var{entrypoint} =
+  parse \ldots
+and \ldots
+;;
+\end{alltt}
 
 Comments are delimited by \verb|(*| and \verb|*)|, as in Caml Light.
 
@@ -173,8 +170,8 @@ Return the absolute position in the input text of the end of the
 matched string. The first character read from the input text has
 position 0.
 
-\item[{\it entrypoint} "lexbuf"]
-(Where {\it entrypoint} is the name of another entry point in the same
+\item[\var{entrypoint} "lexbuf"]
+(Where \var{entrypoint} is the name of another entry point in the same
 lexer definition.) Recursively call the lexer on the given entry point.
 Useful for lexing nested comments, for example.
 
@@ -185,9 +182,11 @@ Useful for lexing nested comments, for example.
 The "camlyacc" command produces a parser from a context-free grammar
 specification with attached semantic actions, in the style of "yacc".
 Assuming the input file is $grammar".mly"$, executing
-$$ "camlyacc " \mbox{\it options} ~ grammar".mly" $$
-produces Caml Light code for a parser in the file $grammar".ml"$, and
-its interface in file $grammar".mli"$.
+\begin{alltt}
+        camlyacc \var{options} \var{grammar}.mly
+\end{alltt}
+produces Caml Light code for a parser in the file \var{grammar}".ml",
+and its interface in file \var{grammar}".mli".
 
 The generated module defines one parsing function per entry point in
 the grammar. These functions have the same names as the entry points.
@@ -198,29 +197,30 @@ functions are usually generated from a lexer specification by the
 "camllex" program. Lexer buffers are an abstract data type
 implemented in the standard library module "lexing". Tokens are values from
 the concrete type "token", defined in the interface file
-$grammar".mli"$ produced by "camlyacc".
+\var{grammar}".mli" produced by "camlyacc".
 
 \section{Syntax of grammar definitions}
 
 Grammar definitions have the following format:
-\begin{flushleft} \it
-\verb"%{"                                                                  \\
-~~header                                                                   \\
-\verb"%}"                                                                  \\
-~~declarations                                                             \\
-\verb"%%"                                                                  \\
-~~rules                                                                    \\
-\verb"%%"                                                                  \\
-~~trailer
-\end{flushleft}
+\begin{alltt}
+%\{
+  \var{header}
+%\}
+  \var{declarations}
+%%
+  \var{rules}
+%%
+  \var{trailer}
+\end{alltt}
 
-Comments are enclosed between \verb|/*| and \verb|*/| pairs, as in C,
-except in the header and trailer sections.
+Comments are enclosed between \verb|/*| and \verb|*/| (as in C) in the
+``declarations'' and ``rules'' sections, and between \verb|(*| and
+\verb|*)| (as in Caml) in the ``header'' and ``trailer'' sections.
 
 \subsection{Header and trailer}
 
 The header and the trailer sections are Caml Light code that is copied
-as is into file $grammar".ml"$. Both sections are optional. The header
+as is into file \var{grammar}".ml". Both sections are optional. The header
 goes at the beginning of the output file; it usually contains
 \verb"#open" directives required by the semantic actions of the rules.
 The trailer goes at the end of the output file.
@@ -321,11 +321,11 @@ The "camlyacc" command recognizes the following options:
 \item["-v"]
 Generate a description of the parsing tables and a report on conflicts
 resulting from ambiguities in the grammar. The description is put in
-file $grammar".output"$.
+file \var{grammar}".output".
 
 \item["-s"]
-Generate a $grammar".ml"$ file with smaller phrases.  Semantic actions
-are presented in the $grammar".ml"$ output file as one large vector of
+Generate a \var{grammar}".ml" file with smaller phrases.  Semantic actions
+are presented in the \var{grammar}".ml" output file as one large vector of
 functions. By default, this vector is built by a single phrase. When
 the grammar is large, or contains complicated semantic actions, the
 resulting phrase may require large amounts of memory to be compiled by

@@ -172,7 +172,7 @@ matches the argument, the exception "Match_failure" is raised.
 
 If the function above is applied to less than $m$ arguments, a
 functional value is returned, that represents the partial application
-of the function to the provided arguments. This partial application is
+of the function to the arguments provided. This partial application is
 a function that, when applied to the remaining arguments,
 matches all arguments against the pattern rows as described above.
 Matching does not start until all $m$ arguments have been provided
@@ -487,17 +487,17 @@ Operator & Associated & Behavior in the default environment \\
 \verb'-' (prefix) & \verb'minus' & Integer negation. \\
 \verb'*' & \verb'prefix *' & Integer multiplication. \\
 \verb'/' & \verb'prefix /' & Integer division. Raise \verb'Division_by_zero' if
-second argument is zero. The result is
-unspecified if either argument is negative. \\
+        second argument is zero. The result is
+        unspecified if either argument is negative. \\
 \verb'mod' & \verb'prefix mod' & Integer modulus. Raise
-\verb'Division_by_zero' if second argument is zero. The result is
-unspecified if either argument is negative. \\
+        \verb'Division_by_zero' if second argument is zero. The result is
+        unspecified if either argument is negative. \\
 \verb'+.' & \verb'prefix +.' & Floating-point addition. \\
 \verb'-.' (infix) & \verb'prefix -.' & Floating-point subtraction. \\
 \verb'-.' (prefix) & \verb'minus_float' & Floating-point negation. \\
 \verb'*.' & \verb'prefix *.' & Floating-point multiplication. \\
-\verb'/.' & \verb'prefix /.' & Floating-point division. The result is
-unspecified if second argument is null. \\
+\verb'/.' & \verb'prefix /.' & Floating-point division.
+        Raise \verb'Division_by_zero' if second argument is zero. \\
 {\tt\char64}  & \verb'prefix '{\tt\char64} & List concatenation. \\
 \verb'^'  & \verb'prefix ^' & String concatenation. \\
 \verb'!'  & \verb'prefix !' & Dereferencing (return the current

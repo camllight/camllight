@@ -15,26 +15,31 @@ allocator and garbage collector; and a set of C functions that
 implement primitive operations such as input/output.
 
 The usage for "camlrun" is:
-$$ "camlrun " \mbox{\it options} ~ \mbox{\it bytecode-executable} ~
-        arg_1 ~ arg_2 ~ \ldots ~ arg_n $$
+\begin{alltt}
+        camlrun \var{options} \var{bytecode-executable} \nth{arg}{1} ... \nth{arg}{n}
+\end{alltt}
 The first non-option argument is taken to be the name of the file
 containing the executable bytecode. (That file is searched in the
 executable path as well as in the current directory.) The remaining
 arguments are passed to the Caml Light program, in the string array
 "sys__command_line". Element 0 of this array is the name of the
-bytecode executable file; elements 1 to $n$ are the remaining
-arguments $arg_1$ to $arg_n$.
+bytecode executable file; elements 1 to \var{n} are the remaining
+arguments \nth{arg}{1} to \nth{arg}{n}.
 
 As mentioned in chapter~\ref{c:camlc}, in most cases, the bytecode
 executable files produced by the "camlc" command are self-executable,
 and manage to launch the "camlrun" command on themselves
 automatically. That is, assuming "caml.out" is a bytecode executable
 file,
-$$ "caml.out " arg_1 ~ arg_2 ~ \ldots ~ arg_n $$
+\begin{alltt}
+        caml.out \nth{arg}{1} ... \nth{arg}{n}
+\end{alltt}
 works exactly as
-$$ "camlrun caml.out " arg_1 ~ arg_2 ~ \ldots ~ arg_n $$
+\begin{alltt}
+        camlrun caml.out \nth{arg}{1} ... \nth{arg}{n}
+\end{alltt}
 Notice that it is not possible to pass options to "camlrun" when
-invoking directly "caml.out".
+invoking "caml.out" directly.
 
 \section{Options}
 
@@ -45,7 +50,7 @@ collector, but they are not for the casual user.)
 \begin{options}
 
 \item["-v"]
-Cause "camlrun" to print various diagnostic messages relative to
+Set up "camlrun" to print various diagnostic messages relative to
 memory allocation and garbage collection. Useful to debug
 memory-related problems.
 
