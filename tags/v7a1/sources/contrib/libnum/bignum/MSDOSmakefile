@@ -1,0 +1,63 @@
+#  Copyright     Digital Equipment Corporation & INRIA     1990
+#  Last modified_on Mon May 21 17:12:01 GMT+2:00 1990 by herve 
+
+CC = msc
+LIB = BigNum.lib
+OBJECT = o\KerN.obj o\bnInit.obj o\bnMult.obj o\bnDivide.obj o\bnCmp.obj o\bzf.obj o\bz.obj
+LIBOBJECT = +o\KerN.obj +o\bnInit.obj +o\bnMult.obj +o\bnDivide.obj +o\bnCmp.obj +o\bzf.obj +o\bz.obj
+KERNH = h\BigNum.h 
+CFLAGS = -DMSDOS -DNOMEM -DDIGITon16BITS /Fo.\o\ -I.\h /AL
+LINK = \msc\link
+LINKFLAGS = /ST:32000 
+
+ECHO = echo
+RM = del
+AR = lib
+
+# Level N
+o\KerN.obj: c\KerN.c 
+	echo "The Default is KerN written in C with digits on 32 bits"
+	$(CC) c\KerN.c, $(CFLAGS);
+
+o\bnInit.obj: c\bn\bnInit.c $(KERNH)
+	$(CC) c\bn\bnInit.c, $(CFLAGS);
+
+o\bnMult.obj: c\bn\bnMult.c $(KERNH)
+	$(CC) c\bn\bnMult.c, $(CFLAGS);
+
+o\bnDivide.obj: c\bn\bnDivide.c $(KERNH)
+	$(CC) c\bn\bnDivide.c, $(CFLAGS);
+
+o\bnCmp.obj: c\bn\bnCmp.c $(KERNH)
+	$(CC) c\bn\bnCmp.c, $(CFLAGS);
+
+# Level Z
+o\bz.obj: c\bz.c h\BigZ.h $(KERNH)
+	$(CC) c\bz.c, $(CFLAGS);
+
+# Some functions build with BigZ
+o\bzf.obj: c\bzf.c h\BigZ.h $(KERNH)
+	$(CC) c\bzf.c, $(CFLAGS);
+
+# build the BigNum library
+$(LIB): $(OBJECT)
+	$(RM) $(LIB)
+	$(AR) $(LIB) $(LIBOBJECT);
+
+# Tests Of KerN
+o\testKerN.obj: c\testKerN.c $(KERNH) h\BntoBnn.h
+	$(CC) c\testKerN.c, $(CFLAGS);
+
+testKerN.exe: o\testKerN.obj $(LIB)
+	$(LINK) $(LINKFLAGS) o\testKerN.obj, testKerN, testKerN, $(LIB);
+
+# Tests Of BigZ
+o\bztest.obj: c\bztest.c h\BigZ.h $(KERNH)
+	$(CC) c\bztest.c, $(CFLAGS);
+
+bztest.exe: o\bztest.obj $(LIB)
+	$(LINK) $(LINKFLAGS) o\bztest.obj, bztest, bztest, $(LIB);
+
+# make all
+all: testKerN.exe bztest.exe
+	$(ECHO) All is done !

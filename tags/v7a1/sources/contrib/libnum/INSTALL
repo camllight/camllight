@@ -1,0 +1,32 @@
+USAGE:
+
+To use the bignum library from your programs, just do
+
+        camlc -custom <other options> nums.zo <other .zo and .ml files> -lnums
+
+for the linking phase.
+
+If you'd like to have the bignum functions available at toplevel, do
+
+        camllight camlnum
+
+As an example, try:
+
+        #open "num";;
+        let rec fact n =
+          if n = 0 then Int 1 else mult_num (num_of_int n) (fact(n-1));;
+        string_of_num(fact 1000);;
+
+
+KNOWN TARGET ARCHITECTURES:
+
+        C               portable C version (default)
+        sparc           Sparc V8 assembly code
+        supersparc      Sparc V9 assembly code
+        mips            MIPS R2000, R3000, R4000 assembly code
+        alpha           DEC Alpha (21064) assembly code
+        68K             Motorola 68020 assembly code
+        vax             DEC VAX assembly code
+        i960            Intel 80960A assembly code
+        ns              National Semiconductors 32032 assembly code
+        pyramid         Pyramid minicomputers assembly code
