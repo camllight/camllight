@@ -31,7 +31,7 @@ let main () =
       close_out !oc;
       sys__remove dest_name;
       begin match exn with
-        Parse_error x ->
+        Parse_error ->
           prerr_string "Syntax error around char ";
           prerr_int (get_lexeme_start lexbuf);
           prerr_endline "."
