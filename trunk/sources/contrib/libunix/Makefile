@@ -22,7 +22,7 @@ OBJS=accept.o access.o addrofstr.o alarm.o bind.o chdir.o chmod.o \
   geteuid.o getgid.o getgr.o getgroups.o gethost.o gethostname.o \
   getlogin.o getpid.o getppid.o getproto.o getpw.o getserv.o getuid.o \
   gmtime.o ioctl.o kill.o link.o listen.o lockf.o lseek.o mkdir.o \
-  mkfifo.o nice.o open.o opendir.o pause.o peek.o pipe.o poke.o read.o \
+  mkfifo.o nice.o open.o opendir.o pause.o pipe.o read.o \
   readdir.o readlink.o rename.o rewinddir.o rmdir.o select.o sendrecv.o \
   setgid.o setuid.o shutdown.o signal.o sleep.o socket.o socketaddr.o \
   socketpair.o stat.o strofaddr.o symlink.o termios.o time.o times.o \
@@ -126,9 +126,7 @@ nice.o : nice.c unix.h
 open.o : open.c unix.h 
 opendir.o : opendir.c unix.h 
 pause.o : pause.c unix.h 
-peek.o : peek.c 
 pipe.o : pipe.c unix.h 
-poke.o : poke.c 
 read.o : read.c unix.h 
 readdir.o : readdir.c unix.h 
 readlink.o : readlink.c unix.h 
