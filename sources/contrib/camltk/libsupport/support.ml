@@ -142,7 +142,7 @@ let register_callback f =
 
 (* Other builtin types and utilities *)
 (* The CAMLtoTKstring converter *)
-(* cannot use "" in Tcl, since []/$ are still substituted inside *) 
+(* []/$ are still substituted inside "" *) 
 
 let cindex p s start = find start
   where rec find i =
@@ -152,7 +152,6 @@ let cindex p s start = find start
     else find (i+1) 
 ;;
 
-(* If somebody can tell me what i should do with \, I'll appreciate *)
 let must_quote c = 
     c == `[` or c == `]` or c == `$`
 ;;

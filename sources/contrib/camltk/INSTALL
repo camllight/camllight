@@ -6,7 +6,9 @@ WARNING: this is an early alpha-release, meaning that
 
 Prerequisites:
  Works only on Unix (uses fork/exec and named pipes)
- Caml Light 0.6, and the "unix" contrib
+ Caml Light 0.61, and the "unix" contrib
+ 	(NOTE: if you use Caml Light 0.6, read note below)
+
  Tk >=3.3 (tested on 3.6). Only the "wish" interpreter is required.
 
 
@@ -25,3 +27,15 @@ since it would overwrite some files.
 Then, type "make install".
 
 
+
+
+
+
+
+Mandatory bug fix for Caml Light 0.6 (fixed in 0.61):
+-------------------------------------------
+In file lib/fstring.mli, do the following change:
+36c36
+<   and compare_strings : string -> string -> int = 1 "compare_strings"
+---
+>   and compare_strings : string -> string -> int = 2 "compare_strings"

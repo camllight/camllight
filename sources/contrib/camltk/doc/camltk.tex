@@ -1,43 +1,60 @@
-\documentstyle[11pt,fullpage]{report}
+\documentstyle[11pt,alltt,fullpage]{report}
 
 \newcommand{\tcl}{{\sf Tcl}}
 \newcommand{\tk}{{\sf Tk}}
 \newcommand{\caml}{{\sf Caml}}
-\newcommand{\camltk}{{\sf Caml-Tk}}
+\newcommand{\camltk}{{\sf CamlTk}}
+\newcommand{\wish}{{\sf wish}}
+\newcommand{\thisrelease}{{\tt alpha2}}
 \title{The \caml-\tk\ interface \\
-       alpha1 Release}
+       Release \thisrelease}
 \author{Fran\c{c}ois Pessaux and Fran\c{c}ois Rouaix \\
            Projet Cristal, INRIA Rocquencourt \\
         {\small Francois.Pessaux@inria.fr, Francois.Rouaix@inria.fr}
         }
-\date{September 1994}
+\date{October 1994}
 \begin{document}
 \maketitle
 
 
 \section*{Introduction}
-\tk\ is a GUI library for the \tcl\ language. Normally, \tk\ is controlled
-from \tcl. The purpose of the \camltk\ interface is to provide a \caml\
-library to control \tk\ from \caml\ programs. Thus, \tk\ can be used to
-program user-interfaces in \caml\ without knowledge of the \tcl\ language.
+\tk\ is a GUI (graphical user-interface) library for the \tcl\ language.
+Normally, \tk\ is controlled from \tcl. The purpose of the \camltk\
+interface is to provide a \caml\ library to control \tk\ from \caml\
+programs. Thus, \tk\ can be used to program user-interfaces in \caml\
+without knowledge of the \tcl\ language.
 
 \section*{The architecture}
-In this version (\verb|alpha1|), the interface is implemented as a
-communication protocol between a \caml\ process and a \tcl\tk\ process.
+In this version (\thisrelease), the interface is implemented as a
+communication protocol between a \caml\ process and the {\tt wish}
+interpreter ({\tt wish} is a toplevel interactive interpreter for 
+\tcl\ and \tk).
 {\bf This implementation is subject to change.}
-A \caml\ function of the library produces \tk\ code, and sends it to the
-\tk\ process. \tk\ sends callback information and results from function
-calls to the \caml\ process.
-
+% A \caml\ function of the library produces \tcl\tk\ code, and sends it to the
+% \wish\ interpreter. \wish\ sends callback information and results from
+% function calls to the \caml\ process.
 
 \section*{Installation}
 See the INSTALL file for instructions regarding the installation.
+\begin{itemize}
+\item This release runs only on Unix systems.
+\item You need Caml Light ($\geq 0.61$).
+\item You need \wish\, from the \tk\ distribution. This release has been
+tested with \tk\ 3.6.
+\end{itemize} 
 
 
 \section*{This documentation}
 {\bf The present documentation is still sketchy, and some basic background
 about toolkits, event-driven programming, and \tk\ is assumed.}
+Documentation for \tk\ is currently available in \cite{ouster94},
+\cite{welch94}, and in the {\tt man} pages of the \tk\ distribution.
+The distribution also includes a first shot at an \caml\ browser, which may
+help in finding out the types of functions available in the library as well as
+the type definitions, all this in an {\em hypertext} tool.
 
+
+What you will find here is:
 \begin{description}
 \item[The user's manual] : describes how to write \caml\ programs using the
 \tk\ interface and to compile them. 
@@ -45,7 +62,10 @@ about toolkits, event-driven programming, and \tk\ is assumed.}
 generated from a high-level description. This part is of interest mainly for
 expert \tk\ users who wish to extend the interface to support more
 functions, more widgets, or simply to fix bugs in test versions.
-\end{description} 
+\item[The Tentative reference manual] : is simply a the collection of
+interface files from the library, restricted to functions (i.e. type
+descriptions do not appear). 
+\end{description}
 
 \section*{Bug reports}
 Before reporting a bug, please check the \verb|KnownBugs| file in the
@@ -55,597 +75,13 @@ For the time being, please report problems and bugs directly to
 Don't hesitate to make comments and suggestions, or ask questions.
 Contributions (description of missing stuff) are welcome.
 
-\chapter{User's Manual}
-{\bf This manual is not a reference manual for \tk}. 
-You should have the \tk\ man pages handy. The \verb|Widgets.src| file (which
-syntax is given in chapter~\ref{chap:impl}) describes the mappings between
-\tk\ and \caml\ for functions and data.
-
-\section{Modules}
-All modules required by the \tk\ interface are in the \verb|tklib.zo| 
-library archive. These modules are
-\begin{itemize}
-\item \verb|tk|, containing the initialisation functions, some frequently
-used functions, and all types manipulated by the library.
-
-\item a module for each widget class (e.g. \verb|button|). The creation
-function and the commands specific to this class are contained in the
-module.
-
-\item various other modules grouping functions of a same family
-(\verb|focus|, \verb|winfo|). In general, you should not \verb|#open| these
-files since many functions bear the same names in different modules.
-Instead, you should use the \verb|modulename__| syntax.
-
-\end{itemize} 
-
-\section{Basics}
-As usual with toolkits, the simplest way to learn how to write programs is
-by copy-paste-ing from available source code. In general, a \caml\ program
-using the \tk\ 
-toolkit will have the following structure :
-\begin{verbatim}
-(* Initialisation of the interface )
-let top = tk__OpenTk ();;
-(* top is now the toplevel widget *)
-(* Widget initialisation *)
-let b = button__create top ...
-;;
-(* Mainloop for events *)
-tk__MainLoop()
-;;
-\end{verbatim} 
-
-\section{Example}
-Here is a complete working example with a few widgets and callbacks.
-This program may be found in the \verb|test| directory of the distribution,
-under the name \verb|addition.ml|.
-
-\begin{verbatim}
-(* Make main functions and types available *)
-#open "tk";;
-
-let main () =
-  let top = OpenTk ()  in
-  (* The widgets. They all have "top" as parent widget.  *)
-  let en1 = entry__create top [TextWidth 6; Relief Sunken] in
-  let lab1 = label__create top [Text "plus"] in
-  let en2 = entry__create top [TextWidth 6 ; Relief Sunken] in
-  let lab2 = label__create top [Text "="] in
-  let result_display = label__create top [] in
-  (* References holding values of entry widgets *)
-  let n1 = ref 0
-  and n2 = ref 0  in
-  (* Refresh result *)
-  let refresh () =
-    label__configure result_display [Text (string_of_int (!n1 + !n2))]  in
-  (* Electric *)
-  let get_and_refresh (w,r) =
-    fun _ _ _ _ ->
-      try
-       r := int_of_string (entry__get w);
-       refresh ()
-      with
-        Failure "int_of_string" ->
-          label__configure result_display [Text "error"]
-  in
-  (* Set the callbacks *)
-  entry__configure en1 [ScrollCommand (get_and_refresh (en1,n1)) ];
-  entry__configure en2 [ScrollCommand (get_and_refresh (en2,n2)) ];
-  (* Map the widgets *)
-  pack [en1;lab1;en2;lab2;result_display] [];
-  (* Make the window resizable *)
-  wm__minsize_set top 1 1;
-  (* Start interaction (event-driven program) *)
-  MainLoop ()
-;;
-
-printexc__f main () ;;
-\end{verbatim}
-
-\section{Bindings}
-\tk\ offers, in addition to widget-specific callbacks, a general facility
-for binding functions to events. (bind(n)).
-In the \caml\tk\ interface, this is implemented by the function
-\begin{verbatim}
-bind: Widget -> (Modifier list * XEvent) list -> BindAction -> unit
-\end{verbatim} 
-with the following types
-\begin{verbatim}
-type Modifier =
-    Control
-  | Shift
-  | Lock
-  | Button1
-  | Button2
-  | Button3
-  | Button4
-  | Button5
-  | Any
-  | Double
-  | Triple
-  | Mod1
-  | Mod2
-  | Mod3
-  | Mod4
-  | Mod5
-  | Meta
-  | Alt 
-;;
-
-type XEvent =
-    XKey of string	(* /usr/include/X11/keysymdef.h *)
-  | ButtonPress
-  | Button
-  | ButtonRelease
-  | Circulate
-  | CirculateRequest
-  | ColorMap
-  | Configure
-  | ConfigureRequest
-  | Destroy
-  | Enter
-  | Expose
-  | FocusIn
-  | FocusOut
-  | Gravity
-  | Keymap
-  | KeyPress
-  | Key
-  | KeyRelease
-  | MapRequest
-  | Motion
-  | Leave
-  | Map
-  | Property
-  | Reparent
-  | ResizeRequest
-  | Unmap
-  | Visibility 
-;;
-
-type EventField =
-    Above
-  | ButtonNumber
-  | Count
-  | Detail
-  | Focus
-  | Height
-  | KeyCode
-  | Mode
-  | State
-  | ValueMask
-  | Width
-  | MouseX
-  | MouseY
-  | WidgetName
-  | Time 
-  | OverrideRedirect
-  | Place
-  | Char
-  | BorderWidth
-  | Display
-  | SendEvent
-  | KeySymString
-  | KeySymInt
-  | RootWindow
-  | SubWindow
-  | Type
-  | RootX
-  | RootY
-;;
-
-type EventInfo = {
-  mutable Ev_Above : int;
-  mutable Ev_ButtonNumber : int;
-  mutable Ev_Count : int;
-  mutable Ev_Detail : string;
-  mutable Ev_Focus : bool;
-  mutable Ev_Height : int;
-  mutable Ev_KeyCode : int;
-  mutable Ev_Mode : string;
-  mutable Ev_State : string;
-  mutable Ev_ValueMask : int;
-  mutable Ev_Width : int;
-  mutable Ev_MouseX : int;
-  mutable Ev_MouseY : int;
-  mutable Ev_WidgetName : string;
-  mutable Ev_Time : string;
-  mutable Ev_OverrideRedirect : string;
-  mutable Ev_Place : string;
-  mutable Ev_Char : string;
-  mutable Ev_BorderWidth : int;
-  mutable Ev_Display : int;
-  mutable Ev_SendEvent : int;
-  mutable Ev_KeySymString : string;
-  mutable Ev_KeySymInt : int;
-  mutable Ev_RootWindow : int;
-  mutable Ev_SubWindow : int;
-  mutable Ev_Type : int;
-  mutable Ev_RootX : int;
-  mutable Ev_RootY : int }
-;;
-
-type BindAction =
-   BindSet of EventField list *  (EventInfo -> unit)
- | BindRemove
-;;
-\end{verbatim} 
-The first argument of type \verb|Widget| is naturally the widget for which
-this binding is defined (there is no support yet for bindings on whole
-widget classes).
-The second argument of type \verb|(Modifier list * XEvent) list| is the 
-succession of events that will trigger the callback.
-The last argument is the action : \verb|BindRemove| will remove a binding.
-\verb|BindSet| will set a binding.
-The argument of \verb|BindSet| are an \verb|EventField list| and the
-callback itself. 
-In bindings, the callback needs some information about the event that
-triggered it. This information is contained in the \verb|EventInfo| passed
-to the callback, but the user has to specify which fields in this record are
-relevant for this particular callback. The other fields do {\bf not} contain
-accurate information. Check also the \tk\ documentation for finding out
-which field is valid for a given event.
-
-\paragraph{Example}
-\begin{verbatim}
-bind MyCan [[],Motion] 
-   (BindSet([MouseX; MouseY;Place;SendEvent;KeySymString], BindCmd)) ;;
-\end{verbatim} 
-will trigger the callback \verb|BindCmd| when the event \verb|Motion| occurs
-in the \verb|MyCan| widget. The command \verb|BindCmd| may assume that the 
-information in the fields {\tt Ev\_MouseX, Ev\_MouseY, Ev\_Place, Ev\_Place,
-Ev\_SendEvent, Ev\_KeySymString} of its \verb|EventInfo| argument contain
-accurate information.
-
-Bindings for \verb|text| and \verb|canvas| widgets obey the same rules.
-
-
-\section{More examples}
-The \verb|test| directory of the distribution contains several other
-examples. Read them to learn more about \caml\tk\ programming.
-The \verb|tktop| directory contains a more advanced example. 
-
-{\bf All examples included in this distribution  should not be considered as
-working applications. They are provided for documentation purposes only}.
-
-\section{Compilation}
-The usual commands for compiling programs using the \caml\tk interface are
-\begin{verbatim}
-$ camlc -c -I $TKDIR addition.ml
-$ camlc -custom -I $TKDIR -o addition unix.zo tklib.zo addition.zo -lunix
-\end{verbatim} 
-\verb|$TKDIR| is the directory where the interface library has been
-installed. \verb|unix.zo| comes from the \verb|libunix| contrib, and is
-normally installed in the same directory as standard \caml libraries.
-
-The distribution \verb|Makefile| also contains an entry to produce a \caml\
-toplevel featuring the \tk\ interface : \verb|camltktop|.
-This toplevel may be run with: 
-\begin{verbatim}
-$ camllight -I $TKDIR $TKDIR/camltktop
-\end{verbatim} 
-
-\section{Debugging}
-Since this is an alpha release, some \tk\ functions may have been improperly
-implemented in the \caml\ library. This may cause undue \tk\ errors
-(exception \verb|TkError|). To facilitate the debugging, you can set the
-Unix environment variable \verb|CAMLTKDEBUG| to any value before launching
-your program. This will allow you to see all
-data transferred between the \caml\ and the \tk\ processes. Since this data is
-essentially \tcl\tk\ code, you need a basic knowledge of this language to
-understand what is going on.
-It is also possible to trigger debugging by setting the boolean reference
-\verb|protocol__debug| to true (or false to remove debugging).
-
-
-\chapter{Implementor's Manual}
-\label{chap:impl}
-\tk\ is still evolving, and also offers numerous user-contributed
-extensions. Thus, we chose to generate the library from a high-level
-description of available widgets and functions. 
-We describe in this chapter
-the syntax and semantics of the description language.
-
-\section{The interface description language}
-The language allows the specification of
-\begin{description}
-\item[widgets] of the standard \tk\ library, with options and associated commands
-\item[toplevel functions,] not associated with a specific widget class
-\item[modules,] grouping families of functions.
-\end{description} 
-
-A source file is simply a collection of entries, each entry describing an
-element of the interface. The {\tt tkcompiler} provided in this distribution
-takes the source file and produces \caml\ modules forming the interface
-library.
-
-\section{Types}
-A type entry contains information to translate data from \caml\ to \tk\ 
-and the converse. Each data type that needs to be exchanged by \caml\ and
-\tk\ must be described by a type entry. For each type, a conversion function
-from \caml\ to \tk\ is generated, as well as a parsing function from \tk\ to
-\caml\ if required (because values of the type are returned by some
-function in the library).
-
-A type is given by a set of value constructors, as in ML. For each
-constructor, one must give the ML name, and optionally
-\begin{itemize}
-\item the \tk\ name of the constructor
-\item the type of its arguments
-\end{itemize} 
-
-\paragraph{Example}
-\begin{verbatim}
-type State { 
-   Normal "normal"
-   Active "active"
-   Disabled "disabled"
-}
-\end{verbatim} 
-defines the \caml\ type
-\begin{verbatim}
-type State =
-          Disabled
-        | Active
-        | Normal
-;;
-\end{verbatim} 
-and the conversion function
-\begin{verbatim}
-let CAMLtoTKState = function
-          Disabled -> "disabled"
-        | Active -> "active"
-        | Normal -> "normal"
-;;
-\end{verbatim} 
-
-The \tk\ source-code produced from the ML value is the \tk\ name (if any)
-followed by the \tk\ version of the argument (if any).
-The parser can be generated only in restricted cases: zeroary constructors,
-and at most one anonymous \verb|int| constructor and one anonymous
-\verb|string| constructor (anonymous means that the \tk\ name is an empty
-string). Otherwise, the compiler will produce a warning
-message, and you have to write the parser yourself. 
-
-\section{Subtypes}
-As customary, types will be statically verified in ML programs. However, in
-order to reduce the number of value constructors required by the interface
-(and associated naming problems),
-we introduced a notion of {\em subtypes}. A subtype is a named subset of the
-set of constructors of a type. In this case, type-checking (i.e. verifiying
-that a constructor belongs to a subtype) will occur at run-time.
-
-If a type requires subtyping, then one should not declare the type itself,
-but instead define each of its subtypes. The compiler will consider the
-whole set of constructors for the definition of the type. Note also that the
-definition of a constructor may be omitted if it has  already been declared.
-
-\paragraph{Example}
-\begin{verbatim}
-subtype Index(entry) {
-   Number (int)
-   End "end"
-   Insert "insert"
-   SelFirst "sel.first"
-   SelLast "sel.last" 
-}
-subtype Index(listbox) {
-   Number End Insert 
-}
-\end{verbatim}
-defines two subtypes (\verb|entry| and \verb|listbox|) of the type
-\verb|Index|.  
-
-Subtypes may be referred to (in argument types of functions) with the same
-syntax: \verb|type(subtype)|.
-\paragraph{Example}
-\begin{verbatim}
-   function () delete "delete" (Index(listbox), Index(listbox))
-\end{verbatim} 
-
-\section{Widgets}
-A widget class description is composed of its name, the set of valid options
-for the creation of widgets of this class, and the set of functions and
-commands associated to the class.
-
-Options descriptions follow the same syntax as value constructors in type or
-subtype declarations, except for the presence of the \verb|option| keyword.
-Actually, the options declared inside a widget description form a subtype
-(with the name of the class) of the \verb|option| type. 
-\verb|option| is not really hardwired in the compiler, in that it obeys the
-same rules for subtyping as user-defined types. However the \verb|option|
-type is implicitly used when producing the widget creation functions.
-
-Function declarations are formed of
-\begin{itemize}
-\item the \verb|function| keyword
-\item the result type of the function (inside parenthesis)
-\item the ML name of the function
-\item the corresponding \tk\ name
-\item the type of the arguments (inside parenthesis)
-\end{itemize} 
-
-The ML function produced from this description always takes a widget as
-first argument. The function is curryfied, although the notation seems to
-imply that the function has only one tuple argument.
-
-
-\paragraph{Example}
-\begin{verbatim}
-widget message {
-   option Anchor
-   option Background
-   option Borderwidth
-   option Cursor
-   option Font
-   option Foreground
-   option PadX
-   option PadY
-   option Relief
-   option Text
-   option Width
-
-   option Aspect "-aspect" (int)
-   option Justify "-justify" (Justification)
-
-   function () configure "configure" (option(message) list)
-   function (string) configure_get "configure" ()
-   }
-\end{verbatim}
-Note that the first options are given implicitly, since they belong to
-``standard'' options, defined elsewhere. The two others are given in their
-full form. 
-
-Each widget class is compiled into a separate module (bearing the name of the
-widget class). Besides the functions described in the entry, the compiler
-produces a creation function of type \verb|Widget -> option list -> Widget|
-(with, in fact, run-time verification of options, who must belong to the
-subtype \verb|option(widgetname)|. The first argument is the parent of the
-created widget.
-
-
-\section{Modules}
-A module is simply a set of functions to be grouped in a separate module.
-\paragraph{Example}
-\begin{verbatim}
-module selection {
-   function () clear "selection clear" (widget)
-   function (string) get "selection get" ()
-   }
-\end{verbatim} 
-
-\section{Builtins}
-Some datatypes cannot be described in the syntax of the interface
-description language, because they require custom pretty-printers and
-parsers. Thus it is possible to write them directly in \caml\ and place
-them in a \verb|builtin_*.ml| file.
-To avoid a warning message from the compiler, one may also declare the type
-as external
-\paragraph{Example}
-\begin{verbatim}
-type Units external     # builtin_GetPixel
-\end{verbatim} 
-For each builtin type \verb|foo|, one should provide a \verb|CAMLtoTKfoo|
-function, of type \verb|foo -> string|, and, if data of this type is to be
-returned by a function, a parser \verb|TKtoCAMLfoo|.
-For example, the file \verb|builtin_GetPixel.ml| contains the \verb|Units|
-type, used extensively in \tk\ for specifying distances or coordinates.
-It requires both a pretty-printer and a parser (which emulates the
-\verb|tkGetPixel| function in the \tk\ library).
-
-
-\section{Compiling}
-The interface description source is compiled with
-\begin{verbatim}
-$ tkcompiler filename
-\end{verbatim}
-(the file compiled defaults to \verb|Widgets.src| if \verb|file| is
-omitted).
-The compiler requires the existence of a \verb|lib| subdirectory, where it
-will produce \verb|tkgen.ml|, \verb|modules|, and various \caml\ files
-corresponding to entries in the interface description source.
-
-The compiler will report the following errors
-\begin{description}
-\item[lexical errors]
-\item[syntax errors] see the grammar of the language below
-\item[duplicate definitions]
-\item[illegal implicit use of constructors]
-\item[cyclic dependancy on types]
-\end{description} 
-
-Producing the library requires the presence of several files in the
-\verb|lib| directory. For more details, check the \verb|Makefile| in
-\verb|lib|. 
-
-\section{Communication protocol}
-The support layer is implemented in the \verb|protocol.ml| and
-\verb|support.ml| files.
-
-
 \tableofcontents
+\include{user}
+\include{impl}
+\include{reference}
+\bibliography{tk}
+\bibliographystyle{plain}
 \appendix
-\chapter*{BNF syntax of the interface description language}
-\begin{verbatim}
-Type0 :
-      TYINT
-    | TYFLOAT
-    | TYBOOL
-    | TYCHAR
-    | TYSTRING
-    | WIDGET
-    | IDENT
-
-Type01 :
-       Type0
-     | IDENT LPAREN IDENT RPAREN
-     | WIDGET LPAREN IDENT RPAREN
-     | OPTION LPAREN IDENT RPAREN
-
-Type1 :
-      Type01
-    | Type01 LIST
-
-Type1list :
-      Type1 COMMA Type1list
-    | Type1
-
-Typearg :
-      LPAREN RPAREN
-    | LPAREN Type1 RPAREN
-    | LPAREN Type1list RPAREN
-
-Type :
-     Typearg
-   | LPAREN FUNCTION Typearg RPAREN
-
-Constructor :
-     IDENT STRING
-   | IDENT Type
-   | IDENT STRING Type
-
-AbbrevConstructor :
-     Constructor
-   | IDENT
-
-Constructors :
-     Constructor Constructors
-   | Constructor
-
-AbbrevConstructors :
-     AbbrevConstructor AbbrevConstructors
-   | AbbrevConstructor
-
-Command :
-     FUNCTION Typearg IDENT STRING Type
-
-Option :
-     OPTION IDENT STRING Type
-   | OPTION IDENT
-
-WidgetComponent :
-     Command
-   | Option
-
-WidgetComponents :
-     /* epsilon */
-   | WidgetComponent WidgetComponents
-
-ModuleComponents :
-     /* epsilon */
-   | Command ModuleComponents
-
-Entry :
-     WIDGET IDENT LBRACE WidgetComponents RBRACE
-   | Command
-   | TYPE IDENT LBRACE Constructors RBRACE
-   | TYPE IDENT EXTERNAL
-   | SUBTYPE OPTION LPAREN IDENT RPAREN LBRACE AbbrevConstructors RBRACE
-   | SUBTYPE IDENT LPAREN IDENT RPAREN LBRACE AbbrevConstructors RBRACE  
-   | MODULE IDENT LBRACE ModuleComponents RBRACE
-   | EOF
-\end{verbatim} 
-
+\include{bnf}
 \end{document}
 
