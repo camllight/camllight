@@ -13,7 +13,7 @@ OBJS=config.zo misc.zo const.zo prim.zo lambda.zo globals.zo \
  location.zo syntax.zo \
  modules.zo builtins.zo types.zo \
  pr_type.zo error.zo typing.zo ty_decl.zo pr_decl.zo ty_intf.zo \
- tr_env.zo event.zo clauses.zo match.zo trstream.zo front.zo \
+ tr_env.zo event.zo clauses.zo matching.zo trstream.zo front.zo \
  instruct.zo back.zo opcodes.zo prim_opc.zo buffcode.zo labels.zo reloc.zo \
  emitcode.zo emit_phr.zo \
  primdecl.zo lexer.zo par_aux.zo parser.zo compiler.zo \
@@ -93,8 +93,8 @@ emitcode.zo: prim.zo reloc.zo prim_opc.zo lambda.zo config.zi labels.zo \
 error.zo: misc.zo syntax.zo pr_type.zo location.zi globals.zo types.zo \
     const.zo 
 event.zo: syntax.zo lambda.zo modules.zo location.zi 
-front.zo: trstream.zo prim.zo lambda.zo error.zo tr_env.zo modules.zo \
-    location.zi const.zo misc.zo match.zo event.zo syntax.zo globals.zo \
+front.zo: trstream.zo prim.zo lambda.zo error.zo tr_env.zo matching.zo \
+    modules.zo location.zi const.zo misc.zo event.zo syntax.zo globals.zo \
     builtins.zo types.zo 
 globals.zo: prim.zo const.zo 
 instruct.zo: prim.zo lambda.zo const.zo 
@@ -103,7 +103,7 @@ lambda.zo: prim.zo globals.zo const.zo
 lexer.zo: lexer.zi misc.zo parser.zi 
 location.zo: location.zi misc.zo config.zi 
 main.zo: modules.zo config.zi compiler.zo misc.zo version.zo event.zo 
-match.zo: clauses.zo prim.zo lambda.zo location.zi const.zo misc.zo \
+matching.zo: clauses.zo prim.zo lambda.zo location.zi const.zo misc.zo \
     syntax.zo instruct.zo globals.zo 
 misc.zo: config.zi 
 modules.zo: misc.zo globals.zo const.zo 
@@ -120,7 +120,7 @@ reloc.zo: buffcode.zo const.zo
 syntax.zo: location.zi globals.zo const.zo 
 tr_env.zo: prim.zo lambda.zo error.zo const.zo misc.zo syntax.zo \
     builtins.zo globals.zo 
-trstream.zo: prim.zo lambda.zo tr_env.zo const.zo misc.zo match.zo \
+trstream.zo: prim.zo lambda.zo tr_env.zo matching.zo const.zo misc.zo \
     syntax.zo 
 ty_decl.zo: typing.zo error.zo modules.zo location.zi const.zo misc.zo \
     syntax.zo globals.zo builtins.zo types.zo 
