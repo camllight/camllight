@@ -373,7 +373,7 @@ let forget_process fd pid =
     prerr_string "Lost connection with process ";
     prerr_int pid;
     if checkpoint = !current_checkpoint then
-      (prerr_endline " (actif process)";
+      (prerr_endline " (active process)";
        match !current_checkpoint.C_state with
        	 C_stopped ->
 	   prerr_string "at time ";
