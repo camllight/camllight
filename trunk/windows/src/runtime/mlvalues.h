@@ -204,6 +204,7 @@ typedef void (*final_fun) P((value));
 
 extern header_t first_atoms[];
 #define Atom(tag) (Val_hp (&(first_atoms [tag])))
+#define Is_atom(v) (v >= Atom(0) && v <= Atom(255))
 
 /* Booleans are atoms tagged 0 or 1 */
 

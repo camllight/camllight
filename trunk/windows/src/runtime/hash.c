@@ -45,7 +45,7 @@ static void hash_aux(obj)
   /* Atoms are not in the heap, but it's better to hash their tag
      than to do nothing. */
 
-  if (obj >= Atom(0) && obj <= Atom(255)) {
+  if (Is_atom(obj)) {
     tag = Tag_val(obj);
     hash_univ_count--;
     Combine_small(tag);
