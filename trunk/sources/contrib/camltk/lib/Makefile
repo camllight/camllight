@@ -1,10 +1,11 @@
+PROFILING=${CAMLPROF}
 SUPPORTDIR=../libsupport
 UNIXDIR=../../libunix
 CAMLC=camlc
 CAMLCOMP=$(CAMLC) -c
 CPP=/lib/cpp -P -Dunix
-COMPFLAGS=-W -O fast -g -I $(UNIXDIR) -I $(SUPPORTDIR)
-LINKFLAGS=-g
+COMPFLAGS=-W -O fast -g -I $(UNIXDIR) -I $(SUPPORTDIR) $(PROFILING)
+LINKFLAGS=-g $(PROFILING)
 CAMLYACC=camlyacc -v
 CAMLLEX=camllex
 CAMLDEP=../../../src/tools/camldep
@@ -45,14 +46,14 @@ tklib2.zo : $(SUPPORT2) $(WIDGETOBJS) tk.zo
 
 camltktop1 : $(WIDGETOBJS) $(SUPPORT1)
 	cp -p $(SUPPORTDIR)/protocol1.zo $(SUPPORTDIR)/protocol.zo
-	camlmktop -o camltktop1 -I $(SUPPORTDIR) \
+	camlmktop -o camltktop1 -I $(SUPPORTDIR) $(PROFILING) \
 	          -custom $(SUPPORT) tk.zo $(WIDGETOBJS) \
 		                $(TKLINKOPT)
 
 
 camltktop2 : $(WIDGETOBJS) $(SUPPORT2)
 	cp -p $(SUPPORTDIR)/protocol2.zo $(SUPPORTDIR)/protocol.zo
-	camlmktop -o camltktop2 -I $(SUPPORTDIR) \
+	camlmktop -o camltktop2 -I $(SUPPORTDIR) $(PROFILING) \
 	            -custom $(UNIXDIR)/unix.zo $(SUPPORT) tk.zo $(WIDGETOBJS) \
                     $(UNIXDIR)/libunix.a
 
