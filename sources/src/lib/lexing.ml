@@ -64,6 +64,11 @@ let get_lexeme_char lexbuf i =
   nth_char lexbuf.lex_buffer (lexbuf.lex_start_pos + i)
 ;;
 
+let start_lexing lexbuf =
+  lexbuf.lex_start_pos <- lexbuf.lex_curr_pos;
+  lexbuf.lex_last_action <- dummy_action
+;;
+
 let backtrack lexbuf =
   lexbuf.lex_curr_pos <- lexbuf.lex_last_pos;
   magic_obj(lexbuf.lex_last_action lexbuf)

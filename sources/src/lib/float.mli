@@ -27,6 +27,7 @@ value minus : float -> float = 1 "~float"
   and div_float : float -> float -> float = 2 "/"
         (* Division. The result is unpredictable if the dividend is 0.0. *)
   and prefix ** : float -> float -> float = 2 "power_float"
+  and prefix **. : float -> float -> float = 2 "power_float"
   and power : float -> float -> float = 2 "power_float"
         (* Exponentiation. *)
   and eq_float : float -> float -> bool = 2 "=float"

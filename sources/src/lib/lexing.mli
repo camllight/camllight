@@ -69,7 +69,7 @@ value get_lexeme : lexbuf -> string
 (* The following definitions are used by the generated scanners only.
    They are not intended to be used by user programs. *)
 
-value dummy_action : lexbuf -> obj
+value start_lexing : lexbuf -> unit
   and get_next_char : lexbuf -> char = 1 "get_next_char"
   and backtrack : lexbuf -> 'a
 ;;
