@@ -1,24 +1,33 @@
-TKDIR=../lib
-CAMLCOMP=camlc -c
-CPP=/lib/cpp -P -Dunix
-CAMLLEX=camllex
+## Configuration
+include ../Makefile.config
+CAMLTKDIR=../lib
+SUPPORTDIR=../libsupport
 
-COMPFLAGS=-g -O fast -I $(TKDIR)
-LINKFLAGS=-g
+COMPFLAGS=-g -O fast -I $(CAMLTKDIR) -I $(SUPPORTDIR)
 
 COMPILEROBJS = config.zo misc.zo globals.zo modules.zo location.zo types.zo \
                errors.zo const.zo builtins.zo
-OBJS= util.zo hyper_printers.zo visual.zo main.zo
+OBJS= lexer.zo util.zo hyper_printers.zo visual.zo source.zo main.zo
 
-CAMLDEP=../../../src/tools/camldep
+all: camlbrowser
 
+# # Two process architecture
+# camlbrowser: $(COMPILEROBJS) $(OBJS)
+# 	camlc -g -custom -I $(CAMLTKDIR) -o camlbrowser unix.zo \
+#                tklib2.zo $(COMPILEROBJS) $(OBJS) -lunix
 
 camlbrowser: $(COMPILEROBJS) $(OBJS)
-	camlc -g -custom -I $(TKDIR) -o camlbrowser unix.zo \
-                tklib.zo $(COMPILEROBJS) $(OBJS) -lunix
+	camlc -g -custom -I $(CAMLTKDIR) -o camlbrowser unix.zo \
+                tklib1.zo $(COMPILEROBJS) $(OBJS) $(TKLINKOPT) -lunix
+
+lexer.mll: lexer.mlp
+	$(CPP) -Dunix lexer.mlp > lexer.mll
+
+lexer.ml: lexer.mll
+	$(CAMLLEX) lexer.mll
 
 clean : 
-	rm -f *.z* location.ml config.ml  camlbrowser
+	rm -f *.z* location.ml config.ml lexer.ml lexer.mll camlbrowser
 
 .SUFFIXES :
 .SUFFIXES : .mli .ml .zi .zo .mlp
@@ -51,11 +60,12 @@ errors.zo: misc.zo location.zi globals.zo const.zo
 globals.zo: prim.zo const.zo 
 hyper_printers.zo: modules.zo const.zo misc.zo globals.zo builtins.zo \
     types.zo 
-info.zo: modules.zo globals.zo const.zo 
 location.zo: location.zi misc.zo config.zi 
-main.zo: modules.zo util.zo config.zi misc.zo visual.zo 
+main.zo: source.zo modules.zo util.zo config.zi misc.zo visual.zo \
+    hyper_printers.zo 
 misc.zo: config.zi 
 modules.zo: misc.zo errors.zo globals.zo const.zo 
 prim.zo: const.zo 
+source.zo: util.zo misc.zo lexer.zo 
 types.zo: misc.zo modules.zo builtins.zo globals.zo const.zo 
 visual.zo: modules.zo util.zo const.zo hyper_printers.zo globals.zo 

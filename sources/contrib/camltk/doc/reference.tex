@@ -3,20 +3,7 @@
 \section*{Module {\tt tk}}
 Builtin functions are:
 \begin{alltt}
-value OpenTk : unit -> Widget;;
-value OpenTkClass : string -> Widget;;
-
-value bind : Widget -> (Modifier list * XEvent) list -> BindAction -> unit;;
-
-value canvas_bind : Widget -> TagOrId 
-     -> (Modifier list * XEvent) list -> BindAction -> unit;;
-
-value text_tag_bind : Widget -> string 
-     -> (Modifier list * XEvent) list -> BindAction -> unit;;
-
-value add_fileinput : file_descr -> (unit -> unit) -> unit;;
-
-value remove_fileinput : file_descr -> unit;;
+\input{tkbuiltin.mli}
 \end{alltt}
 
 \noindent
@@ -31,9 +18,5 @@ The public functions generated from {\tt Widgets.src} are:
 %% Other builtin modules
 \section*{Module {\tt textvariable}}
 \begin{alltt}
-value new : unit -> TextVariable;;
-
-value set : TextVariable -> string -> unit;;
-
-value get : TextVariable -> string;;
+\input{../libsupport/textvariable.mli}
 \end{alltt}

@@ -1,5 +1,5 @@
 \chapter{User's Manual}
-{\bf This manual is a simple tutorial for \caml\tk}.  When writing your own
+{\bf This manual is a simple tutorial for \caml\tk }.  When writing your own
 programs, you should consult the partial reference manual , as well as the
 \tk\ man pages.  Whenever the reference manual is unsufficient, you can
 check the \verb|Widgets.src| file (which syntax is given in
@@ -105,7 +105,7 @@ pages of the distribution. The commands for a given widget class are in
 a module bearing the same name as the class (i.e. \verb|button|), except
 for {\em toplevel} widgets, which are defined is \verb|toplevelw| (due to a 
 technical problem with the Caml Light toplevel).
-As of this release, all widgets of \tk3.6 are supported, although some
+As of this release, all widgets of \tk\ 3.6 are supported, although some
 commands might not be implemented. The most glaring omission is the {\tt
 placer} geometry manager.
 
@@ -373,6 +373,12 @@ would be in \caml:
 \begin{verbatim}
 button__configure b [State Disabled]
 \end{verbatim} 
+
+This is more in the spirit of ML, but unfortunately eliminates the
+possibility to specify configuration of widgets by resources based on widget
+names.
+
+
 
 When widgets are mutually recursive (through callbacks, for example when
 linking a scrollbar to a text widget), one should first create the widgets,
