@@ -1,0 +1,156 @@
+#!/usr/local/bin/perl
+
+# derived from XL format-mli-files for Caml Light library
+
+$root="$ENV{DESTDIR}/camltk";
+$urlroot= "$ENV{'URLROOT'}";
+
+open(SUMMARY, "> $root/library-modules.html");
+
+select(SUMMARY);
+print "<TITLE>Caml Tk, library modules</TITLE>\n";
+print "<H1>List of library modules</H1>\n";
+$summary_in_dl = 0;
+
+open(INDEX, "> $root/library.html");
+
+select(INDEX);
+print "<TITLE>Caml Tk, index to the library</TITLE>\n";
+print "<H1>Index to the library</H1>\n";
+print "<UL>\n\n";
+
+foreach $infile (@ARGV) {
+
+if ($infile =~ s/^%//) {
+  if ($summary_in_dl) { print SUMMARY "</DL>\n"; }
+  print SUMMARY "<H2>$infile</H2>\n";
+  print SUMMARY "<DL>\n";
+  $summary_in_dl = 1;
+  next;
+}
+
+$modname = $infile;
+$modname =~ s|^.*/||;
+$modname =~ s|\.mli||;
+
+open(INPUT, $infile) || (warn "cannot open $infile", next);
+open(OUTPUT, "> $root/library/$modname.html");
+select(OUTPUT);
+
+$_ = <INPUT>;
+s/^\s*\(\*//;
+s/\*\)\s*$//;
+s/\.\s*$//;
+m/^\s*(.)(.*)/;
+$head = $1;
+$head =~ tr/A-Z/a-z/;
+$_ = $head . $2;
+
+print "<TITLE>Module $modname</TITLE>\n";
+print "<H1>Module $modname: $_</H1>\n";
+
+if (! $summary_in_dl) { print SUMMARY "<DL>\n"; $summary_in_dl = 1; }
+print SUMMARY
+  "<DT><A HREF=\"library/$modname.html\"><code>$modname</code></A><DD>$_\n";
+
+$in_enum = 0;
+$in_comment = 0;
+$in_pre = 0;
+
+line:
+while(<INPUT>) {
+  chop;
+  last if /^\(\*--\*\)/;
+  s/;;//;
+  next if /^\s*$/;
+  next if /^#/;
+  s/&/&amp;/g;
+  s/</&lt;/g;
+  s/>/&gt;/g;
+
+  if (/^\(\*\*+\s*(.*)\*\)$/) {
+    print "</PRE>\n" if ($in_pre);
+    print "</DL>\n" if ($in_enum);
+    print "<H2>$1</H2>\n";
+    $in_enum = 0;
+    $in_comment = 0;
+    $in_pre = 0;
+    next line;
+  }
+  if (s/^\s*\(\*//) {
+    if ($in_pre) { print "</PRE>\n"; $in_pre = 0; }
+    print "<DD>\n";
+    $in_comment = 1;
+  }
+  if ($in_comment) {
+    if (s/\*\)\s*$//) { $in_comment = 0; }
+    print "<P>\n" if s/^-//;
+    if (/^\s*\[\s*$/) {
+      print "<LISTING>\n";
+      while(($_ = <INPUT>) && !/^\s*\]\s*$/) {
+        s/^        //;
+        print $_;
+      }
+      print "</LISTING>\n";
+      next line;
+    }
+    $count = 0;
+# Hack to make cross refs
+    s|\[([a-z]+)\] and \[([a-z]+)\] modules|<A HREF=\"\1.html\"><code>\1</code></A> and <A HREF=\"\2.html\"><code>\2</code></A> modules|g;
+    s|\[([a-z]+)\] module|<A HREF=\"\1.html\"><code>\1</code></A> module|g;
+    s|module \[([a-z]+)\]|module <A HREF=\"\1.html\"><code>\1</code></A>|g;
+    foreach $part (split(/([\[\]])/, $_)) {
+      if ($part eq "[") {
+        print ($count == 0 ? "<code>" : "[");
+        $count++;
+      } elsif ($part eq "]") {
+        $count--;
+        print ($count == 0 ? "</code>" : "]");
+      } else {
+        print $part;
+      }
+    }
+    print "\n";
+    if (! $in_comment) { print "<P>\n\n"; }
+  }
+  else
+  {
+    s/^  and/value/;
+    s/= [1-9] ".*"\s*$//;
+    if (! $in_enum) { print "<DL>\n"; $in_enum = 1; }
+    if (! $in_pre) { print "<DT><PRE>\n"; $in_pre = 1; }
+    if (s|^value prefix ([^ :]*)|value <A NAME="\1">prefix \1</A>|) {
+      do index("operator", $1, "prefix $1");
+    }
+    elsif (s|^value ([a-zA-Z0-9_']*)|value <A NAME="\1">\1</A>|) {
+      do index("value", $1, $1);
+    }
+    elsif (s|^type(.*)\s+([a-zA-Z0-9_']+)\s+=|type\1 <A NAME="\2">\2</A> =|) {
+      do index("type", $2, "type $2");
+    }
+    elsif (s|^exception ([a-zA-Z0-9_']*)|exception <A NAME="\1">\1</A>|) {
+      do index("exception", $1, "exception $1");
+    }
+    print "$_\n";
+  }
+}
+
+print "</PRE>\n" if ($in_pre);
+print "</DL>\n" if $in_enum;
+
+close(INPUT);
+close(OUTPUT);
+
+}
+
+print SUMMARY "</DL>\n";
+close(SUMMARY);
+print INDEX "</UL>\n";
+close(INDEX);
+
+sub index {
+  local ($class, $name, $xref) = @_;
+  printf INDEX
+  ("<LI><A HREF=\"$urlroot/library/%s.html#%s\">Module <code>%s</code>, %s <code>%s</code></A>\n\n", 
+   $modname, $xref, $modname, $class, $name);
+}

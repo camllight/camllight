@@ -1,0 +1,54 @@
+\begin{verbatim}
+$accept : %entry% $end
+Type0 : TYINT
+      | TYFLOAT
+      | TYBOOL
+      | TYCHAR
+      | TYSTRING
+      | WIDGET
+      | IDENT
+Type1 : Type0
+      | IDENT LPAREN IDENT RPAREN
+      | WIDGET LPAREN IDENT RPAREN
+      | OPTION LPAREN IDENT RPAREN
+Type2 : Type1
+      | Type1 LIST
+Type_list : Type2 COMMA Type_list
+          | Type2
+FType : LPAREN RPAREN
+      | LPAREN Type2 RPAREN
+      | LPAREN Type_list RPAREN
+Type : Type2
+     | FUNCTION FType
+Arg : STRING
+    | Type
+    | Template
+ArgList : Arg SEMICOLON ArgList
+        | Arg
+Template : LBRACKET ArgList RBRACKET
+Constructor : IDENT Template
+AbbrevConstructor : Constructor
+                  | IDENT
+Constructors : Constructor Constructors
+             | Constructor
+AbbrevConstructors : AbbrevConstructor AbbrevConstructors
+                   | AbbrevConstructor
+Command : FUNCTION FType IDENT Template
+Option : OPTION IDENT Template
+       | OPTION IDENT
+WidgetComponent : Command
+                | Option
+WidgetComponents :
+                 | WidgetComponent WidgetComponents
+ModuleComponents :
+                 | Command ModuleComponents
+Entry : WIDGET IDENT LBRACE WidgetComponents RBRACE
+      | Command
+      | TYPE IDENT LBRACE Constructors RBRACE
+      | TYPE IDENT EXTERNAL
+      | SUBTYPE OPTION LPAREN IDENT RPAREN LBRACE AbbrevConstructors RBRACE
+      | SUBTYPE IDENT LPAREN IDENT RPAREN LBRACE AbbrevConstructors RBRACE
+      | MODULE IDENT LBRACE ModuleComponents RBRACE
+      | EOF
+%entry% : '\001' Entry
+\end{verbatim}
