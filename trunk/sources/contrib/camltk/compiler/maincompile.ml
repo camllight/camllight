@@ -78,11 +78,26 @@ let compile () =
       	output_string oc "#open\"protocol\";;\n";
       	output_string oc "#open\"tk\";;\n";
       	output_string oc "#open\"support\";;\n";
-        write_create (output_string oc) wname;
-      	do_list (write_command (output_string oc)) wdef.Commands;
+	begin match wdef.ModuleType with
+	  Widget ->
+            write_create (output_string oc) wname;
+      	    do_list (write_command (output_string oc)) wdef.Commands
+        | Family ->
+	    do_list (write_function (output_string oc)) wdef.Commands
+        end;
 	close_out oc
      )
-   widget_table
+   module_table;
+  (* write the module list for the Makefile *)
+  let oc = open_out_bin "lib/modules" in
+    output_string oc "WIDGETOBJS=";
+    hashtbl__do_table
+       (fun name _ ->
+	 output_string oc name;
+	 output_string oc ".zo ")
+       module_table;
+    output_string oc "\n";
+    close_out oc
 ;;
 
 let main () =
