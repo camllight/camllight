@@ -1,6 +1,5 @@
 (* Printing a location in the source program *)
 
-(**) #open "printf";;
 (**) #open "config";;
 (**) #open "lexing";;
 (**) #open "parsing";;
