@@ -9,6 +9,9 @@ Caml Light 0.74:
 
 * MS Windows port: fixed image routines bugs.
 
+* libnum: square root rewritten. Many bug fixes to support 64
+  architectures. Lot of functions rewritten or added. More tests added.
+
 Caml Light 0.73:
 ---------------
 
