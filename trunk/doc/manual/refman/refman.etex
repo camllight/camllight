@@ -1,0 +1,54 @@
+\chapter{The Caml Light language reference manual}
+
+\section*{Foreword}
+
+This document is intended as a reference manual for the Caml Light
+language. It lists all language constructs, and gives their precise
+syntax and informal semantics. It is by no means a tutorial
+introduction to the language: there is not a single example. A good
+working knowledge of the language, as provided by the companion tutorial
+{\em Functional programming using Caml Light}, is assumed.
+
+No attempt has been made at mathematical rigor: words are employed
+with their intuitive meaning, without further definition. As a
+consequence, the typing rules have been left out, by lack of the
+mathematical framework required to express them, while they are
+definitely part of a full formal definition of the language. The
+reader interested in truly formal descriptions of languages from the
+ML family is referred to {\em The definition of Standard ML} and {\em
+Commentary on Standard ML}, by Milner, Tofte and Harper, MIT Press.
+
+\section*{Warning}
+
+Even though there is currently only one implementation of the Caml
+Light language, this document carefully distinguishes the language and
+its implementation(s). Implementations can provide extra language
+constructs; moreover, all points left unspecified in this reference
+manual can be interpreted as the language implementor wishes. All
+these implementation-dependent features are of course subject to
+change in future releases; only the features specified in this
+reference manual can be relied upon.
+
+\section*{Notations}
+
+The syntax of the language is given in BNF-like notation. Terminal
+symbols are set in typewriter font (@'like' 'this'@).
+Non-terminal symbols are set in italic font (@like that@). 
+Square brackets @[\ldots]@ denote optional components. Curly brackets
+@{\ldots}@ denotes zero, one or several repetitions of the enclosed
+components. Curly bracket with a trailing plus sign @{{\ldots}}@
+denote one or several repetitions of the enclosed components.
+Parentheses @(\ldots)@ denote grouping.
+
+\input lex
+\input names
+\input values
+\input types
+\input const
+\input patterns
+\input expr
+\input typedecl
+\input directive
+\input impl
+\input intf
+

@@ -1,0 +1,76 @@
+\mysection{Values}
+
+This section describes the kinds of values that are manipulated by
+Caml Light programs.
+
+\subsection{Base values}
+
+\subsubsection*{Integer numbers}
+
+Integer values are integer numbers from $-2^{30}$ to $2^{30}-1$,
+that is $-1073741824$ to $1073741823$. Implementations may support
+a wider range of integer values.
+
+\subsubsection*{Floating-point numbers}
+
+Floating-point values are numbers in floating-point representation.
+Everything about floating-point values is implementation-dependent,
+including the range of representable numbers, the number of
+significant digits, and the way floating-point results are rounded.
+
+\subsubsection*{Characters}
+
+Character values are represented as 8-bit integers between 0 and 255.
+Character codes between 0 and 127 are interpreted following the ASCII
+standard. The interpretation of character codes between 128 and 255 is
+implementation-dependent.
+
+\subsubsection*{Character strings} \label{s:string-val}
+
+String values are finite sequences of characters.
+Implementations must support strings up to $2^{16}-1$ characters in
+length (65535 characters). Implementations may support longer
+strings.
+
+\subsection{Tuples}
+
+Tuples of values are written $(v_1, \ldots, v_n)$, standing for the
+$n$-tuple of values $v_1$ to $v_n$. Tuples of up to $2^{14}-1$ elements
+(16383 elements) must be supported, though implementations may support
+tuples with more elements.
+
+\subsection{Records}
+
+Record values are labeled tuples of values. The record value written
+$\{ label_1 = v_1; \ldots; label_n = v_n \}$ associates the value $v_i$ to
+the record label $label_i$, for $i = 1 \ldots n$. Records with up to
+$2^{14}-1$ fields (16383 fields) must be supported, though
+implementations may support records with more fields.
+
+\subsection{Arrays}
+
+Arrays are finite, variable-sized sequences of values of the same type.
+Arrays of length up to $2^{14}-1$ (16383 elements) must be supported,
+though implementations may support larger arrays.
+
+\subsection{Variant values}
+
+Variant values are either a constant constructor, or a pair of a
+non-constant constructor and a value. The former case is written
+$cconstr$; the latter case is written $ncconstr(v)$, where $v$ is said
+to be the argument of the non-constant constructor $ncconstr$.
+
+The following constants are treated like built-in constant
+constructors:
+\begin{center}
+\begin{tabular}{ll}
+\verb"false" & the boolean false \\
+\verb"true"  & the boolean true \\
+\verb"()"    & the ``unit'' value \\
+\verb"[]"    & the empty list
+\end{tabular}
+\end{center}
+
+\subsection{Functions}
+
+Functional values are mappings from values to values.

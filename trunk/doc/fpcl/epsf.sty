@@ -1,0 +1,381 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\typeout{Document Style Option `epsf' (October 17 90)}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Inclusion of EPSF documents into [Oz]TeX documents.
+%% Michel Mauny - April 25 90.
+%% Emmanuel Chailloux - October  17 90
+%% History:
+% ---------
+%% May 6 91
+%%      Added \catcode`\^^M=10 in \@setdrawingsyntax
+%%      for \obeycr
+%%      [modification undone because it produces strange results].
+%% April 11 91
+%%     Fixed several bugs [mauny]
+%%       * Now accepts lines as %%BoundingBox:100 200 102 23 
+%%                         without space here ^
+%%       * Added a \leavevmode for \epfs{} to be accepted as single element of
+%%         a \begin{center} ... \end{center}
+%%       * Extracted calls to \newdimen for them to be global
+%% July 1992
+%%       * Corrections to fit with dvips 5.47
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% TeX does itself the recognition of the Bounding Box of the drawing.
+%% The macro is:
+%%
+%%   \epsf{filename}
+%%        [xscale=<number>/<number>,yscale=<number>/<number>]  <- optional
+%% or     (hsize=<number>,vsize=<number>)in pt 
+%%        [ps=<PostScript>]  <- optional
+%%
+%% Order of parameters is important, and the 3rd cannot be used without the
+%% 2nd.
+%%
+%% A null hsize indicates the hsize scaled by the vsize scaling.
+%% A null vsize indicates the vsize scaled by the hsize scaling.
+%% A double null is the unit.
+%%
+%% This is not the first package to do that sort of things, but that one
+%% reads by itself the size of drawings, and is thus really trivial to use.
+%%
+%% This package may be extended in two ways:
+%%    * usage of different versions of TeX (dvi2ps) (simple, but not trivial)
+%%    * usage of different EPSF files types (tested only with FreeHand 2.0)
+%%              should be trivial...
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% How to use this package?
+%% Two things to do:
+%%
+%%     1. Create an EPSF file
+%%           Use FreeHand or any program capable of creating such files from
+%%           drawings or whatever.
+%%           Use the `Export' menu item (or anything equivalent), creating
+%%           the file (say) draw.eps
+%% 
+%%     2. In your [La]TeX document, place the following command where you
+%%        want your drawing to appear:
+%%                                      \epsf{draw.eps}
+%%        And your drawing will be at that place, in a TeX box.
+%%        You don't have to leave extra place for your drawing:
+%%        it will be in a TeX box.
+%%
+%%   Z    If you want to specify a scaling (say 33.33333 %) then use the
+%%        optional argument:
+%%                             \epsf{draw.eps}[xscale=2/3,yscale=2/3]
+%%        Scalings may be negative, but must be specified with the form:
+%%        <number>/<number>.
+%%        IMPORTANT: try to use small numbers, otherwise you risk to get
+%%        a TeX internal registers overflow.
+%%
+%%   Z   if you prefer to specify the vsize of  you picture then use the 
+%%       optional argument :
+%%			\epsf{draw.ps}(hsize=200,vsize=300)
+%%	Dimensions are given in points with the TeX convension  : 
+%%                      1in or 72pt.
+%%		
+%%  ZZ    For real hackers only: if you want to add some PostScript to your
+%%        drawing (indeed at its beginning), then use the second optional
+%%        argument:
+%%                   \epsf{draw.eps}[xscale=1/1,yscale=1/1][ps=<my program>]
+%%        The second argument must be specified in order to use the
+%%        second one (if you are tired to do that, make a new macro with
+%%        your default scaling.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% \DVITOPS indicates the default TeX.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\oztex{OzTeX}%
+\def\dvips{dvips}%
+\def\dvitops{dvitops}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Provide the appropriate value to \DVITOPS before installation.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%\let\DVITOPS=\dvitops%
+\let\DVITOPS=\dvips%
+%%\let\DVITOPS=\oztex%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Debugging options.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\yes={yes}%
+\def\no={no}%
+\let\DEBUGepsf=\yes%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% \@doTeXspecial has to be extended in order to work with other DVI2PS programs
+%% OzTeX produces \special{<filename> <postscript to be added>}
+%%       and we produce -<xmin> -<ymin> translate
+%%                      <hscale> <vscale> scale
+%%                      %%%% Added by ... (PostScript comment)
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+{%
+% #1 = filename
+% #2 = xmin, #3 = ymin
+% #4 = xmax, #5 = ymax
+% #6 = hscale, #7 = vscale
+% #8 = user postcript 
+% \ifx\DEBUGepsf\yes
+% \typeout{doTexSpecial #1 #2 #3 #4 #5 #6 #7 #8}
+% \fi
+%%%% Added by \DVITOPS\space PostScript inclusion (epsf.sty)
+%
+%\advance\@pshoffset by -3pt
+%\catcode`\%=11
+\newdimen\@pshscale\newdimen\@psvscale\newdimen\@pshoffset\newdimen\@psvoffset
+\gdef\@doTeXspecial#1#2#3#4#5#6#7#8{%
+\ifx\DVITOPS\oztex%
+\special{#1\space#6\space#7\space scale\space-#2\space-#3\space translate\space#8\space}%
+\else%
+\ifx\DVITOPS\dvips%
+\@pshscale=#6pt\@psvscale=#7pt
+\multiply\@pshscale by 100\multiply\@psvscale by 100%
+\@pshoffset=-#6pt\multiply\@pshoffset by #2
+\@psvoffset=-#7pt\multiply\@psvoffset by #3%
+\special{psfile="#1"\space%
+vscale=\expandafter\@numbof\the\@psvscale\space%
+hoffset=\expandafter\@numbof\the\@pshoffset\space%
+voffset=\expandafter\@numbof\the\@psvoffset\space% 
+hscale=\expandafter\@numbof\the\@pshscale\space}%
+\else%
+\ifx\DVITOPS\dvitops%
+\@pshscale=#6pt%
+\@psvscale=#7pt%
+\@pshoffset=-#6pt\multiply\@pshoffset by #2%
+\@psvoffset=-#7pt\multiply\@psvoffset by #3%
+\special{psfile="#1"\space%
+hoffset=\expandafter\@numbof\the\@pshoffset\space%
+voffset=\expandafter\@numbof\the\@psvoffset\space%
+hscale=\expandafter\@numbof\the\@pshscale\space% 
+vscale=\expandafter\@numbof\the\@psvscale}%
+\else%
+\let\DVITOPS=\dvitops%
+\@doTeXspecial{#1}{#2}{#3}{#4}{#5}{#6}{#7}{#8}%
+\fi%
+\fi%
+\fi%
+}%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%
+%%  Following definitions should not be changed (except bug fixes)
+%%
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Will change the catcodes of % when `parsing' header of EPS file
+% The ``:'' character will be parsed as a space (catcode = 10)
+\def\@setdrawingsyntax
+{%\catcode`\^^M=10
+\catcode`\%=11\catcode`\:=10\catcode`\!=11}%
+%
+% Need some counters and an input channel
+\newread\@drawingchannel%
+\newcount\@drawhsize%
+\newcount\@drawvsize%
+\newdimen\@xscale%
+\newdimen\@yscale%
+\newdimen\@vsize%
+\newdimen\@hsize%
+\newcount\@newvsize%
+\newcount\@newhsize%
+\newcount\@ovsize%
+\newcount\@ohsize%
+%
+%
+% \@scale <count> at <ratio> will multiply <count> by <ratio>
+%         <ratio> must be <number>/<number> (bignums may produce overflows)
+\def\@scale#1at#2/#3{\divide#1by#3\multiply#1by#2}%
+%
+%
+{\catcode`\.=12\catcode`\p=12\catcode`\t=12\gdef\@dimentocount#1.#2pt{#1}}%
+%
+{\catcode`\p=12\catcode`\t=12\gdef\@numbof#1pt{#1}}%
+% \@drawingscale{p1}{q1}{p1}{q2} => xscale:=p1/q1, yscale:=p2/q2
+\def\@drawingscale#1#2#3#4{%
+\@xscale=\the\mag pt\multiply\@xscale by #1
+\divide\@xscale by #2\divide\@xscale by 1000%
+\@yscale=\the\mag pt\multiply\@yscale by #3
+\divide\@yscale by #4\divide\@yscale by 1000%
+}%
+%
+% \firstitem<arg1> to<arg2> => arg1:=car(arg2); arg2:=cdr(arg2)
+\def\firstitem#1to#2{\expandafter\makeseq#1\makeseq#1#2}%
+\long\def\makeseq#1 #2\makeseq#3#4{\gdef#4{#1}\gdef#3{#2}}%
+%%
+%% The user function
+%%       \epsf{<filename>}[xscale=p1/q1,yscale=p2/q2][ps=<postscript>]
+%%   or  \epsf{<filename>}(hsize=w,vsize=h)[ps=<postscript>]
+%% Two optional arguments. If second is needed, then the first one must be
+%% present.
+%%
+\def\epsf#1{\leavevmode% Must leave vertical mode in order to exec. \everypar
+\@ifnextchar[{\s@epsf{#1}}%
+{\@ifnextchar({\h@epsf{#1}}%
+{\s@epsf{#1}[xscale=1/1,yscale=1/1]}}}%
+%%
+\def\s@epsf#1[xscale=#2/#3,yscale=#4/#5]{%
+\@ifnextchar[{\scale@epsf{#1}[xscale={#2}/{#3},yscale={#4}/{#5}]}%
+{\scale@epsf{#1}[xscale={#2}/{#3},yscale={#4}/{#5}][ps=\space]}}%
+%
+% More arguments to come?
+\def\h@epsf#1(hsize=#2,vsize=#3){%
+\@ifnextchar[{\dimen@epsf{#1}(hsize={#2},vsize={#3})}%
+{\dimen@epsf{#1}(hsize={#2},vsize={#3})[ps=\space]}}%
+%
+% The main function (not user acessible)
+%
+%% Used to check wether we found the box or not
+\newif\ifnosize
+\begingroup
+%%% Warning: comment character is & (and no more %)
+\@setdrawingsyntax\catcode`\&=14
+&&
+&& What we will be looking for (`pt' is the supposed unit)
+\gdef\BoundingBox{%%BoundingBox}&
+&&
+&&
+\gdef\read@epsf#1{&
+&& We accept PostScript and scales as optional parameters
+\bgroup\@setdrawingsyntax
+&& Change the code of %
+\typeout{Opening #1}&     && Verbose!
+\openin\@drawingchannel=#1
+\ifeof\@drawingchannel\closein\@drawingchannel&&
+\typeout{LaTeX warning: can't open #1.}&     && If no file, then ask the user
+\typeout{Size of the drawing? }&             && the size of its drawing.
+  \gdef\@minX{0}\gdef\@minY{0}&                  &&
+  \gdef\@maxX{596}\gdef\@maxY{846}&
+&  \message{X (in pts): }&
+&  \read-1 to\mX\global\edef\@maxX{\mX}&
+&  \message{Y (in pts): }&
+&  \read-1 to\mY\global\edef\@maxY{\mY}&
+\else                                          && Otherwise:
+    \read\@drawingchannel to\@drsize& Skipping first line (%!PS-Adobe...)
+  \loop                                        && repeat "get one line"
+    \read\@drawingchannel to\@drsize&
+\typeout{\space\space\space\space \@drsize}&& echo it to the terminal
+    \firstitem\@drsize to\BBox&
+    \ifx\BBox\BoundingBox&                      && First word =? Bounding Box
+	  \nosizefalse&
+          \firstitem\@drsize to\@minX&& If yes, then get the informations
+	  \firstitem\@drsize to\@minY&& i.e. minX, minY, maxX and maxY
+	  \firstitem\@drsize to\@maxX&& in that order
+      \firstitem\@drsize to\@maxY&&
+    \else\nosizetrue&&
+	\fi
+  \ifnosize\relax\repeat&&           && If no, then get one more line, etc.
+\typeout{Closing}&               && Verbose!
+  \closein\@drawingchannel&&
+\fi
+\egroup
+}
+&&
+\gdef\scale@epsf#1[xscale=#2/#3,yscale=#4/#5][ps=#6]{&
+\read@epsf{#1}&
+\common@epsf{#1}[xscale=#2/#3,yscale=#4/#5][ps=#6]&
+}
+&
+&
+\gdef\dimen@epsf#1(hsize=#2,vsize=#3)[ps=#4]{&
+\read@epsf{#1}&
+\@newvsize=#3&
+\@newhsize=#2&
+&&
+&& Computing vsize&
+\@drawvsize=\@maxY&
+\advance\@drawvsize by-\@minY&
+\ifnum\@newvsize=0&                                 if  newvsize=0
+\ifnum\@newhsize=0&                                     if newhsize=0
+\common@epsf{#1}[xscale=1/1,yscale=1/1][ps=#4]&
+\else&                                                  else
+&& Computing hsize
+\@drawhsize=\@maxX&
+\advance\@drawhsize by-\@minX&
+&&\ifnum\@newhsize=0&
+\@ohsize=\@drawhsize&
+\divide\@drawhsize by\@ohsize&
+\multiply\@drawhsize by\@newhsize&
+\multiply\@drawvsize by\@newhsize&
+\divide\@drawvsize by\@ohsize&
+\@drawingscale{\the\@newhsize}{\@ohsize}
+{\the\@newhsize}{\@ohsize}&
+\fi&                                                    fi
+\else&                                                else
+\@ovsize=\@drawvsize&
+\divide\@drawvsize by\@ovsize&
+\multiply\@drawvsize by\@newvsize&
+&&
+&& Computing hsize
+\@newhsize=#2&
+\@drawhsize=\@maxX&
+\advance\@drawhsize by-\@minX&
+\ifnum\@newhsize=0&                                     if newhsize=0
+\multiply\@drawhsize by\@newvsize&
+\divide\@drawhsize by\@ovsize&
+\@drawingscale{\the\@newvsize}{\@ovsize}
+{\the\@newvsize}{\@ovsize}&
+\else&                                                  else
+\@ohsize=\@drawhsize&
+\divide\@drawhsize by\@ohsize&
+\multiply\@drawhsize by\@newhsize&
+\@drawingscale{\the\@newhsize}{\@ohsize}
+{\the\@newvsize}{\@ovsize}&
+\fi&                                                    fi
+\fi&                                                  fi
+&& Infos to the terminal.
+\typeout{Drawing #1:}&
+\typeout{\space\space\space Width=\the\@drawhsize pt  Heigth=\the\@drawvsize pt}&
+&&
+&&
+&\@newhsize=\@drawhsize\multiply\@newhsize by \@xscale
+&\@newvsize=\@drawvsize\multiply\@newvsize by \@yscale
+\typeout{\space\space\space Scalings: X=\the\@xscale\space Y=\the\@yscale}&
+&\fbox{&
+\vbox to\@drawvsize pt{\vfill\hbox to\@drawhsize pt{&  
+{{\@doTeXspecial{#1}\@minX\@minY\@maxX\@maxY&
+        {\expandafter\@numbof\the\@xscale}&
+		{\expandafter\@numbof\the\@yscale}&
+		{#4}}&
+&\hfill&
+}}}}&
+&}&
+&
+&
+\gdef\common@epsf#1[xscale=#2/#3,yscale=#4/#5][ps=#6]{&
+&& Computing hsize
+\@drawhsize=\@maxX&
+\advance\@drawhsize by-\@minX&
+\@scale\@drawhsize at#2/{#3}&
+&& Computing vsize
+\@drawvsize=\@maxY&
+\advance\@drawvsize by-\@minY&
+\@scale\@drawvsize at #4/{#5}&
+&& Infos to the terminal.
+\typeout{Drawing #1:}&
+\typeout{\space\space\space Width \the\@drawhsize pt=(\@maxX-\@minX)*(#2/#3)
+         \space Heigth \the\@drawvsize pt=(\@maxY -\@minY)*(#4/#5)}&
+&&
+&\typeout{*********** #2 #3 #4 #5}&
+\@drawingscale{#2}{#3}{#4}{#5}&
+\typeout{\space\space\space Scalings: X=\the\@xscale\space Y=\the\@yscale}&
+&&
+&\fbox{&
+\vbox to\@drawvsize pt{\vfill\hbox to\@drawhsize pt{&
+{{\@doTeXspecial{#1}\@minX\@minY\@maxX\@maxY&
+        {\expandafter\@numbof\the\@xscale}&
+		{\expandafter\@numbof\the\@yscale}&
+		{#6}}&
+&\hfill&
+}}}&
+&}&
+}
+\endgroup
