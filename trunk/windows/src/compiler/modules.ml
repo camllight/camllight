@@ -126,7 +126,7 @@ let reset_opened_modules () =
 (* Open a module and add its definitions to the table of opened modules. *)
 
 let add_table t1 t2 =
-  hashtbl__do_table (hashtbl__add t2) t1;;
+  hashtbl__do_table_rev (hashtbl__add t2) t1;;
 
 let open_module name =
   let module = find_module name in
