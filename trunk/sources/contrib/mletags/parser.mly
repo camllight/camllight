@@ -30,6 +30,7 @@ let do_directive =
 /* Identifiers, prefixes, infixes */
 %token <string> IDENT
 %token <string> PREFIX
+%token <string> INFIX
 %token <string> INFIX0
 %token <string> INFIX1
 %token <string> INFIX2
@@ -134,6 +135,7 @@ let do_directive =
 %left  STAR INFIX3                      /* multiplicatives */
 %right INFIX4                           /* exponentiations */
 %right prec_uminus
+%left  INFIX
 %right prec_app
 %left  DOT DOTLPAREN DOTLBRACKET
 %right PREFIX                           /* prefix operators, e.g. ! */
@@ -207,6 +209,8 @@ Expr :
       | Expr INFIX1 Expr
           { () }
       | Expr INFIX0 Expr
+          { () }
+      | Expr INFIX Expr
           { () }
       | Expr STAR Expr
           { () }
@@ -562,7 +566,7 @@ Ide :
 ;
 
 Infx :
-        INFIX0          { () }
+        INFIX           { () }    | INFIX0        { () } 
       | INFIX1          { () }    | INFIX2        { () }
       | INFIX3          { () }    | INFIX4        { () }
       | STAR            { () }    | COLONCOLON    { () }
@@ -700,9 +704,9 @@ Type1_def :
 ;
 
 Constr1_decl :
-        IDENT_loc OF Mutable_option Type
+        Ide_loc OF Mutable_option Type
           { $1 }
-      | IDENT_loc
+      | Ide_loc
           { $1 }
 ;
 
