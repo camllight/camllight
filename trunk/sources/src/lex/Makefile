@@ -51,6 +51,6 @@ grammar.zi: syntax.zo
 gram_aux.zo: syntax.zo 
 grammar.zo: grammar.zi gram_aux.zo syntax.zo 
 lexgen.zo: syntax.zo 
-main.zo: output.zo scan_aux.zo lexgen.zo grammar.zi syntax.zo scanner.zo 
+main.zo: lexgen.zo output.zo grammar.zi scanner.zo syntax.zo scan_aux.zo 
 output.zo: syntax.zo 
-scanner.zo: scan_aux.zo grammar.zi syntax.zo 
+scanner.zo: syntax.zo scan_aux.zo grammar.zi 
