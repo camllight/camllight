@@ -1,8 +1,25 @@
 Caml Light 0.71:
+---------------
 
-* Syntactic sugar:
-  conditionals introduced by when (when expr -> expr | ... | _ -> expr)
-  
+* Port to MS Windows (3.1, 95, NT).
+
+* Parsing: better handling of optional ";", concatenations (@, ^) now
+  associate to the right.
+
+* Typing: type constraints in inner lets could cause incorrect generalizations;
+  now, all type variables in type constraints are considered bound at
+  the outermost "let".
+
+* Standard library: fixed bug in parsing engine that generated wrong symbol
+  positions for epsilon-productions; various fixes in "format".
+
+* camlyacc: trailer text in grammar was not copied to generated file.
+
+* libunix: added "gettimeofday", bug fixes in "select", "times",
+  "open_process_in".
+
+* libnum: bug in conversion to string fixed.
+
 
 Caml Light 0.7:
 --------------
