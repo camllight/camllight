@@ -80,6 +80,9 @@ int k;
     if (entry_file) { fclose(entry_file); unlink(entry_file_name); }
     if (text_file) { fclose(text_file); unlink(text_file_name); }
     if (union_file) { fclose(union_file); unlink(union_file_name); }
+    if (output_file && k > 0) {
+      fclose(output_file); unlink(output_file_name);
+    }
     exit(k);
 }
 
