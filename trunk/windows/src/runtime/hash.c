@@ -98,5 +98,6 @@ static void hash_aux(obj)
   }
 
   /* Otherwise, obj is a pointer outside the heap, to an object with
-     a priori unknown structure. Better to do nothing in this case. */
+     a priori unknown structure. Use its physical address as hash key. */
+  Combine((long) obj);
 }
