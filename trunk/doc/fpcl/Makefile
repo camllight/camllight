@@ -1,6 +1,6 @@
 CAMLLATEX=../tools/caml-tex -n 80
 DVI2TXT=../tools/dvi2txt
-RELEASE=$$HOME/release/cl7
+RELEASE=$$HOME/release/$${RELEASENAME}
 
 CHAPTERS = Gen.mltex Fund.mltex Basic.mltex Lists.mltex \
   Types.mltex Annot.mltex Exc.mltex IO.mltex Streams.mltex \
@@ -21,10 +21,10 @@ biblio:
 	bibtex plaintext
 
 all:
-	make fpcl plaintext
-	make biblio
-	make fpcl plaintext
-	make fpcl plaintext
+	$(MAKE) fpcl plaintext
+	$(MAKE) biblio
+	$(MAKE) fpcl plaintext
+	$(MAKE) fpcl plaintext
 
 clean:
 	rm -f *.mltex *~ *.log *.aux *.dvi *.bbl *.blg *.idx *.ilg *.ind *.toc
