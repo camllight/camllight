@@ -50,6 +50,8 @@ let print_one_typedecl (ty_res, ty_comp) =
       printf " == %a\n" output_type ty_body
   | Abstract_type ->
       print_string "\n"
+  | _ ->
+      fatal_error "print_typedecl"
   end
 ;;
 

@@ -302,7 +302,7 @@ let partial_match casel =
 
 
 let extract_loc_from_clause clause = match clause with
-  [pat] -> pat.p_loc
+  pat :: _ -> pat.p_loc
 | _ -> fatal_error "extract_loc_from_clause"
 ;;
 
