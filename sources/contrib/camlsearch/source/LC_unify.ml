@@ -63,7 +63,7 @@ let rename_var (var1,var2) =
 
 exception UNIFYLIST;;
 exception unifyHead;;
-exception found;;
+exception Found;;
 
 let unify_Left_Commutative flat1 flat2 =
 
@@ -74,9 +74,9 @@ let rec unify_LC (Fl((n1,mlt1),ml_flat_list1)) (Fl((n2,mlt2),ml_flat_list2)) =
          in if unify_head (mlt1,mlt2) then            (* set  up  the correct  associative links *)
             unify_list(ml_flat_list1, ml_flat_list2)
             else (var_renaming := saved_var_renaming; false) (* restore partial renaming *)
-and unify_head Heads = (* unify_head is a predicate with side effects on var_renaming *)
+and unify_head heads = (* unify_head is a predicate with side effects on var_renaming *)
   (
-   (try unif_rec Heads;true with unifyHead -> false)
+   (try unif_rec heads;true with unifyHead -> false)
     where rec unif_rec = function
       Ivar(r),Ivar(s) -> if rename_var (r,s) then () else raise unifyHead
     |      _ ,Ivar _  -> raise unifyHead
@@ -102,9 +102,9 @@ and unify_list = function (a,b) ->
           unify_map (x, b);                            (* try to unify componentwise  ...   *)
           var_renaming := saved_var_renaming; ()       (* restore renaming for backtracking *)
          ) (perms a); false
-     with found -> true)
+     with Found -> true)
      where rec unify_map = function
-          ([],[]) -> raise found
+          ([],[]) -> raise Found
         | (a::resta,b::restb) -> if unify_LC a b
                                then unify_map (resta,restb) else false
         | _ -> raise UNIFYLIST (* incorrect state: should never be executed *)
