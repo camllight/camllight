@@ -6,7 +6,6 @@
 #open "builtins";;
 #open "types";;
 #open "modules";;
-#open "pr_type";;
 #open "format";;
 
 let print_global sel_fct gl =
@@ -27,6 +26,28 @@ and output_label =
   (print_global labels_of_module: label_desc global -> unit)
 ;;
 
+let int_to_alpha i =
+  if i < 26
+  then make_string 1 (char_of_int (i+97))
+  else make_string 1 (char_of_int ((i mod 26) + 97)) ^ string_of_int (i/26)
+;;
+
+let type_vars_counter = ref 0
+and type_vars_names = ref ([] : (typ * string) list);;
+
+let reset_type_var_name () =
+  type_vars_counter := 0; type_vars_names := [];;
+
+let name_of_type_var var =
+  try
+    assq var !type_vars_names
+  with Not_found ->
+    let var_name = int_to_alpha !type_vars_counter in
+    incr type_vars_counter;
+    type_vars_names := (var, var_name) :: !type_vars_names;
+    var_name
+;;
+
 let rec print_typ priority ty =
   let ty = type_repr ty in
   match ty.typ_desc with
@@ -34,19 +55,19 @@ let rec print_typ priority ty =
       print_string "'";
       print_string (name_of_type_var ty)
   | Tarrow(ty1, ty2) ->
-      if priority >= 1 then print_string "(";
-      open_hovbox 0;
+      if priority >= 1 then begin open_hovbox 1; print_string "(" end
+       else open_hovbox 0;
       print_typ 1 ty1;
       print_string " ->"; print_space();
       print_typ 0 ty2;
-      close_box();
-      if priority >= 1 then print_string ")"
+      if priority >= 1 then print_string ")";
+      close_box()
   | Tproduct(ty_list) ->
-      if priority >= 2 then print_string "(";
-      open_hovbox 0;
+      if priority >= 2 then begin open_hovbox 1; print_string "(" end
+       else open_hovbox 0;
       print_typ_list 2 " *" ty_list;
-      close_box();
-      if priority >= 2 then print_string ")"
+      if priority >= 2 then print_string ")";
+      close_box()
   | Tconstr(cstr, args) ->
       open_hovbox 0;
       begin match args with
@@ -54,11 +75,12 @@ let rec print_typ priority ty =
       | [ty1] ->
           print_typ 2 ty1; print_space ()
       | tyl ->
+          open_hovbox 1;
           print_string "(";
-          open_hovbox 0;
           print_typ_list 0 "," tyl;
+          print_string ")";
           close_box();
-          print_string ")"; print_space()
+          print_space()
       end;
       print_global types_of_module cstr;
       close_box()
