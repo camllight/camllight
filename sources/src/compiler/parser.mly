@@ -14,6 +14,7 @@
 /* Identifiers, prefixes, infixes */
 %token <string> IDENT
 %token <string> PREFIX
+%token <string> INFIX
 %token <string> INFIX0
 %token <string> INFIX1
 %token <string> INFIX2
@@ -118,6 +119,7 @@
 %left  STAR INFIX3                      /* multiplicatives */
 %right INFIX4                           /* exponentiations */
 %right prec_uminus
+%left  INFIX
 %right prec_app
 %left  DOT DOTLPAREN DOTLBRACKET
 %right PREFIX                           /* prefix operators, e.g. ! */
@@ -191,6 +193,8 @@ Expr :
       | Expr INFIX1 Expr
           { make_binop $2 $1 $3 }
       | Expr INFIX0 Expr
+          { make_binop $2 $1 $3 }
+      | Expr INFIX Expr
           { make_binop $2 $1 $3 }
       | Expr STAR Expr
           { make_binop "*" $1 $3 }
@@ -674,9 +678,9 @@ Type1_def :
 ;
 
 Constr1_decl :
-        IDENT OF Mutable_option Type
+        Ide OF Mutable_option Type
           { Zconstr1decl($1, $4, $3) }
-      | IDENT
+      | Ide
           { Zconstr0decl $1 }
 ;
 

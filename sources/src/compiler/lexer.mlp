@@ -48,15 +48,15 @@ do_list (fun (str,tok) -> hashtbl__add keyword_table str tok) [
   "quo", INFIX3("quo");
   "mod", INFIX3("mod");
   "land", INFIX3("land");
-  "lor", INFIX3("lor");
-  "lxor", INFIX3("lxor");
+  "lor", INFIX2("lor");
+  "lxor", INFIX2("lxor");
   "lsl", INFIX4("lsl");
   "lsr", INFIX4("lsr");
   "asr", INFIX4("asr")
 ];;
 
 let add_infix s =
-  hashtbl__add keyword_table s (INFIX2 s)
+  hashtbl__add keyword_table s (INFIX s)
 ;;
 
 let remove_infix s =
