@@ -333,9 +333,9 @@ FUNCTION
 /FUNCTION
  class arg is not constrained
 *)
-let class_bind class eventsequence action =
+let class_bind clas eventsequence action =
   tkEval [| TkToken "bind";
-      	    TkToken class;
+      	    TkToken clas;
 	    cCAMLtoTKeventSequence eventsequence;
   begin match action with
      BindRemove -> TkToken ""

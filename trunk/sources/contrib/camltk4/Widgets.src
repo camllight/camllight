@@ -1550,7 +1550,7 @@ module winfo {
    unsafe function (string) atomname_displayof ["winfo"; "atomname"; "-displayof"; widget; AtomId]
    function (int) cells ["winfo"; "cells"; widget]
    function (widget list) children ["winfo"; "children"; widget]
-   function (string) class ["winfo"; "class"; widget]
+   function (string) class_name ["winfo"; "class"; widget]
    function (bool) colormapfull ["winfo"; "colormapfull"; widget]
    unsafe function (widget) containing ["winfo"; "containing"; int; int]
    # addition for applets
