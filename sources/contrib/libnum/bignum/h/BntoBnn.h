@@ -5,10 +5,13 @@
 /* BntoBnn.h: allowing to use the new interfaces of KerN */
 
 
+#ifdef __STDC__
+#include <stdlib.h>
+#else
 #ifndef VMS
 extern char *malloc();
 #endif
-
+#endif
 
 		/* old types of Bn */
 
@@ -63,13 +66,13 @@ struct BigNumHeader  			/* The header of a BigNum */
 /*
  *	Creation and access to type and length fields.
  */
-extern char *malloc();
+
 /* Allocates a BigNum structure and returns a pointer to it */
 BigNum BnAlloc(size) int size; {
 	register BigNum n;
  
-	n = (BigNum) (malloc(sizeof(struct BigNumHeader) +
-				size * sizeof(BigNumDigit))
+	n = (BigNum) ((char *) malloc(sizeof(struct BigNumHeader) +
+				      size * sizeof(BigNumDigit))
 			+ sizeof(struct BigNumHeader));
 	BN_LENGTH(n) = size;
 	return(n);
