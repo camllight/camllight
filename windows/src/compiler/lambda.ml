@@ -72,9 +72,24 @@ let share_lambda l =
 (* Guards *)
 let has_guard = function
     _,Lifthenelse(l1, l2, Lstaticfail) -> true
-  | _ -> false;;
+  | _,Levent (_,Lifthenelse(l1, l2, Lstaticfail)) -> true
+  | _ -> false
 
-let guard_expression l1 l2 =
-  Lifthenelse(l1, l2, Lstaticfail);;
+and set_guard_else that = function
+    Lifthenelse(cond, act, Lstaticfail) ->
+      Lifthenelse (cond, act, that)
+  | Levent (e,Lifthenelse(cond, act, Lstaticfail)) ->
+       Levent (e,Lifthenelse(cond, act, that))
+  | e -> e
+
+and apply_guard_action f = function
+    patl,Lifthenelse(cond, act, Lstaticfail) ->
+      patl,Lifthenelse (cond, f act, Lstaticfail)
+  | patl,Levent (e,Lifthenelse(cond, act, Lstaticfail)) ->
+       patl,Levent (e,Lifthenelse(cond, f act, Lstaticfail))
+  | patl,e -> patl,f e
+;;
+
+let guard_expression l1 l2 =  Lifthenelse(l1, l2, Lstaticfail);;
 
 
