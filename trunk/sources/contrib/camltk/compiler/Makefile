@@ -3,7 +3,7 @@ CAMLCOMP=$(CAMLC) -c
 CPP=/lib/cpp -P -Dunix
 COMPFLAGS=-W -O fast -g
 LINKFLAGS=-g
-CAMLYACC=camlyacc -v
+CAMLYACC=camlyacc
 CAMLLEX=camllex
 CAMLDEP=../../../src/tools/camldep
 
