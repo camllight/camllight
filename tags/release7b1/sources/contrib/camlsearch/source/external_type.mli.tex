@@ -1,0 +1,27 @@
+\subsubsection{Codage interm{\'e}diaire du type}
+
+Ce codage est produit par l'analyse syntaxique et lors de la lecture
+des modules.
+
+\verb$GLOBAL_NAME$ repr{\'e}sente un type constant ainsi que
+le nom des fonctions trait{\'e}es. Le nom de module (nom de la librarie)
+est ignor{\'e} durant tout le filtrage mais permet, le cas {\'e}ch{\'e}ant,
+d'afficher le nom complet du type utilis{\'e}.
+
+\begin{caml_code}
+type GLOBAL_NAME =
+  {Module_name : string;
+   Local_name : string};;
+\end{caml_code}
+
+\verb$EXTERNAL_TYPE$ d{\'e}crit simplement l'arbre syntaxique d'un type.
+
+\begin{caml_code}
+type EXTERNAL_TYPE =
+    ET_frozen_variable of int
+  | ET_subst_variable of int
+  | ET_function of EXTERNAL_TYPE * EXTERNAL_TYPE
+  | ET_product of EXTERNAL_TYPE list
+  | ET_constant of GLOBAL_NAME * EXTERNAL_TYPE list
+  | ET_unit;;
+\end{caml_code}

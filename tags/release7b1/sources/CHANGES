@@ -1,0 +1,294 @@
+Caml Light 0.7:
+--------------
+
+* Source-level debugger with replay capabilities. Compiler support for
+  the debugger added.
+
+* New contributed libraries and tools:
+        - a complete X-windows toolkit based on TCL/TK.
+        - a profiler for Caml Light programs (execution counts)
+        - lorder: determine ordering of .zo files at link-time
+
+* Polymorphism is now restricted to values (let x = e generalizes the type of
+  x only if e is syntactically a value, e.g. a constant, a variable, a
+  function, a tuple of values, etc). This ensures correct, type-safe handling
+  of polymorphic mutable structures.
+
+* "Guards" in pattern-matching (match ... with pat when cond -> expr).
+
+* Partial matches and unused match cases are correctly detected now.
+
+* Internationalized error messages (controlled by the LANG environment
+  variable; known languages so far: american english, french).
+  More detailed error messages.
+
+* Various fixes in the garbage collector to fight fragmentation of the
+  major heap, result in major speedups for some long-running programs.
+
+* Generic comparisons (prefix < : 'a -> 'a -> bool). Compiler optimizations
+  for comparisons on base types.
+
+* Type-checker rewritten in bottom-up style instead of top-down style.
+  Hopefully this makes type errors more understandable.
+
+* let rec (f : ty) = ... now supported.
+
+* New class of infix and prefix symbols supported (e.g. *=, !!, ++, with
+  precedence/associativity determined by their first character).
+
+* Syntactic sugar:
+  - Alternate syntax for string access and update (s.[i], s.[i] <- c).
+  - := can be used instead of <- in array,  record and string assignment,
+    e.g. record.lbl := val or array.(index) := val).
+  - Final semicolons permitted in sequences, lists, arrays and records
+    (e.g. begin ...; ...; end or [1;2;]).
+  - Initial | permitted in pattern matchings and type definitions
+    (e.g. function | pat -> expr | ...
+     or type t = | Cstr1 | ...)
+  - "\/" and "/\" synonymous for "&" and "or".
+
+* Optimized access to unqualified identifiers in symbol tables.
+
+* Parser cleaned up a bit, reduce/reduce conflicts eliminated.
+
+* New library modules: format (to write pretty-printers), gc (to control the
+  garbage collector and obtain various statistics on memory allocation).
+
+* The toplevel pretty-prints values and types.
+
+* New toplevel functions: install_printer (user-defined printing functions,
+  now type safe and associated with a type expression -- e.g. int list --
+  not with a type constructor -- e.g. list); set_print_depth (control
+  the printing depth for values).
+
+* Better support for non-generalizable type variables in phrases:
+  they no longer cause an error immediately, the check is delayed till
+  the end of the compilation unit.
+
+* Static type-checking of printf. User-defined printers supported in printf
+  formats (%a and %t).
+
+* Parsing engine now reentrant; a camlyacc-generated parser can call
+  another one in one of its actions.
+
+* Better support for 64-bit architectures: 32-bit architectures can read
+  values written on a file by a 64-bit architecture; max length of strings
+  and arrays now determined by the runtime system.
+
+* New primitive ouput_compact_value to write arbitrary values to disk in
+  a more compact (but more CPU-demanding) format than output_value.
+
+* More robust parsing of argv (some Unix kernels set argv[0] = argv[1] = file
+  when a #! file is run).
+
+* CAMLRUNPARAM environment variable to set GC parameters.
+
+* contrib/libgraph: implemented alternate event handling methods if async I/O
+  are not available; ask for system calls to be restarted if possible;
+  restart read and write system calls if interrupted.
+
+* contrib/libnums: upgraded the bignum library; better 64-bit support
+  (but still has some 64-bit bugs); alternate names for num operations
+  (+/ -/ */ etc).
+
+Main incompatibilities with Caml Light 0.61:
+
+* Polymorphic generalization has been severely restricted to eliminate
+  unsoundness w.r.t. polymorphic mutables. As a consequence, several
+  "let" declarations that used to be polymorphic are now monomorphic,
+  which may cause type errors later. See the manual p. 54 for a complete
+  description of the problem and several workarounds.
+
+* `:=' as assignment operator for record fields cause difficulties if
+  one of the record fields is a reference: r.lbl := v used to mean
+  `update the reference r.lbl with the value v', and now means
+  `assign the mutable field lbl of r the value v'. Consider turning
+  { lbl: T ref ... } into { mutable lbl: T }. Or add extra parentheses
+  (r.lbl) := v to force the interpretation of `:=' as reference assignment.
+  
+* Due to the new infix operators, extra blank space sometimes needs
+  to be inserted, e.g. `x+!y' should now be written `x+ !y'.
+
+
+Caml Light 0.61:
+----------------
+
+* Pattern-matching against (C x) where C has several arguments now works
+  correctly.
+
+* The fatal error "labels_of_type" has been fixed (it was raised when
+  typing e.label, where the type inferred for e is not a record type,
+  but an abbreviation for a record type).
+
+* Hashing has been rewritten to give consistent results across all 
+  architectures, including when -custom is used.
+
+* output_value and intern_value are now fully compatible across 32-bit and
+  64-bit architectures. A 32-bit architecture can read values written
+  on a 64-bit architecture.
+
+* Better error message when compiling a .ml whose .mli has not been compiled.
+
+* The preprocessed files are more compatible with cpp: (**) instead of /**/.
+
+* Typos in library interfaces fixed.
+
+Caml Light 0.6:
+---------------
+
+* Better handling of type abbreviations. Implementing an abstract type
+  as an abbreviation now works correctly.
+
+* Debugging mode (option -g to camlc and camllight) to get access
+  to the internals of module implementations.
+
+* 64-bit architectures are supported.
+
+* New library modules:
+        genlex    generic lexical analyser
+        set       applicative sets over ordered types
+        map       applicative maps over ordered types
+        baltree   balanced binary trees over ordered types
+
+* "compile" command at toplevel (especially useful in the Macintosh version).
+
+* #directory directive.
+
+* Better support for ISO-Latin-1 character set.
+
+* -i option also works when compiling .mli files.
+
+* Errors and warnings: detection of type redefinitions .ml/.mli; warning for
+  partial applications in sequences
+
+* Bug fixes: removed incorrect "optimizations" in stream parsers; incorrect
+  declaration of string__compare_strings; stream__stream_get fixed;
+  POPTRAP restarts correctly after signal handling.
+
+* Optimizations: io__input_line rewritten in C.
+
+* New functions: parsing__rhs_start, parsing__rhs_end; sys__interactive.
+
+* New contributed libraries and tools:
+        camlmode  Emacs editing mode for Caml Light
+        mletags   Indexing of Caml Light source files for use with Emacs "tags"
+        libnum    Arbitrary-precision arithmetic
+        libstr    String operations, regular expressions
+
+* The 80386 PC version is now DPMI-compliant, hence it can run under Windows
+  (in text mode inside a DOS windows and with no graphics, though).
+
+* More examples, including those from the book "Le langage Caml".
+
+* libunix: tty interface (POSIX termios), popen-style functions.
+
+Caml Light 0.5:
+---------------
+
+Language extensions:
+
+* Streams and stream matching, for writing parsers and printers.
+
+* Abstract types can now be implemented as type abbreviations.
+
+* Constructors for variant types are now either constant or
+non-constant, instead of having a fixed arity as before. This fixes
+the nasty problem of ref(1,2) being rejected because ref has arity 1.
+
+Extensions to the caml light environment:
+
+* A general mechanism to link Caml Light code with C code. As a
+consequence, an X-windows interface and a library of Unix system calls
+are now provided.
+
+* Two new commands: camllibr, to build libraries, and camlmktop, to
+construct custom toplevel systems.
+
+* Several new modules in the library (printf, hashtbl, random, stack,
+queue, ...)
+
+* Executable bytecode files are now machine-independent: you can run
+the same bytecode file on different architectures.
+
+Bug fixes: lots of them. The most important are:
+
+* Pattern-matching over mutable structures is now correctly compiled:
+modifying the matched structure after matching, then accessing parts
+of the structure used to fail in various ways; this is now safe.
+
+* Redefinition of exceptions is now correctly handled.
+
+Implementation changes:
+
+* A new garbage collector. The major collector is now incremental,
+meaning that garbage collection is even less disruptive than before.
+
+* The produced bytecode is slightly better, due to several new
+optimizations in the compiler back-end.
+
+* The linker has been separated from the compiler, and is now clever
+enough to avoid linking in useless code. To support this, the format
+of .zo files was changed. The new format is much more compact, loads
+faster, and supports libraries.
+
+* Autoconfiguration script.
+
+Microcomputer ports:
+
+* Graphics primitives.
+
+* For the Macintosh port, the toplevel system is now a standalone
+application, with its own user interface, and does not require MPW
+anymore. (The batch compilers still require MPW.)
+
+* The PC ports work in conjunction with TSR line editors.
+
+* The 80386 PC port is now VCPI-compliant, and handles keyboard
+interrupts correctly.
+
+Main incompatibilities with Caml Light 0.41:
+
+* Assignment operations such as :=, vect_assign, <- now return (), instead
+of the new value.
+
+* The "failure" exception from the standard library is now named "Failure".
+
+* Searching functions from the standard library (assoc, assq, ...) now
+raise "Not_found" on error, instead of "failure".
+
+* Some library modules have been renamed or modified. The old "unix"
+module is now named "sys". The new "sys" module is less Unix-specific.
+Some of the functions in the old "unix" module have disappeared, other
+have a slightly different interface. The old "hash" module is now
+subsumed by the "hashtbl" module.
+
+
+Caml Light 0.41:
+----------------
+
+* Alternate spelling for floating-point operators: +. -. *. etc.
+
+* New library functions: io__input_line, lexing__create_lexer_string.
+
+* io__seek*, io__pos* more efficient.
+
+
+Caml Light 0.4:
+---------------
+
+* A lexer generator (in the style of lex) and a parser generator (in
+  the style of yacc). These tools makes it easier to write compilers
+  and similar programs. They also clean up the bootstrapping process a lot.
+
+* Two new ports to microcomputers: to the 386 PC, and to the Amiga.
+  The 386 PC version runs in 32 bit protected mode, and takes
+  advantage of memory above 640K.
+
+* Many bug fixes.
+
+* A simpler installation procedure.
+
+Caml Light 0.3:
+---------------
+
+* First public release.

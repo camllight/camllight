@@ -1,0 +1,80 @@
+.TH CAMLLORDER n "September 1993"
+
+.SH NAME
+camllorder \- find an ordering relation for Caml Light object files
+
+.SH SYNOPSIS
+.B camllorder
+[
+.B \-s
+]
+[
+.BI \-stdlib\ path
+]
+[
+.BI \-lib\ lib
+]
+.I filename ...
+
+.SH DESCRIPTION
+
+.B camllorder
+analyses Caml Light object files (.zo) to extract the ordering needed by the
+linker.
+
+Each
+.I filename
+must be a Caml Light object file, but *not* a library.
+
+.B camllorder 
+produces on the standard output the partial ordering relating the objects
+files given in argument. This output is suitable as the input the 
+tsort(1) command.
+
+.SH OPTIONS
+
+.TP
+.B \-s
+Also computes a possible topological sort and produces output suitable for
+calling the linker.
+
+.TP
+.BI \-stdlib \ path
+Defines a different 
+.I path
+where to look for the standard library stdlib.zo
+
+.TP
+.BI \-lib \ libfile
+Defines 
+.I libfile 
+as a library file or a module name. 
+A library file (ending in .zo) will be analysed to see what modules it
+provides. Modules of the library (or the module itself) will be removed
+from the dependencies, and thus not included in the output of 
+.B camllorder.
+The standard library 
+.B stdlib.zo
+is always analysed, but its location (default to /usr/local/lib/caml-light)
+can be changed by the  
+.B stdlib 
+option.
+
+.SH EXAMPLES
+
+ % camlc -o foo `camlorder -s $OBJS`
+ % camlorder -stdlib $HOME/lib \\ 
+             -lib mylib.zo -lib sockets $OBJS
+
+.SH SEE ALSO
+
+.B camlc(1),
+.B lorder(1),
+.B tsort(1).
+
+.SH BUGS
+
+Very limited testing.
+The -s option should be used only when the order of modules is irrelevant
+(no tricky initialisations or side-effects).
+

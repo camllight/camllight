@@ -1,0 +1,247 @@
+src:	%aSyntax error.\n
+fr:	%aErreur de syntaxe.\n
+
+src:	%aIllegal character.\n
+fr:	%aCaractère illégal.\n
+
+src:	%tComment not terminated.\n
+fr:	%tCommentaire non terminé.\n
+
+src:	%aIll-formed character literal.\n
+fr:	%aCaractère littéral mal formé.\n
+
+src:	%tString literal not terminated.\n
+fr:	%tChaîne littérale non terminée.\n
+
+src:	, line %d-%d, characters %d-%d:\n
+fr:	, lignes %d-%d, caractères %d-%d:\n
+
+src:	, line %d, characters %d-%d:\n
+fr:	, ligne %d, caractères %d-%d:\n
+
+src:	File "%s"
+fr:	Fichier "%s"
+
+src:	Toplevel input:\n
+fr:	Entrée interactive:\n
+
+src:	File "%s", line 1:\n
+fr:	Fichier "%s", ligne 1:\n
+
+src:	%aWarning: unknown directive "#%s", ignored.\n
+fr:	%aAttention: la directive "#%s" est inconnue, je l'ignore.\n
+
+src:	Cannot find file %s.zi. Please compile %s.mli first.\n
+fr:	Le fichier %s.zi est introuvable. Veuillez compiler %s.mli d'abord.\n
+
+src:	%aThe value identifier %a is unbound.\n
+fr:	%aL'identificateur %a n'est pas défini.\n
+
+src:	%aThe constructor %a is unbound.\n
+fr:	%aLe constructeur %a n'est pas défini.\n
+
+src:	%aThe label %a is unbound.\n
+fr:	%aL'étiquette %a n'est pas définie.\n
+
+src:	%aThe type constructor %a is unbound.\n
+fr:	%aLe constructeur de types %a n'est pas défini.\n
+
+src:	%aThe type variable %s is unbound.\n
+fr:	%aLa variable de type %s n'est pas liée.\n
+
+src:	%aThe type constructor %a expects %d argument(s),\n\
+	but is here given %d argument(s).\n
+fr:	%aLe constructeur de types %a attend %d argument(s),\n\
+	mais reçoit ici %d argument(s).\n
+
+src:	%aThe variable %s is bound several times in this pattern.\n
+fr:	%aL'identificateur %s est défini plusieurs fois dans ce motif.\n
+
+src:	%aA pattern with "|" must not bind variables.\n
+fr:	%aUn motif avec "|" ne doit pas lier d'identificateurs.\n
+
+src:	%aThis pattern matches values of type %a,\n\
+	but should match values of type %a.\n
+fr:	%aCe motif filtre des valeurs de type %a,\n\
+	mais devrait filtrer des valeurs de type %a.\n
+
+src:	%aThis expression has type %a,\n\
+	but is used with type %a.\n
+fr:	%aCette expression est de type %a,\n\
+	mais est utilisée avec le type %a.\n
+
+src:	%aThis function is applied to too many arguments.\n
+fr:	%aCette fonction reçoit trop d'arguments.\n
+
+src:	%aThis expression is not a function, it cannot be applied.\n
+fr:	%aCette expression n'est pas une fonction, elle ne peut être \
+        appliquée.\n
+
+src:	%aThis curried matching contains cases of different lengths.\n
+fr:	%aTous les cas de ce filtrage curryfié n'ont pas la même longueur.\n
+
+src:	%aRepeated type parameter in type declaration.\n
+fr:	%aUn paramètre de type est lié plusieurs fois dans cette déclaration \
+        de type.\n
+
+src:	%aThe identifier %s is not mutable.\n
+fr:	%aL'identificateur %s n'est pas mutable.\n
+
+src:	%tThe type %a is declared in the interface, but not implemented.\n
+fr:	%tLe type %a est déclaré dans l'interface, \
+        mais n'est pas implémenté.\n
+
+src:	%tThe value %a is declared in the interface, but not implemented.\n
+fr:	%tLa valeur %a est déclarée dans l'interface,\n\
+        mais n'est pas définie dans l'implémentation.\n
+
+src:	%tThe value %a is declared with type %a,\n\
+	but defined with type %a.\n
+fr:	%tLa valeur %a est déclarée du type %a,\n\
+	mais est définie avec le type %a.\n
+
+src:	%tThe type inferred for the value %a,\n\
+	that is, %a,\n\
+	contains type variables that cannot be generalized.\n
+fr:	%tLe type inféré pour la valeur %a,\n\
+	c'est-à-dire, %a,\n\
+	contient des variables de type qui ne peuvent être généralisées.\n
+
+src:	%aThe label %a is defined several times in this record.\n
+fr:	%aL'étiquette %a est définie plusieurs fois dans cet enregistrement.\n
+
+src:	%aThe label %a is not defined in this record.\n
+fr:	%aL'étiquette %a n'est pas définie dans cet enregistrement.\n
+
+src:	%aThe label %a is not mutable.\n
+fr:	%aL'étiquette %a n'est pas mutable.\n
+
+src:	%aValues of type %a cannot be defined with a "let rec".\n
+fr:	%aLes valeurs du type %a ne peuvent être définies par un "let rec".\n
+
+src:	%aThe constructor %a requires an argument.\n
+fr:	%aLe constructeur %a exige un argument.\n
+
+src:	%aThe constant constructor %a cannot accept an argument.\n
+fr:	%aLe constructeur %a est constant: il ne peut recevoir un argument.\n
+
+src:	%aOnly variables are allowed as \
+	left-hand sides of "let rec".\n
+fr:	%aLe membre gauche d'un "let rec" doit être réduit à une variable.\n
+
+src:	%aThis kind of expression is not allowed in \
+	right-hand sides of "let rec".\n
+fr:	%aCe type d'expressions n'est pas autorisé comme \
+	membre droit d'un "let rec".\n
+
+src:	%aThe type %a is exported as an abstract type by this module\n\
+	and defined several times in the implementation.\n\
+	Please define it only once.\n
+fr:	%aLe type %a est exporté abstraitement dans l'interface de ce module\n\
+	et défini plusieurs fois dans l'implémentation.\n\
+	Veuillez ne le définir qu'une fois.\n
+
+src:    %aThe type abbreviation %a is a cyclic (infinite) type.\n
+fr:     %aL'abréviation de type %a est cyclique (infinie).\n
+
+src:	%aWarning: this function application is partial,\n\
+	maybe some arguments are missing.\n
+fr:	%aAttention: cette application de fonction est partielle,\n\
+        il manque peut-être des arguments.\n
+
+src:	%aWarning: this matching case is unused.\n
+fr:	%aAttention: ce cas de filtrage est inutile.\n
+
+src:	%aWarning: this matching is not exhaustive.\n
+fr:	%aAttention: ce filtrage n'est pas exhaustif.\n
+
+src:	%aBad format letter `%c'.\n
+fr:	%aLe format `%c' n'existe pas.\n
+
+src:	%tPhrase too large, a relative displacement has overflowed.\n
+fr:	%tUne phrase est si longue qu'un déplacement relatif a débordé.\n
+
+src:	Input/output error: %s.\n
+fr:	Erreur d'entrée/sortie (%s).\n
+
+src:	Internal error: %s.\nPlease report it.\n
+fr:	Erreur interne à Caml: %s.\nVeuillez la signaler.\n
+
+src:	Corrupted compiled interface file %s.\n\
+	Please recompile %s.mli or %s.ml first.\n
+fr:	L'interface compilée %s est illisible.\n\
+	Veuillez recompiler %s.mli ou %s.ml d'abord.\n
+
+src:	Cannot find the compiled interface file %s.zi.\n
+fr:	L'interface compilée %s.zi est introuvable.\n
+
+src:	The Caml Light compiler, version %s\n
+fr:	Le compilateur Caml Light, version %s\n
+
+src:	Cannot find file %s.\n
+fr:	Le fichier %s est introuvable.\n
+
+src:	The Caml Light librarian, version %s\n
+fr:	Le bibliothécaire Caml Light, version %s\n
+
+src:	The global value %s__%s is referenced (from %s) \
+        before being defined.\n\
+        Please link %s.zo before %s.\n
+fr:	La valeur globale %s__%s est référencée (depuis %s) \
+        avant d'être définie.\n\
+        Veuillez charger %s.zo avant %s.\n
+
+src:	The global value %s__%s is referenced before being defined.\n\
+        Please load an implementation of module %s first.\n
+fr:	La valeur globale %s__%s est référencée avant d'être définie.\n\
+        Veuillez d'abord charger une implémentation du module %s.\n
+
+src:	The C primitive "%s" is not available.\n
+fr:	La primitive C "%s" est inconnue.\n
+
+src:	Error while linking file %s.\n
+fr:	Erreur pendant l'édition des liens du fichier %s.\n
+
+src:	Syntax error in "-require" file %s.\n
+fr:	Erreur de syntaxe dans le fichier "-require" %s.\n
+
+src:    The Caml Light linker, version %s\n
+fr:	L'éditeur de liens Caml Light, version %s\n
+
+src:	The function %s is already traced.\n
+fr:	La fonction %s est déjà tracée.\n
+
+src:	The function %s is now traced.\n
+fr:	La fonction %s est dorénavant tracée.\n
+
+src:	Unknown function %s.\n
+fr:	La fonction %s n'est pas définie.\n
+
+src:	The function %s was not traced.\n
+fr:	La fonction %s n'était pas tracée.\n
+
+src:	The function %s is no longer traced.\n
+fr:	La fonction %s n'est plus tracée.\n
+
+src:	%s has the wrong type for a printing function.\n
+fr:	%s n'a pas un type convenable pour une fonction d'impression.\n
+
+src:	No printer named %s.\n
+fr:	Il n'y a pas d'imprimeur appelé %s.\n
+
+src:	Incorrect source file name %s.\n\
+	A source file name must end in ".ml" or ".mli".\n
+fr:	%s ne peut être un nom de fichier source.\n\
+	Le nom d'un fichier source doit se terminer en ".ml" or ".mli".\n
+
+src:	>       Caml Light version %s\n
+fr:	>       Caml Light version %s\n
+
+src:	Interrupted.\n
+fr:	Interruption.\n
+
+src:	Uncaught exception: 
+fr:	Exception non rattrapée: 
+
+src:	<Internal error while printing the exception>
+fr:	<Impossible d'imprimer l'exception>

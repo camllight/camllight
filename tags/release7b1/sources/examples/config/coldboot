@@ -1,0 +1,10 @@
+#!/bin/sh
+# To be called from the examples/ directory
+
+for i in `find . -type d -print`; do
+  p=`echo $i | sed -e 's|/[a-zA-Z]*|/..|g'`
+  echo $i $p
+  (cd $i; imake -I$p/config -DTOPDIR=$p)
+done
+
+  
