@@ -96,17 +96,14 @@ case $status in
 esac
 case $status in
     0) echo "This architecture has no alignment constraints."
-       echo "#undef ALIGNMENT" >> m.h
-       break;;
+       echo "#undef ALIGNMENT" >> m.h;;
     1) echo "This architecture has alignment constraints."
-       echo "#define ALIGNMENT" >> m.h
-       break;;
+       echo "#define ALIGNMENT" >> m.h;;
     *) echo "Something went wrong during alignment determination."
        echo "I'm going to assume this architecture has alignment constraints."
        echo "That's a safe bet: Caml Light will work even if it turns out that"
        echo "this architecture actually has no alignment constraints."
-       echo "#define ALIGNMENT" >> m.h
-       break;;
+       echo "#define ALIGNMENT" >> m.h;;
 esac
 
 sh ./runtest dblalign.c
