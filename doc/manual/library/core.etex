@@ -24,11 +24,12 @@ compiler or to the toplevel system:
 "-O" option & Opened modules (reverse opening order) \\
 \hline
 "-O cautious" (default) & "io", "eq", "int", "float", "ref", "pair", "list",
-                          "vect", "char", "string", "bool", "exc", "stream" \\
+                          "vect", "char", "string", "bool", "exc", "stream",
+                          "builtin" \\
 "-O fast"               & "io", "eq", "int", "float", "ref", "pair", "list",
                           "fvect", "fchar", "fstring", "bool",
-                          "exc", "stream" \\
-"-O none"               & none \\
+                          "exc", "stream", "builtin" \\
+"-O none"               & "builtin" \\
 \hline
 \end{tabular}
 \end{center}

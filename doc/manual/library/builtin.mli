@@ -1,7 +1,7 @@
 (* Base types and constructors *)
 
 (* This module defines some types and exceptions for which the language
-   provides special syntax, and therefore wich are treated specially
+   provides special syntax, and are therefore treated specially
    by the compiler. *)
 
 type int;;
