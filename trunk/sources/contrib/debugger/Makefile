@@ -158,9 +158,9 @@ primitives.zo: primitives.zi
 program_loading.zo: program_loading.zi parameters.zi primitives.zi \
     debugger_config.zi unix_tools.zi input_handling.zi 
 program_management.zo: program_management.zi time_travel.zi parameters.zi \
-    primitives.zi program_loading.zi input_handling.zi checkpoints.zi \
-    events.zi debugger_config.zi constants.zo history.zi unix_tools.zi \
-    communication.zi modules2.zi 
+    primitives.zi program_loading.zi checkpoints.zi events.zi \
+    debugger_config.zi history.zi unix_tools.zi input_handling.zi \
+    constants.zo communication.zi modules2.zi 
 show_information.zo: breakpoints.zi show_source.zi events.zi checkpoints.zi \
     pr_value.zo primitives.zi frames.zi communication.zi 
 show_source.zo: show_source.zi source.zi primitives.zi parameters.zi \
