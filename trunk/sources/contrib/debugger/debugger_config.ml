@@ -12,13 +12,16 @@ let runtime_program = "camlrun";;
 
 (* Modules opened even if there is no event in them. *)
 let always_opened_modules =
-      ["builtin"];;
+      ["ref"; "builtin"];;
 
 (* Modules opened if there are events in them. *)
 let default_modules =
       ["builtin"; "stream"; "exc"; "bool"; "string"; "char"; "vect";
        "fstring"; "fchar"; "fvect"; "list"; "pair"; "ref"; "float"; "int";
        "eq"; "io"];;
+
+(* Time history size (for `last') *)
+let history_size = ref 30;;
 
 (*** Time travel parameters. ***)
 

@@ -1,5 +1,6 @@
 (************************ Simple pattern matching ***************)
 
+#open "primitives";;
 #open "misc";;
 #open "const";;
 #open "globals";;
@@ -35,9 +36,16 @@ let error_matching () =
   prerr_endline "Pattern matching failed";
   raise Toplevel;;
 
+let same_name {qualid = name1} =
+  function
+    GRname name2 ->
+      (name2 = "") or (name1.id = name2)
+  | GRmodname name2 ->
+      name1 = name2;;
+
 let check_same_constr constr constr2 =
   try
-    if constr.qualid <> (find_constr_desc constr2).qualid then
+    if not (same_name constr constr2) then
       error_matching ()
   with
     Desc_not_found ->
@@ -58,65 +66,58 @@ let rec pattern_matching pattern obj ty =
       	(match pattern with
       	   P_tuple pattern_list ->
              pattern_matching_list pattern_list obj ty_list
+	 | P_nth (n, patt) ->
+	     if n >= list_length ty_list then
+	       (prerr_endline "Out of range."; raise Toplevel);
+	     pattern_matching patt (value_nth_field obj n) (list_nth ty_list n)
 	 | _ ->
       	     error_matching ())
+    | Tconstr(cstr, [ty_arg]) when same_type_constr cstr constr_type_list ->
+	(match pattern with
+           P_list pattern_list ->
+             let (last, list) =
+               it_list
+                 (fun (current, list) pattern ->
+                    if value_tag current = 0 then error_matching ();
+                    (value_nth_field current 1,
+                     (pattern, value_nth_field current 0)::list))
+                 (obj, [])
+                 pattern_list
+             in
+               if value_tag last <> 0 then error_matching ();
+               flat_map
+                 (function (x, y) -> pattern_matching x y ty_arg)
+                 (rev list)
+         | P_nth (n, patt) ->
+             let rec find k current =
+               if value_tag current = 0 then
+                 (prerr_endline "Out of range."; raise Toplevel);
+               if k = 0 then
+                 pattern_matching patt (value_nth_field current 0) ty_arg
+               else
+                 find (k - 1) (value_nth_field current 1)
+             in
+               find n obj
+         | P_concat (pattern1, pattern2) ->
+             if value_tag obj == 0 then error_matching ();
+             (pattern_matching pattern1 (value_nth_field obj 0) ty_arg)
+                @ (pattern_matching pattern2 (value_nth_field obj 1) ty)
+         | _ ->
+             error_matching ())
+    | Tconstr(cstr, [ty_arg]) when same_type_constr cstr constr_type_vect ->
+	(match pattern with
+           P_nth (n, patt) ->
+             if n >= value_size obj then
+               (prerr_endline "Out of range."; raise Toplevel);
+             pattern_matching patt (value_nth_field obj n) ty_arg
+         | _ ->
+             error_matching ())
     | Tconstr(cstr, ty_list) ->
-        if same_type_constr cstr constr_type_list then
-          let ty_arg = 
-            match ty_list with
-      	      [ty] -> ty
-      	    | _ -> fatal_error "pattern_matching (list)"
-          in
-	    match pattern with
-	      P_list pattern_list ->
-	        let (last, list) =
-                  it_list
-                    (fun (current, list) pattern ->
-	               if value_tag current = 0 then error_matching ();
-                       (value_nth_field current 1,
-                        (pattern, value_nth_field current 0)::list))
-                    (obj, [])
-                    pattern_list
-                in
-	          if value_tag last <> 0 then error_matching ();
-	          flat_map
-	            (function (x, y) -> pattern_matching x y ty_arg)
-	            (rev list)
-            | P_nth (n, patt) ->
-      	        let rec find k current =
-	          if value_tag current = 0 then
-	            (prerr_endline "Out of range."; raise Toplevel);
-	          if k = 0 then
-	            pattern_matching patt (value_nth_field current 0) ty_arg
-	          else
-	            find (k - 1) (value_nth_field current 1)
-	        in
-      	          find n obj
-	    | P_concat (pattern1, pattern2) ->
-                if value_tag obj == 0 then error_matching ();
-	        (pattern_matching pattern1 (value_nth_field obj 0) ty_arg)
-	           @ (pattern_matching pattern2 (value_nth_field obj 1) ty)
-	    | _ ->
-	        error_matching ()
-        else if same_type_constr cstr constr_type_vect then
-          let ty_arg =
-            match ty_list with
-      	      [ty] -> ty
-            | _ -> fatal_error "pattern_matching (vect)"
-          in
-	    match pattern with
-	      P_nth (n, patt) ->
-	        if n >= value_size obj then
-	          (prerr_endline "Out of range."; raise Toplevel);
-	        pattern_matching patt (value_nth_field obj n) ty_arg
-	    | _ ->
-	        error_matching ()
-        else
-          match cstr.info.ty_abbr with
-            Tabbrev(params, body) ->
-              pattern_matching pattern obj (expand_abbrev params body ty_list)
-          | _ ->
-              match_concrete_type (*?*)pattern obj cstr ty ty_list
+        (match cstr.info.ty_abbr with
+           Tabbrev(params, body) ->
+             pattern_matching pattern obj (expand_abbrev params body ty_list)
+         | _ ->
+             match_concrete_type pattern obj cstr ty ty_list)
 
 and match_concrete_type pattern obj cstr ty ty_list =
   let typ_descr =
@@ -157,6 +158,15 @@ and match_concrete_type pattern obj cstr ty ty_list =
                                pattern_list
                                obj
                                (filter_product n ty_arg)
+	                 | P_nth (n2, patt) ->
+			     let ty_list = filter_product n ty_arg in
+	                       if n2 >= n then
+	                         (prerr_endline "Out of range.";
+                                  raise Toplevel);
+	                       pattern_matching
+                                 patt
+                                 (value_nth_field obj n2)
+      	       	       	       	 (list_nth ty_list n2)
 	                 | P_variable var ->
 		             [var,
       	       	       	      obj,
@@ -176,17 +186,13 @@ and match_concrete_type pattern obj cstr ty ty_list =
   | Record_type label_list ->
       let match_field (label, patt) =
         let lbl =
-	  let lbl_desc =
-	    try
-      	      find_label_desc label
-	    with
-	      Desc_not_found ->
-	        prerr_endline "Undefined label.";
-		raise Toplevel
-      	  in
+	  try
 	    primitives__find
-	      (function l -> l.qualid = lbl_desc.qualid)
+	      (function l -> same_name l label)
 	      label_list
+	  with Not_found ->
+	      prerr_endline "Label not found.";
+      	      raise Toplevel
         in
           let (ty_res, ty_arg) =
             type_pair_instance (lbl.info.lbl_res, lbl.info.lbl_arg)

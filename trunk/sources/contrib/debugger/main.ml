@@ -82,6 +82,7 @@ let toplevel_loop () =
       loop ();;
 
 let stdlib = ref "/usr/local/lib/caml-light";;
+
 let anonymous s =
   program_name := s
 and set_stdlib p =
@@ -113,8 +114,8 @@ let main () =
     initialize_interpreter ();
     current_prompt := debugger_prompt;
 
-    print_string version__banner;	(* Banner. *)
-    print_newline(); print_newline();
+    version__print_banner();	(* Banner. *)
+    print_newline();
 
     initialize_interruptions ();
     toplevel_loop ();			(* Toplevel. *)

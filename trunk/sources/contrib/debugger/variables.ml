@@ -12,18 +12,21 @@
 #open "frames";;
 #open "value";;
 
-(*** Printing a variable name. ***)
+(*** Converting a variable name to a string. ***)
 
-let output_variable_name chan =
+let string_of_variable_name =
   function
     GRname "" ->
-      output_string chan "(accu)"
+      "(accu)"
   | GRname name ->
-      output_string chan name
+      name
   | GRmodname {qual = module; id = name} ->
-      output_string chan module;
-      output_string chan "__";
-      output_string chan name;;
+      module ^ "__" ^ name;;
+
+(*** Printing a variable name. ***)
+
+let output_variable_name chan name =
+  output_string chan (string_of_variable_name name);;
 
 (*** Value and type of a variable. ***)
 

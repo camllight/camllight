@@ -18,6 +18,9 @@ exception Exit;;
 (* Remove on element from an association list. *)
 value assoc_remove : ('a * 'b) list -> 'a -> ('a * 'b) list;;
 
+(* Nth element of a list. *)
+value list_nth : 'a list -> int -> 'a;;
+
 (* Return the `n' first elements of `l'. *)
 (* ### n l -> l' *)
 value list_truncate : int -> 'a list -> 'a list;;
@@ -60,7 +63,3 @@ type IO_CHANNEL =
 value io_channel_of_descr : file_descr -> IO_CHANNEL;;
 value close_io : IO_CHANNEL -> unit;;
 value std_io :IO_CHANNEL;;
-
-(*** Path expansion. ***)
-
-value expand_path : string -> string;;

@@ -1,5 +1,3 @@
-value history_size : int ref;;
-
 value empty_history : unit -> unit;;
 
 value add_current_time : unit -> unit;;

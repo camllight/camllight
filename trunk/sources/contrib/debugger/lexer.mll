@@ -26,10 +26,18 @@ and Argument =	(* Read a raw argument *)
       { EOL }
   | _
       { raise Parse_error }
+and Line_argument =
+  parse
+    _*
+      { ARGUMENT (get_lexeme lexbuf) }
+  | eof
+      { EOL }
 and Lexeme =	(* Read a lexeme *)
   parse
     [` ` `\t`] +
       { Lexeme lexbuf }
+  | "prefix"
+      { PREFIX }
   | [`A`-`Z` `a`-`z` `\192`-`\214` `\216`-`\246` `\248`-`\255` ]
     ( `_` ? [`A`-`Z` `a`-`z` `\192`-`\214` `\216`-`\246` `\248`-`\255` `'` (*'*) `0`-`9` ] ) *
       { IDENTIFIER (get_lexeme lexbuf) }
@@ -70,6 +78,12 @@ and Lexeme =	(* Read a lexeme *)
       { SEMI }
   | "="
       { EQUAL }
+  | ">"
+      { SUPERIOR }
+  | [ `!` `?` `=` `<` `>` `@` `^` `|` `&` `~` `+` `-` `*` `/` `%` ]
+    [ `!` `$` `%` `&` `*` `+` `-` `.` `/` `:` `;` 
+      `<` `=` `>` `?` `@` `^` `|` `~`] *
+      { OPERATOR (get_lexeme lexbuf) }
   | eof
       { EOL }
   | _

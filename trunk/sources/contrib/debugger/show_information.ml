@@ -1,3 +1,4 @@
+#open "format";;
 #open "primitives";;
 #open "communication";;
 #open "checkpoints";;
@@ -8,6 +9,7 @@
 #open "builtins";;
 #open "pr_value";;
 
+(* Display information about the current event. *)
 let show_current_event () =
   print_string "Time : "; print_int (current_time ());
   (match current_pc () with
@@ -19,7 +21,8 @@ let show_current_event () =
   match current_report ()  with
     None ->
       print_newline ();
-      print_string "Beginning of program."; print_newline ()
+      print_string "Beginning of program."; print_newline ();
+      show_no_point ()
   | Some {Rep_type = (Rep_event | Rep_breakpoint); Rep_program_pointer = pc} ->
       let (module, point) = current_point () in
 	print_string (" - module " ^ module);
@@ -28,26 +31,31 @@ let show_current_event () =
 	   [] ->
       	     ()
 	 | [breakpoint] ->
-	     print_string "Breakpoint : "; print_int breakpoint; print_newline ()
+	     print_string "Breakpoint : "; print_int breakpoint;
+             print_newline ()
 	 | breakpoints ->
 	     print_string "Breakpoints : ";
 	     do_list (function x -> print_int x; print_string " ") breakpoints;
       	     print_newline ());
-        show_point module point (current_event_is_before ())
+        show_point module point (current_event_is_before ()) true
   | Some {Rep_type = Rep_exited} ->
-      print_newline (); print_string "Program end."; print_newline ()
-  | Some {Rep_type = Rep_trap} ->	(* Other cases of `Rep_trap' are caught *)
-					(* in `internal_step' *)
+      print_newline (); print_string "Program end."; print_newline ();
+      show_no_point ()
+  | Some {Rep_type = Rep_trap} -> (* Other cases of `Rep_trap' are caught *)
+				  (* in `internal_step' *)
       print_newline ();
       print_string "Program end.";
       print_newline ();
-      print_string "Uncaught exception : ";
+      open_hovbox 0;
+      print_string "Uncaught exception:"; print_space();
       print_value (get_accu ()) type_exn;
-      print_newline ();;
+      close_box();
+      print_newline();
+      show_no_point ();;
 
 (* Display information about the current frame. *)
 (* --- `select frame' must have succeded before calling this function. *)
-let show_current_frame () =
+let show_current_frame selected =
   print_string "#";
   print_int !current_frame;
   print_string "  Pc : ";
@@ -65,7 +73,7 @@ let show_current_frame () =
 	   print_string "Breakpoints : ";
 	   do_list (function x -> print_int x; print_string " ") breakpoints;
       	   print_newline ());
-      show_point module point (selected_event_is_before ())
+      show_point module point (selected_event_is_before ()) selected
   with
     Not_found ->
       print_newline ();

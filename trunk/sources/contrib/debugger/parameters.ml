@@ -6,7 +6,7 @@
 let program_loaded = ref false;;
 let program_name = ref "";;
 let socket_name = ref "";;
-let arguments = ref ([| |]: string vect);;
+let arguments = ref "";;
 let default_load_path = ref ([] : string list);;
 
 let add_path dir =
