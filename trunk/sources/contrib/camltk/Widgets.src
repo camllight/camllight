@@ -373,7 +373,7 @@ subtype option(window) {
    }
 
 type ColorMode { 
-   Color "color"
+   Colormode "color"
    Gray "gray"
    Mono "mono"
 }
