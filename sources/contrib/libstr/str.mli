@@ -111,7 +111,7 @@ value split: regexp -> string -> string list
 (*** Joining *)
 
 value concat: string list -> string
-        (* Catenate a list of string. *)
+        (* Same as [string__concat]: catenate a list of string. *)
   and join: string -> string list -> string;;
         (* Catenate a list of string. The first argument is a separator, which
            is inserted between the strings. *)
@@ -135,7 +135,4 @@ value string_before: string -> int -> string
 (*** Formatting *)
 
 value format: ('a, unit, string) printf__format -> 'a;;
-        (* Same as [fprintf] and [printf] from the [printf] module,
-           except that the result of the formatting is returned as a
-           string instead of being written on a channel. The structure
-           of the format string is described in [printf]. *)
+        (* Same as [printf__sprintf]. *)
