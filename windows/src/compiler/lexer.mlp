@@ -212,13 +212,15 @@ rule main = parse
   | "&&" { AMPERAMPER }
   | "||" { BARBAR }
 
-  | "!="    { INFIX1 "!=" }
+  | "!="    { INFIX0 "!=" }
   | "-"     { SUBTRACTIVE "-" }
   | "-."    { SUBTRACTIVE "-." }
 
   | [ `!` `?` ] [ SYMBOLS ] *
             { PREFIX(get_lexeme lexbuf) }
-  | [ `=` `<` `>` `@` `^` `|` `&` `~` `$` ] [ SYMBOLS ] *
+  | [ `=` `<` `>` `|` `&` `~` `$` ] [ SYMBOLS ] *
+            { INFIX0(get_lexeme lexbuf) }
+  | [ `@` `^` ] [ SYMBOLS ] *
             { INFIX1(get_lexeme lexbuf) }
   | [ `+` `-` ] [ SYMBOLS ] *
             { INFIX2(get_lexeme lexbuf) }

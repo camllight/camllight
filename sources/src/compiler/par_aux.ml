@@ -117,3 +117,18 @@ let rec make_range_pat low high =
     make_pat(Zorpat(make_pat(Zconstantpat(ACchar(char_of_int low))),
                     make_range_pat (succ low) high))
 ;;
+
+let make_recordpat = function
+    [] -> make_pat(Zwildpat)
+  | l -> make_pat(Zrecordpat l);;
+
+let make_listpat =
+  makel (make_pat(Zconstruct0pat(constr_nil)))
+  where rec makel res = function
+    [] ->
+      res
+  | e::l ->
+      makel
+       (make_pat(Zconstruct1pat(constr_cons, make_pat(Ztuplepat [e;res]))))
+       l
+;;
