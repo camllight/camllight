@@ -23,7 +23,8 @@ OBJS=accept.o access.o addrofstr.o alarm.o bind.o chdir.o chmod.o \
   dup.o dup2.o envir.o errmsg.o execv.o execve.o execvp.o exit.o \
   fchmod.o fchown.o fcntl.o fork.o ftruncate.o getcwd.o getegid.o getenv.o \
   geteuid.o getgid.o getgr.o getgroups.o gethost.o gethostname.o \
-  getlogin.o getpid.o getppid.o getproto.o getpw.o getserv.o getuid.o \
+  getlogin.o getpeername.o getpid.o getppid.o getproto.o getpw.o \
+  getserv.o getsockname.o getuid.o \
   gmtime.o ioctl.o kill.o link.o listen.o lockf.o lseek.o mkdir.o \
   mkfifo.o nice.o open.o opendir.o pause.o pipe.o read.o \
   readdir.o readlink.o rename.o rewinddir.o rmdir.o select.o sendrecv.o \
@@ -111,11 +112,13 @@ getgroups.o : getgroups.c unix.h
 gethost.o : gethost.c unix.h socketaddr.h 
 gethostname.o : gethostname.c unix.h 
 getlogin.o : getlogin.c unix.h 
+getpeername.o : getpeername.c unix.h socketaddr.h 
 getpid.o : getpid.c unix.h 
 getppid.o : getppid.c unix.h 
 getproto.o : getproto.c unix.h 
 getpw.o : getpw.c unix.h 
 getserv.o : getserv.c unix.h 
+getsockname.o : getsockname.c unix.h socketaddr.h 
 getuid.o : getuid.c unix.h 
 gmtime.o : gmtime.c unix.h 
 ioctl.o : ioctl.c unix.h 
