@@ -33,7 +33,7 @@
 %type <unit> Entry
 
 %%
-
+/* Atomic types */
 Type0 :
     TYINT
       { Int }
@@ -51,7 +51,8 @@ Type0 :
       { UserDefined $1 }
 ;
 
-Type01 : 
+/* with subtypes */
+Type1 : 
     Type0
       { $1 }
   | IDENT LPAREN IDENT RPAREN
@@ -62,35 +63,56 @@ Type01 :
      { Subtype ("option", $3) }
 ;
 
-Type1 :
-    Type01
+/* with list constructors */
+Type2 :
+    Type1
      { $1 }
-  | Type01 LIST
+  | Type1 LIST
      { List $1 }
 ;
 
+/* with braces (tk list)*/
+Braced_Type :
+    Type2
+      { $1 }
+  | LBRACE Type2 RBRACE
+      { Braced $2 }
+;
 
-Type1list :
-    Type1 COMMA Type1list
+/* products or arguments */
+Type_list :
+    Braced_Type COMMA Type_list
       { $1 :: $3 }
-  | Type1
+  | Braced_Type
       { [$1] }
 ;
 
-Typearg :
+/* subset of types valid as function arguments or result*/
+FTypearg :
     LPAREN RPAREN
       { Unit }
-  | LPAREN Type1 RPAREN
+  | LPAREN Type2 RPAREN
       { $2 }
-  | LPAREN Type1list RPAREN 
+  | LPAREN Type_list RPAREN 
       { Product $2 }
 ;
 
+/* the rest */
+Typearg :
+    FTypearg
+      { $1 }
+  | LBRACE Type2 RBRACE
+      { Braced $2 }
+  | LBRACE Type_list RBRACE
+      { Braced (Product $2) }
+;
+
+/* constructor arguments */
 Type :
     Typearg
       { $1 }
-  | LPAREN FUNCTION Typearg RPAREN
-      { Function $3 }
+  | FUNCTION FTypearg
+      { Function $2 }
 ;
 
 /* Constructors for type declarations */
@@ -137,7 +159,7 @@ AbbrevConstructors :
 ;
 
 Command :
-  FUNCTION Typearg IDENT STRING Type
+  FUNCTION FTypearg IDENT STRING FTypearg
      {{Component = Command; MLName = $3; TkName = $4; Arg = $5; Result = $2 }}
 ;
 
