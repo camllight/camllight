@@ -6,10 +6,11 @@ static void gr_free_image(im)
      value im;
 {
   XFreePixmap(grdisplay, Data_im(im));
+  printf("Freed pixmap %x\n", Data_im(im));
   if (Mask_im(im) != None) XFreePixmap(grdisplay, Mask_im(im));
 }
 
-#define Max_image_mem 1000000
+#define Max_image_mem 200000
 
 value gr_new_image(w, h)
      int w, h;
@@ -20,6 +21,7 @@ value gr_new_image(w, h)
   Data_im(res) = XCreatePixmap(grdisplay, grwindow.win, w, h, 
                                XDefaultDepth(grdisplay, grscreen));
   Mask_im(res) = None;
+  printf("Allocated pixmap %x\n", Data_im(res));
   return res;
 }
 
