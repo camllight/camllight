@@ -119,9 +119,9 @@ Check the files m.h and s.h in config/. Wrong endianness or alignment
 constraints in m.h will immediately crash the bytecode interpreter.
 
 If you get a "segmentation violation" signal, check the limits on the
-stack size and data segment size (type "limit" under csh or "ulimit
--a" under bash). 512k of stack is not enough for bootstrapping on some
-platforms; raise the limit to 1M or 2M.
+stack size and data segment size (type "limit" under csh or
+"ulimit -a" under bash). 512k of stack is not enough for bootstrapping
+on some platforms; raise the limit to 1M or 2M.
 
 Try recompiling the runtime system with optimizations turned off. The
 runtime system contains some complex, atypical pieces of C code that
@@ -165,9 +165,7 @@ MACHINE-SPECIFIC HINTS:
 unable to compile correctly the runtime system (wrong code is
 generated for (x - y) where x is a pointer and y an integer). This
 causes "make world" to crash when compiling in src/lib.  Fix: use
-another C compiler (gcc works fine).  Another option is to apply the
-patch in file HPUX9.patch, which attempts to work around the bug
-in cc.  Seems to work sometimes, but use at your own risks.
+another C compiler (gcc works fine).
 
 * On MIPS machines from MIPS Co.  Add "-systype bsd43" to OPTS.
 Also, some versions of the cc compiler are reportedly unable to

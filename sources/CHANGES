@@ -35,8 +35,6 @@ Caml Light 0.7:
 
 * New class of infix and prefix symbols supported (e.g. *=, !!, ++, with
   precedence/associativity determined by their first character).
-  As a consequence, blanks need to be added in some old code (e.g. x@!y
-  should now be written x@ !y).
 
 * Syntactic sugar:
   - Alternate syntax for string access and update (s.[i], s.[i] <- c).
@@ -51,7 +49,7 @@ Caml Light 0.7:
 
 * Optimized access to unqualified identifiers in symbol tables.
 
-* Parser cleaned up a little, reduce/reduce conflicts eliminated.
+* Parser cleaned up a bit, reduce/reduce conflicts eliminated.
 
 * New library modules: format (to write pretty-printers), gc (to control the
   garbage collector and obtain various statistics on memory allocation).
@@ -60,7 +58,7 @@ Caml Light 0.7:
 
 * New toplevel functions: install_printer (user-defined printing functions,
   now type safe and associated with a type expression -- e.g. int list --
-  instead of a type constructor -- e.g. list); set_print_depth (control
+  not with a type constructor -- e.g. list); set_print_depth (control
   the printing depth for values).
 
 * Better support for non-generalizable type variables in phrases:
@@ -70,10 +68,10 @@ Caml Light 0.7:
 * Static type-checking of printf. User-defined printers supported in printf
   formats (%a and %t).
 
-* Parsing engine now reentrant; a camlyacc-generated parser can now call
+* Parsing engine now reentrant; a camlyacc-generated parser can call
   another one in one of its actions.
 
-* Better support of 64-bit architectures: 32-bit architectures can read
+* Better support for 64-bit architectures: 32-bit architectures can read
   values written on a file by a 64-bit architecture; max length of strings
   and arrays now determined by the runtime system.
 
@@ -86,11 +84,31 @@ Caml Light 0.7:
 * CAMLRUNPARAM environment variable to set GC parameters.
 
 * contrib/libgraph: implemented alternate event handling methods if async I/O
-  are not available; ask for system calls to be restarted if possible.
+  are not available; ask for system calls to be restarted if possible;
+  restart read and write system calls if interrupted.
 
 * contrib/libnums: upgraded the bignum library; better 64-bit support
   (but still has some 64-bit bugs); alternate names for num operations
   (+/ -/ */ etc).
+
+Main incompatibilities with Caml Light 0.61:
+
+* Polymorphic generalization has been severely restricted to eliminate
+  unsoundness w.r.t. polymorphic mutables. As a consequence, several
+  "let" declarations that used to be polymorphic are now monomorphic,
+  which may cause type errors later. See the manual p. 54 for a complete
+  description of the problem and several workarounds.
+
+* `:=' as assignment operator for record fields cause difficulties if
+  one of the record fields is a reference: r.lbl := v used to mean
+  `update the reference r.lbl with the value v', and now means
+  `assign the mutable field lbl of r the value v'. Consider turning
+  { lbl: T ref ... } into { mutable lbl: T }. Or add extra parentheses
+  (r.lbl) := v to force the interpretation of `:=' as reference assignment.
+  
+* Due to the new infix operators, extra blank space sometimes needs
+  to be inserted, e.g. `x+!y' should now be written `x+ !y'.
+
 
 Caml Light 0.61:
 ----------------
@@ -149,8 +167,7 @@ Caml Light 0.6:
 
 * Optimizations: io__input_line rewritten in C.
 
-* New functions: parsing__rhs_start, parsing__rhs_end; sys__interactive;
-  callback.
+* New functions: parsing__rhs_start, parsing__rhs_end; sys__interactive.
 
 * New contributed libraries and tools:
         camlmode  Emacs editing mode for Caml Light
@@ -228,6 +245,22 @@ anymore. (The batch compilers still require MPW.)
 
 * The 80386 PC port is now VCPI-compliant, and handles keyboard
 interrupts correctly.
+
+Main incompatibilities with Caml Light 0.41:
+
+* Assignment operations such as :=, vect_assign, <- now return (), instead
+of the new value.
+
+* The "failure" exception from the standard library is now named "Failure".
+
+* Searching functions from the standard library (assoc, assq, ...) now
+raise "Not_found" on error, instead of "failure".
+
+* Some library modules have been renamed or modified. The old "unix"
+module is now named "sys". The new "sys" module is less Unix-specific.
+Some of the functions in the old "unix" module have disappeared, other
+have a slightly different interface. The old "hash" module is now
+subsumed by the "hashtbl" module.
 
 
 Caml Light 0.41:
