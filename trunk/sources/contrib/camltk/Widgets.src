@@ -961,6 +961,7 @@ type AtomId {
 
 ## update
 function () update "update" ()
+function () update_idletasks "update idletasks" ()
    
 module winfo {
    function (AtomId) atom "winfo atom" (string)
