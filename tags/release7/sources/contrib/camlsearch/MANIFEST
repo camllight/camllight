@@ -1,0 +1,9 @@
+This directory contains the standard distribution of camlsearch,
+a library search tool for CamlLight.
+
+Makefile        The main Makefile
+README          An overview of the camlsearch program
+doc             The manual pages
+emacs-lisp      A complete and flexible Emacs interface to camlsearch
+source          The full source of camlsearch
+tools           Some tools used during the building phase

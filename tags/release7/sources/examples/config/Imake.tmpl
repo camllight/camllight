@@ -1,0 +1,39 @@
+CAMLC=camlc
+COMPFLAGS=-W
+CAMLLIBR=camllibr
+CAMLLEX=camllex
+CAMLYACC=camlyacc
+CPP=/lib/cpp -P
+CAMLDEP=camldep
+RM=rm -f
+TOP=TOPDIR
+CONFIG=$(TOP)/config
+
+all::
+
+#include "Imake.rules"
+
+/**/# (begin Imakefile)
+#include INCLUDE_IMAKEFILE
+/**/# (end Imakefile)
+
+clean::
+	$(RM) *.zi *.zix *.zo *~ #*#
+
+beforedepend::
+
+makefile: beforedepend
+	imake -I$(CONFIG) -DTOPDIR=$(TOP)
+	$(CAMLDEP) *.mli *.ml >> Makefile
+
+makefiles:: makefile
+
+.SUFFIXES: .mli .zi .ml .zo
+
+.mli.zi:
+	$(CAMLC) $(COMPFLAGS) -c $<
+
+.ml.zo:
+	$(CAMLC) $(COMPFLAGS) -c $<
+
+/**/# Generated dependencies below
