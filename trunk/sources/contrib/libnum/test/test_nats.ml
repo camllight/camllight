@@ -144,20 +144,21 @@ test 21 equal_nat (
 nat_of_string s,
 (let nat = make_nat 15 in 
   set_digit_nat nat 0 3;
+  let nat2 = nat_of_string (sub_string s 0 135) in
   set_mult_digit_nat nat 0 15 
-                  (nat_of_string (sub_string s 0 135)) 0 14 
+                     nat2 0 (length_nat nat2) 
                   (nat_of_int 10) 0;
   nat))
 ;;
 
 let s = "1234567890ABCDEF" in
+let nat = sys_nat_of_string 16 s 0 16 in
 test 22 
 eq_string 
   (sys_string_of_nat 
-     16 "" (sys_nat_of_string 16 s 0 16) 0 2 "", 
+     16 "" nat 0 (length_nat nat) "", 
    s)
 ;;
-
 
 testing_function "decimal_of_string";;
 
