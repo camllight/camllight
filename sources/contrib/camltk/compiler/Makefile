@@ -36,7 +36,7 @@ install:
 .ml.zo:
 	$(CAMLCOMP) $(COMPFLAGS) $<
 
-depend:
+depend: parser.ml parser.mli lexer.ml
 	mv Makefile Makefile.bak
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
 	 $(CAMLDEP) *.mli *.ml) > Makefile
@@ -47,4 +47,5 @@ compile.zo: tables.zo
 intf.zo: compile.zo tables.zo 
 lexer.zo: parser.zi 
 maincompile.zo: parser.zi lexer.zo compile.zo intf.zo tsort.zo tables.zo 
+parser.zo: parser.zi tables.zo 
 tables.zo: tsort.zo 

@@ -11,6 +11,9 @@
 %token LPAREN		/* "(" */
 %token RPAREN		/* ")" */
 %token COMMA		/* "," */
+%token SEMICOLON	/* ";" */
+%token LBRACKET		/* "[" */
+%token RBRACKET		/* "]" */
 %token LBRACE		/* "{" */
 %token RBRACE		/* "}" */
 
@@ -71,24 +74,16 @@ Type2 :
      { List $1 }
 ;
 
-/* with braces (tk list)*/
-Braced_Type :
-    Type2
-      { $1 }
-  | LBRACE Type2 RBRACE
-      { Braced $2 }
-;
-
-/* products or arguments */
+/* products */
 Type_list :
-    Braced_Type COMMA Type_list
+    Type2 COMMA Type_list
       { $1 :: $3 }
-  | Braced_Type
+  | Type2
       { [$1] }
 ;
 
-/* subset of types valid as function arguments or result*/
-FTypearg :
+/* callback arguments or function results*/
+FType :
     LPAREN RPAREN
       { Unit }
   | LPAREN Type2 RPAREN
@@ -97,43 +92,44 @@ FTypearg :
       { Product $2 }
 ;
 
-/* the rest */
-Typearg :
-    FTypearg
-      { $1 }
-  | LBRACE Type2 RBRACE
-      { Braced $2 }
-  | LBRACE Type_list RBRACE
-      { Braced (Product $2) }
-;
-
-/* constructor arguments */
 Type :
-    Typearg
+    Type2
       { $1 }
-  | FUNCTION FTypearg
+  | FUNCTION FType
       { Function $2 }
 ;
 
+
+
+Arg:
+    STRING
+      {StringArg $1}
+  | Type
+      {TypeArg $1 }
+  | Template
+      { $1 }
+;
+
+ArgList:
+    Arg SEMICOLON ArgList
+       { $1 :: $3}
+  | Arg
+      { [$1] }
+;
+
+/* Template */
+Template :
+    LBRACKET ArgList RBRACKET
+      { ListArg $2 }
+;
+
+
 /* Constructors for type declarations */
 Constructor :
-    IDENT STRING
+    IDENT Template
       {{ Component = Constructor; 
          MLName = $1; 
-         TkName = $2; 
-         Arg = Unit; 
-         Result = Unit }}
-  | IDENT Type
-      {{ Component = Constructor; 
-         MLName = $1; 
-         TkName = ""; 
-         Arg = $2; 
-         Result = Unit }}
-  | IDENT STRING Type
-      {{ Component = Constructor; 
-         MLName = $1; 
-         TkName = $2; 
-         Arg = $3; 
+	 Template = $2;
          Result = Unit }}
 ;
 
@@ -159,13 +155,13 @@ AbbrevConstructors :
 ;
 
 Command :
-  FUNCTION FTypearg IDENT STRING FTypearg
-     {{Component = Command; MLName = $3; TkName = $4; Arg = $5; Result = $2 }}
+  FUNCTION FType IDENT Template
+     {{Component = Command; MLName = $3; Template = $4; Result = $2 }}
 ;
 
 Option :
-   OPTION IDENT STRING Type
-     {{Component = Constructor; MLName = $2; TkName = $3; Arg = $4; Result = Unit }}
+   OPTION IDENT Template
+     {{Component = Constructor; MLName = $2; Template = $3; Result = Unit }}
    /* Abbreviated */
 |  OPTION IDENT
      { retrieve_option $2 }

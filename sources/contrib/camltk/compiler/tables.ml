@@ -17,8 +17,14 @@ type MLtype =
  | UserDefined of string
  | Subtype of string * string
  | Function of MLtype			(* arg type only *)
- | Braced of MLtype
 ;;
+
+type Template =
+   StringArg of string
+ | TypeArg of MLtype
+ | ListArg of Template list
+;;
+
 
 (* Sorts of components *)
 type ComponentType =
@@ -30,8 +36,7 @@ type ComponentType =
 type FullComponent = {
   Component : ComponentType;
   MLName : string;
-  TkName   : string;
-  Arg      : MLtype;
+  Template : Template;
   Result   : MLtype
   }
 ;;
@@ -132,7 +137,12 @@ let rec enter_argtype = function
   | UserDefined s -> tsort__add_element types_order s
   | Subtype (s,_) -> tsort__add_element types_order s
   | Function ty -> enter_argtype ty
-  | Braced ty -> enter_argtype ty
+;;
+
+let rec enter_template_types = function
+     StringArg _ -> ()
+   | TypeArg t -> enter_argtype t
+   | ListArg l -> do_list enter_template_types l
 ;;
 
 (* Find type dependancies on s *)
@@ -143,10 +153,23 @@ let rec add_dependancies s =
   | Subtype(s',_) -> if s <> s' then tsort__add_relation types_order (s', s)
   | UserDefined s' -> if s <> s' then tsort__add_relation types_order (s', s)
   | Function ty -> add_dependancies s ty
-  | Braced ty -> add_dependancies s ty
   | _ -> ()
 ;;
 
+let rec add_template_dependancies s = function
+     StringArg _ -> ()
+   | TypeArg t -> add_dependancies s t
+   | ListArg l -> do_list (add_template_dependancies s) l
+;;
+
+(* Assumes functions are not nested in products, which is reasonable due to syntax*)
+let rec has_callback = function
+     StringArg _ -> false
+   | TypeArg (Function _ ) -> true
+   | TypeArg _ -> false
+   | ListArg l -> exists has_callback l
+;;
+  
 
 (*** Returned types ***)
 let really_add ty = 
@@ -166,14 +189,13 @@ let rec add_return_type = function
   | UserDefined s -> really_add s
   | Subtype (s,_) -> really_add s
   | Function _ -> fatal_error "unexpected return type (function)" (* whoah *)
-  | Braced _ -> fatal_error "unexpected return type (brace)"
 ;;
 
 (*** Update tables for a component ***)
-let enter_component_types c =
-  add_return_type c.Result;
-  enter_argtype c.Result;
-  enter_argtype c.Arg
+let enter_component_types {Template = t; Result = r} =
+  add_return_type r;
+  enter_argtype r;
+  enter_template_types t
 ;;
 
 
@@ -188,7 +210,7 @@ let rec check_duplicate_constr allowed c =
   | c'::rest -> 
     if c.MLName = c'.MLName then  (* defined *)
       if allowed then 
-      	if c.Arg = c'.Arg then true (* same arg *)
+      	if c.Template = c'.Template then true (* same arg *)
 	else raise (Duplicate_Definition ("constructor",c.MLName))
       else raise (Duplicate_Definition ("constructor", c.MLName))
     else check_duplicate_constr allowed c rest
@@ -212,12 +234,12 @@ let enter_type typname constructors =
 		if not (check_duplicate_constr false c typdef.constructors)
 		then begin 
 		   typdef.constructors := c :: typdef.constructors;
-		   add_dependancies typname c.Arg
+		   add_template_dependancies typname c.Template
 		end;
 		(* Callbacks require widget context *)
-      	       	match c.Arg with
-      	       	  Function _ -> typdef.requires_widget_context := true
-                | _ -> ())
+		typdef.requires_widget_context := 
+      	       	  typdef.requires_widget_context or
+                  has_callback c.Template)
             constructors
 ;;
 
@@ -236,13 +258,12 @@ let enter_subtype typ subtyp constructors =
       	       	  Full c -> 
 		    if not (check_duplicate_constr true c typdef.constructors)
 		    then begin
-		       add_dependancies typ c.Arg;
+		       add_template_dependancies typ c.Template;
 		       typdef.constructors <- c :: typdef.constructors
 		    end;
-                    begin match c.Arg with
-      	       	      Function _ -> typdef.requires_widget_context := true
-                    |  _ -> ()
-                    end;
+		    typdef.requires_widget_context :=
+      	       	       typdef.requires_widget_context or
+      	       	       has_callback c.Template;
                     c
                | Abbrev name -> find_constructor name typdef.constructors
                 )
