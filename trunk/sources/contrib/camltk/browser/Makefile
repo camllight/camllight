@@ -17,7 +17,7 @@ SUPPORTDIR=../libsupport
 UNIXDIR=../../libunix
 
 # These options are overriden when called from ../Makefile
-X11_LIB=/usr/lib
+X11_LIB=/usr/X11R6/lib
 TCLLIBDIR=/usr/local/lib/tcl/lib
 TKLIBDIR=/usr/local/lib/tk/lib
 TKLIBS=-ltcl -ltk -lX11
@@ -40,12 +40,7 @@ OBJS= lexer.zo complete.zo util.zo modlist.zo tags.zo source.zo \
 
 all: camlbrowser
 
-# # Two process architecture
-# camlbrowser: $(COMPILEROBJS) $(OBJS)
-# 	$(CAMLC) $(LINKFLAGS) -I $(CAMLTKDIR) -o camlbrowser $(UNIXDIR)/unix.zo \
-#                tklib2.zo $(COMPILEROBJS) $(OBJS) $(UNIXDIR)/libunix.a
-
-camlbrowser: $(OBJS)
+camlbrowser: $(OBJS) ../lib/tklib.zo
 	$(CAMLC) $(LINKFLAGS) -I $(CAMLTKDIR) -I ../../../src/compiler \
 		-o camlbrowser $(UNIXDIR)/unix.zo \
                 tklib.zo $(COMPILEROBJS) $(OBJS) $(TKLINKOPT) \
