@@ -83,7 +83,7 @@ format.zo: format.zi eq.zi exc.zi bool.zi queue.zi fchar.zi fstring.zi \
     io.zi ref.zi float.zi int.zi 
 fstring.zo: fstring.zi eq.zi fchar.zi ref.zi int.zi 
 fvect.zo: fvect.zi eq.zi list.zi int.zi 
-gc.zo: gc.zi 
+gc.zo: gc.zi printf.zi 
 genlex.zo: genlex.zi hashtbl.zi stream.zi exc.zi eq.zi fchar.zi float.zi \
     fstring.zi list.zi ref.zi int.zi 
 hashtbl.zo: hashtbl.zi eq.zi exc.zi fvect.zi int.zi 
@@ -93,8 +93,8 @@ lexing.zo: lexing.zi exc.zi eq.zi fstring.zi io.zi obj.zi int.zi
 list.zo: list.zi eq.zi exc.zi int.zi 
 map.zo: map.zi baltree.zi list.zi 
 pair.zo: pair.zi exc.zi 
-parsing.zo: parsing.zi exc.zi eq.zi iparsing.zi fvect.zi lexing.zi obj.zi \
-    int.zi 
+parsing.zo: parsing.zi exc.zi eq.zi iparsing.zi fvect.zi ref.zi lexing.zi \
+    obj.zi int.zi 
 printexc.zo: printexc.zi eq.zi exc.zi sys.zi bool.zi io.zi fvect.zi obj.zi \
     int.zi 
 printf.zo: printf.zi eq.zi exc.zi bool.zi fstring.zi io.zi obj.zi float.zi \
