@@ -52,27 +52,21 @@ let parse_phrase parsing_fun lexing_fun lexbuf =
          let pos1 = lexing__get_lexeme_start lexbuf in
          let pos2 = lexing__get_lexeme_end lexbuf in
          if f (obj__repr EOF) or f (obj__repr SEMISEMI) then () else skip();
-         printf__eprintf "%lSyntax error.\n" (Loc(pos1, pos2));
+         printf__eprintf "%aSyntax error.\n" output_location (Loc(pos1, pos2));
          raise misc__Toplevel
      | lexer__Lexical_error(errcode, pos1, pos2) ->
          let l = Loc(pos1, pos2) in
          begin match errcode with
            lexer__Illegal_character ->
-             printf__eprintf "%lIllegal character.\n" l
+             printf__eprintf "%aIllegal character.\n" output_location l
          | lexer__Unterminated_comment ->
-             printf__eprintf "%IComment not terminated.\n" ()
+             printf__eprintf "%tComment not terminated.\n" output_input_name
          | lexer__Bad_char_constant ->
-             printf__eprintf "%lIll-formed character literal.\n" l
-         | lexer__No_comment_start_in_string ->
-             printf__eprintf
-               "%lNo start-of-comment sequence in string literals.\n\
-                Please write (\\* instead.\n" l
-         | lexer__No_comment_end_in_string ->
-             printf__eprintf
-               "%lNo end-of-comment sequence in string literals.\n\
-                Please write *\\) instead.\n" l
+             printf__eprintf "%aIll-formed character literal.\n"
+                             output_location l
          | lexer__Unterminated_string ->
-             printf__eprintf "%IString literal not terminated.\n" ()
+             printf__eprintf "%tString literal not terminated.\n"
+                             output_input_name
          end;
          skip();
          raise misc__Toplevel

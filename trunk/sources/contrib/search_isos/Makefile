@@ -19,7 +19,7 @@ IMPL = common.zo myTypes.zo myLexer.zo myTypeParser.zo TypeOfString.zo \
     module_iterator.zo TypeRewrite.zo LC_unify.zo Equal.zo Search_isos.zo
 
 COMPMODS = config.zo misc.zo const.zo prim.zo globals.zo location.zo \
-    syntax.zo error.zo modules.zo builtins.zo types.zo pr_type.zo \
+    syntax.zo modules.zo types.zo pr_type.zo error.zo builtins.zo \
     typing.zo par_aux.zo
 
 GENFILES = myTypeParser.mli myTypeParser.ml myLexer.ml Search_isos.ml
