@@ -114,8 +114,6 @@ let char_for_decimal_code lexbuf i =
                     (int_of_char(get_lexeme_char lexbuf (i+2)) - 48))
 ;;
 
-let saved_string_start = ref 0;;
-
 }
 
 #ifdef unix
@@ -150,10 +148,9 @@ rule main = parse
       { FLOAT (float_of_string(get_lexeme lexbuf)) }
   | "\""
       { reset_string_buffer();
-        (* Start of token is start of string. *)
-        saved_string_start := lexbuf.lex_start_pos;
+        let string_start = lexbuf.lex_start_pos + lexbuf.lex_abs_pos in
         string lexbuf;
-        lexbuf.lex_start_pos <- !saved_string_start;
+        lexbuf.lex_start_pos <- string_start - lexbuf.lex_abs_pos;
         STRING (get_stored_string()) }
   | "`"
       { let char_start = lexbuf.lex_start_pos + lexbuf.lex_abs_pos in
