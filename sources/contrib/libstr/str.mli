@@ -12,7 +12,7 @@ value regexp: string -> regexp
 -          [.     ] matches any character except newline
 -          [*     ] (postfix) matches the previous expression zero, one or
                     several times
--          [-     ] (postfix) matches the previous expression one or
+-          [+     ] (postfix) matches the previous expression one or
                     several times
 -          [?     ] (postfix) matches the previous expression once or
                     not at all
