@@ -62,7 +62,7 @@ let new_scrollable_text top options navigation =
 (*
  * Searching
  *)
-let patternv = frx_misc__autodef textvariable__new
+let patternv = frx_misc__autodef textvariable__create
 ;;
 let topsearch t =
   (* The user interface *)
@@ -76,9 +76,9 @@ let topsearch t =
   and bgroup = frame__create top [] in
     let fdir = frame__create hgroup [] 
     and fmisc = frame__create hgroup [] in
-    let direction = textvariable__new_temporary fdir
-    and exactv = textvariable__new_temporary fdir
-    and casev = textvariable__new_temporary fdir in
+    let direction = textvariable__create_temporary fdir
+    and exactv = textvariable__create_temporary fdir
+    and casev = textvariable__create_temporary fdir in
        let forw = radiobutton__create_named fdir "forward"
 	     [Text "Forward"; Variable direction; Value "f"]
       and backw = radiobutton__create_named fdir "backward"

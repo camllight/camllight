@@ -51,14 +51,14 @@ let getv () =
     v
 ;;
 
-let new_temporary w =
+let create_temporary w =
   let v = getv() in
     add w v;
     v
 ;;
 
 (* Initialize the variable to avoid error *)
-let new () = getv ()
+let create () = getv ()
 ;;
 
 let set v x =

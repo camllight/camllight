@@ -36,7 +36,7 @@ let f w name title mesg bitmap def buttons =
      pack [b][Side Side_Left; PadX (Millimeters 3.0); PadY (Millimeters 3.0)]
   end;
   
-  let waitv = textvariable__new_temporary t in
+  let waitv = textvariable__create_temporary t in
  
   let buttons =
     mapi (fun i bname ->

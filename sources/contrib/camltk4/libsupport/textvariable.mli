@@ -6,9 +6,9 @@ type textVariable
       (* TextVariable is an abstract type *)
 ;;
 
-value new : unit -> textVariable
+value create : unit -> textVariable
       (* Allocation of a TextVariable *)
-and   new_temporary : widget -> textVariable
+and   create_temporary : widget -> textVariable
       (* Allocation of a textVariable with lifetime associated to widget *)
 and   set : textVariable -> string -> unit
       (* Setting the value of a TextVariable *)

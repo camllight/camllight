@@ -61,7 +61,7 @@ let open_simple_synchronous title memory =
   let e =
     entry__create t [Relief Sunken; TextVariable memory; TextWidth len] in
 
-  let waiting = textvariable__new_temporary t in
+  let waiting = textvariable__create_temporary t in
   
   let activate _ =
      grab__release t;			(* because of wm *)
