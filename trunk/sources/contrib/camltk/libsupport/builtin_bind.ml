@@ -131,8 +131,8 @@ type EventInfo = {
   mutable Ev_State : string;
   mutable Ev_ValueMask : int;
   mutable Ev_Width : int;
-  mutable Ev_X : float;
-  mutable Ev_Y : float;
+  mutable Ev_X : int;
+  mutable Ev_Y : int;
   mutable Ev_WidgetName : string;
   mutable Ev_Time : string;
   mutable Ev_OverrideRedirect : string;
@@ -194,8 +194,8 @@ let FillEventInfo ev = function
   | State 	-> ev.Ev_State 		<- GetTkToken !PipeTkCallB
   | ValueMask	-> ev.Ev_ValueMask 	<- int_of_string (GetTkToken !PipeTkCallB)
   | Width 	-> ev.Ev_Width 		<- int_of_string (GetTkToken !PipeTkCallB)
-  | MouseX 	-> ev.Ev_X 		<- float_of_string (GetTkToken !PipeTkCallB)
-  | MouseY 	-> ev.Ev_Y 		<- float_of_string (GetTkToken !PipeTkCallB)
+  | MouseX 	-> ev.Ev_X 		<- int_of_string (GetTkToken !PipeTkCallB)
+  | MouseY 	-> ev.Ev_Y 		<- int_of_string (GetTkToken !PipeTkCallB)
   | WidgetName 	-> ev.Ev_WidgetName 	<- GetTkToken !PipeTkCallB
   | Time 	-> ev.Ev_Time  		<- GetTkToken !PipeTkCallB
   | OverrideRedirect -> ev.Ev_OverrideRedirect <- GetTkToken !PipeTkCallB
@@ -226,8 +226,8 @@ let WrapEventInfo f what =
     Ev_State = "";
     Ev_ValueMask = 0;
     Ev_Width = 0;
-    Ev_X = 0.0;
-    Ev_Y = 0.0;
+    Ev_X = 0;
+    Ev_Y = 0;
     Ev_WidgetName = "";
     Ev_Time = "";
     Ev_OverrideRedirect = "";
