@@ -3,6 +3,7 @@
 # These options are overriden when called from ../Makefile
 CC=cc
 OPTS=
+LIBDIR=/usr/local/lib/caml-light
 
 # Test to see whether ranlib exists on the machine
 RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
