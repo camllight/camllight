@@ -2,7 +2,7 @@
 
 OUTPUT=camltop provide expunge
 
-INCLUDES=../lib -I ../compiler -I ../linker
+INCLUDES=-I ../compiler -I ../linker
 
 EXTERNOBJS=config.zo misc.zo interntl.zo \
     const.zo prim.zo instruct.zo lambda.zo \
@@ -24,10 +24,12 @@ PERVASIVES=baltree bool char eq exc fchar filename float format fstring fvect \
 
 SPECIALS=sys
 
+all: camltop
+
 camltop: $(OBJS) provide expunge
 	$(CAMLRUN) provide -stdlib ../lib @&&!
 $(PERVASIVES)
-!
+! > required
 	$(CAMLLINK) $(LINKFLAGS) -o camltop1 -require required @&&!
 stdlib.zo $(EXTERNOBJS) $(OBJS)
 !
@@ -53,7 +55,8 @@ install:
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
-toplevel.zo: toplevel.zi meta.zi pr_value.zo load_phr.zo do_phr.zo 
-do_phr.zo: pr_value.zo meta.zi load_phr.zo 
+do_phr.zo: pr_value.zo meta.zi load_phr.zo fmt_type.zo 
 load_phr.zo: pr_value.zo meta.zi 
 main.zo: meta.zi toplevel.zi version.zo do_phr.zo 
+pr_value.zo: fmt_type.zo 
+toplevel.zo: toplevel.zi meta.zi pr_value.zo load_phr.zo do_phr.zo 

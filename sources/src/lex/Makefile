@@ -23,11 +23,11 @@ install:
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
-main.zo: lexgen.zo output.zo grammar.zi scanner.zo syntax.zo scan_aux.zo 
-lexgen.zo: syntax.zo 
-output.zo: syntax.zo 
 gram_aux.zo: syntax.zo 
 iset.zo: iset.zi 
+lexgen.zo: syntax.zo 
+main.zo: lexgen.zo output.zo grammar.zi scanner.zo syntax.zo scan_aux.zo 
+output.zo: syntax.zo 
 scanner.zo: syntax.zo scan_aux.zo grammar.zi 
 grammar.zo: grammar.zi gram_aux.zo syntax.zo 
 grammar.zi: syntax.zo 

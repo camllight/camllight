@@ -4,7 +4,7 @@ OUTPUT=camllibr
 
 INCLUDES=-I ../compiler -I ../linker
 
-EXTERNOBJS=config.zo misc.zo readword.zo 
+EXTERNOBJS=config.zo misc.zo interntl.zo readword.zo 
 
 OBJS=librar.zo version.zo main.zo
 

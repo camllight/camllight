@@ -4,7 +4,7 @@ OUTPUT=camllink
 
 INCLUDES=-I ../compiler
 
-EXTERNOBJS=config.zo misc.zo opcodes.zo
+EXTERNOBJS=config.zo misc.zo interntl.zo opcodes.zo
 
 OBJS=predef.zo prim_c.zo symtable.zo patch.zo tr_const.zo link.zo \
     readword.zo version.zo main.zo
@@ -31,3 +31,8 @@ predef.ml : ../runtime/globals.h ../runtime/fail.h
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
+link.zo: tr_const.zo symtable.zo patch.zo 
+main.zo: link.zo version.zo symtable.zo readword.zo 
+patch.zo: symtable.zo 
+symtable.zo: predef.zo prim_c.zo 
+tr_const.zo: symtable.zo 
