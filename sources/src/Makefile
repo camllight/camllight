@@ -1,5 +1,5 @@
-BINDIR=C:\caml386\bin
-LIBDIR=C:\caml386\lib
+BINDIR=\caml\bin
+LIBDIR=\caml\lib
 
 # Build the system for the first time
 world:
@@ -32,20 +32,15 @@ bootstrap: promote again compare
 
 # Make the newly compiled compiler the current compiler
 promote:
-	del camlcomp.bak
-	rename camlcomp camlcomp.bak
+	mv camlcomp camlcomp.bak
 	copy compiler\camlcomp camlcomp
-	del camllink.bak
-	rename camllink camllink.bak
+	mv camllink camllink.bak
 	copy linker\camllink camllink
-	del camllibr.bak
-	rename camllibr camllibr.bak
+	mv camllibr camllibr.bak
 	copy librar\camllibr camllibr
-	del camltop.bak
-	rename camltop camltop.bak
+	mv camltop camltop.bak
 	copy toplevel\camltop camltop
-	del camllex.bak
-	rename camllex camllex.bak
+	mv camllex camllex.bak
 	copy lex\camllex camllex
 
 # Recompile all Caml code from scratch
