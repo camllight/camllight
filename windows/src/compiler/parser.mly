@@ -58,8 +58,8 @@
 %token BARRBRACKET    /* "|]" */
 %token GREATERRBRACKET/* ">]" */
 %token RBRACE         /* "}" */
-%token SLASHBACKSLASH /* "/\" */
-%token BACKSLASHSLASH /* "\/" */
+%token AMPERAMPER     /* "&&" */
+%token BARBAR         /* "||" */
 /* Keywords */
 %token AND            /* "and" */
 %token AS             /* "as" */
@@ -107,8 +107,8 @@
 %left  AS
 %left  BAR
 %left  COMMA
-%left  OR BACKSLASHSLASH
-%left  AMPERSAND SLASHBACKSLASH
+%left  OR BARBAR
+%left  AMPERSAND AMPERAMPER
 %left  NOT
 %left  INFIX1 EQUAL EQUALEQUAL          /* comparisons, concatenations */
 %right COLONCOLON                       /* cons */
@@ -198,11 +198,11 @@ Expr :
           { make_binop "==" $1 $3 }
       | Expr AMPERSAND Expr
           { make_expr(Zsequand($1, $3)) }
-      | Expr SLASHBACKSLASH Expr
+      | Expr AMPERAMPER Expr
           { make_expr(Zsequand($1, $3)) }
       | Expr OR Expr
           { make_expr(Zsequor($1, $3)) }
-      | Expr BACKSLASHSLASH Expr
+      | Expr BARBAR Expr
           { make_expr(Zsequor($1, $3)) }
       | Simple_expr DOT Ext_ident LESSMINUS Expr
           { make_expr(Zrecord_update($1, find_label $3, $5)) }
