@@ -234,12 +234,13 @@ let rec conquer_matching =
     Matching([], _) ->
       Lstaticfail, True
    | Matching(([], action) :: rest, pathl) ->
-      if has_guard ([], action) then
-        let lambda2, partial2 =
-            conquer_matching (Matching (rest, pathl)) in
-        set_guard_else lambda2 action, partial2
-      else
-        action, False
+      begin match action with
+        Lwhen(cond, act) ->
+          let lambda2, partial2 = conquer_matching (Matching (rest, pathl)) in
+          (Lifthenelse(cond, act, lambda2), partial2)
+      | _ ->
+          (action, False)
+      end
   | Matching(_, (path :: _)) as matching ->
       begin match upper_left_pattern matching with
         {p_desc = (Zwildpat | Zvarpat _)} ->
@@ -292,11 +293,9 @@ let make_initial_matching = function
 
 (* The entry point *)
 
-let translate_matching_hidden check_partial_match failure_code loc casel =
+let translate_match check_partial_match failure_code loc casel =
   let casel' =
-    map
-      (apply_guard_action share_lambda) 
-      (check_unused casel) in
+    map (fun (patl, act) -> (patl, share_lambda act)) (check_unused casel) in
   let (lambda, partial) =
     conquer_matching (make_initial_matching casel') in
   if check_partial_match & partial_match casel then
@@ -309,9 +308,9 @@ let translate_matching_hidden check_partial_match failure_code loc casel =
 ;;
 
 let translate_matching_check_failure failure_code loc casel =
-  translate_matching_hidden true failure_code loc casel
+  translate_match true failure_code loc casel
 ;;
 
 let translate_matching failure_code loc casel =
-  translate_matching_hidden false failure_code loc casel
+  translate_match false failure_code loc casel
 ;;
