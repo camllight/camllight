@@ -355,7 +355,7 @@ find file'' error appears, you're all set.
 
 \item[The type inferred for \var{name},
 	that is, \var{t},
-	contains type variables that cannot be generalized]
+	contains non-generalizable type variables]
 Type variables ("'a", "'b", \ldots) in a type \var{t} can be in either
 of two states: generalized (which means that the type \var{t} is valid
 for all possible instantiations of the variables) and not generalized
@@ -384,19 +384,19 @@ variables. There are two solutions to this problem:
 monomorphic type (without type variables) to \var{name}. For instance,
 instead of writing
 \begin{verbatim}
-        let sort_int_list = sort (prefix <);;
-        (* inferred type 'a list -> 'a list, with 'a not generalized *)
+    let sort_int_list = sort (prefix <);;
+    (* inferred type 'a list -> 'a list, with 'a not generalized *)
 \end{verbatim}
 write
 \begin{verbatim}
-        let sort_int_list = (sort (prefix <) : int list -> int list);;
+    let sort_int_list = (sort (prefix <) : int list -> int list);;
 \end{verbatim}
 \item If you really need \var{name} to have a polymorphic type, turn
 its defining expression into a function by adding an extra parameter.
 For instance, instead of writing
 \begin{verbatim}
-        let map_length = map vect_length;;
-        (* inferred type 'a vect list -> int list, with 'a not generalized *)
+    let map_length = map vect_length;;
+    (* inferred type 'a vect list -> int list, with 'a not generalized *)
 \end{verbatim}
 write
 \begin{verbatim}
