@@ -2,7 +2,7 @@
 #open "parser";;
 #open "tables";;
 #open "compile";;
-
+#open "intf";;
 
 let input_name = ref "Widgets.src"
 ;;
@@ -74,18 +74,25 @@ let compile () =
     close_out oc;
   hashtbl__do_table 
     (fun wname wdef ->
-      let oc = open_out_bin ("lib/" ^ wname ^ ".ml") in
+      let oc = open_out_bin ("lib/" ^ wname ^ ".ml") 
+      and oc' = open_out_bin ("lib/" ^ wname ^ ".mli") in
       	output_string oc "#open\"protocol\";;\n";
       	output_string oc "#open\"tk\";;\n";
+      	output_string oc' "#open\"tk\";;\n";
       	output_string oc "#open\"support\";;\n";
+      	output_string oc' "#open\"support\";;\n";
 	begin match wdef.ModuleType with
 	  Widget ->
             write_create (output_string oc) wname;
-      	    do_list (write_command wname (output_string oc)) wdef.Commands
+	    write_create_p (output_string oc') wname;
+      	    do_list (write_command wname (output_string oc)) wdef.Commands;
+	    do_list (write_command_p wname (output_string oc')) wdef.Commands
         | Family ->
-	    do_list (write_function (output_string oc)) wdef.Commands
+	    do_list (write_function (output_string oc)) wdef.Commands;
+	    do_list (write_function_p (output_string oc')) wdef.Commands
         end;
-	close_out oc
+	close_out oc;
+	close_out oc'
      )
    module_table;
   (* write the module list for the Makefile *)
