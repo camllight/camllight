@@ -46,7 +46,12 @@ static char copyright[]="@(#)KerN.c: copyright Digital Equipment Corporation & I
 	/******* non arithmetic access to digits ********/
 
 
+#ifndef _NO_PROTO
 void BnnSetToZero (BigNum nn, BigNumLength nl) 
+#else
+void BnnSetToZero (nn, nl)
+BigNum nn; BigNumLength nl;
+#endif
 
 /*
  * Sets all the specified digits of the BigNum to 0
