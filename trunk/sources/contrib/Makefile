@@ -64,7 +64,7 @@ X11_LIB=/usr/lib/X11
 # See the file libnum/README for more explanations.
 # If you don't know, leave BIGNUM_ARCH=C, which selects a portable
 # C implementation of these routines.
-BIGNUM_ARCH=C
+BIGNUM_ARCH=alpha
 
 # Name of the directory where LaTeX style files should be installed.
 # Needed only for the "caml-tex" and "caml-latex2e" packages.
