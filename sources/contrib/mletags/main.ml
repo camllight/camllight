@@ -51,9 +51,7 @@ let output_tags filename tags =
 
 let tags_ml filename parser = 
   let ic = open_in filename in
-    lexer__input_chan := ic;
-    lexer__current_line := 1 ;
-    lexer__current_beg := -1 ;
+    lexer__init_mem ic;
     let lexbuf = lexing__create_lexer_channel ic in
     let tags = ref [] in 
       try 

@@ -17,4 +17,7 @@ value main: lexing__lexbuf -> token
 value input_chan : in_channel ref
 and current_line : int ref
 and current_beg : int ref
+and last_line : int ref
+and last_beg : int ref
+and init_mem : in_channel -> unit
 ;;
