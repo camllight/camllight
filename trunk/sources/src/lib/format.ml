@@ -80,13 +80,12 @@ and pp_curr_depth = ref 0	  (* current number of opened blocks *)
 and pp_max_boxes = ref 35	  (* maximum number of blocks which can be
                                      opened at the same time *)
 and pp_ellipsis = ref "."         (* ellipsis string *)
-and pp_out_channel = ref std_out  (* out_channel of the pretty_printer *)
+and pp_output_function = ref(output std_out) (* output function *)
 ;;
 
 (* Output functions for the formatter *)
-let pp_output s = output !pp_out_channel s
-and pp_output_string s = output_string !pp_out_channel s
-and pp_output_newline () = output_char !pp_out_channel `\n`;;
+let pp_output_string s = !pp_output_function s 0 (string_length s)
+and pp_output_newline () = !pp_output_function "\n" 0 1;;
 
 (* The pretty-printer queue *)
 let pp_queue = (queue__new () : pp_queue_elem queue__t);;
@@ -104,7 +103,7 @@ let pp_enqueue ({Length=len;_} as token) =
 let blank_line = make_string 80 ` `;;
 let display_blanks n =
     if n > 0 then
-    if n <= 80 then pp_output blank_line 0 n
+    if n <= 80 then !pp_output_function blank_line 0 n
     else pp_output_string (make_string n ` `);;
 
 (* To format a break, indenting a new line *)
@@ -352,7 +351,6 @@ let pp_flush b =
     done;
     pp_right_total := pp_infinity; advance_left ();
     if b then pp_output_newline ();
-    flush !pp_out_channel;
     pp_rinit();;
 
 (**************************************************************
@@ -477,8 +475,9 @@ let set_min_space_left n =
 let set_max_indent n = set_min_space_left (!pp_margin - n);;
 let get_max_indent () = !pp_max_indent;;
 
-let set_formatter_output os = pp_out_channel := os;;
-let get_formatter_output () = !pp_out_channel;;
+let set_formatter_output_function f = pp_output_function := f;;
+let set_formatter_output_channel os = pp_output_function := (output os);;
+let get_formatter_output_function () = !pp_output_function;;
 
 (* Initializing formatter *)
 pp_rinit();;

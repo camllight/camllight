@@ -6,7 +6,10 @@
 *)
 
 (* The behaviour of pretty-printing commands is unspecified
-   if there is no opened pretty-printing box. *)
+   if there is no opened pretty-printing box. Each box opened via
+   one of the [open_] functions below must be closed using [close_box]
+   for proper formatting. Otherwise, some of the material printed in the
+   boxes may not be output, or may be formatted incorrectly. *)
 
 #open "io";;
 
@@ -146,8 +149,13 @@ value get_ellipsis_text : unit -> string;;
         (* Return the text of the ellipsis. *)
 
 (*** Redirecting formatter output *)
-value set_formatter_output : out_channel -> unit;;
+value set_formatter_output_channel : out_channel -> unit;;
         (* Redirect the pretty-printer output to the given channel. *)
-value get_formatter_output : unit -> out_channel;;
-        (* Return the channel connected to the pretty-printer. *)
+value set_formatter_output_function : (string -> int -> int -> unit) -> unit;;
+        (* Redirect the pretty-printer output to the given function.
+           The function is called with a string [s], a start position [p],
+           and a number of characters [n]; it is supposed to output
+           characters [p] to [p+n-1] of [s]. *)
+value get_formatter_output_function : unit -> (string -> int -> int -> unit);;
+        (* Return the current output function of the pretty-printer. *)
 
