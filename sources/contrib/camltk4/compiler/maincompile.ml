@@ -105,6 +105,8 @@ let compile () =
       	output_string oc' "#open\"tk\";;\n";
       	output_string oc "#open\"support\";;\n";
       	output_string oc' "#open\"support\";;\n";
+      	output_string oc "#open\"textvariable\";;\n";
+      	output_string oc' "#open\"textvariable\";;\n";
 	begin match wdef.ModuleType with
 	  Widget ->
             write_create (output_string oc) wname;
