@@ -8,7 +8,7 @@ all: $(FILES) FORCE
 	../../tools/texexpand manual.tex \
         | ../../tools/htmlgen > manual.html
 	cd man-caml; \
-        ../../../tools/htmlcut -3 -4 -11 -12 ../manual.html > index.html
+        ../../../tools/htmlcut -3 -4 -14 -15 ../manual.html > index.html
 	cd man-caml; ../../../tools/htmlthread node*.html
 
 FORCE:
