@@ -40,7 +40,7 @@ let print_one_typedecl (ty_res, ty_comp) =
   output_one_type stdout ty_res;
   begin match ty_comp with
     Variant_type(cstr1::cstrl) ->
-      print_string " = \n    "; print_constr_decl cstr1;
+      print_string " = \n  | "; print_constr_decl cstr1;
       do_list (fun cstr -> print_string "  | "; print_constr_decl cstr) cstrl
   | Record_type(lbl1::lbll) ->
       print_string " = \n  { "; print_label_decl lbl1;
