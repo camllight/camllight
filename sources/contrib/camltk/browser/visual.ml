@@ -1,3 +1,4 @@
+#open "misc";;
 #open "const";;
 #open "globals";;
 #open "modules";;
@@ -26,7 +27,8 @@ let rec visual_meta visual silent sym =
     let title =
       label__create t [Text (visual.namer desc); Relief Raised] in
     pack [title] [Fill Fill_X];
-    label__configure title [Cursor (XCursor "clock")];
+    label__configure title [Cursor (XCursor "watch")];
+    update();
     let f = frame__create t [] in
     let tx = hypertext f visual.hyperprinter desc in
     let sb = scrollbar__create f [] in
@@ -39,13 +41,23 @@ let rec visual_meta visual silent sym =
     let q = 
       button__create t [Text "Ok"; Relief Raised; 
       	       	        Command (fun _ -> destroy t)] in
-
+    bind tx [[Any],XKey "Escape"] 
+      	     (BindSet([], (fun _ -> button__invoke q)));
     pack [f] [Fill Fill_Both; Expand true];
     pack [q] [Side Side_Bottom; Fill Fill_X];
     label__configure title [Cursor (XCursor "hand2")];
     util__resizeable t
    with   
-    Desc_not_found -> 
+    Toplevel -> begin
+	 dialog (support__new_toplevel_widget "error")
+	     "Caml Browser Error"
+	     ( "Cannot open module :" ^ sym)
+	     ""
+	     0
+	     ["Ok"];
+	 ()
+	end
+   | Desc_not_found -> 
       	if not silent then begin
 	  dialog (support__new_toplevel_widget "error")
 	      "Caml Browser Error"
