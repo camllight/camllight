@@ -229,7 +229,7 @@ and char = parse
       { char_for_backslash (get_lexeme_char lexbuf 1) }
   | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`] "`"
       { char_for_decimal_code lexbuf 1 }
-  | _
+  | [^ `\``] * ("`" | eof)
       { raise (Lexical_error(Bad_char_constant,
                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
 
