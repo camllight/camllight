@@ -31,7 +31,7 @@ let read_transl_file msgfile =
       `:`           -> (i, skip_blanks 0)
     | ` `|`\n`|`\t` -> read_tag i
     | c             -> read_tag(store_tag c i) in
-  let transl_tbl = hashtbl__new 59 in
+  let transl_tbl = hashtbl__new 37 in
   let currsrc = ref "" in
   begin try
     while true do
@@ -42,7 +42,7 @@ let read_transl_file msgfile =
         hashtbl__add transl_tbl !currsrc (sub_string msg_buffer 0 msg_len)
       else ()
     done
-  with End_of_file -> (* Message is not in message file *)
+  with End_of_file ->
     close_in ic
   end;
   transl_tbl
@@ -64,12 +64,12 @@ let rec translate msg =
   | Unknown ->
       transl_table :=
         if string_length !language == 0 then
-          Unknown
+          None
         else begin
           try
             Transl(read_transl_file(find_in_path "camlmsgs.txt"))
           with Cannot_find_file _ | sys__Sys_error _ | sys__Break ->
-            Unknown
+            None
         end;
       translate msg
 ;;
