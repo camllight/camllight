@@ -8,7 +8,7 @@
 (defvar inferior-caml-mode-map nil)
 (if inferior-caml-mode-map nil
   (setq inferior-caml-mode-map
-        (full-copy-sparse-keymap comint-mode-map))
+        (copy-keymap comint-mode-map))
   (setq inferior-caml-mode-map
         (nconc inferior-caml-mode-map caml-mode-map)))
 
