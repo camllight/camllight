@@ -42,17 +42,25 @@ MANEXT=1
 # The directory where the manual pages will be installed
 MANDIR=/usr/local/man/man$(MANEXT)
 
-# The path to the include directory containing the X11/*.h includes
+# The path to the include directory containing the X11/*.h includes,
+# for instance libX11.h.
 # (usually /usr/include; for SunOS with OpenLook, /usr/openwin/include)
 # Needed for the "libgraph" and "camltk" packages.
-X11_INCLUDES=/usr/X11R6/include
+# For True64 Unix
 #X11_INCLUDES=/usr/include/X11
 
-# The path to the directory containing the X11 libraries.
-# (usually /usr/lib; for SunOS with OpenLook, /usr/openwin/lib)
+# For Linux, could also be 
+#X11_INCLUDES=/usr/X11R6/include/
+# For Linux, generally
+X11_INCLUDES=/usr/X11R6/include/X11
+
+# The path to the directory containing the X11 libraries, for instance
+# libX11.a (usually /usr/lib; for SunOS with OpenLook, /usr/openwin/lib)
 # Needed for the "libgraph" and "camltk" packages.
-X11_LIB=/usr/X11R6/lib
+# For True64 Unix
 #X11_LIB=/usr/lib/X11
+# For Linux, generally
+X11_LIB=/usr/X11R6/lib
 
 # Name of the target architecture.
 # Used only for the libnum library (arbitrary-precision arithmetic), to
@@ -67,29 +75,44 @@ X11_LIB=/usr/X11R6/lib
 BIGNUM_ARCH=C
 
 # Name of the directory where LaTeX style files should be installed.
+# Should be a sub-directory of the directory Latex, in which you find
+# a lot of auxilliary styles (.sty files).
 # Needed only for the "caml-tex" and "caml-latex2e" packages.
-TEXINPUTDIR=/usr/lib/texmf/tex/latex/etc
+# For True64 Unix
+#TEXINPUTDIR=/usr/lib/texmf/tex/latex/etc
+
+# For Linux, generally
+TEXINPUTDIR=/usr/share/texmf/tex/latex/misc
 
 # Name of the directory where Emacs Lisp files should be installed.
-# Needed only for the "camlmode" package.
-EMACSLISPDIR=/usr/lib/emacs/site-lisp
+# Needed only for the "camlmode" package. The location of the
+# site-lisp sub-directory.
+# For True64 Unix
+#EMACSLISPDIR=/usr/lib/emacs/site-lisp
+
+# For Linux, generally
+EMACSLISPDIR=/usr/share/emacs/site-lisp
 
 # Name of the directories where the tcl.h and tk.h includes can be found.
 # Needed only for the "camltk" package.
 
 # /usr/local configuration
+# True64 configuration
 #TCLINCLDIR=/usr/local/lib/tcl8.0/include
 #TKINCLDIR=/usr/local/lib/tk8.0/include
-# RedHat Linux configuration
+
+# RedHat (and Mandrake) Linux configuration
 TCLINCLDIR=/usr/include
 TKINCLDIR=/usr/include
 
 # Name of the directories where the libtcl.a and libtk.a libraries can be found
 # Needed only for the "camltk" package.
 # /usr/local configuration
+# True64 Unix configuration
 #TKLIBDIR=/usr/local/lib/tk8.0/lib
 #TCLLIBDIR=/usr/local/lib/tcl8.0/lib
-# RedHat Linux configuration
+
+# RedHat (and Mandrake) Linux configuration
 TKLIBDIR=/usr/lib
 TCLLIBDIR=/usr/lib
 
@@ -97,9 +120,10 @@ TCLLIBDIR=/usr/lib
 # a custom Tcl/Tk with various extensions (such as Xpm)
 #TKLIBS=-ltk -ltcl -lX11
 # True64 Unix configuration
-#TKLIBS=-ltk8.0 -ltcl8.0 -lX11 -ldl -lm
-# RedHat Linux configuration
-TKLIBS=-ltk8.0 -ltcl8.0 -lX11 -ldl -lm
+#TKLIBS=-ltk8.0 -ltcl8.0 -lX11 -lm
+
+# RedHat (and Mandrake) Linux configuration
+TKLIBS=-ltk8.3 -ltcl8.3 -lX11 -ldl -lm
 
 # Some "make"s need this to ensure that they call /bin/sh, not /bin/csh
 # Seems harmless on most other "make"s. Try removing this line if you
@@ -148,3 +172,4 @@ clean:
 # Rebuild the dependencies
 depend:
 	@set +e; set -x; for d in $(SUBDIRS); do (cd $$d; $(MAKE) $(DEFINES) depend); done
+
