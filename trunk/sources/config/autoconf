@@ -282,6 +282,7 @@ if test -f /usr/include/termios.h &&
   echo "#define HAS_TERMIOS" >> s.h
 fi
 
+# The following four lines must be commented out on DEC OSF1 3.0
 if sh ./runtest async_io.c; then
   echo "Asynchronous I/O are supported."
   echo "#define HAS_ASYNC_IO" >> s.h
