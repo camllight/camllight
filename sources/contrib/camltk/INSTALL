@@ -1,0 +1,27 @@
+WARNING: this is an early alpha-release, meaning that 
+ * the doc is still sketchy (sic)
+ * it has been partially tested
+ * subject to change !
+
+
+Prerequisites:
+ Works only on Unix (uses fork/exec and named pipes)
+ Caml Light 0.6, and the "unix" contrib
+ Tk >=3.3 (tested on 3.6). Only the "wish" interpreter is required.
+
+
+Installation steps:
+1 - Check that the prerequisites are available
+2 - Extract this archive in the contrib directory of Caml Light
+3 - cd .../contrib/camltk; make
+
+To install the library, first check the installation path
+INSTALLDIR in camltk/Makefile and camltk/lib/Makefile.
+By default, this path is : /usr/local/lib/caml-light/tk
+
+WARNING: DO NOT set this path to the same directory as Caml Light library,
+since it would overwrite some files.
+
+Then, type "make install".
+
+
