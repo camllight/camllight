@@ -74,8 +74,10 @@ void CGraphView::OnInitialUpdate()
 
 void CGraphView::OnDraw(CDC* pDC)
 {
-	pDC->SelectObject(theApp.m_Font);
+	// pDC->SelectObject(theApp.m_Font);
+	CBitmap * oldbmp = CAMLGraph->m_OffScreenDC->SelectObject(CAMLGraph->m_bmp);
 	pDC->BitBlt(0,0,CAMLGraph->m_sizeX,CAMLGraph->m_sizeY,CAMLGraph->m_OffScreenDC,0,0,SRCCOPY);
+    CAMLGraph->m_OffScreenDC->SelectObject(oldbmp);
 }
  
 void CGraphView::ForceRedraw()

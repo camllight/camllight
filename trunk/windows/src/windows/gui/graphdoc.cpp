@@ -58,9 +58,6 @@ CGraphDoc::CGraphDoc()
 	m_logPen->lopnStyle=PS_SOLID;
 	m_logPen->lopnWidth.x=1;
 	m_logPen->lopnColor=BLACK;
-
-	m_dummyBrush=new CBrush(BLACK);
-	m_dummyPen=new CPen(PS_SOLID,1,BLACK);
 }
 
 BOOL CGraphDoc::OnNewDocument()
@@ -81,34 +78,30 @@ void CGraphDoc::InitDocumentDC(CClientDC *pDC)
 
 	m_bmp=new CBitmap;
 	m_bmp->CreateCompatibleBitmap(pDC,m_sizeX,m_sizeY);
-	m_OffScreenDC->SelectObject(m_bmp);
 
 	m_OffScreenDC->SetBkColor(BLUE);
 
 	m_pen=new CPen;
-	ASSERT(m_pen->CreatePen(PS_SOLID, 1, BLACK));
-	m_OffScreenDC->SelectObject(m_pen);	
+	VERIFY(m_pen->CreatePen(PS_SOLID, 1, BLACK));
+
 	m_brush=new CBrush;
-	ASSERT(m_brush->CreateSolidBrush(BLACK));
-	m_OffScreenDC->SelectObject(m_brush);
+	VERIFY(m_brush->CreateSolidBrush(BLACK));
 
 	// The default font is that used by the toplevel itself:
 	m_lf = theApp.m_lf;
 
 	m_font = new(CFont);
-	ASSERT(m_font->CreateFontIndirect(&m_lf));
-
-	m_dummyFont = new(CFont);
-	ASSERT(m_dummyFont->CreateFontIndirect(&m_lf));
+	VERIFY(m_font->CreateFontIndirect(&m_lf));
 
 	// The default background color id set to White:
 	m_BkColor = WHITE; // RGB(192,192,192);
 	m_OffScreenDC->SetBkColor(m_BkColor);
 	m_DC->SetBkColor(m_BkColor);
 
-	activeDC=m_OffScreenDC;
+	activeDC = NULL;
+
  	m_tempDC=new CDC;
- 	ASSERT(m_tempDC->CreateCompatibleDC(pDC));
+ 	VERIFY(m_tempDC->CreateCompatibleDC(pDC));
 }
 
 CGraphDoc::~CGraphDoc()
@@ -122,17 +115,8 @@ CGraphDoc::~CGraphDoc()
 	m_font->DeleteObject();
 	delete m_font;
 
-	m_dummyFont->DeleteObject();
-	delete m_dummyFont;
-
 	m_brush->DeleteObject();
 	delete m_brush;
-
-	m_dummyBrush->DeleteObject();
-	delete m_dummyBrush;
-
-	m_dummyPen->DeleteObject();
-	delete m_dummyPen;
 
 	delete m_logBrush;
 	delete m_logPen;
@@ -191,7 +175,6 @@ void CGraphDoc::Serialize(CArchive& ar)
 
 extern CGraphDoc 	*CAMLGraph;        
 
-#define OffScreenDC_(x) ( m_OffScreenDC->x )
 #define UD(y)			( m_sizeY - 1 - (y)) 
 #define convert_y(y)	( UD(Short_val(y)) )
 // Conversion from absolute to relative coordinates:
@@ -200,19 +183,28 @@ extern CGraphDoc 	*CAMLGraph;
 
 void SelectDC(CDC *pDC)
 {
-	activeDC->SelectObject(CAMLGraph->m_dummyPen);
-	activeDC->SelectObject(CAMLGraph->m_dummyFont);
-	activeDC->SelectObject(CAMLGraph->m_dummyBrush);
-	pDC->SelectObject(CAMLGraph->m_pen);	
-	pDC->SelectObject(CAMLGraph->m_font);	
-	pDC->SelectObject(CAMLGraph->m_brush);	
-	activeDC=pDC;
-	if(activeDC!=CAMLGraph->m_OffScreenDC) {
-		sp=CAMLGraph->m_View->GetScrollPosition(),	
-		cp=CAMLGraph->m_OffScreenDC->GetCurrentPosition();		
-		activeDC->MoveTo(cp.x-sp.x,cp.y-sp.y);
-	}
-	else { sp.x=0; sp.y=0; }	
+	CAMLGraph->m_oldbmp = CAMLGraph->m_OffScreenDC->SelectObject(CAMLGraph->m_bmp);
+	CAMLGraph->m_oldpen = pDC->SelectObject(CAMLGraph->m_pen);	
+	CAMLGraph->m_oldfont = pDC->SelectObject(CAMLGraph->m_font);	
+	CAMLGraph->m_oldbrush = pDC->SelectObject(CAMLGraph->m_brush);	
+	if(pDC != CAMLGraph->m_OffScreenDC) {
+		sp=CAMLGraph->m_View->GetScrollPosition();
+		cp=CAMLGraph->m_OffScreenDC->GetCurrentPosition();
+		pDC->MoveTo(cp.x-sp.x,cp.y-sp.y);
+	} else {
+        sp.x=0;
+        sp.y=0;
+    }	
+	activeDC = pDC;
+}
+
+void UnselectDC()
+{
+	activeDC->SelectObject(CAMLGraph->m_oldpen);
+	activeDC->SelectObject(CAMLGraph->m_oldfont);
+	activeDC->SelectObject(CAMLGraph->m_oldbrush);
+	CAMLGraph->m_OffScreenDC->SelectObject(CAMLGraph->m_oldbmp);
+	activeDC = NULL;
 }
 
 void graphic_fail(char *msg)
@@ -220,8 +212,9 @@ void graphic_fail(char *msg)
 	raise_with_arg(GRAPHIC_FAILURE_EXN, copy_string(msg));
 }
 
-#define GRAPHPRIM(method,prim,args,call) extern "C" value prim args	\
-	{ return CAMLGraph->method call; }							\
+#define GRAPHPRIM(method,prim,args,call) \
+	extern "C" value prim args \
+	{ return CAMLGraph->method call; } \
 	value CGraphDoc::##method args
 
 // Each graphical order is executed in the memory DC and in the current physical DC,
@@ -229,11 +222,13 @@ void graphic_fail(char *msg)
 
 GRAPHPRIM( ClearGraph, gr_clear_graph, (), () )
 {
-	CBrush*	br;
+	CBrush*	oldbr, *br;
 	br = new CBrush(m_BkColor);
-	OffScreenDC_(SelectObject(br));
-	OffScreenDC_(FillRect(CRect(0,0,m_sizeX,m_sizeY),
-				 br));
+	SelectDC(m_OffScreenDC);
+	oldbr = m_OffScreenDC->SelectObject(br);
+	m_OffScreenDC->FillRect(CRect(0,0,m_sizeX,m_sizeY), br);
+	m_OffScreenDC->SelectObject(oldbr);
+	UnselectDC();
 	br->DeleteObject();
 	delete br;
 	// We force the view to be updated 
@@ -269,30 +264,20 @@ GRAPHPRIM( SetColor, gr_set_color, (value col), (col) )
 // but this is in the reverse order in Windows...
 // I make a conversion here instead of changing lib/graphics.ml.
 
-	BYTE r = (color & 0xFF0000) >> 16, 
+	int  r = (color & 0xFF0000) >> 16, 
 		 g = (color & 0x00FF00) >> 8 , 
 		 b =  color & 0x0000FF;
 	COLORREF c = RGB(r,g,b);
 
 	// The current pen...
 	m_logPen->lopnColor = c;
-	m_OffScreenDC->SelectObject(CAMLGraph->m_dummyPen);
-	m_DC->SelectObject(CAMLGraph->m_dummyPen);
 	m_pen->DeleteObject();
-	if(! m_pen->CreatePenIndirect(m_logPen)) {
-	  AfxMessageBox("bad pen");
-	}
-	OffScreenDC_(SelectObject(m_pen));
+	VERIFY(m_pen->CreatePenIndirect(m_logPen));
 
 	// The current brush...
 	m_logBrush->lbColor = c;
-	m_OffScreenDC->SelectObject(CAMLGraph->m_dummyBrush);
-	m_DC->SelectObject(CAMLGraph->m_dummyBrush);
 	m_brush->DeleteObject();
-	if(! m_brush->CreateBrushIndirect(m_logBrush)) {
-	  AfxMessageBox("bad brush");
-	}
-	OffScreenDC_(SelectObject(m_brush));
+	VERIFY(m_brush->CreateBrushIndirect(m_logBrush));
 
 	// And finally the color of the text:
 	m_DC->SetTextColor(c);
@@ -328,25 +313,26 @@ GRAPHPRIM( OpenGraph, gr_open_graph, (value mode), (mode) )
 
 GRAPHPRIM( PointColor, gr_point_color, (value x, value y), (x, y) )
 {
+	SelectDC(m_OffScreenDC);
 	COLORREF color = m_OffScreenDC->GetPixel( Short_val(x), UD(Short_val(y)) );
 
 	unsigned long b = (unsigned long)((color & 0xFF0000) >> 16), 
 		 		  g = (unsigned long)((color & 0x00FF00) >> 8) , 
 		 		  r = (unsigned long)(color & 0x0000FF);
-
+	UnselectDC();
   	return Val_long( (r<<16) + (g<<8) + b);
 }
 
 GRAPHPRIM( MoveTo, gr_moveto, (value x, value y), (x, y) )
 {
- 	OffScreenDC_(MoveTo(Int_val(x),convert_y(y)));
+	m_OffScreenDC->MoveTo(Int_val(x),convert_y(y));
 	return Val_unit;
 }
 
 GRAPHPRIM( CurrentPoint, gr_current_point, (), () )
 {
 	value res = alloc_tuple(2);
-  	CPoint p = OffScreenDC_(GetCurrentPosition());
+  	CPoint p = m_OffScreenDC->GetCurrentPosition();
 	long x = p.x,
 		 y = p.y;
 
@@ -360,9 +346,11 @@ GRAPHPRIM( LineTo, gr_lineto, (value x, value y), (x, y) )
 {
 	SelectDC(m_DC);
 	activeDC->LineTo(Int_val(x)-sp.x,convert_y(y)-sp.y);
+	UnselectDC();
 
 	SelectDC(m_OffScreenDC);
 	activeDC->LineTo(Int_val(x)-sp.x,convert_y(y)-sp.y);
+	UnselectDC();
 
 	return Val_unit;
 }
@@ -374,7 +362,8 @@ GRAPHPRIM( Plot, gr_plot, (value x, value y), (x, y) )
 	return Val_unit;
 }
 
-#define deg2rad(x)	(x*acos(-1)/180.0)
+#define PI 3.14159265359
+#define deg2rad(x) ((x) * PI / 180.0)
 
 GRAPHPRIM( DrawOrFillArc, gr_draw_or_fill_arc, (value *argv, int argc, BOOL fill), (argv, argc, fill) )
 {
@@ -408,11 +397,14 @@ GRAPHPRIM( DrawOrFillArc, gr_draw_or_fill_arc, (value *argv, int argc, BOOL fill
 		activeDC->Pie(x1-sp.x, UD(y1)-sp.y, x2-sp.x, UD(y2)-sp.y, x3-sp.x, UD(y3)-sp.y, x4-sp.x, UD(y4)-sp.y);
 	else
 		activeDC->Arc(x1-sp.x, UD(y1)-sp.y, x2-sp.x, UD(y2)-sp.y, x3-sp.x, UD(y3)-sp.y, x4-sp.x, UD(y4)-sp.y);
+	UnselectDC();
+
 	SelectDC(m_OffScreenDC);
 	if( fill )
 		activeDC->Pie(x1-sp.x, UD(y1)-sp.y, x2-sp.x, UD(y2)-sp.y, x3-sp.x, UD(y3)-sp.y, x4-sp.x, UD(y4)-sp.y);
 	else
 		activeDC->Arc(x1-sp.x, UD(y1)-sp.y, x2-sp.x, UD(y2)-sp.y, x3-sp.x, UD(y3)-sp.y, x4-sp.x, UD(y4)-sp.y);
+	UnselectDC();
 
 	return Val_unit;
 }
@@ -424,50 +416,57 @@ GRAPHPRIM( DrawArc, gr_draw_arc, (value *argv, int argc), (argv, argc) )
 
 GRAPHPRIM( DrawChar, gr_draw_char, (value c), (c) )
 {		   
-	CString buf((char)Long_val(c)); // c << 1
+	CString buf((char)Int_val(c));
 
 	CSize extent;
+
 	SelectDC(m_DC);
 	extent = activeDC->GetTextExtent( buf, 1);
 	activeDC->TextOut(cp.x-sp.x,cp.y-sp.y-m_lf.lfHeight,
 					  buf,1);
+	UnselectDC();
 
 	SelectDC(m_OffScreenDC);
 	activeDC->TextOut(cp.x-sp.x,cp.y-sp.y-m_lf.lfHeight,
 					  buf,1);
 	activeDC->MoveTo(cp.x+extent.cx,cp.y);
+	UnselectDC();
 
 	return Val_unit;
 }
 
 GRAPHPRIM( DrawString, gr_draw_string, (value s), (s) )
 {
-	mlsize_t len;
-	if ((len = string_length(s)) > 32767)
-		len = 32767;
+	mlsize_t len = string_length(s);
+	if (len > 32767) len = 32767;
 	CSize extent;
+
 	SelectDC(m_DC);
 	extent = activeDC->GetTextExtent( String_val(s), len);
 	activeDC->TextOut(cp.x-sp.x,cp.y-sp.y-m_lf.lfHeight,
 					  String_val(s),len);
 
+	UnselectDC();
+
 	SelectDC(m_OffScreenDC);
 	activeDC->TextOut(cp.x-sp.x,cp.y-sp.y-m_lf.lfHeight,
 					  String_val(s),len);
 	activeDC->MoveTo(cp.x+extent.cx,cp.y);
+	UnselectDC();
 
 	return Val_unit;
 }
 
 GRAPHPRIM( TextSize, gr_text_size, (value s), (s) )
 {
-	mlsize_t	len;
-	if ((len = string_length(s)) > 32767)
-		len = 32767;
+	mlsize_t len = string_length(s);
+	if (len > 32767) len = 32767;
 	CSize extent;
+
 	SelectDC(m_DC);
 	extent = activeDC->GetTextExtent( String_val(s), len);
-	
+	UnselectDC();
+
 	value	res = alloc_tuple(2);
 	Field(res, 0) = Val_long(extent.cx);
 	Field(res, 1) = Val_long(extent.cy);
@@ -486,9 +485,11 @@ GRAPHPRIM( FillRect, gr_fill_rect, (value vx, value vy, value vw, value vh), (vx
 
 	SelectDC(m_DC);
 	activeDC->FillRect(CRect(x-sp.x,UD(y+h-1)-sp.y,x+w-sp.x,UD(y-1)-sp.y), m_brush);
+	UnselectDC();
 
 	SelectDC(m_OffScreenDC);
 	activeDC->FillRect(CRect(x-sp.x,UD(y+h-1)-sp.y,x+w-sp.x,UD(y-1)-sp.y), m_brush);
+	UnselectDC();
 
 	return Val_unit;
 }
@@ -517,6 +518,7 @@ GRAPHPRIM( FillPoly, gr_fill_poly, (value vect), (vect) )
 		p++;
 	}
 	activeDC->Polygon(poly,n_points);
+	UnselectDC();
 
 	SelectDC(m_OffScreenDC);
 	p = poly;
@@ -526,13 +528,14 @@ GRAPHPRIM( FillPoly, gr_fill_poly, (value vect), (vect) )
 		p++;
 	}
 	activeDC->Polygon(poly,n_points);
+	UnselectDC();
 
 	free(poly);
 
 	return Val_unit;
 }
 
-int BDown, BUp , KeyPress, 	Motion , Poll, charCode,
+int BDown, BUp , KeyPress, Motion , Poll, charCode,
 	GraphEvent,
 	button,
 	LookGraphEvent;
@@ -634,8 +637,7 @@ GRAPHPRIM( Sound, gr_sound, (value freq, value duration), (freq, duration) )
 {
 	long f = Long_val (freq);
 	long d = Long_val (duration);
-	if(!Beep((DWORD)f,(DWORD)d))
-		AfxMessageBox("Beep failed !");
+	Beep((DWORD)f,(DWORD)d);
   	return Val_unit;
 }
 
@@ -662,7 +664,7 @@ GRAPHPRIM( CreateImage, gr_create_image, (value w, value h), (w, h) )
 {
 	if (Int_val (w) < 0 || Int_val (h) < 0)
 	    graphic_fail("create_image: width and height must be positive");
-    CBitmap * cbm = new CBitmap;
+	CBitmap * cbm = new CBitmap;
 	cbm->CreateCompatibleBitmap(m_DC, Int_val(w), Int_val(h));
 	value res = alloc_shr(sizeof(struct image) / sizeof(value), Final_tag);
 	Final_fun (res) = finalize_image;
@@ -675,7 +677,7 @@ GRAPHPRIM( CreateImage, gr_create_image, (value w, value h), (w, h) )
 
 GRAPHPRIM( BlitImage, gr_blit_image, (value i, value x, value y), (i, x, y) )
 {
-    CBitmap * oldBmp = m_tempDC->SelectObject(Data(i));
+	CBitmap * oldBmp = m_tempDC->SelectObject(Data(i));
 	int xsrc = Int_val(x);
 	int ysrc = UD(Int_val(y) + Height(i) - 1); 
 	m_tempDC->BitBlt(0, 0, Width(i), Height(i),
@@ -702,9 +704,12 @@ GRAPHPRIM( DrawImage, gr_draw_image, (value i, value x, value y), (i, x, y) )
 								       m_tempDC, 0, 0, SRCPAINT);
   	  m_tempDC->SelectObject(oldBmp);
 	}
+
 	SelectDC(m_DC);
 	m_DC->BitBlt(xdst-sp.x, ydst-sp.y, Width(i), Height(i), 
 	         				m_OffScreenDC, xdst, ydst, SRCCOPY);
+	UnselectDC();
+
   	return Val_unit;
 }
 
@@ -750,7 +755,6 @@ GRAPHPRIM( MakeImage, gr_make_image, (value matrix), (matrix) )
 	    cbm->CreateCompatibleBitmap(m_DC, width, height);
 		Mask(img) = cbm;
 		CBitmap * oldBmp = m_tempDC->SelectObject(Mask(img));
-		ASSERT(oldBmp != NULL);
 		for (int i = 0; i < height; i++) {
 		  for (int j = 0; j < width; j++) {
 		    int col = Long_val (Field (Field (matrix, i), j));

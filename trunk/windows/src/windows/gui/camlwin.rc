@@ -93,7 +93,6 @@ BEGIN
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       ID_APP_EXIT
-        MENUITEM "&New",                        ID_FILE_NEW
     END
     POPUP "&Edit"
     BEGIN
@@ -163,7 +162,6 @@ BEGIN
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       ID_APP_EXIT
-        MENUITEM "&New",                        ID_FILE_NEW
     END
     POPUP "&Edit"
     BEGIN
@@ -302,7 +300,6 @@ BEGIN
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       ID_APP_EXIT
-        MENUITEM "&New",                        ID_FILE_NEW
     END
     POPUP "&Edit"
     BEGIN
