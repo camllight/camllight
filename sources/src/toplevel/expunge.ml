@@ -4,10 +4,7 @@
 #open "sys";;
 #open "symtable";;
 
-let pervasives =
-  map filename__basename
-      (list_of_vect(sub_vect command_line 3 (vect_length command_line - 3)))
-;;
+let pervasives = readword__from_chan std_in;;
 
 let qualid_pervasive qualid =
   mem qualid.qual pervasives
@@ -73,7 +70,7 @@ let main() =
   output_binary_int oc size_data;
   output_binary_int oc (pos2 - pos1);
   output_binary_int oc 0;
-  output_string oc "CL07";
+  output_string oc "CL06";
   close_out oc
 ;;
 

@@ -1,5 +1,15 @@
-# Configuration
-CPP=/lib/cpp -P
+## Configuration
+CPP=/lib/cpp -P -Dunix
+
+# Where mletags will live
+BINDIR=/usr/local/bin
+
+# Where the man page will sleep
+MANEXT=1
+MANDIR=/usr/man/man$(MANEXT)
+
+## End of configuration
+
 CAMLCOMP=camlc -c
 CAMLLEX=camllex
 CAMLYACC=camlyacc
@@ -8,15 +18,12 @@ COMPFLAGS=-O fast
 LINKFLAGS=-g
 
 OBJS=lexer.zo parser.zo main.zo
-GENFILES=lexer.ml parser.ml parser.mli lexer.mll
-
-all: mletags
 
 mletags: $(OBJS)
 	camlc -o mletags  $(OBJS)
 
 lexer.mll: lexer.mlp
-	$(CPP) -Dunix lexer.mlp > lexer.mll
+	$(CPP) lexer.mlp > lexer.mll
 
 lexer.ml: lexer.mll
 	$(CAMLLEX) lexer.mll
@@ -26,7 +33,7 @@ parser.ml parser.mli: parser.mly
 	$(CAMLYACC) -s parser.mly
 
 clean:
-	rm -f *.z* mletags $(GENFILES)
+	rm -f *.z? mletags 
 
 scratch: clean
 	rm -f lexer.ml lexer.mll parser.ml parser.mli
@@ -53,10 +60,10 @@ TAGS:
 
 .mlp.ml:
 	@rm -f $@
-	$(CPP) -Dunix $< > $@
+	$(CPP) $< > $@
 	@chmod a-w $@
 
-depend: $(GENFILES)
+depend: lexer.ml parser.ml parser.mli
 	mv Makefile Makefile.bak
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
          camldep *.mli *.ml) > Makefile

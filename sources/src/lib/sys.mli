@@ -80,8 +80,6 @@ value exit : int -> 'a = 1 "sys_exit"
         (* Change the current working directory of the process.
 	   Note that there is no easy way of getting the current
 	   working directory from the operating system. *)
-  and system_command : string -> int = 1 "sys_system_command"
-        (* Execute the given shell command and return its exit code. *)
 ;;
 
 exception Break
@@ -93,12 +91,4 @@ value catch_break : bool -> unit = 1 "sys_catch_break"
            or raises the [Break] exception. Call [catch_break true] to enable
 	   raising [Break], and [catch_break false] to let the system
 	   terminate the program on user interrupt. *)
-;;
-
-(*--*)
-
-value max_vect_length : int
-  and max_string_length : int
-        (* Max length for arrays and strings, as imposed by the
-           runtime system. *)
 ;;

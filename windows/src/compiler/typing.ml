@@ -7,7 +7,8 @@
 #open "builtins";;
 #open "modules";;
 #open "types";;
-#open "error";;
+#open "errors";;
+#open "ty_error";;
 
 (* To convert type expressions to types *)
 
@@ -32,9 +33,8 @@ let bind_type_expression_vars var_list =
 ;;
 
 let type_of_type_expression strict_flag typexp =
-  let rec type_of typexp =
-    match typexp.te_desc with
-    Ztypevar v ->
+  let rec type_of = function
+    Typexp(Ztypevar v, _) ->
       begin try
         assoc v !type_expr_vars
       with Not_found ->
@@ -45,21 +45,20 @@ let type_of_type_expression strict_flag typexp =
           type_expr_vars := (v,t) :: !type_expr_vars; t
         end
       end
-  | Ztypearrow(arg1, arg2) ->
+  | Typexp(Ztypearrow(arg1, arg2), loc) ->
       type_arrow(type_of arg1, type_of arg2)
-  | Ztypetuple argl ->
+  | Typexp(Ztypetuple argl, loc) ->
       type_product(map type_of argl)
-  | Ztypeconstr(cstr_name, args) ->
+  | Typexp(Ztypeconstr(cstr_name, args), loc) as texp ->
       let cstr =
         try
           find_type_desc cstr_name
         with Desc_not_found ->
-          unbound_type_constr_err cstr_name typexp.te_loc in
+          unbound_err "Type constructor" cstr_name loc in
       if list_length args != cstr.info.ty_arity then
-        type_arity_err cstr args typexp.te_loc
-      else
-        { typ_desc = Tconstr(cstr.info.ty_constr, map type_of args);
-          typ_level = notgeneric }
+        type_arity_err cstr args loc;
+      { typ_desc=Tconstr(cstr.info.ty_constr, map type_of args);
+        typ_level=notgeneric }
   in type_of typexp
 ;;
 
@@ -81,16 +80,15 @@ let rec type_of_structured_constant = function
 
 (* Typing of patterns *)
 
-let unify_pat pat expected_ty actual_ty =
+let unify_pat pat ty ty' =
   try
-    unify (expected_ty, actual_ty)
+    unify (ty, ty')
   with Unify ->
-    pat_wrong_type_err pat actual_ty expected_ty
+    pat_wrong_type_err pat ty' ty
 ;;
 
-let rec tpat new_env (pat, ty, mut_flag) =
-  pat.p_typ <- ty;
-  match pat.p_desc with
+let rec tpat new_env ((Pat(desc, loc) as pat), ty, mut_flag) =
+  match desc with
     Zwildpat ->
       new_env
   | Zvarpat v ->
@@ -119,12 +117,12 @@ let rec tpat new_env (pat, ty, mut_flag) =
           unify_pat pat ty (type_instance cstr.info.cs_res);
           new_env
       | _ ->
-          non_constant_constr_err cstr pat.p_loc
+          non_constant_constr_err cstr loc
       end
   | Zconstruct1pat(cstr, arg) ->
       begin match cstr.info.cs_kind with
         Constr_constant ->
-          constant_constr_err cstr pat.p_loc
+          constant_constr_err cstr loc
       | _ ->
         let (ty_res, ty_arg) =
           type_pair_instance (cstr.info.cs_res, cstr.info.cs_arg) in
@@ -163,345 +161,261 @@ and tpat_list new_env = fun
 
 let type_pattern = tpat []
 and type_pattern_list = tpat_list []
-;;
-
-(* Check if an expression is non-expansive, that is, the result of its 
-   evaluation cannot contain newly created mutable objects. *)
-
-let rec is_nonexpansive expr =
-  match expr.e_desc with
-    Zident id -> true
-  | Zconstant sc -> true
-  | Ztuple el -> for_all is_nonexpansive el
-  | Zconstruct0 cstr -> true
-  | Zconstruct1(cstr, e) -> cstr.info.cs_mut == Notmutable & is_nonexpansive e
-  | Zlet(rec_flag, bindings, body) ->
-      for_all (fun (pat, expr) -> is_nonexpansive expr) bindings &
-      is_nonexpansive body
-  | Zfunction pat_expr_list -> true
-  | Ztrywith(body, pat_expr_list) ->
-      is_nonexpansive body &
-      for_all (fun (pat, expr) -> is_nonexpansive expr) pat_expr_list
-  | Zsequence(e1, e2) -> is_nonexpansive e2
-  | Zcondition(cond, ifso, ifnot) ->
-      is_nonexpansive ifso & is_nonexpansive ifnot
-  | Zconstraint(e, ty) -> is_nonexpansive e
-  | Zrecord lbl_expr_list ->
-      for_all (fun (lbl, expr) ->
-                  lbl.info.lbl_mut == Notmutable & is_nonexpansive expr)
-              lbl_expr_list
-  | Zrecord_access(e, lbl) -> is_nonexpansive e
-  | Zparser pat_expr_list -> true
-  | Zwhen(cond, act) -> is_nonexpansive act
-  | _ -> false
-;;
-
-(* Typing of printf formats *)
-
-let type_format loc fmt =
-  let len = string_length fmt in
-  let ty_input = new_type_var()
-  and ty_result = new_type_var() in
-  let rec skip_args j =
-    if j >= len then j else
-      match nth_char fmt j with
-        `0` .. `9` | ` ` | `.` | `-` -> skip_args (succ j)
-      | _ -> j in
-  let rec scan_format i =
-    if i >= len then ty_result else
-    match nth_char fmt i with
-      `%` ->
-        let j = skip_args(succ i) in
-        begin match nth_char fmt j with
-          `%` ->
-            scan_format (succ j)
-        | `s` ->
-            type_arrow (type_string, scan_format (succ j))
-        | `c` ->
-            type_arrow (type_char, scan_format (succ j))
-        | `d` | `o` | `x` | `X` | `u` ->
-            type_arrow (type_int, scan_format (succ j))
-        | `f` | `e` | `E` | `g` | `G` ->
-            type_arrow (type_float, scan_format (succ j))
-        | `b` ->
-            type_arrow (type_bool, scan_format (succ j))
-        | `a` ->
-            let ty_arg = new_type_var() in
-            type_arrow (type_arrow (ty_input, type_arrow (ty_arg, ty_result)),
-                        type_arrow (ty_arg, scan_format (succ j)))
-        | `t` ->
-            type_arrow (type_arrow (ty_input, ty_result), scan_format (succ j))
-        | c ->
-            bad_format_letter loc c
-        end
-    | _ -> scan_format (succ i) in
-  {typ_desc=Tconstr(constr_type_format, [scan_format 0; ty_input; ty_result]);
-   typ_level=notgeneric}
+and type_pattern_list2 = it_list tpat []
 ;;
 
 (* Typing of expressions *)
 
-let unify_expr expr expected_ty actual_ty =
+let unify_expr expr ty ty' =
   try
-    unify (expected_ty, actual_ty)
+    unify (ty, ty')
   with Unify ->
-    expr_wrong_type_err expr actual_ty expected_ty
+    expr_wrong_type_err expr ty' ty
 ;;
 
-let rec type_expr env expr =
-  let inferred_ty =
-  match expr.e_desc with
-    Zident r ->
-      begin match !r with
-          Zglobal glob_desc ->
-            type_instance glob_desc.info.val_typ
-        | Zlocal s ->
-            try
-              let (ty_schema, mut_flag) = assoc s env in
-                type_instance ty_schema
-            with Not_found ->
+let rec type_expr env =
+  let rec texp ((Expr(desc, loc) as expr), ty) =
+    match desc with
+      Zident r ->
+        let ty' =
+          match !r with
+            Zglobal glob_desc ->
+              type_instance glob_desc.info.val_typ
+          | Zlocal s ->
               try
-                let glob_desc = find_value_desc(GRname s) in
-                  r := Zglobal glob_desc;
-                  type_instance glob_desc.info.val_typ
-              with Desc_not_found ->
-                unbound_value_err (GRname s) expr.e_loc
-      end
-  | Zconstant cst ->
-      type_of_structured_constant cst
-  | Ztuple(args) ->
-      type_product(map (type_expr env) args)
-  | Zconstruct0(cstr) ->
-      begin match cstr.info.cs_kind with
-        Constr_constant ->
-          type_instance cstr.info.cs_res
-      | _ ->
-          non_constant_constr_err cstr expr.e_loc
-      end            
-  | Zconstruct1(cstr, arg) ->
-      begin match cstr.info.cs_kind with
-        Constr_constant ->
-          constant_constr_err cstr expr.e_loc
-      | _ ->            
-          let (ty_res, ty_arg) =
-            type_pair_instance (cstr.info.cs_res, cstr.info.cs_arg) in
-          type_expect env arg ty_arg;
-          ty_res
-      end
-  | Zapply(fct, args) ->
-      let ty_fct = type_expr env fct in
-      let rec type_args ty_res = function
-        [] -> ty_res
-      | arg1 :: argl ->
-          let (ty1, ty2) =
-            try
-              filter_arrow ty_res
-            with Unify ->
-              application_of_non_function_err fct ty_fct in
-          type_expect env arg1 ty1;
-          type_args ty2 argl in
-      type_args ty_fct args
-  | Zlet(rec_flag, pat_expr_list, body) ->
-      type_expr (type_let_decl env rec_flag pat_expr_list) body
-  | Zfunction [] ->
-      fatal_error "type_expr: empty matching"
-  | Zfunction ((patl1,expr1)::_ as matching) ->
-      let ty_args = map (fun pat -> new_type_var()) patl1 in
-      let ty_res = new_type_var() in
-      let tcase (patl, action) =
-        if list_length patl != list_length ty_args then
-          ill_shaped_match_err expr;
-        type_expect (type_pattern_list patl ty_args @ env) action ty_res in
-      do_list tcase matching;
-      list_it (fun ty_arg ty_res -> type_arrow(ty_arg, ty_res))
-              ty_args ty_res
-  | Ztrywith (body, matching) ->
-      let ty = type_expr env body in
-      do_list
-        (fun (pat, expr) ->
-          type_expect (type_pattern (pat, type_exn, Notmutable) @ env) expr ty)
-        matching;
-      ty
-  | Zsequence (e1, e2) ->
-      type_statement env e1; type_expr env e2
-  | Zcondition (cond, ifso, ifnot) ->
-      type_expect env cond type_bool;
-      if match ifnot.e_desc
-         with Zconstruct0 cstr -> cstr == constr_void | _ -> false
-      then begin
-        type_expect env ifso type_unit;
-        type_unit
-      end else begin
-        let ty = type_expr env ifso in
-        type_expect env ifnot ty;
-        ty
-      end
-  | Zwhen (cond, act) ->
-      type_expect env cond type_bool;
-      type_expr env act
-  | Zwhile (cond, body) ->
-      type_expect env cond type_bool;
-      type_statement env body;
-      type_unit
-  | Zfor (id, start, stop, up_flag, body) ->
-      type_expect env start type_int;
-      type_expect env stop type_int;
-      type_statement ((id,(type_int,Notmutable)) :: env) body;
-      type_unit
-  | Zsequand (e1, e2) ->
-      type_expect env e1 type_bool;
-      type_expect env e2 type_bool;
-      type_bool
-  | Zsequor (e1, e2) ->
-      type_expect env e1 type_bool;
-      type_expect env e2 type_bool;
-      type_bool
-  | Zconstraint (e, ty_expr) ->
-      let ty' = type_of_type_expression false ty_expr in
-      type_expect env e ty';
-      ty'
-  | Zvector elist ->
-      let ty_arg = new_type_var() in
-      do_list (fun e -> type_expect env e ty_arg) elist;
-      type_vect ty_arg
-  | Zassign(id, e) ->
-      begin try
-        match assoc id env with
-          (ty_schema, Notmutable) ->
-            not_mutable_err id expr.e_loc
-        | (ty_schema, Mutable) ->
-            type_expect env e (type_instance ty_schema);
-            type_unit
-      with Not_found ->
-        unbound_value_err (GRname id) expr.e_loc
-      end
-  | Zrecord lbl_expr_list ->
-      let ty = new_type_var() in
-      do_list
-        (fun (lbl, exp) ->
-          let (ty_res, ty_arg) =
-            type_pair_instance (lbl.info.lbl_res, lbl.info.lbl_arg) in
-          unify (ty, ty_res);
-          type_expect env exp ty_arg)
-        lbl_expr_list;
-      let label = vect_of_list (labels_of_type ty) in
-      let defined = make_vect (vect_length label) false in
-      do_list (fun (lbl, exp) ->
-        let p = lbl.info.lbl_pos in
-          if defined.(p)
-          then label_multiply_defined_err expr lbl
-          else defined.(p) <- true)
-        lbl_expr_list;
-      for i = 0 to vect_length label - 1 do
-        if not defined.(i) then label_undefined_err expr label.(i)
-      done;
-      ty
-  | Zrecord_access (e, lbl) ->
-      let (ty_res, ty_arg) =
-        type_pair_instance (lbl.info.lbl_res, lbl.info.lbl_arg) in
-      type_expect env e ty_res;
-      ty_arg      
-  | Zrecord_update (e1, lbl, e2) ->
-      let (ty_res, ty_arg) =
-        type_pair_instance (lbl.info.lbl_res, lbl.info.lbl_arg) in
-      if lbl.info.lbl_mut == Notmutable then label_not_mutable_err expr lbl;
-      type_expect env e1 ty_res;
-      type_expect env e2 ty_arg;
-      type_unit
-  | Zstream complist ->
-      let ty_comp = new_type_var() in
-      let ty_res = type_stream ty_comp in
-      do_list
-        (function Zterm e -> type_expect env e ty_comp
-                | Znonterm e -> type_expect env e ty_res)
-        complist;
-      ty_res
-  | Zparser casel ->
-      let ty_comp = new_type_var() in
-      let ty_stream = type_stream ty_comp in
-      let ty_res = new_type_var() in
-      let rec type_stream_pat new_env = function
-        ([], act) ->
-          type_expect (new_env @ env) act ty_res
-      | (Ztermpat p :: rest, act) ->
-          type_stream_pat (tpat new_env (p, ty_comp, Notmutable)) (rest,act)
-      | (Znontermpat(parsexpr, p) :: rest, act) ->
-          let ty_parser_result = new_type_var() in
-          type_expect (new_env @ env) parsexpr
-                      (type_arrow(ty_stream, ty_parser_result));
-          type_stream_pat (tpat new_env (p, ty_parser_result, Notmutable))
-                          (rest,act)
-      | (Zstreampat s :: rest, act) ->
-          type_stream_pat ((s, (ty_stream, Notmutable)) :: new_env) (rest,act)
-      in
-      do_list (type_stream_pat [])  casel;
-      type_arrow(ty_stream, ty_res)
-  in
-    expr.e_typ <- inferred_ty;
-    inferred_ty
-
-(* Typing of an expression with an expected type.
-   Some constructs are treated specially to provide better error messages. *)
-
-and type_expect env exp expected_ty =
-  match exp.e_desc with
-    Zconstant(SCatom(ACstring s)) ->
-      let actual_ty =
-        match (type_repr expected_ty).typ_desc with
-          (* Hack for format strings *)
-          Tconstr(cstr, _) ->
-            if cstr = constr_type_format
-            then type_format exp.e_loc s
-            else type_string
+                let (ty_schema, mut_flag) = assoc s env in
+                  type_instance ty_schema
+              with Not_found ->
+                try
+                  let glob_desc = find_value_desc(GRname s) in
+                    r := Zglobal glob_desc;
+                    type_instance glob_desc.info.val_typ
+                with Desc_not_found ->
+                  unbound_err "Variable" (GRname s) loc
+        in
+          unify_expr expr ty ty'
+    | Zconstant cst ->
+        unify_expr expr ty (type_of_structured_constant cst)
+    | Ztuple(args) ->
+        begin try
+          texp_list (args, filter_product (list_length args) ty)
+        with Unify ->
+          expr_wrong_type_err expr
+            (type_product(new_type_var_list (list_length args))) ty
+        end
+    | Zconstruct0(cstr) ->
+        begin match cstr.info.cs_kind with
+          Constr_constant ->
+            unify_expr expr ty (type_instance cstr.info.cs_res)
         | _ ->
-            type_string in
-      unify_expr exp expected_ty actual_ty
-  | Zlet(rec_flag, pat_expr_list, body) ->
-      type_expect (type_let_decl env rec_flag pat_expr_list) body expected_ty
-  | Zsequence (e1, e2) ->
-      type_statement env e1; type_expect env e2 expected_ty
-  | Zcondition (cond, ifso, ifnot) ->
-      type_expect env cond type_bool;
-      type_expect env ifso expected_ty;
-      type_expect env ifnot expected_ty
-  | Ztuple el ->
-      begin try
-        do_list2 (type_expect env)
-                 el (filter_product (list_length el) expected_ty)
-      with Unify ->
-        unify_expr exp expected_ty (type_expr env exp)
-      end
-(* To do: try...with, match...with ? *)
+            non_constant_constr_err cstr loc
+        end            
+    | Zconstruct1(cstr, arg) ->
+        begin match cstr.info.cs_kind with
+          Constr_constant ->
+            constant_constr_err cstr loc
+        | _ ->            
+            let (ty_res, ty_arg) =
+              type_pair_instance (cstr.info.cs_res, cstr.info.cs_arg) in
+            unify_expr expr ty ty_res;
+            texp(arg, ty_arg)
+        end
+    | Zapply(fct, args) ->
+        let rec make_ty_fct = function
+          [] -> ([], ty)
+        | arg1::argl ->
+            let alpha = new_type_var()
+            and (ty_args, ty_fct) = make_ty_fct argl
+            in (alpha::ty_args, type_arrow(alpha, ty_fct)) in
+        let (ty_args, ty_fct) = make_ty_fct args in
+          texp(fct, ty_fct);
+          texp_list(args, ty_args)
+    | Zlet(rec_flag, pat_expr_list, body) ->
+        type_expr (type_let_decl env rec_flag pat_expr_list) (body, ty)
+    | Zfunction [] ->
+        fatal_error "type_expr: empty matching"
+    | Zfunction ((casel1,expr1)::_ as matching) ->
+        let rec find_types ty = function
+          [] -> ([],ty)
+        | pat::rest ->
+            try
+              let (ty1,ty2) = filter_arrow ty in
+              let (ty_args, ty_res) = find_types ty2 rest in
+                (ty1 :: ty_args, ty_res)
+            with Unify ->
+              expr_wrong_type_err expr
+                 (type_arrow(new_type_var(), new_type_var())) ty in
+        let (ty_args, ty_res) =
+          find_types ty casel1 in
+        let tcase (patl, expr) =
+          if list_length patl != list_length ty_args then
+            ill_shaped_match_err expr;
+          type_expr (type_pattern_list patl ty_args @ env) (expr, ty_res)
+        in
+          do_list tcase matching
+    | Ztrywith (body, matching) ->
+        texp (body, ty);
+        do_list
+          (fun (pat, expr) ->
+            type_expr (type_pattern (pat, type_exn, Notmutable) @ env)
+                      (expr, ty))
+          matching
+    | Zsequence (e1, e2) ->
+        type_statement env e1; texp(e2, ty)
+    | Zcondition (cond, ifso, ifnot) ->
+        texp(cond, type_bool);
+        texp(ifnot, ty);
+        texp(ifso, ty)
+    | Zwhile (cond, body) ->
+        texp(cond, type_bool);
+        type_statement env body;
+        unify_expr expr ty type_unit
+    | Zfor (id, start, stop, up_flag, body) ->
+        texp(start, type_int);
+        texp(stop, type_int);
+        type_statement ((id,(type_int,Notmutable)) :: env) body;
+        unify_expr expr ty type_unit
+    | Zsequand (e1, e2) ->
+        texp(e1, type_bool);
+        texp(e2, type_bool);
+        unify_expr expr ty type_bool
+    | Zsequor (e1, e2) ->
+        texp(e1, type_bool);
+        texp(e2, type_bool);
+        unify_expr expr ty type_bool
+    | Zconstraint (e, ty_expr) ->
+        let ty' = type_of_type_expression false ty_expr in
+          texp(e, ty');
+          unify_expr expr ty ty'
+    | Zvector elist ->
+        let ty_arg = new_type_var() in
+        let ty_vect = type_vect ty_arg in
+        unify_expr expr ty ty_vect;
+        do_list (fun e -> texp(e, ty_arg)) elist
+    | Zassign(id, e) ->
+        begin try
+          match assoc id env with
+            (ty_schema, Notmutable) ->
+              not_mutable_err id loc
+          | (ty_schema, Mutable) ->
+              unify_expr expr ty type_unit;
+              texp (e, type_instance ty_schema)
+        with Not_found ->
+          unbound_err "The local variable" (GRname id) loc
+        end
+    | Zrecord lbl_expr_list ->
+        do_list
+          (fun (lbl, e) ->
+            let (ty_res, ty_arg) =
+              type_pair_instance (lbl.info.lbl_res, lbl.info.lbl_arg) in
+            unify_expr expr ty ty_res;
+            texp (e, ty_arg))
+          lbl_expr_list;
+        let label_list =
+          match (type_repr ty).typ_desc with
+            Tconstr(cstr, _) ->
+              begin match (type_descr_of_type_constr cstr).info.ty_desc with
+                Record_type lbl_list -> lbl_list
+              | _ -> fatal_error "labels_of_type"
+              end
+          | _ ->
+              fatal_error "labels_of_type" in
+        let v = make_vect (list_length label_list) false in
+          do_list (fun (lbl, e) ->
+            let p = lbl.info.lbl_pos in
+              if v.(p)
+              then label_err " is multiply defined." expr lbl
+              else v.(p) <- true)
+            lbl_expr_list;
+          let rec check_labels i = function
+            [] -> ()
+          | lbl::rest ->
+              if v.(i)
+              then check_labels (succ i) rest
+              else label_err " is undefined." expr lbl
+          in check_labels 0 label_list
+    | Zrecord_access (e, lbl) ->
+        let (ty_res, ty_arg) =
+          type_pair_instance (lbl.info.lbl_res, lbl.info.lbl_arg) in
+        unify_expr expr ty ty_arg;
+        texp(e, ty_res)
+    | Zrecord_update (e1, lbl, e2) ->
+        let (ty_res, ty_arg) =
+          type_pair_instance (lbl.info.lbl_res, lbl.info.lbl_arg) in
+        unify_expr expr ty type_unit;
+        if lbl.info.lbl_mut == Notmutable then
+          label_err " is not mutable." expr lbl;
+        texp(e1, ty_res);
+        texp(e2, ty_arg)
+    | Zstream complist ->
+        let ty_comp = new_type_var() in
+        unify_expr expr ty (type_stream ty_comp);
+        do_list
+          (function Zterm e -> texp(e, ty_comp)
+                  | Znonterm e -> texp(e, ty))
+          complist
+    | Zparser casel ->
+        let ty_comp = new_type_var() in
+        let ty_stream = type_stream ty_comp in
+        let ty_res = new_type_var() in
+        unify_expr expr ty (type_arrow(ty_stream, ty_res));
+        let rec type_stream_pat new_env = function
+          ([], act) ->
+            type_expr (new_env @ env) (act, ty_res)
+        | (Ztermpat p :: rest, act) ->
+            type_stream_pat (tpat new_env (p, ty_comp, Notmutable)) (rest,act)
+        | (Znontermpat(parsexpr,p) :: rest, act) ->
+            let ty_parser_result = new_type_var() in
+            type_expr (new_env @ env)
+                      (parsexpr, type_arrow(ty_stream, ty_parser_result));
+            type_stream_pat (tpat new_env (p, ty_parser_result, Notmutable))
+                            (rest,act)
+        | (Zstreampat s :: rest, act) ->
+            type_stream_pat ((s, (ty_stream, Notmutable)) :: new_env) (rest,act)
+        in
+        do_list (type_stream_pat [])  casel
+
+  and texp_list = function
+    [], [] -> ()
+  | e::el, ty::tyl ->
+      texp(e,ty); texp_list(el,tyl)
   | _ ->
-      unify_expr exp expected_ty (type_expr env exp)
-  
+      fatal_error "texp_list"
+
+  in texp
+
 (* Typing of "let" definitions *)
 
 and type_let_decl env rec_flag pat_expr_list =
-  let generalizable =
-    for_all (fun (pat, expr) -> is_nonexpansive expr) pat_expr_list in
-  if generalizable then push_type_level();
-  let ty_list =
-    map (fun (pat, expr) -> new_type_var()) pat_expr_list in
+  push_type_level();
+  let (pat_ty_list, expr_ty_list) =
+    list_it
+     (fun (pat,expr) (pt, et) ->
+        let alpha = new_type_var () in
+          (pat,alpha,Notmutable)::pt, (expr,alpha)::et)
+     pat_expr_list
+     ([],[]) in
   let add_env =
-    type_pattern_list (map (fun (pat, expr) -> pat) pat_expr_list) ty_list in
+    type_pattern_list2 pat_ty_list in
   let new_env =
-    add_env @ env in
-  do_list2
-    (fun (pat, exp) ty ->
-        type_expect (if rec_flag then new_env else env) exp ty)
-    pat_expr_list ty_list;
-  if generalizable then begin
+    add_env @ env
+  in
+    do_list
+      (type_expr (if rec_flag then new_env else env))
+      expr_ty_list;
     pop_type_level();
-    do_list generalize_type ty_list
-  end;
-  new_env
+    do_list (fun (_, (ty, _)) -> generalize_type ty) add_env;
+   new_env
 
-(* Typing of statements (expressions whose values are ignored) *)
+(* Typing of statements (expressions whose value is ignored) *)
 
-and type_statement env expr =
-  let ty = type_expr env expr in
+and type_statement env (Expr(desc, loc) as e) =
+  let ty = new_type_var() in
+  type_expr env (e, ty);
   match (type_repr ty).typ_desc with
-    Tarrow(_,_) -> partial_apply_warning expr.e_loc
+    Tarrow(_,_) ->
+      location__prerr_location loc;
+      prerr_begline " Warning: function partially applied.";
+      prerr_endline2 ""
   | _ -> ()
 ;;

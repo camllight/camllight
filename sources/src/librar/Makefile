@@ -5,13 +5,10 @@ CAMLLINK=../camlrun ../camllink
 INCLUDES=-stdlib ../lib -I ../compiler -I ../linker
 COMPFLAGS=-O fast $(INCLUDES)
 LINKFLAGS=-g $(INCLUDES)
-CPP=/lib/cpp -P
 
-EXTERNOBJS=config.zo misc.zo interntl.zo readword.zo
+EXTERNOBJS=config.zo misc.zo readword.zo 
 
 OBJS=librar.zo version.zo main.zo
-
-GENSOURCES=version.ml
 
 all: camllibr
 
@@ -20,14 +17,13 @@ camllibr: $(OBJS)
 
 clean:
 	rm -f *.zi *.zo camllibr
-	rm -f $(GENSOURCES)
 
 install:
 	cat $(LIBDIR)/header camllibr > $(BINDIR)/camllibr
 	chmod a+x $(BINDIR)/camllibr
 
 .SUFFIXES :
-.SUFFIXES : .mli .ml .zi .zo .mlp
+.SUFFIXES : .mli .ml .zi .zo
 
 .mli.zi:
 	$(CAMLCOMP) $(COMPFLAGS) $<
@@ -35,23 +31,14 @@ install:
 .ml.zo:
 	$(CAMLCOMP) $(COMPFLAGS) $<
 
-.mlp.ml:
-	@rm -f $@
-	$(CPP) -Dunix $< > $@
-	@chmod a-w $@
-
-depend: $(GENSOURCES)
+depend:
 	mv Makefile Makefile.bak
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
          ../tools/camldep -I ../compiler -I ../linker *.ml) > Makefile
 	rm Makefile.bak
 
-version.ml: version.mlp ../version.h
-
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
-librar.zo: ../compiler/emit_phr.zo ../compiler/misc.zo \
-    ../compiler/interntl.zo 
+librar.zo: ../compiler/emit_phr.zo ../compiler/misc.zo 
 main.zo: librar.zo version.zo ../compiler/misc.zo ../linker/readword.zo \
-    ../compiler/interntl.zo ../compiler/config.zi 
-version.zo: ../compiler/interntl.zo 
+    ../compiler/config.zi 

@@ -9,7 +9,6 @@
 #include <sys\stat.h>
 #endif
 #include "alloc.h"
-#include "debugcom.h"
 #include "fail.h"
 #include "globals.h"
 #include "instruct.h"
@@ -43,31 +42,14 @@ char * error_message()
 
 #endif /* HAS_STRERROR */
 
-void sys_error(arg)
-     char * arg;
+void sys_error()
 {
-  char * err = error_message();
-  int err_len = strlen(err);
-  int arg_len;
-  value str;
-
-  if (arg == NULL) {
-    str = alloc_string(err_len);
-    bcopy(err, &Byte(str, 0), err_len);
-  } else {
-    arg_len = strlen(arg);
-    str = alloc_string(arg_len + 2 + err_len);
-    bcopy(arg, &Byte(str, 0), arg_len);
-    bcopy(": ", &Byte(str, arg_len), 2);
-    bcopy(err, &Byte(str, arg_len + 2), err_len);
-  }
-  raise_with_arg(SYS_ERROR_EXN, str);
+  raise_with_string(SYS_ERROR_EXN, error_message());
 }
 
 void sys_exit(retcode)          /* ML */
      value retcode;
 {
-  debugger(PROGRAM_EXIT);
   exit(Int_val(retcode));
 }
 
@@ -99,14 +81,14 @@ value sys_open(path, flags, perm) /* ML */
   ret = open(String_val(path), convert_flag_list(flags, sys_open_flags),
              Int_val(perm));
 #endif
-  if (ret == -1) sys_error(String_val(path));
+  if (ret == -1) sys_error();
   return Val_long(ret);
 }
 
 value sys_close(fd)             /* ML */
      value fd;
 {
-  if (close(Int_val(fd)) != 0) sys_error(NULL);
+  if (close(Int_val(fd)) != 0) sys_error();
   return Atom(0);
 }
 
@@ -115,7 +97,7 @@ value sys_remove(name)          /* ML */
 {
   int ret;
   ret = unlink(String_val(name));
-  if (ret != 0) sys_error(String_val(name));
+  if (ret != 0) sys_error();
   return Atom(0);
 }
 
@@ -123,8 +105,7 @@ value sys_rename(oldname, newname) /* ML */
      value oldname, newname;
 {
 #ifdef HAS_RENAME
-  if (rename(String_val(oldname), String_val(newname)) != 0) 
-    sys_error(String_val(oldname));
+  if (rename(String_val(oldname), String_val(newname)) != 0) sys_error();
 #else
   invalid_argument("rename: not implemented");
 #endif
@@ -134,7 +115,7 @@ value sys_rename(oldname, newname) /* ML */
 value sys_chdir(dirname)        /* ML */
      value dirname;
 {
-  if (chdir(String_val(dirname)) != 0) sys_error(String_val(dirname));
+  if (chdir(String_val(dirname)) != 0) sys_error();
   return Atom(0);
 }
 
@@ -150,18 +131,6 @@ value sys_getenv(var)           /* ML */
     mlraise(Atom(NOT_FOUND_EXN));
   }
   return copy_string(res);
-}
-
-value sys_system_command(command)   /* ML */
-     value command;
-{
-#ifdef macintosh
-  invalid_arg("system_command unavailable");
-#else
-  int retcode = system(String_val(command));
-  if (retcode == -1) sys_error(String_val(command));
-  return Val_int(retcode);
-#endif
 }
 
 static int sys_var_init[] = {
@@ -191,9 +160,6 @@ void sys_init(argv)
   for (i = SYS__S_IRUSR; i <= SYS__S_IXALL; i++)
     Field(global_data, i) = Val_long(sys_var_init[i - SYS__S_IRUSR]);
   Field(global_data, SYS__INTERACTIVE) = Val_false;
-  Field(global_data, SYS__MAX_VECT_LENGTH) = Val_long(Max_wosize);
-  Field(global_data, SYS__MAX_STRING_LENGTH) =
-    Val_long(Max_wosize * sizeof(value) - 2);
 }
 
 /* Handling of user interrupts */

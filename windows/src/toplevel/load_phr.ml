@@ -9,7 +9,6 @@
 #open "emitcode";;
 #open "tr_const";;
 #open "pr_value";;
-#open "format";;
 
 let do_code may_free code entrypoint len =
   if number_of_globals() >= vect_length global_data then
@@ -27,19 +26,13 @@ let do_code may_free code entrypoint len =
         (sys__Break | misc__Toplevel | misc__Zinc _) as sys_exn ->
           raise sys_exn
       | Out_of_memory ->
-          gc__full_major(); ()
+          gc(); gc(); ()
       | _ ->
           ()
       end;
-      open_hovbox 0;
-      print_string (interntl__translate "Uncaught exception: ");
-      begin try
-        print_value (obj__repr x) builtins__type_exn
-      with _ ->
-        print_string
-          (interntl__translate "<Internal error while printing the exception>")
-      end;
-      print_newline();
+      print_begline "Uncaught exception: ";
+      print_value (obj__repr x) builtins__type_exn;
+      print_endline "";
       raise Toplevel
   in
     if may_free then static_free code;

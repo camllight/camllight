@@ -1,18 +1,15 @@
-# Files to install
+# Where the Emacs Lisp files should be installed.
+# This must be one of the directories in the Emacs search path.
+LISPDIR=/usr/local/emacs/site-lisp
 
-FILES=caml.el inf-caml.el camldebug.el
-
-# Overriden when called from ../Makefile
-EMACSLISPDIR=/usr/local/emacs/site-lisp
-
-# Which Emacs to use for compilation
-EMACS=emacs
-
-all:
+# Files to install -- Comment out the first line and uncomment the second line
+# if you're using Emacs 18.
+FILES=caml.el inf-caml.el             # If you're using Emacs 19
+##FILES=caml.el inf-caml.el comint.el # If you're using Emacs 18
 
 install:
-	cp $(FILES) $(EMACSLISPDIR)
-	dir=`pwd`; cd $(EMACSLISPDIR); $(EMACS) -batch -l $$dir/compile
+	cp $(FILES) $(LISPDIR)
+	for f in $(FILES); do emacs -batch -f batch-byte-compile $(LISPDIR)/$$f; done
 
 clean:
 	rm -f *~ #*#

@@ -13,16 +13,29 @@
 
 extern value *c_roots_head;
 
-void init_c_roots P((void));
-value raw_alloc_shr P((mlsize_t, tag_t));
-value alloc_shr P((mlsize_t, tag_t));
-void adjust_gc_speed P((mlsize_t, mlsize_t));
-void modify P((value *, value));
-void initialize P((value *, value));
-char * stat_alloc P((asize_t));	             /* Size in bytes. */
-void stat_free P((char *));
-char * stat_resize P((char *, asize_t));     /* Size in bytes. */
+#ifdef ANSI
 
+extern void init_memory (asize_t, asize_t);
+extern value raw_alloc_shr (mlsize_t, tag_t);
+extern value alloc_shr (mlsize_t, tag_t);
+extern void modify (value *, value);
+extern void initialize (value *, value);
+extern char * stat_alloc (asize_t);	        /* Size in bytes. */
+extern void stat_free (char *);
+extern char * stat_resize (char *, asize_t);     /* Size in bytes. */
+
+#else
+
+void init_memory ();
+value raw_alloc_shr ();
+value alloc_shr ();
+void modify ();
+void initialize ();
+char * stat_alloc ();		/* Size in bytes. */
+void stat_free ();
+char * stat_resize ();		/* Size in bytes. */
+
+#endif /* ANSI */
 
 #define Alloc_small(result, wosize, tag) {				      \
   char *_res_ = young_ptr;						      \
@@ -50,8 +63,8 @@ char * stat_resize P((char *, asize_t));     /* Size in bytes. */
     if (Is_block (val) && Is_young (val)				      \
 	&& ! (Is_block (_old_) && Is_young (_old_))){			      \
       *ref_table_ptr++ = (fp);						      \
-      if (ref_table_ptr >= ref_table_limit){				      \
-        Assert (ref_table_ptr == ref_table_limit);			      \
+      if (ref_table_ptr >= ref_table_end){				      \
+        Assert (ref_table_ptr == ref_table_end);			      \
 	realloc_ref_table ();						      \
       }									      \
     }									      \

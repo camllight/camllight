@@ -5,11 +5,11 @@
 
 #include "socketaddr.h"
 
-value unix_connect(socket, address)   /* ML */
-     value socket, address;
+value unix_connect(sock, addr)   /* ML */
+     value sock, addr;
 {
-  get_sockaddr(address);
-  if (connect(Int_val(socket), &sock_addr.s_gen, sock_addr_len) == -1)
+  get_sockaddr(addr);
+  if (connect(Int_val(sock), &sock_addr.s_gen, sock_addr_len) == -1)
     uerror("connect", Nothing);
   return Val_unit;
 }

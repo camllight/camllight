@@ -1,6 +1,6 @@
 /* Copyright     Digital Equipment Corporation & INRIA     1988, 1989 */
-/* Last modified_on Thu Apr  4 20:01:18 GMT+2:00 1991 by herve */
-/*      modified_on Thu Mar 22 20:45:38 GMT+1:00 1990 by shand */
+/* Last modified on Thu Apr  4 20:01:18 GMT+2:00 1991 by herve */
+/*      modified on Thu Mar 22 20:45:38 GMT+1:00 1990 by shand */
 
 
 /* bz.c: provides an implementation of "unlimited-precision" 
@@ -78,11 +78,7 @@ static double BzLog [] =
 /**/
     
 
-#ifndef _NO_PROTO
-void BzInit (void)
-#else  /* _NO_PROTO */
 void BzInit ()
-#endif /* _NO_PROTO */
 {
     if (!Initialized)
     {
@@ -94,12 +90,9 @@ void BzInit ()
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-BigZ BzCreate (BigNumLength Size)
-#else  /* _NO_PROTO */
 BigZ BzCreate (Size)
-BigNumLength Size;
-#endif /* _NO_PROTO */
+
+int Size;
 
 /* 
  * Allocates a BigZ of the desired size.
@@ -125,12 +118,9 @@ BigNumLength Size;
 
 
 
-#ifndef _NO_PROTO
-void BzFree (BigZ z)	
-#else  /* _NO_PROTO */
 void BzFree (z)	
+
 BigZ z;
-#endif /* _NO_PROTO */
 
 /*
  * Frees an existing BigZ.
@@ -144,12 +134,9 @@ BigZ z;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-void BzFreeString (char *s)	
-#else  /* _NO_PROTO */
 void BzFreeString (s)	
+
 char *s;
-#endif /* _NO_PROTO */
 
 /*
  * Frees an existing BigZ allocated string.
@@ -162,12 +149,9 @@ char *s;
 		/***************************************/
 /**/
 
-#ifndef _NO_PROTO
-BigNumLength BzNumDigits (BigZ z)
-#else  /* _NO_PROTO */
-BigNumLength BzNumDigits (z)
+unsigned BzNumDigits (z)
+
 BigZ z;
-#endif /* _NO_PROTO */
 
 /* 
  * Returns the number of digits used by z.
@@ -181,12 +165,9 @@ BigZ z;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-BigZ BzCopy (BigZ z)	
-#else  /* _NO_PROTO */
 BigZ BzCopy (z)	
+
 BigZ z;
-#endif /* _NO_PROTO */
 
 /* 
  * Creates a copy of the passed BigZ.
@@ -214,12 +195,9 @@ BigZ z;
 /**/
 
 
-#ifndef _NO_PROTO
-BigZ BzNegate (BigZ z)	
-#else  /* _NO_PROTO */
 BigZ BzNegate (z)	
+
 BigZ z;
-#endif /* _NO_PROTO */
 
 /* 
  * Negates the passed BigZ.
@@ -237,12 +215,9 @@ BigZ z;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-BigZ BzAbs (BigZ z)	
-#else  /* _NO_PROTO */
 BigZ BzAbs (z)	
+
 BigZ z;
-#endif /* _NO_PROTO */
 
 /* 
  * Takes the absolute value of the passed BigZ.
@@ -260,12 +235,9 @@ BigZ z;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-BzCmp BzCompare (BigZ y, BigZ z)
-#else  /* _NO_PROTO */
 BzCmp BzCompare (y, z)
-BigZ y; BigZ z;
-#endif /* _NO_PROTO */
+
+BigZ y, z;
 
 /* 
  * Returns BZ_GT	if Y > Z,
@@ -287,12 +259,9 @@ BigZ y; BigZ z;
 /**/
 
 
-#ifndef _NO_PROTO
-BigZ BzAdd (BigZ y, BigZ z)
-#else  /* _NO_PROTO */
 BigZ BzAdd (y, z)
-BigZ y; BigZ z;
-#endif /* _NO_PROTO */
+
+BigZ y, z;
 
 /* 
  * Returns Y + Z.
@@ -318,7 +287,7 @@ BigZ y; BigZ z;
 	        if ((n = BzCreate (yl+1)) != NULL)
 		{
 		    BnnAssign (BzToBn (n), BzToBn (y), yl);
-		    BnnAdd (BzToBn (n), yl+1, BzToBn (z), zl, (BigNumCarry) 0);
+		    BnnAdd (BzToBn (n), yl+1, BzToBn (z), zl, 0);
 		    BzSetSign (n, BzGetSign (y));
 		}
 	    break;
@@ -328,7 +297,7 @@ BigZ y; BigZ z;
 		if ((n = BzCreate (zl+1)) != NULL)
 		{
 		    BnnAssign (BzToBn (n), BzToBn (z), zl);
-		    BnnAdd (BzToBn (n), zl+1, BzToBn (y), yl, (BigNumCarry) 0);
+		    BnnAdd (BzToBn (n), zl+1, BzToBn (y), yl, 0);
 		    BzSetSign (n, BzGetSign (z));
 		}
 	    break;
@@ -352,7 +321,7 @@ BigZ y; BigZ z;
 		if ((n = BzCreate (yl)) != NULL)
 		{
 		    BnnAssign (BzToBn (n), BzToBn (y), yl);
-		    BnnSubtract (BzToBn (n), yl, BzToBn (z), zl, (BigNumCarry) 1);
+		    BnnSubtract (BzToBn (n), yl, BzToBn (z), zl, 1);
 		    BzSetSign (n, BzGetSign (y));
 		}
 	    break;
@@ -362,7 +331,7 @@ BigZ y; BigZ z;
 		if ((n = BzCreate (zl)) != NULL)
 		{
 		    BnnAssign (BzToBn (n), BzToBn (z), zl);
-		    BnnSubtract (BzToBn (n), zl, BzToBn (y), yl, (BigNumCarry) 1);
+		    BnnSubtract (BzToBn (n), zl, BzToBn (y), yl, 1);
 		    BzSetSign (n, BzGetSign (z));
 		}
 	    break;
@@ -376,12 +345,9 @@ BigZ y; BigZ z;
 /**/
 
 
-#ifndef _NO_PROTO
-BigZ BzSubtract (BigZ y, BigZ z)	
-#else  /* _NO_PROTO */
 BigZ BzSubtract (y, z)	
-BigZ y; BigZ z;
-#endif /* _NO_PROTO */
+
+BigZ y, z;
 
 /* 
  * Returns Y - Z.
@@ -406,12 +372,9 @@ BigZ y; BigZ z;
 /**/
 
 
-#ifndef _NO_PROTO
-BigZ BzMultiply (BigZ y, BigZ z)	
-#else  /* _NO_PROTO */
 BigZ BzMultiply (y, z)	
-BigZ y; BigZ z;
-#endif /* _NO_PROTO */
+
+BigZ y, z;
 
 /* 
  * Returns Y * Z.
@@ -438,12 +401,9 @@ BigZ y; BigZ z;
 /**/
 
 
-#ifndef _NO_PROTO
-BigZ BzDivide (BigZ y, BigZ z, BigZ *r)	
-#else  /* _NO_PROTO */
 BigZ BzDivide (y, z, r)	
-BigZ y; BigZ z; BigZ *r;
-#endif /* _NO_PROTO */
+
+BigZ y, z, *r;
 
 /* 
  * Sets Y mod Z => R, 
@@ -518,12 +478,9 @@ BigZ y; BigZ z; BigZ *r;
 /**/
 
 
-#ifndef _NO_PROTO
-BigZ BzDiv (BigZ y, BigZ z)		
-#else  /* _NO_PROTO */
 BigZ BzDiv (y, z)		
-BigZ y; BigZ z;
-#endif /* _NO_PROTO */
+
+BigZ y, z;
 
 /* 
  * Returns Y div Z.
@@ -548,12 +505,9 @@ BigZ y; BigZ z;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-BigZ BzMod (BigZ y, BigZ z)		
-#else  /* _NO_PROTO */
 BigZ BzMod (y, z)		
-BigZ y; BigZ z;
-#endif /* _NO_PROTO */
+
+BigZ y, z;
 
 /* 
  * Returns Y mod Z.
@@ -572,12 +526,10 @@ BigZ y; BigZ z;
 /**/
 
 
-#ifndef _NO_PROTO
-char * BzToString (BigZ z, BigNumDigit base)
-#else  /* _NO_PROTO */
 char * BzToString (z, base)
-BigZ z; BigNumDigit base;
-#endif /* _NO_PROTO */
+
+BigZ 		z;
+BigNumDigit 	base;
 
 /*
  * Returns a pointer to a string that represents Z in the specified base.
@@ -650,12 +602,10 @@ BigZ z; BigNumDigit base;
 /**/
 
 
-#ifndef _NO_PROTO
-BigZ BzFromString (char *s, BigNumDigit base)
-#else  /* _NO_PROTO */
 BigZ BzFromString (s, base)
-char *s; BigNumDigit base;
-#endif /* _NO_PROTO */
+
+char 		*s;
+BigNumDigit 	base;
 
 /*
  * Creates a BigZ whose value is represented by "string" in the
@@ -709,12 +659,9 @@ char *s; BigNumDigit base;
 
 		/***************************************/
 
-#ifndef _NO_PROTO
-BigZ BzFromInteger (int i)
-#else  /* _NO_PROTO */
 BigZ BzFromInteger (i)
+
 int i;
-#endif /* _NO_PROTO */
 
 {
     BigZ z;
@@ -738,12 +685,9 @@ int i;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-int BzToInteger (BigZ z)
-#else  /* _NO_PROTO */
 int BzToInteger (z)
+
 BigZ z;
-#endif /* _NO_PROTO */
 
 {
     if (BzNumDigits (z) > 1)
@@ -758,12 +702,10 @@ BigZ z;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-BigZ BzFromBigNum (BigNum n, BigNumLength nl)
-#else  /* _NO_PROTO */
 BigZ BzFromBigNum (n, nl)
-BigNum n; BigNumLength nl;
-#endif /* _NO_PROTO */
+
+BigNum          n;
+BigNumLength    nl;
 
 {
     BigZ z;
@@ -786,12 +728,10 @@ BigNum n; BigNumLength nl;
 
 		/***************************************/
 
-#ifndef _NO_PROTO
-BigNum BzToBigNum (BigZ z, BigNumLength *nl)
-#else  /* _NO_PROTO */
 BigNum BzToBigNum (z, nl)
-BigZ z; BigNumLength *nl;
-#endif /* _NO_PROTO */
+
+BigZ         z;
+BigNumLength *nl;
 
 {
     BigNum n, m;
@@ -817,11 +757,7 @@ BigZ z; BigNumLength *nl;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-void BzClose (void)
-#else  /* _NO_PROTO */
 void BzClose ()
-#endif /* _NO_PROTO */
 {
     if (Initialized)
     {

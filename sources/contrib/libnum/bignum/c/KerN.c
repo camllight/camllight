@@ -1,6 +1,6 @@
 /* Copyright     Digital Equipment Corporation & INRIA     1988, 1989 */
-/* Last modified_on Thu Feb 20 18:18:12 GMT+1:00 1992 by shand */
-/*      modified_on Tue Jan 15 19:32:53 GMT+1:00 1991 by herve */
+/* Last modified on Tue Jan 15 19:32:53 GMT+1:00 1991 by herve */
+/*      modified on Mon Feb 19 20:22:20 GMT+1:00 1990 by shand */
 
 
 /* KerN.c: the kernel written in C */
@@ -36,7 +36,7 @@
 
 #define BNNMACROS_OFF
 #include "BigNum.h"
-#define NOMEM
+
 
                 /*** copyright ***/
 
@@ -46,50 +46,56 @@ static char copyright[]="@(#)KerN.c: copyright Digital Equipment Corporation & I
 	/******* non arithmetic access to digits ********/
 
 
-#ifndef _NO_PROTO
-void BnnSetToZero (BigNum nn, BigNumLength nl) 
-#else
-void BnnSetToZero (nn, nl)
-BigNum nn; BigNumLength nl;
-#endif
+void BnnSetToZero (nn, nl) 
+
+register BigNum 	nn; 
+register int 		nl;
 
 /*
  * Sets all the specified digits of the BigNum to 0
  */
 
 {
-    BigNum nnlim;
-    if (nl <= 0)
-	return;
-    nnlim = nn+nl-1;
-    do *nn = 0; while(nn++ < nnlim);
+#ifdef __STDC__
+    memset(nn, 0, nl*(BN_DIGIT_SIZE/BN_BYTE_SIZE));
+#else
+#ifdef NOMEM
+    while (--nl >= 0)
+	*(nn++) = 0;
+#else
+    bzero (nn, nl*(BN_DIGIT_SIZE/BN_BYTE_SIZE));
+#endif
+#endif
 }
  
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-void BnnAssign (BigNum mm, BigNum nn, BigNumLength nl) 
-#else  /* _NO_PROTO */
-void BnnAssign ( mm,  nn,  nl) 
-BigNum mm; BigNum nn; BigNumLength nl;
-#endif /* _NO_PROTO */
+void BnnAssign (mm, nn, nl) 
+
+register BigNum	mm, nn;
+register int 	nl;
 
 /* 
  * Copies N => M
  */
 
 {
-    BigNum nnlim;
-    if (nl <= 0)
-	return;
-    nnlim = nn+nl;
+#ifdef __STDC__
+    memmove(mm, nn, nl*(BN_DIGIT_SIZE/BN_BYTE_SIZE));
+#else 
 #ifdef MSDOS
-    if (realaddr(mm) < realaddr(nn) || realaddr(mm) > realaddr(nnlim))
+    if (realaddr(mm) < realaddr(nn) || realaddr(mm) > realaddr(nn+nl))
 #else
-    if ((mm < nn) || ( mm > nnlim))
+    if ((mm < nn) || ( mm > nn+nl))
 #endif
-	do *mm++ = *nn++; while(nn < nnlim);
+#ifdef NOMEM 
+	while (--nl >= 0)
+	    *mm++ = *nn++;
+#else
+        /* be care: bcopy (SRC, DEST, L): SRC-->DEST !!! */
+        bcopy (nn, mm, nl*(BN_DIGIT_SIZE/BN_BYTE_SIZE));
+#endif
     else
 #ifdef MSDOS
     if (realaddr(mm) > realaddr(nn))
@@ -97,21 +103,22 @@ BigNum mm; BigNum nn; BigNumLength nl;
     if (mm > nn)
 #endif
     {
+	nn += nl;
 	mm += nl;
-	do *--mm = *--nnlim; while(nn < nnlim);
+	while (--nl >= 0) 
+	    *--mm = *--nn;
     }
+#endif
 }
  
 		/***************************************/
 /**/
 
 
-#ifndef _NO_PROTO
-void BnnSetDigit (BigNum nn, BigNumDigit d) 
-#else  /* _NO_PROTO */
-void BnnSetDigit ( nn,  d) 
-BigNum nn; BigNumDigit d;
-#endif /* _NO_PROTO */
+void BnnSetDigit (nn, d) 
+
+BigNum 	nn; 
+int 	d;
 
 /*
  * Sets a single digit of N to the passed value
@@ -124,12 +131,9 @@ BigNum nn; BigNumDigit d;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-BigNumDigit BnnGetDigit (BigNum nn)
-#else  /* _NO_PROTO */
-BigNumDigit BnnGetDigit ( nn)
-BigNum nn;
-#endif /* _NO_PROTO */
+BigNumDigit BnnGetDigit (nn)
+
+BigNum 	nn;
 
 /* 
  * Returns the single digit pointed by N
@@ -143,12 +147,10 @@ BigNum nn;
 /**/
 
 
-#ifndef _NO_PROTO
-BigNumLength BnnNumDigits (BigNum nn, BigNumLength nl) 
-#else  /* _NO_PROTO */
-BigNumLength BnnNumDigits ( nn,  nl) 
-BigNum nn; BigNumLength nl;
-#endif /* _NO_PROTO */
+BigNumLength BnnNumDigits (nn, nl) 
+
+register BigNum nn;
+register int 	nl;
 
 /* 
  * Returns the number of digits of N, not counting leading zeros
@@ -166,46 +168,26 @@ BigNum nn; BigNumLength nl;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-BigNumDigit BnnNumLeadingZeroBitsInDigit (BigNumDigit d) 
-#else  /* _NO_PROTO */
-BigNumDigit BnnNumLeadingZeroBitsInDigit ( d) 
+BigNumDigit BnnNumLeadingZeroBitsInDigit (d) 
+
 BigNumDigit d;
-#endif /* _NO_PROTO */
 
 /*
  * Returns the number of leading zero bits in a digit 
  */
 
 {
+    register BigNumDigit mask = 1 << (BN_DIGIT_SIZE - 1);
     register int 	p = 0;
-    if (BN_DIGIT_SIZE == 16 || BN_DIGIT_SIZE == 32 || BN_DIGIT_SIZE == 64)
-    {
-	register BigNumDigit mask = (~(BigNumDigit)0) << (BN_DIGIT_SIZE/2);
-	register BigNumLength maskl = BN_DIGIT_SIZE/2;
 
-	if (d == 0) 
-	    return (BN_DIGIT_SIZE);
-	while (maskl)
-	{
-	    if ((d & mask) == 0)
-	    {
-		p += maskl;
-		d <<= maskl;
-	    }
-	    maskl >>= 1;
-	    mask <<= maskl;
-	}
-    }
-    else
-    {
-	register BigNumDigit mask = ((BigNumDigit)1) << (BN_DIGIT_SIZE-1);
+    
+    if (d == 0) 
+        return (BN_DIGIT_SIZE);
 
-	while ((d & mask) == 0)
-	{
-	    p++;
-	    mask >>= 1;
-	}
+    while ((d & mask) == 0)
+    {
+	p++;
+	mask >>= 1;
     }
 
     return (p);
@@ -217,12 +199,9 @@ BigNumDigit d;
 	/************** Predicates on one digit ***************/
 
 
-#ifndef _NO_PROTO
-Boolean BnnDoesDigitFitInWord (BigNumDigit d)
-#else  /* _NO_PROTO */
-Boolean BnnDoesDigitFitInWord ( d)
+Boolean BnnDoesDigitFitInWord (d)
+
 BigNumDigit d;
-#endif /* _NO_PROTO */
 
 /*
  * Returns TRUE iff the digit can be represented in just BN_WORD_SIZE bits
@@ -230,7 +209,7 @@ BigNumDigit d;
 {
     /* The C compiler must evaluate the predicate at compile time */
     if (BN_DIGIT_SIZE > BN_WORD_SIZE)
-        return (d >= ((BigNumDigit)1) << BN_WORD_SIZE ? FALSE : TRUE);
+        return (d >= 1 << BN_WORD_SIZE ? FALSE : TRUE);
     else
 	return (TRUE);
 }
@@ -238,12 +217,9 @@ BigNumDigit d;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-Boolean BnnIsDigitZero (BigNumDigit d)
-#else  /* _NO_PROTO */
-Boolean BnnIsDigitZero ( d)
+Boolean BnnIsDigitZero (d)
+
 BigNumDigit d;
-#endif /* _NO_PROTO */
 
 /* Returns TRUE iff digit = 0 */
 
@@ -254,12 +230,9 @@ BigNumDigit d;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-Boolean BnnIsDigitNormalized (BigNumDigit d)
-#else  /* _NO_PROTO */
-Boolean BnnIsDigitNormalized ( d)
+Boolean BnnIsDigitNormalized (d)
+
 BigNumDigit d;
-#endif /* _NO_PROTO */
 
 /*
  * Returns TRUE iff Base/2 <= digit < Base
@@ -267,18 +240,15 @@ BigNumDigit d;
  */
 
 {
-    return (d & (((BigNumDigit)1) << (BN_DIGIT_SIZE - 1)) ? TRUE : FALSE);
+    return (d & (1 << (BN_DIGIT_SIZE - 1)) ? TRUE : FALSE);
 }
 
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-Boolean BnnIsDigitOdd (BigNumDigit d) 
-#else  /* _NO_PROTO */
-Boolean BnnIsDigitOdd ( d) 
+Boolean BnnIsDigitOdd (d) 
+
 BigNumDigit d;
-#endif /* _NO_PROTO */
 
 /*
  * Returns TRUE iff digit is odd 
@@ -291,12 +261,9 @@ BigNumDigit d;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-BigNumCmp BnnCompareDigits (BigNumDigit d1, BigNumDigit d2)
-#else  /* _NO_PROTO */
-BigNumCmp BnnCompareDigits ( d1,  d2)
-BigNumDigit d1; BigNumDigit d2;
-#endif /* _NO_PROTO */
+BigNumCmp BnnCompareDigits (d1, d2)
+
+BigNumDigit d1, d2;
 
 /*
  * Returns 	BN_GREATER 	if digit1 > digit2
@@ -311,41 +278,28 @@ BigNumDigit d1; BigNumDigit d2;
 	/***************** Logical operations ********************/
 
 
-#ifndef _NO_PROTO
-void BnnComplement (BigNum nn, BigNumLength nl) 
-#else  /* _NO_PROTO */
-void BnnComplement ( nn,  nl) 
-BigNum nn; BigNumLength nl;
-#endif /* _NO_PROTO */
+void BnnComplement (nn, nl) 
+
+register BigNum nn;
+register int 	nl;
 
 /*
  * Performs the computation BBase(N) - N - 1 => N
  */
 
 {
-    BigNum nnlim;
-
-    if (nl <= 0)
-	return;
-    nnlim = nn+nl;
-    do
-    {
-	nn++;
-	nn[-1] = ~nn[-1];
-    }
-    while (nn < nnlim);
+    while (--nl >= 0)
+	*(nn++) ^= -1;
 }
 
 		/***************************************/
 /**/
 
 
-#ifndef _NO_PROTO
-void BnnAndDigits (BigNum n, BigNumDigit d)
-#else  /* _NO_PROTO */
-void BnnAndDigits ( n,  d)
-BigNum n; BigNumDigit d;
-#endif /* _NO_PROTO */
+void BnnAndDigits (n, d)
+
+BigNum		n;
+BigNumDigit 	d;
 
 /* 
  * Returns the logical computation n[0] AND d in n[0]
@@ -358,12 +312,10 @@ BigNum n; BigNumDigit d;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-void BnnOrDigits (BigNum n, BigNumDigit d)
-#else  /* _NO_PROTO */
-void BnnOrDigits ( n,  d)
-BigNum n; BigNumDigit d;
-#endif /* _NO_PROTO */
+void BnnOrDigits (n, d)
+
+BigNum		n;
+BigNumDigit 	d;
 
 /*
  * Returns the logical computation n[0] OR d2 in n[0].
@@ -376,12 +328,10 @@ BigNum n; BigNumDigit d;
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-void BnnXorDigits (BigNum n, BigNumDigit d)
-#else  /* _NO_PROTO */
-void BnnXorDigits ( n,  d)
-BigNum n; BigNumDigit d;
-#endif /* _NO_PROTO */
+void BnnXorDigits (n, d)
+
+BigNum		n;
+BigNumDigit 	d;
 
 /*
  * Returns the logical computation n[0] XOR d in n[0].
@@ -397,12 +347,11 @@ BigNum n; BigNumDigit d;
 	/****************** Shift operations *******************/
 
 
-#ifndef _NO_PROTO
-BigNumDigit BnnShiftLeft (BigNum mm, BigNumLength ml, int nbits)
-#else  /* _NO_PROTO */
-BigNumDigit BnnShiftLeft ( mm,  ml,  nbits)
-BigNum mm; BigNumLength ml; int nbits;
-#endif /* _NO_PROTO */
+BigNumDigit BnnShiftLeft (mm, ml, nbits)
+
+register BigNum mm;
+register int 	ml;
+	 int	nbits;
 
 /* 
  * Shifts M left by "nbits", filling with 0s.  
@@ -419,7 +368,7 @@ BigNum mm; BigNumLength ml; int nbits;
     {
 	rnbits = BN_DIGIT_SIZE - nbits;
 
-	while (ml-- > 0) 
+	while (--ml >= 0) 
 	{
 	    save = *mm;
 	    *mm++ = (save << nbits) | res;
@@ -434,12 +383,11 @@ BigNum mm; BigNumLength ml; int nbits;
 /**/
 
 
-#ifndef _NO_PROTO
-BigNumDigit BnnShiftRight (BigNum mm, BigNumLength ml, int nbits)
-#else  /* _NO_PROTO */
-BigNumDigit BnnShiftRight ( mm,  ml,  nbits)
-BigNum mm; BigNumLength ml; int nbits;
-#endif /* _NO_PROTO */
+BigNumDigit BnnShiftRight (mm, ml, nbits)
+
+register BigNum mm;
+register int 	ml;
+	 int	nbits;
 
 /*
  * Shifts M right by "nbits", filling with 0s.  
@@ -457,7 +405,7 @@ BigNum mm; BigNumLength ml; int nbits;
 	mm += ml;
 	lnbits = BN_DIGIT_SIZE - nbits;
 
-	while (ml-- > 0)
+	while (--ml >= 0)
 	{
 	    save = *(--mm);
 	    *mm = (save >> nbits) | res;
@@ -475,12 +423,11 @@ BigNum mm; BigNumLength ml; int nbits;
 	/******************* Additions **************************/
 
 
-#ifndef _NO_PROTO
-BigNumCarry BnnAddCarry (BigNum nn, BigNumLength nl, BigNumCarry carryin)
-#else  /* _NO_PROTO */
-BigNumCarry BnnAddCarry ( nn,  nl,  carryin)
-BigNum nn; BigNumLength nl; BigNumCarry carryin;
-#endif /* _NO_PROTO */
+BigNumCarry BnnAddCarry (nn, nl, carryin)
+
+register BigNum 	nn;
+register int 		nl;
+	 BigNumCarry 	carryin;
 
 /*
  * Performs the sum N + CarryIn => N.  
@@ -494,22 +441,22 @@ BigNum nn; BigNumLength nl; BigNumCarry carryin;
     if (nl == 0) 
         return (1);
 
-    while (nl > 0 && !(++(*nn++)))
-        nl--;
+    while (--nl >= 0 && !(++(*nn++)))
+        ;
 
-    return (nl > 0 ? 0 : 1);
+    return (nl >= 0 ? 0 : 1);
 }
 
 		/***************************************/
 /**/
 
 
-#ifndef _NO_PROTO
-BigNumCarry BnnAdd (BigNum mm, BigNumLength ml, BigNum nn, BigNumLength nl, BigNumCarry carryin)
-#else  /* _NO_PROTO */
-BigNumCarry BnnAdd ( mm,  ml,  nn,  nl,  carryin)
-BigNum mm; BigNumLength ml; BigNum nn; BigNumLength nl; BigNumCarry carryin;
-#endif /* _NO_PROTO */
+BigNumCarry BnnAdd (mm, ml, nn, nl, carryin)
+
+register BigNum 	mm, nn;
+	 int 		ml;
+register int 		nl;
+	 BigNumCarry 	carryin; 
 
 /* 
  * Performs the sum M + N + CarryIn => M.
@@ -525,19 +472,18 @@ BigNum mm; BigNumLength ml; BigNum nn; BigNumLength nl; BigNumCarry carryin;
     /* test computed at compile time */
     if (sizeof (BigNumProduct) > sizeof (BigNumDigit))
     {
-	while (nl > 0)
+	while (--nl >= 0)
 	{
 	    c += ((BigNumProduct)*mm) + *(nn++);
 	    *(mm++) = c;
 	    c >>= BN_DIGIT_SIZE;
-	    nl--;
 	}
     }
     else 
     {
 	register BigNumProduct save;
 
-	while (nl > 0)
+	while (--nl >= 0)
 	{
 	    save = *mm;
 	    c += save;
@@ -553,7 +499,6 @@ BigNum mm; BigNumLength ml; BigNum nn; BigNumLength nl; BigNumCarry carryin;
 		*(mm++) = c;
 		c = (c < save) ? 1 : 0;
 	    }
-	    nl--;
 	}
     }
 
@@ -567,12 +512,11 @@ BigNum mm; BigNumLength ml; BigNum nn; BigNumLength nl; BigNumCarry carryin;
 
 
 
-#ifndef _NO_PROTO
-BigNumCarry BnnSubtractBorrow (BigNum nn, BigNumLength nl, BigNumCarry carryin)
-#else  /* _NO_PROTO */
-BigNumCarry BnnSubtractBorrow ( nn,  nl,  carryin)
-BigNum nn; BigNumLength nl; BigNumCarry carryin;
-#endif /* _NO_PROTO */
+BigNumCarry BnnSubtractBorrow (nn, nl, carryin)
+
+register BigNum 	nn;
+register int 		nl;
+	 BigNumCarry 	carryin;
 
 /*
  * Performs the difference N + CarryIn - 1 => N.
@@ -585,22 +529,22 @@ BigNum nn; BigNumLength nl; BigNumCarry carryin;
     if (nl == 0)
         return (0);
 
-    while (nl > 0 && !((*nn++)--)) 
-        nl--;
+    while (--nl >= 0 && !((*nn++)--)) 
+        ;
 
-    return (nl > 0 ? 1 : 0);
+    return (nl >= 0 ? 1 : 0);
 }
 
 		/***************************************/
 /**/
 
 
-#ifndef _NO_PROTO
-BigNumCarry BnnSubtract (BigNum mm, BigNumLength ml, BigNum nn, BigNumLength nl, BigNumCarry carryin)
-#else  /* _NO_PROTO */
-BigNumCarry BnnSubtract ( mm,  ml,  nn,  nl,  carryin)
-BigNum mm; BigNumLength ml; BigNum nn; BigNumLength nl; BigNumCarry carryin;
-#endif /* _NO_PROTO */
+BigNumCarry BnnSubtract (mm, ml, nn, nl, carryin)
+
+register BigNum 	mm, nn;
+	 int 		ml;
+register int 		nl;
+	 BigNumCarry 	carryin;
 
 /* 
  * Performs the difference M - N + CarryIn - 1 => M.
@@ -617,20 +561,19 @@ BigNum mm; BigNumLength ml; BigNum nn; BigNumLength nl; BigNumCarry carryin;
     /* test computed at compile time */
     if (sizeof (BigNumProduct) > sizeof (BigNumDigit))
     {
-	while (nl > 0) 
+	while (--nl >= 0) 
 	{
 	    invn = *(nn++) ^ -1;
 	    c += ((BigNumProduct)*mm) + invn;
 	    *(mm++) = c;
 	    c >>= BN_DIGIT_SIZE;
-	    nl--;
 	}
     }
     else
     {
 	register BigNumProduct save;
 
-	while (nl > 0) 
+	while (--nl >= 0) 
 	{
 	    save = *mm;
 	    invn = *(nn++) ^ -1;
@@ -647,7 +590,6 @@ BigNum mm; BigNumLength ml; BigNum nn; BigNumLength nl; BigNumCarry carryin;
  		*(mm++) = c;
  		c = (c < invn) ? 1 : 0;
 	    }
-	    nl--;
  	}
     }
 
@@ -659,12 +601,12 @@ BigNum mm; BigNumLength ml; BigNum nn; BigNumLength nl; BigNumCarry carryin;
 
 	/***************** Multiplication ************************/
 
-#ifndef _NO_PROTO
-BigNumCarry BnnMultiplyDigit (BigNum pp, BigNumLength pl, BigNum mm, BigNumLength ml, BigNumDigit d)
-#else  /* _NO_PROTO */
-BigNumCarry BnnMultiplyDigit ( pp,  pl,  mm,  ml,  d)
-BigNum pp; BigNumLength pl; BigNum mm; BigNumLength ml; BigNumDigit d;
-#endif /* _NO_PROTO */
+
+BigNumCarry BnnMultiplyDigit (pp, pl, mm, ml, d)
+
+register BigNum 	pp, mm;
+         int 		pl, ml; 
+	 BigNumDigit	d;
 
 /*
  * Performs the product:
@@ -717,13 +659,13 @@ BigNum pp; BigNumLength pl; BigNum mm; BigNumLength ml; BigNumDigit d;
 #define X1 Hm
 	register BigNumDigit Lm, Hm, Ld, Hd, X0, X2 /*, X1, X3 */;
 
-	Ld = d & ((((BigNumDigit)1) << (BN_DIGIT_SIZE / 2)) -1);
+	Ld = d & ((1 << (BN_DIGIT_SIZE / 2)) -1);
 	Hd = d >> (BN_DIGIT_SIZE / 2);
 	while (ml != 0) 
 	{
 	    ml--;
 	    m_digit = *mm++;
-	    Lm = m_digit & ((((BigNumDigit)1) << (BN_DIGIT_SIZE / 2)) -1);
+	    Lm = m_digit & ((1 << (BN_DIGIT_SIZE / 2)) -1);
 	    Hm = m_digit >> (BN_DIGIT_SIZE / 2);
 	    X0 = Ld * Lm;
 	    X2 = Hd * Lm;
@@ -731,7 +673,7 @@ BigNum pp; BigNumLength pl; BigNum mm; BigNumLength ml; BigNumDigit d;
 	    X1 = Ld * Hm;
 
 	    if ((c += X0) < X0) X3++;
-	    if ((X1 += X2) < X2) X3 += (((BigNumDigit)1)<<(BN_DIGIT_SIZE / 2));
+	    if ((X1 += X2) < X2) X3 += (1<<(BN_DIGIT_SIZE / 2));
 	    X3 += (X1 >> (BN_DIGIT_SIZE / 2));
 	    X1 <<= (BN_DIGIT_SIZE / 2);
 	    if ((c += X1) < X1) X3++;
@@ -760,12 +702,11 @@ BigNum pp; BigNumLength pl; BigNum mm; BigNumLength ml; BigNumDigit d;
 }
 
 #ifdef mips
-#ifndef _NO_PROTO
-BigNumCarry BnnMultiply2Digit (BigNum pp, BigNumLength pl, BigNum mm, BigNumLength ml, BigNumDigit d0, BigNumDigit d1)
-#else  /* _NO_PROTO */
-BigNumCarry BnnMultiply2Digit ( pp,  pl,  mm,  ml,  d0,  d1)
-BigNum pp; BigNumLength pl; BigNum mm; BigNumLength ml; BigNumDigit d0; BigNumDigit d1;
-#endif /* _NO_PROTO */
+BigNumCarry BnnMultiply2Digit (pp, pl, mm, ml, d0, d1)
+
+register BigNum 	pp, mm;
+register int 		pl, ml; 
+	 BigNumDigit 	d0, d1;
 
 /*
  * Provided for compatibility with mips assembler implementation.
@@ -780,11 +721,10 @@ BigNum pp; BigNumLength pl; BigNum mm; BigNumLength ml; BigNumDigit d0; BigNumDi
 
 { 
     return
-	BnnMultiplyDigit (pp, pl, mm, ml, d0)
-	+ BnnMultiplyDigit (pp+1, pl-1, mm, ml, d1);
+        BnnMultiplyDigit (pp, pl, mm, ml, d0)
+        + BnnMultiplyDigit (pp+1, pl-1, mm, ml, d1);
 }
-#endif /* mips */
-
+#endif
 
 		/***************************************/
 /**/
@@ -796,17 +736,16 @@ BigNum pp; BigNumLength pl; BigNum mm; BigNumLength ml; BigNumDigit d0; BigNumDi
 #define SUB(xh,xl,yh,yl)	if (yl > xl) {xl -= yl; xh -= yh + 1;}\
 				else         {xl -= yl; xh -= yh;}
 
-#define LOW(x) 			(x & ((((BigNumDigit)1) << (BN_DIGIT_SIZE / 2)) -1)) 
+#define LOW(x) 			(x & ((1 << (BN_DIGIT_SIZE / 2)) -1)) 
 #define HIGH(x) 		(x >> (BN_DIGIT_SIZE / 2)) 
 #define L2H(x) 			(x << (BN_DIGIT_SIZE / 2)) 
 
 
-#ifndef _NO_PROTO
-BigNumDigit BnnDivideDigit (BigNum qq, BigNum nn, BigNumLength nl, BigNumDigit d)
-#else  /* _NO_PROTO */
-BigNumDigit BnnDivideDigit ( qq,  nn,  nl,  d)
-BigNum qq; BigNum nn; BigNumLength nl; BigNumDigit d;
-#endif /* _NO_PROTO */
+BigNumDigit BnnDivideDigit (qq, nn, nl, d)
+
+register BigNum 	qq, nn;
+register int 		nl;
+	 BigNumDigit 	d;
 
 /* Performs the quotient: N div d => Q
  * Returns R = N mod d
@@ -838,7 +777,7 @@ BigNum qq; BigNum nn; BigNumLength nl; BigNumDigit d;
     else
     {
 	int 		k;
-	BigNumLength	orig_nl;
+	int 		orig_nl;
 	BigNumDigit 	rh;  		/* Two halves of current remainder */
 	BigNumDigit 	rl;  		/* Correspond to quad above */
 	register BigNumDigit qa;   	/* Current appr. to quotient */

@@ -24,8 +24,8 @@ exception TypingBug of string;;
 let new_vartype, reset_vartypes =
   (* Generating and resetting unknowns *)
   let counter = ref 0 in
-  (function () -> counter := !counter+1; {Index = !counter; Value = Unknown}),
-  (function () -> counter := 0)
+  (function () -> counter:=!counter+1; {Index=!counter; Value=Unknown}),
+  (function () -> counter:=0)
 ;;
 
 let rec shorten t =
@@ -217,7 +217,7 @@ global_typing_env:=
             TypeVar{Index=1;Value=Unknown})))
    ::init_typing_env;
 ();;
-typing (parse_top "f = z(\\f.(\\n. C (= n 0) 1 ( * n (f (- n 1)))));");;
+typing (parse_top "f = z(\\f.(\\n. C (= n 0) 1 (* n (f (- n 1)))));");;
 typing (parse_top "x = f 8;");;
 typing (parse_top
   "b = z(\\b.(\\n. C (= n 1) 1 (C (= n 2) 1 (+ (b(- n 1)) (b(- n 2))))));");;

@@ -26,6 +26,7 @@ let little_name_of_global g = g.qualid.id
 
 type type_constr =
   { mutable ty_stamp: int;              (* Stamp *)
+    mutable ty_dang: bool;              (* Dangerous or not *)
     mutable ty_abbr: type_abbrev }      (* Abbreviation or not *)
 
 and type_abbrev =
@@ -89,8 +90,6 @@ and label_desc =
 
 let generic = (-1)
 and notgeneric = 0;;
-
-let no_type = { typ_desc = Tproduct []; typ_level = 0 };;
 
 (* Global variables *)
 

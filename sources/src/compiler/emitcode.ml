@@ -2,7 +2,6 @@
 
 #open "misc";;
 #open "const";;
-#open "lambda";;
 #open "instruct";;
 #open "prim";;
 #open "opcodes";;
@@ -189,10 +188,6 @@ let rec emit = function
     | Kpush :: Kget_global qualid :: Ktermapply :: C ->
         out PUSH_GETGLOBAL_APPTERM;
         reloc__slot_for_get_global qualid;
-        emit C
-    | Kevent ev :: C ->
-        ev.ev_pos <- !out_position;
-        event__enter ev;
         emit C
     | instr :: C ->
         out(match instr with

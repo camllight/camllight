@@ -3,44 +3,6 @@
 
 #open "const";;
 #open "prim";;
-#open "globals";;
-
-(* Structure of compilation environments *)
-
-type access_path =
-    Path_root
-  | Path_son of int * access_path
-  | Path_tuple of access_path list
-;;
-
-type lambda_variable =
-  { var_name: string;
-    var_path: access_path;
-    var_typ: typ }
-;;
-
-type transl_env =
-    Tnullenv
-  | Treserved of transl_env
-  | Tenv of lambda_variable list * transl_env
-;; 
-
-(* Debugging events *)
-
-type event_kind =
-    Lbefore
-  | Lafter of typ
-;;
-
-type event =
-  { ev_kind : event_kind;
-    ev_file: string;
-    ev_char: int;
-    ev_env: transl_env;
-    mutable ev_pos: int }
-;;
-
-(* The intermediate language *)
 
 type lambda =
     Lvar of int
@@ -62,19 +24,8 @@ type lambda =
   | Lsequand of lambda * lambda
   | Lsequor of lambda * lambda
   | Lshared of lambda * int ref
-  | Levent of event * lambda
 ;;
 
 let share_lambda l =
-  Lshared(l, ref (-1))
+  Lshared(l, ref instruct__Nolabel)
 ;;
-
-(* Guards *)
-let has_guard = function
-    _,Lifthenelse(l1, l2, Lstaticfail) -> true
-  | _ -> false;;
-
-let guard_expression l1 l2 =
-  Lifthenelse(l1, l2, Lstaticfail);;
-
-

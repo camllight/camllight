@@ -27,7 +27,7 @@ value gr_wait_event(eventlist)
   int mouse_x, mouse_y, button, key;
   Window rootwin, childwin;
   int root_x, root_y, win_x, win_y, modifiers;
-  sighandler_return_type (*oldsig)();
+  sighandler_return_type (*oldsigio)();
   XEvent event;
 
   mask = 0;
@@ -68,7 +68,7 @@ value gr_wait_event(eventlist)
       gr_head++;
       if (gr_head >= SIZE_QUEUE) gr_head = 0;
     } else {
-      oldsig = signal(EVENT_SIGNAL, SIG_IGN);
+      oldsigio = signal(SIGIO, SIG_IGN);
       XSelectInput(grdisplay, grwindow.win, DEFAULT_EVENT_MASK | mask);
     again:
       XNextEvent(grdisplay, &event);
@@ -86,10 +86,7 @@ value gr_wait_event(eventlist)
         break;
       case KeyPress:
         gr_handle_simple_event(&event);
-        /* Some KeyPress events do not enqueue any characters (e.g. pressing
-           Ctrl), because they expand via XLookupString to the empty string.
-           Therefore we need to check again whether the char queue is empty. */
-        if ((mask & KeyPressMask) == 0 || QueueIsEmpty) goto again;
+        if (!(mask & KeyPressMask)) goto again;
         key = gr_queue[gr_head];
         gr_head++;
         if (gr_head >= SIZE_QUEUE) gr_head = 0;
@@ -98,7 +95,7 @@ value gr_wait_event(eventlist)
         gr_handle_simple_event(&event);
         goto again;
       }
-      signal(EVENT_SIGNAL, oldsig);
+      signal(SIGIO, oldsigio);
       XSelectInput(grdisplay, grwindow.win, DEFAULT_EVENT_MASK);
       XFlush(grdisplay);
     }

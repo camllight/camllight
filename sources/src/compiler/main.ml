@@ -8,10 +8,7 @@
 let anonymous s =
   if filename__check_suffix s ".ml" then
     let filename = filename__chop_suffix s ".ml" in
-    compile_implementation (filename__basename filename) filename ".ml"
-  else if filename__check_suffix s ".mlt" then (* profiler temp files *)
-    let filename = filename__chop_suffix s ".mlt" in
-    compile_implementation (filename__basename filename) filename ".mlt"
+    compile_implementation (filename__basename filename) filename
   else if filename__check_suffix s ".mli" then
     let filename = filename__chop_suffix s ".mli" in
     compile_interface (filename__basename filename) filename
@@ -28,13 +25,11 @@ and open_set set =
   with Not_found ->
     raise (arg__Bad ("unknown module set " ^ set))
 and show_version () =
-  version__print_banner(); flush std_err
+   prerr_string version__banner; prerr_endline ""
 and show_types_flag () =
   compiler__verbose := true
 and debug_option () =
-  event__record_events := true; compiler__write_extended_intf := true
-and set_language lang =
-  interntl__language := lang
+  compiler__write_extended_zi := true
 ;;
 
 let main() =
@@ -51,18 +46,15 @@ try
               "-version", arg__Unit show_version;
               "-i", arg__Unit show_types_flag;
               "-g", arg__Unit debug_option;
-              "-lang", arg__String set_language;
+              "-debug", arg__Unit debug_option;
               "-", arg__String anonymous]
              anonymous;
   exit 0
+
 with Toplevel -> exit 2
-   | sys__Break -> exit 2
-   | sys__Sys_error msg ->
-      interntl__eprintf "Input/output error: %s.\n" msg;
-      exit 2
-   | Zinc s ->
-      interntl__eprintf "Internal error: %s.\nPlease report it.\n" s;
-      exit 100
+   | sys__Break -> exit 3
+   | Zinc s -> prerr_string "# Internal error: "; prerr_endline s; exit 4
 ;;
 
-printexc__f main (); exit 0;;
+printexc__f main ()
+;;

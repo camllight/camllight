@@ -61,7 +61,7 @@ let signal sig = function
 let system cmd =
   match fork() with
      0 -> execv "/bin/sh" [| "/bin/sh"; "-c"; cmd |]; exit 127
-  | id -> snd(waitpid [] id)
+  | id -> waitpid [] id
 ;;
 
 type popen_process =
@@ -103,7 +103,7 @@ let open_process cmd =
 
 let close_proc fun_name proc =
   try
-    let (_, status) = waitpid [] (hashtbl__find popen_processes proc) in
+    let status = waitpid [] (hashtbl__find popen_processes proc) in
     hashtbl__remove popen_processes proc;
     status
   with Not_found ->
@@ -145,16 +145,14 @@ let establish_server server_fun sockaddr =
   listen sock 3;
   while true do
     let (s, caller) = accept sock in
-    (* The "double fork" trick, the process which calls server_fun will not
-       leave a zombie process *)
     match fork() with
-       0 -> if fork() != 0 then exit 0; (* The son exits, the grandson works *)
+       0 -> if fork() != 0 then exit 0;
             let inchan = in_channel_of_descr s in
             let outchan = out_channel_of_descr s in
             server_fun inchan outchan;
             close_in inchan;
             close_out outchan
-    | id -> close s; waitpid [] id (* Reclaim the son *); ()
+    | id -> close s; waitpid [] id; ()
   done
 ;;
 

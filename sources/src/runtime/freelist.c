@@ -2,228 +2,131 @@
 #include "debugger.h"
 #include "freelist.h"
 #include "gc.h"
-#include "gc_ctrl.h"
 #include "major_gc.h"
 #include "misc.h"
 #include "mlvalues.h"
 
-/* The free-list is kept sorted by increasing addresses.
-   This makes the merging of adjacent free blocks possible.
-   (See [fl_merge_block].)
-*/
-
 typedef struct {
-  char *next_bp;   /* Pointer to the first byte of the next block. */
+  char *next_block_bp;
 } block;
 
-static struct {
-  value filler1; /* Make sure the sentinel is never adjacent to any block. */
-  header_t h;
-  value first_hp;
-  value filler2; /* Make sure the sentinel is never adjacent to any block. */
-} sentinel = {0, Make_header (0, 0, Blue), NULL, 0};
-
-#define Fl_head ((char *) (&(sentinel.first_hp)))
-static char *fl_prev = Fl_head;  /* Current allocation pointer. */
-static char *fl_last = NULL;     /* Last block in the list.  Only valid
-                                    just after fl_allocate returned NULL. */
-char *fl_merge = Fl_head;        /* Current insertion pointer.  Managed
-                                    jointly with [sweep_slice]. */
-
-#define Next(b) (((block *) (b))->next_bp)
-
 #ifdef DEBUG
-void fl_verify ()
+void fl_verify (fl)
+     free_list_t fl;
 {
-  char *cur, *prev;
-  int prev_found = 0, merge_found = 0;
+  char *cur;
+  char **prev;
 
-  prev = Fl_head;
-  cur = Next (prev);
+  prev = &(fl->first_block_bp);
+  cur = *prev;
   while (cur != NULL){
     Assert (Is_in_heap (cur));
-    if (cur == fl_prev) prev_found = 1;
-    if (cur == fl_merge) merge_found = 1;
-    prev = cur;
-    cur = Next (prev);
+    prev = &(((block *) cur)->next_block_bp);
+    cur = *prev;
   }
-  Assert (prev_found || fl_prev == Fl_head);
-  Assert (merge_found || fl_merge == Fl_head);
 }
 #endif
 
-/* [allocate_block] is called by [fl_allocate].  Given a suitable free
-   block and the desired size, it allocates a new block from the free
-   block.  There are three cases:
-   0. The free block has the desired size.  Detach the block from the
-      free-list and return it.
-   1. The free block is 1 word longer than the desired size.  Detach
-      the block from the free list (the remaining word cannot be linked),
-      make an empty block (header only), and return the rest.
-   2. The free block is big enough.  Split it in two and return the right
-      block.
-   In all cases, the allocated block is right-justified in the free block:
-   it is located in the high-address words of the free block.  This way,
-   the linking of the free-list does not change in case 2.
-*/
-static char *allocate_block (wh_sz, prev, cur)
-    mlsize_t wh_sz;
-    char *prev, *cur;
+free_list_t fl_new ()
 {
-  header_t h = Hd_bp (cur);
-                                             Assert (Whsize_hd (h) >= wh_sz);
-  if (Wosize_hd (h) < wh_sz + 1){                        /* Cases 0 and 1. */
-    Next (prev) = Next (cur);
-                    Assert (Is_in_heap (Next (prev)) || Next (prev) == NULL);
-    if (fl_merge == cur) fl_merge = prev;
-#ifdef DEBUG
-    fl_last = NULL;
-#endif
-      /* In case 1, the following creates the empty block correctly.
-         In case 0, it gives an invalid header to the block.  The function
-         calling [fl_allocate] will overwrite it. */
-    Hd_op (cur) = Make_header (0, 0, White);
-  }else{                                                        /* Case 2. */
-    Hd_op (cur) = Make_header (Wosize_hd (h) - wh_sz, 0, Blue);
-  }
-  fl_prev = prev;
-  return cur + Bosize_hd (h) - Bsize_wsize (wh_sz);
-}  
+  free_list_t result = (free_list_t) malloc (sizeof (struct free_list));
 
-/* [fl_allocate] does not set the header of the newly allocated block.
-   The calling function must do it before any GC function gets called.
-   [fl_allocate] returns a head pointer.
-*/
-char *fl_allocate (wo_sz)
-     mlsize_t wo_sz;
+  result->first_block_bp = NULL;
+  result->total_wosize = 0;
+  return result;
+}
+
+void fl_free (fl)
+     free_list_t fl;
 {
-  char *cur, *prev;
-                                  Assert (sizeof (char *) == sizeof (value));
-                                  Assert (fl_prev != NULL);
-                                  Assert (wo_sz >= 1);
-    /* Search from [fl_prev] to the end of the list. */
-  prev = fl_prev;
-  cur = Next (prev);
-  while (cur != NULL){                             Assert (Is_in_heap (cur));
-    if (Wosize_bp (cur) >= wo_sz){
-      return allocate_block (Whsize_wosize (wo_sz), prev, cur);
+  free ((char *) fl);
+}
+
+char *fl_allocate (fl, sz)
+     free_list_t fl;
+     mlsize_t sz;
+{
+  char *cur;
+  char **prev;
+  char *new_hp;
+
+  Assert (sizeof (char *) == sizeof (value));
+  prev = &(fl->first_block_bp);
+  cur = *prev;
+  while (cur != NULL){
+    Assert (Is_in_heap (cur));
+    if (Wosize_op (cur) >= sz){
+      if (Wosize_op (cur) >= Whsize_wosize (sz) + 1){
+	/* Allocate a chunk from the end of the block. */
+	new_hp = cur + Bosize_op (cur) - Bhsize_wosize (sz);
+	/* Blue tells the GC not to collect this block. */
+	Hd_hp (new_hp) = Make_header (sz, 0, Blue);
+	Hd_op (cur) = Make_header(Wosize_op(cur) - Whsize_wosize(sz), 0, Blue);
+	fl->total_wosize -= Whsize_wosize (sz);
+	return new_hp;
+      }else{
+	/* Detach the block from the free-list. */
+	*prev = ((block *) cur)->next_block_bp;
+	Assert (Is_in_heap (*prev) || *prev == NULL);
+	if (Wosize_op (cur) == Whsize_wosize (sz)){
+	  /* Leave an extra empty block.  We leave it at the end of the
+             useful block so that the sweeping code will collapse them when the
+             useful block is deallocated. */
+	  Hd_hp (cur + Bsize_wsize (sz)) = Make_header (0, 0, White);
+	  Hd_op (cur) = Make_header (sz, 0, Blue);
+	  fl->total_wosize -= Whsize_wosize (sz);
+	  return Hp_op (cur);
+	}else{
+	  Assert (Wosize_op (cur) == sz);
+	  /* Allocate the whole block. */
+	  fl->total_wosize -= sz;
+	  return Hp_op (cur);
+	}
+      }
     }
-    prev = cur;
-    cur = Next (prev);
+    prev = &(((block *) cur)->next_block_bp);
+    cur = *prev;
   }
-  fl_last = prev;
-    /* Search from the start of the list to [fl_prev]. */
-  prev = Fl_head;
-  cur = Next (prev);
-  while (prev != fl_prev){
-    if (Wosize_bp (cur) >= wo_sz){
-      return allocate_block (Whsize_wosize (wo_sz), prev, cur);
-    }
-    prev = cur;
-    cur = Next (prev);
-  }
-    /* No suitable block was found. */
+  /* No suitable block was found. */
   return NULL;
 }
 
-void fl_init_merge ()
+void fl_add_block (fl, bp)
+     free_list_t fl;
+     char *bp;
 {
-  fl_merge = Fl_head;
-}
+  mlsize_t sz;
+  mlsize_t prevsz;
 
-/* [fl_merge_block] returns the hp of the next block after bp, because
-   merging blocks may change that. */
-char *fl_merge_block (bp)
-    char *bp;
-{
-  char *prev, *cur, *adj;
-  header_t hd = Hd_bp (bp);
-  
+  Assert (sizeof (char *) == sizeof (value));
+  sz = Wosize_bp (bp);
 #ifdef DEBUG
-  {
-    mlsize_t i;
-    for (i = 0; i < Wosize_hd (hd); i++){
-      Field (Val_bp (bp), i) = not_random ();
-    }
+  { mlsize_t i;
+    for (i = 0; i < sz; i++) Field (Val_bp (bp), i) = not_random ();
   }
 #endif
-  prev = fl_merge;
-  cur = Next (prev);
-    /* The sweep code makes sure that this is the right place to insert
-       this block: */
-    Assert (prev < bp || prev == Fl_head);
-    Assert (cur > bp || cur == NULL);
-
-    /* If [bp] and [cur] are adjacent, remove [cur] from the free-list
-       and merge them. */
-  adj = bp + Bosize_hd (hd);
-  if (adj == Hp_bp (cur)){
-    char *next_cur = Next (cur);
-    long cur_whsz = Whsize_bp (cur);
-
-    Next (prev) = next_cur;
-    if (fl_prev == cur) fl_prev = prev;
-    hd = Make_header (Wosize_hd (hd) + cur_whsz, 0, Blue);
-    Hd_bp (bp) = hd;
-    adj = bp + Bosize_hd (hd);
-#ifdef DEBUG
-    fl_last = NULL;
-    Next (cur) = (char *) not_random ();
-    Hd_bp (cur) = not_random ();
-#endif
-    cur = next_cur;
+  if (fl->first_block_bp != NULL){
+    prevsz = Wosize_bp (fl->first_block_bp);
+  }else{
+    prevsz = 0;
   }
-    /* If [prev] and [bp] are adjacent merge them, else insert [bp] into
-       the free-list if it is big enough. */
-  if (prev + Bosize_bp (prev) == Hp_bp (bp)){
-    Hd_bp (prev) = Make_header (Wosize_bp (prev) + Whsize_hd (hd), 0, Blue);
+  if ((fl->first_block_bp + Bsize_wsize (prevsz)) == Hp_bp (bp)){
+    /* Collapse the new block with the first block of the free-list. */
+    sz = Whsize_wosize (sz);
 #ifdef DEBUG
     Hd_bp (bp) = not_random ();
 #endif
-    Assert (fl_merge == prev);
-  }else if (Wosize_hd (hd) > 0){
-    Hd_bp (bp) = Bluehd_hd (hd);
-    Next (bp) = cur;
-    Next (prev) = bp;
-    fl_merge = bp;
-  } /* Else leave it in white. */
-  return adj;
-}
-
-/* This is a heap extension.  We have to insert it in the right place
-   in the free-list.
-   [fl_add_block] can only be called just after a call to [fl_allocate]
-   that returned NULL.
-   Most of the heap extensions are expected to be at the end of the
-   free list.  (This depends on the implementation of [malloc].)
-*/
-void fl_add_block (bp)
-     char *bp;
-{
-                                                   Assert (fl_last != NULL);
-                                            Assert (Next (fl_last) == NULL);
-#ifdef DEBUG
-  {
-    mlsize_t i;
-    for (i = 0; i < Wosize_bp (bp); i++){
-      Field (Val_bp (bp), i) = not_random ();
-    }
-  }
-#endif
-  if (bp > fl_last){
-    Next (fl_last) = bp;
-    Next (bp) = NULL;
+    Hd_bp (fl->first_block_bp) = Make_header (prevsz + sz, 0, Blue);
+    fl->total_wosize += sz;
   }else{
-    char *cur, *prev;
-
-    prev = Fl_head;
-    cur = Next (prev);
-    while (cur != NULL && cur < bp){   Assert (prev < bp || prev == Fl_head);
-      prev = cur;
-      cur = Next (prev);
-    }                                  Assert (prev < bp || prev == Fl_head);
-                                            Assert (cur > bp || cur == NULL);
-    Next (bp) = cur;
-    Next (prev) = bp;
+    if (sz >= 1){
+      Hd_bp (bp) = Make_header (sz, 0, Blue);
+      ((block *) bp)->next_block_bp = fl->first_block_bp;
+      fl->first_block_bp = bp;
+      fl->total_wosize += sz;
+    }else{
+      Assert (sz == 0);
+      Hd_bp (bp) = Make_header (0, 0, White);
+    }
   }
 }

@@ -4,11 +4,6 @@ stdlib=LIBDIR
 includes=""
 options=""
 
-case "$LANG" in
-  "") ;;
-   *) options="-lang $LANG";;
-esac
-
 while : ; do
   case $1 in
     "")
@@ -24,14 +19,9 @@ while : ; do
     -stdlib)
       stdlib=$2
       shift;;
-    -lang)
-      options="$options -lang $2"
-      shift;;
     -*)
       echo "Unknown option \"$1\", ignored" >&2;;
     *)
-      PATH=${stdlib}:${PATH}
-      export PATH
       exec $1 -stdlib $stdlib $includes $options;;
   esac
   shift

@@ -55,54 +55,73 @@ let new_type_var_list n =
   type_var_list n !current_level
 ;;
 
-(* To compute the free type variables in a type *)
+(* To compute the free nongeneric type variables and the dangerous variables
+   in a type *)
 
-let free_type_vars level ty =
-  let fv = ref [] in
-  let rec free_vars ty =
-    let ty = type_repr ty in
-    match ty.typ_desc with
-      Tvar _ ->
-        if ty.typ_level >= level then fv := ty :: !fv
+let rec free_type_vars ty =
+  let ty = type_repr ty in
+  match ty.typ_desc with
+    Tvar _ ->
+      if ty.typ_level == generic then [] else [ty]
   | Tarrow(t1,t2) ->
-      free_vars t1; free_vars t2
+      free_type_vars t1 @ free_type_vars t2
   | Tproduct(ty_list) ->
-      do_list free_vars ty_list
+      flat_map free_type_vars ty_list
   | Tconstr(c, ty_list) ->
-      do_list free_vars ty_list in
-  free_vars ty;
-  !fv
+      flat_map free_type_vars ty_list
+;;
+
+let rec dangerous_vars ty =
+  let ty = type_repr ty in
+  match ty.typ_desc with
+    Tvar _ -> []
+  | Tarrow(t1,t2) -> []
+  | Tproduct(ty_list) ->
+      flat_map dangerous_vars ty_list
+  | Tconstr(c, ty_list) ->
+      if c.info.ty_dang
+      then free_type_vars ty
+      else flat_map dangerous_vars ty_list
 ;;
 
 (* To generalize a type *)
 
-let rec gen_type ty =
+type type_position = Regular | Protected | Dangerous
+;;
+
+let rec gen_type pos ty =
   let ty = type_repr ty in
   begin match ty.typ_desc with
     Tvar _ ->
-      if ty.typ_level > !current_level then ty.typ_level <- generic
+      if ty.typ_level > !current_level then begin
+        ty.typ_level <- (if pos == Dangerous then !current_level else generic)
+      end
   | Tarrow(t1,t2) ->
-      let lvl1 = gen_type t1 in
-      let lvl2 = gen_type t2 in
-      ty.typ_level <- if lvl1 <= lvl2 then lvl1 else lvl2
+      let pos' =
+        if pos == Dangerous then Dangerous else Protected in
+      ty.typ_level <- min (gen_type pos' t1) (gen_type pos' t2)
   | Tproduct(ty_list) ->
-      ty.typ_level <- gen_type_list ty_list
+      ty.typ_level <- gen_type_list pos ty_list
   | Tconstr(c, ty_list) ->
-      ty.typ_level <- gen_type_list ty_list
+      ty.typ_level <-
+        gen_type_list
+          (if pos != Regular then pos
+           else if c.info.ty_dang then Dangerous else Regular)
+         ty_list
   end;
   ty.typ_level
 
-and gen_type_list = function
+and gen_type_list pos = function
     [] ->
       notgeneric
   | ty::rest ->
-      let lvl1 = gen_type ty in
-      let lvl2 = gen_type_list rest in
-      if lvl1 <= lvl2 then lvl1 else lvl2
+      min (gen_type pos ty) (gen_type_list pos rest)
 ;;
 
 let generalize_type ty =
-  gen_type ty; ()
+  let level = gen_type Regular ty in ()
+and generalize_type_constr ty =
+  let level = gen_type Protected ty in ()
 ;;
 
 (* To take an instance of a type *)
@@ -340,33 +359,3 @@ and filter_expand ty1 ty2 =
   | (_, _) ->
       raise Unify
 ;;
-
-(* Simple equality between base types. *)
-
-let rec same_base_type ty base_ty =
-  match ((type_repr ty).typ_desc, (type_repr base_ty).typ_desc) with
-    Tconstr({info = {ty_abbr = Tabbrev(params,body)}}, args), _ ->
-      same_base_type (expand_abbrev params body args) base_ty
-  | _, Tconstr({info = {ty_abbr = Tabbrev(params,body)}}, args) ->
-      same_base_type ty (expand_abbrev params body args)
-  | Tconstr(cstr1, []), Tconstr(cstr2, []) ->
-      same_type_constr cstr1 cstr2
-  | _, _ ->
-      false
-;;
-
-(* Extract the list of labels of a record type. *)
-
-let rec labels_of_type ty =
-  match (type_repr ty).typ_desc with
-    Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args) ->
-      labels_of_type (expand_abbrev params body args)
-  | Tconstr(cstr, _) ->
-      begin match (type_descr_of_type_constr cstr).info.ty_desc with
-        Record_type lbl_list -> lbl_list
-      | _ -> fatal_error "labels_of_type"
-      end
-  | _ ->
-      fatal_error "labels_of_type"
-;;
-

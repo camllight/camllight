@@ -1,5 +1,5 @@
 ! Copyright     Digital Equipment Corporation     1991
-! Last modified_on Fri Mar  1 17:21:25 GMT+1:00 1991 by shand
+! Last modified on Fri Mar  1 17:21:25 GMT+1:00 1991 by shand
 !
 !    KerN for SPARC
 !    Mark Shand

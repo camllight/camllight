@@ -22,8 +22,3 @@ The code in the bignum/ subdirectory is copyright INRIA and Digital,
 and may be reproduced and distributed freely to non commercial usage
 according to the conditions stated in the documentation of this package
 (directory bignum/doc).
-
-KNOWN PROBLEMS:
-
-64-bit architectures are not yet fully supported.  The test suite passes on 
-a Dec Alpha, but some bugs remain.

@@ -4,7 +4,6 @@
 #define _stacks_
 
 
-#include "misc.h"
 #include "mlvalues.h"
 #include "memory.h"
 
@@ -50,9 +49,19 @@ extern value * extern_rsp;
 extern struct trap_frame * tp;
 extern value global_data;
 
-void reset_roots P((void));
-void init_stacks P((void));
-void realloc_stacks P((void));
+#ifdef ANSI
+
+void reset_roots(void);
+void init_stacks(void);
+void realloc_stacks(void);
+
+#else
+
+void reset_roots();
+void init_stacks();
+void realloc_stacks();
+
+#endif
 
 
 #endif /* _stacks_ */

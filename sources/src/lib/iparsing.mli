@@ -13,11 +13,9 @@ type parser_env =
     mutable lval : obj;                 (* Its semantic attribute *)
     mutable symb_start : int;           (* Start pos. of the current symbol*)
     mutable symb_end : int;             (* End pos. of the current symbol *)
-    mutable asp : int;                  (* The stack pointer for attributes *)
-    mutable rule_len : int;             (* Number of rhs items in the rule *)
-    mutable rule_number : int;          (* Rule number to reduce by *)
-    mutable sp : int;                   (* Saved sp for parse_engine *)
-    mutable state : int }               (* Saved state for parse_engine *)
+    mutable sp : int;                   (* The stack pointer *)
+    mutable rule_len : int;             (* Number of rsh items in the rule *)
+    mutable rule_number : int }         (* Rule number to reduce by *)
 ;;
 
 type parser_input =

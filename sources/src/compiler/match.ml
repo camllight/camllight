@@ -8,7 +8,6 @@
 #open "lambda";;
 #open "prim";;
 #open "instruct";;
-#open "clauses";;
 
 (*  See Peyton-Jones, The Implementation of functional programming
     languages, chapter 5. *)
@@ -30,13 +29,11 @@ type pattern_matching =
 
 (* Simple pattern manipulations *)
 
-let make_path = fun
-  n (path::pathl) ->
-    let rec make i =
-      if i >= n then pathl else Lprim(Pfield i, [path]) :: make (i+1)
-    in
-      make 0
-| _ _ -> fatal_error "make_path"
+let make_path n (path::pathl) =
+  let rec make i =
+    if i >= n then pathl else Lprim(Pfield i, [path]) :: make (i+1)
+  in
+    make 0
 ;;
 
 let add_to_match (Matching(casel,pathl)) cas =
@@ -49,16 +46,14 @@ and make_constant_match = fun
 and make_tuple_match arity pathl =
   Matching([], make_path arity pathl)
 
-and make_construct_match = fun
-  cstr (path :: pathl as pathl0) cas ->
-  (match cstr.info.cs_kind with
+and make_construct_match cstr (path :: pathl as pathl0) cas =
+  match cstr.info.cs_kind with
     Constr_constant ->
       Matching([cas], pathl)
   | Constr_superfluous n ->
       Matching([cas], pathl0)
   | _ ->
-      Matching([cas], Lprim(Pfield 0, [path]) :: pathl))
-| _ _ _ -> fatal_error "make_construct_match"
+      Matching([cas], Lprim(Pfield 0, [path]) :: pathl)
 ;;
 
 (* Auxiliaries for factoring common tests *)
@@ -74,11 +69,11 @@ let add_to_division make_match divlist key cas =
 (* To skip type constraints and aliases, and flatten "or" patterns. *)
 
 let rec simpl_casel = function
-    ({p_desc = Zaliaspat(pat,v)} :: patl, action) :: rest ->
+    (Pat(Zaliaspat(pat,v),_) :: patl, action) :: rest ->
       simpl_casel ((pat::patl, action) :: rest)
-  | ({p_desc = Zconstraintpat(pat,ty)} :: patl, action) :: rest ->
+  | (Pat(Zconstraintpat(pat,ty),_) :: patl, action) :: rest ->
       simpl_casel ((pat::patl, action) :: rest)
-  | ({p_desc = Zorpat(pat1, pat2)} :: patl, action) :: rest ->
+  | (Pat(Zorpat(pat1, pat2),_) :: patl, action) :: rest ->
       simpl_casel ((pat1::patl, action) :: (pat2::patl, action) :: rest)
   | casel ->
       casel
@@ -89,7 +84,7 @@ let rec simpl_casel = function
 let divide_constant_matching (Matching(casel, pathl)) =
   divide_rec casel where rec divide_rec casel =
     match simpl_casel casel with
-      ({p_desc = Zconstantpat(cst)} :: patl, action) :: rest ->
+      (Pat(Zconstantpat(cst),_) :: patl, action) :: rest ->
         let (constant, others) = divide_rec rest in
           add_to_division
             (make_constant_match pathl) constant cst (patl, action),
@@ -98,17 +93,16 @@ let divide_constant_matching (Matching(casel, pathl)) =
         [], Matching(casel, pathl)
 ;;
 
-let wildcard_pat =
-  {p_desc = Zwildpat; p_loc = no_location; p_typ = no_type};;
-
 let divide_tuple_matching arity (Matching(casel, pathl)) =
   divide_rec casel where rec divide_rec casel =
     match simpl_casel casel with
-      ({p_desc = Ztuplepat(args)} :: patl, action) :: rest ->
+      (Pat(Ztuplepat(args), _) :: patl, action) :: rest ->
         add_to_match (divide_rec rest) (args @ patl, action)
-    | ({p_desc = (Zwildpat | Zvarpat _)} :: patl, action) :: rest ->
+    | (Pat((Zwildpat | Zvarpat _), _) :: patl, action) :: rest ->
         let rec make_pats i =
-          if i >= arity then [] else wildcard_pat :: make_pats (i+1) in
+          if i >= arity
+          then []
+          else Pat(Zwildpat, no_location) :: make_pats (i+1) in
         add_to_match (divide_rec rest) (make_pats 0 @ patl, action)
     | [] ->
         make_tuple_match arity pathl
@@ -119,13 +113,13 @@ let divide_tuple_matching arity (Matching(casel, pathl)) =
 let divide_construct_matching (Matching(casel, pathl)) =
   divide_rec casel where rec divide_rec casel =
     match simpl_casel casel with
-      ({p_desc = Zconstruct0pat(c)} :: patl, action) :: rest ->
+      (Pat(Zconstruct0pat(c), _) :: patl, action) :: rest ->
         let (constrs, others) =
           divide_rec rest in
         add_to_division
           (make_construct_match c pathl) constrs c.info.cs_tag (patl, action),
         others
-    | ({p_desc = Zconstruct1pat(c,arg)} :: patl, action) :: rest ->
+    | (Pat(Zconstruct1pat(c,arg),_) :: patl, action) :: rest ->
         let patl' =
           match c.info.cs_kind with
             Constr_constant -> patl
@@ -139,27 +133,24 @@ let divide_construct_matching (Matching(casel, pathl)) =
         [], Matching(casel, pathl)
 ;;
 
-let divide_var_matching = function
-  Matching(casel, (_ :: endpathl as pathl)) ->
-    let rec divide_rec casel =
-      match simpl_casel casel with
-        ({p_desc = (Zwildpat | Zvarpat _)} :: patl, action) :: rest ->
-          let vars, others = divide_rec rest in
-            add_to_match vars (patl, action),
-            others
-      | casel ->
-          Matching([], endpathl), Matching(casel, pathl)
-    in divide_rec casel
-| _ -> fatal_error "divide_var_matching"
+let divide_var_matching (Matching(casel, (_ :: endpathl as pathl))) =
+  divide_rec casel where rec divide_rec casel =
+    match simpl_casel casel with
+      (Pat((Zwildpat | Zvarpat _),_) :: patl, action) :: rest ->
+        let vars, others = divide_rec rest in
+          add_to_match vars (patl, action),
+          others
+    | casel ->
+        Matching([], endpathl), Matching(casel, pathl)
 ;;
 
 let divide_record_matching (Matching(casel, pathl)) =
   let max_pos = ref 0 in
   let rec max_size = function
-      {p_desc = Zaliaspat(pat,v)} -> max_size pat
-    | {p_desc = Zconstraintpat(pat,ty)} -> max_size pat
-    | {p_desc = Zorpat(pat1,pat2)} -> max_size pat1; max_size pat2
-    | {p_desc = Zrecordpat pat_expr_list} ->
+      Pat(Zaliaspat(pat,v),_) -> max_size pat
+    | Pat(Zconstraintpat(pat,ty),_) -> max_size pat
+    | Pat(Zorpat(pat1,pat2),_) -> max_size pat1; max_size pat2
+    | Pat(Zrecordpat pat_expr_list,_) ->
         do_list
           (fun (lbl,p) ->
             if lbl.info.lbl_pos > !max_pos then
@@ -171,24 +162,24 @@ let divide_record_matching (Matching(casel, pathl)) =
             | _ -> fatal_error "divide_record_matching")
     casel;
   let rec divide_rec = function
-      ({p_desc = Zaliaspat(pat,v)} :: patl, action) :: rest ->
+      (Pat(Zaliaspat(pat,v),_) :: patl, action) :: rest ->
         divide_rec ((pat::patl, action) :: rest)
-    | ({p_desc = Zconstraintpat(pat,ty)} :: patl, action) :: rest ->
+    | (Pat(Zconstraintpat(pat,ty),_) :: patl, action) :: rest ->
         divide_rec ((pat::patl, action) :: rest)
-    | ({p_desc = Zorpat(pat1, pat2)} :: patl, action) :: rest ->
+    | (Pat(Zorpat(pat1, pat2),_) :: patl, action) :: rest ->
         divide_rec ((pat1::patl, action) :: (pat2::patl, action) :: rest)
-    | ({p_desc = Zrecordpat pat_expr_list} :: patl, action) :: rest ->
+    | (Pat(Zrecordpat pat_expr_list,_) :: patl, action) :: rest ->
         divide_rec_cont pat_expr_list patl action rest
-    | ({p_desc = (Zwildpat | Zvarpat _)} :: patl, action) :: rest ->
+    | (Pat((Zwildpat | Zvarpat _),_) :: patl, action) :: rest ->
         divide_rec_cont [] patl action rest
     | [] ->
         Matching([], make_path (succ !max_pos) pathl)
     | _ ->
         fatal_error "divide_record_matching"
   and divide_rec_cont pat_expr_list patl action rest =
-    let v = make_vect (succ !max_pos) wildcard_pat in
-    do_list (fun (lbl, pat) -> v.(lbl.info.lbl_pos) <- pat) pat_expr_list;
-    add_to_match (divide_rec rest) (list_of_vect v @ patl, action)
+    let v = make_vect (succ !max_pos) (Pat(Zwildpat, no_location)) in
+      do_list (fun (lbl, pat) -> v.(lbl.info.lbl_pos) <- pat) pat_expr_list;
+      add_to_match (divide_rec rest) (list_of_vect v @ patl, action)
   in
     divide_rec casel
 ;;
@@ -200,9 +191,9 @@ let length_of_matching (Matching(casel,_)) = list_length casel
 
 let upper_left_pattern =
   let rec strip = function
-      {p_desc = Zaliaspat(pat,_)} -> strip pat
-    | {p_desc = Zconstraintpat(pat,_)} -> strip pat
-    | {p_desc = Zorpat(pat1,pat2)} -> strip pat1
+      Pat(Zaliaspat(pat,_),_) -> strip pat
+    | Pat(Zconstraintpat(pat,_),_) -> strip pat
+    | Pat(Zorpat(pat1,pat2),_) -> strip pat1
     | pat -> pat in
   function Matching((pat::_, _) :: _, _) -> strip pat
       |                _                 -> fatal_error "upper_left_pattern"
@@ -216,8 +207,8 @@ let get_span_of_constr cstr =
 
 let get_span_of_matching matching =
   match upper_left_pattern matching with
-      {p_desc = Zconstruct0pat(c)}   -> get_span_of_constr c
-    | {p_desc = Zconstruct1pat(c, _)} -> get_span_of_constr c
+      Pat(Zconstruct0pat(c), _)   -> get_span_of_constr c
+    | Pat(Zconstruct1pat(c,_), _) -> get_span_of_constr c
     | _ -> fatal_error "get_span_of_matching"
 ;;
 
@@ -239,58 +230,57 @@ let tristate_or = function
 let rec conquer_matching =
   let rec conquer_divided_matching = function
     [] ->
-      [], False
+      [], False, []
   | (key, matchref) :: rest ->
-      let lambda1, partial1 = conquer_matching !matchref
-      and list2,   partial2 = conquer_divided_matching rest in
+      let lambda1, partial1, used1 = conquer_matching !matchref
+      and list2,   partial2, used2 = conquer_divided_matching rest in
         (key, lambda1) :: list2,
-        tristate_or(partial1,partial2)
+        tristate_or(partial1,partial2),
+        used1 @ used2
   in function
     Matching([], _) ->
-      Lstaticfail, True
-  | Matching(([], Lifthenelse (cond, act, Lstaticfail)) :: rest, pathl) ->
-      let lambda2, partial2 =
-          conquer_matching (Matching (rest, pathl)) in
-      Lifthenelse (cond, act, lambda2), partial2
-   | Matching(([], action) :: rest, _) ->
-      action, False
+      Lstaticfail, True, []
+  | Matching(([], action) :: rest, _) ->
+      action, False, [action]
   | Matching(_, (path :: _)) as matching ->
-      begin match upper_left_pattern matching with
-        {p_desc = (Zwildpat | Zvarpat _)} ->
+     (match upper_left_pattern matching with
+        Pat((Zwildpat | Zvarpat _), _) ->
           let vars, rest = divide_var_matching matching in
-          let lambda1, partial1 = conquer_matching vars
-          and lambda2, partial2 = conquer_matching rest in
+          let lambda1, partial1, used1 = conquer_matching vars
+          and lambda2, partial2, used2 = conquer_matching rest in
             if partial1 == False then
-              lambda1, False
+              lambda1, False, used1
             else
 	      Lstatichandle(lambda1, lambda2),
-              (if partial2 == False then False else Maybe)
-      | {p_desc = Ztuplepat patl} ->
+              (if partial2 == False then False else Maybe),
+              used1 @ used2
+      | Pat(Ztuplepat patl, _) ->
           conquer_matching (divide_tuple_matching (list_length patl) matching)
-      | {p_desc = (Zconstruct0pat(_) | Zconstruct1pat(_,_))} ->
+      | Pat((Zconstruct0pat(_) | Zconstruct1pat(_,_)),_) ->
           let constrs, vars = divide_construct_matching matching in
-          let switchlst, partial1 = conquer_divided_matching constrs
-          and lambda,    partial2 = conquer_matching vars in
+          let switchlst, partial1, used1 = conquer_divided_matching constrs
+          and lambda,    partial2, used2 = conquer_matching vars in
           let span = get_span_of_matching matching
           and num_cstr = list_length constrs in
             if num_cstr == span & partial1 == False then
-              Lswitch(span, path, switchlst), False
+              Lswitch(span, path, switchlst), False, used1
             else
               Lstatichandle(Lswitch(span, path, switchlst), lambda),
               (if partial2 == False then False
                else if num_cstr < span & partial2 == True then True
-               else Maybe)
-      | {p_desc = Zconstantpat _} ->
+               else Maybe),
+              used1 @ used2
+      | Pat(Zconstantpat _,_) ->
           let constants, vars = divide_constant_matching matching in
-            let condlist1, _ = conquer_divided_matching constants
-            and lambda2, partial2 = conquer_matching vars in
+            let condlist1, _, used1 = conquer_divided_matching constants
+            and lambda2, partial2, used2 = conquer_matching vars in
               Lstatichandle(Lcond(path, condlist1), lambda2),
-              partial2
-      | {p_desc = Zrecordpat _} ->
+              partial2,
+              used1 @ used2
+      | Pat(Zrecordpat _,_) ->
           conquer_matching (divide_record_matching matching)
       | _ ->
-          fatal_error "conquer_matching 2"
-      end
+          fatal_error "conquer_matching 2")
   | _ -> fatal_error "conquer_matching 1"
 ;;
 
@@ -306,28 +296,17 @@ let make_initial_matching = function
 
 (* The entry point *)
 
-let translate_matching_hidden check_partial_match failure_code loc casel =
-  let casel' =
-    map (fun 
-           (patl, Lifthenelse(cond,act,Lstaticfail)) ->
-              (patl, Lifthenelse(cond, share_lambda act, Lstaticfail))
-         | (patl,l) -> (patl, share_lambda l)) 
-        (check_unused casel) in
-  let (lambda, partial) =
-    conquer_matching (make_initial_matching casel') in
-  if check_partial_match & partial_match casel then
-    Lstatichandle(lambda, failure_code true)
-  else
-    match partial with
-      False -> lambda
-    | _     -> Lstatichandle (lambda, failure_code false)
-        (* produces dead code *)
-;;
-
-let translate_matching_check_failure failure_code loc casel =
-  translate_matching_hidden true failure_code loc casel
-;;
-
 let translate_matching failure_code loc casel =
-  translate_matching_hidden false failure_code loc casel
+  let casel' =
+    map (fun (patl,l) -> (patl, share_lambda l)) casel in
+  let (lambda, partial, used) =
+    conquer_matching (make_initial_matching casel') in
+  if not for_all (fun (_, act) -> memq act used) casel' then begin
+    prerr_location loc;
+    prerr_begline " Warning: some cases are unused in this matching.";
+    prerr_endline2 ""
+  end;
+  match partial with
+      False -> lambda
+    |   _   -> Lstatichandle(lambda, failure_code partial)
 ;;

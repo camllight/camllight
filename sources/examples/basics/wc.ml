@@ -32,6 +32,14 @@ let count_file name =
   close_in ic
 ;;
 
+let count name =
+  count_file name;
+  print_int !chars; print_string " characters, ";
+  print_int !words; print_string " words, ";
+  print_int !lines; print_string " lines";
+  print_newline()
+;;
+
 if sys__interactive then () else
 try
   if vect_length sys__command_line <= 1 then

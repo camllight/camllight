@@ -12,9 +12,6 @@
 #include "mlvalues.h"
 #include "signals.h"
 #include "sys.h"
-#ifdef HAS_UI
-#include "ui.h"
-#endif
 
 /* Common functions. */
 
@@ -43,9 +40,8 @@ value channel_size(channel)      /* ML */
   long end;
 
   end = lseek(channel->fd, 0, 2);
-  if (end == -1) sys_error(NULL);
-  if (lseek(channel->fd, channel->offset, 0) != channel->offset) 
-    sys_error(NULL);
+  if (end == -1) sys_error();
+  if (lseek(channel->fd, channel->offset, 0) != channel->offset) sys_error();
   return Val_long(end);
 }
 
@@ -58,12 +54,8 @@ static void really_write(fd, p, n)
 {
   int retcode;
   while (n > 0) {
-#ifdef HAS_UI
-    retcode = ui_write(fd, p, n);
-#else
     retcode = write(fd, p, n);
-#endif
-    if (retcode == -1) sys_error(NULL);
+    if (retcode == -1) sys_error();
     p += retcode;
     n -= retcode;
   }
@@ -93,7 +85,7 @@ value output_char(channel, ch)  /* ML */
 
 void putword(channel, w)
      struct channel * channel;
-     uint32 w;
+     long w;
 {
   putch(channel, w >> 24);
   putch(channel, w >> 16);
@@ -163,7 +155,7 @@ value seek_out(channel, pos)    /* ML */
     channel->curr = channel->buff + dest - channel->offset;
   } else {
     flush(channel);
-    if (lseek(channel->fd, dest, 0) != dest) sys_error(NULL);
+    if (lseek(channel->fd, dest, 0) != dest) sys_error();
     channel->offset = dest;
   }
   return Atom(0);
@@ -194,13 +186,13 @@ static int really_read(fd, p, n)
   int retcode;
 
   enter_blocking_section();
-#ifdef HAS_UI
-  retcode = ui_read(fd, p, n);
+#ifdef MSDOS
+  retcode = msdos_read(fd, p, n);
 #else
   retcode = read(fd, p, n);
 #endif
   leave_blocking_section();
-  if (retcode == -1) sys_error(NULL);
+  if (retcode == -1) sys_error();
   return retcode;
 }
 
@@ -225,11 +217,11 @@ value input_char(channel)       /* ML */
   return Val_long(c);
 }
 
-uint32 getword(channel)
+long getword(channel)
      struct channel * channel;
 {
   int i;
-  uint32 res;
+  long res;
 
   res = 0;
   for(i = 0; i < 4; i++) {
@@ -241,12 +233,7 @@ uint32 getword(channel)
 value input_int(channel)        /* ML */
      struct channel * channel;
 {
-  long i;
-  i = getword(channel);
-#ifdef SIXTYFOUR
-  i = (i << 32) >> 32;          /* Force sign extension */
-#endif
-  return Val_long(i);
+  return Val_long(getword(channel));
 }
 
 unsigned getblock(channel, p, n)
@@ -280,20 +267,6 @@ unsigned getblock(channel, p, n)
   }
 }
 
-int really_getblock(chan, p, n)
-     struct channel * chan;
-     char * p;
-     unsigned long n;
-{
-  unsigned r;
-  while (n > 0) {
-    r = getblock(chan, p, (unsigned) n);
-    if (r == 0) return 0;
-    p += r;
-    n -= r;
-  }
-  return 1;
-}
 
 value input(channel, buff, start, length) /* ML */
      value channel, buff, start, length;
@@ -314,7 +287,7 @@ value seek_in(channel, pos)     /* ML */
       dest <= channel->offset) {
     channel->curr = channel->max - (channel->offset - dest);
   } else {
-    if (lseek(channel->fd, dest, 0) != dest) sys_error(NULL);
+    if (lseek(channel->fd, dest, 0) != dest) sys_error();
     channel->offset = dest;
     channel->curr = channel->max = channel->buff;
   }
@@ -335,43 +308,65 @@ value close_in(channel)     /* ML */
   return Atom(0);
 }
 
-value input_scan_line(channel)       /* ML */
+static value build_string(pref, start, end)
+     value pref;
+     char * start, * end;
+{
+  value res;
+  mlsize_t preflen;
+
+  if (Is_block(pref)) {
+    Push_roots(r, 1);
+    r[0] = pref;
+    preflen = string_length(pref);
+    res = alloc_string(preflen + end - start);
+    bcopy(&Byte(r[0], 0), &Byte(res, 0), preflen);
+    bcopy(start, &Byte(res, preflen), end - start);
+    Pop_roots();
+  } else {
+    res = alloc_string(end - start);
+    bcopy(start, &Byte(res, 0), end - start);
+    return res;
+  }
+  return res;
+}
+
+value input_line(channel)       /* ML */
      struct channel * channel;
 {
-  char * p;
+  char * start;
   int n;
+  value res;
 
-  p = channel->curr;
+  Push_roots(r, 1);
+#define prevstring r[0]
+  prevstring = Val_long(0);
+  start = channel->curr;
   do {
-    if (p >= channel->max) {
-      /* No more characters available in the buffer */
-      if (channel->curr > channel->buff) {
-        /* Try to make some room in the buffer by shifting the unread
-           portion at the beginning */
-        bcopy(channel->curr, channel->buff, channel->max - channel->curr);
-        n = channel->curr - channel->buff;
+    if (channel->curr >= channel->max) { /* No more characters available */
+      if (start > channel->buff) {       /* First, make as much room */
+        bcopy(start, channel->buff, channel->max - start); /* as possible */
+        n = start - channel->buff;       /* in the buffer */
         channel->curr -= n;
-        channel->max -= n;
-        p -= n;
+        channel->max  -= n;
+        start = channel->buff;
       }
-      if (channel->max >= channel->end) {
-        /* Buffer is full, no room to read more characters from the input.
-           Return the number of characters in the buffer, with negative
-           sign to indicate that no newline was encountered. */
-        return Val_long(-(channel->max - channel->curr));
+      if (channel->curr >= channel->end) { /* Buffer full? */
+        prevstring = build_string(prevstring, start, channel->curr);
+        start = channel->buff;             /* Flush it in the heap */
+        channel->curr = channel->buff;
       }
-      /* Fill the buffer as much as possible */
-      n = really_read(channel->fd, channel->max, channel->end - channel->max);
+      n = really_read(channel->fd, channel->curr, channel->end-channel->curr);
       if (n == 0) {
-        /* End-of-file encountered. Return the number of characters in the
-           buffer, with negative sign since we haven't encountered 
-           a newline. */
-        return Val_long(-(channel->max - channel->curr));
+        Pop_roots();
+        mlraise(Atom(END_OF_FILE_EXN));
       }
       channel->offset += n;
-      channel->max += n;
+      channel->max = channel->curr + n;
     }
-  } while (*p++ != '\n');
-  /* Found a newline. Return the length of the line, newline included. */
-  return Val_long(p - channel->curr);
+  } while (*(channel->curr)++ != '\n');
+  res = build_string(prevstring, start, channel->curr - 1);
+  Pop_roots();
+  return res;
+#undef prevstring
 }

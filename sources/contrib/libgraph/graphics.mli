@@ -91,10 +91,7 @@ value plot : int -> int -> unit = 2 "gr_plot"
         (* [draw_circle x y r] draws a circle with center [x,y] and
            radius [r]. The current point is unchanged. *)
   and set_line_width : int -> unit = 1 "gr_set_line_width"
-        (* Set the width of points and lines drawn with the functions above.
-           Under X Windows, [set_line_width 0] selects a width of 1 pixel
-           and a faster, but less precise drawing algorithm than the one
-           used when [set_line_width 1] is specified. *)
+        (* Set the width of points and lines drawn with the functions above. *)
 ;;
 
 (*** Text drawing *)

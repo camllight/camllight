@@ -158,10 +158,10 @@ eq_num (num_of_string "12.3/345.6", Ratio (ratio_of_string "123/3456"));;
 set_error_when_null_denominator false;;
 test 5
 eq_num (num_of_string "12.3/0.0", Ratio (ratio_of_string "123/0"));;
+*********)
 test 6
 eq_num (num_of_string "0/0", Ratio (ratio_of_string "0/0"));;
 set_error_when_null_denominator true;;
-*********)
 test 7
 eq_num (num_of_string "1234567890",
         Big_int (big_int_of_string "1234567890"));;

@@ -23,16 +23,14 @@ install:
 	  chmod a+x $(BINDIR)/$$script; \
 	done
 
-camlc: camlc.tpl ../version.h
-	sed -e 's|LIBDIR|$(LIBDIR)|' -e 's|CC|$(CC)|' \
-            -e s/VERSION/`sed -e 's/#define VERSION //' ../version.h`/ \
-            camlc.tpl > camlc
+camlc: camlc.tpl
+	sed -e "s|LIBDIR|$(LIBDIR)|" -e "s|CC|$(CC)|" camlc.tpl > camlc
 
 camllight: camllight.tpl
-	sed -e 's|LIBDIR|$(LIBDIR)|' -e 's|CC|$(CC)|' camllight.tpl > camllight
+	sed -e "s|LIBDIR|$(LIBDIR)|" -e "s|CC|$(CC)|" camllight.tpl > camllight
 
 camlmktop: camlmktop.tpl
-	sed -e 's|LIBDIR|$(LIBDIR)|' -e 's|CC|$(CC)|' camlmktop.tpl > camlmktop
+	sed -e "s|LIBDIR|$(LIBDIR)|" -e "s|CC|$(CC)|" camlmktop.tpl > camlmktop
 
 testprog: testprog.ml
 	$(CAMLCOMP) testprog.ml

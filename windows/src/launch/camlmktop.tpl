@@ -11,9 +11,8 @@ ccopt=""
 output=camltop.out
 
 perv="baltree bool char eq exc fchar filename float fstring fvect \
-    gc genlex hashtbl int io iparsing lexing list map obj pair parsing \
-    printexc printf queue random ref set sort stack stream string \
-    toplevel vect"
+    genlex hashtbl int io iparsing lexing list map obj pair parsing printexc \
+    printf queue random ref set sort stack stream string toplevel vect"
 
 while :; do
   case $1 in
@@ -56,7 +55,7 @@ camlrun $stdlib/provide -stdlib $stdlib $includes $perv > /tmp/camlreq.$$ \
   || exit $?
 camlrun $stdlib/camllink -stdlib $stdlib $custom -require /tmp/camlreq.$$ \
   -exec /tmp/camlout.$$ -g $includes stdlib.zo $linkfiles toplib.zo || exit $?
-camlrun $stdlib/expunge /tmp/camlout.$$ $output sys $perv || exit $?
+echo sys $perv | camlrun $stdlib/expunge /tmp/camlout.$$ $output || exit $?
 rm -f /tmp/camlreq.$$ /tmp/camlout.$$
 if test -n "$custom"; then
   if mv $output /tmp/camlcode.$$ \

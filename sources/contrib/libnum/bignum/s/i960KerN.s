@@ -1,8 +1,8 @@
 /*
 **	(c) Copyright 1989 Digital Equipment Corporation 
 **
-** Last modified_on Mon Apr  9 20:18:11 GMT+2:00 1990 by shand
-** modified_on Tue Apr  3 19:48:27 GMT+2:00 1990 by sills@notok.enet.dec.com
+** Last modified on Mon Apr  9 20:18:11 GMT+2:00 1990 by shand
+** modified on Tue Apr  3 19:48:27 GMT+2:00 1990 by sills@notok.enet.dec.com
 **
 **	KerN for 80960KA
 **

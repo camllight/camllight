@@ -2,7 +2,7 @@
 
 (* Hash tables are hashed association tables, with in-place modification. *)
 
-type ('a, 'b) t;;
+type ('a, 'b) t mutable;;
         (* The type of hash tables from type ['a] to type ['b]. *)
 
 value new : int -> ('a,'b) t

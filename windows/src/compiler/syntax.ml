@@ -5,8 +5,7 @@
 #open "globals";;
 
 type type_expression =
-  { te_desc: type_expression_desc;
-    te_loc: location }
+    Typexp of type_expression_desc * location
 and type_expression_desc =
     Ztypevar of string
   | Ztypearrow of type_expression * type_expression
@@ -15,9 +14,7 @@ and type_expression_desc =
 ;;
 
 type pattern =
-  { p_desc: pattern_desc;
-    p_loc: location;
-    mutable p_typ: typ }
+    Pat of pattern_desc * location
 and pattern_desc =
     Zwildpat
   | Zvarpat of string
@@ -32,9 +29,7 @@ and pattern_desc =
 ;;
 
 type expression =
-  { e_desc: expression_desc;
-    e_loc: location;
-    mutable e_typ: typ }
+    Expr of expression_desc * location
 and expression_desc =
     Zident of expr_ident ref
   | Zconstant of struct_constant
@@ -59,7 +54,6 @@ and expression_desc =
   | Zrecord_update of expression * label_desc global * expression
   | Zstream of stream_component list
   | Zparser of (stream_pattern list * expression) list
-  | Zwhen of expression * expression
 
 and expr_ident =
     Zglobal of value_desc global
@@ -76,7 +70,7 @@ and stream_pattern =
 ;;
 
 type type_decl =
-    Zabstract_type
+    Zabstract_type of mutable_flag
   | Zvariant_type of constr_decl list
   | Zrecord_type of (string * type_expression * mutable_flag) list
   | Zabbrev_type of type_expression
@@ -91,8 +85,7 @@ type directiveu =
 ;;
 
 type impl_phrase =
-  { im_desc: impl_desc;
-    im_loc: location }
+    Impl of impl_desc * location
 and impl_desc =
     Zexpr of expression
   | Zletdef of bool * (pattern * expression) list
@@ -102,8 +95,7 @@ and impl_desc =
 ;;
 
 type intf_phrase =
-  { in_desc: intf_desc;
-    in_loc: location }
+    Intf of intf_desc * location
 and intf_desc =
     Zvaluedecl of (string * type_expression * prim_desc) list
   | Ztypedecl of (string * string list * type_decl) list
@@ -111,8 +103,8 @@ and intf_desc =
   | Zintfdirective of directiveu
 ;;
 
-let rec free_vars_of_pat pat =
-  match pat.p_desc with
+let rec free_vars_of_pat (Pat(desc, _)) =
+  match desc with
     Zwildpat -> []
   | Zvarpat v -> [v]
   | Zaliaspat(pat,v) -> v :: free_vars_of_pat pat
@@ -126,8 +118,8 @@ let rec free_vars_of_pat pat =
       flat_map (fun (lbl,pat) -> free_vars_of_pat pat) lbl_pat_list
 ;;    
 
-let rec expr_is_pure expr =
-  match expr.e_desc with
+let rec expr_is_pure (Expr(desc,loc)) =
+  match desc with
     Zident _ -> true
   | Zconstant _ -> true
   | Ztuple el -> for_all expr_is_pure el

@@ -114,7 +114,7 @@ let rec output_entries = function
     [] -> failwith "output_entries"
   | (name,state_num) :: rest ->
       output_string !oc (name ^ " lexbuf =\n");
-      output_string !oc "  start_lexing lexbuf;\n";
+      output_string !oc "  lexbuf.lex_start_pos <- lexbuf.lex_curr_pos;\n";
       output_string !oc ("  state_" ^ string_of_int state_num ^ " lexbuf\n");
       match rest with
         [] -> output_string !oc ";;\n"; ()

@@ -1,9 +1,12 @@
 #ifndef _roots_
 #define _roots_
 
-#include "misc.h"
 
-void local_roots P((void (*copy_fn) (value *, value)));
+#ifdef ANSI
+void local_roots (void (*copy_fn) (value *, value));
+#else
+void local_roots ();
+#endif
 
 
 #endif /* _roots_ */

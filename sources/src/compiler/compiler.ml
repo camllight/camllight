@@ -2,7 +2,6 @@
 
 #open "obj";;
 #open "misc";;
-#open "interntl";;
 #open "const";;
 #open "lexer";;
 #open "parser";;
@@ -13,7 +12,7 @@
 #open "globals";;
 #open "modules";;
 #open "types";;
-#open "error";;
+#open "ty_error";;
 #open "typing";;
 #open "ty_decl";;
 #open "pr_decl";;
@@ -40,22 +39,15 @@ let parse_phrase parsing_fun lexing_fun lexbuf =
          let pos1 = lexing__get_lexeme_start lexbuf in
          let pos2 = lexing__get_lexeme_end lexbuf in
          if f (obj__repr EOF) or f (obj__repr SEMISEMI) then () else skip();
-         eprintf "%aSyntax error.\n" output_location (Loc(pos1, pos2));
+         prerr_location (Loc(pos1, pos2));
+         prerr_begline " Syntax error.";
+         prerr_endline "";
          raise Toplevel
-     | lexer__Lexical_error(errcode, pos1, pos2) ->
-         let l = Loc(pos1, pos2) in
-         begin match errcode with
-           lexer__Illegal_character ->
-             eprintf "%aIllegal character.\n" output_location l
-         | lexer__Unterminated_comment ->
-             eprintf "%tComment not terminated.\n" output_input_name
-         | lexer__Bad_char_constant ->
-             eprintf "%aIll-formed character literal.\n"
-                             output_location l
-         | lexer__Unterminated_string ->
-             eprintf "%tString literal not terminated.\n"
-                             output_input_name
-         end;
+     | lexer__Lexical_error(msg, pos1, pos2) ->
+         if pos1 >= 0 & pos2 >= 0 then prerr_location (Loc(pos1, pos2));
+         prerr_begline " Lexical error: ";
+         prerr_string msg;
+         prerr_endline ".";
          skip();
          raise Toplevel
      | Toplevel ->
@@ -63,46 +55,45 @@ let parse_phrase parsing_fun lexing_fun lexbuf =
          raise Toplevel
 ;;
 
-let parse_impl_phrase = parse_phrase parser__Implementation lexer__main
-and parse_intf_phrase = parse_phrase parser__Interface lexer__main
+let parse_impl_phrase = parse_phrase Implementation Main
+and parse_intf_phrase = parse_phrase Interface Main
 ;;
 
 (* Executing directives *)
 
-let do_directive loc = function
+let do_directive = function
     Zdir("open", name) ->
-      open_module name
+      used_modules := find_module name :: !used_modules; ()
   | Zdir("close", name) ->
-      close_module name
+      used_modules := exceptq (find_module name) !used_modules; ()
   | Zdir("infix", name) ->
-      add_infix name
+      add_infix name; ()
   | Zdir("uninfix", name) ->
-      remove_infix name
+      remove_infix name; ()
   | Zdir("directory", dirname) ->
       load_path := dirname :: !load_path
   | Zdir(d, name) ->
-      eprintf 
-        "%aWarning: unknown directive \"#%s\", ignored.\n"
-        output_location loc d;
-      flush stderr
+      prerr_begline " Warning: unknown directive \"";
+	  prerr_string d;
+      prerr_endline2 "\", ignored."
 ;;
 
 (* Compiling an interface *)
 
 let verbose = ref false;;
   
-let compile_intf_phrase phr =
-  begin match phr.in_desc with
+let compile_intf_phrase (Intf(desc,loc)) =
+  begin match desc with
     Zvaluedecl decl ->
-      type_valuedecl phr.in_loc decl; ()
+      type_valuedecl loc decl; ()
   | Ztypedecl decl ->
-      let ty_decl = type_typedecl phr.in_loc decl in
+      let ty_decl = type_typedecl loc decl in
       if !verbose then print_typedecl ty_decl
   | Zexcdecl decl ->
-      let ex_decl = type_excdecl phr.in_loc decl in
+      let ex_decl = type_excdecl loc decl in
       if !verbose then print_excdecl ex_decl
   | Zintfdirective dir ->
-      do_directive phr.in_loc dir
+      do_directive dir
   end
 ;;
 
@@ -134,37 +125,36 @@ let compile_interface modname filename =
 
 (* Compiling an implementation *)
 
-let compile_impl_phrase outstream phr =
+let compile_impl_phrase outstream (Impl(desc,loc)) =
   reset_type_expression_vars();
-  begin match phr.im_desc with
+  begin match desc with
     Zexpr expr ->
-      let ty = type_expression phr.im_loc expr in
+      let ty = type_expression loc expr in
       emit_phrase outstream
                   (expr_is_pure expr)
                   (compile_lambda false (translate_expression expr));
       if !verbose then print_expr ty
   | Zletdef(rec_flag, pat_expr_list) ->
-      let env = type_letdef phr.im_loc rec_flag pat_expr_list in
+      let env = type_letdef loc rec_flag pat_expr_list in
       emit_phrase outstream
          (letdef_is_pure pat_expr_list)
-         (if rec_flag then
-            compile_lambda true (translate_letdef_rec phr.im_loc pat_expr_list)
-          else
-            compile_lambda false (translate_letdef phr.im_loc pat_expr_list));
+         (if rec_flag
+          then compile_lambda true  (translate_letdef_rec loc pat_expr_list)
+          else compile_lambda false (translate_letdef loc pat_expr_list));
       if !verbose then print_valdef env
   | Ztypedef decl ->
-      let ty_decl = type_typedecl phr.im_loc decl in
+      let ty_decl = type_typedecl loc decl in
       if !verbose then print_typedecl ty_decl
   | Zexcdef decl ->
-      let ex_decl = type_excdecl phr.im_loc decl in
+      let ex_decl = type_excdecl loc decl in
       if !verbose then print_excdecl ex_decl
   | Zimpldirective dir ->
-      do_directive phr.im_loc dir
+      do_directive dir
   end
 ;;
 
-let compile_impl modname filename suffix =
-  let source_name = filename ^ suffix
+let compile_impl modname filename =
+  let source_name = filename ^ ".ml"
   and obj_name = filename ^ ".zo" in
   let ic = open_in_bin source_name
   (* The source file must be opened in binary mode, so that the absolute
@@ -191,24 +181,18 @@ let compile_impl modname filename suffix =
       raise x
 ;;
 
-let write_extended_intf = ref false;;
+let write_extended_zi = ref false;;
 
-let compile_implementation modname filename suffix =
+let compile_implementation modname filename =
   external_types := [];
   if file_exists (filename ^ ".mli") then begin
     try
-      if not (file_exists (filename ^ ".zi")) then begin
-        eprintf
-          "Cannot find file %s.zi. Please compile %s.mli first.\n"
-          filename filename;
-        raise Toplevel
-      end;
-      let intf = read_module modname (filename ^ ".zi") in
+      let intf = read_module (filename ^ ".zi") in
       start_compiling_implementation modname intf;
       enter_interface_definitions intf;
-      compile_impl modname filename suffix;
+      compile_impl modname filename;
       check_interface intf;
-      if !write_extended_intf then begin
+      if !write_extended_zi then begin
         let ext_intf_name = filename ^ ".zix" in
         let oc = open_out_bin ext_intf_name in
         try
@@ -228,8 +212,7 @@ let compile_implementation modname filename suffix =
     let oc = open_out_bin intf_name in
     try
       start_compiling_interface modname;
-      compile_impl modname filename suffix;
-      check_nongen_values();
+      compile_impl modname filename;
       write_compiled_interface oc;
       close_out oc
     with x ->

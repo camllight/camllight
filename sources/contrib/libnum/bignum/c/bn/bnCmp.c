@@ -1,13 +1,12 @@
 /* Copyright     Digital Equipment Corporation & INRIA     1988, 1989 */
-/* Last modified_on Fri Oct  5 16:13:31 GMT+1:00 1990 by herve */
-/*      modified_on Fri Aug 10 17:21:47 GMT+2:00 1990 by shand */
+/* Last modified on Fri Oct  5 16:13:31 GMT+1:00 1990 by herve */
+/*      modified on Fri Aug 10 17:21:47 GMT+2:00 1990 by shand */
 
 
 /* bnCmp.c: a piece of the bignum kernel written in C */
 
 
 		/***************************************/
-
 #define BNNMACROS_OFF
 #include "BigNum.h"
 
@@ -16,12 +15,10 @@
 static char copyright[]="@(#)bnCmp.c: copyright Digital Equipment Corporation & INRIA 1988, 1989, 1990\n";
 
 
-#ifndef _NO_PROTO
-Boolean BnnIsZero (BigNum nn, BigNumLength nl)
-#else  /* _NO_PROTO */
 Boolean BnnIsZero (nn, nl)
-BigNum nn; BigNumLength nl;
-#endif /* _NO_PROTO */
+
+BigNum 		nn;
+BigNumLength 	nl;
 
 /* 
  * Returns TRUE iff N = 0
@@ -35,12 +32,10 @@ BigNum nn; BigNumLength nl;
 /**/
 
 
-#ifndef _NO_PROTO
-BigNumCmp BnnCompare (BigNum mm, BigNumLength ml, BigNum nn, BigNumLength nl)
-#else  /* _NO_PROTO */
 BigNumCmp BnnCompare (mm, ml, nn, nl)
-BigNum mm; BigNumLength ml; BigNum nn; BigNumLength nl;
-#endif /* _NO_PROTO */
+
+	 BigNum	 	mm, nn;
+register BigNumLength 	ml, nl;
 
 /*
  * return

@@ -1,8 +1,13 @@
 # Makefile for the Unix interface library
 
-# These options are overriden when called from ../Makefile
+### Configuration section
+
+# The path to the Caml Light standard library
+LIBDIR=/usr/local/lib/caml-light
+
+# Which C compiler to use.
 CC=cc
-OPTS=
+CFLAGS=-I../../src/runtime
 
 # Test to see whether ranlib exists on the machine
 RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
@@ -10,10 +15,9 @@ RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
 # How to invoke ranlib
 RANLIB=ranlib
 
-# Compilation options
-CFLAGS=-I../../src/runtime $(OPTS)
-CAMLC=camlc
-CAMLMKTOP=camlmktop
+### End of configuration section
+
+CAMLCOMP=camlc -c
 
 OBJS=accept.o access.o addrofstr.o alarm.o bind.o chdir.o chmod.o \
   chown.o chroot.o close.o closedir.o connect.o cst2constr.o cstringv.o \
@@ -29,45 +33,53 @@ OBJS=accept.o access.o addrofstr.o alarm.o bind.o chdir.o chmod.o \
   truncate.o umask.o unix.o unlink.o utimes.o wait.o waitopt.o waitpid.o \
   write.o
 
-INTF= unix.zi
+INTF= unix.zi peek.zi poke.zi
 
 IMPL= unix.zo
 
-all: libunix.a $(INTF) $(IMPL) camlunix
+all: libunix.a $(INTF) $(IMPL)
+
+camlunix: all
+	camlmktop -o camlunix -custom unix.zo libunix.a
 
 libunix.a: $(OBJS)
 	rm -f libunix.a
 	ar rc libunix.a $(OBJS)
 	if $(RANLIBTEST); then $(RANLIB) libunix.a; else true; fi
 
-camlunix: libunix.a $(IMPL)
-	$(CAMLMKTOP) -o camlunix -custom unix.zo libunix.a
-
 clean:
-	rm -f libunix.a *.o *.zi *.zo lint-blurb camlunix
+	rm -f libunix.a *.o *.zi *.zo camlunix lint-blurb
+	rm -f *.dvi *.log *.aux
+	cd Examples; make clean
 
 install:
 	cp libunix.a $(LIBDIR)/libunix.a
 	if $(RANLIBTEST); then cd $(LIBDIR); $(RANLIB) libunix.a; else true; fi
 	cp $(INTF) $(IMPL) $(LIBDIR)
-	cp camlunix $(LIBDIR)
 
-.SUFFIXES: .ml .mli .zo .zi
+doc: unix.tex peek.tex poke.tex doc.tex
+	latex doc.tex
+
+.SUFFIXES: .ml .mli .zo .zi .tex
 
 .mli.zi:
-	$(CAMLC) -c $<
+	$(CAMLCOMP) $<
 
 .ml.zo:
-	$(CAMLC) -c $<
+	$(CAMLCOMP) $<
 
 lint:
-	lint -I../../src/runtime *.c > lint-blurb
+	lint -I../../src/runtime `echo $(OBJS) | sed -e 's/\.o/.c/g'` \
+                > lint-blurb
 
 depend:
 	mv Makefile Makefile.BAK; \
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.BAK; \
          gcc -MM $(CFLAGS) *.c; \
          ../../src/tools/camldep *.mli *.ml) > Makefile
+
+.mli.tex:
+	../../doc/manual/library/format-intf $* $*.mli > $*.tex
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
@@ -158,7 +170,6 @@ unlink.o : unlink.c unix.h
 utimes.o : utimes.c unix.h 
 wait.o : wait.c unix.h 
 waitopt.o : waitopt.c unix.h 
-waitpid.o : waitpid.c unix.h 
 write.o : write.c unix.h 
 iunix.zi: unix.zi 
 unix.zo: unix.zi iunix.zi 

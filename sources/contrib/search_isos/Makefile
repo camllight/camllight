@@ -1,14 +1,14 @@
-# Overriden when called from ../Makefile
-LIBDIR=/usr/local/lib/caml-light
-BINDIR=/usr/local/bin
+### System dependent configuration section
 
 COMPLIBDIR=../../src/compiler
-UNIXLIBDIR=../libunix
+
+### End of system dependent configuration section
+
 CAMLC=camlc
 CAMLYACC=camlyacc
 CAMLLEX=camllex
-COMPFLAGS=-I $(COMPLIBDIR) -I $(UNIXLIBDIR)
-LINKFLAGS=-I $(COMPLIBDIR) -I $(UNIXLIBDIR) -g
+COMPFLAGS=-I $(COMPLIBDIR)
+LINKFLAGS=-I $(COMPLIBDIR) -g
 
 SRC = common.ml myTypes.ml TypeOfString.ml Search_isos.ml myLexer.mll \
     myTypeParser.mly TypeRewrite.ml LC_unify.ml Equal.ml module_iterator.ml \
@@ -18,29 +18,24 @@ SRC = common.ml myTypes.ml TypeOfString.ml Search_isos.ml myLexer.mll \
 IMPL = common.zo myTypes.zo myLexer.zo myTypeParser.zo TypeOfString.zo \
     module_iterator.zo TypeRewrite.zo LC_unify.zo Equal.zo Search_isos.zo
 
-COMPMODS = config.zo misc.zo interntl.zo const.zo prim.zo globals.zo \
-    location.zo syntax.zo modules.zo types.zo pr_type.zo error.zo builtins.zo \
-    typing.zo par_aux.zo
-
-GENFILES = myTypeParser.mli myTypeParser.ml myLexer.ml Search_isos.ml
+COMPMODS = config.zo misc.zo const.zo prim.zo globals.zo location.zo \
+    syntax.zo errors.zo modules.zo builtins.zo types.zo pr_type.zo \
+    ty_error.zo typing.zo par_aux.zo
 
 all: search_isos
 
 search_isos: $(IMPL)
 	$(CAMLC) $(LINKFLAGS) -o search_isos -custom \
-        unix.zo $(COMPMODS) $(IMPL) $(UNIXLIBDIR)/libunix.a
+        unix.zo $(COMPMODS) $(IMPL) -lunix
 
 clean: 
 	rm -f search_isos
-	rm -f *.z[io] $(GENFILES)
-
-install:
-	cp search_isos $(BINDIR)/camlsearch
+	rm -f *.z[io]
 
 distrib:	
 	tar -cvf - $(SRC) Makefile README | compress -c > search_isos.tar.Z
 
-depend: $(GENFILES)
+depend: $(SRC) myTypeParser.mli myTypeParser.ml myLexer.ml
 	mv Makefile Makefile.bak
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
 	 camldep *.mli *.ml) > Makefile
@@ -50,11 +45,6 @@ myLexer.ml: myLexer.mll
 
 myTypeParser.ml myTypeParser.mli: myTypeParser.mly
 	$(CAMLYACC) myTypeParser.mly
-
-Search_isos.ml: Search_isos.mlp
-	@rm -f Search_isos.ml
-	sed -e 's|LIBDIR|$(LIBDIR)|' Search_isos.mlp > Search_isos.ml
-	@chmod -w Search_isos.ml
 
 .SUFFIXES: .ml .mli .zo .zi
 

@@ -3,8 +3,6 @@
 #open "prelude";;
 #open "terms";;
 
-type rule == int * (int * (term * term));;
-
 (* standardizes an equation so its variables are 1,2,... *)
 
 let mk_rule M N =
@@ -15,12 +13,12 @@ let mk_rule M N =
 ;;
 
 (* checks that rules are numbered in sequence and returns their number *)
-let (check_rules: rule list -> int) =
+let check_rules =
   it_list (fun n (k,_) -> if k=n+1 then k
                           else failwith "Rule numbers not in sequence") 0
 ;;
 
-let pretty_rule (k,(n,(M,N)): rule) =
+let pretty_rule (k,(n,(M,N))) =
   print_int k; print_string " : ";
   pretty_term M; print_string " = "; pretty_term N;
   print_newline()

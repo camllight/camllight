@@ -12,17 +12,17 @@ rm -f s.h m.h
 # Check the sizes of data types
 
 echo "Checking the sizes of integers and pointers..."
-set `sh runtest sizes.c`
+set - `sh runtest sizes.c`
 case "$1,$2,$3" in
   4,4,4) echo "OK, this is a regular 32 bit architecture.";;
   4,8,8) echo "Wow! A 64 bit architecture!"
          echo "#define SIXTYFOUR" >> m.h;;
-  8,*,*) echo "Wow! A 64 bit architecture!"
-         echo "Unfortunately, Caml Light does not handle the case"
+  8,8,8) echo "Wow! A 64 bit architecture!"
+         echo "Unfortunately, Caml Light has never been tested in the case"
          echo "sizeof(int) = 8."
          echo "Caml Light won't run on this architecture."
          exit 2;;
-  *,4,8) echo "Wow! A 64 bit architecture!"
+  4,4,8) echo "Wow! A 64 bit architecture!"
          echo "Unfortunately, Caml Light cannot work in the case"
          echo "sizeof(long) != sizeof(long *)."
          echo "Caml Light won't run on this architecture."
@@ -31,10 +31,6 @@ case "$1,$2,$3" in
          echo "Caml Light won't run on this architecture."
          exit 2;;
 esac
-
-# "unix" is not always defined by cpp, so add it here just in case
-
-(echo "#ifndef unix"; echo "#define unix"; echo "#endif") >> s.h
 
 # Are chars signed?
 
@@ -57,9 +53,9 @@ case $? in
          case "$goodopt" in
            "") echo "Sorry, I can't find the right option."
                echo "Please figure it out yourself, and"
-               echo "add it to OPTS in src/runtime/Makefile.";;
+               echo "add it to OTHEROPTS in src/runtime/Makefile.";;
             *) echo "Yippie! Option $goodopt works. Good!"
-               echo "Add \"$goodopt\" to OPTS in src/Makefile.";;
+               echo "Add \"$goodopt\" to OTHEROPTS in src/runtime/Makefile.";;
          esac;;
      esac;;
 esac
@@ -259,7 +255,8 @@ if sh hasgot waitpid;  then
   echo "#define HAS_WAITPID" >> s.h
 fi
 
-if test -f /usr/include/sys/param.h && sh runtest getgroups.c; then
+if sh hasgot getgroups && test -f /usr/include/sys/param.h && grep -s NGROUPS /usr/include/sys/param.h >/dev/null;
+then
   echo "getgroups() found."
   echo "#define HAS_GETGROUPS" >> s.h
 fi
@@ -270,26 +267,6 @@ if test -f /usr/include/termios.h &&
   echo "#define HAS_TERMIOS" >> s.h
 fi
 
-if sh runtest async_io.c; then
-  echo "Asynchronous I/O are supported."
-  echo "#define HAS_ASYNC_IO" >> s.h
-fi
-
-if sh hasgot setitimer; then
-  echo "setitimer() found."
-  echo "#define HAS_SETITIMER" >> s.h
-fi
-
-if sh hasgot gethostname; then
-  echo "gethostname() found."
-  echo "#define HAS_GETHOSTNAME" >> s.h
-fi
-
-if test -f /usr/include/sys/utsname.h && sh hasgot uname; then
-  echo "uname() found."
-  echo "#define HAS_UNAME" >> s.h
-fi
-
-rm -f tst hasgot.c
+rm -f tst
 rm -f ../m.h ../s.h
 mv m.h s.h ..

@@ -29,11 +29,9 @@ struct parser_env {       /* Mirrors parser_env in ../lib/iparsing.mli */
   value lval;
   value symb_start;
   value symb_end;
-  value asp;
+  value sp;
   value rule_len;
   value rule_number;
-  value sp;
-  value state;
 };
 
 #ifdef BIG_ENDIAN
@@ -75,8 +73,8 @@ value parse_engine(tables, env, cmd, arg) /* ML */
      value cmd;
      value arg;
 {
-  int state;
-  mlsize_t sp;
+  static int state;
+  static mlsize_t sp;
   int n, n1, n2, m, state1;
 
   switch(Tag_val(cmd)) {
@@ -90,14 +88,10 @@ value parse_engine(tables, env, cmd, arg) /* ML */
     n = Short(tables->defred, state);
     if (n != 0) goto reduce;
     if (Int_val(env->curr_char) >= 0) goto testshift;
-    env->sp = Val_int(sp);
-    env->state = Val_int(state);
     return READ_TOKEN;
                                 /* The ML code calls the lexer and updates */
                                 /* symb_start and symb_end */
   case TOKEN_READ:
-    sp = Int_val(env->sp);
-    state = Int_val(env->state);
     env->curr_char = Field(tables->transl, Tag_val(arg));
     if (Wosize_val(arg) == 0) {
       env->lval = Val_long(0);
@@ -118,8 +112,6 @@ value parse_engine(tables, env, cmd, arg) /* ML */
       n = Short(tables->table, n2);
       goto reduce;
     }
-    env->sp = Val_int(sp);
-    env->state = Val_int(state);
     return RAISE_PARSE_ERROR;
                                 /* The ML code raises the Parse_error exn */
   shift:
@@ -127,13 +119,9 @@ value parse_engine(tables, env, cmd, arg) /* ML */
     Trace(printf("Shift %d\n", state));
     sp++;
     if (sp < Long_val(env->stacksize)) goto push;
-    env->sp = Val_int(sp);
-    env->state = Val_int(state);
     return GROW_STACKS_1;
                                 /* The ML code resizes the stacks */
   case STACKS_GROWN_1:
-    sp = Int_val(env->sp);
-    state = Int_val(env->state);
   push:
     Field(env->s_stack, sp) = Val_int(state);
     modify(&Field(env->v_stack, sp), env->lval);
@@ -145,7 +133,7 @@ value parse_engine(tables, env, cmd, arg) /* ML */
   reduce:
     Trace(printf("Reduce %d\n", n));
     m = Short(tables->len, n);
-    env->asp = Val_int(sp);
+    env->sp = Val_int(sp);
     env->rule_number = Val_int(n);
     env->rule_len = Val_int(m);
     sp = sp - m + 1;
@@ -160,25 +148,17 @@ value parse_engine(tables, env, cmd, arg) /* ML */
       state = Short(tables->dgoto, m);
     }
     if (sp < Long_val(env->stacksize)) goto semantic_action;
-    env->sp = Val_int(sp);
-    env->state = Val_int(state);
     return GROW_STACKS_2;
                                 /* The ML code resizes the stacks */
   case STACKS_GROWN_2:
-    sp = Int_val(env->sp);
-    state = Int_val(env->state);
   semantic_action:
-    env->sp = Val_int(sp);
-    env->state = Val_int(state);
     return COMPUTE_SEMANTIC_ACTION;
                                 /* The ML code calls the semantic action */
   case SEMANTIC_ACTION_COMPUTED:
-    sp = Int_val(env->sp);
-    state = Int_val(env->state);
     Field(env->s_stack, sp) = Val_int(state);
     modify(&Field(env->v_stack, sp), arg);
     Field(env->symb_end_stack, sp) =
-      Field(env->symb_end_stack, Int_val(env->asp));
+      Field(env->symb_end_stack, Int_val(env->sp));
     goto loop;
   }
 }

@@ -1,6 +1,6 @@
 /* Copyright     Digital Equipment Corporation & INRIA     1988, 1989 */
-/* Last modified_on Fri Oct  5 16:28:39 GMT+1:00 1990 by herve */
-/*      modified_on Fri Mar 30  3:28:56 GMT+2:00 1990 by shand */
+/* Last modified on Fri Oct  5 16:28:39 GMT+1:00 1990 by herve */
+/*      modified on Fri Mar 30  3:28:56 GMT+2:00 1990 by shand */
 
 
 /* bnInit.c: a piece of the bignum kernel written in C */

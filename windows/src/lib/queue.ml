@@ -1,6 +1,7 @@
 #open "int";;
 #open "ref";;
 #open "exc";;
+#open "queue";;
 
 type 'a queue_cell =
     Nil
@@ -21,7 +22,7 @@ let clear q =
 ;;
 
 let add x = function
-    { head = h; tail = Nil as t } ->    (* if tail = Nil then head = Nil *)
+    { head = Nil as h; tail = Nil as t } ->
       let c = Cons(x, ref Nil) in
         h <- c; t <- c
   | { tail = Cons(_, ref newtail) as oldtail } ->

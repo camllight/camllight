@@ -27,27 +27,23 @@ let main () =
   let (Lexdef(header,_) as def) =
     try
       lexer_definition main lexbuf
-    with exn ->
-      close_out !oc;
-      sys__remove dest_name;
-      begin match exn with
-        Parse_error x ->
-          prerr_string "Syntax error around char ";
-          prerr_int (get_lexeme_start lexbuf);
-          prerr_endline "."
-      | scan_aux__Lexical_error s ->
-          prerr_string "Lexical error around char ";
-          prerr_int (get_lexeme_start lexbuf);
-          prerr_string ": ";
-          prerr_string s;
-          prerr_endline "."
-      | _ -> raise exn
-      end;
-      exit 2 in
+    with
+      Parse_error x ->
+        prerr_string "Syntax error around char ";
+        prerr_int (get_lexeme_start lexbuf);
+        prerr_endline ".";
+        exit 2
+    | scan_aux__Lexical_error s ->
+        prerr_string "Lexical error around char ";
+        prerr_int (get_lexeme_start lexbuf);
+        prerr_string ": ";
+        prerr_string s;
+        prerr_endline ".";
+        exit 2 in
   let ((init, states, acts) as dfa) = make_dfa def in
   output_lexdef header dfa;
   close_in !ic;
   close_out !oc
 ;;
 
-printexc__f main (); exit 0;;
+printexc__f main ();;

@@ -7,6 +7,7 @@ value global_data : obj vect
   and static_alloc : int -> string = 1 "static_alloc"
   and static_free : string -> unit = 1 "static_free"
   and static_resize : string -> int -> string = 2 "static_resize"
+  and gc : unit -> int = 1 "gc"
   and interprete : string -> int -> int -> obj = 3 "start_interp"
   and available_primitives : unit -> string vect = 1 "available_primitives"
 ;;

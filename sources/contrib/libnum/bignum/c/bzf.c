@@ -1,5 +1,5 @@
 /* Copyright     Digital Equipment Corporation & INRIA     1988, 1989 */
-/* Last modified_on Mon Jan 23 16:05:27 GMT+1:00 1989 by herve */
+/* Last modified on Mon Jan 23 16:05:27 GMT+1:00 1989 by herve */
 
 /*
  * bzf.c: Miscellaneous functions built on top of BigZ.
@@ -16,12 +16,9 @@
 		/***************************************/
 
 
-#ifndef _NO_PROTO
-BigZ BzFactorial (BigZ z)
-#else  /* _NO_PROTO */
 BigZ BzFactorial (z)
+
 BigZ z;
-#endif /* _NO_PROTO */
 
 /*
  * Returns Z!

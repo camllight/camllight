@@ -10,9 +10,9 @@ typedef struct {
   char *next;
 } heap_chunk_head;
 
+extern free_list_t master_fl;
 extern int gc_phase;
 extern unsigned long allocated_words;
-extern unsigned long extra_heap_memory;
 
 #define Phase_mark 0
 #define Phase_sweep 1
@@ -37,12 +37,19 @@ extern char *gc_sweep_hp;
 #define Is_in_heap(p) (page_table [Page (p)] == In_heap)
 #endif
 
-void init_major_heap P((asize_t));
-asize_t round_heap_chunk_size P((asize_t));
-void darken P((value));
-void major_collection_slice P((void));
-void major_collection P((void));
-void finish_major_cycle P((void));
+#ifdef ANSI
+extern void init_major_heap (asize_t);
+extern asize_t round_heap_chunk_size (asize_t);
+extern void darken (value);
+extern void major_collection_slice (void);
+extern unsigned long major_collection (void);
+#else
+void init_heap ();
+asize_t round_heap_chunk_size ();
+void darken ();
+void major_collection_slice ();
+unsigned long major_collection ();
+#endif
 
 
 #endif /* _major_gc_ */

@@ -1,13 +1,23 @@
-#include "alloc.h"
-#include "misc.h"
 #include "mlvalues.h"
 #include "signals.h"
+#include "alloc.h"
 #include "stacks.h"
 
-Volatile int signal_is_pending = 0;
+#ifdef ANSI
+
+volatile int signal_is_pending = 0;
 int in_blocking_section = 0;
-Volatile code_t signal_handler;
-Volatile int signal_number;
+volatile code_t signal_handler;
+volatile int signal_number;
+
+#else
+
+int signal_is_pending = 0;
+int in_blocking_section = 0;
+code_t signal_handler;
+int signal_number;
+
+#endif
 
 void execute_signal()
 {
@@ -19,7 +29,6 @@ void execute_signal()
     callback(clos, Val_int(signal_number));
   } else {
     signal_is_pending = 1;
-    something_to_do = 1;
   }
 }
 

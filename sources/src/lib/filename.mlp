@@ -12,8 +12,7 @@ let check_suffix name suff =
 ;;
 
 let chop_suffix name suff =
-  let n = string_length name - string_length suff in
-  if n < 0 then invalid_arg "chop_suffix" else sub_string name 0 n
+  sub_string name 0 (string_length name - string_length suff)
 ;;
 
 #ifdef unix

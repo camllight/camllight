@@ -61,6 +61,13 @@ value static_resize(blk, new_size) /* ML */
   return (value) stat_resize((char *) blk, (asize_t) Long_val(new_size));
 }
 
+value gc(arg)                       /* ML */
+     value arg;
+{
+  minor_collection ();
+  return Val_long (major_collection ());
+}
+
 value obj_is_block(arg)             /* ML */
      value arg;
 {

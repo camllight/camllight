@@ -1,7 +1,6 @@
 (* Operations on integers *)
 
-(* Integers are 31 bits wide (or 63 on 64-bit processors).
-   All operations are taken modulo $2^{31}$ (or $2^{63}$).
+(* Integers are 31 bits wide. All operations are taken modulo $2^{31}$.
    They do not fail on overflow. *)
 
 exception Division_by_zero;;
@@ -34,14 +33,22 @@ value minus : int -> int = 1 "~int"
         (* Integer equality. Equivalent to generic equality, just faster. *)
   and neq_int : int -> int -> bool = 2 "<>int"
         (* Negation of [eq_int]. *)
+  and prefix < : int -> int -> bool = 2 "<int"
   and lt_int : int -> int -> bool = 2 "<int"
+  and prefix > : int -> int -> bool = 2 ">int"
   and gt_int : int -> int -> bool = 2 ">int"
+  and prefix <= : int -> int -> bool = 2 "<=int"
   and le_int : int -> int -> bool = 2 "<=int"
+  and prefix >= : int -> int -> bool = 2 ">=int"
   and ge_int : int -> int -> bool = 2 ">=int"
         (* Usual comparisons between integers. *)
 ;;
 
-value abs : int -> int
+value min : int -> int -> int
+        (* Return the smaller of the arguments. *)
+  and max : int -> int -> int
+        (* Return the greater of the arguments. *)
+  and abs : int -> int
         (* Return the absolute value of the argument. *)
 ;;
 

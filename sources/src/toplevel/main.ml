@@ -8,7 +8,6 @@
 #open "location";;
 #open "do_phr";;
 #open "compiler";;
-#open "format";;
 
 let anonymous s =
   raise (arg__Bad ("don't know what to do with " ^ s))
@@ -24,8 +23,6 @@ and open_set set =
     raise (arg__Bad ("unknown module set " ^ set))
 and debug_option () =
   toplevel__debug_mode true
-and set_language lang =
-  interntl__language := lang
 ;;
 
 let main() =
@@ -39,12 +36,11 @@ try
               "-O", arg__String open_set;
               "-open", arg__String open_set;
               "-g", arg__Unit debug_option;
-              "-lang", arg__String set_language;
               "-debug", arg__Unit debug_option]
              anonymous;
   default_used_modules := "toplevel" :: !default_used_modules;
-  version__print_banner();
-  print_newline();
+  print_string version__banner;
+  print_newline(); print_newline();
   let ic = open_in_bin command_line.(0) in
     seek_in ic (in_channel_length ic - 20);
     let size_code = input_binary_int ic in
@@ -63,26 +59,23 @@ try
     while true do
       try
         print_string toplevel_input_prompt;
-        print_flush ();
+        flush std_out;
         reset_rollback();
         do_toplevel_phrase(parse_impl_phrase lexbuf)
       with End_of_file ->
              io__exit 0
          | Toplevel ->
-             flush std_err;
+             flush std_out;
              rollback ()
          | Break ->
-             print_string(interntl__translate "Interrupted.\n");
+             print_begline "Interrupted."; print_endline "";
+             flush std_out;
              rollback ()
     done
 
 with Toplevel -> exit 2
-   | sys__Sys_error msg ->
-      interntl__eprintf "Input/output error: %s.\n" msg;
-      exit 2
-   | Zinc s ->
-      interntl__eprintf "Internal error: %s.\nPlease report it.\n" s;
-      exit 100
+   | Zinc s -> prerr_string "# Internal error: "; prerr_endline s; exit 4
 ;;
 
-printexc__f main (); exit 0;;
+printexc__f main ()
+;;

@@ -5,12 +5,12 @@
 
 #include "socketaddr.h"
   
-value unix_bind(socket, address)      /* ML */
-     value socket, address;
+value unix_bind(sock, addr)      /* ML */
+     value sock, addr;
 {
   int ret;
-  get_sockaddr(address);
-  ret = bind(Int_val(socket), &sock_addr.s_gen, sock_addr_len);
+  get_sockaddr(addr);
+  ret = bind(Int_val(sock), &sock_addr.s_gen, sock_addr_len);
   if (ret == -1) uerror("bind", Nothing);
   return Val_unit;
 }

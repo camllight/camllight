@@ -11,8 +11,6 @@ let testing_function s =
     print_newline();;
 
 let test test_number eq_fun (answer, correct_answer) =
- flush std_out;
- flush std_err;
  if not eq_fun answer correct_answer then begin
    fprintf stderr ">>> Bad result (%s, test %d)\n" !function_tested test_number;
    error_occurred := true;
@@ -24,8 +22,6 @@ let test test_number eq_fun (answer, correct_answer) =
 ;;
 
 let failure_test test_number fun_to_test arg =
- flush std_out;
- flush std_err;
  try
    fun_to_test arg;
    fprintf stderr ">>> Failure expected (%s, test %d)\n"

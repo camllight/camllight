@@ -12,29 +12,13 @@ ccfiles=""
 cclib=""
 ccopt=""
 linkout=a.out
-profile=false
-p=""
-prodump=""
-proflags="fm"
-
-case "$LANG" in
-  "") ;;
-   *) compopt="-lang $LANG"; linkopt="-lang $LANG";;
-esac
 
 while : ; do
   case $1 in
     "")
       break;;
     *.ml)
-      if $profile
-      then 
-	$stdlib/camlinstr -m $proflags -stdlib $stdlib $includes $compopt $1 ${1}t || exit $?
-        camlrun $stdlib/camlcomp -stdlib $stdlib $includes $compopt ${1}t || { rm -f ${1}t; exit $?; }
-	rm -f ${1}t
-      else
-        camlrun $stdlib/camlcomp -stdlib $stdlib $includes $compopt $1 || exit $?
-      fi
+      camlrun $stdlib/camlcomp -stdlib $stdlib $includes $compopt $1 || exit $?
       linkfiles="$linkfiles $1";;
     *.mli)
       camlrun $stdlib/camlcomp -stdlib $stdlib $includes $compopt $1 || exit $?
@@ -61,7 +45,7 @@ while : ; do
       stdlib=$2
       shift;;
     -v|-version)
-      echo "The Caml Light system, version" VERSION
+      echo "The Caml Light system, version 0.6"
       echo "  (standard library from $stdlib)"
       camlrun -V
       camlrun $stdlib/camlcomp -version
@@ -82,19 +66,6 @@ while : ; do
       cc=$2; shift;;
     -ccopt)
       ccopt="$ccopt $2"; shift;;
-    -p)
-      profile=true
-      p=p
-      prodump=$stdlib/prodump.zo;;
-    -p*)
-      profile=true
-      p=p
-      prodump=$stdlib/prodump.zo
-      proflags=`echo $1 | sed -e 's/^-p//'`;;
-    -lang)
-      compflags="$compflags -lang $2"
-      linkflags="$compflags -lang $2"
-      shift;;
     -*)
       echo "Unknown option \"$1\", ignored" >&2;;
     *)
@@ -105,7 +76,7 @@ done
 
 if $linkalso && test -n "$linkfiles"; then
   camlrun $stdlib/camllink -stdlib $stdlib $includes $custom $linkopt \
-    -exec $linkout $stdlib/stdlib$p.zo $linkfiles $prodump || exit $?
+    -exec $linkout $stdlib/stdlib.zo $linkfiles || exit $?
   if test -n "$custom"; then
     if mv $linkout /tmp/camlcode.$$ \
        && $cc -I$stdlib -o $linkout $ccopt /tmp/camlprim.$$.c $ccfiles  \

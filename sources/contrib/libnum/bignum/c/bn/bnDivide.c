@@ -1,6 +1,6 @@
 /* Copyright     Digital Equipment Corporation & INRIA     1988, 1989 */
-/* Last modified_on Mon Apr 15 18:51:35 GMT+2:00 1991 by herve */
-/*      modified_on Fri Mar 30  3:29:17 GMT+2:00 1990 by shand */
+/* Last modified on Mon Apr 15 18:51:35 GMT+2:00 1991 by herve */
+/*      modified on Fri Mar 30  3:29:17 GMT+2:00 1990 by shand */
 
 
 /* bnDivide.c: a piece of the bignum kernel written in C */

@@ -134,9 +134,6 @@ value open_out : string -> out_channel
            are detected and preserved. The object can be read back,
            by the function [input_value]. The format is compatible across
 	   all machines for a given version of Caml Light. *)
-  and output_compact_value : out_channel -> 'a -> unit = 2 "extern_compact_val"
-        (* Same as [output_value], but uses a different format, more compact,
-           but slower to generate and read back. *)
   and seek_out : out_channel -> int -> unit = 2 "seek_out"
         (* [seek_out chan pos] sets the current writing position to [pos]
            for channel [chan]. This works only for regular files. On
@@ -178,12 +175,12 @@ value open_in : string -> in_channel
   and input_char : in_channel -> char = 1 "input_char"
         (* Read one character from the given input channel.
            Raise [End_of_file] if there are no more characters to read. *)
-  and input_line : in_channel -> string
+  and input_line : in_channel -> string = 1 "input_line"
         (* Read characters from the given input channel, until a
            newline character is encountered. Return the string of
            all characters read, without the newline character at the end.
            Raise [End_of_file] if the end of the file is reached
-           at the beginning of line. *)
+           before the line is complete. *)
   and input : in_channel -> string -> int -> int -> int
         (* [input chan buff ofs len] attempts to read [len] characters
            from channel [chan], storing them in string [buff], starting at
@@ -213,8 +210,7 @@ value open_in : string -> in_channel
 	   integer. *)
   and input_value : in_channel -> 'a = 1 "intern_val"
         (* Read the representation of a structured value, as produced
-           by [output_value] or [output_compact_value], and return
-           the corresponding value.
+           by [output_value], and return the corresponding value.
            This is not type-safe. The type of the returned object is
            not ['a] properly speaking: the returned object has one
            unique type, which cannot be determined at compile-time.
@@ -242,5 +238,4 @@ value open_in : string -> in_channel
 value fast_input : in_channel -> string -> int -> int -> int = 4 "input"
   and fast_really_input : in_channel -> string -> int -> int -> unit
   and fast_output : out_channel -> string -> int -> int -> unit = 4 "output"
-  and input_scan_line: in_channel -> int = 1 "input_scan_line"
 ;;

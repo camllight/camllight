@@ -5,20 +5,15 @@
 
 
 #include "config.h"
-#ifdef __STDC__
+#ifdef ANSI
 #include <stddef.h>
 #endif
+
 #ifdef SIXTEEN
 #include <stdlib.h>
 #endif
 
-#ifdef __STDC__
-#define P(x) x
-#else
-#define P(x) ()
-#endif
-
-#ifdef __STDC__
+#ifdef ANSI
 typedef size_t asize_t;
 #else
 typedef int asize_t;
@@ -34,26 +29,21 @@ typedef char huge * addr;
 typedef char * addr;
 #endif
 
-#ifdef __STDC__
-#define Volatile volatile
-#else
-#define Volatile
-#endif
-
-#ifdef __GNUC__
-#define Noreturn void volatile
-#else
-#define Noreturn void
-#endif
-
 extern int verb_gc;
-extern int Volatile something_to_do;
 
-void gc_message P((char *, unsigned long));
-Noreturn fatal_error P((char *));
-Noreturn fatal_error_arg P((char *, char *));
-void memmov P((char *, char *, unsigned long));
-char * aligned_malloc P((asize_t, int));
+#ifdef ANSI
+extern void gc_message (char *, unsigned long);
+extern void fatal_error (char *);
+extern void fatal_unix_error (char *, char *);
+extern void memmov (char *, char *, unsigned long);
+extern char * aligned_malloc (asize_t, int);
+#else
+void gc_message ();
+void fatal_error ();
+void fatal_unix_error ();
+void memmov ();
+char * aligned_malloc ();
+#endif /* ANSI */
 
 
 #endif /* _misc_ */

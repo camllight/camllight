@@ -1,6 +1,6 @@
  # Copyright     Digital Equipment Corporation & INRIA     1988, 1989
- # Last modified_on Tue Jul 31 17:48:45 GMT+2:00 1990 by shand
- #      modified_on Fri Mar  2 16:53:50 GMT+1:00 1990 by herve
+ # Last modified on Tue Jul 31 17:48:45 GMT+2:00 1990 by shand
+ #      modified on Fri Mar  2 16:53:50 GMT+1:00 1990 by herve
  #
  #		KerN for Mips
  #		Paul Zimmermann & Robert Ehrlich & Bernard Paul Serpette
@@ -593,58 +593,58 @@ BDD46:		srl	$2,$13,$6		# return(rl >> k);
 	.align	2
 	.globl	BnnMultiply2Digit
 	.globl	BnnM2DFastLink
-#define	c0 $2		/* low carry */
-#define	 tb1 $2
-#define	 tc1 $2
-#define	 tj1 $2
-#define	 tn1 $2
-#define	 tq1 $2
-#define	 tz1 $2
-#define	 tA2 $2
-#define	c1 $3		/* high carry */
-#define	 th2 $3
-#define	 ti2 $3
-#define	 pH3 $3
-#define	 tx3 $3
-#define	 ty3 $3
-#define	ss $4
-#define	sl $5
-#define	mm $6
-#define	ml $7
-#define	mlim $7
-#define	d0 $8
-#define	d1 $9
-#define	ds $10		/* d0+d1 mod base */
-#define	t_z $11
-#define	 tC3 $11
-#define	 s0 $11
-#define	 ta0 $11
-#define	 td0 $11
-#define	 te1 $11
-#define	 tf1 $11
-#define	 s1 $11
-#define	 to2 $11
-#define	 tp2 $11
-#define	 ts2 $11
-#define	 pM1 $11
-#define	m0 $12
-#define	 ms $12		/* b0+b1 mod base */
-#define	 tr2 $12 
-#define	 tu3 $12
-#define	 tv3 $12
-#define	pL0 $13
-#define	 tg1 $13
-#define	 tk2 $13
-#define	 tm2 $13
-#define	 tt2 $13
-#define	 tw2 $13
-#define	t_1 $14
-#define	 pL1 $14
-#define	 pH2 $14
-#define	 pM2 $14
-#define	 tB2 $14
-#define	m1 $15
-#define	 borrow $15
+#define	c0 2		/* low carry */
+#define	 tb1 2
+#define	 tc1 2
+#define	 tj1 2
+#define	 tn1 2
+#define	 tq1 2
+#define	 tz1 2
+#define	 tA2 2
+#define	c1 3		/* high carry */
+#define	 th2 3
+#define	 ti2 3
+#define	 pH3 3
+#define	 tx3 3
+#define	 ty3 3
+#define	ss 4
+#define	sl 5
+#define	mm 6
+#define	ml 7
+#define	mlim 7
+#define	d0 8
+#define	d1 9
+#define	ds 10		/* d0+d1 mod base */
+#define	t_z 11
+#define	 tC3 11
+#define	 s0 11
+#define	 ta0 11
+#define	 td0 11
+#define	 te1 11
+#define	 tf1 11
+#define	 s1 11
+#define	 to2 11
+#define	 tp2 11
+#define	 ts2 11
+#define	 pM1 11
+#define	m0 12
+#define	 ms 12		/* b0+b1 mod base */
+#define	 tr2 12 
+#define	 tu3 12
+#define	 tv3 12
+#define	pL0 13
+#define	 tg1 13
+#define	 tk2 13
+#define	 tm2 13
+#define	 tt2 13
+#define	 tw2 13
+#define	t_1 14
+#define	 pL1 14
+#define	 pH2 14
+#define	 pM2 14
+#define	 tB2 14
+#define	m1 15
+#define	 borrow 15
  # Special "friends" entry point--allows fast non-standard procedure linkage.
  # Permits passing d0:d1 in r8-r9 and a low-order 64-bit integer in r2-r3
  # that is added to final result.
@@ -653,9 +653,9 @@ BDD46:		srl	$2,$13,$6		# return(rl >> k);
 	.ent	BnnM2DFastLink
 BnnM2DFastLink:
 	.frame	$sp, 0, $31
-	subu	sl,ml
-	blez	ml,BM2D6
-	lw	m0,0(mm)
+	subu	$sl,$ml
+	blez	$ml,BM2D6
+	lw	$m0,0($mm)
 	b	BnnM2DFLAux
 	.end	BnnM2DFastLink			# (ss sl mm ml d0, d1)
 
@@ -664,376 +664,376 @@ BnnMultiply2Digit:
 	.frame	$sp, 0, $31
 
 	.set	noreorder
-		lw	d0, 16($sp)		# d0;
-		lw	d1, 20($sp)		# d1;
-		li	c0,0
-		li	c1,0
-		blez	ml,BM2D6		# if(ml <= 0) goto end_loop;
+		lw	$d0, 16($sp)		# d0;
+		lw	$d1, 20($sp)		# d1;
+		li	$c0,0
+		li	$c1,0
+		blez	$ml,BM2D6		# if(ml <= 0) goto end_loop;
 		# BDSLOT
-		subu	t_1,d0,1		# t_1 = d0-1
+		subu	$t_1,$d0,1		# t_1 = d0-1
 	.set	reorder
-		or	t_z,d0,d1		# t_z = (d0 | d1)
-		beq	t_z,0,BM2D7		# if(d0.d1 == 0)
+		or	$t_z,$d0,$d1		# t_z = (d0 | d1)
+		beq	$t_z,0,BM2D7		# if(d0.d1 == 0)
 						#	return(0);
-		lw	m0,0(mm)
-		or	t_1,d1		# t_1 = (d0-1)|d1
-		subu	sl,ml			# sl -= ml;
-		beq	t_1,0,BM2DADD0		# if(d0.d1 != 1)
+		lw	$m0,0($mm)
+		or	$t_1,$d1		# t_1 = (d0-1)|d1
+		subu	$sl,$ml			# sl -= ml;
+		beq	$t_1,0,BM2DADD0		# if(d0.d1 != 1)
 						#     BnnAdd(pp, pl, mm, ml, 0);
 	.set	noreorder
 BnnM2DFLAux:
-		 multu	d0,m0
+		 multu	$d0,$m0
 #define EnableOddLength 1
 #ifdef EnableOddLength
-#define	t_odd $15
-#define	t_a $15
-#define	t_b $14
-#define	t_c $15
-#define	t_d $15
-#define	t_e $14
-#define	t_f $13
-#define	t_g $15
+#define	t_odd 15
+#define	t_a 15
+#define	t_b 14
+#define	t_c 15
+#define	t_d 15
+#define	t_e 14
+#define	t_f 13
+#define	t_g 15
 		# the ifdef'ed code handles case when length of mm is odd.
-		and	t_odd,ml,1
-		sll	mlim,ml,2		# ml *= 4;
-		beq	t_odd,$0,BM2DmlEven
-		addu	mlim,mlim,mm		# mlim = mm+ml;
-		lw	s0,0(ss)
-		addu	mm,4
-		addu	ss,4
-		mflo	t_a
-		mfhi	t_b
-		addu	s0,t_a,s0
-		sltu	t_c,s0,t_a
-		multu	d1,m0
-		lw	m0,0(mm)
-		addu	t_d,t_c,t_b
-		mflo	t_e
-		mfhi	t_f
-		addu	c0,t_e,t_d
-		sltu	t_g,c0,t_e
-		multu	d0,m0
-		addu	c1,t_g,t_f
-		beq	mm,mlim,BM2D6
+		and	$t_odd,$ml,1
+		sll	$mlim,$ml,2		# ml *= 4;
+		beq	$t_odd,$0,BM2DmlEven
+		addu	$mlim,$mlim,$mm		# mlim = mm+ml;
+		lw	$s0,0($ss)
+		addu	$mm,4
+		addu	$ss,4
+		mflo	$t_a
+		mfhi	$t_b
+		addu	$s0,$t_a,$s0
+		sltu	$t_c,$s0,$t_a
+		multu	$d1,$m0
+		lw	$m0,0($mm)
+		addu	$t_d,$t_c,$t_b
+		mflo	$t_e
+		mfhi	$t_f
+		addu	$c0,$t_e,$t_d
+		sltu	$t_g,$c0,$t_e
+		multu	$d0,$m0
+		addu	$c1,$t_g,$t_f
+		beq	$mm,$mlim,BM2D6
 		# BDSLOT
-		sw	s0,-4(ss)
+		sw	$s0,-4($ss)
 
 BM2DmlEven:
 #else EnableOddLength
-		sll	mlim,ml,2		# ml *= 4;
-		addu	mlim,mlim,mm		# mlim = mm+ml;
+		sll	$mlim,$ml,2		# ml *= 4;
+		addu	$mlim,$mlim,$mm		# mlim = mm+ml;
 #endif EnableOddLength
-		lw	m1,4(mm)		# ml *= 4;
-		bltu	d0,d1,BM2DHighBig	# expands to 2 instructions
+		lw	$m1,4($mm)		# ml *= 4;
+		bltu	$d0,$d1,BM2DHighBig	# expands to 2 instructions
 		# BDSLOT
 		nop
-		bltu	m1,m0,BM2DLNeg	# expands to 2 instructions
+		bltu	$m1,$m0,BM2DLNeg	# expands to 2 instructions
 		# BDSLOT
-		subu	ds,d0,d1
+		subu	$ds,$d0,$d1
 		b	BM2DLPEntry
 		# BDSLOT
-		lw	s0,0(ss)
+		lw	$s0,0($ss)
 		
 BM2DLLoop:
-		lw	m0,0(mm)
-		sw	tz1,4(ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
-		 multu	m0,d0
-		addu	ss,8
-		sltu	tA2,tz1,pM1
-		addu	tB2,pM2,tA2		# tB2 = pM2 + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		addu	c0,tB2,tw2		# c0 = pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		lw	m1,4(mm)
-		sltu	tC3,c0,tB2
-		bltu	m1,m0,BM2DLNeg	# expands to 2 instructions
+		lw	$m0,0($mm)
+		sw	$tz1,4($ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
+		 multu	$m0,$d0
+		addu	$ss,8
+		sltu	$tA2,$tz1,$pM1
+		addu	$tB2,$pM2,$tA2		# tB2 = pM2 + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		addu	$c0,$tB2,$tw2		# c0 = pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		lw	$m1,4($mm)
+		sltu	$tC3,$c0,$tB2
+		bltu	$m1,$m0,BM2DLNeg	# expands to 2 instructions
 		# BDSLOT
-		addu	c1,ty3,tC3
+		addu	$c1,$ty3,$tC3
 		
 BM2DLPos:
-		lw	s0,0(ss)
+		lw	$s0,0($ss)
 BM2DLPEntry:
-		subu	ms,m1,m0
-		addu	ta0,s0,c0		# ta0 = (s0+c0)%B
-		 mfhi	pL1
-		 mflo	pL0
-		sltu	tb1,ta0,c0
-		addu	tc1,pL1,tb1		# tc1 = pL1 + (s0+c0)/B
-		 multu	m1,d1
-		addu	td0,pL0,ta0		# td0 = (pL0+s0+c0)%B
-		sw	td0,0(ss)		#  (pL0+s0+c0)%B -> ss[0] FIN
-		sltu	te1,td0,pL0
-		addu	tf1,tc1,te1		# tf1 = pL1 + (pL0+s0+c0)/B
-		addu	tg1,pL0,c1		# tg1 = (pL0+c1)%B
-		sltu	th2,tg1,c1
-		addu	ti2,pL1,th2		# ti2 = pL1 + (pL0+c1)/B
-		addu	tj1,tg1,tf1		# tj1 = (pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sltu	tk2,tj1,tg1
-		lw	s1,4(ss)
-		addu	tm2,ti2,tk2		# tm2 = pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B
-		 mfhi	pH3
-		 mflo	pH2
-		addu	tn1,tj1,s1		# tn1 = (s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sltu	to2,tn1,s1
-		 multu	ms,ds
-		addu	tp2,pH3,to2		# tp2 = pH3 + (s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		addu	tq1,pH2,tn1		# tq1 = (pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sltu	tr2,tq1,pH2
-		addu	ts2,tp2,tr2		# ts2 = pH3 + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		addu	tt2,pH2,tm2		# tt2 = (pH2+pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B
-		sltu	tu3,tt2,pH2
-		addu	tv3,pH3,tu3		# tv3 = pH3 + (pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
-		addu	tw2,ts2,tt2		# tw2 = pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		sltu	tx3,tw2,ts2
-		addu	ty3,tv3,tx3		# ty3 = pH3 + (pH3+(pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
-		addu	mm,8
-		 mflo	pM1
-		 mfhi	pM2
-		bne	mlim,mm,BM2DLLoop	# if(mm!=mlim) goto BM2DLLoop;
+		subu	$ms,$m1,$m0
+		addu	$ta0,$s0,$c0		# ta0 = (s0+c0)%B
+		 mfhi	$pL1
+		 mflo	$pL0
+		sltu	$tb1,$ta0,$c0
+		addu	$tc1,$pL1,$tb1		# tc1 = pL1 + (s0+c0)/B
+		 multu	$m1,$d1
+		addu	$td0,$pL0,$ta0		# td0 = (pL0+s0+c0)%B
+		sw	$td0,0($ss)		#  (pL0+s0+c0)%B -> ss[0] FIN
+		sltu	$te1,$td0,$pL0
+		addu	$tf1,$tc1,$te1		# tf1 = pL1 + (pL0+s0+c0)/B
+		addu	$tg1,$pL0,$c1		# tg1 = (pL0+c1)%B
+		sltu	$th2,$tg1,$c1
+		addu	$ti2,$pL1,$th2		# ti2 = pL1 + (pL0+c1)/B
+		addu	$tj1,$tg1,$tf1		# tj1 = (pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sltu	$tk2,$tj1,$tg1
+		lw	$s1,4($ss)
+		addu	$tm2,$ti2,$tk2		# tm2 = pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B
+		 mfhi	$pH3
+		 mflo	$pH2
+		addu	$tn1,$tj1,$s1		# tn1 = (s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sltu	$to2,$tn1,$s1
+		 multu	$ms,$ds
+		addu	$tp2,$pH3,$to2		# tp2 = pH3 + (s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		addu	$tq1,$pH2,$tn1		# tq1 = (pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sltu	$tr2,$tq1,$pH2
+		addu	$ts2,$tp2,$tr2		# ts2 = pH3 + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		addu	$tt2,$pH2,$tm2		# tt2 = (pH2+pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B
+		sltu	$tu3,$tt2,$pH2
+		addu	$tv3,$pH3,$tu3		# tv3 = pH3 + (pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
+		addu	$tw2,$ts2,$tt2		# tw2 = pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		sltu	$tx3,$tw2,$ts2
+		addu	$ty3,$tv3,$tx3		# ty3 = pH3 + (pH3+(pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
+		addu	$mm,8
+		 mflo	$pM1
+		 mfhi	$pM2
+		bne	$mlim,$mm,BM2DLLoop	# if(mm!=mlim) goto BM2DLLoop;
 		# BDSLOT
-		addu	tz1,pM1,tq1		# tz1 = (pM1+pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		addu	$tz1,$pM1,$tq1		# tz1 = (pM1+pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
 		
 	.set	reorder
-		sw	tz1,4(ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
-		addu	ss,8
-		sltu	tA2,tz1,pM1
-		addu	tB2,pM2,tA2		# tB2 = pM2 + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		addu	c0,tB2,tw2		# c0 = pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		sltu	tC3,c0,tB2
-		addu	c1,ty3,tC3
+		sw	$tz1,4($ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
+		addu	$ss,8
+		sltu	$tA2,$tz1,$pM1
+		addu	$tB2,$pM2,$tA2		# tB2 = pM2 + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		addu	$c0,$tB2,$tw2		# c0 = pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		sltu	$tC3,$c0,$tB2
+		addu	$c1,$ty3,$tC3
 		b	BM2D6
 	.set	noreorder
 		
 BM2DNLLoop:
-		lw	m0,0(mm)
-		subu	tz1,tq1,pM1		# tz1 = (-pM1+pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		 multu	m0,d0
-		sw	tz1,4(ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
-		addu	ss,8
-		addu	tB2,pM2,borrow
-		sltu	tC3,tw2,tB2
-		lw	m1,4(mm)
-		subu	c0,tw2,tB2		# c0 = -pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		bgeu	m1,m0,BM2DLPos	# expands to 2 instructions
+		lw	$m0,0($mm)
+		subu	$tz1,$tq1,$pM1		# tz1 = (-pM1+pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		 multu	$m0,$d0
+		sw	$tz1,4($ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
+		addu	$ss,8
+		addu	$tB2,$pM2,$borrow
+		sltu	$tC3,$tw2,$tB2
+		lw	$m1,4($mm)
+		subu	$c0,$tw2,$tB2		# c0 = -pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		bgeu	$m1,$m0,BM2DLPos	# expands to 2 instructions
 		# BDSLOT
-		subu	c1,ty3,tC3
+		subu	$c1,$ty3,$tC3
 		
 BM2DLNeg:
-		lw	s0,0(ss)
-		subu	ms,m0,m1
-		addu	ta0,s0,c0		# ta0 = (s0+c0)%B
-		 mfhi	pL1
-		 mflo	pL0
-		sltu	tb1,ta0,c0
-		addu	tc1,pL1,tb1		# tc1 = pL1 + (s0+c0)/B
-		 multu	m1,d1
-		addu	td0,pL0,ta0		# td0 = (pL0+s0+c0)%B
-		sw	td0,0(ss)		#  (pL0+s0+c0)%B -> ss[0] FIN
-		sltu	te1,td0,pL0
-		addu	tf1,tc1,te1		# tf1 = pL1 + (pL0+s0+c0)/B
-		addu	tg1,pL0,c1		# tg1 = (pL0+c1)%B
-		sltu	th2,tg1,c1
-		addu	ti2,pL1,th2		# ti2 = pL1 + (pL0+c1)/B
-		addu	tj1,tg1,tf1		# tj1 = (pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sltu	tk2,tj1,tg1
-		lw	s1,4(ss)
-		addu	tm2,ti2,tk2		# tm2 = pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B
-		 mfhi	pH3
-		 mflo	pH2
-		addu	tn1,tj1,s1		# tn1 = (s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sltu	to2,tn1,s1
-		 multu	ms,ds
-		addu	tp2,pH3,to2		# tp2 = pH3 + (s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		addu	tq1,pH2,tn1		# tq1 = (pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sltu	tr2,tq1,pH2
-		addu	ts2,tp2,tr2		# ts2 = pH3 + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		addu	tt2,pH2,tm2		# tt2 = (pH2+pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B
-		sltu	tu3,tt2,pH2
-		addu	tv3,pH3,tu3		# tv3 = pH3 + (pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
-		addu	tw2,ts2,tt2		# tw2 = pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		sltu	tx3,tw2,ts2
-		addu	ty3,tv3,tx3		# ty3 = pH3 + (pH3+(pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
+		lw	$s0,0($ss)
+		subu	$ms,$m0,$m1
+		addu	$ta0,$s0,$c0		# ta0 = (s0+c0)%B
+		 mfhi	$pL1
+		 mflo	$pL0
+		sltu	$tb1,$ta0,$c0
+		addu	$tc1,$pL1,$tb1		# tc1 = pL1 + (s0+c0)/B
+		 multu	$m1,$d1
+		addu	$td0,$pL0,$ta0		# td0 = (pL0+s0+c0)%B
+		sw	$td0,0($ss)		#  (pL0+s0+c0)%B -> ss[0] FIN
+		sltu	$te1,$td0,$pL0
+		addu	$tf1,$tc1,$te1		# tf1 = pL1 + (pL0+s0+c0)/B
+		addu	$tg1,$pL0,$c1		# tg1 = (pL0+c1)%B
+		sltu	$th2,$tg1,$c1
+		addu	$ti2,$pL1,$th2		# ti2 = pL1 + (pL0+c1)/B
+		addu	$tj1,$tg1,$tf1		# tj1 = (pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sltu	$tk2,$tj1,$tg1
+		lw	$s1,4($ss)
+		addu	$tm2,$ti2,$tk2		# tm2 = pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B
+		 mfhi	$pH3
+		 mflo	$pH2
+		addu	$tn1,$tj1,$s1		# tn1 = (s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sltu	$to2,$tn1,$s1
+		 multu	$ms,$ds
+		addu	$tp2,$pH3,$to2		# tp2 = pH3 + (s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		addu	$tq1,$pH2,$tn1		# tq1 = (pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sltu	$tr2,$tq1,$pH2
+		addu	$ts2,$tp2,$tr2		# ts2 = pH3 + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		addu	$tt2,$pH2,$tm2		# tt2 = (pH2+pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B
+		sltu	$tu3,$tt2,$pH2
+		addu	$tv3,$pH3,$tu3		# tv3 = pH3 + (pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
+		addu	$tw2,$ts2,$tt2		# tw2 = pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		sltu	$tx3,$tw2,$ts2
+		addu	$ty3,$tv3,$tx3		# ty3 = pH3 + (pH3+(pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
 		# Subtract ds
-		# sltu	borrow,tw2,ds
-		# subu	tw2,ds
-		# subu	ty3,borrow
+		# sltu	$borrow,$tw2,$ds
+		# subu	$tw2,$ds
+		# subu	$ty3,$borrow
 		# End Subtract
-		addu	mm,8
-		 mflo	pM1
-		 mfhi	pM2
-		bne	mlim,mm,BM2DNLLoop	# if(mm!=mlim) goto BM2DNLLoop;
+		addu	$mm,8
+		 mflo	$pM1
+		 mfhi	$pM2
+		bne	$mlim,$mm,BM2DNLLoop	# if(mm!=mlim) goto BM2DNLLoop;
 		# BDSLOT
-		sltu	borrow,tq1,pM1
+		sltu	$borrow,$tq1,$pM1
 		
 	.set	reorder
-		subu	tz1,tq1,pM1		# tz1 = (-pM1+pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sw	tz1,4(ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
-		addu	ss,8
-		addu	tB2,pM2,borrow
-		sltu	tC3,tw2,tB2
-		subu	c0,tw2,tB2		# c0 = -pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		subu	c1,ty3,tC3
+		subu	$tz1,$tq1,$pM1		# tz1 = (-pM1+pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sw	$tz1,4($ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
+		addu	$ss,8
+		addu	$tB2,$pM2,$borrow
+		sltu	$tC3,$tw2,$tB2
+		subu	$c0,$tw2,$tB2		# c0 = -pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		subu	$c1,$ty3,$tC3
 		b	BM2D6
 	.set	noreorder
 BM2DHighBig:
-		bltu	m0,m1,BM2DHNeg	# expands to 2 instructions
-		subu	ds,d1,d0
+		bltu	$m0,$m1,BM2DHNeg	# expands to 2 instructions
+		subu	$ds,$d1,$d0
 		# BDSLOT
 		b	BM2DHEntry
 		# BDSLOT
-		lw	s0,0(ss)
+		lw	$s0,0($ss)
 		
 BM2DHLoop:
-		lw	m0,0(mm)
-		sw	tz1,4(ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
-		 multu	m0,d0
-		addu	ss,8
-		sltu	tA2,tz1,pM1
-		addu	tB2,pM2,tA2		# tB2 = pM2 + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		addu	c0,tB2,tw2		# c0 = pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		lw	m1,4(mm)
-		sltu	tC3,c0,tB2
-		bltu	m0,m1,BM2DHNeg	# expands to 2 instructions
+		lw	$m0,0($mm)
+		sw	$tz1,4($ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
+		 multu	$m0,$d0
+		addu	$ss,8
+		sltu	$tA2,$tz1,$pM1
+		addu	$tB2,$pM2,$tA2		# tB2 = pM2 + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		addu	$c0,$tB2,$tw2		# c0 = pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		lw	$m1,4($mm)
+		sltu	$tC3,$c0,$tB2
+		bltu	$m0,$m1,BM2DHNeg	# expands to 2 instructions
 		# BDSLOT
-		addu	c1,ty3,tC3
+		addu	$c1,$ty3,$tC3
 		
 BM2DHPos:
-		lw	s0,0(ss)
+		lw	$s0,0($ss)
 BM2DHEntry:
-		subu	ms,m0,m1
-		addu	ta0,s0,c0		# ta0 = (s0+c0)%B
-		 mfhi	pL1
-		 mflo	pL0
-		sltu	tb1,ta0,c0
-		addu	tc1,pL1,tb1		# tc1 = pL1 + (s0+c0)/B
-		 multu	m1,d1
-		addu	td0,pL0,ta0		# td0 = (pL0+s0+c0)%B
-		sw	td0,0(ss)		#  (pL0+s0+c0)%B -> ss[0] FIN
-		sltu	te1,td0,pL0
-		addu	tf1,tc1,te1		# tf1 = pL1 + (pL0+s0+c0)/B
-		addu	tg1,pL0,c1		# tg1 = (pL0+c1)%B
-		sltu	th2,tg1,c1
-		addu	ti2,pL1,th2		# ti2 = pL1 + (pL0+c1)/B
-		addu	tj1,tg1,tf1		# tj1 = (pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sltu	tk2,tj1,tg1
-		lw	s1,4(ss)
-		addu	tm2,ti2,tk2		# tm2 = pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B
-		 mfhi	pH3
-		 mflo	pH2
-		addu	tn1,tj1,s1		# tn1 = (s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sltu	to2,tn1,s1
-		 multu	ms,ds
-		addu	tp2,pH3,to2		# tp2 = pH3 + (s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		addu	tq1,pH2,tn1		# tq1 = (pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sltu	tr2,tq1,pH2
-		addu	ts2,tp2,tr2		# ts2 = pH3 + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		addu	tt2,pH2,tm2		# tt2 = (pH2+pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B
-		sltu	tu3,tt2,pH2
-		addu	tv3,pH3,tu3		# tv3 = pH3 + (pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
-		addu	tw2,ts2,tt2		# tw2 = pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		sltu	tx3,tw2,ts2
-		addu	ty3,tv3,tx3		# ty3 = pH3 + (pH3+(pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
-		addu	mm,8
-		 mflo	pM1
-		 mfhi	pM2
-		bne	mlim,mm,BM2DHLoop	# if(mm!=mlim) goto BM2DHLoop;
+		subu	$ms,$m0,$m1
+		addu	$ta0,$s0,$c0		# ta0 = (s0+c0)%B
+		 mfhi	$pL1
+		 mflo	$pL0
+		sltu	$tb1,$ta0,$c0
+		addu	$tc1,$pL1,$tb1		# tc1 = pL1 + (s0+c0)/B
+		 multu	$m1,$d1
+		addu	$td0,$pL0,$ta0		# td0 = (pL0+s0+c0)%B
+		sw	$td0,0($ss)		#  (pL0+s0+c0)%B -> ss[0] FIN
+		sltu	$te1,$td0,$pL0
+		addu	$tf1,$tc1,$te1		# tf1 = pL1 + (pL0+s0+c0)/B
+		addu	$tg1,$pL0,$c1		# tg1 = (pL0+c1)%B
+		sltu	$th2,$tg1,$c1
+		addu	$ti2,$pL1,$th2		# ti2 = pL1 + (pL0+c1)/B
+		addu	$tj1,$tg1,$tf1		# tj1 = (pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sltu	$tk2,$tj1,$tg1
+		lw	$s1,4($ss)
+		addu	$tm2,$ti2,$tk2		# tm2 = pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B
+		 mfhi	$pH3
+		 mflo	$pH2
+		addu	$tn1,$tj1,$s1		# tn1 = (s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sltu	$to2,$tn1,$s1
+		 multu	$ms,$ds
+		addu	$tp2,$pH3,$to2		# tp2 = pH3 + (s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		addu	$tq1,$pH2,$tn1		# tq1 = (pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sltu	$tr2,$tq1,$pH2
+		addu	$ts2,$tp2,$tr2		# ts2 = pH3 + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		addu	$tt2,$pH2,$tm2		# tt2 = (pH2+pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B
+		sltu	$tu3,$tt2,$pH2
+		addu	$tv3,$pH3,$tu3		# tv3 = pH3 + (pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
+		addu	$tw2,$ts2,$tt2		# tw2 = pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		sltu	$tx3,$tw2,$ts2
+		addu	$ty3,$tv3,$tx3		# ty3 = pH3 + (pH3+(pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
+		addu	$mm,8
+		 mflo	$pM1
+		 mfhi	$pM2
+		bne	$mlim,$mm,BM2DHLoop	# if(mm!=mlim) goto BM2DHLoop;
 		# BDSLOT
-		addu	tz1,pM1,tq1		# tz1 = (pM1+pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		addu	$tz1,$pM1,$tq1		# tz1 = (pM1+pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
 		
 	.set	reorder
-		sw	tz1,4(ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
-		addu	ss,8
-		sltu	tA2,tz1,pM1
-		addu	tB2,pM2,tA2		# tB2 = pM2 + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		addu	c0,tB2,tw2		# c0 = pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		sltu	tC3,c0,tB2
-		addu	c1,ty3,tC3
+		sw	$tz1,4($ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
+		addu	$ss,8
+		sltu	$tA2,$tz1,$pM1
+		addu	$tB2,$pM2,$tA2		# tB2 = pM2 + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		addu	$c0,$tB2,$tw2		# c0 = pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		sltu	$tC3,$c0,$tB2
+		addu	$c1,$ty3,$tC3
 		b	BM2D6
 	.set	noreorder
 
 BM2DNHLoop:
-		lw	m0,0(mm)
-		subu	tz1,tq1,pM1		# tz1 = (-pM1+pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		 multu	m0,d0
-		sw	tz1,4(ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
-		addu	ss,8
-		addu	tB2,pM2,borrow
-		sltu	tC3,tw2,tB2
-		lw	m1,4(mm)
-		subu	c0,tw2,tB2		# c0 = -pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		bgeu	m0,m1,BM2DHPos	# expands to 2 instructions
+		lw	$m0,0($mm)
+		subu	$tz1,$tq1,$pM1		# tz1 = (-pM1+pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		 multu	$m0,$d0
+		sw	$tz1,4($ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
+		addu	$ss,8
+		addu	$tB2,$pM2,$borrow
+		sltu	$tC3,$tw2,$tB2
+		lw	$m1,4($mm)
+		subu	$c0,$tw2,$tB2		# c0 = -pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		bgeu	$m0,$m1,BM2DHPos	# expands to 2 instructions
 		# BDSLOT
-		subu	c1,ty3,tC3
+		subu	$c1,$ty3,$tC3
 		
 BM2DHNeg:
-		lw	s0,0(ss)
-		subu	ms,m1,m0
-		addu	ta0,s0,c0		# ta0 = (s0+c0)%B
-		 mfhi	pL1
-		 mflo	pL0
-		sltu	tb1,ta0,c0
-		addu	tc1,pL1,tb1		# tc1 = pL1 + (s0+c0)/B
-		 multu	m1,d1
-		addu	td0,pL0,ta0		# td0 = (pL0+s0+c0)%B
-		sw	td0,0(ss)		#  (pL0+s0+c0)%B -> ss[0] FIN
-		sltu	te1,td0,pL0
-		addu	tf1,tc1,te1		# tf1 = pL1 + (pL0+s0+c0)/B
-		addu	tg1,pL0,c1		# tg1 = (pL0+c1)%B
-		sltu	th2,tg1,c1
-		addu	ti2,pL1,th2		# ti2 = pL1 + (pL0+c1)/B
-		addu	tj1,tg1,tf1		# tj1 = (pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sltu	tk2,tj1,tg1
-		lw	s1,4(ss)
-		addu	tm2,ti2,tk2		# tm2 = pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B
-		 mfhi	pH3
-		 mflo	pH2
-		addu	tn1,tj1,s1		# tn1 = (s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sltu	to2,tn1,s1
-		 multu	ms,ds
-		addu	tp2,pH3,to2		# tp2 = pH3 + (s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		addu	tq1,pH2,tn1		# tq1 = (pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sltu	tr2,tq1,pH2
-		addu	ts2,tp2,tr2		# ts2 = pH3 + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		addu	tt2,pH2,tm2		# tt2 = (pH2+pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B
-		sltu	tu3,tt2,pH2
-		addu	tv3,pH3,tu3		# tv3 = pH3 + (pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
-		addu	tw2,ts2,tt2		# tw2 = pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		sltu	tx3,tw2,ts2
-		addu	ty3,tv3,tx3		# ty3 = pH3 + (pH3+(pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
+		lw	$s0,0($ss)
+		subu	$ms,$m1,$m0
+		addu	$ta0,$s0,$c0		# ta0 = (s0+c0)%B
+		 mfhi	$pL1
+		 mflo	$pL0
+		sltu	$tb1,$ta0,$c0
+		addu	$tc1,$pL1,$tb1		# tc1 = pL1 + (s0+c0)/B
+		 multu	$m1,$d1
+		addu	$td0,$pL0,$ta0		# td0 = (pL0+s0+c0)%B
+		sw	$td0,0($ss)		#  (pL0+s0+c0)%B -> ss[0] FIN
+		sltu	$te1,$td0,$pL0
+		addu	$tf1,$tc1,$te1		# tf1 = pL1 + (pL0+s0+c0)/B
+		addu	$tg1,$pL0,$c1		# tg1 = (pL0+c1)%B
+		sltu	$th2,$tg1,$c1
+		addu	$ti2,$pL1,$th2		# ti2 = pL1 + (pL0+c1)/B
+		addu	$tj1,$tg1,$tf1		# tj1 = (pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sltu	$tk2,$tj1,$tg1
+		lw	$s1,4($ss)
+		addu	$tm2,$ti2,$tk2		# tm2 = pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B
+		 mfhi	$pH3
+		 mflo	$pH2
+		addu	$tn1,$tj1,$s1		# tn1 = (s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sltu	$to2,$tn1,$s1
+		 multu	$ms,$ds
+		addu	$tp2,$pH3,$to2		# tp2 = pH3 + (s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		addu	$tq1,$pH2,$tn1		# tq1 = (pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sltu	$tr2,$tq1,$pH2
+		addu	$ts2,$tp2,$tr2		# ts2 = pH3 + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		addu	$tt2,$pH2,$tm2		# tt2 = (pH2+pL1 + (pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B
+		sltu	$tu3,$tt2,$pH2
+		addu	$tv3,$pH3,$tu3		# tv3 = pH3 + (pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
+		addu	$tw2,$ts2,$tt2		# tw2 = pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		sltu	$tx3,$tw2,$ts2
+		addu	$ty3,$tv3,$tx3		# ty3 = pH3 + (pH3+(pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B)/B+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)/B
 		# Subtract ds
-		# sltu	borrow,tw2,ds
-		# subu	tw2,ds
-		# subu	ty3,borrow
+		# sltu	$borrow,$tw2,$ds
+		# subu	$tw2,$ds
+		# subu	$ty3,$borrow
 		# End Subtract
-		addu	mm,8
-		 mflo	pM1
-		 mfhi	pM2
-		bne	mlim,mm,BM2DNHLoop	# if(mm!=mlim) goto BM2DHLoop;
+		addu	$mm,8
+		 mflo	$pM1
+		 mfhi	$pM2
+		bne	$mlim,$mm,BM2DNHLoop	# if(mm!=mlim) goto BM2DHLoop;
 		# BDSLOT
-		sltu	borrow,tq1,pM1
+		sltu	$borrow,$tq1,$pM1
 		
 	.set	reorder
-		subu	tz1,tq1,pM1		# tz1 = (-pM1+pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
-		sw	tz1,4(ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
-		addu	ss,8
-		addu	tB2,pM2,borrow
-		sltu	tC3,tw2,tB2
-		subu	c0,tw2,tB2		# c0 = -pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
-		subu	c1,ty3,tC3
+		subu	$tz1,$tq1,$pM1		# tz1 = (-pM1+pH2+s1+pL1+pL0+c1 + (pL0+s0+c0)/B)%B
+		sw	$tz1,4($ss)		#  (pM1+pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B -> ss[1] FIN
+		addu	$ss,8
+		addu	$tB2,$pM2,$borrow
+		sltu	$tC3,$tw2,$tB2
+		subu	$c0,$tw2,$tB2		# c0 = -pM2+pH3+(pH2+pL1+(pL1+(pL0+s0+c0)/B+pL0+c1)/B)%B + (pM1+(pH2+s1+pL1+pL0+c1+(pL0+s0+c0)/B)%B+pH2+s1+(pL1+pL0+c1+(pL0+s0+c0)/B)%B)/B
+		subu	$c1,$ty3,$tC3
 		# b	BM2D6
 
 BM2D6:		
-		lw	s0,0(ss)		# s0 = *ss;
-		addu	c0,s0			# c0 = (c0+s0)%B
-		sltu	$12,c0,s0		# r = (c0+s0)/B
-		lw	s1,4(ss)		# 
-		sw	c0,0(ss)		# *ss = c0;
-		addu	c1,s1			# c1 = (c1+s1)%B
-		sltu	c0,c1,s1		# c0 = (c1+s1)/B
-		addu	c1,$12			# c1 = (c1+s1+(c0+s0)/B)%B
-		sltu	$12,c1,$12		# r = ((c1+s1)%B+(c0+s0)/B)/B
-		sw	c1,4(ss)
-		addu	c0,$12			# c0 = (c1+s1+(c0+s0)/B)/B
-		addu	ss,8			# ss+=2;
-		bne	c0,0,BM2D8		# if(c0) goto BM2D8;
+		lw	$s0,0($ss)		# s0 = *ss;
+		addu	$c0,$s0			# c0 = (c0+s0)%B
+		sltu	$12,$c0,$s0		# r = (c0+s0)/B
+		lw	$s1,4($ss)		# 
+		sw	$c0,0($ss)		# *ss = c0;
+		addu	$c1,$s1			# c1 = (c1+s1)%B
+		sltu	$c0,$c1,$s1		# c0 = (c1+s1)/B
+		addu	$c1,$12			# c1 = (c1+s1+(c0+s0)/B)%B
+		sltu	$12,$c1,$12		# r = ((c1+s1)%B+(c0+s0)/B)/B
+		sw	$c1,4($ss)
+		addu	$c0,$12			# c0 = (c1+s1+(c0+s0)/B)/B
+		addu	$ss,8			# ss+=2;
+		bne	$c0,0,BM2D8		# if(c0) goto BM2D8;
 BM2D7:		li	$2,0			# return(0);
 		j	$31
 BM2D8:		subu	$5,2			# sl-=2;
@@ -1050,7 +1050,7 @@ BM2D10:		li	$2,1			# return(1);
 
  #==============================================================================
 
-BM2DADD0:	li	c0,0
+BM2DADD0:	li	$c0,0
 BM2DADD1:	subu	$7,1			# nl--;
 		lw	$15,0($4)		# save = *mm;
 		addu	$4,4			# mm++;

@@ -1,34 +1,30 @@
 DESCRIPTION:
 
-This directory contains files to help editing Caml code, running a
-Caml toplevel, and running the Caml debugger under the Gnu Emacs editor.
+This directory contains files to help editing Caml code and running a
+Caml toplevel under the Gnu Emacs editor (version 18 or 19).
 
-AUTHORS:
+AUTHOR:
 
-Xavier Leroy (Xavier.Leroy@inria.fr), Jerome Vouillon (Jerome.Vouillon@ens.fr).
-camldebug.el is derived from FSF code.
+Xavier Leroy (Xavier.Leroy@inria.fr).
 
 CONTENTS:
 
     caml.el         A major mode for editing Caml code in Gnu Emacs
     inf-caml.el     To run a Caml toplevel under Emacs, with input and
                     output in an Emacs buffer.    
-    camldebug.el    To run the Caml debugger under Emacs.
-    comint.el       Compatibility library for Emacs 18.
+    comint.el       A library used by inf-caml.el.
 
-NOTE FOR EMACS 18 USERS:
+INSTALLATION:
 
-You will have to copy and byte-compile comint.el in your Emacs Lisp directory.
-Also, the display of the current event is extremely crude under Emacs 18.
+Edit the variables at the beginning of the Makefile and do "make install".
 
 USAGE:
 
-Add the following lines to your .emacs file:
+Add the following three lines to your .emacs file:
 
 (setq auto-mode-alist (cons '("\\.ml[iylp]?" . caml-mode) auto-mode-alist))
 (autoload 'caml-mode "caml" "Major mode for editing Caml code." t)
 (autoload 'run-caml "inf-caml" "Run an inferior Caml process." t)
-(autoload 'camldebug "camldebug" "Run the Caml debugger." t)
 
 The Caml major mode is triggered by visiting a file with extension .ml,
 .mli, .mly. .mll or .mlp, or manually by M-x caml-mode. It gives you the
@@ -64,18 +60,3 @@ maintained:
 After M-x run-caml, typing C-x C-e or M-C-x in a buffer in Caml mode
 sends the current phrase (containing the point) to the Caml toplevel,
 and evaluates it.
-
-M-x camldebug FILE starts the Caml debugger camldebug on the executable
-FILE, with input and output in an Emacs buffer named *camldebug-FILE*.
-In addition to the usual comint bindings, the following key bindings are
-available in this buffer:
-
-        ESC r           run (execute program forward)
-        ESC b           back (execute program one step backward)
-        ESC s           step (execute program one step forward)
-        C-c >           down (select frame below current frame)
-        C-c <           up (select frame above current frame)
-        C-c C-f         finish (run till current function returns)
-
-In any buffer in caml mode, C-x SPC sets a breakpoint at the current position.
-

@@ -3,7 +3,6 @@
 #open "const";;
 #open "misc";;
 #open "instruct";;
-#open "lambda";;
 #open "config";;
 #open "opcodes";;
 #open "symtable";;
@@ -16,23 +15,33 @@
 
 (* First pass : determine which phrases are required *)
 
-let compare_qualids q1 q2 =
-  let c = compare_strings q1.id q2.id in
-  if c != 0 then c else compare_strings q1.qual q2.qual;;
-
-let missing_globals = ref (set__empty compare_qualids);;
+let missing_globals =
+    (hashtbl__new 263 : (qualified_ident, unit) hashtbl__t);;
 
 let is_required = function
-    Reloc_setglobal id, _ -> set__mem id !missing_globals
-  | _ -> false;;
+    Reloc_setglobal id, _ ->
+      begin try
+        hashtbl__find missing_globals id; true
+      with Not_found ->
+        false
+      end
+  | _ ->
+      false
+;;
 
 let remove_required = function
-    Reloc_setglobal id, _ -> missing_globals := set__remove id !missing_globals
-  | _ -> ();;
+    Reloc_setglobal id, _ ->
+      hashtbl__remove missing_globals id
+  | _ ->
+      ()
+;;
 
 let add_required = function
-    Reloc_getglobal id, _ -> missing_globals := set__add id !missing_globals
-  | _ -> ();;
+    Reloc_getglobal id, _ ->
+      hashtbl__add missing_globals id ()
+  | _ ->
+      ()
+;;
 
 let scan_phrase tolink phr =
   if not phr.cph_pure or exists is_required phr.cph_reloc then begin
@@ -44,8 +53,8 @@ let scan_phrase tolink phr =
 ;;
 
 let scan_file tolink name =
+  let truename = find_in_path name in
   try
-    let truename = find_in_path name in
     let inchan = open_in_bin truename in
     let n = input_binary_int inchan in
     seek_in inchan n;
@@ -53,26 +62,17 @@ let scan_file tolink name =
     let required = it_list scan_phrase [] phrase_index in
     close_in inchan;
     (truename, required)::tolink
-  with Cannot_find_file name ->
-    interntl__eprintf "Cannot find file %s.\n" name;
-    raise Toplevel
+  with x ->
+    prerr_begline ">> Error on file ";
+    prerr_endline truename;
+    raise x
 ;;
 
 let require_qualid qual id =
-  missing_globals := set__add {qual=qual; id=id} !missing_globals;;
+  hashtbl__add missing_globals {qual=qual; id=id} ()
+;;
 
 (* Second pass : link in the required phrases. *)
-
-let events = ref ([] : event list)
-and abs_pos = ref 0;;
-
-let add_events eventlist =
-  do_list
-    (function ev ->
-      ev.ev_pos <- !abs_pos + ev.ev_pos;
-      events := ev :: !events)
-    eventlist
-;;
 
 let link_object outchan (truename, required) =
   let inchan = open_in_bin truename in
@@ -83,13 +83,12 @@ let link_object outchan (truename, required) =
         let buff = create_string phr.cph_len in
         fast_really_input inchan buff 0 phr.cph_len;
         patch_object buff 0 phr.cph_reloc;
-        add_events phr.cph_events;
-        output outchan buff 0 phr.cph_len;
-        abs_pos := !abs_pos + phr.cph_len)
+        output outchan buff 0 phr.cph_len)
       required;
     close_in inchan
   with x ->
-    interntl__eprintf "Error while linking file %s.\n" truename;
+    prerr_begline ">> Error while linking file ";
+    prerr_endline truename;
     close_in inchan;
     raise x
 ;;
@@ -106,7 +105,7 @@ let emit_data outstream =
 
 (* To build a bytecode executable file *)
 
-let write_debug_info = ref false;;
+let write_symbols = ref false;;
 
 let link module_list exec_name =
   let tolink =
@@ -117,40 +116,36 @@ let link module_list exec_name =
       (s_irall + s_iwall + s_ixall)
       exec_name in
   try
-    (* The header *)
+      (* The header *)
     begin try
       let inchan = open_in_bin (filename__concat !path_library "header") in
-      let buff = create_string 1024 in
-      while true do
-        let n = input inchan buff 0 1024 in
-        if n <= 0 then begin close_in inchan; raise Exit end;
-        output outchan buff 0 n
-      done
-    with Exit -> ()
-       | Sys_error _ -> ()
+      let buff = create_string 4096 in
+      let rec copy () =
+        match input inchan buff 0 4096 with
+          0 -> ()
+        | n -> output outchan buff 0 n; copy() in
+      copy()
+    with Sys_error _ ->
+      ()
     end;
-    (* The bytecode *)
+      (* The bytecode *)
     let pos1 = pos_out outchan in
-    abs_pos := 0;
     do_list (link_object outchan) tolink;
     output_byte outchan STOP;
-    (* The table of global data *)
+      (* The table of global data *)
     let pos2 = pos_out outchan in
     emit_data outchan;
-    (* Linker tables *)
+      (* Linker tables *)
     let pos3 = pos_out outchan in
-    if !write_debug_info then save_linker_tables outchan;
-    (* Debugging info (the events) *)
+    if !write_symbols then save_linker_tables outchan;
+      (* Debugging info (none, presently) *)
     let pos4 = pos_out outchan in
-    if !write_debug_info then output_compact_value outchan !events;
-    events := [];
-    (* The trailer *)
-    let pos5 = pos_out outchan in
+      (* The trailer *)
     output_binary_int outchan (pos2 - pos1);
     output_binary_int outchan (pos3 - pos2);
     output_binary_int outchan (pos4 - pos3);
-    output_binary_int outchan (pos5 - pos4);
-    output_string outchan "CL07";
+    output_binary_int outchan 0;
+    output_string outchan "CL06";
     close_out outchan
   with x ->
     remove_file exec_name;

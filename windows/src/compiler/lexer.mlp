@@ -1,8 +1,8 @@
 (* The lexer definition *)
 
 {
-(**) #open "misc";;
-(**) #open "parser";;
+/**/ #open "misc";;
+/**/ #open "parser";;
 
 (* For nested comments *)
 
@@ -34,36 +34,29 @@ do_list (fun (str,tok) -> hashtbl__add keyword_table str tok) [
   "not", NOT;
   "of", OF;
   "or", OR;
-  "prefix", PREF;
+  "prefix", PREFIX;
   "rec", REC;
   "then", THEN;
   "to", TO;
   "try", TRY;
   "type", TYPE;
   "value", VALUE;
-  "when", WHEN;
   "where", WHERE;
   "while", WHILE;
-  "with", WITH;
-
-  "quo", INFIX3("quo");
-  "mod", INFIX3("mod");
-  "land", INFIX3("land");
-  "lor", INFIX3("lor");
-  "lxor", INFIX3("lxor");
-  "lsl", INFIX4("lsl");
-  "lsr", INFIX4("lsr");
-  "asr", INFIX4("asr")
+  "with", WITH
 ];;
 
 let add_infix s =
-  hashtbl__add keyword_table s (INFIX2 s)
+  hashtbl__add keyword_table s (INFIX s)
 ;;
 
 let remove_infix s =
   hashtbl__remove keyword_table s
 ;;
 
+do_list add_infix
+  ["quo"; "mod"; "land"; "lor"; "lxor"; "lsl"; "lsr"; "asr"]
+;;
 
 (* To buffer string literals *)
 
@@ -128,13 +121,9 @@ let saved_string_start = ref 0;;
 #define ACCENTED `\128`-`\154` `\160`-`\165`
 #endif
 
-#define SYMBOLS \
-    `!` `$` `%` `&` `*` `+` `-` `.` `/` `:` `;` \
-    `<` `=` `>` `?` `@` `^` `|` `~`
-
-rule main = parse
-    [` ` `\010` `\013` `\009` `\012`] +
-      { main lexbuf }
+rule Main = parse
+    [` ` `\010` `\013` `\009` `\026` `\012`] +
+      { Main lexbuf }
   | [`A`-`Z` `a`-`z` ACCENTED ]
     ( `_` ? [`A`-`Z` `a`-`z` ACCENTED `'` (*'*) `0`-`9` ] ) *
       { let s = get_lexeme lexbuf in
@@ -153,81 +142,93 @@ rule main = parse
       { reset_string_buffer();
         (* Start of token is start of string. *)
         saved_string_start := lexbuf.lex_start_pos;
-        string lexbuf;
+        String lexbuf;
         lexbuf.lex_start_pos <- !saved_string_start;
         STRING (get_stored_string()) }
   | "`"
-      { let char_start = lexbuf.lex_start_pos + lexbuf.lex_abs_pos in
-        let c = char lexbuf in
-        lexbuf.lex_start_pos <- char_start - lexbuf.lex_abs_pos;
-        CHAR c }
+      { CHAR (Char lexbuf) }
   | "(*"
-      { comment_depth := 1; comment lexbuf; main lexbuf }
+      { comment_depth := 1; Comment lexbuf; Main lexbuf }
   | "#" { SHARP }
+  | "!" { BANG }
+  | "!=" { COMPARISON "!=" }
   | "&" { AMPERSAND }
   | "'" { QUOTE }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "*" { STAR }
+  | "*." { MULTIPLICATIVE "*." }
+  | "+" { ADDITIVE "+" }
+  | "+." { ADDITIVE "+." }
   | "," { COMMA }
+  | "-" { SUBTRACTIVE "-" }
+  | "-." { SUBTRACTIVE "-." }
   | "->" { MINUSGREATER }
   | "." { DOT }
   | ".." { DOTDOT }
   | ".(" { DOTLPAREN }
-  | ".[" { DOTLBRACKET }
+  | "/" { MULTIPLICATIVE "/" }
+  | "/." { MULTIPLICATIVE "/." }
   | ":" { COLON }
   | "::" { COLONCOLON }
   | ":=" { COLONEQUAL }
   | ";" { SEMI }
   | ";;" { SEMISEMI }
+  | "<" { COMPARISON "<" }
+  | "<." { COMPARISON "<." }
   | "<-" { LESSMINUS }
+  | "<=" { COMPARISON "<=" }
+  | "<=." { COMPARISON "<=." }
+  | "<>" { COMPARISON "<>" }
+  | "<>." { COMPARISON "<>." }
   | "=" { EQUAL }
+  | "=." { COMPARISON "=." }
   | "==" { EQUALEQUAL }
+  | ">" { COMPARISON ">" }
+  | ">." { COMPARISON ">." }
+  | ">=" { COMPARISON ">=" }
+  | ">=." { COMPARISON ">=." }
   | ">]" { GREATERRBRACKET }
+  | "@" { CONCATENATION "@" }
   | "[" { LBRACKET }
   | "[|" { LBRACKETBAR }
   | "[<" { LBRACKETLESS }
   | "]" { RBRACKET }
+  | "^" { CONCATENATION "^" }
   | "_" { UNDERSCORE }
   | "__" { UNDERUNDER }
   | "{" { LBRACE }
   | "|" { BAR }
   | "|]" { BARRBRACKET }
   | "}" { RBRACE }
-  | "/\\" { SLASHBACKSLASH }
-  | "\\/" { BACKSLASHSLASH }
-
-  | "!="    { INFIX1 "!=" }
-  | "-"     { SUBTRACTIVE "-" }
-  | "-."    { SUBTRACTIVE "-." }
-
-  | [ `!` `?` ] [ SYMBOLS ] *
-            { PREFIX(get_lexeme lexbuf) }
-  | [ `=` `<` `>` `@` `^` `|` `&` `~` ] [ SYMBOLS ] *
-            { INFIX1(get_lexeme lexbuf) }
-  | [ `+` `-` ] [ SYMBOLS ] *
-            { INFIX2(get_lexeme lexbuf) }
-  | "**" [ SYMBOLS ] *
-            { INFIX4(get_lexeme lexbuf) }
-  | [ `*` `/` `%` ] [ SYMBOLS ] *
-            { INFIX3(get_lexeme lexbuf) }
   | eof { EOF }
   | _
-      { raise (Lexical_error(Illegal_character,
+      { raise (Lexical_error("illegal character",
                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
 
-and comment = parse
+and Comment = parse
     "(*"
-      { comment_depth := succ !comment_depth; comment lexbuf }
+      { comment_depth := succ !comment_depth; Comment lexbuf }
   | "*)"
       { comment_depth := pred !comment_depth;
-        if !comment_depth > 0 then comment lexbuf }
+        if !comment_depth > 0 then Comment lexbuf }
+  | "\""
+      { reset_string_buffer();
+        String lexbuf;
+        reset_string_buffer();
+        Comment lexbuf }
+  | "`" [^ `\\` `\``] "`"
+      { Comment lexbuf }
+  | "`" `\\` [`\\` `\`` `n` `t` `b` `r`] "`"
+      { Comment lexbuf }
+  | "`" `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`] "`"
+      { Comment lexbuf }
   | eof
-      { raise (Lexical_error(Unterminated_comment, -1, -1)) }
+      { raise (Lexical_error("comment not terminated", -1, -1)) }
   | _
-      { comment lexbuf }
+      { Comment lexbuf }
 
-and char = parse
+and Char = parse
     [^ `\\` `\``] "`"
       { get_lexeme_char lexbuf 0 }
   | `\\` [`\\` `\`` `n` `t` `b` `r`] "`"
@@ -235,23 +236,23 @@ and char = parse
   | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`] "`"
       { char_for_decimal_code lexbuf 1 }
   | _
-      { raise (Lexical_error(Bad_char_constant,
+      { raise (Lexical_error("bad character constant",
                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
 
-and string = parse
+and String = parse
     `"`
       { () }
   | `\\` [` ` `\010` `\013` `\009` `\026` `\012`] +
-      { string lexbuf }
+      { String lexbuf }
   | `\\` [`\\` `"` `n` `t` `b` `r`]
       { store_string_char(char_for_backslash(get_lexeme_char lexbuf 1));
-        string lexbuf }
+        String lexbuf }
   | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`]
       { store_string_char(char_for_decimal_code lexbuf 1);
-         string lexbuf }
+         String lexbuf }
   | eof
-      { raise (Lexical_error(Unterminated_string, -1, -1)) }
+      { raise (Lexical_error("string not terminated", -1, -1)) }
   | _
       { store_string_char(get_lexeme_char lexbuf 0);
-        string lexbuf }
+        String lexbuf }
 ;;

@@ -7,7 +7,6 @@ let offset_compiled_phrase ofs cp =
   { cph_pos = cp.cph_pos + ofs;
     cph_len = cp.cph_len;
     cph_reloc = cp.cph_reloc;
-    cph_events = cp.cph_events;
     cph_pure = cp.cph_pure }
 ;;
 
@@ -23,9 +22,10 @@ let add_to_library outchan (offset, index_rest) filename =
     close_in inchan;
     let new_index = map (offset_compiled_phrase offset) old_index in
       (offset + len, new_index @ index_rest)
-  with Cannot_find_file name ->
-    interntl__eprintf "Cannot find file %s.\n" name;
-    raise Toplevel
+  with x ->
+    prerr_begline ">> Error on file ";
+    prerr_endline filename;
+    raise x
 ;;    
 
 let make_library file_list library_name =

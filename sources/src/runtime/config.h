@@ -34,7 +34,7 @@
 
 /* Signed char type */
 
-#if defined(__STDC__) || defined(SIGNED_CHAR_WORKS)
+#if defined(ANSI) || defined(SIGNED_CHAR_WORKS)
 typedef signed char schar;
 #else
 typedef char schar;
@@ -49,7 +49,7 @@ typedef char schar;
 
 /* The size of a page for memory management (in bytes) is [1 << Page_log].
    It must be a multiple of [sizeof (long)]. */
-#define Page_log 12             /* A page is 4 kilobytes. */
+#define Page_log 12             /* A page is 4 kB. */
 
 /* Initial sizes of stacks (bytes). */
 #define Arg_stack_size 16384
@@ -73,38 +73,31 @@ typedef char schar;
 /* Must be > 4 */
 #define Max_young_wosize 256
 
+/* Default size of the minor zone. (bytes)
+   It is a good idea to have this smaller than your processor cache. */
+#define Generation_size 65536
 
-/* Minimum size of the minor zone. (bytes)
-   This must be at least [sizeof (long) * (Max_young_wosize + 1)]. */
-#define Minor_heap_min 4096
+/* Initial size of the major heap. (bytes)
+   It must be a multiple of [Page_size]. */
+#define Heap_size (62 * Page_size)
 
-/* Maximum size of the minor zone. (bytes)
-   Must be greater than or equal to [Minor_heap_min].
-*/
-#define Minor_heap_max (1 << 24)
-
-/* Default size of the minor zone. (bytes)  */
-#define Minor_heap_def 65536
-
-
-/* Minimum size increment when growing the heap (bytes).
-   Must be a multiple of [Page_size]. */
-#define Heap_chunk_min (2 * Page_size)
+/* Size increment when growing the heap (bytes).  Depending on your [malloc]
+   library function, it might be a good idea to use a power of two minus
+   twice the page size. */
+#define Heap_chunk_min (62 * Page_size)
 
 /* Maximum size of a contiguous piece of the heap (bytes).
    Must be greater than or equal to [Heap_chunk_min].
    Must be greater than or equal to [Max_hbsize].  (see mlvalues.h) */
 #define Heap_chunk_max (1 << 24)
 
-/* Default size increment when growing the heap. (bytes)
-   Must be a multiple of [Page_size]. */
-#define Heap_chunk_def (62 * Page_size)
+/* The GC will try to have that much free memory at the start
+   of each cycle. (percent of the heap size) */
+#define Free_mem_percent_max 30
+#define Free_mem_percent_min 30
 
-
-/* Default speed setting for the major GC.  The GC will try to have this
-   percentage of free memory at the start of each cycle. */
-#define Percent_free_def 30
-
+/* Maximum size of the cache for gray objects. (units) */
+#define Gray_vals_max 32768
 
 #else
 #ifdef SIXTEEN                 /* Scaled-down parameters for 16-bit machines */
@@ -117,13 +110,15 @@ typedef char schar;
 #define Max_arg_stack_size 49152
 #define Max_ret_stack_size 49152
 #define Max_young_wosize 256
-#define Minor_heap_min 2048
-#define Minor_heap_max 0xF000
-#define Minor_heap_def 16384
-#define Heap_chunk_min 0x800
+#define Generation_size 16384
+#define Heap_size 0xF000
+#define Heap_chunk_min 0x8000
 #define Heap_chunk_max 0xF000
-#define Heap_chunk_def 0x8000
-#define Percent_free_def 15
+/* The GC will try to have between this and that much free memory at the start
+   of each cycle. (percent of the heap size) */
+#define Free_mem_percent_max 30
+#define Free_mem_percent_min 5
+#define Gray_vals_max 4096
 
 #else
 #ifdef SMALL                   /* Scaled-down parameters for small memory */
@@ -136,13 +131,13 @@ typedef char schar;
 #define Max_arg_stack_size 524288
 #define Max_ret_stack_size 524288
 #define Max_young_wosize 256
-#define Minor_heap_min 2048
-#define Minor_heap_max (1 << 24)
-#define Minor_heap_def 32768
-#define Heap_chunk_min (2 * Page_size)
+#define Generation_size 32768
+#define Heap_size (126 * Page_size)
+#define Heap_chunk_min (62 * Page_size)
 #define Heap_chunk_max (1 << 24)
-#define Heap_chunk_def (126 * Page_size)
-#define Percent_free_def 30
+#define Free_mem_percent_max 30
+#define Free_mem_percent_min 5
+#define Gray_vals_max 8192
 
 #endif /* SMALL */
 #endif /* SIXTEEN */

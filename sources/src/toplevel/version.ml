@@ -1,1 +1,1 @@
-let banner = ">       Caml Light version 0.61";;
+let banner = ">       Caml Light version 0.6";;

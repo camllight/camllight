@@ -24,14 +24,14 @@ let set_stdlib p =
 and add_include d =
   load_path := d :: !load_path
 and set_debug () =
-  write_debug_info := true
+  write_symbols := true
 and set_exec_file e =
   exec_file := e
 and set_custom f =
   custom_runtime := true;
   prim_file := f
 and show_version () =
-  version__print_banner(); exit 0
+  prerr_string version__banner; prerr_endline ""; exit 0
 and process_include filename =
   do_list anonymous (readword__from_file filename)
 and process_require filename =
@@ -43,11 +43,8 @@ and process_require filename =
   | "prim"::name::rest ->
       let n = get_num_of_prim name in require rest
   | _ ->
-      interntl__eprintf "Syntax error in \"-require\" file %s.\n" filename;
-      raise Toplevel in
-  require (readword__from_file filename)
-and set_language lang =
-  interntl__language := lang
+      fatal_error "bad require file"
+  in require (readword__from_file filename)
 ;;
 
 let main() =
@@ -67,7 +64,6 @@ try
               "-version", arg__Unit show_version;
               "-files", arg__String process_include;
               "-require", arg__String process_require;
-              "-lang", arg__String set_language;
               "-", arg__String anonymous]
              anonymous;
   link (rev !object_files) !exec_file;
@@ -80,12 +76,8 @@ try
 
 with Toplevel -> exit 2
    | sys__Break -> exit 3
-   | sys__Sys_error msg ->
-      interntl__eprintf "Input/output error: %s.\n" msg;
-      exit 2
-   | Zinc s ->
-      interntl__eprintf "Internal error: %s.\nPlease report it.\n" s;
-      exit 100
+   | Zinc s -> prerr_string "# Internal error: "; prerr_endline s; exit 4
 ;;
 
-printexc__f main (); exit 0;;
+printexc__f main ()
+;;

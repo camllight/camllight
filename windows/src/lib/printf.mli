@@ -2,9 +2,7 @@
 
 #open "io";;
 
-type ('a, 'b, 'c) format;;
-
-value fprintf: out_channel -> ('a, out_channel, unit) format -> 'a
+value fprintf: out_channel -> string -> 'a
         (* [fprintf outchan format arg1 ... argN] formats the arguments
            [arg1] to [argN] according to the format string [format],
            and outputs the resulting string on the channel [outchan].
@@ -32,23 +30,14 @@ value fprintf: out_channel -> ('a, out_channel, unit) format -> 'a
 -          [b]: convert a boolean argument to the string [true] or [false]
 -          Refer to the C library [printf] function for the meaning of
            flags and field width specifiers.
-
            The exception [Invalid_argument] is raised if the types of the
            provided arguments do not match the format. The exception is
            also raised if too many arguments are provided. If too few
            arguments are provided, printing stops just before converting
-           the first missing argument.
+           the first missing argument. *)
 
-           Even though this function performs a number of type checks at
-           run-time, it is not type-safe, since it returns a value with
-           static type ['a]. It is recommended to use always [fprintf]
-           in a sequence, as in: [fprintf chan "%d" n; ()]. *)
-
-  and printf: ('a, out_channel, unit) format -> 'a
+  and printf: string -> 'a
         (* Same as [fprintf], but output on [std_out]. *)
-
-  and eprintf: ('a, out_channel, unit) format -> 'a
-        (* Same as [fprintf], but output on [std_err]. *)
 
   and fprint: out_channel -> string -> unit
         (* Print the given string on the given output channel, without
@@ -57,8 +46,4 @@ value fprintf: out_channel -> ('a, out_channel, unit) format -> 'a
   and print: string -> unit
         (* Print the given string on [std_out], without any formatting.
 	   This is the same function as [print_string] of module [io]. *)
-
-  and eprint: string -> unit
-        (* Print the given string on [std_err], without any formatting.
-	   This is the same function as [prerr_string] of module [io]. *)
 ;;

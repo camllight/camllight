@@ -7,43 +7,29 @@
 #open "syntax";;
 #open "modules";;
 #open "builtins";;
-#open "error";;
+#open "errors";;
 
-let make_expr desc =
-  {e_desc = desc; e_loc = get_current_location(); e_typ = no_type}
-and make_pat desc =
-  {p_desc = desc; p_loc = get_current_location(); p_typ = no_type}
-and make_typ desc =
-  {te_desc = desc; te_loc = get_current_location()}
-and make_impl desc =
-  {im_desc = desc; im_loc = get_current_location()}
-and make_intf desc =
-  {in_desc = desc; in_loc = get_current_location()}
+let make_expr desc = Expr(desc, get_current_location())
+and make_pat desc = Pat(desc, get_current_location())
+and make_typ desc = Typexp(desc, get_current_location())
+and make_impl desc = Impl(desc, get_current_location())
+and make_intf desc = Intf(desc, get_current_location())
 ;;
 
 let make_apply = function
-    {e_desc = Zconstruct0(cstr1)}, [e2] ->
+    Expr(Zconstruct0(cstr1), _), [e2] ->
       make_expr(Zconstruct1(cstr1, e2))
   | e1, el ->
       make_expr(Zapply(e1,el))
 ;;
 
-let make_unop op ({e_loc=Loc(l1,m1)} as e1) =
+let make_unop op (Expr(_, Loc(l1,m1)) as e1) =
   let (Loc(l, m) as loc) = get_current_location() in
-    {e_desc = Zapply({e_desc = Zident(ref (Zlocal op));
-                      e_loc = Loc(l, l1);
-                      e_typ = no_type}, [e1]);
-     e_loc = loc; e_typ = no_type}
-and make_binop op ({e_loc=Loc(l1,m1)} as e1) ({e_loc=Loc(l2,m2)} as e2) =
-  make_expr(Zapply({e_desc = Zident(ref (Zlocal op));
-                    e_loc = Loc(m1, l2);
-                    e_typ = no_type},
-                   [e1;e2]))
-and make_ternop op ({e_loc=Loc(l1,m1)} as e1) ({e_loc=Loc(l2,m2)} as e2) e3 =
-  make_expr(Zapply({e_desc = Zident(ref (Zlocal op));
-                    e_loc = Loc(m1, l2);
-                    e_typ = no_type},
-                   [e1;e2;e3]))
+    Expr(Zapply(Expr(Zident(ref (Zlocal op)), Loc(l, l1)), [e1]), loc)
+and make_binop op (Expr(_, Loc(l1,m1)) as e1) (Expr(_, Loc(l2,m2)) as e2) =
+  make_expr(Zapply(Expr(Zident(ref (Zlocal op)), Loc(m1, l2)), [e1;e2]))
+and make_ternop op (Expr(_, Loc(l1,m1)) as e1) (Expr(_, Loc(l2,m2)) as e2) e3 =
+  make_expr(Zapply(Expr(Zident(ref (Zlocal op)), Loc(m1, l2)), [e1;e2;e3]))
 ;;
 
 let make_list =
@@ -56,13 +42,13 @@ let make_list =
 ;;
 
 let make_unary_minus = fun
-    "-"  {e_desc = Zconstant(SCatom(ACint i))} ->
+    "-"  (Expr(Zconstant(SCatom(ACint i)), _)) ->
       make_expr(Zconstant(SCatom(ACint(minus i))))
-  | "-"  {e_desc = Zconstant(SCatom(ACfloat f))} ->
+  | "-"  (Expr(Zconstant(SCatom(ACfloat f)), _)) ->
       make_expr(Zconstant(SCatom(ACfloat(minus_float f))))
   | "-"  e ->
       make_unop "minus" e
-  | "-." {e_desc = Zconstant(SCatom(ACfloat f))} ->
+  | "-." (Expr(Zconstant(SCatom(ACfloat f)), _)) ->
       make_expr(Zconstant(SCatom(ACfloat(minus_float f))))
   | "-." e ->
       make_unop "minus_float" e
@@ -70,33 +56,18 @@ let make_unary_minus = fun
       fatal_error "make_unary_minus"
 ;;
 
-let make_assignment lhs rhs =
-  match lhs.e_desc with
-    Zapply ({e_desc = Zident (ref (Zlocal op)); _},
-            [e1;e2]) ->
-     begin match op with
-          "vect_item" -> make_ternop "vect_assign" e1 e2 rhs
-        | "nth_char" -> make_ternop "set_nth_char" e1 e2 rhs
-        | _ -> make_binop ":=" lhs rhs
-        end
-  | Zrecord_access (e1,lab) ->
-     make_expr(Zrecord_update(e1, lab, rhs))
-  | e ->
-     make_binop ":=" lhs rhs
-;;
-
 let find_constructor gr =
   try
     find_constr_desc gr
   with Desc_not_found ->
-    unbound_constr_err gr (get_current_location()) gr
+    unbound_err "Constructor" gr (get_current_location())
 ;;
 
 let find_label gr =
   try
     find_label_desc gr
   with Desc_not_found ->
-    unbound_label_err gr (get_current_location()) gr
+    unbound_err "Label" gr (get_current_location())
 ;;
 
 let expr_constr_or_ident = function
@@ -113,7 +84,7 @@ let expr_constr_or_ident = function
         try
           make_expr(Zident(ref(Zglobal(find_value_desc gr))))
         with Desc_not_found ->
-          unbound_value_err gr (get_current_location())
+          unbound_err "Value" gr (get_current_location())
 ;;
 
 let pat_constr_or_var s =

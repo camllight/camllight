@@ -3,8 +3,6 @@
 #include <sys/param.h>
 #include "unix.h"
 
-#ifdef HAS_GETHOSTNAME
-
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 256
 #endif
@@ -16,22 +14,3 @@ value unix_gethostname()         /* ML */
   name[MAXHOSTNAMELEN-1] = 0;
   return copy_string(name);
 }
-
-#else
-#ifdef HAS_UNAME
-
-#include <sys/utsname.h>
-
-value unix_gethostname()
-{
-  struct utsname un;
-  uname(&un);
-  return copy_string(un.nodename);
-}
-
-#else
-
-value unix_gethostname() { invalid_argument("gethostname not implemented"); }
-
-#endif
-#endif

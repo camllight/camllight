@@ -5,11 +5,9 @@ type location =
 
 value get_current_location : unit -> location
   and no_location : location
+  and prerr_location : location -> unit
+  and prerr_input_name : unit -> unit
   and input_name : string ref
   and input_chan : in_channel ref
   and input_lexbuf : lexing__lexbuf ref
-;;
-
-value output_location: out_channel -> location -> unit
-and output_input_name: out_channel -> unit
 ;;

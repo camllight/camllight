@@ -6,7 +6,6 @@
 #include "fail.h"
 #include "instruct.h"
 #include "memory.h"
-#include "minor_gc.h"
 #include "misc.h"
 #include "mlvalues.h"
 #include "prims.h"
@@ -14,9 +13,8 @@
 #include "stacks.h"
 #include "str.h"
 #include "unalignd.h"
-#include "debugcom.h"
-#ifdef HAS_UI
-#include "ui.h"
+#ifdef macintosh
+#include <CursorCtl.h>
 #endif
 
 #ifdef DEBUG
@@ -140,17 +138,17 @@ value interprete(prog)
    and don't put it in a register. 
    For GCC users, I've hand-assigned registers for some architectures. */
 
-#if defined(__GNUC__) && defined(sparc)
-  register code_t pc asm("%l0");
-  register value accu asm("%l1");
-  register value * asp asm("%l2");
-  register value * rsp asm("%l3");
-#else
 #if defined(__GNUC__) && defined(mc68000)
   register code_t pc asm("a5");
   register value accu;
   register value * asp;
   register value * rsp;
+#else
+#if defined(__GNUC__) && defined(sparc)
+  register code_t pc asm("%l0");
+  register value accu asm("%l1");
+  register value * asp asm("%l2");
+  register value * rsp asm("%l3");
 #else
 #if defined(__GNUC__) && defined(i386)
 #if defined(MSDOS)
@@ -169,7 +167,6 @@ value interprete(prog)
 #endif
 #endif
 #endif
-  int cur_instr;
   int cache_size;
   value env;
   value tmp;
@@ -195,8 +192,6 @@ value interprete(prog)
   if (setjmp(raise_buf.buf)) {
     c_roots_head = initial_c_roots_head;
     accu = exn_bucket;
-    asp = extern_asp;
-    rsp = extern_rsp;
     goto raise;
   }
   initial_external_raise = external_raise;
@@ -209,7 +204,7 @@ value interprete(prog)
 
 #ifdef DIRECT_JUMP
 # define Instruct(name) lbl_##name
-# define Next cur_instr = *pc++; goto *jumptable[cur_instr]
+# define Next goto *jumptable[*pc++]
 #else
 # define Instruct(name) case name
 # define Next break
@@ -220,7 +215,8 @@ value interprete(prog)
 #else
   while (1) {
 #ifdef DEBUG
-    if (icount-- == 0) stop_here ();
+    --icount;
+    if (icount == 0) stop_here ();
     *log_ptr++ = pc;
     if (log_ptr >= log_buffer + LOG_BUFFER_SIZE) log_ptr = log_buffer;
     if (trace_flag) disasm_instr(pc);
@@ -229,9 +225,7 @@ value interprete(prog)
     Assert(rsp >= ret_stack_low);
     Assert(rsp <= ret_stack_high);
 #endif
-    cur_instr = *pc++;
-  decode_instruction:
-    switch (cur_instr) {
+    switch (*pc++) {
 #endif
 
     Instruct(STOP):
@@ -291,41 +285,36 @@ value interprete(prog)
       /* fall through CHECK_SIGNALS */
 
     Instruct(CHECK_SIGNALS):
-#ifdef PERIODIC_ACTION_FREQ
-      { static int periodic_action_count = 1;
-        if (--periodic_action_count == 0) {
-          periodic_action_count = PERIODIC_ACTION_FREQ;
-          ui_periodic_action();
-        }
+#ifdef macintosh
+      { static int spin_count = 1;
+        if (--spin_count == 0) { spin_count = 24; SpinCursor ((short) 1); }
+      }
 #endif
-      if (something_to_do) goto process_signal;
+#if defined(MSDOS) && defined(__GNUC__)
+      { static int poll_count = 1;
+        if (--poll_count == 0) { poll_count = 500; poll_break(); }
+      }
+#endif
+      if (signal_is_pending) goto process_signal;
       Next;
 
     process_signal:
-      something_to_do = 0;
-      if (force_minor_gc){
-	Setup_for_gc;
-	minor_collection ();
-	Restore_after_gc;
-      }
-      if (signal_is_pending){
-	signal_is_pending = 0;
-	push_ret_frame();
-	retsp->pc = pc;
-	retsp->env = env;
-	retsp->cache_size = cache_size;
-	*--asp = MARK;
-	*--asp = accu;
-	*--asp = MARK;
-	env = Atom(0);
-	push_ret_frame();
-	retsp->pc = return_from_interrupt;
-	retsp->env = env;
-	retsp->cache_size = 0;
-	*--rsp = Val_int(signal_number);
-	cache_size = 1;
-	pc = signal_handler;
-      }
+      signal_is_pending = 0;
+      push_ret_frame();
+      retsp->pc = pc;
+      retsp->env = env;
+      retsp->cache_size = cache_size;
+      *--asp = MARK;
+      *--asp = accu;
+      *--asp = MARK;
+      env = Atom(0);
+      push_ret_frame();
+      retsp->pc = return_from_interrupt;
+      retsp->env = env;
+      retsp->cache_size = 0;
+      *--rsp = Val_int(signal_number);
+      cache_size = 1;
+      pc = signal_handler;
       Next;
 
     Instruct(PUSH_GETGLOBAL_APPLY):
@@ -467,12 +456,6 @@ value interprete(prog)
     raise:			/* An external raise jumps here */
 
     Instruct(RAISE):
-      if ((value *) tp >= trap_barrier) {
-        Setup_for_gc;
-        retsp->pc = pc;
-        debugger(TRAP_BARRIER);
-        Restore_after_gc;
-      }
       rsp = (value *) tp;
       if (rsp >= (value *)((char *) ret_stack_high - initial_rsp_offset)) {
         exn_bucket = accu;
@@ -490,10 +473,10 @@ value interprete(prog)
       Next;
       
     Instruct(POPTRAP):
-      if (something_to_do) {
+      if (signal_is_pending) {
         /* We must check here so that if a signal is pending and its
            handler triggers an exception, the exception is trapped
-           by the current try...with, not the enclosing one. */
+           by the current try...with, not the englobing one. */
         pc--; /* restart the POPTRAP after processing the signal */
         goto process_signal;
       }
@@ -890,35 +873,9 @@ value interprete(prog)
       tmp = Long_val(*asp++);
       goto setfield;
 
-    Instruct(BREAK):
-      Setup_for_gc;
-      retsp->pc = pc - 1;
-      cur_instr = debugger(BREAKPOINT);
-      if (cur_instr == -1) cur_instr = pc[-1];
-      Restore_after_gc;
-#ifdef DIRECT_JUMP
-      goto *jumptable[cur_instr & 0x7F];
-#else
-      cur_instr &= 0x7F;
-      goto decode_instruction;
-#endif
-
-#ifdef DIRECT_JUMP
-    lbl_EVENT:
-#else
+#ifdef DEBUG
     default:
-#endif
-      if (--event_count == 0) {
-        Setup_for_gc;
-        retsp->pc = pc - 1;
-        debugger(EVENT);
-        Restore_after_gc;
-      }
-#ifdef DIRECT_JUMP
-      goto *jumptable[cur_instr & 0x7F];
-#else
-      cur_instr &= 0x7F;
-      goto decode_instruction;
+      fatal_error("unknown opcode");
 #endif
 
 #ifndef DIRECT_JUMP

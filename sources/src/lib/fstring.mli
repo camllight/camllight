@@ -33,7 +33,7 @@ value eq_string : string -> string -> bool = 2 "=string"
   and lt_string : string -> string -> bool = 2 "<string"
   and ge_string : string -> string -> bool = 2 ">=string"
   and gt_string : string -> string -> bool = 2 ">string"
-  and compare_strings : string -> string -> int = 2 "compare_strings"
+  and compare_strings : string -> string -> int = 1 "compare_strings"
 ;;
 value string_for_read : string -> string
 ;;
