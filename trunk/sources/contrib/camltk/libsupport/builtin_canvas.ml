@@ -41,27 +41,6 @@ let CAMLtoTKSearchSpec = function
   | Withtag a -> "withtag "^(CAMLtoTKTagOrId a)
 ;;
 
-
-type CanvasIndex = 
-    CI_Number of int		(* tk keyword: *)
-  | CI_End			(* tk keyword: end *)
-  | CI_Insert			(* tk keyword: insert *)
-  | CI_SelFirst			(* tk keyword: sel.first *)
-  | CI_SelLast			(* tk keyword: sel.last *)
-  | CI_At of int * int		(* tk keyword: @x,y *)
-;;
-
-
-let CAMLtoTKCanvasIndex = function
-    CI_Number (bar) -> string_of_int bar
-  | CI_End -> "end"
-  | CI_Insert -> "insert"
-  | CI_SelFirst -> "sel.first"
-  | CI_SelLast -> "sel.last"
-  | CI_At (foo, bar) -> ("@"^(string_of_int foo)^","^(string_of_int bar))
-;;
-
-
 (* TODO: restrict event fields *)
 let canvas_bind widget tag eventsequence action =
   check_widget_class widget "canvas";
