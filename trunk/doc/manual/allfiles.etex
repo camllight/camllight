@@ -9,12 +9,12 @@
 \begin{center}
 ~\vfill
 \Huge           The Caml Light system \\
-                release 0.72 \\[1cm]
+                release 0.73 \\[1cm]
 \Large          Documentation and user's manual \\[1cm]
 \large          Xavier Leroy \\[1cm]
                 \today
 \vfill
-\normalsize     Copyright \copyright\ 1996 Institut National de
+\normalsize     Copyright \copyright\ 1997 Institut National de
                 Recherche en Informatique et Automatique
 \end{center}
 \cleardoublepage

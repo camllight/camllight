@@ -13,11 +13,11 @@ requires X11 release 4 or later.
 
 \begin{installation}
 The Unix version is distributed in source format, as a compressed
-"tar" file named "cl72unix.tar.Z". To extract, move to the directory
-where you want the source files to reside, transfer "cl7unix.tar.Z"
+"tar" file named "cl73unix.tar.gz". To extract, move to the directory
+where you want the source files to reside, transfer "cl7unix.tar.gz"
 to that directory, and execute
 \begin{verbatim}
-        zcat cl72unix.tar.Z | tar xBf -
+        zcat cl73unix.tar.gz | tar xBf -
 \end{verbatim}
 This extracts the source files in the current directory. The file
 "INSTALL" contains complete instructions on how to configure, compile
@@ -42,7 +42,7 @@ in the distribution for APDA's address.
 
 \begin{installation}
 Create the folder where the Caml Light files will reside. Double-click
-on the file "cl72macbin.sea" from the distribution. This displays
+on the file "cl73macbin.sea" from the distribution. This displays
 a file dialog box. Open the folder where the Caml Light files will
 reside, and click on the "Extract" button. This will re-create all
 files from the distribution in the Caml Light folder.
@@ -51,7 +51,7 @@ To test the installation, double-click on the application
 {\tt Caml Light}. The ``Caml Light output'' window should display
 something like
 \begin{verbatim}
-        >       Caml Light version 0.72
+        >       Caml Light version 0.73
 
         #
 \end{verbatim}
@@ -59,7 +59,7 @@ In the ``Caml Light input'' window, enter \verb"1+2;;" and
 press the "Return" key. The ``Caml Light output'' window should
 display:
 \begin{verbatim}
-        >       Caml Light version 0.72
+        >       Caml Light version 0.73
 
         #1+2;;
         - : int = 3
@@ -119,15 +119,8 @@ About 3M of free space on the disk. At least 8M of RAM is recommended.
 \end{requirements}
 
 \begin{installation}
-The MS-Windows version is distributed as a ".zip" archive named
-"cl72win.zip". Change to a temporary directory and unpack it with
-\verb"pkunzip -d" or other decompressors such as "WinZip" or "unzip".
-Then, run the graphical installation program "install.exe".
-\begin{verbatim}
-        cd \temp
-        pkunzip -d cl72win.zip
-        install.exe
-\end{verbatim}
-If you are using "pkunzip", be careful not to omit the "-d" option.
+The MS-Windows version is distributed as a self-extracting,
+self-installing archive named "cl73win.exe". Simply run it and follow
+the steps of the installation program.
 
 \end{installation}

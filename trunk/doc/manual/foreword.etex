@@ -1,7 +1,7 @@
 \chapter*{Foreword}
 \markboth{Foreword}{}
 
-This manual documents the release 0.71 of the Caml Light system. It is
+This manual documents the release 0.73 of the Caml Light system. It is
 organized as follows.
 \begin{itemize}
 \item Part~\ref{p:gettingstarted}, ``Getting started'', explains how
@@ -35,10 +35,10 @@ specific to one version are presented as shown below:
 \section*{License}
 
 The Caml Light system is copyright \copyright\ 1989, 1990, 1991, 1992,
-1993, 1994, 1995, 1996 Institut National de Recherche en Informatique et en
-Automatique (INRIA).  INRIA holds all ownership rights to the Caml
-Light system. See the file "COPYRIGHT" in the distribution for the
-copyright notice.
+1993, 1994, 1995, 1996, 1997 Institut National de Recherche en
+Informatique et en Automatique (INRIA).  INRIA holds all ownership
+rights to the Caml Light system. See the file "COPYRIGHT" in the
+distribution for the copyright notice.
 
 The Caml Light system can be freely copied, but not sold. More precisely,
 INRIA grants any user of the Caml Light system the right to reproduce
