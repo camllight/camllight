@@ -1,17 +1,17 @@
 \chapter*{Foreword}
 \markboth{Foreword}{}
 
-This manual documents the release 0.7 of the Caml Light system. It is
+This manual documents the release 0.71 of the Caml Light system. It is
 organized as follows.
 \begin{itemize}
 \item Part~\ref{p:gettingstarted}, ``Getting started'', explains how
 to install Caml Light on your machine.
 \item Part~\ref{p:refman}, ``The Caml Light language reference
 manual'', is the reference description of the Caml Light language.
-\item Part~\ref{p:library}, ``The Caml Light library'', describes the
-modules provided in the standard library.
 \item Part~\ref{p:commands}, ``The Caml Light commands'', documents
 the Caml Light compiler, toplevel system, and programming utilities.
+\item Part~\ref{p:library}, ``The Caml Light library'', describes the
+modules provided in the standard library.
 \item Part~\ref{p:appendix}, ``Appendix'', contains a short bibliography, an
 index of all identifiers defined in the standard library, and an
 index of Caml Light keywords.
@@ -62,11 +62,5 @@ Files:      & see the index in file "README"
 \end{center}
 \end{latexonly}
 \begin{rawhtml}
-<blockquote>
-<b>Host:</b> <tt>ftp.inria.fr</tt> (Internet address <tt>192.93.2.54</tt>)<br>
-<b>Login name:</b> <tt>anonymous</tt> <br>
-<b>Password:</b> your e-mail address <br>
-<b>Directory:</b> <tt>lang/caml-light</tt><br>
-<b>Files:</b> see the index in file <tt>README</tt>
-</blockquote>
+<A HREF="ftp://ftp.inria.fr/lang/caml-light/">ftp://ftp.inria.fr/lang/caml-light/</A>
 \end{rawhtml}
