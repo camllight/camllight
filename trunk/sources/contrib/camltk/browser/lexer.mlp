@@ -166,7 +166,7 @@ rule main = parse
       	let theend = comment lexbuf in
       	  Commentaire (thestart,theend)} 
   | "#" [` ` `\010` `\013` `\009` `\012`]* "open" 
-        [` ` `\010` `\013` `\009` `\012`]* `"`
+        [` ` `\010` `\013` `\009` `\012`]* "\""
       { let string_start = get_lexeme_end lexbuf in
       	let string_end = string lexbuf in
         Open (string_start,pred string_end) }
