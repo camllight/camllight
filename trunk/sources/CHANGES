@@ -1,11 +1,18 @@
 Caml Light 0.74:
 ---------------
 
+* Typing: when typing a sequence (e1;e2), warn if e1 does not have
+  type "unit".
+
 * Standard library:
   - module string: added index_char, rindex_char, index_char_from,
     rindex_char_from.
   - module vect: added init_vect.
   - module format: added a printf facility to control the pretty-printer.
+  - module float: more floating-point functions (all ANSI-C functions).
+  - The iterators do_list, do_vect et al have more restricted types, e.g.
+    ('a -> unit) -> 'a list -> unit instead of ('a -> 'b) -> 'a list -> unit.
+  - module sys: new function sys__time to measure elapsed time.
 
 * MS Windows port: fixed bugs in functions over graphics__image.
 
