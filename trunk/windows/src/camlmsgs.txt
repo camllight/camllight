@@ -5,7 +5,7 @@ src:	%aIllegal character.\n
 fr:	%aCaractère illégal.\n
 
 src:	%tComment not terminated.\n
-fr:	%tCommentaire non terminé.\n
+fr:	%tCommentaire sans fin.\n
 
 src:	%aIll-formed character literal.\n
 fr:	%aCaractère littéral mal formé.\n
@@ -63,7 +63,7 @@ fr:	%aUn motif avec "|" ne doit pas lier d'identificateurs.\n
 src:	%aThis pattern matches values of type %a,\n\
 	but should match values of type %a.\n
 fr:	%aCe motif filtre des valeurs de type %a,\n\
-	mais devrait filtrer des valeurs de type %a.\n
+	pas des valeurs de type %a.\n
 
 src:	%aThis expression has type %a,\n\
 	but is used with type %a.\n
@@ -131,7 +131,7 @@ fr:	%aLe membre gauche d'un "let rec" doit être réduit à une variable.\n
 
 src:	%aThis kind of expression is not allowed in \
 	right-hand sides of "let rec".\n
-fr:	%aCe type d'expressions n'est pas autorisé comme \
+fr:	%aCe genre d'expressions n'est pas autorisé comme \
 	membre droit d'un "let rec".\n
 
 src:	%aThe type %a is exported as an abstract type by this module\n\
@@ -187,14 +187,14 @@ fr:	Le bibliothécaire Caml Light, version %s\n
 src:	The global value %s__%s is referenced (from %s) \
         before being defined.\n\
         Please link %s.zo before %s.\n
-fr:	La valeur globale %s__%s est référencée (depuis %s) \
+fr:	La valeur globale %s__%s est utilisée (depuis %s) \
         avant d'être définie.\n\
-        Veuillez charger %s.zo avant %s.\n
+        Veuillez lier %s.zo avant %s.\n
 
 src:	The global value %s__%s is referenced before being defined.\n\
         Please load an implementation of module %s first.\n
-fr:	La valeur globale %s__%s est référencée avant d'être définie.\n\
-        Veuillez d'abord charger une implémentation du module %s.\n
+fr:	La valeur globale %s__%s est utilisée avant d'être définie.\n\
+        Veuillez charger une implémentation du module %s.\n
 
 src:	The C primitive "%s" is not available.\n
 fr:	La primitive C "%s" est inconnue.\n
@@ -227,7 +227,7 @@ src:	%s has the wrong type for a printing function.\n
 fr:	%s n'a pas un type convenable pour une fonction d'impression.\n
 
 src:	No printer named %s.\n
-fr:	Il n'y a pas d'imprimeur appelé %s.\n
+fr:	Il n'y a pas d'imprimeur nommé %s.\n
 
 src:	Incorrect source file name %s.\n\
 	A source file name must end in ".ml" or ".mli".\n
@@ -247,4 +247,4 @@ src:	<Internal error while printing the exception>
 fr:	<Impossible d'imprimer l'exception>
 
 src:    %tWarning: useless #open on module "%s".\n
-fr:     %tAttention: #open inutile sur le module "%s".\n
+fr:     %tRemarque: directive #open inutile pour le module "%s".\n
