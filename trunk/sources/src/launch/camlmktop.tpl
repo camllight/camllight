@@ -37,7 +37,7 @@ while :; do
       stdlib=$2; shift;;
     -custom)
       custom="-custom /tmp/camlprim.$$.c";;
-    -g)
+    -g|-debug)
       debug="-g";;
     *.c)
       $cc -c -I$stdlib $ccopt $1 || exit $?
