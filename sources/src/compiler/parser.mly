@@ -31,7 +31,6 @@
 %token EQUALEQUAL     /* "==" */
 %token SHARP          /* "#" */
 %token AMPERSAND      /* "&" */
-%token AMPERAMPER     /* "&&" */
 %token QUOTE          /* "'" */
 %token LPAREN         /* "(" */
 %token RPAREN         /* ")" */
@@ -56,10 +55,11 @@
 %token UNDERUNDER     /* "__" */
 %token LBRACE         /* "{" */
 %token BAR            /* "|" */
-%token BARBAR         /* "||" */
 %token BARRBRACKET    /* "|]" */
 %token GREATERRBRACKET/* ">]" */
 %token RBRACE         /* "}" */
+%token SLASHBACKSLASH /* "/\" */
+%token BACKSLASHSLASH /* "\/" */
 /* Keywords */
 %token AND            /* "and" */
 %token AS             /* "as" */
@@ -105,8 +105,8 @@
 %left  AS
 %left  BAR
 %right COMMA
-%right OR BARBAR
-%left  AMPERSAND AMPERAMPER
+%right OR BACKSLASHSLASH
+%left  AMPERSAND SLASHBACKSLASH
 %left  NOT
 %left  INFIX1 EQUAL EQUALEQUAL          /* comparisons, concatenations */
 %right COLONCOLON                       /* cons */
@@ -240,11 +240,11 @@ Expr :
           { make_assignment $1 $3 }
       | Expr AMPERSAND Expr 
           { make_expr(Zsequand($1, $3)) }
-      | Expr AMPERAMPER Expr 
+      | Expr SLASHBACKSLASH Expr 
           { make_expr(Zsequand($1, $3)) }
       | Expr OR Expr
           { make_expr(Zsequor($1, $3)) }
-      | Expr BARBAR Expr
+      | Expr BACKSLASHSLASH Expr
           { make_expr(Zsequor($1, $3)) }
       | Simple_expr DOT Ext_ident LESSMINUS Expr
           { make_expr(Zrecord_update($1, find_label $3, $5)) }

@@ -308,10 +308,10 @@ let rec type_expr env expr =
   | Zfunction ((patl1,expr1)::_ as matching) ->
       let ty_args = map (fun pat -> new_type_var()) patl1 in
       let ty_res = new_type_var() in
-      let tcase (patl, expr) =
+      let tcase (patl, action) =
         if list_length patl != list_length ty_args then
           ill_shaped_match_err expr;
-        type_expect (type_pattern_list patl ty_args @ env) expr ty_res in
+        type_expect (type_pattern_list patl ty_args @ env) action ty_res in
       do_list tcase matching;
       list_it (fun ty_arg ty_res -> type_arrow(ty_arg, ty_res))
               ty_args ty_res
@@ -464,6 +464,13 @@ and type_expect env exp expected_ty =
       type_expect env cond type_bool;
       type_expect env ifso expected_ty;
       type_expect env ifnot expected_ty
+  | Ztuple el ->
+      begin try
+        do_list2 (type_expect env)
+                 el (filter_product (list_length el) expected_ty)
+      with Unify ->
+        unify_expr exp expected_ty (type_expr env exp)
+      end
 (* To do: try...with, match...with ? *)
   | _ ->
       unify_expr exp expected_ty (type_expr env exp)

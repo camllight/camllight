@@ -165,7 +165,6 @@ rule main = parse
       { comment_depth := 1; comment lexbuf; main lexbuf }
   | "#" { SHARP }
   | "&" { AMPERSAND }
-  | "&&" { AMPERAMPER }
   | "'" { QUOTE }
   | "(" { LPAREN }
   | ")" { RPAREN }
@@ -193,9 +192,10 @@ rule main = parse
   | "__" { UNDERUNDER }
   | "{" { LBRACE }
   | "|" { BAR }
-  | "||" { BARBAR }
   | "|]" { BARRBRACKET }
   | "}" { RBRACE }
+  | "/\\" { SLASHBACKSLASH }
+  | "\\/" { BACKSLASHSLASH }
 
   | "!="    { INFIX1 "!=" }
   | "-"     { SUBTRACTIVE "-" }
