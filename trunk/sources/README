@@ -1,4 +1,4 @@
-  This is the release 0.7 beta 1 of the Caml Light system, for Unix machines.
+  This is the release 0.7 beta 2 of the Caml Light system, for Unix machines.
 
 OVERVIEW:
 
@@ -120,7 +120,7 @@ BUG REPORTS AND USER FEEDBACK:
 
   Send your bug reports by E-mail to
 
-          caml-light@margaux.inria.fr
+          caml-light@pauillac.inria.fr
 
   or by paper mail to
 
@@ -134,9 +134,9 @@ BUG REPORTS AND USER FEEDBACK:
   small) that exhibits the unexpected behavior, and the configuration
   you are using (machine type, etc).
 
-  The mailing list caml-light@margaux.inria.fr is forwarded to a small
+  The mailing list caml-light@pauillac.inria.fr is forwarded to a small
   group of implementors at INRIA. For general questions and discussions,
-  caml-list@margaux.inria.fr is better; for bug reports and very specific
-  technical questions, caml-light@margaux.inria.fr is preferred. We often
+  caml-list@pauillac.inria.fr is better; for bug reports and very specific
+  technical questions, caml-light@pauillac.inria.fr is preferred. We often
   cross-post from one list to the other, anyway.
 
