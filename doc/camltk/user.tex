@@ -1,13 +1,14 @@
 \chapter{User's Manual}
-{\bf This manual is a simple tutorial for \caml\tk }.  When writing your own
-programs, you should consult the partial reference manual , as well as the
+{\bf This manual is a simple tutorial for \camltk }.  When writing your own
+programs, you should consult the partial reference manual, as well as the
 \tk\ man pages.  Whenever the reference manual is unsufficient, you can
 check the \verb|Widgets.src| file (which syntax is given in
 chapter~\ref{chap:impl}) since it describes the mappings between
 \tk\ and \caml\ for functions and data. 
 
 \section{Modules}
-The modules provided by \caml\tk\ are
+The \camltk\ interface is provided as a \caml\ library, composed of the
+following modules:
 
 \begin{itemize}
 \item \verb|tk|, containing the initialisation functions, some frequently
@@ -19,96 +20,55 @@ module. The module bears the same name as the widget class, except for
 \verb|toplevel| widgets which are defined in module \verb|toplevelw|.
 
 \item various other modules grouping functions of a same family
-(\verb|focus|, \verb|winfo|). 
+(e.g. \verb|focus|, \verb|winfo|). 
 
 \item the \verb|textvariable| module, for the \verb|-textvariable| option
-support.
+support. 
 
 \item \verb|protocol| and \verb|support|, which contain the internals
-of the interface, and are of no interest to the programmer.
+of the interface. For example, the abstract type of widgets is defined in
+\verb|support|, as well as some widget naming utilities.
 \end{itemize} 
 
-In general, you should \verb|#open| only the \verb|tk| module, and for the
-rest of the functions use the \verb|modulename__symbol| syntax.
+The organization of the interface is designed so that, in general, you
+should \verb|#open| only the \verb|tk| module, and for the 
+rest of the functions use the \verb|modulename__symbol| syntax (e.g.
+\verb|text__insert|).
 This is because some functions (such as \verb|create| and \verb|configure|)
-exist in many different modules. Thus it is more practical to refer to the
-function with its exact name.
+exist in many different modules, and it is more practical to refer to the
+function with its exact qualified name.
 
-All modules required by the \tk\ interface are in the \verb|tklib1.zo| or
-\verb|tklib2.zo| library archives (only one of them is required, depending
-on the architecture you choose, cf \ref{sec:compiling}).
+All modules required by the \camltk\ interface are in the \verb|tklib1.zo|
+or \verb|tklib2.zo| library archives (only one of them is required,
+depending on the architecture you choose, cf. section~\ref{sec:compiling}).
 
 \section{Basics}
 As usual with toolkits, the simplest way to learn how to write programs is
 by copy-paste-ing from available source code. In general, a \caml\ program
 using the \tk\ toolkit will have the following structure :
-\begin{verbatim}
-#open "tk";;
-(* Initialisation of the interface *)
-let top = OpenTk ();;
-(* top is now the toplevel widget *)
-(* Widget initialisation *)
-let b = button__create top 
-          [Text "foobar"; 
-           Command (function () -> print_string "foobar\n"; flush stdout)];;
-pack [b][];;
-(* Mainloop for events *)
-MainLoop();;
-\end{verbatim} 
+
+\begin{alltt}
+\input{../test/helloworld.ml}
+\end{alltt}
 
 The first step is to initialize the interface with \verb|OpenTk|, and this
-returns the {\em toplevel} widget.
-Then, the program creates some widgets, as child of the {\em toplevel},
-forming the user interface of your application. Finally, the program enters
-the \verb|MainLoop|, and user-interaction takes place.
+returns the {\em toplevel} widget\footnote{Note that attempting to call a
+\camltk\ function without previously having initialised the interface will
+probably cause your program to core dump.}.
+Then, the program creates some widgets, as children of the {\em toplevel}
+widget forming the user interface of your application. In this simple case,
+we have only one button, whose behaviour is to print a simple message on the
+standard output. Finally, the program enters the \verb|MainLoop|, and
+user-interaction takes place.
 
 \section{Example}
 Here is a complete working example with a few widgets and callbacks.
 This program may be found in the \verb|test| directory of the distribution,
 under the name \verb|addition.ml|.
 
-\begin{verbatim}
-(* Make main functions and types available *)
-#open "tk";;
-
-let main () =
-  let top = OpenTk ()  in
-  (* The widgets. They all have "top" as parent widget.  *)
-  let en1 = entry__create top [TextWidth 6; Relief Sunken] in
-  let lab1 = label__create top [Text "plus"] in
-  let en2 = entry__create top [TextWidth 6 ; Relief Sunken] in
-  let lab2 = label__create top [Text "="] in
-  let result_display = label__create top [] in
-  (* References holding values of entry widgets *)
-  let n1 = ref 0
-  and n2 = ref 0  in
-  (* Refresh result *)
-  let refresh () =
-    label__configure result_display [Text (string_of_int (!n1 + !n2))]  in
-  (* Electric *)
-  let get_and_refresh (w,r) =
-    fun _ _ _ _ ->
-      try
-       r := int_of_string (entry__get w);
-       refresh ()
-      with
-        Failure "int_of_string" ->
-          label__configure result_display [Text "error"]
-  in
-  (* Set the callbacks *)
-  entry__configure en1 [ScrollCommand (get_and_refresh (en1,n1)) ];
-  entry__configure en2 [ScrollCommand (get_and_refresh (en2,n2)) ];
-  (* Map the widgets *)
-  pack [en1;lab1;en2;lab2;result_display] [];
-  (* Make the window resizable *)
-  wm__minsize_set top 1 1;
-  (* Start interaction (event-driven program) *)
-  MainLoop ()
-;;
-
-printexc__f main () ;;
-\end{verbatim}
-
+\begin{alltt}
+\input{../test/addition.ml}
+\end{alltt}
 
 \section{Widgets}
 The full description of widgets, their creation options, their commands, is
@@ -123,133 +83,14 @@ been tested.
 \section{Bindings}
 \tk\ offers, in addition to widget-specific callbacks, a general facility
 for binding functions to events. (bind(n)).
-In the \caml\tk\ interface, this is implemented by the function
+In the \camltk\ interface, this is implemented by the function
 \begin{verbatim}
 bind: Widget -> (Modifier list * XEvent) list -> BindAction -> unit
 \end{verbatim} 
 with the following types
-\begin{verbatim}
-type Modifier =
-    Control
-  | Shift
-  | Lock
-  | Button1
-  | Button2
-  | Button3
-  | Button4
-  | Button5
-  | Any
-  | Double
-  | Triple
-  | Mod1
-  | Mod2
-  | Mod3
-  | Mod4
-  | Mod5
-  | Meta
-  | Alt 
-;;
 
-type XEvent =
-    XKey of string      (* /usr/include/X11/keysymdef.h *)
-  | ButtonPress
-  | Button
-  | ButtonRelease
-  | Circulate
-  | CirculateRequest
-  | ColorMap
-  | Configure
-  | ConfigureRequest
-  | Destroy
-  | Enter
-  | Expose
-  | FocusIn
-  | FocusOut
-  | Gravity
-  | Keymap
-  | KeyPress
-  | Key
-  | KeyRelease
-  | MapRequest
-  | Motion
-  | Leave
-  | Map
-  | Property
-  | Reparent
-  | ResizeRequest
-  | Unmap
-  | Visibility 
-  | WhatButton of int
-;;
+\input{bindtypes.mli}
 
-type EventField =
-    Above
-  | ButtonNumber
-  | Count
-  | Detail
-  | Focus
-  | Height
-  | KeyCode
-  | Mode
-  | State
-  | ValueMask
-  | Width
-  | MouseX
-  | MouseY
-  | WidgetName
-  | Time 
-  | OverrideRedirect
-  | Place
-  | Char
-  | BorderWidth
-  | Display
-  | SendEvent
-  | KeySymString
-  | KeySymInt
-  | RootWindow
-  | SubWindow
-  | Type
-  | RootX
-  | RootY
-;;
-
-type EventInfo = {
-  mutable Ev_Above : int;
-  mutable Ev_ButtonNumber : int;
-  mutable Ev_Count : int;
-  mutable Ev_Detail : string;
-  mutable Ev_Focus : bool;
-  mutable Ev_Height : int;
-  mutable Ev_KeyCode : int;
-  mutable Ev_Mode : string;
-  mutable Ev_State : string;
-  mutable Ev_ValueMask : int;
-  mutable Ev_Width : int;
-  mutable Ev_MouseX : int;
-  mutable Ev_MouseY : int;
-  mutable Ev_WidgetName : string;
-  mutable Ev_Time : string;
-  mutable Ev_OverrideRedirect : string;
-  mutable Ev_Place : string;
-  mutable Ev_Char : string;
-  mutable Ev_BorderWidth : int;
-  mutable Ev_Display : int;
-  mutable Ev_SendEvent : int;
-  mutable Ev_KeySymString : string;
-  mutable Ev_KeySymInt : int;
-  mutable Ev_RootWindow : int;
-  mutable Ev_SubWindow : int;
-  mutable Ev_Type : int;
-  mutable Ev_RootX : int;
-  mutable Ev_RootY : int }
-;;
-
-type BindAction =
-   BindSet of EventField list *  (EventInfo -> unit)
- | BindRemove
- | BindExtend of EventField list *  (EventInfo -> unit)
-;;
-\end{verbatim} 
 The first argument of type \verb|Widget| is naturally the widget for which
 this binding is defined.
 The second argument of type \verb|(Modifier list * XEvent) list| is the 
@@ -270,7 +111,8 @@ which field is valid for a given event.
 \paragraph{Example}
 \begin{verbatim}
 bind MyCan [[],Motion] 
-   (BindSet([MouseX; MouseY;Place;SendEvent;KeySymString], BindCmd)) ;;
+   (BindSet([Ev_MouseX; Ev_MouseY;Ev_Place;Ev_SendEvent;Ev_KeySymString], 
+            BindCmd)) ;;
 \end{verbatim} 
 will trigger the callback \verb|BindCmd| when the event \verb|Motion| occurs
 in the \verb|MyCan| widget. The command \verb|BindCmd| may assume that the 
@@ -307,11 +149,35 @@ signal SIGINT (Signal_handle (function _ -> CloseTk(); exit 0))
 should help your application behave nicely. Naturally your own cleanup
 should be inserted also.
 
+\section{Errors}
+The \camltk\ interface may raise the following exceptions:
+\begin{description}
+\item[TkError of string] this exception is raised when a \tcl\tk\ fails
+during an evaluation. Normally, static typing in \caml, in addition to some
+run-time verifications should prevent this situation from happening.
+However, some errors are due to the external environment (e.g.
+\verb|selection__get|) and cannot be prevented. The exception will carry the
+\tcl\tk error message.
+
+\item[IllegalWidgetType of string]
+this exception is raised when a widget command is applied to a widget of a
+different or unappropriate class (e.g. \verb|button__configure| applied to
+a {\em scrollbar} widget). The exception carries the class of the faulty
+widget.
+
+\item[Invalid\_argument of string]
+this exception is raised  when some data cannot be exchanged between \caml\
+and \tk. This situation occurs for example when an illegal option is used
+for creating a widget. However, this error may also be caused by a faulty or
+incomplete description of a widget, widget command or type.
+\end{description} 
+
 \section{More examples}
 The \verb|test| directory of the distribution contains several other
-examples. Read them to learn more about \caml\tk\ programming.
-The \verb|tktop| directory contains a more advanced example, although
-not very robust.
+examples. Read them to learn more about \camltk\ programming.
+
+%The \verb|tktop| directory contains a more advanced example, although
+%not very robust.
 
 {\bf All examples included in this distribution  should not be considered as
 working applications. They are provided for documentation purposes only}.
@@ -319,7 +185,7 @@ working applications. They are provided for documentation purposes only}.
 \section{The Caml Browser}
 In the directory {\tt browser} you fill find a yet more complete example,
 featuring many different kinds of widgets. The browser mimicks the Caml
-Light toplevel behaviour: you can add open and close modules ({\tt \#open} and
+Light toplevel behaviour: you can open and close modules ({\tt \#open} and
 {\tt \#close} directives), or add a library path ({\tt \#directory} directive).
 You can enter a symbol (value, type constructor, value constructor,
 exception), and see its definition. You can also see the complete interface
@@ -328,29 +194,39 @@ Remember that the browser will show you a pretty-printed version
 of compiled interfaces ({\tt .zi} files), so you will not see the comments
 that were in the source file.
 
-The browser can also display source files, although hypertext is not
-implemented for them.
+The browser can also display source files. Hypertext navigation is also
+available for source files, but does not reflect the compiler's semantics,
+as the \verb|#open| directives in the source file are not taken into
+account.
+
 
 \section{Compilation}
 \label{sec:compiling}
 \subsection{Architecture}
-In this release, there are two possible architectures for the \caml\tk\
+In this release, there are two possible architectures for the \camltk\
 interface. As in previous versions, there is a {\em two-process}
 architecture, where \caml\ communicates to a slave \wish\ interpreter.
 There is now a {\em single-process} architecture, where both \caml\ and \tk\
 coexist in a single process.
 
-In the following, we refer to \verb|CAMLTKDIR| as an environment variable
-pointing to the directory where the interface library has been
-installed, that is normally \verb|/usr/local/lib/caml-light/tk|.
+%% Avec la 0.7, Camltk est installe avec le reste du bouzin
+% In the following, we refer to \verb|CAMLTKDIR| as an environment variable
+% pointing to the directory where the interface library has been
+% installed, that is normally \verb|/usr/local/lib/caml-light/tk|.
+In the following, we refer to \verb|TCLLIBDIR| (resp. \verb|TKLIBDIR|) as
+an environment variable containing the directory where \verb|libtcl.a|
+(resp. \verb|libtk.a|) are located. Consult your system administrator if you
+don't have this information. Moreover, we assume a ``standard installation''
+of \caml from the distribution.
+
 \subsection{Compilation for Single-process architecture}
-The library is named \verb|tklib1.zo|.
+The library is named \verb|tklib.zo|.
 The usual commands for compiling and linking are:
 \begin{verbatim}
-$ camlc -c -I $CAMLTKDIR addition.ml
-$ camlc -custom -I $CAMLTKDIR -o addition tklib1.zo addition.zo \
+$ camlc -c addition.ml
+$ camlc -custom -o addition tklib.zo addition.zo \
         -ccopt -L$TCLLIBDIR -ccopt -L$TKLIBDIR \
-        $CAMLTKDIR/camltk.o -lcaml -ltk -ltcl -lX11
+        -lcamltk -lcaml -ltk -ltcl -lX11
 \end{verbatim}
 Linking is a bit complex, because we need to tell the C compiler/linker
 where to find the libtk.a and libtcl.a libraries, and to link with all
@@ -362,29 +238,28 @@ We will try to provide a bug-fix if this turns out to be a problem.
 The library is named \verb|tklib2.zo|.
 The usual commands for compiling and linking are:
 \begin{verbatim}
-$ camlc -c -I $CAMLTKDIR addition.ml
-$ camlc -custom -I $CAMLTKDIR -o addition unix.zo tklib2.zo addition.zo -lunix
+$ camlc -c addition.ml
+$ camlc -custom -o addition unix.zo tklib2.zo addition.zo -lunix
 \end{verbatim} 
- \verb|unix.zo| comes from the
-\verb|libunix| contrib, and is normally installed in the same directory as
-standard \caml\ libraries. 
+ \verb|unix.zo| comes from the \verb|libunix| contrib, and is normally
+installed in the same directory as standard \caml\ libraries. 
 
 \subsection{Toplevels}
-The distribution also contains two toplevels featuring the \caml\tk\
+The distribution also contains two toplevels featuring the \camltk\
 interface: \verb|camltktop1| and \verb|camltktop2|.
 These toplevels may be run with: 
 \begin{verbatim}
-$ camllight -I $CAMLTKDIR $CAMLTKDIR/camltktop1
-$ camllight -I $CAMLTKDIR $CAMLTKDIR/camltktop2
+$ camllight camltktop1
+$ camllight camltktop2
 \end{verbatim} 
 Note however that the usage of the toplevels is awkward (for the time
 being), because callbacks cannot be executed until you enter MainLoop, and
 you cannot easily leave MainLoop.
 
 \section{Extensions}
-The alpha versions have already one extension (i.e. a feature not
-normally available in \tk\ 3.6). This extension allows the association of
-callbacks to Unix input file descriptors. 
+\camltk\ has already one extension (i.e. a feature not normally available in
+\tk\ 3.6). This extension allows the association of callbacks to Unix input
+file descriptors.
 
 \subsection{File descriptor callbacks}
 A callback can be associated to a file descriptor using the following
@@ -399,7 +274,8 @@ tk__remove_fileinput : file_descr -> unit
 \end{verbatim} 
 Removes the file descriptor callback. It is the programmer's responsability
 to check for end of file, and to remove the callback if the file descriptor
-is closed.
+is closed. Be aware that calling the \verb|update| function will potentially
+destroy the sequentiality of read operations.
 
 \section{Translating \tk\ idioms}
 If you are a seasoned \tk\ programmer, you will find out that some \tk\
@@ -431,7 +307,7 @@ button__configure b [State Disabled]
 
 This is more in the spirit of ML, but unfortunately eliminates the
 possibility to specify configuration of widgets by resources based on widget 
-names. It you absolutely want to you resources then you may call the
+names. It you absolutely want to use resources then you may call the
 alternate \verb|create_named| function:
 \begin{verbatim}
 let b = button__create_named myf "bok" [Title "Ok"; Relief Raised] in
@@ -444,17 +320,20 @@ valid identifiers for path elements.
 When widgets are mutually recursive (through callbacks, for example when
 linking a scrollbar to a text widget), one should first create the widgets,
 and then set up the callbacks by calling \verb|configure| on the widgets.
-Otherwise, partially applied widget commands (such as redisplay commands)
-translate quite well to \caml, with possibly some wrapping required due to
+This is in contrast with \tcl\tk\ where one may refer to a procedure that
+has not yet been defined.
+
+Partially applied widget commands (such as redisplay commands) translate
+quite well to \caml, with possibly some wrapping required due to 
 value constructors.
 
 \subsection{Text variables}
-\verb|TextVariables| are now available in \caml\tk. However,
+\verb|TextVariables| are now available in \camltk. However,
 \verb|textvariables| are not physically shared between \caml\ and \tk.
 Instead, setting or consulting a \verb|textvariable| requires a transaction
-between \caml\ and \tk. However, if the \verb|textvariable| is used to
-physically share the content of an {\tt entry} with the text of a {\tt
-label}, then this sharing will effectively occur in the \tk\ world, and
+between \caml\ and \tk. However, if the \verb|textvariable| is for example
+used to physically share the content of an {\tt entry} with the text of a
+{\tt label}, then this sharing will effectively occur in the \tk\ world, and
 \caml\ is not concerned with the actual contents of the \verb|textvariable|.
 
 \subsection{How to find out the \caml\ name of \tk\ keywords and functions}
@@ -463,12 +342,14 @@ to make some efforts to find out what functions are available, and how the
 datatypes are defined. For the time being the best methods are:
 \begin{itemize}
 \item Check the .mli files in the library directory (they also appear in
-chapter~\ref{chap:ref}). This will give you at
-least the functions for each widget class.
-\item The types are almost all defined in the \verb|tk| module. Instead of
-looking at the source, you can use the {\tt mletags} utility in conjunction
-with the {\tt tags} mechanism of Emacs. 
-\item Use the browser
+chapter~\ref{chap:ref}). This will give you at least the functions for each
+widget class. For each function, the basic form of its \tk\ equivalent is
+given in a comment. When a \tk\  function has several forms (e.g. variable
+number of arguments), the \camltk\ interface will have different versions of
+this function with different names (hopefully significative enough).
+
+\item Check the \verb|Widgets.src| file of the distribution. 
+
 \end{itemize} 
 
 \section{Debugging}
