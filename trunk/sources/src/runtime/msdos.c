@@ -32,9 +32,7 @@ void ui_periodic_action()
   r.x.ax = 0x3303;
   int86(0x21, &r, &r);
   if (r.x.dx != 0) {
-    signal_handler = raise_break_exn;
-    signal_number = 0;
-    execute_signal();
+    handle_signal(raise_break_exn, 1);
   }
 }
 
@@ -65,7 +63,7 @@ int ui_read(fd, ptr, len)
     if (stdin_is_console) {
       read_buffer.max_len = sizeof(read_buffer.data) - 1;
       if (len <= read_buffer.max_len) read_buffer.max_len = len - 1;
-      if (bdosptr(0xA, &read_buffer, 0) != 0) poll_break();
+      if (bdosptr(0xA, &read_buffer, 0) != 0) ui_periodic_action();
       bdos(0x2, '\n', 0);
       read_buffer.data[read_buffer.act_len] = '\n';
       bcopy(read_buffer.data, ptr, read_buffer.act_len + 1);
