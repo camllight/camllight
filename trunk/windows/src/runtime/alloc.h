@@ -12,7 +12,7 @@ value alloc_final P((mlsize_t, final_fun, mlsize_t, mlsize_t));
 value copy_string P((char *));
 value copy_string_array P((char **));
 value copy_double P((double));
-value alloc_array P((value (*funct) P((value)), char ** array));
+value alloc_array P((value (*funct) P((char *)), char ** array));
 int convert_flag_list P((value, int *));
 
 
