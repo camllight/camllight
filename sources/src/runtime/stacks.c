@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "debugger.h"
+#include "debugcom.h"
 #include "fail.h"
 #include "misc.h"
 #include "mlvalues.h"
@@ -29,6 +30,7 @@ void init_stacks()
   ret_stack_threshold = ret_stack_low + Ret_stack_threshold / sizeof (value);
   extern_rsp = ret_stack_high;
   tp = (struct trap_frame *) ret_stack_high;
+  trap_barrier = ret_stack_high + 1;
 }
 
 static void realloc_arg_stack()
@@ -93,6 +95,7 @@ static void realloc_ret_stack()
   for (p = tp; p < (struct trap_frame *) new_high; p = p->tp) {
     p->tp = (struct trap_frame *) shift(p->tp);
   }
+  trap_barrier = (value *) shift(trap_barrier);
   ret_stack_low = new_low;
   ret_stack_high = new_high;
   ret_stack_threshold = ret_stack_low + Ret_stack_threshold / sizeof (value);

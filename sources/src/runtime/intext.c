@@ -1,4 +1,4 @@
-/* structured input/output */
+/* Structured input/output */
 
 #include "debugger.h"
 #include "fail.h"
@@ -462,8 +462,6 @@ static void expand_block(source, dest, source_len, dest_len, color)
 
 #else /* !SIXTYFOUR */
 
-#ifndef NO_SIXTYFOUR_INTERN
-
 /* Routines to convert 64-bit externed objects to 32-bit memory blocks. */
 
 typedef double value64;         /* Should work on just about any machine */
@@ -606,7 +604,7 @@ static int shrink_block(source, dest, source_len, dest_len, color)
       }
     case Double_tag:
       *d++ = Make_header(Double_wosize, Double_tag, color);
-      Store_double_val(d, Double_val(p));
+      Store_double_val((value)d, Double_val((value)p));
       p += sizeof(double) / sizeof(value64);
       d += sizeof(double) / sizeof(value);
       break;
@@ -661,23 +659,7 @@ static int shrink_block(source, dest, source_len, dest_len, color)
   return 0;
 }
 
-#endif /* NO_SIXTYFOUR_INTERN */
 #endif /* SIXTYFOUR */
-
-static int really_getblock(chan, p, n)
-     struct channel * chan;
-     char * p;
-     unsigned long n;
-{
-  unsigned r;
-  while (n > 0) {
-    r = getblock(chan, p, (unsigned) n);
-    if (r == 0) return 0;
-    p += r;
-    n -= r;
-  }
-  return 1;
-}
 
 value intern_val(chan)          /* ML */
      struct channel * chan;
@@ -689,8 +671,8 @@ value intern_val(chan)          /* ML */
   color_t color;
   header_t hd;
 
-  magic = getword(chan);
-  if (magic < First_valid_magic_number && magic > Last_valid_magic_number)
+  magic = (uint32) getword(chan);
+  if (magic < First_valid_magic_number || magic > Last_valid_magic_number)
     failwith("intern: bad object");
   whsize = getword(chan);
   if (whsize == 0) {
@@ -752,14 +734,12 @@ value intern_val(chan)          /* ML */
   if (magic == Little_endian_64_magic_number ||
       magic == Big_endian_64_magic_number) {
     /* Shrinkage 64 -> 32 required */
-#ifdef NO_SIXTYFOUR_INTERN
-    failwith("intern: 64-bit object, cannot load");
-#else
     mlsize_t whsize64;
     value64 * block;
     whsize64 = whsize;
     block = (value64 *) stat_alloc(whsize64 * sizeof(value64));
-    if (really_getblock(chan, block, whsize64 * sizeof(value64)) == 0) {
+    if (really_getblock(chan, (char *) block, 
+                        whsize64 * sizeof(value64)) == 0) {
       stat_free((char *) block);
       failwith ("intern : truncated object");
     }
@@ -789,7 +769,6 @@ value intern_val(chan)          /* ML */
       failwith("intern: 64-bit object too big");
     }
     stat_free((char *) block);
-#endif /* !NO_SIXTYFOUR_INTERN */
   } else {
     /* Block has natural word size (32) */
     res = alloc_shr(wosize, String_tag);

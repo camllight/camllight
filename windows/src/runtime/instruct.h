@@ -124,7 +124,8 @@ enum instructions {
   MAKEVECTOR,
   VECTLENGTH,
   GETVECTITEM,
-  SETVECTITEM
+  SETVECTITEM,
+  BREAK
 };
 
 enum float_instructions {

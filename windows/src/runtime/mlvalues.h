@@ -3,6 +3,7 @@
 
 
 #include "config.h"
+#include "misc.h"
 
 /* Definitions
 
@@ -182,24 +183,15 @@ typedef unsigned char *code_t;
 #define Double_val(v) (* (double *) (v))
 #define Store_double_val(v,d) (* (double *) (v) = (d))
 #else
-#ifdef ANSI
-extern double Double_val(value);
-extern void Store_double_val(value,double);
-#else
-double Double_val();
-void Store_double_val();
-#endif
+double Double_val P((value));
+void Store_double_val P((value,double));
 #endif
 
 /* Finalized things.  Just like abstract things, but the GC will call the
    [Final_fun] before deallocation.
 */
 #define Final_tag (No_scan_tag + 3)
-#ifdef ANSI
-typedef void (*final_fun) (value);
-#else
-typedef void (*final_fun) ();
-#endif
+typedef void (*final_fun) P((value));
 #define Final_fun(val) (((final_fun *) (val)) [0]) /* Also an l-value. */
 
 

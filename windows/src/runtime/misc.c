@@ -18,20 +18,9 @@ void gc_message (msg, arg)
 void fatal_error (s)
      char *s;
 {
-  fprintf (stderr, "Fatal error: %s.\n", s);
+  fprintf (stderr, "%s", s);
   exit(2);
 }
-
-extern int errno;
-extern char * error_message();
-
-void fatal_unix_error (s1, s2)
-     char * s1, * s2;
-{
-  fprintf (stderr, "Fatal error: %s%s: %s.\n", s1, s2, error_message (errno));
-  exit(2);
-}
-
 
 #ifdef USING_MEMMOV
 

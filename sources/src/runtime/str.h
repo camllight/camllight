@@ -2,17 +2,10 @@
 #define _str_
 
 
-#ifdef ANSI
+#include "misc.h"
 
-mlsize_t string_length(value);
-value compare_strings(value, value);
-
-#else
-
-mlsize_t string_length();
-value compare_strings();
-
-#endif
+mlsize_t string_length P((value));
+value compare_strings P((value, value));
 
 
 #endif /* _str_ */

@@ -3,7 +3,7 @@
 #include "alloc.h"
 #include "stacks.h"
 
-#ifdef ANSI
+#ifdef __STDC__
 
 volatile int signal_is_pending = 0;
 int in_blocking_section = 0;

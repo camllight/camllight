@@ -34,7 +34,7 @@
 
 /* Signed char type */
 
-#if defined(ANSI) || defined(SIGNED_CHAR_WORKS)
+#if defined(__STDC__) || defined(SIGNED_CHAR_WORKS)
 typedef signed char schar;
 #else
 typedef char schar;

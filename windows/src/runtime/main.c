@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <fcntl.h>
+#include "version.h"
 #include "alloc.h"
 #include "exec.h"
 #include "fail.h"
@@ -13,6 +14,7 @@
 #include "mlvalues.h"
 #include "stacks.h"
 #include "sys.h"
+#include "debugcom.h"
 
 extern value interprete();
 
@@ -22,6 +24,7 @@ extern value interprete();
 
 header_t first_atoms[256];
 code_t start_code;
+asize_t code_size;
 
 static void init_atoms()
 {
@@ -58,57 +61,22 @@ static int read_trailer(fd, trail)
 
 extern char * searchpath();
 
-int attempt_open(name, trail, do_open_script)
+int attempt_open(name, trail)
      char ** name;
      struct exec_trailer * trail;
-     int do_open_script;
 {
   char * truename;
   int fd;
   int err;
-  char buf [2];
 
   truename = searchpath(*name);
   if (truename == 0) truename = *name; else *name = truename;
   fd = open(truename, O_RDONLY | O_BINARY);
   if (fd == -1) return FILE_NOT_FOUND;
-  if (!do_open_script){
-    err = read (fd, buf, 2);
-    if (err < 2) return TRUNCATED_FILE;
-    if (buf [0] == '#' && buf [1] == '!') return BAD_MAGIC_NUM;
-  }
   err = read_trailer(fd, trail);
   if (err != 0) { close(fd); return err; }
   return fd;
 }
-
-char usage[] =
-#ifdef SMALL
-  "usage: camlrun [-v] [-V] [-g generation size]\n               [-f free mem % min] [-F free mem % max] <file> <args>\n";
-#else
-  "usage: camlrun [-v] [-V] [-g generation size] [-F free mem %] <file> <args>\n";
-#endif
-
-/* Invocation of camlrun: 4 cases.
-
-   1.  runtime + bytecode
-       user types:  camlrun [options] bytecode args...
-       arguments:  camlrun [options] bytecode args...
-
-   2.  bytecode script
-       user types:  bytecode args...
-    a  arguments: (kernel1)  camlrun ./bytecode args...
-    b  arguments: (kernel2)  bytecode bytecode args...
-
-   3.  concatenated runtime and bytecode
-       user types:  composite args...
-       arguments:  composite args...
-
-Algorithm: try to use the first argument as a byte-code file, except when
-it starts with #! (case 2b).  If that fails (cases 1 and 2a) or if the file
-starts with #!, parse the line as: (whatever) [options] bytecode args...
-
-*/
 
 int main(argc, argv)
      int argc;
@@ -120,6 +88,7 @@ int main(argc, argv)
   asize_t heap_size, generation_size;
   struct longjmp_buffer raise_buf;
   struct channel * chan;
+  char * debugger_address;
 
 #ifdef MSDOS
   extern char ** check_args();
@@ -130,13 +99,15 @@ int main(argc, argv)
   generation_size = Generation_size;
   free_mem_percent_min = Free_mem_percent_min;
   free_mem_percent_max = Free_mem_percent_max;
-  verb_gc = 0;
 #ifdef DEBUG
   verb_gc = 1;
+#else
+  verb_gc = 0;
 #endif
+  debugger_address = NULL;
 
   i = 0;
-  fd = attempt_open(&argv[0], &trail, 0);
+  fd = attempt_open(&argv[0], &trail);
 
   if (fd < 0) {
 
@@ -152,8 +123,9 @@ int main(argc, argv)
         break;
 #endif
       case 'V':
-        { extern char version_string [];
-          fprintf(stderr, "%s", version_string);
+        { extern int major_version, minor_version;
+          fprintf(stderr, "The Caml Light runtime system, version %d.%d.\n",
+                  MAJOR, MINOR);
           exit(0);
         }
       case 'g':
@@ -167,17 +139,22 @@ int main(argc, argv)
       case 'F':
         free_mem_percent_max = atoi(argv[++i]);
         break;
+      case 'D':
+        debugger_address = argv[++i];
+        break;
       default:
-        fatal_error("unknown option");
+        fprintf(stderr, "Unknown option %s.\n", argv[i]);
+        exit(2);
+        
       }
     }
 
     if (argv[i] == 0) {
-      fprintf(stderr, "%s", usage);
+      fprintf(stderr, "No bytecode file specified.\n");
       exit(2);
     }
 
-    fd = attempt_open(&argv[i], &trail, 1);
+    fd = attempt_open(&argv[i], &trail);
 
     switch(fd) {
     case FILE_NOT_FOUND:
@@ -192,6 +169,9 @@ int main(argc, argv)
     }
   }
 
+  if (debugger_address == NULL)
+    debugger_address = getenv("CAML_DEBUG_SOCKET");
+
   if (setjmp(raise_buf.buf) == 0) {
 
     external_raise = &raise_buf;
@@ -203,13 +183,13 @@ int main(argc, argv)
     lseek(fd, - (long) (TRAILER_SIZE + trail.code_size + trail.data_size
                         + trail.symbol_size + trail.debug_size), 2);
 
-    start_code = (code_t) stat_alloc((asize_t) trail.code_size);
-    if ((unsigned) read(fd, start_code, (unsigned) trail.code_size)
-        != trail.code_size)
-      fatal_error("truncated bytecode file");
+    code_size = trail.code_size;
+    start_code = (code_t) stat_alloc(code_size);
+    if ((unsigned) read(fd, start_code, (unsigned) code_size) != code_size)
+      fatal_error("Fatal error: truncated bytecode file.\n");
 
 #if defined(BIG_ENDIAN) && !defined(ALIGNMENT)
-    fixup_endianness(start_code, (asize_t) trail.code_size);
+    fixup_endianness(start_code, code_size);
 #endif
 
     chan = open_descriptor(Val_long(fd));
@@ -218,15 +198,16 @@ int main(argc, argv)
     close_in(chan);
 
     sys_init(argv + i);
+    if (debugger_address != NULL) debugger_init(debugger_address);
     interprete(start_code);
     sys_exit(0);
 
   } else {
 
     if (exn_bucket == Atom(OUT_OF_MEMORY_EXN))
-      fatal_error ("out of memory");
+      fatal_error ("Fatal error: out of memory.\n");
     else
-      fatal_error ("uncaught exception");
+      fatal_error ("Fatal error: uncaught exception.\n");
 
   }
 }

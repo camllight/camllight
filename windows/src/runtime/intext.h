@@ -4,19 +4,12 @@
 #define _intext_
 
 
+#include "misc.h"
+#include "mlvalues.h"
 #include "io.h"
 
-#ifdef ANSI
-
-extern value extern_val(struct channel *, value);
-extern value intern_val(struct channel *);
-
-#else
-
-value extern_val();
-value intern_val();
-
-#endif
+value extern_val P((struct channel *, value));
+value intern_val P((struct channel *));
 
 
 #endif /* _intext_ */
