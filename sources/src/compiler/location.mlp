@@ -21,7 +21,7 @@ let get_current_location () =
 
 #ifdef macintosh
 let output_lines oc char1 char2 charline1 line1 line2 =
-  fprintf oc (*'"'"*)"; Line \165!%d:\165!%d\n"(*"'"'*) char1 char2; ()
+  fprintf oc "; Line \165!%d:\165!%d\n" char1 char2; ()
 ;;
 #else
 let output_lines oc char1 char2 charline1 line1 line2 =

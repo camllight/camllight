@@ -57,7 +57,7 @@ static void oldify (p, v)
 
  tail_call:
   if (Is_block (v) && Is_young (v)){
-    Assert (Hp_val (v) < young_ptr);
+    Assert ((char *) Hp_val (v) < young_ptr);
     if (Is_blue_val (v)){    /* Already forwarded ? */
       *p = Field (v, 0);     /* Then the forward pointer is the first field. */
     }else if (Tag_val (v) >= No_scan_tag){

@@ -25,8 +25,6 @@ and debug_option () =
   toplevel__debug_mode true
 and set_language lang =
   interntl__language := lang
-and warnings_option () =
-  typing__warnings := true
 ;;
 
 let main() =
@@ -34,6 +32,7 @@ try
   toplevel := true;
   default_used_modules := assoc "cautious" default_used_interfaces;
   load_path := [!path_library];
+  typing__warnings := true;
   arg__parse ["-stdlib", arg__String set_stdlib;
               "-I", arg__String add_include;
               "-include", arg__String add_include;
@@ -41,8 +40,7 @@ try
               "-open", arg__String open_set;
               "-g", arg__Unit debug_option;
               "-debug", arg__Unit debug_option;
-              "-lang", arg__String set_language;
-              "-W", arg__Unit warnings_option]
+              "-lang", arg__String set_language]
              anonymous;
   default_used_modules := "toplevel" :: !default_used_modules;
   version__print_banner();

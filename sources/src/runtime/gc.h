@@ -13,7 +13,10 @@ extern unsigned free_mem_percent_min, free_mem_percent_max;
 #define Black (3 << 8)
 
 #define Color_hd(hd) ((color_t) ((hd) & Black))
+/* inlined [Hd_hp] to avoid problems with "recursive" macros.  See [mlvalues.h]
 #define Color_hp(hp) Color_hd (Hd_hp (hp))
+*/
+#define Color_hp(hp) Color_hd (* (header_t *) (hp))
 
 #define Is_white_hd(hd) (Color_hd (hd) == White)
 #define Is_gray_hd(hd) (Color_hd (hd) == Gray)
