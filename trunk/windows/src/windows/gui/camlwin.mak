@@ -728,15 +728,18 @@ SOURCE=.\CAMLWIN.DEF
 # Begin Source File
 
 SOURCE=.\graphvw.cpp
+
+!IF  "$(CFG)" == "Camlwin - Win32 Debug"
+
 DEP_CPP_GRAPH=\
 	".\stdafx.h"\
 	".\camlwin.h"\
 	".\graphvw.h"\
 	".\graphdoc.h"\
 	
-
-!IF  "$(CFG)" == "Camlwin - Win32 Debug"
-
+NODEP_CPP_GRAPH=\
+	".\;"\
+	
 
 "$(INTDIR)\graphvw.obj" : $(SOURCE) $(DEP_CPP_GRAPH) "$(INTDIR)"
 
@@ -745,6 +748,12 @@ DEP_CPP_GRAPH=\
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
 
+DEP_CPP_GRAPH=\
+	".\stdafx.h"\
+	".\camlwin.h"\
+	".\graphvw.h"\
+	".\graphdoc.h"\
+	
 
 "$(INTDIR)\graphvw.obj" : $(SOURCE) $(DEP_CPP_GRAPH) "$(INTDIR)"
 
@@ -756,6 +765,9 @@ DEP_CPP_GRAPH=\
 # Begin Source File
 
 SOURCE=.\graphdoc.cpp
+
+!IF  "$(CFG)" == "Camlwin - Win32 Debug"
+
 DEP_CPP_GRAPHD=\
 	".\stdafx.h"\
 	".\camlwin.h"\
@@ -781,9 +793,9 @@ DEP_CPP_GRAPHD=\
 	".\..\..\RUNTIME\minor_gc.h"\
 	".\..\..\RUNTIME\freelist.h"\
 	
-
-!IF  "$(CFG)" == "Camlwin - Win32 Debug"
-
+NODEP_CPP_GRAPHD=\
+	".\CAMLGraph"\
+	
 
 "$(INTDIR)\graphdoc.obj" : $(SOURCE) $(DEP_CPP_GRAPHD) "$(INTDIR)"
 
@@ -792,6 +804,31 @@ DEP_CPP_GRAPHD=\
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
 
+DEP_CPP_GRAPHD=\
+	".\stdafx.h"\
+	".\camlwin.h"\
+	".\xeditvw.h"\
+	".\txtrmdoc.h"\
+	".\txtrmfr.h"\
+	".\mainfrm.h"\
+	".\graphdoc.h"\
+	".\graphvw.h"\
+	".\..\..\RUNTIME\alloc.h"\
+	".\..\..\RUNTIME\memory.h"\
+	".\..\..\RUNTIME\fail.h"\
+	".\..\..\RUNTIME\signals.h"\
+	".\..\..\RUNTIME\str.h"\
+	".\colors.h"\
+	".\..\..\RUNTIME\misc.h"\
+	".\..\..\RUNTIME\mlvalues.h"\
+	".\..\..\RUNTIME\config.h"\
+	".\..\..\..\config\m.h"\
+	".\..\..\..\config\s.h"\
+	".\..\..\RUNTIME\gc.h"\
+	".\..\..\RUNTIME\major_gc.h"\
+	".\..\..\RUNTIME\minor_gc.h"\
+	".\..\..\RUNTIME\freelist.h"\
+	
 
 "$(INTDIR)\graphdoc.obj" : $(SOURCE) $(DEP_CPP_GRAPHD) "$(INTDIR)"
 

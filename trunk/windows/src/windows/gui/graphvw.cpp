@@ -27,6 +27,7 @@ CGraphView::CGraphView()
 
 CGraphView::~CGraphView()
 {
+	delete m_DC;
 }
 
 
@@ -64,7 +65,8 @@ void CGraphView::OnInitialUpdate()
 	sizeLine.cx = sizeLine.cy = sizePage.cx / 10;
 	SetScrollSizes(MM_TEXT, sizeTotal, sizePage, sizeLine);
 
-	pDoc->InitDocumentDC(new CClientDC(this));
+	m_DC = new CClientDC(this);
+	pDoc->InitDocumentDC(m_DC);
 
  	CScrollView::OnInitialUpdate();
 

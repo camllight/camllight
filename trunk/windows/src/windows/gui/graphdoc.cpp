@@ -43,9 +43,11 @@ CGraphDoc::CGraphDoc()
 {
 	m_DC = NULL;
 
-	m_sizeX=((CMainFrame *)(theApp.m_pMainWnd))->GetDC()->GetDeviceCaps(HORZRES);
-	m_sizeY=((CMainFrame *)(theApp.m_pMainWnd))->GetDC()->GetDeviceCaps(VERTRES);
+	CDC *tmpDC = ((CMainFrame *)theApp.m_pMainWnd)->GetDC();
+	m_sizeX=tmpDC->GetDeviceCaps(HORZRES);
+	m_sizeY=tmpDC->GetDeviceCaps(VERTRES);
 	m_sizeDoc=CSize(m_sizeX, m_sizeY);
+	((CMainFrame *)theApp.m_pMainWnd)->ReleaseDC(tmpDC);
 
 	m_logBrush = new LOGBRUSH;
 	m_logBrush->lbStyle = BS_SOLID;
@@ -137,7 +139,6 @@ CGraphDoc::~CGraphDoc()
 
 	delete m_tempDC;
 	delete m_OffScreenDC;
-	delete m_DC;
 }
 
 BEGIN_MESSAGE_MAP(CGraphDoc, CDocument)
@@ -281,8 +282,7 @@ GRAPHPRIM( SetColor, gr_set_color, (value col), (col) )
 	if(! m_pen->CreatePenIndirect(m_logPen)) {
 	  AfxMessageBox("bad pen");
 	}
-	// m_pen->CreatePenIndirect(m_logPen);
-	OffScreenDC_(SelectObject(m_logPen));
+	OffScreenDC_(SelectObject(m_pen));
 
 	// The current brush...
 	m_logBrush->lbColor = c;
@@ -292,12 +292,11 @@ GRAPHPRIM( SetColor, gr_set_color, (value col), (col) )
 	if(! m_brush->CreateBrushIndirect(m_logBrush)) {
 	  AfxMessageBox("bad brush");
 	}
-	// m_brush->CreateBrushIndirect(m_logBrush);
-	OffScreenDC_(SelectObject(m_logBrush));
+	OffScreenDC_(SelectObject(m_brush));
 
 	// And finally the color of the text:
-	m_DC->SetTextColor(c);;
-	m_OffScreenDC->SetTextColor(c);;
+	m_DC->SetTextColor(c);
+	m_OffScreenDC->SetTextColor(c);
 
 	return Val_unit;
 }
