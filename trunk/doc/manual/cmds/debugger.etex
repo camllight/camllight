@@ -283,16 +283,16 @@ identifiers are still undefined. Moreover, C functions are not
 recognized by the debugger. See section~\ref{s:debugger-values} for
 the syntax of \var{function}.
 
-\item["break @" \optvar{module} \var{line}]
+\item["break \@" \optvar{module} \var{line}]
 Set a breakpoint in module \var{module} (or in the current module if
 \var{module} is not given), at the first event of line \var{line}.
 
-\item["break @" \optvar{module} \var{line} \var{column}]
+\item["break \@" \optvar{module} \var{line} \var{column}]
 Set a breakpoint in module \var{module} (or in the current module if
 \var{module} is not given), at the event closest to line \var{line},
 column \var{column}.
 
-\item["break @" \optvar{module} "#" \var{character}]
+\item["break \@" \optvar{module} "#" \var{character}]
 Set a breakpoint in module \var{module} at the event closest to
 character number \var{character}.
 
@@ -396,7 +396,8 @@ pattern:
 The pattern @ident@, where @ident@ is an identifier, matches any
 value, and binds the identifier to this value. The pattern
 @'#' n pattern@ matches a list, a vector or a tuple whose @n@-th
-element matches @pattern@. The pattern @'>' pattern@ matches any
+element matches @pattern@.
+The pattern @'>' pattern@ matches any
 constructed value whose argument matches @pattern@, regardless of the
 constructor; it is a shortcut for skipping a constructor.
 
@@ -516,7 +517,7 @@ Select whether the debugger makes checkpoints or not.
 \end{options}
 
 \subsection{Communication between the debugger and the program}
-\abel{s:communication}
+\label{s:communication}
 
 The debugger communicate with the program being debugged through a
 Unix socket. You may need to change the socket name, for example if

@@ -1,5 +1,5 @@
 FILES=install.tex comp.tex top.tex runtime.tex librar.tex lexyacc.tex \
-  debugger.tex intf-c.tex
+  profil.tex debugger.tex intf-c.tex
 
 TRANSF=../../tools/transf
 TEXQUOTE=../../tools/texquote2
@@ -19,3 +19,5 @@ clean:
 lexyacc.tex: lexyacc.etex $(TRANSF)
 	$(TRANSF) < lexyacc.etex | $(TEXQUOTE) > lexyacc.tex
 
+debugger.tex: debugger.etex $(TRANSF)
+	$(TRANSF) < debugger.etex | $(TEXQUOTE) > debugger.tex

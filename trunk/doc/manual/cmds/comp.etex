@@ -164,6 +164,14 @@ searched last). (Directories can also be added to the search path from
 inside the programs with the "#directory" directive; see
 chapter~\ref{c:extensions}.)
 
+\item["-lang" \var{language-code}]
+Translate the compiler messages to the specified language.
+The \var{language-code} is "fr" for French, "es" for Spanish, "de" for
+German, \ldots\ (See the file "camlmsgs.txt" in the Caml Light
+standard library directory for a list of available languages.)
+When an unknown language is specified, or no translation is available
+for a message, American English is used by default.
+
 \item["-o" \var{exec-file}]
 Specify the name of the output file produced by the linker.
 
@@ -196,10 +204,30 @@ The default compilation mode is "-O cautious". See
 chapter~\ref{c:stdlib} for a complete listing of the modules in the
 "cautious" and "fast" sets.
 
+\item["-p"]
+Compile and link in profiling mode. See the description of the
+profiler "camlpro" in chapter~\ref{c:profiler}.
+
 \item["-v"]
-Print the version number the various passes of the compiler.
+Print the version number of the compiler.
 
 \end{options}
+
+\begin{unix} The following environment variable is also consulted:
+\begin{options}
+\item["LANG"] When set, control which language is used to print the
+compiler messages (see the "-lang" command-line option).
+\end{options}
+\end{unix}
+
+\begin{pc} The following environment variables are also consulted:
+\begin{options}
+\item["CAMLLIB"] Contain the path to the standard library directory.
+
+\item["LANG"] When set, control which language is used to print the
+compiler messages (see the "-lang" command-line option).
+\end{options}
+\end{pc}
 
 \section{Modules and the file system}
 
