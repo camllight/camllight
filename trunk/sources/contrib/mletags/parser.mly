@@ -74,8 +74,8 @@ let do_directive =
 %token BARRBRACKET    /* "|]" */
 %token GREATERRBRACKET/* ">]" */
 %token RBRACE         /* "}" */
-%token SLASHBACKSLASH /* "/\" */
-%token BACKSLASHSLASH /* "\/" */
+%token AMPERAMPER     /* "&&" */
+%token BARBAR         /* "||" */
 /* Keywords */
 %token AND            /* "and" */
 %token AS             /* "as" */
@@ -123,8 +123,8 @@ let do_directive =
 %left  AS
 %left  BAR
 %left  COMMA
-%left  OR BACKSLASHSLASH
-%left  AMPERSAND SLASHBACKSLASH
+%left  OR BARBAR
+%left  AMPERSAND AMPERAMPER
 %left  NOT
 %left  INFIX1 EQUAL EQUALEQUAL          /* comparisons, concatenations */
 %right COLONCOLON                       /* cons */
@@ -214,11 +214,11 @@ Expr :
           { () }
       | Expr AMPERSAND Expr
           { () }
-      | Expr SLASHBACKSLASH Expr
+      | Expr AMPERAMPER Expr
           { () }
       | Expr OR Expr
           { () }
-      | Expr BACKSLASHSLASH Expr
+      | Expr BARBAR Expr
           { () }
       | Simple_expr DOT Ext_ident LESSMINUS Expr
           { () }
@@ -232,16 +232,16 @@ Expr :
           { () }
       | IF Expr THEN Expr  %prec prec_if
           { () }
-      | WHILE Expr DO Expr Opt_semi DONE
+      | WHILE Expr DO Expr DONE
           { () }
-      | FOR Ide EQUAL Expr TO Expr DO Expr Opt_semi DONE
+      | FOR Ide EQUAL Expr TO Expr DO Expr DONE
           { () }
-      | FOR Ide EQUAL Expr DOWNTO Expr DO Expr Opt_semi DONE
+      | FOR Ide EQUAL Expr DOWNTO Expr DO Expr DONE
           { () }
       | Expr SEMI Expr
           { () }
-      | Expr SEMI Expr SEMI
-          { () }
+      | Expr SEMI
+          { $1 }
       | MATCH Expr WITH Opt_bar Function_match
           { () }
       | MATCH Expr WITH Opt_bar Parser_match
@@ -271,15 +271,15 @@ Simple_expr :
           { () }
       | LPAREN RPAREN
           { () }
-      | LBRACKET Expr_sm_list Opt_semi RBRACKET
+      | LBRACKET Expr_sm_list RBRACKET
           { () }
       | LBRACKET RBRACKET
           { () }
-      | LBRACKETBAR Expr_sm_list Opt_semi BARRBRACKET
+      | LBRACKETBAR Expr_sm_list BARRBRACKET
           { () }
       | LBRACKETBAR BARRBRACKET
           { () }
-      | LBRACKETLESS Stream_expr Opt_semi GREATERRBRACKET
+      | LBRACKETLESS Stream_expr GREATERRBRACKET
           { () }
       | LBRACKETLESS GREATERRBRACKET
           { () }
@@ -287,9 +287,9 @@ Simple_expr :
           { () }
       | LPAREN Expr RPAREN
           { () }
-      | BEGIN Expr Opt_semi END
+      | BEGIN Expr END
           { () }
-      | LBRACE Expr_label_list Opt_semi RBRACE
+      | LBRACE Expr_label_list RBRACE
           { () }
       | PREFIX Simple_expr
           { () }
@@ -318,6 +318,8 @@ Expr_comma_list :
 Expr_sm_list :
         Expr_sm_list SEMI Expr  %prec prec_list
           { () }
+      | Expr_sm_list SEMI
+          { () }
       | Expr  %prec prec_list
           { () }
 ;
@@ -334,6 +336,8 @@ Expr_label :
 
 Expr_label_list :
         Expr_label_list SEMI Expr_label  %prec prec_list
+          { () }
+      | Expr_label_list SEMI
           { () }
       | Expr_label  %prec prec_list
           { () }
@@ -411,16 +415,16 @@ Binding :
 Pattern_sm_list :
         Pattern SEMI Pattern_sm_list
           { () }
-      | Pattern
+      | Pattern Opt_semi
           { () }
 ;
 
 Pattern_label_list :
         Pattern_label SEMI Pattern_label_list
           { () }
-      | Pattern_label
+      | Pattern_label Opt_semi
           { () }
-      | UNDERSCORE
+      | UNDERSCORE Opt_semi
           { () }
 ;
 
@@ -443,7 +447,7 @@ Simple_pattern_list :
           { () }
 ;
 
-Pattern_loc:
+Pattern_loc :
         Pattern {loc()}
 ;
 
@@ -479,11 +483,11 @@ Simple_pattern :
           { () }
       | LBRACKET RBRACKET
           { () }
-      | LBRACKET Pattern_sm_list Opt_semi RBRACKET
+      | LBRACKET Pattern_sm_list RBRACKET
           { () }
       | LPAREN Pattern COLON Type RPAREN
           { () }
-      | LBRACE Pattern_label_list Opt_semi RBRACE
+      | LBRACE Pattern_label_list RBRACE
           { () }
       | LPAREN Pattern RPAREN
           { () }
@@ -495,6 +499,8 @@ Simple_pattern :
 
 Stream_expr :
         Stream_expr SEMI Stream_expr_component  %prec prec_list
+          { () }
+      | Stream_expr SEMI
           { () }
       | Stream_expr_component  %prec prec_list
           { () }
@@ -539,7 +545,7 @@ Parser_match :
 
 /* Identifiers */
 
-Ide_loc:
+Ide_loc :
         Ide {loc()}
 ;
 
@@ -647,7 +653,7 @@ Constr_decl :
 Label_decl :
         Label1_decl SEMI Label_decl
           { $1 :: $3 }
-      | Label1_decl
+      | Label1_decl Opt_semi
           { [$1] }
 ;
 
@@ -663,7 +669,7 @@ Prim_decl :
           { () }
 ;
 
-IDENT_loc: 
+IDENT_loc :
         IDENT {loc()}
 ;
 
@@ -677,7 +683,7 @@ Type1_def :
           { [] }
       | EQUAL Opt_bar Constr_decl
           { $3 }
-      | EQUAL LBRACE Label_decl Opt_semi RBRACE
+      | EQUAL LBRACE Label_decl RBRACE
           { $3 }
       | EQUALEQUAL Type
           { [] }
