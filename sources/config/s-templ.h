@@ -29,11 +29,6 @@
    routines provided in the standard library, but at least it is guaranteed
    to work. So, in doubt, don't define anything. */
 
-#define HAS__SETJMP
-
-/* Define HAS__SETJMP if you have `_setjmp' and
-   `_longjmp' as faster variants of `setjmp' and `longjmp'. */
-
 typedef int sighandler_return_type;
 
 /* Define as sighandler_return_type the return type of signal handlers
