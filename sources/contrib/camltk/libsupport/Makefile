@@ -1,7 +1,7 @@
 CAMLC=camlc
 CAMLCOMP=$(CAMLC) -c
 CPP=/lib/cpp -P -Dunix
-COMPFLAGS=-O fast -g
+COMPFLAGS=-O fast -g -I ../../libunix
 LINKFLAGS=-g
 CAMLYACC=camlyacc -v
 CAMLLEX=camllex
@@ -29,7 +29,7 @@ camltk.o : camltk.c
 		 camltk.c
 
 install: camltk.o support.zi textvariable.zi protocol.zi
-	[ -d $(LIBDIR) ] || mkdir $(LIBDIR)
+	if test -d $(LIBDIR); then : ; else mkdir $(LIBDIR); fi
 	cp -p support.zi $(LIBDIR)
 	cp -p textvariable.zi $(LIBDIR)
 	cp -p protocol.zi $(LIBDIR)

@@ -49,7 +49,7 @@ clean :
 	rm -f *.z* *.ml *.mli tklib[12].zo  camltktop[12]
 
 install: tklib1.zo tklib2.zo  camltktop1 camltktop2
-	[ -d $(LIBDIR) ] || mkdir $(LIBDIR)
+	if test -d $(LIBDIR); then : ; else mkdir $(LIBDIR); fi
 	cp -p *.zi tklib?.zo camltktop? $(LIBDIR)
 	chmod 644 $(LIBDIR)/*.zi
 	chmod 644 $(LIBDIR)/tklib?.zo
