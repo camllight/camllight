@@ -40,8 +40,10 @@ value quit : unit -> unit
            [printername] as a printer for objects whose types match
            its argument type. That is, the toplevel loop will call
            [printername] when it has such an object to print.
-           For best visual results, the printing function [printername]
-           should use the [format] library module to produce its output. *)
+           The printing function [printername] must use the [format] library
+           module to produce its output, otherwise the output of
+           [printername] will not be correctly located in the values
+           printed by the toplevel loop. *)
   and remove_printer : string -> unit
         (* [remove_printer "printername"] removes the function named
            [printername] from the table of toplevel printers. *)
@@ -62,4 +64,7 @@ value quit : unit -> unit
            to starting the toplevel with the [-g] option. *)
   and cd : string -> unit
         (* Change the current working directory. *)
+  and directory : string -> unit
+        (* Add the given directory to the search path for files.
+           Same behavior as the [-I] option or the [#directory] directive. *)
 ;;    

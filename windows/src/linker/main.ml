@@ -43,9 +43,11 @@ and process_require filename =
   | "prim"::name::rest ->
       let n = get_num_of_prim name in require rest
   | _ ->
-      printf__eprintf "Syntax error in \"-require\" file %s.\n" filename;
+      interntl__eprintf "Syntax error in \"-require\" file %s.\n" filename;
       raise Toplevel in
   require (readword__from_file filename)
+and set_language lang =
+  interntl__language := lang
 ;;
 
 let main() =
@@ -65,6 +67,7 @@ try
               "-version", arg__Unit show_version;
               "-files", arg__String process_include;
               "-require", arg__String process_require;
+              "-lang", arg__String set_language;
               "-", arg__String anonymous]
              anonymous;
   link (rev !object_files) !exec_file;
@@ -78,10 +81,10 @@ try
 with Toplevel -> exit 2
    | sys__Break -> exit 3
    | sys__Sys_error msg ->
-      printf__eprintf "Input/output error: %s.\n" msg;
+      interntl__eprintf "Input/output error: %s.\n" msg;
       exit 2
    | Zinc s ->
-      printf__eprintf "Internal error: %s.\nPlease report it.\n" s;
+      interntl__eprintf "Internal error: %s.\nPlease report it.\n" s;
       exit 100
 ;;
 

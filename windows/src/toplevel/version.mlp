@@ -1,4 +1,4 @@
 #include "../version.h"
 
 let print_banner() =
-  printf__printf ">       Caml Light version %s\n" VERSION; ();;
+  interntl__printf ">       Caml Light version %s\n" VERSION; ();;

@@ -31,6 +31,7 @@ let do_toplevel_phrase phr =
       if is_nonexpansive expr then generalize_type ty;
       let res =
         load_phrase(compile_lambda false (translate_expression expr)) in
+      flush std_err;
       open_hovbox 0;
       print_string "- : ";
       print_one_type ty;
@@ -48,6 +49,7 @@ let do_toplevel_phrase phr =
           load_phrase
             (compile_lambda false
               (translate_letdef phr.im_loc pat_expr_list)) in
+      flush std_err;
       reset_rollback ();
       do_list
         (fun (name, (typ, mut_flag)) ->

@@ -24,7 +24,7 @@ let add_to_library outchan (offset, index_rest) filename =
     let new_index = map (offset_compiled_phrase offset) old_index in
       (offset + len, new_index @ index_rest)
   with Cannot_find_file name ->
-    printf__eprintf "Cannot find file %s.\n" name;
+    interntl__eprintf "Cannot find file %s.\n" name;
     raise Toplevel
 ;;    
 

@@ -24,6 +24,8 @@ and open_set set =
     raise (arg__Bad ("unknown module set " ^ set))
 and debug_option () =
   toplevel__debug_mode true
+and set_language lang =
+  interntl__language := lang
 ;;
 
 let main() =
@@ -37,6 +39,7 @@ try
               "-O", arg__String open_set;
               "-open", arg__String open_set;
               "-g", arg__Unit debug_option;
+              "-lang", arg__String set_language;
               "-debug", arg__Unit debug_option]
              anonymous;
   default_used_modules := "toplevel" :: !default_used_modules;
@@ -69,16 +72,16 @@ try
              flush std_err;
              rollback ()
          | Break ->
-             print_string "Interrupted.\n";
+             print_string(interntl__translate "Interrupted.\n");
              rollback ()
     done
 
 with Toplevel -> exit 2
    | sys__Sys_error msg ->
-      printf__eprintf "Input/output error: %s.\n" msg;
+      interntl__eprintf "Input/output error: %s.\n" msg;
       exit 2
    | Zinc s ->
-      printf__eprintf "Internal error: %s.\nPlease report it.\n" s;
+      interntl__eprintf "Internal error: %s.\nPlease report it.\n" s;
       exit 100
 ;;
 

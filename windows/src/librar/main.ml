@@ -20,6 +20,8 @@ and set_stdlib p =
   load_path := [!path_library]
 and add_include d =
   load_path := d :: !load_path
+and set_language lang =
+  interntl__language := lang
 ;;
 
 let main() =
@@ -32,6 +34,7 @@ let main() =
                 "-v", arg__Unit show_version;
                 "-version", arg__Unit show_version;
                 "-files", arg__String process_include;
+                "-lang", arg__String set_language;
                 "-", arg__String anonymous]
              anonymous;
     librar__make_library (rev !lib_files) !lib_name;
@@ -39,10 +42,10 @@ let main() =
   with Toplevel ->
         exit 2
      | sys__Sys_error msg ->
-        printf__eprintf "Input/output error: %s.\n" msg;
+        interntl__eprintf "Input/output error: %s.\n" msg;
         exit 2
      | Zinc s ->
-        printf__eprintf "Internal error: %s.\nPlease report it.\n" s;
+        interntl__eprintf "Internal error: %s.\nPlease report it.\n" s;
         exit 100
 ;;
 
