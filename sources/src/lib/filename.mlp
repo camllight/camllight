@@ -2,14 +2,33 @@
 
 (**) #open "int";;
 (**) #open "eq";;
+(**) #open "fchar";;
 (**) #open "fstring";;
 (**) #open "exc";;
 
+#ifndef msdos
 let check_suffix name suff =
- string_length name >= string_length suff &
- sub_string name (string_length name - string_length suff) (string_length suff)
+  string_length name >= string_length suff &
+  sub_string name (string_length name - string_length suff) (string_length suff)
     = suff
 ;;
+#else
+let lowercase s =
+  let s' = create_string (string_length s) in
+  for i = 0 to string_length s - 1 do
+    let c = s.[i] in
+	if c >= `A` & c <= `Z`
+	then s'.[i] <- char_of_int(int_of_char c + 32)
+	else s'.[i] <- c
+  done;
+  s'
+;;
+let check_suffix name suff =
+  string_length name >= string_length suff &
+  lowercase (sub_string name (string_length name - string_length suff) 
+                             (string_length suff)) = lowercase suff
+;;
+#endif
 
 let chop_suffix name suff =
   let n = string_length name - string_length suff in
