@@ -148,7 +148,7 @@ main(argc, argv)
 
   {
 #if defined (macintosh) && defined (HAS_UI)
-    char *opt = get_env_resource ((char *) "\pCAMLRUNPARAM");
+    char *opt = ui_getenv ((char *) "\pCAMLRUNPARAM");
 #else
     char *opt = getenv ("CAMLRUNPARAM");
 #endif
