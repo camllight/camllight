@@ -93,15 +93,7 @@ let CAMLtoTKTextMark  x =  x
 let TKtoCAMLTextMark x = x
 ;;
 
-let GetTextTag port = 
-  TKtoCAMLTextTag (GetTkToken port)
-;;
-
-let GetTextTagList port = 
-  map TKtoCAMLTextTag (GetTkTokenList port)
-;;
-
-let text_tagbind widget tag eventsequence action =
+let text_tag_bind widget tag eventsequence action =
   check_widget_class widget "text";
   Send2TkStart "$PipeTkCallB";
   Send2Tk (widget_name widget ^ " tag bind " ^ (CAMLtoTKTextTag tag) ^ " " ^
