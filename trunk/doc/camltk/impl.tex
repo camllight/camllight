@@ -218,7 +218,15 @@ Producing the library requires the presence of several files in the
 \verb|lib| directory. For more details, check the \verb|Makefile| in
 \verb|lib|. 
 
-\section{Communication protocol}
+\section{The architecture}
+In this version (\thisrelease), the interface is implemented as a
+communication protocol between a \caml\ process and the {\tt wish}
+interpreter ({\tt wish} is a toplevel interactive interpreter for 
+\tcl\ and \tk).
+{\bf This implementation is subject to change.}
+A \caml\ function of the library produces \tcl\tk\ code, and sends it to the
+\wish\ interpreter. \wish\ sends callback information and results from
+function calls to the \caml\ process.
 The support layer is implemented in the \verb|protocol.ml| and
 \verb|support.ml| files.
 
