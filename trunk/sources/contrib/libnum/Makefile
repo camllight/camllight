@@ -72,18 +72,18 @@ depend:
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
 big_int.zi: nat.zi 
-format_latex_numbers.zi: ratio.zi num.zi nat.zi big_int.zi 
-format_num.zi: ratio.zi num.zi nat.zi big_int.zi 
+fmt_num.zi: ratio.zi num.zi nat.zi big_int.zi 
+ltx_num.zi: ratio.zi num.zi nat.zi big_int.zi 
 num.zi: ratio.zi nat.zi big_int.zi 
 ratio.zi: nat.zi big_int.zi 
 arith_flags.zo: arith_flags.zi 
 arith_status.zo: arith_status.zi arith_flags.zi 
 big_int.zo: big_int.zi int_misc.zi nat.zi 
-format_latex_numbers.zo: format_latex_numbers.zi num.zi int_misc.zi nat.zi \
-    big_int.zi ratio.zi 
-format_num.zo: format_num.zi string_misc.zi num.zi int_misc.zi nat.zi \
-    big_int.zi ratio.zi 
+fmt_num.zo: fmt_num.zi string_misc.zi num.zi int_misc.zi nat.zi big_int.zi \
+    ratio.zi 
 int_misc.zo: int_misc.zi 
+load_all.zo: int_misc.zi nat.zi 
+ltx_num.zo: ltx_num.zi num.zi int_misc.zi nat.zi big_int.zi ratio.zi 
 nat.zo: nat.zi string_misc.zi int_misc.zi 
 num.zo: num.zi int_misc.zi nat.zi big_int.zi ratio.zi arith_flags.zi 
 ratio.zo: ratio.zi string_misc.zi int_misc.zi nat.zi big_int.zi \
