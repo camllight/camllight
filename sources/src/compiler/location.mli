@@ -9,3 +9,7 @@ value get_current_location : unit -> location
   and input_chan : in_channel ref
   and input_lexbuf : lexing__lexbuf ref
 ;;
+
+value output_location: out_channel -> location -> unit
+and output_input_name: out_channel -> unit
+;;

@@ -14,14 +14,13 @@ and maxint_short = 32767
 and minint_short = (-32768)
 ;;
 
-(* The standard interfaces used by default. *)
+(* The standard interfaces used by default. In opening order. *)
 
 let default_used_interfaces =
-  ["cautious", ["io"; "eq"; "int"; "float"; "ref"; "pair"; "list";
-                "vect"; "char"; "string"; "bool"; "exc"; "stream"; "builtin"];
-   "fast",     ["io"; "eq"; "int"; "float"; "ref"; "pair"; "list";
-                "fvect"; "fchar"; "fstring"; "bool";
-                "exc"; "stream"; "builtin"];
+  ["cautious", ["builtin"; "stream"; "exc"; "bool"; "string"; "char"; "vect";
+                "list"; "pair"; "ref"; "float"; "int"; "eq"; "io"];
+   "fast",     ["builtin"; "stream"; "exc"; "bool"; "fstring"; "fchar";
+                "fvect"; "list"; "pair"; "ref"; "float"; "int"; "eq"; "io"];
    "none",     ["builtin"]]
 ;;
 

@@ -78,7 +78,9 @@ let rec gen_type ty =
     Tvar _ ->
       if ty.typ_level > !current_level then ty.typ_level <- generic
   | Tarrow(t1,t2) ->
-      ty.typ_level <- min (gen_type t1) (gen_type t2)
+      let lvl1 = gen_type t1 in
+      let lvl2 = gen_type t2 in
+      ty.typ_level <- if lvl1 <= lvl2 then lvl1 else lvl2
   | Tproduct(ty_list) ->
       ty.typ_level <- gen_type_list ty_list
   | Tconstr(c, ty_list) ->
@@ -90,7 +92,9 @@ and gen_type_list = function
     [] ->
       notgeneric
   | ty::rest ->
-      min (gen_type ty) (gen_type_list rest)
+      let lvl1 = gen_type ty in
+      let lvl2 = gen_type_list rest in
+      if lvl1 <= lvl2 then lvl1 else lvl2
 ;;
 
 let generalize_type ty =
@@ -331,6 +335,20 @@ and filter_expand ty1 ty2 =
       filter (ty1, expand_abbrev params body args)
   | (_, _) ->
       raise Unify
+;;
+
+(* Simple equality between base types. *)
+
+let rec same_base_type ty base_ty =
+  match ((type_repr ty).typ_desc, (type_repr base_ty).typ_desc) with
+    Tconstr({info = {ty_abbr = Tabbrev(params,body)}}, args), _ ->
+      same_base_type (expand_abbrev params body args) base_ty
+  | _, Tconstr({info = {ty_abbr = Tabbrev(params,body)}}, args) ->
+      same_base_type ty (expand_abbrev params body args)
+  | Tconstr(cstr1, []), Tconstr(cstr2, []) ->
+      same_type_constr cstr1 cstr2
+  | _, _ ->
+      false
 ;;
 
 (* Extract the list of labels of a record type. *)

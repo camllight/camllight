@@ -146,19 +146,17 @@ let output_location oc loc =
       in
         incr curr_pos; c
     and seek pos =
-      curr_pos := pos - !input_lexbuf.lex_abs_pos
+      let new_pos = pos - !input_lexbuf.lex_abs_pos in
+      curr_pos := if new_pos >= 0 then new_pos else 0
     in
       output_loc oc input seek false loc
   end
 ;;
 
-let output_input_name oc () =
+let output_input_name oc =
 #ifdef macintosh
   fprintf oc "File \"%s\"\n" !input_name
 #else
   fprintf oc "File \"%s\", line 1:\n" !input_name
 #endif
 ;;
-
-add_format `l` output_location;
-add_format `I` output_input_name;;

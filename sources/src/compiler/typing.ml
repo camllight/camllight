@@ -175,7 +175,6 @@ let rec is_nonexpansive expr =
   | Ztuple el -> for_all is_nonexpansive el
   | Zconstruct0 cstr -> true
   | Zconstruct1(cstr, e) -> cstr.info.cs_mut == Notmutable & is_nonexpansive e
-  | Zapply(e, args) -> false
   | Zlet(rec_flag, bindings, body) ->
       for_all (fun (pat, expr) -> is_nonexpansive expr) bindings &
       is_nonexpansive body
@@ -186,22 +185,58 @@ let rec is_nonexpansive expr =
   | Zsequence(e1, e2) -> is_nonexpansive e2
   | Zcondition(cond, ifso, ifnot) ->
       is_nonexpansive ifso & is_nonexpansive ifnot
-  | Zwhen(cond, act) -> is_nonexpansive act
-  | Zwhile(cond, body) -> true          (* returns () *)
-  | Zfor(id, lo, hi, up, body) -> true  (* returns () *)
-  | Zsequand(e1, e2) -> true            (* returns a boolean *)
-  | Zsequor(e1, e2) -> true             (* returns a boolean *)
   | Zconstraint(e, ty) -> is_nonexpansive e
-  | Zvector el -> false
-  | Zassign(id, e) -> true              (* returns () *)
   | Zrecord lbl_expr_list ->
       for_all (fun (lbl, expr) ->
                   lbl.info.lbl_mut == Notmutable & is_nonexpansive expr)
               lbl_expr_list
   | Zrecord_access(e, lbl) -> is_nonexpansive e
-  | Zrecord_update(e1, lbl, e2) -> true (* returns () *)
-  | Zstream el -> false
   | Zparser pat_expr_list -> true
+  | Zwhen(cond, act) -> is_nonexpansive act
+  | _ -> false
+;;
+
+(* Typing of printf formats *)
+
+let type_format loc fmt =
+  let len = string_length fmt in
+  let ty_input = new_type_var()
+  and ty_result = new_type_var() in
+  let rec skip_args j =
+    if j >= len then j else
+      match nth_char fmt j with
+        `0` .. `9` | ` ` | `.` | `-` -> skip_args (succ j)
+      | _ -> j in
+  let rec scan_format i =
+    if i >= len then ty_result else
+    match nth_char fmt i with
+      `%` ->
+        let j = skip_args(succ i) in
+        begin match nth_char fmt j with
+          `%` ->
+            scan_format (succ j)
+        | `s` ->
+            type_arrow (type_string, scan_format (succ j))
+        | `c` ->
+            type_arrow (type_char, scan_format (succ j))
+        | `d` | `o` | `x` | `X` | `u` ->
+            type_arrow (type_int, scan_format (succ j))
+        | `f` | `e` | `E` | `g` | `G` ->
+            type_arrow (type_float, scan_format (succ j))
+        | `b` ->
+            type_arrow (type_bool, scan_format (succ j))
+        | `a` ->
+            let ty_arg = new_type_var() in
+            type_arrow (type_arrow (ty_input, type_arrow (ty_arg, ty_result)),
+                        type_arrow (ty_arg, scan_format (succ j)))
+        | `t` ->
+            type_arrow (type_arrow (ty_input, ty_result), scan_format (succ j))
+        | c ->
+            bad_format_letter loc c
+        end
+    | _ -> scan_format (succ i) in
+  {typ_desc=Tconstr(constr_type_format, [scan_format 0; ty_input; ty_result]);
+   typ_level=notgeneric}
 ;;
 
 (* Typing of expressions *)
@@ -263,7 +298,6 @@ let rec type_expr env expr =
               filter_arrow ty_res
             with Unify ->
               application_of_non_function_err fct ty_fct in
-          let ty_arg1 = type_expr env arg1 in
           type_expect env arg1 ty1;
           type_args ty2 argl in
       type_args ty_fct args
@@ -406,10 +440,33 @@ let rec type_expr env expr =
     expr.e_typ <- inferred_ty;
     inferred_ty
 
-(* Typing of an expression with an expected type *)
+(* Typing of an expression with an expected type.
+   Some constructs are treated specially to provide better error messages. *)
 
 and type_expect env exp expected_ty =
-  unify_expr exp expected_ty (type_expr env exp)
+  match exp.e_desc with
+    Zconstant(SCatom(ACstring s)) ->
+      let actual_ty =
+        match (type_repr expected_ty).typ_desc with
+          (* Hack for format strings *)
+          Tconstr(cstr, _) ->
+            if cstr = constr_type_format
+            then type_format exp.e_loc s
+            else type_string
+        | _ ->
+            type_string in
+      unify_expr exp expected_ty actual_ty
+  | Zlet(rec_flag, pat_expr_list, body) ->
+      type_expect (type_let_decl env rec_flag pat_expr_list) body expected_ty
+  | Zsequence (e1, e2) ->
+      type_statement env e1; type_expect env e2 expected_ty
+  | Zcondition (cond, ifso, ifnot) ->
+      type_expect env cond type_bool;
+      type_expect env ifso expected_ty;
+      type_expect env ifnot expected_ty
+(* To do: try...with, match...with ? *)
+  | _ ->
+      unify_expr exp expected_ty (type_expr env exp)
   
 (* Typing of "let" definitions *)
 
