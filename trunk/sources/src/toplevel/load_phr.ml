@@ -31,7 +31,7 @@ let do_code may_free code entrypoint len =
       | _ ->
           ()
       end;
-      open_hovbox 0;
+      open_box 0;
       print_string (interntl__translate "Uncaught exception: ");
       begin try
         print_value (obj__repr x) builtins__type_exn

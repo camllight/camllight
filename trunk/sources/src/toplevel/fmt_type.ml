@@ -56,27 +56,27 @@ let rec print_typ priority ty =
       print_string "'";
       print_string (name_of_type_var ty)
   | Tarrow(ty1, ty2) ->
-      if priority >= 1 then begin open_hovbox 1; print_string "(" end
-       else open_hovbox 0;
+      if priority >= 1 then begin open_box 1; print_string "(" end
+       else open_box 0;
       print_typ 1 ty1;
       print_string " ->"; print_space();
       print_typ 0 ty2;
       if priority >= 1 then print_string ")";
       close_box()
   | Tproduct(ty_list) ->
-      if priority >= 2 then begin open_hovbox 1; print_string "(" end
-       else open_hovbox 0;
+      if priority >= 2 then begin open_box 1; print_string "(" end
+       else open_box 0;
       print_typ_list 2 " *" ty_list;
       if priority >= 2 then print_string ")";
       close_box()
   | Tconstr(cstr, args) ->
-      open_hovbox 0;
+      open_box 0;
       begin match args with
         []    -> ()
       | [ty1] ->
           print_typ 2 ty1; print_space ()
       | tyl ->
-          open_hovbox 1;
+          open_box 1;
           print_string "(";
           print_typ_list 0 "," tyl;
           print_string ")";
