@@ -173,7 +173,7 @@ void xfree(block)
 {
   Header(block)->next->prev = Header(block)->prev;
   Header(block)->prev->next = Header(block)->next;
-  free(block);
+  free((char *) Header(block));
 }
 
 char * xrealloc(block, size)
@@ -183,7 +183,8 @@ char * xrealloc(block, size)
   char * res;
   Header(block)->next->prev = Header(block)->prev;
   Header(block)->prev->next = Header(block)->next;
-  res = (char *) realloc(block, sizeof(struct malloc_header) + size);
+  res = (char *) realloc((char *)Header(block), 
+                         sizeof(struct malloc_header) + size);
   if (res == NULL) return NULL;
   res += sizeof(struct malloc_header);
   Header(res)->next = malloc_chain.next;
