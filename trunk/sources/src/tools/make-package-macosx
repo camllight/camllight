@@ -5,7 +5,9 @@
 cd package-macosx
 rm -rf camllight.pkg camllight-rw.dmg camllight.dmg
 
-package root camllight.info
+/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker \
+  -build -p "`pwd`/camllight.pkg" -f "`pwd`/root" -i "`pwd`/Info.plist" \
+  -d "`pwd`/Description.plist" -r "`pwd`/resources"
 
 size=`du -s camllight.pkg | cut -f 1`
 size=`expr $size + 8192`
@@ -22,6 +24,7 @@ else
   echo 'Unable to mount the disk image as "/Volumes/Caml Light"' >&2
   exit 3
 fi
+open "/Volumes/Caml Light"
 hdiutil detach $name
 
 hdiutil convert camllight-rw.dmg -format UDZO -o camllight.dmg
