@@ -138,7 +138,7 @@ let output_primitives oc =
   for i = 0 to vect_length prim - 1 do
     fprintf oc "extern long %s();\n" prim.(i)
   done;
-  fprintf oc "typedef long (\*primitive)();\n";
+  fprintf oc "typedef long (*primitive)();\n";
   fprintf oc "primitive cprim[] = {\n";
   for i = 0 to vect_length prim - 1 do
     fprintf oc "  %s,\n" prim.(i)
@@ -148,7 +148,7 @@ let output_primitives oc =
   for i = 0 to vect_length prim - 1 do
     fprintf oc "  \"%s\",\n" prim.(i)
   done;
-  fprintf oc "  (char *\) 0 };\n";
+  fprintf oc "  (char *) 0 };\n";
   ()
 ;;
 
