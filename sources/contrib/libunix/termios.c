@@ -21,7 +21,7 @@ enum { Input, Output };
 
 /* Number of fields in the terminal_io record field. Cf. unix.mli */
 
-#define NFIELDS 51
+#define NFIELDS 38
 
 /* Structure of the terminal_io record. Cf. unix.mli */
   
@@ -40,19 +40,6 @@ static long terminal_io_descr[] = {
   Bool, iflags, IXOFF,
   /* Output modes */
   Bool, oflags, OPOST,
-  Bool, oflags, OLCUC,
-  Bool, oflags, ONLCR,
-  Bool, oflags, OCRNL,
-  Bool, oflags, ONOCR,
-  Bool, oflags, ONLRET,
-  Bool, oflags, OFILL,
-  Bool, oflags, OFDEL,
-  Enum, oflags, 0, 2, NLDLY, NL0, NL1,
-  Enum, oflags, 0, 2, CRDLY, CR0, CR1,
-  Enum, oflags, 0, 4, TABDLY, TAB0, TAB1, TAB2, TAB3,
-  Enum, oflags, 0, 2, BSDLY, BS0, BS1,
-  Enum, oflags, 0, 2, VTDLY, VT0, VT1,
-  Enum, oflags, 0, 2, FFDLY, FF0, FF1,
   /* Control modes */
   Speed, Output,
   Speed, Input,

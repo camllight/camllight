@@ -72,10 +72,11 @@ type popen_process =
 
 let popen_processes = (hashtbl__new 7 : (popen_process, int) hashtbl__t);;
 
-let open_proc cmd proc input output =
+let open_proc cmd proc input output toclose =
   match fork() with
      0 -> if input != stdin then begin dup2 input stdin; close input end;
           if output != stdout then begin dup2 output stdout; close output end;
+          do_list close toclose;
           execv "/bin/sh" [| "/bin/sh"; "-c"; cmd |];
           exit 127
   | id -> hashtbl__add popen_processes proc id
@@ -84,7 +85,7 @@ let open_proc cmd proc input output =
 let open_process_in cmd =
   let (in_read, in_write) = pipe() in
   let inchan = in_channel_of_descr in_read in
-  open_proc cmd (Process_in inchan) stdin in_write; 
+  open_proc cmd (Process_in inchan) stdin in_write [in_read]; 
   close in_write;
   inchan
 ;;
@@ -92,7 +93,7 @@ let open_process_in cmd =
 let open_process_out cmd =
   let (out_read, out_write) = pipe() in
   let outchan = out_channel_of_descr out_write in
-  open_proc cmd (Process_out outchan) out_read stdout;
+  open_proc cmd (Process_out outchan) out_read stdout [out_write];
   close out_read;
   outchan
 ;;
@@ -102,27 +103,33 @@ let open_process cmd =
   let (out_read, out_write) = pipe() in
   let inchan = in_channel_of_descr in_read in
   let outchan = out_channel_of_descr out_write in
-  open_proc cmd (Process(inchan, outchan)) out_read in_write; (inchan, outchan)
+  open_proc cmd (Process(inchan, outchan))
+            out_read in_write [out_write; in_read];
+  (inchan, outchan)
 ;;
 
-let close_proc fun_name proc =
+let find_proc_id fun_name proc =
   try
-    let (_, status) = waitpid [] (hashtbl__find popen_processes proc) in
+    let pid = hashtbl__find popen_processes proc in
     hashtbl__remove popen_processes proc;
-    status
+    pid
   with Not_found ->
     raise(Unix_error(EBADF, fun_name, ""))
 ;;
-
 let close_process_in inchan =
-  close_in inchan; 
-  close_proc "close_process_in" (Process_in inchan)
-and close_process_out outchan =
+  let pid = find_proc_id "close_process_in" (Process_in inchan) in
+  close_in inchan;
+  snd(waitpid [] pid)
+;;
+let close_process_out outchan =
+  let pid = find_proc_id "close_process_out" (Process_out outchan) in
   close_out outchan;
-  close_proc "close_process_out" (Process_out outchan)
-and close_process (inchan, outchan) =
-  close_in inchan; close_out outchan; 
-  close_proc "close_process" (Process(inchan, outchan))
+  snd(waitpid [] pid)
+;;
+let close_process (inchan, outchan) =
+  let pid = find_proc_id "close_process" (Process(inchan, outchan)) in
+  close_in inchan; close_out outchan;
+  snd(waitpid [] pid)
 ;;
 
 (* High-level network functions *)
