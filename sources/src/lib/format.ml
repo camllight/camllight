@@ -21,7 +21,7 @@ type pp_token =
    | Pp_tend                      (* end of a tabulation block *)
    | Pp_newline                   (* to force a newline inside a block *)
    | Pp_if_newline                 (* to do something only if this very
-                                     line has been broken *)
+                                      line has been broken *)
 
 and block_type =
     Pp_hbox   (* Horizontal block no line breaking *)
@@ -37,21 +37,21 @@ and tblock = Pp_tbox of int list ref  (* Tabulation box *)
 
 (* The Queue: contains all formatting elements.
    elements are tuples (size,token,length), where
-    size is set when the size of the block is known
-    len is the declared length of the token *)
+   size is set when the size of the block is known
+   len is the declared length of the token *)
 type pp_queue_elem =
     {mutable Elem_size : int; Token : pp_token; Length : int};;
 
 (* Scan stack
-   each element is (left_total, queue element) where left_total is the value
-   of pp_left_total when the element has been enqueued *)
+   each element is (left_total, queue element) where left_total
+   is the value of pp_left_total when the element has been enqueued *)
 type pp_scan_elem = Scan_elem of int * pp_queue_elem;;
 let pp_scan_stack = ref ([] : pp_scan_elem list);;
 
 (* Formatting Stack:
-   used to break the lines while printing tokens *)
-(* The formatting stack contains the description of
-   the currently active blocks *)
+   used to break the lines while printing tokens.
+   The formatting stack contains the description of
+   the currently active blocks. *)
 type pp_format_elem = Format_elem of block_type * int;;
 let pp_format_stack = ref ([]:pp_format_elem list);;
 
@@ -70,22 +70,22 @@ let pp_margin = ref 78
 (* Minimal space left before margin, when opening a block *)
 let pp_min_space_left = ref 5;;
 (* maximum value of indentation:
-   then no blocks can be opened *)
+   no blocks can be opened further *)
 let pp_max_indent = ref (!pp_margin - !pp_min_space_left)
 ;;
 
 let pp_space_left = ref !pp_margin(* space remaining on the current line *)
-and pp_current_indent = ref 0	(* current value of indentation *)
-and pp_left_total = ref 1	(* total width of tokens already printed *)
-and pp_right_total = ref 1	(* total width of tokens ever put in queue *)
-and pp_curr_depth = ref 0	(* current number of opened blocks *)
-and pp_max_depth = ref 35	(* maximum number of blocks which can be
-                                   opened at the same time *)
-and pp_ellipsis = ref "."       (* ellipsis character *)
-and pp_out_channel = ref std_out(* out_channel of the pretty_printer *)
+and pp_current_indent = ref 0	  (* current value of indentation *)
+and pp_left_total = ref 1	  (* total width of tokens already printed *)
+and pp_right_total = ref 1	  (* total width of tokens ever put in queue *)
+and pp_curr_depth = ref 0	  (* current number of opened blocks *)
+and pp_max_depth = ref 35	  (* maximum number of blocks which can be
+                                     opened at the same time *)
+and pp_ellipsis = ref "."         (* ellipsis string *)
+and pp_out_channel = ref std_out  (* out_channel of the pretty_printer *)
 ;;
 
-    (* output functions for the formatter *)
+(* Output functions for the formatter *)
 let pp_output s = output !pp_out_channel s
 and pp_output_string s = output_string !pp_out_channel s
 and pp_output_newline () = output_char !pp_out_channel `\n`;;
@@ -135,7 +135,7 @@ let pp_force_newline () =
            Pp_fits -> () | Pp_hbox -> () | _ -> break_line width)
    | _ -> pp_output_newline();;
 
-(* To skip a token if the previous line has been broken *)
+(* To skip a token, if the previous line has been broken *)
 let pp_skip_token () =
     (* When calling pp_skip_token the queue cannot be empty *)
     match queue__take pp_queue with
@@ -145,6 +145,7 @@ let pp_skip_token () =
 
 (* To format a token *)
 let format_pp_token size = function
+
     Pp_text s -> pp_space_left := !pp_space_left - size; pp_output_string s
 
   | Pp_begin (off,ty) ->
@@ -232,9 +233,9 @@ let format_pp_token size = function
      | _ -> () (* No opened block *)
      end;;
 
-(* Print if token size is known or printing is lagging
-   Size is known if not negative
-   Printing is lagging if the text waiting in the queue requires
+(* Print if token size is known or printing is delayed
+   Size is known when not negative
+   Printing is delayed when the text waiting in the queue requires
    more room to format than exists on the current line *)
 let rec advance_left () =
     try
@@ -301,32 +302,6 @@ let scan_push b tok =
     if b then set_size true;
     pp_scan_stack := Scan_elem (!pp_right_total,tok) :: !pp_scan_stack;;
 
-(**************************************************************
-
-  Procedures to control pretty-printer from outside
-
- **************************************************************)
-
-(* To format a string *)
-let print_as n s =
-    if !pp_curr_depth < !pp_max_depth then (enqueue_string_as n s);;
-
-let print_string s = print_as (string_length s) s;;
-
-let print_spaces n = print_string (make_string n ` `);;
-
-(* To format an integer *)
-let print_int i = print_string (string_of_int i);;
-
-(* To format a float *)
-let print_float f = print_string (float__string_of_float f);;
-
-(* To format a boolean *)
-let print_bool b = print_string (string_of_bool b);;
-
-(* To format a char *)
-let print_char c = print_string (char_for_read c);;
-
 (*
   To open a new block :
   the user may set the depth bound pp_max_depth
@@ -339,12 +314,6 @@ let pp_open_box (indent,br_ty) =
         {Elem_size = (- !pp_right_total);
          Token = Pp_begin (indent, br_ty); Length = 0}) else
     if !pp_curr_depth = !pp_max_depth then enqueue_string !pp_ellipsis;;
-
-let open_hbox () = pp_open_box (0, Pp_hbox)
-and open_vbox indent = pp_open_box (indent, Pp_vbox)
-
-and open_hvbox indent = pp_open_box (indent, Pp_hvbox)
-and open_hovbox indent = pp_open_box (indent, Pp_hovbox);;
 
 (* The box which is always opened *)
 let pp_open_sys_box () =
@@ -378,6 +347,38 @@ let pp_flush b =
     if b then pp_output_newline ();
     flush !pp_out_channel;
     pp_rinit();;
+
+(**************************************************************
+
+  Procedures to format objects, and use boxes
+
+ **************************************************************)
+
+(* To format a string *)
+let print_as n s =
+    if !pp_curr_depth < !pp_max_depth then (enqueue_string_as n s);;
+
+let print_string s = print_as (string_length s) s;;
+
+let print_spaces n = print_string (make_string n ` `);;
+
+(* To format an integer *)
+let print_int i = print_string (string_of_int i);;
+
+(* To format a float *)
+let print_float f = print_string (float__string_of_float f);;
+
+(* To format a boolean *)
+let print_bool b = print_string (string_of_bool b);;
+
+(* To format a char *)
+let print_char c = print_string (char_for_read c);;
+
+let open_hbox () = pp_open_box (0, Pp_hbox)
+and open_vbox indent = pp_open_box (indent, Pp_vbox)
+
+and open_hvbox indent = pp_open_box (indent, Pp_hvbox)
+and open_hovbox indent = pp_open_box (indent, Pp_hovbox);;
 
 (* Print a new line after printing all queued text
    (same for print_flush but without a newline)    *)
@@ -414,14 +415,14 @@ let open_tbox () =
         {Elem_size = 0;
          Token = Pp_tbegin (Pp_tbox (ref [])); Length = 0};;
 
-(* close a tabulation block *)
+(* Close a tabulation block *)
 let close_tbox () =
     if !pp_curr_depth > 1 then begin
     if !pp_curr_depth < !pp_max_depth then
      enqueue_advance {Elem_size = 0; Token = Pp_tend; Length = 0};
     decr pp_curr_depth end;;
 
-(* Prints a tabulation break *)
+(* Print a tabulation break *)
 let print_tbreak (width, offset) =
     if !pp_curr_depth < !pp_max_depth then
       scan_push true
@@ -434,10 +435,16 @@ let set_tab () =
     if !pp_curr_depth < !pp_max_depth
     then enqueue_advance {Elem_size = 0; Token = Pp_stab; Length=0};;
 
-(* to fit max_depth *)
+(**************************************************************
+
+  Procedures to control the pretty-printer
+
+ **************************************************************)
+
+(* Fit max_depth *)
 let set_max_print_depth n = if n > 1 then pp_max_depth := n;;
 
-(* to know current print_depth *)
+(* To know current print_depth *)
 let get_max_print_depth () = !pp_max_depth;;
 
 (* Ellipsis *)
