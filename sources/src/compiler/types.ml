@@ -3,7 +3,6 @@
 #open "misc";;
 #open "const";;
 #open "globals";;
-#open "builtins";;
 #open "modules";;
 
 (* Type constructor equality *)

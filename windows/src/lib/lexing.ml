@@ -6,7 +6,6 @@
 #open "exc";;
 #open "io";;
 #open "obj";;
-#open "ref";;
 
 let lex_aux_buffer =
   create_string 1024

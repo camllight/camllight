@@ -2,7 +2,6 @@
 
 #open "exc";;
 #open "fstring";;
-#open "fchar";;
 #open "int";;
 
 let string_of_float f =

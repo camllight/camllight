@@ -2,7 +2,6 @@
 #open "io";;
 #open "exc";;
 #open "obj";;
-#open "int";;
 #open "fstring";;
 #open "ref";;
 

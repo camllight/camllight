@@ -1,6 +1,5 @@
 (* streams.ml: translation of streams *)
 
-#open "misc";;
 #open "const";;
 #open "syntax";;
 #open "prim";;

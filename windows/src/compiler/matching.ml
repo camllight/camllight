@@ -7,7 +7,6 @@
 #open "location";;
 #open "lambda";;
 #open "prim";;
-#open "instruct";;
 #open "clauses";;
 
 (*  See Peyton-Jones, The Implementation of functional programming

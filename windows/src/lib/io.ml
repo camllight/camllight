@@ -5,7 +5,6 @@
 #open "int";;
 #open "sys";;
 #open "fstring";;
-#open "ref";;
 
 type in_channel
  and out_channel

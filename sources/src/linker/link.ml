@@ -2,7 +2,6 @@
 #open "obj";;
 #open "const";;
 #open "misc";;
-#open "instruct";;
 #open "lambda";;
 #open "config";;
 #open "opcodes";;

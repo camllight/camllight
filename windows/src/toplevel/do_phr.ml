@@ -4,7 +4,6 @@
 #open "misc";;
 #open "const";;
 #open "modules";;
-#open "location";;
 #open "syntax";;
 #open "types";;
 #open "typing";;

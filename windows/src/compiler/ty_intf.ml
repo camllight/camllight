@@ -1,12 +1,10 @@
 (* Consistency check between an interface and an implementation *)
 
 #open "const";;
-#open "misc";;
 #open "globals";;
 #open "modules";;
 #open "types";;
 #open "error";;
-#open "hashtbl";;
 #open "ty_decl";;
 
 (* Create the initial environment for compiling an implementation

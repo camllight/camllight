@@ -1,7 +1,5 @@
 (* Association tables over ordered types *)
 
-#open "int";;
-#open "eq";;
 #open "list";;
 #open "baltree";;
 

@@ -5,7 +5,6 @@
 #open "fstring";;
 #open "eq";;
 #open "bool";;
-#open "queue";;
 #open "io";;
 
 (* Tokens are one of the following : *)
