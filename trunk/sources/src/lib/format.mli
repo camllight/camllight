@@ -83,8 +83,8 @@ value print_newline : unit -> unit;;
         (* Equivalent to [print_flush] followed by a new line. *)
 
 value print_if_newline : unit -> unit;;
-        (* If the preceding line has not been split, the next formatting command
-           is ignored. *)
+        (* If the preceding line has not been split, the next
+           formatting command is ignored. *)
 
 (*** Tabulations *)
 value open_tbox : unit -> unit;;
@@ -120,21 +120,22 @@ value get_margin : unit -> int;;
 value set_max_indent : int -> unit;;
         (* [set_max_indent d] sets the value of the maximum
            indentation limit to [d] (in characters):
-           once this limit is reached, boxes are rejected to the left.
+           once this limit is reached, boxes are rejected to the left,
+           if they do not fit on the current line.
            Nothing happens if [d] is not greater than 1. *)
 value get_max_indent : unit -> int;;
         (* Return the value of the maximum indentation limit (in
            characters). *)
 
 (*** Formatting depth: maximum number of boxes allowed before ellipsis *)
-value set_max_print_depth : int -> unit;;
-        (* [set_max_print_depth max_depth] sets the maximum number
+value set_max_boxes : int -> unit;;
+        (* [set_max_boxes max] sets the maximum number
            of boxes simultaneously opened.
            Material inside boxes nested deeper is printed as an
            ellipsis (more precisely as the text returned by
            [get_ellipsis_text]).
-           Nothing happens if [max_depth] is not greater than 1. *)
-value get_max_print_depth : unit -> int;;
+           Nothing happens if [max] is not greater than 1. *)
+value get_max_boxes : unit -> int;;
         (* Return the maximum number of boxes allowed before ellipsis. *)
 
 (*** Ellipsis *)
@@ -142,7 +143,7 @@ value set_ellipsis_text : string -> unit;;
         (* Set the text of the ellipsis printed when too many boxes
            are opened (a single dot, [.], by default). *)
 value get_ellipsis_text : unit -> string;;
-        (* Return the the text of the ellipsis. *)
+        (* Return the text of the ellipsis. *)
 
 (*** Redirecting formatter output *)
 value set_formatter_output : out_channel -> unit;;
