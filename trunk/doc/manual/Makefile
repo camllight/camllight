@@ -33,8 +33,8 @@ files: $(FILES)
 	cd cmds; make all
 
 all:
-	make manual plaintext scrolltext
-	make manual plaintext scrolltext
+	make manual plaintext
+	make manual plaintext
 	make index
 	make manual plaintext
 
