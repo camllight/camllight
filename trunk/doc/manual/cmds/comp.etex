@@ -99,6 +99,12 @@ compilation. Source code files are turned into compiled files, but no
 executable file is produced. This option is useful to
 compile modules separately.
 
+\item["-ccopt" \var{option}]
+Pass the given option to the C compiler and linker, when linking in
+``custom runtime'' mode (see the "-custom" option). For instance,
+"-ccopt -L"\var{dir} causes the C linker to search for C libraries in
+directory \var{dir}.
+
 \item["-custom"]
 Link in ``custom runtime'' mode. In the default linking mode, the
 linker produces bytecode that is intended to be executed with the
@@ -113,6 +119,10 @@ chapter~\ref{c:intf-c}.
 \begin{unix} Never strip an executable produced with the "-custom"
 option.
 \end{unix}
+
+\begin{pc} This option requires the "DJGPP" port of the GNU C compiler
+to be installed.
+\end{pc}
 
 \item["-files" \var{response-file}]
 Process the files whose names are listed in file

@@ -333,9 +333,6 @@ code preloaded at start-up.
 \begin{mac} This command is not available in the Macintosh version.
 \end{mac}
 
-\begin{pc} This command is not available in the PC version.
-\end{pc}
-
 The "camlmktop" command takes as argument a set of ".zo" files, and
 links them with the object files that implement the Caml Light
 toplevel. The typical use is:
@@ -369,6 +366,11 @@ The following command-line options are recognized by "camlmktop".
 
 \begin{options}
 
+\item["-ccopt" \var{option}]
+Pass the given option to the C compiler and linker, when linking in
+``custom runtime'' mode. See the corresponding option for
+"camlc", in chapter~\ref{c:camlc}.
+
 \item["-custom"]
 Link in ``custom runtime'' mode. See the corresponding option for
 "camlc", in chapter~\ref{c:camlc}.
@@ -382,7 +384,11 @@ Add the given directory to the list of directories searched for
 compiled object code files (".zo").
 
 \item["-o" \var{exec-file}]
-Specify the name of the toplevel file produced by the linker. The
-default is "camltop.out".
+Specify the name of the toplevel file produced by the linker.
+
+\begin{unix} The default is "camltop.out". \end{unix}
+
+\begin{pc} The default is "camltop.exe". The name must have ".exe"
+extension. \end{pc}
 
 \end{options}
