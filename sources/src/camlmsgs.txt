@@ -40,7 +40,7 @@ es:     Fichero "%s", línea 1:\n
 
 src:	%aWarning: unknown directive "#%s", ignored.\n
 fr:	%aAttention: la directive "#%s" est inconnue, je l'ignore.\n
-es:     %aAviso: la directiva "#%s" es desconocida, será ignorada.\n
+es:     %a¡Cuidado!: la directiva "#%s" es desconocida, será ignorada.\n
 
 src:	Cannot find file %s.zi. Please compile %s.mli first.\n
 fr:	Le fichier %s.zi est introuvable. Veuillez compiler %s.mli d'abord.\n
@@ -79,7 +79,7 @@ es:     %aEl identificador %s se ha definido varias veces en este patrón.\n
 
 src:	%aWarning: the variable %s starts with an upper case letter in this pattern.\n
 fr:	%aAttention: dans ce motif l'identificateur %s commence par une majuscule.\n
-es:     %aAviso: en este patrón el identificador %s comienza con una mayúscula.\n
+es:     %a¡Cuidado!:: en este patrón el identificador %s comienza con una mayúscula.\n
 
 src:	%aA pattern with "|" must not bind variables.\n
 fr:	%aUn motif avec "|" ne doit pas lier d'identificateurs.\n
@@ -89,8 +89,8 @@ src:	%aThis pattern matches values of type %a,\n\
 	but should match values of type %a.\n
 fr:	%aCe motif filtre des valeurs de type %a,\n\
 	pas des valeurs de type %a.\n
-es:     %aEste patrón se confronta con valores de tipo %a,\n\
-        pero sólo encaja con valores de tipo %a.\n 
+es:     %aEste patrón filtra valores de tipo %a,\n\
+        pero no valores de tipo %a.\n 
 
 src:	%aThis expression has type %a,\n\
 	but is used with type %a.\n
@@ -111,7 +111,7 @@ es:     %aEsta expresión no es una función; no puede ser aplicada.\n
 
 src:	%aThis curried matching contains cases of different lengths.\n
 fr:	%aTous les cas de ce filtrage curryfié n'ont pas la même longueur.\n
-es:     %aComparación currificada con casos de diferente longitud.\n
+es:     %aFiltración currificada con casos de diferente longitud.\n
 
 src:	%aRepeated type parameter in type declaration.\n
 fr:	%aUn paramètre de type est lié plusieurs fois dans cette déclaration \
@@ -208,16 +208,16 @@ src:	%aWarning: this function application is partial,\n\
 	maybe some arguments are missing.\n
 fr:	%aAttention: cette application de fonction est partielle,\n\
         il manque peut-être des arguments.\n
-es:     %aAviso: esta aplicación de función es parcial,\n\
+es:     %a¡Cuidado!:: esta aplicación de función es parcial,\n\
         puede que falte algún argumento.\n
 
 src:	%aWarning: this matching case is unused.\n
 fr:	%aAttention: ce cas de filtrage est inutile.\n
-es:     %aAviso: este caso de la comparación es inútil.\n
+es:     %a¡Cuidado!:: este caso de la filtración es inútil.\n
 
 src:	%aWarning: this matching is not exhaustive.\n
 fr:	%aAttention: ce filtrage n'est pas exhaustif.\n
-es:     %aAviso: esta comparación no es exhaustiva.\n
+es:     %a¡Cuidado!:: esta filtración no es exhaustiva.\n
 
 src:	%aBad format letter `%c'.\n
 fr:	%aLe format `%c' n'existe pas.\n
@@ -339,7 +339,7 @@ fr:	Interruption.\n
 es:     Interrupción.\n
 
 src:	Uncaught exception: 
-fr:	Exception non rattrapée:
+fr:	Exception non rattrapée: 
 es:     Excepción no atrapada: 
 
 src:	<Internal error while printing the exception>
@@ -348,9 +348,12 @@ es:     <Imposible imprimir la excepción>
 
 src:    %tWarning: useless #open on module "%s".\n
 fr:     %tRemarque: directive #open inutile pour le module "%s".\n
-es:     %tAviso: directiva #open inútil para el módulo "%s".\n
+es:     %tObservación: directiva #open inútil para el módulo "%s".\n
 
 src:    %aThe type %a has been declared with %d parameter(s)\n\
         but is here defined with %d parameter(s).\n
 fr:     %aLe type %a, qui a été déclaré avec %d paramètre(s),\n\
-        est ici défini avec %d paramètres(s).\n
+        est défini ici avec %d paramètres(s).\n
+es:     %aEl tipo %a que fue declarado con %d parámetro(s),\n\
+        se define aquí con %d parámetro(s).\n
+
