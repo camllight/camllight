@@ -129,33 +129,6 @@ evaluated and its value returned as the result of the matching, as
 usual. But if @cond_i@ evaluates to "false", the matching is resumed
 against the patterns following @pattern_i@.
 
-\section{When conditionals}
-Multiple conditions may be tested using a multi-branches conditional
-introduced by the "when" keyword:
-
-\begin{latexonly}
-$$\begin{array}{rlll}
-\token{when}  & {\sl cond}_1 & \token{->} & {\sl expr}_1 \\
-\token{|}     & \ldots \\
-\token{|}     & {\sl cond}_n & \token{->} & {\sl expr}_n \\
-\token{|}     & [\token{_} & \token{->} & {\sl expr}]
-\end{array}$$
-\end{latexonly}
-\begin{rawhtml}
-<pre>
-when <i>cond</i>1 -&gt; <i>expr</i>1
-   | ...
-   | <i>cond</i>N -&gt; <i>expr</i>N
-   | [_ -&gt; <i>expr</i>]
-</pre>
-\end{rawhtml}
-The expressions @cond_i@ are evaluated in turn: as soon as @cond_i@
-evaluates to "true", then @expr_i@ is evaluated and its value returned as
-the result of the whole construct.  If @cond_i@ evaluates to "false",
-the evaluation procedes with the conditions following @cond_i@.
-The @"_"@ in the optional last clause always evaluates to "true". If
-this last clause is omitted then default clause @"_" "->" "()"@ is assumed.
-
 \section{Range patterns}
 
 In patterns, Caml Light recognizes the form
