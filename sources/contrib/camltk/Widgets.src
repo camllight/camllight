@@ -64,7 +64,7 @@ subtype option(standard) {
    Relief "-relief" (Relief)
    RepeatDelay "-repeatdelay" (int)
    RepeatInterval "-repeatinterval" (int)
-   ScrollCommand "-scrollcommand" (function(int, int, int, int))
+   ScrollCommand "-scrollcommand" function (int, int, int, int)
    SelectBackground "-selectbackground" (Color)
    SelectBorderWidth "-selectborderwidth" (Units)
    SelectForeground "-selectforeground" (Color)
@@ -72,8 +72,8 @@ subtype option(standard) {
    Text "-text" (string)
    TextVariable "-textvariable" (TextVariable)
    UnderlinedChar "-underline" (int)
-   XScrollCommand "-xscrollcommand" (function (int, int, int, int))
-   YScrollCommand "-yscrollcommand" (function (int, int, int, int))
+   XScrollCommand "-xscrollcommand" function (int, int, int, int)
+   YScrollCommand "-yscrollcommand" function (int, int, int, int)
 }
 
 
@@ -123,7 +123,7 @@ widget button {
    option Text
    option TextVariable
 
-   option Command "-command" (function ())
+   option Command "-command" function ()
    option Height "-height" (Units)
    option State "-state" (State)
    option Width "-width" (Units)
@@ -156,7 +156,7 @@ widget checkbutton {
    option Text
    option TextVariable
 
-   option Command "-command" (function ())
+   option Command "-command" function ()
    option Height "-height" (Units)
    option OffValue "-offvalue" (string)
    option OnValue "-onvalue" (string)
@@ -194,7 +194,7 @@ widget radiobutton {
    option Text
    option TextVariable
 
-   option Command "-command"(function ())
+   option Command "-command" function ()
    option Height "-height" (Units)
    option Selector
    option State
@@ -419,7 +419,7 @@ widget canvas {
    option Confine "-confine" (bool)
    option Height "-height" (Units)
    option ScrollIncrement "-scrollincrement" (Units)
-   option ScrollRegion "-scrollregion" (Units,Units,Units,Units)
+   option ScrollRegion "-scrollregion" {Units,Units,Units,Units}
    option Width "-width" (Units)
 
    function () addtag "addtag" (TagOrId, SearchSpec)     # Tag only
@@ -592,7 +592,7 @@ widget menu {
    option Font
    option Foreground
 
-   option PostCommand "-postcommand" (function())
+   option PostCommand "-postcommand" function()
    option Selector
 
    function () activate "activate" (MenuIndex)
@@ -628,7 +628,7 @@ subtype option(menucascade) {
 	Accelerator "-accelerator" (string)
 	Background    
 	Bitmap
-	Command "-command" (function ())
+	Command "-command" function ()
 	Font "-font" (string)
 	Label "-label" (string)
 	Menu "-menu" (widget(menu))
@@ -693,7 +693,7 @@ widget scale {
    option Relief
 
    # cannot be called Command
-   option Slidecommand "-command" (function (int))
+   option Slidecommand "-command" function (int)
    option From "-from" (int)
    option Label "-label" (string)
    option Length "-length" (Units)
