@@ -21,14 +21,26 @@ SUPPORT2=$(SUPPORTDIR)/support.zo $(SUPPORTDIR)/protocol2.zo \
 
 SUPPORT=support.zo protocol.zo textvariable.zo
 
-all : $(WIDGETOBJS) tklib.zo tklib2.zo camltktop1 camltktop2
+all : tklib.zo tklib2.zo toplevels
 
 toplevels: camltktop1 camltktop2
 
-tklib.zo : $(SUPPORT1) $(WIDGETOBJS)
+tkgen.ml: ../Widgets.src
+	cd ..; compiler/tkcompiler
+
+tk.ml : tkgen.ml $(SUPPORTDIR)/report.ml $(SUPPORTDIR)/builtin_*.ml
+	(echo '#open "support";;'; \
+	 echo '#open "protocol";;'; \
+	 echo '#open "textvariable";;'; \
+	 cat $(SUPPORTDIR)/report.ml; \
+	 cat $(SUPPORTDIR)/builtin_*.ml; \
+	 cat tkgen.ml; \
+         cat $(SUPPORTDIR)/builtina_*.ml) > tk.ml
+
+tklib.zo : $(SUPPORT1) $(WIDGETOBJS) tk.zo 
 	camllibr -o tklib.zo $(SUPPORT1) tk.zo $(WIDGETOBJS)
 
-tklib2.zo : $(SUPPORT2) $(WIDGETOBJS)
+tklib2.zo : $(SUPPORT2) $(WIDGETOBJS) tk.zo
 	camllibr -o tklib2.zo $(SUPPORT2) tk.zo $(WIDGETOBJS)
 
 camltktop1 : $(WIDGETOBJS) $(SUPPORT1)
@@ -55,14 +67,6 @@ install: tklib.zo tklib2.zo  camltktop1 camltktop2
 	chmod 644 $(LIBDIR)/tklib*.zo
 	chmod 755 $(LIBDIR)/camltktop*
 
-tk.ml : tkgen.ml $(SUPPORTDIR)/report.ml $(SUPPORTDIR)/*.ml
-	(echo '#open "support";;'; \
-	 echo '#open "protocol";;'; \
-	 echo '#open "textvariable";;'; \
-	 cat $(SUPPORTDIR)/report.ml; \
-	 cat $(SUPPORTDIR)/builtin_*.ml; \
-	 cat tkgen.ml; \
-         cat $(SUPPORTDIR)/builtina_*.ml) > tk.ml
 
 .SUFFIXES :
 .SUFFIXES : .mli .ml .zi .zo .mlp
