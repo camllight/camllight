@@ -430,12 +430,13 @@ let instr_break lexbuf =
         add_breakpoint_at_pc pc
     | BA_function var ->			(* break FUNCTION *)
         let (val, typ) = variable var in
-          (match (type_repr typ).typ_desc with
+        begin match (type_repr typ).typ_desc with
              Tarrow (_, _) ->
 	       add_breakpoint_at_pc (get_closure_code val)
            | _ ->
       	       prerr_endline "Not a function.";
-	       raise Toplevel)
+	       raise Toplevel
+        end
     | BA_pos1 (module, line, column) ->		(* break @ [MODULE] LINE [COL] *)
       	let module_name = convert_module module in
 	  new_breakpoint
@@ -737,14 +738,16 @@ let info_events lexbuf =
         | Some {ev_file = f} -> f
   in
     print_endline ("Module : " ^ module);
-    print_endline "  Address  Character   Kind";
+    print_endline "   Address  Character   Kind";
     do_list
       (function {ev_pos = pc; ev_char = char; ev_kind = kind} ->
     	 printf__printf
-      	   "%10d %10d %6s\n"
+      	   "%10d %10d  %s\n"
            pc
            char
-           (if kind = Lbefore then "before" else "after"))
+           (match kind with
+               Lbefore -> "before"
+             | Lafter _ -> "after"))
       (events_in_module module);;
 
 (** Initialization. **)
