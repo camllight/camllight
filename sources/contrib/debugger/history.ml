@@ -1,8 +1,7 @@
 #open "checkpoints";;
 #open "misc";;
 #open "primitives";;
-
-let history_size = ref 30;;
+#open "debugger_config";;
 
 let history = ref ([] : int list);;
 

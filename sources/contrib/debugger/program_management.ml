@@ -146,7 +146,9 @@ let install_events () =
   if !debug_loading then
     (print_string "Installing events..."; print_newline ());
   do_list (function {ev_pos = pos} -> set_event pos) !events;;
-
+                                      (* Not optimized : *)
+                                      (* the same position may be installed *)
+                                      (* several times !!! *)
 let mark_globals () =
   if !debug_loading then
     (print_string "Marking global variables..."; print_newline ());
@@ -158,7 +160,10 @@ let mark_globals () =
 let initialize_loading () =
   if !debug_loading then
     (print_string "Loading debugging informations..."; print_newline ());
-  load_information !program_name;
+  load_information
+    (try search_in_path !program_name with
+       Not_found ->
+      	 prerr_endline "Program not found."; raise Toplevel);
   if !debug_loading then
     (print_string "Opening a socket..."; print_newline ());
   open_connection

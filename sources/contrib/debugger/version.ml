@@ -1,1 +1,5 @@
-let banner = "       Caml Light debugger version 0.6";;
+
+
+let print_banner() =
+  printf__printf "       Caml Light debugger version %s\n" "0.7alpha3"; ()
+;;

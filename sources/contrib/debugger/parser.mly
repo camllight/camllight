@@ -27,6 +27,9 @@
 %token		RBRACE			/* }  */
 %token		SEMI			/* ;  */
 %token		EQUAL			/* =  */
+%token		SUPERIOR		/* >  */
+%token		PREFIX			/* prefix */
+%token <string>	OPERATOR          	/* infix/prefix symbols */
 %token		EOL
 
 %right COMMA
@@ -163,10 +166,26 @@ Variable_eol :
   Variable End_of_line
     { $1 };
 
-Variable :
+Local_name :
     IDENTIFIER
+      { $1 }
+  | PREFIX STAR
+      { "*" };
+  | PREFIX MINUS
+      { "-" }
+  | PREFIX AT
+      { "@" }
+  | PREFIX EQUAL
+      { "=" }
+  | PREFIX SUPERIOR
+      { ">" }
+  | PREFIX OPERATOR
+      { $2 };
+
+Variable :
+    Local_name
       { GRname $1 }
-  | IDENTIFIER UNDERUNDER IDENTIFIER
+  | IDENTIFIER UNDERUNDER Local_name
       { GRmodname {qual = $1; id = $3} }
   | STAR
       { GRname "" };
@@ -219,10 +238,10 @@ Pattern_label :
 ;
 
 Pattern_comma_list :
-    Pattern COMMA Pattern_comma_list
-      { $1::$3 }
-  | Pattern  %prec COMMA
-      { [$1] }
+        Pattern_comma_list COMMA Pattern
+          { $3 :: $1 }
+      | Pattern COMMA Pattern
+          { [$3; $1] }
 ;
   
 Pattern :
@@ -230,10 +249,12 @@ Pattern :
       { $1 }
   | Pattern COLONCOLON Pattern
       { P_concat ($1, $3) }
-  | Pattern COMMA Pattern_comma_list
-      { P_tuple ($1::$3) }
+  | Pattern_comma_list
+      { P_tuple (rev $1) }
   | Variable Simple_pattern
       { P_constr ($1, $2) }
+  | SUPERIOR Simple_pattern
+      { P_constr (GRname "", $2) }
 ;
 
 Simple_pattern :
