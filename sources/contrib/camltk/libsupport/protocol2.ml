@@ -8,12 +8,15 @@ let debug =
 ;;
 
 (* Communication channels *)
-let PipeCaml2Tk = ref stdout
-and PipeTkCallB = ref stdout
-and PipeTkResult = ref stdout
+let PipeCaml2Tk = ref stdout		(* commands to wish *)
+and PipeTkCallB = ref stdout		(* callback information *)
+and PipeTkResult = ref stdout		(* function call results *)
 ;;
 
+(* Note: writing is not completely robust *) 
+(* One might just get a SIGPIPE *)
 
+(* Start a Tcl phrase *)
 let Send2TkStart chan  =
   if !debug then begin
       prerr_string "safeeval ";
@@ -26,7 +29,7 @@ let Send2TkStart chan  =
   write !PipeCaml2Tk " { " 0 3
 ;; 
 
-(* use "safe_write" instead ? *)
+(* Pieces of phrase. Space tokenisation here to avoid complex source *)
 let Send2Tk s = 
   if !debug then begin
       prerr_string s; prerr_string " "; flush std_err
@@ -36,6 +39,7 @@ let Send2Tk s =
   () 
 ;;
 
+(* End phrase and eval *)
 let Send2TkEval () = 
   if !debug then begin
       prerr_string " }\n"; flush std_err
@@ -44,15 +48,24 @@ let Send2TkEval () =
   ()
 ;;
 
+(* Special send without  additional space, because of some mystery in the way 
+   wish parses its input *)
+let rawSend2Tk s = 
+  if !debug then begin
+      prerr_string s; flush std_err
+      end;
+  write !PipeCaml2Tk s 0 (string_length s);
+  () 
+;;
 
-(* Communication with Tk *)
 exception TkError of string
 ;;
 
+(* Read on port until end_char predicate is matched *)
 let read_string end_char port = 
   let rec read_rec buf bufsize offs =
     let n = read port buf offs 1 in
-      if n == 0 then (* wish interpreter has quit *)
+      if n == 0 then (* eof *)
       	raise (TkError "terminated")
       else let c = nth_char buf offs in
       	if end_char c then sub_string buf 0 offs
@@ -144,6 +157,7 @@ let GetTkString port =
       res
 ;;
 
+(* Catching tcl evaluation errors *)
 let safeeval_code = "
 proc safeeval { chan cmd } {
   if [catch { uplevel $cmd } errmsg] {
@@ -156,35 +170,36 @@ proc safeeval { chan cmd } {
 "
 ;;
 
+(* Process stuff *)
+let child_pid = ref 0
+;;
 
-(* could use argument to do some setup *)
 let OpenTkInternal = function argv ->
-  (* rw_rw_rw for named pipes *)
-  umask 0;
   let dollardollar = string_of_int (getpid()) in
   (* create those pipes *)
-    mkfifo ("/tmp/PipeCaml2Tk"^dollardollar) 0o666;
-    mkfifo ("/tmp/PipeTkResult"^dollardollar) 0o666;
-    mkfifo ("/tmp/PipeTkCallB"^dollardollar) 0o666;
-  (* open the shared one *)
-    PipeCaml2Tk := open ("/tmp/PipeCaml2Tk"^dollardollar) [O_RDWR] 0;
+    mkfifo ("/tmp/PipeCaml2Tk"^dollardollar) 0o600;
+    mkfifo ("/tmp/PipeTkResult"^dollardollar) 0o600;
+    mkfifo ("/tmp/PipeTkCallB"^dollardollar) 0o600;
   (* fork our slave Tk interpreter *)
     match fork() with
       0 -> (* the child *)
       	(* connect stdin to emission pipe *)
-	  dup2 !PipeCaml2Tk stdin;
-      	  execvp "wish" argv;	
-	  failwith "exec failed"
-    | _ -> (* Caml process *)
+	  let i = open ("/tmp/PipeCaml2Tk"^dollardollar) [O_RDONLY] 0 in
+	    dup2 i stdin; close i;
+      	    execvp "wish" argv;	
+	    raise (TkError "Can't start wish")
+    | n -> (* Caml process *)
+        child_pid := n;
       	(* open the other pipes *)
-        PipeTkCallB := open ("/tmp/PipeTkCallB"^dollardollar) [O_RDWR] 0;
-      	PipeTkResult := open ("/tmp/PipeTkResult"^dollardollar) [O_RDWR] 0;
+        PipeCaml2Tk := open ("/tmp/PipeCaml2Tk"^dollardollar) [O_WRONLY] 0;
       	(* initialize Tk  (unprotected calls) *)
-      	Send2Tk("set PipeCaml2Tk [open /tmp/PipeCaml2Tk"^(dollardollar)^" a+]\n");
-      	Send2Tk("set PipeTkCallB [open /tmp/PipeTkCallB"^(dollardollar)^" a+]\n");
-      	Send2Tk("set PipeTkResult [open /tmp/PipeTkResult"^(dollardollar)^" a+]\n");
-        Send2Tk("proc nputs { pip str } { puts $pip [string length $str]; puts $pip $str}\n");
-	Send2Tk safeeval_code;
+      	rawSend2Tk("set PipeTkCallB [open /tmp/PipeTkCallB"^(dollardollar)^" w]\n");
+      	rawSend2Tk("set PipeTkResult [open /tmp/PipeTkResult"^(dollardollar)^" w]\n");
+        rawSend2Tk("proc nputs { pip str } { puts $pip [string length $str]; puts $pip $str}\n");
+	rawSend2Tk safeeval_code;
+      	(* open the other pipes *)
+        PipeTkCallB := open ("/tmp/PipeTkCallB"^dollardollar) [O_RDONLY] 0;
+      	PipeTkResult := open ("/tmp/PipeTkResult"^dollardollar) [O_RDONLY] 0;
 	(* return the toplevel widget *)
         default_toplevel_widget
 ;;
@@ -194,10 +209,24 @@ let OpenTk () = OpenTkInternal [| "wish" |]
 let OpenTkClass s = OpenTkInternal [| "wish"; "-name"; s |]
 ;;
 
+(* This does not work 
+(* If wish was killed, write raise SIGPIPE *)
+(* Can't figure better way to check for child termination *)
+(* the second waitpid() fails iff the child is dead ...      *)
+  begin try
+    waitpid [WNOHANG] !child_pid;
+    waitpid [WNOHANG] !child_pid;
+    (* Don't use Send2Tk because extra space prevents wish from exiting *)
+    rawSend2Tk "exit\n"
+  with _ -> ()
+  end;
+*)
 
 let CloseTk = function () ->
-  (* Don't use Send2Tk because last space prevents wish from exiting *)
-  write !PipeCaml2Tk "exit\n" 0 5;
+  begin try
+    kill !child_pid SIGINT
+  with _ -> ()
+  end;
   (* cleanup *)
   close !PipeTkCallB;
   close !PipeCaml2Tk;
@@ -207,7 +236,3 @@ let CloseTk = function () ->
   unlink ("/tmp/PipeTkCallB"^dollardollar);
   unlink ("/tmp/PipeTkResult"^dollardollar)
 ;;
-
-
-
-
