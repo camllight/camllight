@@ -33,7 +33,8 @@ report: $(TEXOBJ)
 
 #					Install CamlSearch
 install: $(NAME)
-	install -c -m 755 $(NAME) $(INSTALLDIR)
+	cp $(NAME) $(INSTALLDIR)
+	chmod 755 $(INSTALLDIR)/$(NAME)
 #					Efface les fichiers inutiles
 clean:
 	rm -f $(NAME)

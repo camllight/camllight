@@ -27,7 +27,7 @@ camlstr: libstr.a str.zo
 	camlmktop -o camlstr -custom str.zo libstr.a
 
 $(REGEXLIB)/regex.o: $(REGEXLIB)/regex.c $(REGEXLIB)/regex.h
-	cd $(REGEXLIB); CC=$(CC) sh configure; make
+	cd $(REGEXLIB); CC="$(CC)" sh configure; make
 
 clean:
 	rm -f libstr.a *.o *.zo *.zi camlstr
