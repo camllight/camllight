@@ -1,0 +1,87 @@
+\subsubsection{Formes normales}
+
+Un type sous forme normale est r{\'e}cursivement un produit de fonctions
+\verb$A->B$ o{\`u} A est sous forme normale et B est un type simple. Il est 
+donc cod{\'e} sous la forme d'une liste (produit) de couples (fonctions)
+type simple (en fait base) - param{\`e}tres. On distingue explicitement
+les bases-types construits, les bases-variables universelles et les
+bases-variables de filtrage.
+
+Dans le cas du type filtrant (\verb$PATTERN_TYPE$), les param{\`e}tres des
+types construits et les arguments des fonctions jouent le m{\^e}me r{\^o}le
+(et sont donc regroup{\'e}s). De plus, la base d'un type construit doit
+{\^e}tre son nom : ses arguments peuvent contenir des variables de
+filtrage. Par contre, pour les types filtr{\'e}s (\verb$SUBJECT_TYPE$), un
+type construit est sa propre base.
+
+\begin{caml_code}
+type PATTERN_TYPE =
+  {P_constant : (P_CONSTANT * PATTERN_TYPE list PARAMETER) list;
+   P_frozen_variable : (FROZEN_VARIABLE * PATTERN_TYPE PARAMETER) list;
+   P_subst_variable : (SUBST_VARIABLE * PATTERN_TYPE PARAMETER) list;
+   P_arity : int}
+
+and SUBJECT_TYPE =
+  {S_constant : (S_CONSTANT * SUBJECT_TYPE PARAMETER) list;
+   S_frozen_variable : (FROZEN_VARIABLE * SUBJECT_TYPE PARAMETER) list;
+   S_arity : int}
+\end{caml_code}
+
+\verb$P_CONSTANT$ et \verb$S_CONSTANT$ sont respectivement les bases d'un
+type construit dans le cas d'un type filtrant et d'un type filtr{\'e}. Les
+diff{\'e}rentes variables sont indentifi{\'e}es par un num{\'e}ro.
+
+\begin{caml_code}
+and P_CONSTANT == string
+and S_CONSTANT == string * SUBJECT_TYPE list
+
+and FROZEN_VARIABLE == int
+and SUBST_VARIABLE == int
+\end{caml_code}
+
+\verb$PARAMETER$ d{\'e}crit les param{\`e}tres des fonctions. Les fonctions sont
+regroup{\'e}es suivant leur base. \verb$Count$ est donc le nombre de fonctions de
+m{\^e}me base, et \verb$Parameter$ est la liste de leurs param{\`e}tres.
+
+\begin{caml_code}
+and 'a PARAMETER =
+  {Count : int;
+         (* ^ list_length Parameter *)
+   Parameter : 'a list};;
+\end{caml_code}
+
+Une variable est soit libre (non-instanti{\'e}e), soit li{\'e}e (instanti{\'e}e).
+
+\begin{caml_code}
+type 'a VALUE =
+    Free
+  | Bound of 'a;;
+\end{caml_code}
+
+\verb$PARB$ d{\'e}crit l'environnement, cad la table des valeurs des 
+variables, le nombre de variables (afin de cr{\'e}er facilement de
+nouvelles variables) et une pile de ce qui reste {\`a} filtrer. La
+profondeur d{\'e}crit la complexit{\'e} de la solution et permet ainsi de
+trier les propositions afin de proposer les plus vraissemblables en
+premier.
+
+\begin{caml_code}
+type DEPTH == int;;
+type SUBTAB_TYPE == (SUBST_VARIABLE * (DEPTH * PATTERN_TYPE VALUE)) list;;
+type REST_TYPE == (PATTERN_TYPE * SUBJECT_TYPE) list;;
+type FROTAB_TYPE == (FROZEN_VARIABLE * FROZEN_VARIABLE) list;;
+type PARB = 
+  {Max_depth : int;
+   Depth : int;
+   Sub_nb : int;
+   Fro_nb : int;
+   Sub_tab : SUBTAB_TYPE;
+   Fro_tab : FROTAB_TYPE;
+   Rest : REST_TYPE};;
+\end{caml_code}
+
+\begin{caml_hidden}
+value Unit : PATTERN_TYPE;;
+
+value Unit_cost : int;;
+\end{caml_hidden}
