@@ -178,12 +178,12 @@ value open_in : string -> in_channel
   and input_char : in_channel -> char = 1 "input_char"
         (* Read one character from the given input channel.
            Raise [End_of_file] if there are no more characters to read. *)
-  and input_line : in_channel -> string = 1 "input_line"
+  and input_line : in_channel -> string
         (* Read characters from the given input channel, until a
            newline character is encountered. Return the string of
            all characters read, without the newline character at the end.
            Raise [End_of_file] if the end of the file is reached
-           before the line is complete. *)
+           at the beginning of line. *)
   and input : in_channel -> string -> int -> int -> int
         (* [input chan buff ofs len] attempts to read [len] characters
            from channel [chan], storing them in string [buff], starting at
@@ -242,4 +242,5 @@ value open_in : string -> in_channel
 value fast_input : in_channel -> string -> int -> int -> int = 4 "input"
   and fast_really_input : in_channel -> string -> int -> int -> unit
   and fast_output : out_channel -> string -> int -> int -> unit = 4 "output"
+  and input_scan_line: in_channel -> int = 1 "input_scan_line"
 ;;
