@@ -102,7 +102,7 @@ and print_concrete_type prio depth obj cstr ty ty_list =
     type_descr_of_type_constr cstr in
   match typ_descr.info.ty_desc with
     Abstract_type ->
-      print_string "<abstract>"
+      print_string "<abstr>"
   | Variant_type constr_list ->
       let tag = obj_tag obj in
       begin try
