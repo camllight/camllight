@@ -14,9 +14,8 @@ LINKFLAGS=-g -custom
 CAMLYACC=camlyacc -v
 CAMLLEX=camllex
 
-TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) \
+TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
 	   $(SUPPORTDIR)/camltk.o -lcaml -ltk -ltcl -lX11
-
 
 OBJS = lexer.zo emacsbindings.zo sessions.zo slavetop.zo top.zo  main.zo
 
