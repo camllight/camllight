@@ -1,0 +1,1284 @@
+% Copyright     Digital Equipment Corporation & INRIA     1988, 1989
+% Original by Vuillemin, 25 Sept 88
+% Upate by Serpette Mon, 10 Oct 88 16:24:48 -0100
+% Update by Vuillemin on Oct 12, 88
+% Update by Vuillemin on Dec 15, 88
+%      modified_on Fri Dec 16 18:52:38 GMT+1:00 1988 by herve
+%      modified_on Mon Jan 16 18:11:01 GMT+1:00 1989 by jv
+% Last modified_on Mon Jul  1 18:19:09 GMT+2:00 1991 by herve
+%      modified_on Fri Mar 23 17:36:00 GMT+1:00 1990 by shand
+%      modified_on Tue May 23 16:06:11 1989 by Bignard
+
+\section{Introduction}
+Developing an arbitrary-precision arithmetic package that is
+both efficient and portable brings up two main problems:
+\begin{itemize}
+  \item
+If an arithmetic package is written in a  high-level language
+(such as languages Modula2+, \lelisp, C,\ldots), the compiled code
+will typically be 4 to 10  
+times slower than carefully hand-crafted machine code.
+  \item Many important arithmetic computations run an order of magnitude
+faster when all forms of storage allocation are removed
+from the inner loop,
+storing intermediate and final results exclusively in the memory area
+used by input variables. Yet some advanced form of automatic
+storage management and garbage collection must be part of any useful
+arithmetic package; furthermore, the number allocator must blend well with
+native storage allocation in the host language.
+\end{itemize}
+To satisfy these conflicting requirements, we have organized our
+software in two layers:
+\begin{enumerate}
+  \item A layer called \verb+Bn+, in which every operation deals with unsigned
+integers,  allocates no storage,
+and returns results in place of the first
+argument passed to the routine. 
+  \item A layer called \verb+Bz+, implemented on top of \verb+Bn+,
+which implements signed arithmetic operations and allocates
+storage for the results, in a straightforward manner.
+\end{enumerate}
+ 
+Any high-level language ${\cal L}$
+capable of interfacing directly with the
+language C can do so directly with \verb+Bn+ and  \verb+Bz+. When language
+${\cal L}$ possesses its own storage allocator (possibly
+with garbage collection, as 
+in \lelisp  and Modula2+), it is best to rewrite directly 
+in ${\cal L}$ the (small)
+storage allocation code of the \verb+Bz+ package. In this way, 
+allocating and freeing numbers is directly handled in ${\cal L}$. 
+ 
+For speed reasons, the package \verb+Bn+ itself is structured in two
+layers: 
+\begin{itemize}
+ \item The kernel \verb+KerN+, which contains code for the time-critical 
+low-level operations.
+ \item The rest of \verb+Bn+, whose C code   calls  the kernel.
+\end{itemize}
+
+The kernel \verb+KerN+ is written in 
+C for portability and documentation,  
+and can be compiled as such. However, to obtain a truly efficient
+implementation on a given machine, \verb+KerN+ must be directly written
+in assembly code, which we provide for VAX, 68020, and NS instruction sets.
+\verb+KerN+ is small indeed: 325 to 475 lines of C code, and 500 to 700 lines
+of VAX assembly code.
+ 
+The non-kernel part of \verb+Bn+ is written in C and compiled directly.
+The distinction between kernel and non-kernel operations is defined so 
+that the time penalty
+for running the mixture of assembly and C code, 
+as opposed to pure assembly code, is
+less than 20\% on typical benchmarks. The knowledge of 
+which procedures are
+in \verb+KerN+ is only important for someone who attempts to port the
+package on a new machine and who is not satisfied with the speed of the C
+implementation.
+ 
+Finally, we point out that \verb+Bn+ has proved to be a sound basis on
+which to develop other specialized packages, such as rational,
+polynomial or modular arithmetic. Having full control over the exact
+storage representation of numbers is the key to truly fast
+implementations of such extensions to the basic package.
+
+Details on how to obtain this package are in appendix \ref{HowToObtain}.
+
+\clearpage
+\section{Number representation}
+Using radix $b$ positional notation, an integer $N \in \N$ can be
+written as:
+$$ \n = \sum_{0 \leq i < nl} n_{i} \bb^i 
+\: \equiv \; \ob n_0 \cdots n_{nl-1}].
+$$
+In this equation:
+\begin{itemize}
+  \item $\bb > 1$ is the {\em base}.
+  \item For all $i$, $0 \leq i < nl$, $n_i$ are the {\em digits}
+  of $N$ written in base $\bb$, such that $n_i \in \Bb= [0..\bb -1]$.
+  \item The {\em length} $nl$ of $N$ is any integer greater than or
+  equal to the number $\lceil log_b(N+1) \rceil$ of significant
+  digits of $N$ written in base $\bb$.
+\end{itemize}
+In the implementation, the base $\bb$ is the largest power of two
+(typically 16 or 32) such that a digit
+fits in a memory word, and the  instruction set supports base $\bb$
+unsigned extended arithmetic. The digit bit length is parameterized
+in the global C constant 
+\begin{center}
+\verb+BN_DIGIT_SIZE+$ \; = \; \log_2(\bb).$
+\end{center}
+In \verb+Bn+, an integer $\n \in \N$ is passed as a
+pair \verb+(n,nl)+ where:
+\begin{enumerate}
+  \item \verb+n+ is a pointer inside an array of consecutive digits,
+  \item \verb+nl+ is the number (length) of digits from \verb+n+ in base $\bb$.
+\end{enumerate}
+Thus, for $0 \leq i < nl$, $n_i$ is the content of memory location
+$n+i$. We use below the notation:
+$$ \n = \sum_{0 \leq i < nl} n_{i} \bb^i \: \equiv \; \verb+(n,nl)+ 
+\: \equiv \; \ob n_0 \cdots n_{nl-1}].
+$$
+for the integer $N$.
+
+ In \verb+Bz+, an integer is passed as a  pointer to an array of
+consecutive digits; the header of this array contains the size (number of
+digits) of the array, and the sign of the  number, defined as:
+$$
+sgn(z) \; = \; \left\{ 
+\begin{array}{r} -1 \mbox{ if } z<0; \\  0 \mbox{ if } z=0; \\  1 \mbox{ if } 
+z>0; 
+\end{array} \right. $$
+
+\clearpage
+The implementation defines the following C types:
+\begin{verbatim}
+typedef unsigned int   BigNumDigit; /* A single 32 bits digit */
+typedef BigNumDigit    BigNumCarry; /* Either 0 or 1 */
+typedef BigNumDigit *  BigNum;      /* Entity seen by the user */
+typedef int            BigNumCmp;   /* = -1, 0, or 1 */
+typedef int            Boolean;
+\end{verbatim}
+Note that for the 16 bit implementation, the type \verb+BigNumDigit+ must
+be cast to a C \verb+unsigned short+.
+
+\clearpage
+\section{In place operations: Bn}
+We classify the procedures in \verb+Bn+ according to their
+underlying mathematical operations.
+
+\subsection{Initialization}
+\begin{func} Initialization \verb+ BnnInit+:
+\index{Bnn!Init()|ips}
+\begin{itemize}
+ \item {\bf C header}: 
+\begin{verbatim}
+void BnnInit()
+\end{verbatim}
+ \item {\bf Inputs}: none 
+ \item {\bf Output}: none
+ \item {\bf Side Effect}: initializes Bn.
+\end{itemize}
+\end{func}
+Note: \verb+ BnnInit+ $\notin$ \verb+KerN+.
+
+\begin{func} Closing \verb+ BnnClose+:
+\index{Bnn!Close()|ips}
+\begin{itemize}
+ \item {\bf C header}: 
+\begin{verbatim}
+void BnnClose()
+\end{verbatim}
+ \item {\bf Inputs}: none 
+ \item {\bf Output}: none
+ \item {\bf Side Effect}: closes Bn.
+\end{itemize}
+\end{func}
+Note: \verb+ BnnClose+ $\notin$ \verb+KerN+.
+
+\subsection{Addition}
+\begin{func} Increment  \verb+ BnnAddCarry+:
+\index{Bnn!AddCarry(n,nl,c)|ips}
+\begin{itemize}
+ \item {\bf C header}: 
+\begin{verbatim}
+BigNumCarry BnnAddCarry(n, nl, c)
+    BigNum n;
+    unsigned nl;
+    BigNumCarry c; 
+\end{verbatim}
+ \item {\bf Inputs}: 
+   \begin{enumerate}
+     \item  $ \n \; \equiv \; \mbox{\verb+(n,nl)+} \equiv \; \ob n_0 \cdots
+n_{nl-1} ],$ the integer to be incremented.
+     \item \verb+c+ $\in \Bd$, the carry in.
+   \end{enumerate}
+ \item {\bf Invariant}: $\n+\verb+c+ \; = \; S \; \equiv \; \ob s_0
+ \cdots s_{nl-1} s_{nl} ]$.
+ \item {\bf Output}: the carry out $s_{nl} \in \Bd.$
+ \item {\bf Side Effect}: the $nl$ least significant digits of $S$ are
+stored back in memory locations $n$ through $n+nl-1$ as a 
+{\bf side effect} on the first argument \verb+n+ of the procedure:
+$$\ob s_0 \cdots s_{nl-1} ] \; \Rightarrow \; \mbox{\verb+(n,nl)+}.$$
+\end{itemize}
+\end{func}
+Note: \verb+ BnnAddCarry+ $\in$ \verb+KerN+; the output is 1 iff 
+$\n \equiv \bb^{nl}-1$ and $\verb+c+=1$; \verb+nl+ can be equal to zero, in
+which case the carry out has the same value as the carry in.
+\begin{func} Addition  \verb+ BnnAdd+:
+\index{Bnn!Add(m,ml,n,nl,c)|ips}
+\begin{itemize}
+ \item{\bf C header:}
+\begin{verbatim}
+BigNumCarry BnnAdd(m, ml, n, nl, c)
+    BigNum m, n;
+    unsigned ml, nl;
+    BigNumCarry c; 
+\end{verbatim}
+ \item {\bf Inputs}: 
+   \begin{enumerate}
+     \item   $ \m \; \equiv \; \mbox{\verb+(m,ml)+} \;
+\equiv \; \ob m_0 \cdots m_{ml-1} ],$ the addend;
+     \item  $ \n \; \equiv \; \mbox{\verb+(n,nl)+} \equiv \; 
+\ob n_0 \cdots n_{nl-1} ],$
+the augend, no longer than
+the addend: $nl \leq ml$.
+     \item \verb+c+ $\in \Bd$, the carry in.
+   \end{enumerate}
+ \item {\bf Invariant}: $\n + \m + \verb+c+ \; = \; S \; \equiv \;
+ \ob s_0 \cdots s_{ml-1} s_{ml} ]$.
+ \item {\bf Output}: the carry out $s_{ml} \in \Bd.$
+ \item {\bf Side Effect}:
+$\ob s_0 \cdots s_{ml-1} ] \; \Rightarrow \; \mbox{\verb+(m,ml)+}.$
+\end{itemize}
+\end{func}
+Note: \verb+ BnnAdd+ $\in$ \verb+KerN+; it is possible to call \verb+ BnnAdd+
+with $\mbox{\verb+m+} = \mbox{\verb+n+}$;
+\verb+nl+ can be equal to zero, in
+which case the operation \verb+BnnAdd+ is equivalent to 
+\verb+BnnAddCarry(m, ml, c)+.
+\subsection{Subtraction}
+\begin{func} Additive Inverse   \verb+ BnnComplement+:
+\index{Bnn!Complement(n,nl)|ips}
+\begin{itemize}
+ \item {\bf C header}:
+\begin{verbatim}
+void BnnComplement(n, nl)
+    BigNum n; 
+    unsigned nl; 
+\end{verbatim}
+ \item {\bf Input}: 
+  $ \n \; \equiv \; \mbox{\verb+(n,nl)+} \equiv \; \ob n_0 \cdots
+n_{nl-1} ].$
+ \item {\bf Invariant}: $\n+\overline{N}=\bb^{nl}-1; \;  \overline{N} \; \equiv \; \ob
+\overline{n_0} \cdots \overline{n_{nl-1}}]$, with $\overline{n_k}=\bb-n_k-1.$
+ \item {\bf Output}: none
+ \item {\bf Side Effect}: 
+$\ob \overline{n_0} \cdots \overline{n_{nl-1}} ] \; \Rightarrow \;
+ \mbox{\verb+(n,nl)+}.$
+\end{itemize}
+\end{func}
+Note: \verb+ BnnComplement+ $\in$ \verb+KerN+; does nothing when $nl=0$.
+\begin{func} Decrement  \verb+ BnnSubtractBorrow+:
+\index{Bnn!SubtractBorrow(n,nl,br)|ips}
+\begin{itemize}
+ \item{\bf C header:}
+\begin{verbatim}
+BigNumCarry BnnSubtractBorrow(n, nl, br)
+    BigNum n;
+    unsigned nl;
+    BigNumCarry br; 
+\end{verbatim}
+ \item {\bf Inputs}: 
+   \begin{enumerate}
+     \item  $ \n \; \equiv \; \mbox{\verb+(n,nl)+} \equiv \; \ob n_0 \cdots
+n_{nl-1} ],$ the integer to be decremented.
+     \item \verb+br+ $\in \Bd$, the borrow in.
+   \end{enumerate}
+ \item {\bf Invariant}: $\n+\bb^{nl}+\verb+br+-1 \; = \; S \;
+ \equiv \; \ob s_0 \cdots s_{nl-1} s_{nl} ]$.
+ \item {\bf Output}: the borrow out $s_{nl} \in \Bd.$
+ \item {\bf Side Effect}:
+$\ob s_0 \cdots s_{nl-1} ] \; \Rightarrow \; \mbox{\verb+(n,nl)+}$.
+\end{itemize}
+\end{func}
+Note: \verb+ BnnSubtractBorrow+ $\in$ \verb+KerN+; the output  is 0 iff
+$\n=\verb+br+=0$; \verb+nl+ can be equal to zero, in which case the carry out 
+has the same value as the carry in.
+ 
+\begin{func} Subtraction  \verb+ BnnSubtract+:
+\index{Bnn!Subtract(m,ml,n,nl,br)|ips}
+\begin{itemize}
+ \item{\bf C header:}
+\begin{verbatim}
+BigNumCarry BnnSubtract(m, ml, n, nl, br)
+    BigNum m, n;
+    unsigned ml, nl;
+    BigNumCarry br; 
+\end{verbatim}
+ \item {\bf Inputs}: 
+   \begin{enumerate}
+     \item   $ \m \; \equiv \; \mbox{\verb+(m,ml)+} \;
+\equiv \; \ob m_0 \cdots m_{ml-1} ],$ the positive term;
+     \item  $ \n \; \equiv \; \mbox{\verb+(n,nl)+} \equiv \; \ob n_0
+ \cdots n_{nl-1} ],$ 
+the negative term, no longer than the positive: $\verb+nl+ \leq \verb+ml+$.
+     \item \verb+br+ $\in \Bd$, the borrow in.
+   \end{enumerate}
+ \item {\bf Invariant}: $\m +\bb^{ml}- \n+\verb+br+-1 \; = \; S \; \equiv \;
+ \ob s_0 \cdots s_{ml-1} s_{ml} ]$.
+ \item {\bf Output}: the borrow out $s_{ml} \in \Bd.$
+ \item {\bf Side Effect}:
+$\ob s_0 \cdots s_{ml-1} ] \; \Rightarrow \; \mbox{\verb+(m,ml)+}.$
+\end{itemize}
+\end{func}
+Note:  \verb+ BnnSubtract+ $\in$ \verb+KerN+; the output $s_{ml}$ is 0 iff
+$\n+\verb+br+ \leq \m$; it is possible to call \verb+ BnnSubtract+ with 
+$\mbox{\verb+m+} = \mbox{\verb+n+}$; 
+\verb+nl+ can be equal to zero, in
+which case the operation \verb+BnnSubtract+ is equivalent to 
+\verb+BnnSubtractBorrow(m, ml, br)+.
+ 
+\subsection{Multiplication}
+\begin{func} Multiplication by a digit  \verb+ BnnMultiplyDigit+:
+\index{Bnn!MultiplyDigit(p,pl,m,ml,d)|ips}
+\begin{itemize}
+ \item{\bf C header:}
+\begin{verbatim}
+BigNumCarry BnnMultiplyDigit(p, pl, m, ml, d)
+    BigNum p, m;
+    unsigned pl, ml; 
+    BigNumDigit d;
+\end{verbatim}
+ \item {\bf Inputs}: 
+   \begin{enumerate}
+     \item  $ \p \; \equiv \; \mbox{\verb+(p,pl)+} \;
+\equiv \; \ob p_0 \cdots p_{pl-1} ],$ the sum;
+     \item   $ \m \; \equiv \; \mbox{\verb+(m,ml)+} \;
+\equiv \; \ob m_0 \cdots m_{ml-1} ],$ the multiplier, 
+shorter than the sum: $\verb+pl+>\verb+ml+$.
+     \item  $\dd \; \equiv \; $ the multiplicand digit \verb/d/.
+   \end{enumerate}
+ \item {\bf Invariant}: $\p + \m \times \dd \; = \; R \; \equiv \;
+ \ob r_0 \cdots r_{pl-1} r_{pl} ]$.
+ \item {\bf Output}: the carry out $r_{pl} \in \Bd.$
+ \item {\bf Side Effect}:
+$\ob r_0 \cdots r_{pl-1} ] \; \Rightarrow \; \mbox{\verb+(p,pl)+}.$
+\end{itemize}
+\end{func}
+Note: \verb+ BnnMultiplyDigit+ $\in$ \verb+KerN+; \verb+ml+ can be equal to
+zero, in which case the carry out is zero and no side effect is performed;
+it is possible to call \verb+BnnMultiplyDigit+ with
+$\verb+p+ \equiv \verb+m+$; 
+the digit \verb/d/ can be any digit of \p or \m.
+ 
+\begin{func} Long Multiplication  \verb+ BnnMultiply+:
+\index{Bnn!Multiply(p,pl,m,ml,n,nl)|ips}
+\begin{itemize}
+ \item{\bf C header:}
+\begin{verbatim}
+BigNumCarry BnnMultiply (p, pl, m, ml, n, nl)
+    BigNum p, m, n;
+    unsigned pl, ml, nl;
+\end{verbatim}
+ \item {\bf Inputs}: 
+   \begin{enumerate}
+     \item  $ \p \; \equiv \; \mbox{\verb+(p,pl)+} \;
+\equiv \; \ob p_0 \cdots p_{pl-1} ],$ the sum;
+     \item   $ \m \; \equiv \; \mbox{\verb+(m,ml)+} \;
+\equiv \; \ob m_0 \cdots m_{ml-1} ],$ the multiplier;
+     \item  $ \n \; \equiv \;
+\mbox{\verb+(n,nl)+} \; \equiv \; \ob n_0 \cdots n_{nl-1} ],$ 
+the multiplicand.
+   \end{enumerate}
+The length of operands must be such that $\verb+pl+\geq\verb+nl++\verb+ml+$
+and  $\verb+ml+ \geq \verb+nl+$; this last condition is imposed by
+speed requirements.
+ \item {\bf Invariant}: $\p + \m \times \n \; = \; R \; \equiv \;
+ \ob r_0 \cdots r_{pl-1} r_{pl} ]$.
+ \item {\bf Output}: the carry out $r_{pl} \in \Bd.$
+ \item {\bf Side Effect}:
+$\ob r_0 \cdots r_{pl-1} ] \; \Rightarrow \; \mbox{\verb+(p,pl)+}.$
+\end{itemize}
+\end{func}
+Note: \verb+ In some implementations BnnMultiply+ $\notin$ \verb+KerN+;
+it is possible to
+call \verb+BnnMultiply+ with $\verb+n+ = \verb+m+$
+if in addition $nl = ml$ special squaring code is used
+that is considerably faster than normal multiplication;
+when $\verb+nl+=0$ there is no side effect and the carry out is 0.
+\begin{func} Multiply by a power of 2  \verb+ BnnShiftLeft+:
+\index{Bnn!ShiftLeft(m,ml,nbits)|ips}
+\begin{itemize}
+ \item {\bf C header}:
+\begin{verbatim}
+BigNumDigit BnnShiftLeft(m, ml, nbits)
+    BigNum m; 
+    unsigned ml, nbits;
+\end{verbatim}
+ \item {\bf Inputs}: 
+   \begin{enumerate}
+     \item   $ \m \; \equiv \; \mbox{\verb+(m,ml)+} \;
+\equiv \; \ob m_0 \cdots m_{ml-1} ],$ the integer to be shifted left.
+     \item \verb+nbits+ $\in \N$, the shift amount, $0 \leq$\verb+nbits+$<
+ \log_2(\bb)$.
+   \end{enumerate}
+ \item {\bf Invariant}: $\m \; \times \; 2^{\mbox{\verb+nbits+}} = \; S \; \equiv \;
+ \ob s_0 \cdots s_{ml-1} s_{ml} ]$.
+ \item {\bf Output}: the digit $ s_{ml}$ shifted out.
+ \item {\bf Side Effects}:
+$ \begin{array}{rcl}
+      \ob s_0 \cdots s_{ml-1} ] & \Rightarrow & \mbox{\verb+(m,ml)+}.
+  \end{array}$
+\end{itemize}
+\end{func}
+Note: \verb+ BnnShiftLeft+ $\in$ \verb+KerN+; if $\verb+ml+ = 0$ then $s_{ml}=0$.
+ 
+\subsection{Division}
+\begin{func} Division by a digit  \verb+ BnnDivideDigit+:
+\index{Bnn!DivideDigit(q,n,nl,d)|ips}
+\begin{itemize}
+ \item{\bf C header:}
+\begin{verbatim}
+BigNumDigit BnnDivideDigit(q, n, nl, d)
+    BigNum q, n;
+    unsigned nl; 
+    BigNumDigit d;
+\end{verbatim}
+ \item {\bf Inputs}: 
+   \begin{enumerate}
+     \item  $ \q \; \equiv \; \mbox{\verb+(q,nl-1)+} \equiv \; \ob q_0
+ \cdots q_{nl-2} ],$.
+     \item  $ \n \; \equiv \; \mbox{\verb+(n,nl)+} \equiv \; \ob n_0
+ \cdots n_{nl-1} ],$ the dividend.
+     \item $ \dd \; \equiv \;$ 
+the divisor digit \verb/d/, whose value must be greater than that of the most
+significant digit of $\n$: \verb/d/ $ > n_{nl-1}$.
+   \end{enumerate}
+ \item {\bf Invariant}: $\n = \dd \times \q + \r, \; 0 \leq \r < \dd$,
+with $ \q \equiv \ob q_0 \cdots q_{nl-2}] , \; \r \equiv \ob r_0 ].$
+ \item {\bf Output}: the remaining digit $R$.
+ \item {\bf Side Effect}: $ \begin{array}{rcl}
+ \ob q_0 \cdots q_{nl-2}] & \Rightarrow & \mbox{\verb;(q,nl-1);}.
+\end{array} $
+\end{itemize}
+\end{func}
+Note: \verb+ BnnDivideDigit+ $\in$ \verb+KerN+ stores the $\verb+nl+-1$ 
+digits of the quotient  in $\q$ and returns the remainder.
+ 
+\begin{func} Long Division  \verb+ BnnDivide+:
+\index{Bnn!Divide(n,nl,d,dl)|ips}
+\begin{itemize}
+ \item{\bf C header:}
+\begin{verbatim}
+void BnnDivide (n, nl, d, dl)
+    BigNum n, d;
+    unsigned nl, dl;
+\end{verbatim}
+ \item {\bf Inputs}: 
+   \begin{enumerate}
+     \item  $ \n \; \equiv \; \mbox{\verb+(n,nl)+} \equiv \; \ob n_0
+ \cdots n_{nl-1} ],$ the dividend.
+     \item $ \dd  \; \equiv \; \mbox{\verb+(d,dl)+}$, 
+the divisor, shorter than the dividend:  $\verb+dl+<\verb+nl+$.
+   \end{enumerate}
+The most significant digit of the divisor must be greater than that of 
+the dividend: $$d_{dl-1} > n_{nl-1}.$$
+Without this condition, we could not guarantee that both quotient and
+remainder will exactly fit in the storage allocated to $\n$.
+ \item {\bf Invariant}: $\n = \dd \times \q + \r, \; 0 \leq \r < \dd$, with
+$ \q \equiv \ob q_0 \cdots q_{nl-dl-1}] ,
+ \; \r \equiv \ob r_0 \cdots r_{dl-1} ].$
+ \item {\bf Output}: none
+ \item {\bf Side Effect}:
+$ \begin{array}{rcl}
+ \ob r_0 \cdots r_{dl-1}] & \Rightarrow & \mbox{\verb+(n,dl)+}; \\
+ \ob q_0 \cdots q_{nl-dl-1}] & \Rightarrow & \mbox{\verb;(n+dl,nl-dl);}.
+\end{array} $
+ \item {\bf Errors}: errors can occur possibly if you do concurrent programming
+ because the procedure \verb+BnnDivide+ modifies the parameters \verb+n+ and \verb+d+
+ during the process.
+\end{itemize}
+\end{func}
+Note: \verb+ BnnDivide+ $\notin$ \verb+KerN+, replaces the $nl-dl$ most
+significant digits of $\n$ by the quotient, and the $dl$ least significant
+digits by the remainder.
+\begin{func} Divide by a power of 2  \verb+ BnnShiftRight+:
+\index{Bnn!ShiftRight(m,ml,nbits)|ips}
+\begin{itemize}
+ \item {\bf C header}:
+\begin{verbatim}
+BigNumDigit BnnShiftRight(m, ml, nbits)
+    BigNum m;
+    unsigned ml, nbits;
+\end{verbatim}
+ \item {\bf Inputs}: 
+   \begin{enumerate}
+     \item   $ \m \; \equiv \; \mbox{\verb+(m,ml)+} \;
+\equiv \; \ob m_0 \cdots m_{ml-1} ],$ the integer to be shifted right.
+     \item \verb+nbits+ $\in \N$, the shift amount, $0 \leq$\verb+nbits+$<
+  \log_2(\bb)$.
+   \end{enumerate}
+ \item {\bf Invariant}:  
+    $\m \; = \; 2^{\mbox{\verb+nbits+}} \times S + R \times
+    2^{\mbox{\verb+nbits+}-\mbox{BN\_DIGIT\_SIZE}}
+        \; = \; 2^{\mbox{\verb+nbits+}} \times (S + R \times \bb^{-1})$
+with $S \; \equiv \;  \ob s_0 \cdots s_{ml-1}]$, $0 \leq R < \bb$. 
+ \item {\bf Output}: the shifted out digit $R$.
+ \item {\bf Side Effect}:
+$ \begin{array}{rcl}
+      \ob s_0 \cdots s_{ml-1} ] \; & \Rightarrow & \; \mbox{\verb+(m,ml)+}
+  \end{array}$.
+\end{itemize}
+\end{func}
+Note:  \verb+ BnnShiftRight+ $\in$ \verb+KerN+; if $\verb+ml+ = 0$
+then $R = 0$.
+ 
+\vspace*{2mm}
+The next two procedures are used in the normalization step of long
+division.
+\begin{func}        \verb+ BnnNumLeadingZeroBitsInDigit+:
+\index{Bnn!NumLeadingZeroBitsInDigit(d)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+unsigned BnnNumLeadingZeroBitsInDigit(d) 
+    BigNumDigit d; 
+\end{verbatim}
+  \item{\bf Input}: digit \verb/d/.
+  \item{\bf Invariant}: $ \frac{\bb}{2} < 2^k \times (\mbox{\verb/d/}+1) \leq \bb.$
+  \item{\bf Output}: $k$.
+  \item{\bf Side Effect}: none
+\end{itemize}
+\end{func}
+Note:       \verb+ BnnNumLeadingZeroBitsInDigit + $\in$  \verb+KerN+.
+The output is the number of most significant bits equal to zero in \verb/d/.
+\begin{func}        \verb+ BnnIsDigitNormalized +:
+\index{Bnn!IsDigitNormalized(d)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+Boolean BnnIsDigitNormalized(d) 
+    BigNumDigit d; 
+\end{verbatim}
+  \item{\bf Input}: digit \verb/d/.
+  \item{\bf Output}: the predicate $\frac{\bb}{2} \leq \mbox{\verb/d/} < \bb.$
+  \item{\bf Side Effect}: none.
+\end{itemize}
+\end{func}
+Note: \verb+ BnnIsDigitNormalized +  $\in$  \verb+KerN+.
+ 
+\subsection{Comparisons}
+\begin{func} Test for zero digit    \verb+ BnnIsDigitZero+:
+\index{Bnn!IsDigitZero(d)|ips}
+\begin{itemize}
+ \item {\bf C header}:
+\begin{verbatim}
+Boolean BnnIsDigitZero(d) 
+    BigNumDigit d; 
+\end{verbatim}
+ \item {\bf Input}: digit \verb/d/.
+ \item {\bf Output}: the predicate $(\mbox{\verb/d/} =0)$.
+ \item {\bf Side Effect}: none
+\end{itemize}
+\end{func}
+Note: \verb+ BnnIsDigitZero+ $\in$ \verb+KerN+. 
+ 
+\begin{func} Test for zero number   \verb+ BnnIsZero+:
+\index{Bnn!IsZero(n,nl)|ips}
+\begin{itemize}
+ \item {\bf C header}:
+\begin{verbatim}
+Boolean BnnIsZero (n, nl)
+    BigNum n;
+    unsigned nl;
+\end{verbatim}
+ \item {\bf Input}: 
+  $ \n \; \equiv \; \mbox{\verb+(n,nl)+} \equiv \; \ob n_0 \cdots
+n_{nl-1} ]$.
+ \item {\bf Output}: the predicate $(\n =0)$.
+ \item {\bf Side Effect}: none
+\end{itemize}
+\end{func}
+Note: \verb+ BnnIsZero+ $\notin$ \verb+KerN+. 
+\begin{func} Digit comparison  \verb+ BnnCompareDigits+:
+\index{Bnn!CompareDigits(c,d)|ips}
+\begin{itemize}
+ \item {\bf C header}:
+\begin{verbatim}
+BigNumCmp BnnCompareDigits(c, d)
+    BigNumDigit c, d;
+\end{verbatim}
+ \item {\bf Inputs}: digits \verb/c/ and \verb/d/.
+ \item {\bf Output}: $sgn(\mbox{\verb/c/} - \mbox{\verb/d/}) = \{ -1,0,1 \}$.
+ \item {\bf Side Effect}: none
+\end{itemize}
+\end{func}
+Note: \verb+ BnnCompareDigits+ $\in$ \verb+KerN+.
+\begin{func} Number comparison  \verb+ BnnCompare+:
+\index{Bnn!Compare(m,ml,n,nl)|ips}
+\begin{itemize}
+ \item {\bf C header}:
+\begin{verbatim}
+BigNumCmp BnnCompare (m, ml, n, nl)
+    BigNum m, n;
+    unsigned ml, nl;
+\end{verbatim}
+ \item {\bf Inputs}: 
+   \begin{enumerate}
+     \item $ \m \; \equiv \; \mbox{\verb+(m,ml)+} \;
+\equiv \; \ob m_0 \cdots m_{ml-1} ].$
+     \item  $ \n \; \equiv \; \mbox{\verb+(n,nl)+} \equiv \; \ob n_0
+ \cdots n_{nl-1} ].$
+   \end{enumerate}
+ \item {\bf Output}: $sgn(\m - \n) = \{ -1,0,1 \}$.
+ \item {\bf Side Effect}: none
+\end{itemize}
+\end{func}
+Note: \verb+ BnnCompare+ $\notin$ \verb+KerN+.
+\begin{func}        \verb+ BnnIsDigitOdd +:
+\index{Bnn!IsDigitOdd(d)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+Boolean BnnIsDigitOdd(d) 
+    BigNumDigit d; 
+\end{verbatim}
+  \item{\bf Input}: digit \verb/d/.
+  \item{\bf Output}: the predicate $(\mbox{\verb/d/} \bmod 2 = 1)$.
+  \item{\bf Side Effect}: none.
+\end{itemize}
+\end{func}
+Note:  \verb+ BnnIsDigitOdd+ $\notin$ \verb+KerN+. 
+\begin{func}        \verb+ BnnNumDigits +:
+\index{Bnn!NumDigits(n,nl)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+unsigned BnnNumDigits(n, nl)  
+    BigNum n;  
+    unsigned nl; 
+\end{verbatim}
+  \item{\bf Input}:
+   $ \n \; \equiv \; \mbox{\verb+(n,nl)+}.$
+  \item{\bf Invariant}: $ ln = \lceil \log_{\bb}(\n +1 ) \rceil,\;if\;
+                        \n\neq 0\;and\;1\;otherwise$.
+  \item{\bf Output}: $ln$.
+  \item{\bf Side Effect}: none.
+\end{itemize}
+\end{func}
+Note:  \verb+ BnnNumDigits+ $\in$ \verb+KerN+; $ln$ is the number of
+significant digits of \n.
+ 
+\subsection{Logical operations}
+\begin{func}        \verb+ BnnAndDigits +:
+\index{Bnn!AndDigits(n,d)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+void BnnAndDigits(n, d) 
+    BigNum n; 
+    BigNumDigit d;
+\end{verbatim}
+  \item{\bf Inputs}
+   \begin{enumerate}
+    \item    $ \n \; \equiv \;$ \verb+(n,1)+.
+    \item    $ \dd \; \equiv \;$ digit \verb/d/.
+   \end{enumerate}
+  \item{\bf Invariant}: let $n\&d$ be the bitwise logical {\em AND} 
+of $\n$ and
+$D$.
+  \item{\bf Output}: none
+  \item{\bf Side Effect}: $n\&d \; \Rightarrow$ \verb+(n,1)+.
+\end{itemize}
+\end{func}
+Note: \verb+ BnnAndDigits+ $\in$ \verb+KerN+. 
+\begin{func}        \verb+ BnnOrDigits +:
+\index{Bnn!OrDigits(n,d)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+void BnnOrDigits(n, d) 
+    BigNum n; 
+    BigNumDigit d;
+\end{verbatim}
+  \item{\bf Inputs}
+   \begin{enumerate}
+    \item   $ \n \; \equiv \; \mbox{\verb+(n,1)+}.$
+    \item    $ \dd \; \equiv \;$ digit \verb/d/.
+   \end{enumerate}
+  \item{\bf Invariant}: let $n\vee d$ be the bitwise logical {\em OR} of $\n$ and
+$D$.
+  \item{\bf Output}: none
+  \item{\bf Side Effect}: $n\vee d \; \Rightarrow$ \verb+(n,1)+.
+\end{itemize}
+\end{func}
+Note: \verb+ BnnOrDigits+ $\in$ \verb+KerN+. 
+\begin{func}        \verb+ BnnXorDigits +:
+\index{Bnn!XorDigits(n,d)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+void BnnXorDigits(n, d) 
+    BigNum n; 
+    BigNumDigit d;
+\end{verbatim}
+  \item{\bf Inputs}
+   \begin{enumerate}
+    \item   $ \n \; \equiv \; \mbox{\verb+(n,1)+}.$
+    \item    $ \dd \; \equiv \;$ digit \verb/d/.
+   \end{enumerate}
+  \item{\bf Invariant}: let $n\oplus d$ be the bitwise {\em EXCLUSIVE-OR} 
+of $\n$ and $D$.
+  \item{\bf Output}: none
+  \item{\bf Side Effect}: $n\oplus d \; \Rightarrow$ \verb+(n,1)+.
+\end{itemize}
+\end{func}
+Note: \verb+ BnnXorDigits+ $\in$ \verb+KerN+.   
+ 
+\subsection{Assignments}
+The following functions permit direct manipulation of 
+the  representation.
+\begin{func}        \verb+ BnnSetToZero +:
+\index{Bnn!SetToZero(n,nl)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+void BnnSetToZero(n, nl)  
+    BigNum n;  
+    unsigned nl; 
+\end{verbatim}
+  \item{\bf Input}:
+  $ \n \; \equiv \; \mbox{\verb+(n,nl)+} \equiv \; \ob n_0 \cdots
+n_{nl-1} ].$
+  \item{\bf Output}: none
+  \item{\bf Side Effect}: $0 \; \Rightarrow \;$ \verb+(n,nl)+.
+\end{itemize}
+\end{func}
+Note: \verb+ BnnSetToZero+ $\in$ \verb+KerN+; if $\verb+nl+ = 0$ then no side
+effect is performed.
+ 
+\begin{func}        \verb+ BnnSetDigit +:
+\index{Bnn!SetDigit(n,d)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+void BnnSetDigit(n, d) 
+    BigNum n; 
+    BigNumDigit d; 
+\end{verbatim}
+  \item{\bf Inputs}
+   \begin{enumerate}
+    \item     $ \n \; \equiv \; \mbox{\verb+(n,1)+}.$
+    \item \verb/d/ is an integer $0 \leq \mbox{\verb/d/} < \bb .$
+   \end{enumerate}
+  \item{\bf Output}: none
+  \item{\bf Side Effect}: \verb/d/ $\; \Rightarrow \;$ \verb+(n,1)+.
+\end{itemize}
+\end{func}
+Note: \verb+ BnnSetDigit+ $\in$ \verb+KerN+. 
+\begin{func}        \verb+ BnnAssign +:
+\index{Bnn!Assign(m,n,nl)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+void BnnAssign(m, n, nl)  
+    BigNum m, n;  
+    unsigned nl; 
+\end{verbatim}
+  \item{\bf Inputs}
+   \begin{enumerate}
+    \item 
+  $ \m \; \equiv \; \mbox{\verb+(m,nl)+} \equiv \; \ob m_0 \cdots
+m_{nl-1} ].$
+    \item 
+  $ \n \; \equiv \; \mbox{\verb+(n,nl)+} \equiv \; \ob n_0 \cdots
+n_{nl-1} ].$
+   \end{enumerate}
+  \item{\bf Output}: none
+  \item{\bf Side Effect}: $\n  \; \Rightarrow \;$ \verb+(m,nl)+.
+\end{itemize}
+\end{func}
+Note: \verb+ BnnAssign+ $\in$ \verb+KerN+; all kinds of overlapping are
+possible; no side effect when $\verb+nl+=0$.
+ 
+\subsection{Conversion to a small integer}
+In most languages, it is not possible to represent, 
+as the value of an ordinary integer, a full size (e.g., 32 bit) digit. 
+The following predicate specifies which
+digits can be directly represented by an integer in the target language.
+The binary length of such numbers is less than the package constant:
+\verb+BN_WORD_SIZE+. (In \lelisp, \verb+BN_WORD_SIZE+=15, for example).
+\begin{func}        \verb+  BnnDoesDigitFitInWord  +:
+\index{Bnn!DoesDigitFitInWord(d)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+Boolean BnnDoesDigitFitInWord(d) 
+    BigNumDigit d; 
+\end{verbatim}
+  \item{\bf Input}:
+     $ \dd \; \equiv \;$ digit \verb/d/.
+  \item{\bf Output}: the predicate $\log_2 (\dd) \leq$ \verb+BN_WORD_SIZE+.
+  \item{\bf Side Effect}: none.
+\end{itemize}
+\end{func}
+Note: \verb+ BnnDoesDigitFitInWord+ $\in$ \verb+KerN+.
+\begin{func}        \verb+ BnnGetDigit +:
+\index{Bnn!GetDigit(n)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigNumDigit BnnGetDigit(n)  
+    BigNum n; 
+\end{verbatim}
+  \item{\bf Input}:
+     $ \n \; \equiv \; \mbox{\verb+(n,1)+} \equiv \; n_0$,
+such that $\log_2(n_0) \leq$ \verb+ BN_WORD_SIZE+.
+  \item{\bf Output}: the digit $n_0$ as a regular C unsigned  integer.
+  \item{\bf Side Effect}: none
+\end{itemize}
+\end{func}
+Note: \verb+ BnnGetDigit+ $\in$ \verb+KerN+; this function does not test
+whether $n_0$ actually fits in a word.
+\clearpage
+\section{Storage allocating operations: Bz}
+The layer \verb+Bz+ is conceptually simpler than \verb+Bn+. A number $z \in
+Z$ is represented by a pointer to an array containing the sign and the
+digits of the base $\bb$ representation of $z$. Procedures in \verb+Bz+
+allocate storage for their results.
+
+\subsection{Initialization Operations}
+
+\begin{func} Initialization \verb+ BzInit+:
+\index{Bz!Init()|ips}
+\begin{itemize}
+ \item {\bf C header}: 
+\begin{verbatim}
+void BzInit()
+\end{verbatim}
+ \item {\bf Inputs}: none 
+ \item {\bf Output}: none
+ \item {\bf Side Effect}: initializes Bz and Bn.
+\end{itemize}
+\end{func}
+
+\begin{func} Closing \verb+ BzClose+:
+\index{Bz!Close()|ips}
+\begin{itemize}
+ \item {\bf C header}: 
+\begin{verbatim}
+void BzClose()
+\end{verbatim}
+ \item {\bf Inputs}: none 
+ \item {\bf Output}: none
+ \item {\bf Side Effect}: closes Bz and Bn.
+\end{itemize}
+\end{func}
+
+\subsection{Storage operations}
+
+\begin{func} Allocate  \verb+BzCreate+:
+\index{Bz!Create(size)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigZ BzCreate (size)    
+     unsigned size;
+\end{verbatim}
+  \item{\bf Output}: a number having \verb+size+ digits.
+\end{itemize}
+\end{func}
+ 
+\begin{func} Dispose  \verb+BzFree+:
+\index{Bz!Free(z)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+void BzFree (z)
+     BigZ z;
+\end{verbatim}
+  \item{\bf Output}: none
+  \item{\bf Side Effect}: Frees the storage occupied by $z$.
+\end{itemize}
+\end{func}
+ 
+\begin{func} Dispose  \verb+BzFreeString+:
+\index{Bz!FreeString(s)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+void BzFreeString (s)
+     char *s;
+\end{verbatim}
+  \item{\bf Output}: none
+  \item{\bf Side Effect}: Frees the storage occupied by $s$ (previously allocated by \verb+BzToString+).
+\end{itemize}
+\end{func}
+ 
+\begin{func} Physical copy  \verb+BzCopy+:
+\index{Bz!Copy(z)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigZ BzCopy (z)
+     BigZ z;
+\end{verbatim}
+  \item{\bf Output}: \verb+BzCopy(z)+ $= z  $.
+\end{itemize}
+\end{func}
+
+\begin{func} Size  \verb+BzNumDigits+:
+\index{Bz!NumDigits(z)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+unsigned BzNumDigits (z)
+     BigZ z;
+\end{verbatim}
+  \item{\bf Output}: the number of significant digits of $z$.
+\end{itemize}
+\end{func}
+ 
+\begin{func} Size  \verb+BzGetSize+:
+\index{Bz!GetSize(z)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+unsigned BzGetSize (z)
+     BigZ z;
+\end{verbatim}
+  \item{\bf Output}: the number of allocated digits of $z$.
+\end{itemize}
+\end{func}
+ 
+\subsection{Arithmetic Operations}
+ 
+\begin{func} Absolute value \verb+BzAbs+
+\index{Bz!Abs(z)|ips}
+\begin{itemize}
+   \item {\bf C header}: 
+\begin{verbatim}
+BigZ BzAbs (z)  
+     BigZ z;
+\end{verbatim}
+   \item {\bf Output}: \verb+BzAbs(z)+$= |z| = sgn(z) \times z.$
+\end{itemize}
+\end{func}
+ 
+\begin{func} Sign  \verb+BzGetSign+:
+\index{Bz!GetSign(z)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigNumCmp BzGetSign (z) 
+     BigZ z;
+\end{verbatim}
+  \item{\bf Output}: \verb+BzGetSign(z)+ $= sgn(z) = \{ -1,0,1 \}$.
+\end{itemize}
+\end{func}
+ 
+ 
+\begin{func} Arithmetic opposite  \verb+BzNegate+:
+\index{Bz!Negate(z)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigZ BzNegate (z)       
+     BigZ z;
+\end{verbatim}
+  \item{\bf Output}: \verb+BzNegate(z)+ $= -z  $.
+\end{itemize}
+\end{func}
+ 
+ 
+\begin{func} Comparison  \verb+BzCompare+:
+\index{Bz!Compare(y,z)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigNumCmp BzCompare (y, z)
+     BigZ y, z;
+\end{verbatim}
+  \item{\bf Output}: \verb+BzCompare(y,z)+ $= sgn(y-z) = \{ -1,0,1 \}$.
+\end{itemize}
+\end{func}
+ 
+ 
+\begin{func} Addition  \verb+BzAdd+:
+\index{Bz!Add(y,z)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigZ BzAdd (y, z)       
+     BigZ y, z;
+\end{verbatim}
+  \item{\bf Output}: \verb+BzAdd(y,z)+ $= y+z  $.
+\end{itemize}
+\end{func}
+ 
+ 
+\begin{func}  Subtraction \verb+BzSubtract+:
+\index{Bz!Subtract(y,z)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigZ BzSubtract (y, z)  
+     BigZ y, z;
+\end{verbatim}
+  \item{\bf Output}: \verb+BzSubtract(y,z)+ $= y-z   $.
+  \item {\bf Errors}: errors can possibly occur if you do concurrent programming
+  because the function \verb+BzSubtract+ modifies the parameter \verb+z+ 
+  during the process.
+\end{itemize}
+\end{func}
+ 
+ 
+\begin{func} Multiplication  \verb+BzMultiply+:
+\index{Bz!Multiply(y,z)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigZ BzMultiply (y, z)
+     BigZ y, z;
+\end{verbatim}
+  \item{\bf Output}: \verb+BzMultiply(y,z)+ $= y \times z  $.
+\end{itemize}
+\end{func}
+ 
+ 
+\begin{func}  Quotient  \verb+BzDiv+:
+\index{Bz!Div(y,z)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigZ BzDiv (y, z)
+     BigZ y, z;
+\end{verbatim}
+  \item{\bf Output}: \verb+BzDiv(y,z)+ $= y \div z  $.\\
+    Returns $NULL$ if $z = 0$. \\
+    Returns $floor(y/z)$ if $z > 0$\\
+    otherwise returns $ceil(y/z)$\\
+    where $/$ is the real numbers division.
+\end{itemize}
+\end{func}
+ 
+ 
+\begin{func} Modulo  \verb+BzMod+:
+\index{Bz!Mod(y,z)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigZ BzMod (y, z)
+     BigZ y, z;
+\end{verbatim}
+  \item{\bf Output}: \verb+BzMod(y,z)+ $= y \mod z  $.
+\end{itemize}
+\end{func}
+ 
+\begin{func} Division  \verb+BzDivide +:
+\index{Bz!Divide(y,z,r)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigZ BzDivide (y, z, r)
+     BigZ y, z, *r;
+\end{verbatim}
+  \item{\bf Output}: the quotient $y \div z$.\\
+    Returns $NULL$ if $z = 0$.\\
+    Returns $floor(y/z)$ if $z > 0$\\
+    otherwise returns $ceil(y/z)$\\
+    where $/$ is the real numbers division.
+  \item{\bf Side Effect}: assigns the modulo to $r$
+    such that $0 \leq r < abs(z)$
+\end{itemize}
+\end{func}
+ 
+\subsection{Read and Print}
+ 
+\begin{func} Write in base $b$  \verb+BzToString+:
+\index{Bz!ToString(z,b)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+char* BzToString (z, b)
+     BigZ z;
+     unsigned b;
+\end{verbatim}
+  \item{\bf Output}: \verb+BzToString(z,b)+ is the string representing
+$z$ in base $b$, with $2 \leq b \leq 16$.
+\end{itemize}
+\end{func}
+
+ 
+\begin{func} Read in base $b$  \verb+BzFromString+:
+\index{Bz!FromString(s,b)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigZ BzFromString (s, b)
+     char *s;
+     unsigned b;
+\end{verbatim}
+  \item{\bf Output}: \verb+BzFromString(s,b)+ is the number represented
+by the string $s$, in base $b$ with $2 \leq b \leq 16$, .
+\end{itemize}
+\end{func}
+
+\subsection{Conversions}
+
+\begin{func}  \verb+BzFromInteger+:
+\index{Bz!FromInteger(i)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigZ BzFromInteger (i)    
+     int i;
+\end{verbatim}
+  \item{\bf Output}: a number equal to \verb/i/.
+\end{itemize}
+\end{func}
+
+
+\begin{func}  \verb+BzToInteger+:
+\index{Bz!ToInteger(z)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+int BzToInteger (z)    
+     BigZ z;
+\end{verbatim}
+  \item{\bf Output}: an integer equal to \verb/z/ 
+   iff \verb/-MAXINT/ $<$ \verb/z/ $\leq$ \verb/MAXINT/,
+                    otherwise returns \verb/-MAXINT/.
+\end{itemize}
+\end{func}
+
+
+\begin{func}  \verb+BzFromBigNum+:
+\index{Bz!FromBigNum(n,nl)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigZ BzFromBigNum (n, nl)    
+     BigNum n;
+     unsigned nl;
+\end{verbatim}
+ \item {\bf Inputs}: 
+     $ \n \; \equiv \; \mbox{\verb+(n,nl)+} \equiv \; \ob n_0 \cdots
+n_{nl-1} ]$.
+ \item{\bf Output}: a number equal to $\n$.
+\end{itemize}
+\end{func}
+
+\begin{func}  \verb+BzToBigNum+:
+\index{Bz!ToBigNum(z,nl)|ips}
+\begin{itemize}
+  \item{\bf C header}:
+\begin{verbatim}
+BigNum BzToBigNum (z, nl)    
+     BigZ z;
+     unsigned * nl;
+\end{verbatim}
+  \item{\bf Output}: a number $\n$ equal to \verb/z/ iff \verb/z/ $\geq 0 $,
+                    otherwise returns $NULL$.
+  \item{\bf Side Effect}: assigns the length of $\n$ to \verb+nl+.
+
+\end{itemize}
+\end{func}
+
+\vspace{3cm}
+
+\section{Bibliography}
+\begin{description}
+\item [{[Knuth]}]
+D. E. Knuth,
+\begin{sf}
+The Art of Computer Programming, vol. 2, Seminumerical Algorithms.
+\end{sf}
+Addison Wesley, 1981.
+\end{description}
+
+
+\clearpage
+\appendix
+
+\section{What is in the package?}
+\begin{verbatim}
+   Documentation Files:
+      doc/bn.tex      - This document in LaTeX format
+      doc/bnf.tex     - Document BigNum in French and LaTeX format
+
+   C Include Files:
+      h/BigZ.h        - Types and structures for clients of BigZ
+      h/BigNum.h      - Types and structures for clients of BigNum
+
+   C Source Code:
+      c/bz.c          - BigZ implementation
+      c/bn.c          - BigNum implementation ("non-kernel" routines)
+      c/KerN.c        - BigNum implementation ("kernel" routines)
+      c/bztest.c      - Test program for verifying BigZ implementation
+      c/testKerN.c    - Test program for verifying KerN implementation
+
+   Assembly-Language Source Code:
+      s/vaxKerN.s     - VAX implementation of KerN
+      s/68KerN.s      - 68020 implementation of KerN (MIT syntax)
+      s/68KerN.mot.s  - 68020 implementation of KerN (Motorola syntax)
+      s/nsKerN.s      - NS implementation of KerN
+
+   Other Files:
+      Makefile        - Compiles source code, creates test programs
+
+In order to build or modify the current version of the package, 
+the following commands are provided:
+      make vax        - to use vax assembly code
+      make 68K        - to use 68020 assembly code
+      make ns         - to use NS assembly code
+      make C16        - to use C code with 16 bit digits
+      make C32        - to use C code with 32 bit digits 
+      make            - to use the default version (C32)
+
+One of these commands products the following files:
+      BigNum.a        - BigNum library
+      bztest          - Test program executable for BigZ
+      testKerN        - Test program executable for KerN
+
+If you have the tools LaTeX, makeindex and aptex, type:
+      make doc        - to build the Postscript files of the documents
+\end{verbatim}
+
+\clearpage
+\section{How to obtain the package?}
+\label{HowToObtain}
+This document and the source code of the BigNum package bear the
+marking "Copyright Digital Equipment Corporation \& INRIA 1989"
+This documentation and the source code of the BigNum package may
+be ordered either by postal or electronic mail from:\\
+
+    Librarian \\
+    Digital PRL\\			
+    85, Avenue Victor Hugo\\ 
+    92563 Rueil Malmaison Cedex  France\\         
+    (doc-server@prl.dec.com) \\
+    (or decprl::doc-server) \\
+
+ or INRIA\\			
+    Bernard Serpette\\
+    Domaine de Voluceau\\ 
+    78150 Rocquencourt  France\\
+    (serpette@inria.inria.fr)\\
+
+  The source code will be sent through electronic mail.
+
+This documentation, and the source code of the BigNum package may
+be reproduced and distributed freely to non commercial usage provided
+that the following conditions are respected:
+\begin{itemize}
+   \item Digital PRL or INRIA should be notified of the copy.
+
+   \item The original Copyright notice should not be removed from the
+   documentation or from the source code under any circumstances.
+ 
+   \item Any work using the BigNum package should state explicitly the use
+   of such package, and its origin by including the following sentence:
+   {\em This work uses the BigNum package developed jointly by INRIA and
+   Digital PRL.}
+
+   \item If any modification is applied to the BigNum package,
+   explicit statements should identify the fact that such modifications
+   have been made, by whom, and where. These statements should not be
+   removed in any further distribution.
+ 
+   \item Any work using extensively the BigNum package should be freely
+   distributed under conditions similar to the distribution of the
+   BigNum package.
+\end{itemize}
+INRIA and Digital Equipment Corporation make no representations, 
+express or implicit, with
+respect to this documentation or the software it describes, including
+without limitations, any implied warranties of merchandability or
+fitness for a particular purpose, all of which are expressly
+disclaimed. INRIA and Digital Equipment Corporation  or subsequent distributors 
+shall in no event
+be liable for any indirect, incidental or consequential damages.
+
