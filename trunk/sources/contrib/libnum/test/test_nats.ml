@@ -225,7 +225,10 @@ set_digit_nat nat 0 16;
 test 7 equal_nat (sqrt_nat nat 0 1,
                   nat_of_int 4) &&
 test 8 equal_nat (sqrt_nat nat 1 1,
-                  nat_of_int 5) &&
+                  nat_of_int 5);;
+
+(*************
+(* 64-bit only *)
 test 9 equal_nat
        (sqrt_nat (nat_of_int biggest_int) 0 1, nat_of_int 2147483647);;
 
@@ -243,6 +246,7 @@ test 13 equal_nat
        (sqrt_nat (nat) 0 2, nat_of_string "9223372036854775806") &&
 test 14 equal_nat
        (sqrt_nat (nat) 0 3, nat_of_string "39614081257132168793550749695");;
+*****************)
 
 let nat =
  nat_of_string "115792089237316195423570985008687907853269984665640564039457584007913129639935" in
