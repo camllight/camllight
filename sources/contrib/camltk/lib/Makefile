@@ -21,12 +21,12 @@ SUPPORT2=$(SUPPORTDIR)/support.zo $(SUPPORTDIR)/protocol2.zo \
 
 SUPPORT=support.zo protocol.zo textvariable.zo
 
-all : $(WIDGETOBJS) tklib1.zo tklib2.zo camltktop1 camltktop2
+all : $(WIDGETOBJS) tklib.zo tklib2.zo camltktop1 camltktop2
 
 toplevels: camltktop1 camltktop2
 
-tklib1.zo : $(SUPPORT1) $(WIDGETOBJS)
-	camllibr -o tklib1.zo $(SUPPORT1) tk.zo $(WIDGETOBJS)
+tklib.zo : $(SUPPORT1) $(WIDGETOBJS)
+	camllibr -o tklib.zo $(SUPPORT1) tk.zo $(WIDGETOBJS)
 
 tklib2.zo : $(SUPPORT2) $(WIDGETOBJS)
 	camllibr -o tklib2.zo $(SUPPORT2) tk.zo $(WIDGETOBJS)
@@ -46,14 +46,14 @@ camltktop2 : $(WIDGETOBJS) $(SUPPORT2)
 
 
 clean : 
-	rm -f *.z* *.ml *.mli tklib[12].zo  camltktop[12]
+	rm -f *.z* *.ml *.mli tklib*.zo  camltktop*
 
-install: tklib1.zo tklib2.zo  camltktop1 camltktop2
+install: tklib.zo tklib2.zo  camltktop1 camltktop2
 	if test -d $(LIBDIR); then : ; else mkdir $(LIBDIR); fi
-	cp -p *.zi tklib?.zo camltktop? $(LIBDIR)
+	cp -p *.zi tklib*.zo camltktop* $(LIBDIR)
 	chmod 644 $(LIBDIR)/*.zi
-	chmod 644 $(LIBDIR)/tklib?.zo
-	chmod 755 $(LIBDIR)/camltktop?
+	chmod 644 $(LIBDIR)/tklib*.zo
+	chmod 755 $(LIBDIR)/camltktop*
 
 tk.ml : tkgen.ml $(SUPPORTDIR)/report.ml $(SUPPORTDIR)/*.ml
 	(echo '#open "support";;'; \
