@@ -89,7 +89,7 @@ let latex_print_for_read_big_int bi =
 let sys_latex_print_ratio base before r after = 
   cautious_set_ratio_normalized_when_printing r;
   sys_latex_print_big_int base before (numerator_ratio r) "";
-  print_cut (); print_string "/"; print_break (0, 1);
+  print_cut (); print_string "/"; print_break 0 1;
   sys_latex_print_big_int base "" (denominator_ratio r) after
 ;;
 

@@ -607,7 +607,7 @@ let string_for_read_of_ratio r = sys_string_of_ratio 10 "#[" r "]";;
 
 let sys_ratio_of_string base s off_set length = 
  try
-  let n = index_char s off_set length `/` in
+  let n = index_char_from s off_set `/` in
   let (snum, k1) = decimal_of_string base s off_set (n - off_set)
   and (sden, k2) = decimal_of_string base s (succ n)
                     (pred (length + off_set - n)) in

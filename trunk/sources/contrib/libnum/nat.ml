@@ -678,10 +678,10 @@ let decimal_of_string base s off len =
  let offset_limit = offset + length - 1 in
 
  try
-  let dot_pos = index_char s offset length `.` in
+  let dot_pos = index_char_from s offset `.` in
   try
    if dot_pos = offset_limit then raise Not_found else
-   let e_pos = index_char s (dot_pos + 1) (offset_limit - dot_pos - 1) `e` in
+   let e_pos = index_char_from s (dot_pos + 1) `e` in
    (* int.int e int *)
    let e_arg =
       if e_pos = offset_limit then 0 else
@@ -709,7 +709,7 @@ let decimal_of_string base s off len =
    (* no `.` *)
    try
     (* int e int *)
-    let e_pos = index_char s offset length `e` in
+    let e_pos = index_char_from s offset `e` in
     let e_arg =
       if e_pos = offset_limit then 0 else
       sys_int_of_string base s (succ e_pos) (offset_limit - e_pos) in
