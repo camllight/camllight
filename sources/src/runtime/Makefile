@@ -40,6 +40,11 @@ libcaml.a: $(OBJS)
 	ar rc libcaml.a $(OBJS)
 	if $(RANLIBTEST); then $(RANLIB) libcaml.a; else true; fi
 
+libcamld.a: $(DOBJS)
+	rm -f libcamld.a
+	ar rc libcamld.a $(DOBJS)
+	if $(RANLIBTEST); then $(RANLIB) libcamld.a; else true; fi
+
 clean:
 	rm -f camlrun camlrund *.o *.a
 	rm -f primitives prims.c opnames.h jumptbl.h
