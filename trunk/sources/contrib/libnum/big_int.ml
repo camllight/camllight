@@ -327,7 +327,7 @@ let int_of_big_int bi =
 
 let is_int_big_int bi = 
    is_nat_int (bi.Abs_Value) 0 (num_digits_big_int bi)
-or (bi.Sign == -1 && num_digits_big_int bi == 1 &&
+|| (bi.Sign == -1 && num_digits_big_int bi == 1 &&
     num_leading_zero_bits_in_digit (bi.Abs_Value) 0 >= 1);;
 
 (* XL: le "1" provient de "pred (length_of_digit - length_of_int))" *)

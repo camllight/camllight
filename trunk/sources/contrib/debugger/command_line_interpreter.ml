@@ -369,7 +369,7 @@ let instr_print lexbuf =
     do_list
       (function x ->
       	 let (val, typ) = variable x in
-           open_hovbox 0;
+           open_box 0;
       	   output_variable_name std_out x;
            print_string " :"; print_space();
            print_one_type typ; print_string " ="; print_space();
@@ -390,7 +390,7 @@ let instr_match lexbuf =
       do_list
 	(function
 	   (name, val, typ) ->
-             open_hovbox 0;
+             open_box 0;
 	     print_string name;
 	     print_string " :"; print_space();
              print_one_type typ;
