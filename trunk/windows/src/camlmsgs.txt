@@ -545,3 +545,27 @@ de:	%aDer Typ %a wurde mit %d Parameter(n) deklariert,\n\
 	aber mit %d Parameter(n) definiert.\n
 it:	%aIl tipo %a che è dichiarato con %d parametro(i),\n\
 	è definito qui con %d parametro(i).\n
+
+src:	%tThe value %a is declared with type %a,\n\
+	but defined with type %a.\n
+fr:	%tLa valeur %a est déclarée du type %a,\n\
+	mais est définie avec le type %a.\n
+es:	%tEl valor %a se ha declarado con tipo %a,\n\
+	pero se ha definido con tipo %a.\n
+de:	%t%a wurde als Wert vom Typ %a deklariert,\n\
+	aber als Wert vom Typ %a implementiert.\n
+it:	%tIl valore %a è dichiarato con il tipo %a,\n\
+	ma è definito con il tipo %a.\n
+
+src:	Exception %s defined.\n
+fr:	L'exception %s est définie.\n
+es:	La excepción %s está definida.\n
+de:	Die Ausnahme %s ist definiert.\n
+it:	L'eccezione %s è definita.\n
+
+src:	Type %s defined.\n
+fr:	Le type %s est défini.\n
+es:	El tipo %s está definido.\n
+de:	Der Typ %s ist deklariert.\n
+it:	Il typo %s è definito.\n
+
