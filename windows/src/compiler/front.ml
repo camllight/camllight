@@ -228,12 +228,17 @@ let rec translate_expr env =
   | Zfunction [] ->
       fatal_error "translate_expr: empty fun"
   | Zfunction((patl1,act1)::_ as case_list) ->
-      let rec transl_fun = function
+      let rec transl_fun debug_env = function
           [] ->
             translate_match expr.e_loc env (partial_fun expr.e_loc) case_list
         | pat::patl ->
-            Lfunction(transl_fun patl) in
-      transl_fun patl1
+            let new_debug_env =
+              if pat_irrefutable pat
+              then fst(add_pat_to_env debug_env pat)
+              else Treserved debug_env in
+            Lfunction(event__after_pat new_debug_env pat
+                        (transl_fun new_debug_env patl)) in
+      transl_fun env patl1
   | Ztrywith(body, pat_expr_list) ->
       Lhandle(transl body,
               translate_simple_match expr.e_loc env partial_try pat_expr_list)

@@ -114,7 +114,7 @@
 %left  INFIX2 SUBTRACTIVE               /* additives, subtractives */
 %right prec_typearrow
 %left  STAR INFIX3                      /* multiplicatives */
-%left  INFIX4                           /* exponentiations */
+%right INFIX4                           /* exponentiations */
 %right prec_uminus
 %right prec_app
 %left  DOT DOTLPAREN DOTLBRACKET

@@ -145,3 +145,25 @@ let rec expr_is_pure expr =
 let letdef_is_pure pat_expr_list =
   for_all (fun (pat,expr) -> expr_is_pure expr) pat_expr_list
 ;;
+
+let single_constructor cstr =
+  match cstr.info.cs_tag with
+    ConstrRegular(_, span) -> span == 1
+  | ConstrExtensible(_,_) -> false
+;;
+
+let rec pat_irrefutable pat =
+  match pat.p_desc with
+    Zwildpat -> true
+  | Zvarpat s -> true
+  | Zaliaspat(pat, _) -> pat_irrefutable pat
+  | Zconstantpat _ -> false
+  | Ztuplepat patl -> for_all pat_irrefutable patl
+  | Zconstruct0pat cstr -> single_constructor cstr
+  | Zconstruct1pat(cstr, pat) -> single_constructor cstr & pat_irrefutable pat
+  | Zorpat(pat1, pat2) -> pat_irrefutable pat1 or pat_irrefutable pat2
+  | Zconstraintpat(pat, _) -> pat_irrefutable pat
+  | Zrecordpat lbl_pat_list ->
+      for_all (fun (lbl, pat) -> pat_irrefutable pat) lbl_pat_list
+;;
+
