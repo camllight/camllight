@@ -3,7 +3,8 @@ FILES= refman.tex lex.tex names.tex values.tex const.tex types.tex \
   exten.tex
 
 TRANSF=../../tools/transf
-VPATH=../refman
+
+vpath %.etex ../refman
 
 all: $(FILES)
 

@@ -16,7 +16,10 @@ FORMAT=../../tools/format-html-intf
 
 CLDIR=../../../cl
 
-VPATH=../library:$(CLDIR)/src/lib:$(CLDIR)/contrib/libgraph:$(CLDIR)/contrib/libunix:$(CLDIR)/contrib/libstr:$(CLDIR)/contrib/libnum
+SEARCHPATH=../library:$(CLDIR)/src/lib:$(CLDIR)/contrib/libgraph:$(CLDIR)/contrib/libunix:$(CLDIR)/contrib/libstr:$(CLDIR)/contrib/libnum
+
+vpath %.etex $(SEARCHPATH)
+vpath %.mli $(SEARCHPATH)
 
 all: $(FILES)
 
