@@ -71,9 +71,11 @@ let rec print_val prio depth obj ty =
   | Tarrow(ty1, ty2) ->
       print_string "<fun>"
   | Tproduct(ty_list) ->
-      if prio > 0 then print_string "(";
+      if prio > 0 then begin open_hovbox 1; print_string "(" end
+       else open_hovbox 0;
       print_val_list 1 depth obj ty_list;
-      if prio > 0 then print_string ")"
+      if prio > 0 then print_string ")";
+      close_box()
   | Tconstr(cstr, ty_list) ->
       if same_type_constr cstr constr_type_list then begin
         let ty_arg = 
@@ -89,11 +91,11 @@ let rec print_val prio depth obj ty =
             end
           in
            begin
+            open_hovbox 1;
             print_string "[";
-            open_hovbox 0;
             cautious (print_conses (depth - 1)) obj;
-            close_box();
-            print_string "]"
+            print_string "]";
+            close_box()
            end
 
       end else if same_type_constr cstr constr_type_vect then begin
@@ -106,11 +108,11 @@ let rec print_val prio depth obj ty =
               print_val depth 0 (obj_field obj i) ty_arg
              done
          in
+          open_hovbox 2;
           print_string "[|";
-          open_hovbox 0;
           cautious (print_items (depth - 1)) obj;
-          close_box();
-          print_string "|]"
+          print_string "|]";
+          close_box()
       end else
         try
           let rec find_printer = function
@@ -150,23 +152,25 @@ and print_concrete_type prio depth obj cstr ty ty_list =
           Constr_constant ->
             output_constr constr
         | Constr_regular ->
-            if prio > 1 then print_string "(";
-            open_hovbox 0;
+            if prio > 1 then begin open_hovbox 2; print_string "(" end
+             else open_hovbox 1;
             output_constr constr;
             print_space();
             cautious (print_val 2 (depth - 1) (obj_field obj 0)) ty_arg;
-            close_box();
-            if prio > 1 then print_string ")"
+            if prio > 1 then print_string ")";
+            close_box()
         | Constr_superfluous n ->
-            if prio > 1 then print_string "(";
-            open_hovbox 1;
+            if prio > 1 then begin open_hovbox 2; print_string "(" end
+            else open_hovbox 1;
             output_constr constr;
             print_space();
+            open_hovbox 1;
             print_string "(";
             print_val_list 1 (depth - 1) obj (filter_product n ty_arg);
             print_string ")";
             close_box();
-            if prio > 1 then print_string ")"
+            if prio > 1 then print_string ")";
+            close_box()
       with
         Constr_not_found ->
           print_string "<unknown constructor>"
@@ -177,8 +181,9 @@ and print_concrete_type prio depth obj cstr ty ty_list =
       end
   | Record_type label_list ->
       let print_field depth lbl =
+        open_hovbox 1; 
         output_label lbl;
-        print_string "=";
+        print_string "="; print_cut();
         let (ty_res, ty_arg) =
           type_pair_instance (lbl.info.lbl_res, lbl.info.lbl_arg) in
         begin try
@@ -186,7 +191,8 @@ and print_concrete_type prio depth obj cstr ty ty_list =
         with Unify ->
           fatal_error "print_val: types should match"
         end;
-        print_val 0 depth (obj_field obj lbl.info.lbl_pos) ty_arg in
+        print_val 0 depth (obj_field obj lbl.info.lbl_pos) ty_arg;
+        close_box() in
       let rec print_fields depth = function
         [] -> ()
       | [lbl] -> print_field depth lbl
@@ -194,11 +200,11 @@ and print_concrete_type prio depth obj cstr ty ty_list =
           print_field depth lbl; print_string ";"; print_space();
           print_fields depth rest
       in
+      open_hovbox 1;
       print_string "{";
-      open_hovbox 0;
       cautious (print_fields (depth - 1)) label_list;
-      close_box();
-      print_string "}"
+      print_string "}";
+      close_box()
   | Abbrev_type(_,_) ->
       fatal_error "print_val: abbrev type"
 
@@ -212,10 +218,7 @@ and print_val_list prio depth obj ty_list =
        print_val prio depth (obj_field obj i) ty;
        print_string ","; print_space();
        print_list depth (succ i) ty_list
-  in
-    open_hovbox 0;
-    cautious (print_list (depth - 1) 0) ty_list;
-    close_box()
+  in cautious (print_list (depth - 1) 0) ty_list
 ;;
 
 let print_value obj ty = print_val 0 !printer_depth obj ty
