@@ -180,7 +180,7 @@ let remove_all_breakpoints () =
 (*** Temporary breakpoints. ***)
 
 (* Temporary breakpoint position. *)
-let temporary_breakpoint_position = ref (None : int OPTION);;
+let temporary_breakpoint_position = ref (None : int option);;
 
 (* Execute `funct' with a breakpoint added at `pc'. *)
 (* --- Used by `finish'. *)

@@ -1,5 +1,4 @@
 #open "format";;
-#open "primitives";;
 #open "communication";;
 #open "checkpoints";;
 #open "events";;

@@ -1,6 +1,5 @@
 (******************************* Breakpoints ***************************)
 
-#open "primitives";;
 #open "lambda";;
 
 (*** Debugging. ***)
@@ -14,7 +13,7 @@ value breakpoints_count : unit -> int;;
 value breakpoints : (int * event) list ref;;
 
 (* `None' if no breakpoint at `pc'; `Some instruction' otherwise. *)
-value instruction_at_pc : int -> char OPTION;;
+value instruction_at_pc : int -> char option;;
 
 (* Is there a breakpoint at `pc' ? *)
 value breakpoint_at_pc : int -> bool;;
@@ -42,7 +41,7 @@ value remove_all_breakpoints : unit -> unit;;
 (*** Temporary breakpoints. ***)
 
 (* Temporary breakpoint position. *)
-value temporary_breakpoint_position :int OPTION ref;;
+value temporary_breakpoint_position :int option ref;;
 
 (* Execute `funct' with a breakpoint added at `pc'. *)
 (* --- Used by `finish'. *)

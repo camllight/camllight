@@ -1,7 +1,6 @@
 (******************************* Frames ************************************)
 
 #open "lambda";;
-#open "primitives";;
 
 (* Current frame number *)
 value current_frame : int ref;;
@@ -14,7 +13,7 @@ value selected_events : event list ref;;
 
 (* The main event of the previous list *)
 (* --- Cf `main_event' for definition of "main event". *)
-value selected_event : event OPTION ref;;
+value selected_event : event option ref;;
 
 (* Selected position in source. *)
 (* Raise `Not_found' if not on an event. *)

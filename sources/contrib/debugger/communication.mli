@@ -69,7 +69,7 @@ value restart : char -> int -> REPORT;;
 
 (* Select the frame number `frame_number'. *)
 (* Return corresponding frame pointer and program counter. *)
-value move_frame : int -> (int * int) OPTION;;
+value move_frame : int -> (int * int) option;;
 
 (* Set the trap barrier at `position'. *)
 (* The program will stop if an exception reaches the trap barrier. *)

@@ -2,7 +2,6 @@
 
 #open "const";;
 #open "globals";;
-#open "primitives";;
 #open "input_handling";;
 #open "parser_aux";;
 
@@ -52,10 +51,10 @@
 %type <int> Integer
 
 %start Opt_integer_eol
-%type <int primitives__OPTION> Opt_integer_eol
+%type <int option> Opt_integer_eol
 
 %start Opt_signed_integer_eol
-%type <int primitives__OPTION> Opt_signed_integer_eol
+%type <int option> Opt_signed_integer_eol
 
 %start Identifier
 %type <string> Identifier
@@ -64,10 +63,10 @@
 %type <string> Identifier_eol
 
 %start Identifier_or_eol
-%type <string primitives__OPTION> Identifier_or_eol
+%type <string option> Identifier_or_eol
 
 %start Opt_identifier_eol
-%type <string primitives__OPTION> Opt_identifier_eol
+%type <string option> Opt_identifier_eol
 
 %start Variable_list_eol
 %type <globals__global_reference list> Variable_list_eol
@@ -79,7 +78,7 @@
 %type <globals__global_reference * parser_aux__PATTERN> Match_arguments_eol
 
 %start List_arguments_eol
-%type <string primitives__OPTION * int primitives__OPTION * int primitives__OPTION> List_arguments_eol
+%type <string option * int option * int option> List_arguments_eol
 
 %start End_of_line
 %type <unit> End_of_line

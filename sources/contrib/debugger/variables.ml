@@ -1,6 +1,5 @@
 (****************************** Variables **********************************)
 
-#open "primitives";;
 #open "lambda";;
 #open "const";;
 #open "misc";;

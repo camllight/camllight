@@ -1,7 +1,6 @@
 (******************************* Frames ************************************)
 
 #open "lambda";;
-#open "primitives";;
 #open "communication";;
 #open "checkpoints";;
 #open "events";;
@@ -17,7 +16,7 @@ let selected_events = ref ([] : event list);;
 
 (* The main event of the previous list *)
 (* --- Cf `main_event' for definition of "main event". *)
-let selected_event = ref (None : event OPTION);;
+let selected_event = ref (None : event option);;
 
 (* Recompute the data above. *)
 (* --- Assume the currents events have already been updated. *)

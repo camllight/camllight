@@ -19,7 +19,7 @@ type CHECKPOINT =
    mutable C_pid : int;
    mutable C_fd : IO_CHANNEL;
    mutable C_valid : bool;
-   mutable C_report : REPORT OPTION;
+   mutable C_report : REPORT option;
    mutable C_state : CHECKPOINT_STATE;
    mutable C_parent : CHECKPOINT;
    mutable C_breakpoint_version : int;
@@ -35,5 +35,5 @@ value checkpoints : CHECKPOINT list ref;;
 value current_checkpoint : CHECKPOINT ref;;
 
 value current_time : unit -> int;;
-value current_report : unit -> REPORT OPTION;;
-value current_pc : unit -> int OPTION;;
+value current_report : unit -> REPORT option;;
+value current_pc : unit -> int option;;
