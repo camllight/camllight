@@ -8,22 +8,13 @@ LINKFLAGS=-g $(PROFILING)
 CAMLYACC=camlyacc -v
 CAMLLEX=camllex
 CAMLDEP=../../../src/tools/camldep
+X11_INCLUDES=/usr/include
+TCLINCLDIR=/usr/local/lib/tcl/include
+TKINCLDIR=/usr/local/lib/tk/include
+RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
+RANLIB=ranlib
 
-all: support.zo textvariable.zo camltk.zi libcamltk.a protocol1.zo
-
-protocol1.zo: protocol1.ml
-	rm -f protocol.ml
-	cp -p protocol1.ml protocol.ml
-	$(CAMLCOMP) $(COMPFLAGS) protocol.ml
-	mv protocol.zo protocol1.zo
-
-# Not supported anymore
-# protocol2.zo: protocol2.ml
-#	rm -f protocol.ml
-#	cp -p protocol2.ml protocol.ml
-#	$(CAMLCOMP) $(COMPFLAGS) protocol.ml
-#	mv protocol.zo protocol2.zo
-
+all: support.zo textvariable.zo camltk.zi libcamltk.a protocol.zo
 
 camltk.o : camltk.c
 	$(CC) -g -c -I../../../src/runtime \
@@ -48,7 +39,7 @@ install: libcamltk.a support.zi textvariable.zi protocol.zi
 	chmod 644 $(LIBDIR)/*.zi $(LIBDIR)/libcamltk.a
 
 clean : 
-	rm -f *.z* *.o *.a protocol.ml
+	rm -f *.z* *.o *.a
 
 .SUFFIXES :
 .SUFFIXES : .mli .ml .zi .zo .mlp
@@ -67,8 +58,10 @@ depend:
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
+camltk.zi: protocol.zi 
 protocol.zi: support.zi 
-protocol1.zo: support.zi camltk.zi 
-protocol2.zo: support.zi 
-support.zo: support.zi 
+textvariable.zi: protocol.zi 
+mainloop.zo: protocol.zi 
+protocol.zo: protocol.zi support.zi camltk.zi 
+support.zo: support.zi protocol.zi 
 textvariable.zo: textvariable.zi protocol.zi support.zi 

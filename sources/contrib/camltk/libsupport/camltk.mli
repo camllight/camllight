@@ -1,5 +1,6 @@
 (* Primitives provided in camltk.c *)
 #open "unix";;
+#open "protocol";;
 
 value install_callback_handler : (string list -> unit) -> unit
       	= 1 "camltk_install_callback_handler"
@@ -13,4 +14,6 @@ value install_callback_handler : (string list -> unit) -> unit
         = 1 "camltk_rem_file_input"
   and tk_mainloop : unit -> unit
       	= 1 "camltk_tk_mainloop"
+  and tcl_direct_eval : TkArgs vect -> string
+      	= 1 "camltk_tcl_direct_eval"
 ;;
