@@ -6,13 +6,7 @@
 (**) #open "fstring";;
 (**) #open "exc";;
 
-#ifndef msdos
-let check_suffix name suff =
-  string_length name >= string_length suff &
-  sub_string name (string_length name - string_length suff) (string_length suff)
-    = suff
-;;
-#else
+#ifdef msdos
 (**) #open "fchar";;
 
 let lowercase s =
@@ -29,6 +23,12 @@ let check_suffix name suff =
   string_length name >= string_length suff &
   lowercase (sub_string name (string_length name - string_length suff) 
                              (string_length suff)) = lowercase suff
+;;
+#else
+let check_suffix name suff =
+  string_length name >= string_length suff &
+  sub_string name (string_length name - string_length suff) (string_length suff)
+    = suff
 ;;
 #endif
 
