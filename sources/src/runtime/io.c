@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #endif
 #include "alloc.h"
+#include "debugger.h"
 #include "fail.h"
 #include "io.h"
 #include "memory.h"

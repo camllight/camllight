@@ -7,8 +7,8 @@
 #include <fcntl.h>
 #endif
 #include <signal.h>
-#include "config.h"
 #include "alloc.h"
+#include "config.h"
 #include "debugcom.h"
 #include "fail.h"
 #include "globals.h"
@@ -98,6 +98,7 @@ value sys_open(path, flags, perm) /* ML */
      value path, flags, perm;
 {
   int ret;
+
 #ifdef macintosh
   ret = open(String_val(path), convert_flag_list(flags, sys_open_flags));
   if (ret != -1 && convert_flag_list (flags, sys_text_flags))
@@ -164,6 +165,7 @@ value sys_system_command(command)   /* ML */
 {
 #ifdef macintosh
   invalid_argument("system_command: not implemented");
+  return 0;  /* not reached */
 #else
   int retcode = system(String_val(command));
   if (retcode == -1) sys_error(String_val(command));
