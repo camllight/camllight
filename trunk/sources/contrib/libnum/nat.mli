@@ -103,3 +103,4 @@ value create_nat : int -> nat = 1 "create_nat"
   and print_nat : nat -> unit
   and debug_print_nat : nat -> unit;;
 
+value word_size : int;;
