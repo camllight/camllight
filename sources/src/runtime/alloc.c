@@ -83,7 +83,7 @@ value copy_string(s)
 }
 
 value alloc_array(funct, arr)
-     value (*funct)();
+     value (*funct) P((char *));
      char ** arr;
 {
   mlsize_t nbr, n;
@@ -114,7 +114,7 @@ value alloc_array(funct, arr)
 value copy_string_array(arr)
      char ** arr;
 {
-  return alloc_array((value (*) ())copy_string, arr);
+  return alloc_array(copy_string, arr);
 }
 
 int convert_flag_list(list, flags)
