@@ -10,6 +10,7 @@ cclib=""
 ccopt=""
 output=camltop.out
 p=""
+debug=""
 
 perv="baltree bool char eq exc fchar filename float format fstring fvect \
     gc genlex hashtbl int io iparsing lexing list map obj pair parsing \
@@ -36,6 +37,8 @@ while :; do
       stdlib=$2; shift;;
     -custom)
       custom="-custom /tmp/camlprim.$$.c";;
+    -g)
+      debug="-g";;
     *.c)
       $cc -c -I$stdlib $ccopt $1 || exit $?
       ccfiles="$ccfiles `basename $1 .c`.o";;
@@ -59,7 +62,7 @@ camlrun $stdlib/provide -stdlib $stdlib $includes $perv > /tmp/camlreq.$$ \
   || exit $?
 camlrun $stdlib/camllink -stdlib $stdlib $custom -require /tmp/camlreq.$$ \
   -exec /tmp/camlout.$$ -g $includes stdlib$p.zo $linkfiles toplib.zo || exit $?
-camlrun $stdlib/expunge /tmp/camlout.$$ $output sys $perv || exit $?
+camlrun $stdlib/expunge $debug /tmp/camlout.$$ $output sys $perv || exit $?
 rm -f /tmp/camlreq.$$ /tmp/camlout.$$
 if test -n "$custom"; then
   if mv $output /tmp/camlcode.$$ \
