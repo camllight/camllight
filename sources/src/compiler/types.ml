@@ -359,3 +359,19 @@ and filter_expand ty1 ty2 =
   | (_, _) ->
       raise Unify
 ;;
+
+(* Extract the list of labels of a record type. *)
+
+let rec labels_of_type ty =
+  match (type_repr ty).typ_desc with
+    Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args) ->
+      labels_of_type (expand_abbrev params body args)
+  | Tconstr(cstr, _) ->
+      begin match (type_descr_of_type_constr cstr).info.ty_desc with
+        Record_type lbl_list -> lbl_list
+      | _ -> fatal_error "labels_of_type"
+      end
+  | _ ->
+      fatal_error "labels_of_type"
+;;
+

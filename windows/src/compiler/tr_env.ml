@@ -11,6 +11,7 @@
 type access_path =
     Path_root
   | Path_son of int * access_path
+  | Path_tuple of access_path list
 ;;
 
 type transl_env =
@@ -19,9 +20,12 @@ type transl_env =
   | Tenv of (string * access_path) list * transl_env
 ;; 
 
-let translate_path root = transl where rec transl = function
-    Path_root          -> root
-  | Path_son(n, p)     -> Lprim(Pfield n, [transl p])
+let translate_path root =
+  let rec transl = function
+      Path_root -> root
+    | Path_son(n, p) -> Lprim(Pfield n, [transl p])
+    | Path_tuple pl -> Lprim(Pmakeblock(ConstrRegular(0,1)), map transl pl)
+  in transl
 ;;
 
 let rec translate_access s env =
@@ -44,12 +48,34 @@ let translate_update s env newval =
   | Tenv(L,env)   ->
       try
         match assoc s L with
-          Path_root -> raise Not_found
+          Path_root -> transl (i+1) env
+            (* We have two occurrences of s in the environment:
+               one is let-bound (path = Path_root) and is the value
+               at the time of the matching,
+               the other is a non-trivial access path in the data structure.
+               The latter is the one that should be modified, so we skip the
+               former. *)
         | Path_son(start,rest) ->
             Lprim(Psetfield start, [translate_path (Lvar i) rest; newval])
+        | Path_tuple pl -> fatal_error "translate_update"
       with Not_found ->
         transl (i+1) env
   in transl 0 env
+;;
+
+let rec pat_is_named (Pat(desc,loc)) =
+  match desc with
+    Zvarpat s -> true
+  | Zaliaspat(pat, s) -> true
+  | Zconstraintpat(pat, _) -> pat_is_named pat
+  | _ -> false
+;;
+
+let tuple_path nfields path =
+  let rec list_of_fields i =
+    if i >= nfields then [] else Path_son(i, path) :: list_of_fields (succ i)
+  in
+    Path_tuple(list_of_fields 0)
 ;;
 
 let rec paths_of_pat path (Pat(desc,loc)) =
@@ -69,7 +95,7 @@ let rec paths_of_pat path (Pat(desc,loc)) =
   | Zconstruct1pat(cstr, p) ->
       begin match cstr.info.cs_kind with
         Constr_superfluous n ->
-          paths_of_pat path p
+          paths_of_pat (if pat_is_named p then tuple_path n path else path) p
       | _ ->
           paths_of_pat (Path_son(0, path)) p
       end
@@ -116,7 +142,9 @@ let add_lets_to_expr varlist env expr =
       [] -> []
     | var::rest ->
         translate_access var env :: add (Treserved env) rest in
-  Llet(add env varlist, expr)
+  match add env varlist with
+    [] -> expr
+  | el -> Llet(el, expr)
 ;;
 
 let add_pat_to_env env pat =

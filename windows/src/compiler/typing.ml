@@ -311,15 +311,7 @@ let rec type_expr env =
             unify_expr expr ty ty_res;
             texp (e, ty_arg))
           lbl_expr_list;
-        let label_list =
-          match (type_repr ty).typ_desc with
-            Tconstr(cstr, _) ->
-              begin match (type_descr_of_type_constr cstr).info.ty_desc with
-                Record_type lbl_list -> lbl_list
-              | _ -> fatal_error "labels_of_type"
-              end
-          | _ ->
-              fatal_error "labels_of_type" in
+        let label_list = labels_of_type ty in
         let v = make_vect (list_length label_list) false in
           do_list (fun (lbl, e) ->
             let p = lbl.info.lbl_pos in

@@ -6,8 +6,6 @@
 #open "globals";;
 #open "builtins";;
 #open "syntax";;
-#open "types";;
-#open "typing";;
 #open "primdecl";;
 %}
 

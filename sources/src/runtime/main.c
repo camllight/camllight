@@ -58,18 +58,25 @@ static int read_trailer(fd, trail)
 
 extern char * searchpath();
 
-int attempt_open(name, trail)
+int attempt_open(name, trail, do_open_script)
      char ** name;
      struct exec_trailer * trail;
+     int do_open_script;
 {
   char * truename;
   int fd;
   int err;
+  char buf [2];
 
   truename = searchpath(*name);
   if (truename == 0) truename = *name; else *name = truename;
   fd = open(truename, O_RDONLY | O_BINARY);
   if (fd == -1) return FILE_NOT_FOUND;
+  if (!do_open_script){
+    err = read (fd, buf, 2);
+    if (err < 2) return TRUNCATED_FILE;
+    if (buf [0] == '#' && buf [1] == '!') return BAD_MAGIC_NUM;
+  }
   err = read_trailer(fd, trail);
   if (err != 0) { close(fd); return err; }
   return fd;
@@ -81,6 +88,27 @@ char usage[] =
 #else
   "usage: camlrun [-v] [-V] [-g generation size] [-F free mem %] <file> <args>\n";
 #endif
+
+/* Invocation of camlrun: 4 cases.
+
+   1.  runtime + bytecode
+       user types:  camlrun [options] bytecode args...
+       arguments:  camlrun [options] bytecode args...
+
+   2.  bytecode script
+       user types:  bytecode args...
+    a  arguments: (kernel1)  camlrun ./bytecode args...
+    b  arguments: (kernel2)  bytecode bytecode args...
+
+   3.  concatenated runtime and bytecode
+       user types:  composite args...
+       arguments:  composite args...
+
+Algorithm: try to use the first argument as a byte-code file, except when
+it starts with #! (case 2b).  If that fails (cases 1 and 2a) or if the file
+starts with #!, parse the line as: (whatever) [options] bytecode args...
+
+*/
 
 int main(argc, argv)
      int argc;
@@ -108,7 +136,7 @@ int main(argc, argv)
 #endif
 
   i = 0;
-  fd = attempt_open(&argv[0], &trail);
+  fd = attempt_open(&argv[0], &trail, 0);
 
   if (fd < 0) {
 
@@ -149,7 +177,7 @@ int main(argc, argv)
       exit(2);
     }
 
-    fd = attempt_open(&argv[i], &trail);
+    fd = attempt_open(&argv[i], &trail, 1);
 
     switch(fd) {
     case FILE_NOT_FOUND:

@@ -23,7 +23,6 @@ let new initial_size =
 ;;
 
 let clear h =
-  h.max_len <- 2;
   for i = 0 to vect_length h.data - 1 do
     h.data.(i) <- Empty
   done

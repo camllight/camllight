@@ -1,8 +1,8 @@
 (* The lexer definition *)
 
 {
-/**/ #open "misc";;
-/**/ #open "parser";;
+(**) #open "misc";;
+(**) #open "parser";;
 
 (* For nested comments *)
 

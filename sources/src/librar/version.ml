@@ -1,1 +1,1 @@
-let banner = "The Caml Light librarian, version 0.6";;
+let banner = "The Caml Light librarian, version 0.61";;

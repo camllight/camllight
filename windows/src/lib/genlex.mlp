@@ -1,13 +1,13 @@
 (* A generic lexer *)
 
-/**/ #open "float";;
-/**/ #open "int";;
-/**/ #open "ref";;
-/**/ #open "exc";;
-/**/ #open "list";;
-/**/ #open "fchar";;
-/**/ #open "fstring";;
-/**/ #open "stream";;
+(**) #open "float";;
+(**) #open "int";;
+(**) #open "ref";;
+(**) #open "exc";;
+(**) #open "list";;
+(**) #open "fchar";;
+(**) #open "fstring";;
+(**) #open "stream";;
 
 (* The string buffering machinery *)
 
@@ -97,8 +97,8 @@ let make_lexer keywords =
   and neg_number = function
     [< '(*'*) `0`..`9` as c; s >] ->
       reset_buffer(); store `-`; store c; number s
-  | [< >] ->
-      keyword_or_error `-`
+  | [< s >] ->
+      reset_buffer(); store `-`; ident2 s
     
   and number = function
     [< '(*'*) `0`..`9` as c; s >] ->

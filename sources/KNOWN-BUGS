@@ -1,23 +1,5 @@
 The following problems have not been fixed at the time of this release:
 
-1- Patterns of the format (C x) where C has several arguments:
-
-   In the following code:
-
-        type t = A | B of int * int;;
-        match B(1,2) with B x - > x;;
-
-   the pair bound to x is not equal to (1,2): its first component is 1,
-   its second component is 2, but it is not correctly tagged, hence
-   x = (1,2) returns false, and x and (1,2) have different hash values.
-   The difference between x and (1,2) is observable only with ad-hoc
-   polymorphic primitives such as equality (=) and hashing.
-
-   To avoid this problem, match against a more precise pattern and rebuild
-   the tuple of arguments in the right-hand side:
-
-        match B(1,2) with B(y,z) -> (y,z);;
-
 2- Stream concatenation using [< ... >] does not always preserve the
    sharing among streams, and sometimes duplicate stream subcomponents.
    For instance, if you define s' = [< '1; s >] and then read alternatively

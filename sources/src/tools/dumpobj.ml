@@ -48,11 +48,12 @@ let print_code ic len =
         if op == ACCESS or op == DUMMY or op == ENDLET
         or op == CONSTBYTE or op == ATOM or op == GETFIELD or op == SETFIELD
         or op == MAKEBLOCK1 or op == MAKEBLOCK2 or op == MAKEBLOCK3
-        or op == MAKEBLOCK4 or op == C_CALL1 or op == C_CALL2 or op == C_CALL3
-        or op == C_CALL4 or op == C_CALL5 then
+        or op == MAKEBLOCK4 then
           print_int(input_byte ic)
-        else if op == GETGLOBAL or op == SETGLOBAL or op == PUSH_GETGLOBAL_APPLY
-        or op == PUSH_GETGLOBAL_APPTERM then
+        else if op == GETGLOBAL or op == SETGLOBAL
+        or op == PUSH_GETGLOBAL_APPLY or op == PUSH_GETGLOBAL_APPTERM
+        or op == C_CALL1 or op == C_CALL2 or op == C_CALL3
+        or op == C_CALL4 or op == C_CALL5 then
           print_int(input_u16 ic)
         else if op == CONSTSHORT then
           print_int(input_s16 ic)
@@ -74,6 +75,10 @@ let print_code ic len =
              done)
         else if op == BRANCHINTERVAL then
           (print_depl ic; print_string ", "; print_depl ic)
+        else if op == C_CALLN then
+          (print_int(input_byte ic);
+           print_string ", ";
+           print_int(input_u16 ic))
         else
           ();
         print_newline()

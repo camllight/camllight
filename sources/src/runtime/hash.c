@@ -16,7 +16,9 @@ value hash_univ_param(count, limit, obj) /* ML */
   hash_univ_count = Long_val(count);
   hash_accu = 0;
   hash_aux(obj);
-  return Val_long(hash_accu & Max_long);
+  return Val_long(hash_accu & 0x3FFFFFFF);
+  /* The & has two purposes: ensure that the return value is positive
+     and give the same result on 32 bit and 64 bit architectures. */
 }
 
 #define Alpha 65599
@@ -29,12 +31,33 @@ static void hash_aux(obj)
 {
   unsigned char * p;
   mlsize_t i;
+  tag_t tag;
 
   hash_univ_limit--;
   if (hash_univ_count < 0 || hash_univ_limit < 0) return;
 
-  if (Is_block(obj) && (Is_in_heap(obj) || Is_young(obj)))
-    switch(Tag_val(obj)) {
+  if (Is_long(obj)) {
+    hash_univ_count--;
+    Combine(Long_val(obj));
+    return;
+  }
+
+  /* Atoms are not in the heap, but it's better to hash their tag
+     than to do nothing. */
+
+  if (obj >= Atom(0) && obj <= Atom(255)) {
+    tag = Tag_val(obj);
+    hash_univ_count--;
+    Combine_small(tag);
+    return;
+  }
+
+  /* Pointers into the heap are well-structured blocks.
+     We can inspect the block contents. */
+  
+  if (Is_in_heap(obj) || Is_young(obj)) {
+    tag = Tag_val(obj);
+    switch (tag) {
     case String_tag:
       hash_univ_count--;
       i = string_length(obj);
@@ -42,17 +65,28 @@ static void hash_aux(obj)
         Combine_small(*p);
       break;
     case Double_tag:
+      /* For doubles, we inspect their binary representation, LSB first.
+         The results are consistent among all platforms with IEEE floats. */
       hash_univ_count--;
-      i = Wosize_val(obj);
-      while (i != 0) {
-        i--;
-        Combine(Field(obj, i));
-      }
+#ifdef BIG_ENDIAN
+      for (p = &Byte_u(obj, sizeof(double) - 1), i = sizeof(double);
+           i > 0;
+           p--, i--)
+#else
+      for (p = &Byte_u(obj, 0), i = sizeof(double);
+           i > 0;
+           p++, i--)
+#endif
+        Combine_small(*p);
       break;
     case Abstract_tag:
     case Final_tag:
+      /* We don't know anything about the contents of the block.
+         Better do nothing. */
       break;
     default:
+      hash_univ_count--;
+      Combine_small(tag);
       i = Wosize_val(obj);
       while (i != 0) {
         i--;
@@ -60,8 +94,9 @@ static void hash_aux(obj)
       }
       break;
     }
-  else {
-    hash_univ_count--;
-    Combine((long) obj);
+    return;
   }
+
+  /* Otherwise, obj is a pointer outside the heap, to an object with
+     a priori unknown structure. Better to do nothing in this case. */
 }
