@@ -33,17 +33,15 @@ void gc_message (msg, arg)
 void fatal_error (msg)
      char * msg;
 {
-#ifdef HAS_UI
-  ui_fatal_error("%s", msg);
-#else
-  fprintf (stderr, "%s", msg);
-  exit(2);
-#endif
+  fatal_error_arg("%s", msg);
 }
 
 void fatal_error_arg (fmt, arg)
      char * fmt, * arg;
 {
+#ifdef NEED_FREE_ALL
+  xfree_all();
+#endif
 #ifdef HAS_UI
   ui_fatal_error(fmt, arg);
 #else
