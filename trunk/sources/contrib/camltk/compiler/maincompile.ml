@@ -30,15 +30,15 @@ let parse_file filename =
        Entry Main lexbuf
       done
   with
-    parsing__Parse_error _ ->
+    parsing__Parse_error ->
       close_in ic;
       prerr_error_header();
-      prerr_string "syntax error \n";
+      prerr_string "Syntax error \n";
       exit 1
   | lexer__Lexical_error s ->
       close_in ic;
       prerr_error_header();
-      prerr_string "lexical error (";
+      prerr_string "Lexical error (";
       prerr_string s;
       prerr_string ")\n";
       exit 1

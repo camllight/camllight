@@ -137,7 +137,7 @@ let interprete_line line =
       	  resume_user_input ();
 	  false
     with
-      Parse_error | parsing__Parse_error _ ->
+      Parse_error | parsing__Parse_error ->
         error "Syntax error.";;
 
 let line_loop line_buffer =
