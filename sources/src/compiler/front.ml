@@ -217,10 +217,8 @@ let rec translate_expr env =
                   translate_compar fn (assoc fn comparison_table)
                                    arg1.e_typ (transl arg1) (transl arg2)
                 with Not_found ->
-                  event__after env expr (Lprim(p, map transl args))
+                  Lprim(p, map transl args)
                 end
-            | (Pccall(_, _), _) ->
-                event__after env expr (Lprim(p, map transl args))
             | (_, _) ->
                 Lprim(p, map transl args)
           else

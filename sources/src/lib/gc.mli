@@ -70,9 +70,6 @@ type control = {
 value stat : unit -> stat = 1 "gc_stat";;
   (* Return the current values of the memory management counters in a
      [stat] record. *)
-value print_stat : io__out_channel -> unit;;
-  (* Print the current values of the memory management counters (in
-     human-readable form) into the channel argument. *)
 value get : unit -> control = 1 "gc_get";;
   (* Return the current values of the GC parameters in a [control] record. *)
 value set : control -> unit = 1 "gc_set";;
