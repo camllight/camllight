@@ -38,8 +38,7 @@ let show_point module point before =
     with
       Out_of_range ->
         prerr_endline "Position out of range."
-    | Cannot_find_file name ->
-        prerr_endline ("Cannot find file " ^ name ^ ".");;
+    |  Toplevel -> ();;
 
 let show_listing module beginning en point before =
   let buffer = get_buffer module in
@@ -53,5 +52,4 @@ let show_listing module beginning en point before =
     with
       Out_of_range ->
         prerr_endline "Position out of range."
-    | Cannot_find_file name ->
-        prerr_endline ("Cannot find file " ^ name ^ ".");;
+    |  Toplevel -> ();;

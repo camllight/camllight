@@ -6,11 +6,8 @@ type OBJECT;;
 
 (*** Invalid value ***)
 
-(* Return the invalid value used to flag unbound globals *)
-value invalid_value : unit -> VALUE
-  = 1 "invalid_value";;
 (* Is the value valid (global variable bound). *)
-value valid_value : VALUE -> bool
+value valid_value : 'a -> bool
   = 1 "valid_value";;
 
 (*** Informations about objects. ***)

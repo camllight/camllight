@@ -1,34 +1,31 @@
-# Makefile for the Caml Light debugger
+CC		= gcc
+OPTS		= -DANSI
+CAMLCOMP	= camlc
+CAMLLEX		= camllex
+CAMLYACC	= camlyacc -v
+CFLAGS		= $(DEBUG) -Wall $(OPTS)
+INCLUDES	= -I ../compiler -I ../linker
+COMPFLAGS	= -c $(DEBUG) $(INCLUDES)
+LINKFLAGS	= -g $(INCLUDES) -ccopt -Wall
+YACCFLAGS	=# -v
+LIBS		= -lunix
 
-# These options are overriden when called from ../Makefile
-CC=cc
-OPTS=
-LIBDIR=/usr/local/lib/caml-light
-CPP=/lib/cpp -P
-
-# Compilation options
-CAMLC=camlc
-CAMLLEX=camllex
-CAMLYACC=camlyacc
-INCLUDES=-I ../libunix -I ../../src/compiler -I ../../src/linker
-COMPFLAGS=$(INCLUDES)
-LINKFLAGS=$(INCLUDES)
-CFLAGS=$(OPTS) -O -I../../src/runtime
-
+DEBUG=	-g
+NAME=	camldebug
 
 EXTERNOBJS = \
-	config.zo globals.zo misc.zo \
+	config.zo globals.zo misc.zo ../runtime/io.o \
 	symtable.zo modules.zo builtins.zo \
 	types.zo pr_type.zo \
-	tr_env.zo 
+	tr_env.zo
 OBJS =	debugger_config.zo constants.zo primitives.zo unix_tools.zo \
 	modules2.zo \
 	parameters.zo \
 	lexer.zo \
 	interruption.zo \
 	input_handling.zo \
-	communication.zo \
-	value.zo \
+	communication.zo communication.o \
+	value.zo value.o \
 	source.zo \
 	pr_value.zo \
 	checkpoints.zo \
@@ -49,63 +46,79 @@ OBJS =	debugger_config.zo constants.zo primitives.zo unix_tools.zo \
 	version.zo \
 	main.zo
 
-COBJS=communication.o value.o
+all:	$(NAME)
 
-GENFILES=constants.ml lexer.ml parser.ml parser.mli main.ml version.ml
+#					Crée l'executable
+$(NAME):	$(OBJS)
+	camlc -g -custom $(LINKFLAGS) -o $(NAME) unix.zo \
+		$(EXTERNOBJS) $(OBJS) $(LIBS)
 
-all: camldbg
+#					Efface les fichiers inutiles
 
-camldbg: $(OBJS) $(COBJS)
-	$(CAMLC) $(LINKFLAGS) -custom -o camldbg \
-          unix.zo $(EXTERNOBJS) $(OBJS) $(COBJS) ../libunix/libunix.a
+dump_event: constants.zo dump_event.zo
+	camlc -g $(LINKFLAGS) -o dump_event symtable.zo constants.zo \
+		information.zo dump_event.zo
 
 clean:
-	rm -f camldbg *.zi *.zo *.o
-	rm -f $(GENFILES)
+#	rm -f $(NAME) *~
+	rm -f *.zi *.zix *.zo *.o
+	rm -f constants.ml
+
 
 install:
-	cp camldbg $(BINDIR)/camldbg
+	cp camldebug $(BINDIR)
+	strip $(BINDIR)/camlrun
 
-.SUFFIXES :
-.SUFFIXES : .mli .ml .zi .zo .c .o
+#					Tags pour Emacs
+tags:
+	mletags *.mli *.ml ../compiler/*.mli ../compiler/*.ml ../linker/*.ml
+	etags -a *.[ch] ../runtime/*.[ch]
 
-.mli.zi:
-	$(CAMLC) -c $(COMPFLAGS) $<
-
-.ml.zo:
-	$(CAMLC) -c $(COMPFLAGS) $<
-
-.c.o:
-	$(CC) $(CFLAGS) -c $<
-
-constants.ml: constants.c
-	@rm -f constants.ml
-	$(CC) $(CFLAGS) -o constants constants.c
-	./constants > constants.ml
-	rm -f constants
-	@chmod -w constants.ml
-
-lexer.ml: lexer.mll
-	$(CAMLLEX) lexer.mll
-
-parser.ml parser.mli: parser.mly
-	$(CAMLYACC) parser.mly
-
-main.ml: main.mlp
-	@rm -f main.ml
-	sed -e 's|LIBDIR|$(LIBDIR)|' main.mlp > main.ml
-	@chmod -w main.ml
-
-version.ml: version.mlp ../../src/version.h
-	@rm -f version.ml
-	$(CPP) -I../../src version.mlp > version.ml
-	@chmod -w version.ml
-
-depend: $(GENFILES)
+#					Crée liste des dépendances
+depend:
 	mv Makefile Makefile.bak
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
-         (camldep *.mli *.ml; gcc -MM $(OPTS) -I../../src/runtime *.c)) \
-        > Makefile
+         (camldep *.mli *.ml; gcc -MM $(OPTS) *.c)) > Makefile
+
+#					Comment compiler
+.SUFFIXES :
+.SUFFIXES : .mll .mly .mli .ml .zi .zo .c .o
+
+.mll.zo:
+	$(CAMLLEX) $<
+	$(CAMLCOMP) $(COMPFLAGS) $*.ml
+	rm $*.ml
+
+.mly.zi:
+	$(CAMLYACC) $(YACCFLAGS) $<
+	$(CAMLCOMP) $(COMPFLAGS) $*.mli $*.ml
+	rm $*.mli $*.ml
+
+.mly.zo:
+	$(CAMLYACC) $(YACCFLAGS) $<
+	$(CAMLCOMP) $(COMPFLAGS) $*.mli $*.ml
+	rm $*.mli $*.ml
+
+.mli.zi:
+	$(CAMLCOMP) $(COMPFLAGS) $<
+
+.ml.zo:
+	$(CAMLCOMP) $(COMPFLAGS) $<
+
+.ml.zi:
+	$(CAMLCOMP) $(COMPFLAGS) $<
+
+.c.o:
+	$(CC) $(COMPFLAGS) $<
+
+constants.zo constants.zi: constants.c
+	$(CC) -o constants constants.c
+	constants > constants.ml
+	$(CAMLCOMP) $(COMPFLAGS) constants.ml
+
+parser.zi: primitives.zi input_handling.zi parser_aux.zi
+parser.zo: primitives.zi input_handling.zi parser_aux.zi
+lexer.zo: parser.zi
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
@@ -115,7 +128,6 @@ communication.zi: primitives.zi value.zi
 events.zi: primitives.zi 
 frames.zi: primitives.zi 
 input_handling.zi: primitives.zi 
-parser.zi: parser_aux.zi primitives.zi 
 parser_aux.zi: primitives.zi 
 pattern_matching.zi: parser_aux.zi value.zi 
 program_loading.zi: primitives.zi 
@@ -127,30 +139,27 @@ breakpoints.zo: breakpoints.zi source.zi primitives.zi checkpoints.zi \
     constants.zo communication.zi interruption.zi 
 checkpoints.zo: checkpoints.zi primitives.zi communication.zi 
 command_line_interpreter.zo: command_line_interpreter.zi breakpoints.zi \
-    show_source.zi time_travel.zi show_information.zo parameters.zi \
-    primitives.zi value.zi program_loading.zi program_management.zi \
-    checkpoints.zi events.zi debugger_config.zi lexer.zo variables.zi \
-    unix_tools.zi history.zi pattern_matching.zi frames.zi source.zi \
-    pr_value.zo parser_aux.zi parser.zi input_handling.zi communication.zi \
-    modules2.zi 
-communication.zo: communication.zi primitives.zi value.zi input_handling.zi \
+    time_travel.zi show_information.zo parameters.zi primitives.zi value.zi \
+    program_loading.zi program_management.zi checkpoints.zi events.zi \
+    debugger_config.zi variables.zi unix_tools.zi pattern_matching.zi \
+    frames.zi source.zi pr_value.zo parser_aux.zi input_handling.zi \
+    communication.zi modules2.zi 
+communication.zo: communication.zi primitives.zi input_handling.zi \
     unix_tools.zi 
 debugger_config.zo: debugger_config.zi 
 events.zo: events.zi checkpoints.zi primitives.zi communication.zi 
 frames.zo: frames.zi events.zi checkpoints.zi primitives.zi \
     communication.zi 
-history.zo: history.zi checkpoints.zi primitives.zi 
-input_handling.zo: input_handling.zi primitives.zi lexer.zo 
+history.zo: history.zi checkpoints.zi 
+input_handling.zo: input_handling.zi primitives.zi 
 interruption.zo: interruption.zi 
-lexer.zo: primitives.zi parser.zi 
 main.zo: show_information.zo parameters.zi time_travel.zi primitives.zi \
     program_loading.zi program_management.zi checkpoints.zi \
-    command_line_interpreter.zi debugger_config.zi lexer.zo frames.zi \
+    command_line_interpreter.zi debugger_config.zi frames.zi \
     interruption.zi input_handling.zi version.zo communication.zi \
     modules2.zi 
 modules2.zo: modules2.zi 
 parameters.zo: parameters.zi primitives.zi 
-parser.zo: parser.zi parser_aux.zi primitives.zi input_handling.zi 
 pattern_matching.zo: pattern_matching.zi primitives.zi parser_aux.zi \
     value.zi 
 pr_value.zo: value.zi 
@@ -175,13 +184,10 @@ unix_tools.zo: unix_tools.zi primitives.zi
 value.zo: value.zi constants.zo communication.zi 
 variables.zo: variables.zi primitives.zi value.zi frames.zi \
     communication.zi 
-communication.o : communication.c ../../src/runtime/../runtime/mlvalues.h ../../src/runtime/../runtime/config.h \
-  ../../src/runtime/../runtime/../../config/m.h ../../src/runtime/../runtime/../../config/s.h \
-  ../../src/runtime/../runtime/misc.h ../../src/runtime/../runtime/fail.h ../../src/runtime/../runtime/io.h \
-  ../../src/runtime/../runtime/alloc.h 
-constants.o : constants.c ../../src/runtime/../runtime/mlvalues.h ../../src/runtime/../runtime/config.h \
-  ../../src/runtime/../runtime/../../config/m.h ../../src/runtime/../runtime/../../config/s.h \
-  ../../src/runtime/../runtime/misc.h ../../src/runtime/../runtime/exec.h ../../src/runtime/../runtime/instruct.h 
-value.o : value.c ../../src/runtime/../runtime/mlvalues.h ../../src/runtime/../runtime/config.h \
-  ../../src/runtime/../runtime/../../config/m.h ../../src/runtime/../runtime/../../config/s.h \
-  ../../src/runtime/../runtime/misc.h ../../src/runtime/../runtime/fail.h ../../src/runtime/../runtime/alloc.h 
+communication.o : communication.c ../runtime/mlvalues.h ../runtime/config.h \
+  ../runtime/../../config/m.h ../runtime/../../config/s.h ../runtime/fail.h ../runtime/io.h \
+  ../runtime/alloc.h 
+constants.o : constants.c ../runtime/mlvalues.h ../runtime/config.h ../runtime/../../config/m.h \
+  ../runtime/../../config/s.h ../runtime/exec.h ../runtime/instruct.h 
+value.o : value.c ../runtime/mlvalues.h ../runtime/config.h ../runtime/../../config/m.h \
+  ../runtime/../../config/s.h ../runtime/fail.h ../runtime/alloc.h 

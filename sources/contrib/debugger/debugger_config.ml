@@ -20,7 +20,7 @@ let default_modules =
        "vect"; "char"; "string"; "fvect"; "fchar"; "fstring";
        "bool"; "exc"; "stream"];;
 
-(*** Time travel parameters. ***)
+(*** Time travel paramaters. ***)
 
 (* Step between checkpoints for long displacements.*)
 let checkpoint_big_step = ref 10000;;

@@ -91,11 +91,11 @@ let find_ident name matcher action alternative lexbuf =
       | _ ->
           error ("Ambiguous " ^ name ^ ".");;
 
-let find_variable action alternative lexbuf =
-  find_ident "variable name" matching_variables action alternative lexbuf;;
+let find_variable =
+  find_ident "variable name" matching_variables;;
 
-let find_info action alternative lexbuf =
-  find_ident "info command" matching_infos action alternative lexbuf;;
+let find_info =
+  find_ident "info command" matching_infos;;
 
 let add_breakpoint_at_pc pc =
   try
@@ -320,7 +320,7 @@ let instr_print lexbuf =
       	 let (val, typ) = variable x in
       	   output_variable_name std_out x;
            print_string " : ";
-           output_one_type std_out typ; print_string " = ";
+           print_one_type typ; print_string " = ";
            print_value val typ;
            print_newline ())
       variables;;
@@ -334,7 +334,7 @@ let instr_match lexbuf =
 	   (name, val, typ) ->
 	     print_string name;
 	     print_string " : ";
-             output_one_type std_out typ;
+             print_one_type typ;
              print_string " = ";
              print_value val typ;
              print_newline ())
