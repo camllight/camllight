@@ -24,15 +24,15 @@ presents many realistic examples of Caml programs.
 \item Lawrence C.\ Paulson. {\it ML for the working programmer.}
 Cambridge University Press, 1991.
 
-An excellent introduction to programming in Standard ML. Develops a
+A good introduction to programming in Standard ML. Develops a
 theorem prover as a complete example. Contains a presentation of
 the module system of Standard ML.
 
-\item Chris Reade. {\em Elements of Functional Programming.}
-Addison-Wesley, 1989.
+\item Jeffrey D.\ Ullman. {\it Elements of ML programming.}
+Prentice Hall, 1993.
 
-An introduction to Standard ML, with sections on denotational
-semantics and lambda-calculus.
+Another good introduction to programming in Standard ML. No realistic
+examples, but a very detailed presentation of the language constructs.
 
 \item Ryan Stansifer. {\em ML primer.} Prentice-Hall, 1992.
 
@@ -45,12 +45,6 @@ l'impératif avec Caml et Ada.} InterÉditions, 1992.
 A first course in programming, that first introduces the main programming
 notions in Caml, then shows them underlying Ada. Intended for
 beginners; slow-paced for the others.
-
-\item Ake Wikstrom. {\em Functional programming using Standard ML}.
-Prentice-Hall, 1987.
-
-A first course in programming, taught in Standard ML. Intended for
-absolute beginners; slow-paced for the others.
 
 \item Harold Abelson and Gerald Jay Sussman.
 {\em Structure and Interpretation of Computer Programs.} The MIT

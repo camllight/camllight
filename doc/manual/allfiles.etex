@@ -1,7 +1,7 @@
-\title{The Caml Light system, release 0.6 \\
+\title{The Caml Light system, release 0.7 \\
        Documentation and user's manual}
 \author{Xavier Leroy}
-\date{September 1993}
+\date{January 1995}
 
 \makeindex
 \makealtindex{\jobname.kwd}
@@ -31,6 +31,9 @@
 \input core.tex
 \input stdlib.tex
 \input graph.tex
+\input libunix.tex
+\input libnum.tex
+\input libstr.tex
 
 \part{The Caml Light commands}
 \label{p:commands}

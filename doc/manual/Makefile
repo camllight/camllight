@@ -39,6 +39,7 @@ all:
 	make manual plaintext
 
 clean:
+	rm $(FILES)
 	@cd refman; make clean
 	@cd library; make clean
 	@cd cmds; make clean
