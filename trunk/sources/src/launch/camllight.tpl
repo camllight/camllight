@@ -22,7 +22,7 @@ while : ; do
     -*)
       echo "Unknown option \"$1\", ignored" >&2;;
     *)
-      PATH=${PATH}:${stdlib}
+      PATH=${stdlib}:${PATH}
       exec $1 -stdlib $stdlib $includes $options;;
   esac
   shift

@@ -56,7 +56,7 @@ camlrun $stdlib/provide -stdlib $stdlib $includes $perv > /tmp/camlreq.$$ \
   || exit $?
 camlrun $stdlib/camllink -stdlib $stdlib $custom -require /tmp/camlreq.$$ \
   -exec /tmp/camlout.$$ -g $includes stdlib.zo $linkfiles toplib.zo || exit $?
-echo sys $perv | camlrun $stdlib/expunge /tmp/camlout.$$ $output || exit $?
+camlrun $stdlib/expunge /tmp/camlout.$$ $output sys $perv || exit $?
 rm -f /tmp/camlreq.$$ /tmp/camlout.$$
 if test -n "$custom"; then
   if mv $output /tmp/camlcode.$$ \
