@@ -1,6 +1,19 @@
 #open "support";;
 #open "camltk";;
 
+(* Until TCL_ERROR_EXN is defined in the runtime and toplevel *)
+let tcl_eval s = 
+  try tcl_eval s
+  with 
+    Failure s -> raise (TkError s)
+;;
+let opentk s =
+  try opentk s
+  with
+    Failure s -> raise (TkError s)
+;;
+
+
 let debug = 
  ref (try sys__getenv "CAMLTKDEBUG"; true
       with Not_found -> false)
@@ -142,7 +155,7 @@ let OpenTkClass s =
 ;;
 
 let CloseTk () =
-  () (* ???? tcl_eval "exit" *)
+  tcl_eval "destroy ."; ()
 ;;
 
 let MainLoop =
