@@ -12,13 +12,15 @@ CAMLLEX=camllex
 
 CAMLTKDIR=../lib
 SUPPORTDIR=../libsupport
+UNIXDIR=../../libunix
 
 TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) \
 	   $(SUPPORTDIR)/camltk.o -lcaml -ltk -ltcl -lX11
 
 CAMLDEP=../../../src/tools/camldep
 
-COMPFLAGS=-g -O fast -I $(CAMLTKDIR) -I $(SUPPORTDIR) -I ../../../src/compiler
+COMPFLAGS=-g -O fast -I $(CAMLTKDIR) -I $(SUPPORTDIR) -I $(UNIXDIR) \
+          -I ../../../src/compiler
 
 COMPILEROBJS = config.zo misc.zo interntl.zo globals.zo modules.zo \
                location.zo types.zo \
@@ -29,13 +31,14 @@ all: camlbrowser
 
 # # Two process architecture
 # camlbrowser: $(COMPILEROBJS) $(OBJS)
-# 	$(CAMLC) $(LINKFLAGS) -I $(CAMLTKDIR) -o camlbrowser unix.zo \
-#                tklib2.zo $(COMPILEROBJS) $(OBJS) -lunix
+# 	$(CAMLC) $(LINKFLAGS) -I $(CAMLTKDIR) -o camlbrowser $(UNIXDIR)/unix.zo \
+#                tklib2.zo $(COMPILEROBJS) $(OBJS) $(UNIXDIR)/libunix.a
 
 camlbrowser: $(OBJS)
 	$(CAMLC) $(LINKFLAGS) -I $(CAMLTKDIR) -I ../../../src/compiler \
-		-o camlbrowser unix.zo \
-                tklib1.zo $(COMPILEROBJS) $(OBJS) $(TKLINKOPT) -lunix
+		-o camlbrowser $(UNIXDIR)/unix.zo \
+                tklib1.zo $(COMPILEROBJS) $(OBJS) $(TKLINKOPT) \
+                $(UNIXDIR)/libunix.a
 
 lexer.mll: lexer.mlp
 	$(CPP) -Dunix lexer.mlp > lexer.mll
