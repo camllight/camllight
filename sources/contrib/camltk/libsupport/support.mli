@@ -40,6 +40,7 @@ value Widget_any_table : string list
 and Widget_menu_table : string list
 and Widget_frame_table : string list
 and Widget_entry_table : string list
+and Widget_listbox_table : string list
 and chk_sub : string -> 'a list -> 'a -> unit
 and check_widget_class : Widget -> string -> unit
       (* Widget subtyping *)
