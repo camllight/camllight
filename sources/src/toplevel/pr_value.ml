@@ -221,6 +221,8 @@ and print_vect depth obj ty_arg =
     close_box()
 ;;
 
-let print_value obj ty = print_val 0 !printer_depth obj ty
+let print_value obj ty =
+    try print_val 0 !printer_depth obj ty
+    with x -> print_newline(); flush std_err; raise x
 ;;
 
