@@ -14,7 +14,7 @@ let print_expr ty =
 let print_valdef env =
   do_list
     (fun (name, (typ, mut_flag)) ->
-       printf "value %s : %a;;\n" name output_one_type typ)
+       printf "value %s : %a;;\n" name output_schema typ)
     env;
   flush std_out
 ;;
