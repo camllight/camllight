@@ -64,13 +64,19 @@ let replace_string dest src pos =
 let string_for_read = fstring__string_for_read
 ;;
 
-let index_char_from = fstring__index_char_from
+let index_char_from s i c =
+  if i < 0 || i >= string_length s
+  then invalid_arg "index_char_from"
+  else fstring__index_char_from s i c
 ;;
 
 let index_char = fstring__index_char
 ;;
 
-let rindex_char_from = fstring__rindex_char_from
+let rindex_char_from s i c =
+  if i < 0 || i >= string_length s
+  then invalid_arg "rindex_char_from"
+  else fstring__rindex_char_from s i c
 ;;
 
 let rindex_char = fstring__rindex_char
