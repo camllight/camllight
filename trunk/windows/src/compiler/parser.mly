@@ -237,11 +237,7 @@ Expr :
       | Expr EQUALEQUAL Expr
           { make_binop "==" $1 $3 }
       | Expr COLONEQUAL Expr
-<<<<<<< parser.mly
-          { make_assign $1 $3 }
-=======
           { make_assignment $1 $3 }
->>>>>>> 1.5
       | Expr AMPERSAND Expr 
           { make_expr(Zsequand($1, $3)) }
       | Expr AMPERAMPER Expr 
