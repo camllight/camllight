@@ -19,12 +19,10 @@ takes place in a separate window, that can be made visible with the
 ``Show graphics window'' menu entry.
 \end{mac}
 
-\begin{pc} The graphics primitive are available both at toplevel and
-in separately compiled programs. The "open_graph" primitive switches
-the whole screen to graphics mode. Under the toplevel system, the
-user's phrases and the system responses are printed on the graphics
-screen too, possibly overwriting parts of the drawings, and causing
-scrolling when the bottom of the screen is reached.
+\begin{pc} The graphics primitive are available from the Windows
+application that runs the toplevel system. They are not available from
+programs compiled by "camlc" and run in a DOS command window.
+Drawing takes place in a separate window.
 \end{pc}
 
 The screen coordinates are interpreted as shown in the figure below.
@@ -85,28 +83,7 @@ geometry.
 \begin{mac} The argument to "open_graph" is ignored.
 \end{mac}
 
-\begin{pc}
-The 386 PC version supports VGA graphics cards, and a number of
-SuperVGA cards, provided the correct driver has been installed. (See
-the installation instructions.) Only 256 color modes are supported.
-This means a resolution of 320x200 on standard VGA, and from 640x480
-to 1024x768 on SuperVGA. 
-
-The graphics primitive do not work if Caml Light runs under Windows 3
-or any DPMI-compliant memory manager.
-
-The argument to "open_graph" is interpreted as follows:
-
-\begin{tableau}{|l|p{8cm}|}{Argument to "open_graph"}{Graphic mode}
-\entree{"\"highest\""}{highest possible resolution}
-\entree{"\"noninterlaced\""}{highest possible resolution, non-interlaced mode}
-\entree{"\"320x200\""}{standard 320x200 VGA mode}
-\entree{"\""\var{w}"x"\var{h}"\""}{at least \var{w} by \var{h} pixels,
-if possible}
-\entree{anything else}{default resolution, as set in the "GO32" variable
-(see the installation instructions).}
-\end{tableau}
-
+\begin{pc} The argument to "open_graph" is ignored.
 \end{pc}
 
 \begin{library}

@@ -63,21 +63,28 @@ back to the "#" prompt.
 \end{mac}
 
 \begin{pc} 
-The toplevel system is started by the command "caml". (The full name
-"camllight" had to be truncated because of the well-known limitations
-of MS-DOS.) Phrases are read on standard input, results are printed on
-standard output, errors on standard error. The "quit" system function
-terminates "caml".
+The toplevel system is presented as a Windows application named
+"Camlwin.exe". It should be launched from the Windows file manager or
+program manager.
 
-A number of TSR line editors that provide line editing
-and history facilities for the "command.com" command-line interpreter
-also work in conjunction with "caml". Some TSR's that work: "dosedit",
-"ced", "toddy". Some TSR's that don't work: "doskey" from the MS-DOS
-distribution.
+The ``Terminal'' windows is split in two panes. Phrases are entered
+and edited in the bottom pane. The top pane displays a copy of the
+input phrases as they are processed by the Caml Light toplevel,
+interspersed with the toplevel responses. The ``Return'' key sends the
+contents of the bottom pane to the Caml Light toplevel. The ``Enter''
+key inserts a newline without sending the contents of the Input
+window. (This can be configured with the ``Preferences'' menu item.)
+
+The contents of the input window can be edited at all times, with the
+standard Macintosh interface. An history of previously entered phrases
+is maintained and displayed in a separate window.
+
+To quit the "Camlwin" application, either select ``Quit'' from
+the ``File'' menu, or use the "quit" function described below.
 
 At any point, the parsing, compilation or evaluation of the current
-phrase can be interrupted by pressing "ctrl-break" or "ctrl-C".
-This goes back to the "#" prompt.
+phrase can be interrupted by selecting the ``Interrupt Caml Light''
+menu item. This goes back to the "#" prompt.
 \end{pc}
 
 \section{Options} \label{s:toplevel-options}
@@ -156,15 +163,6 @@ printed as is; otherwise, they are printed as decimal escape sequences
 ("\\"\var{ddd}).
 \end{options}
 \end{unix}
-
-\begin{pc} The following environment variables are also consulted:
-\begin{options}
-\item["CAMLLIB"] Contain the path to the standard library directory.
-
-\item["LANG"] When set, control which language is used to print the
-compiler messages (see the "-lang" command-line option).
-\end{options}
-\end{pc}
 
 \section{Toplevel control functions}
 \label{s:control}
