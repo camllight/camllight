@@ -803,6 +803,8 @@ widget text {
    function () yview_pickplace_line "yview -pickplace" (int)
    }
 
+# This module will be renamed "tktoplevel" to avoid collision with
+# Caml Light standard toplevel module.
 widget toplevel {
    option Background
    option Borderwidth
@@ -830,7 +832,20 @@ module focus {
   function  ()      none "focus none" ()
 }
 
-##### grab (TODO)
+type GrabStatus {
+   GrabNone "none"
+   GrabLocal "local"
+   GrabGlobal "global"
+}
+
+##### grab (current is missing)
+module grab {
+   function () set_local "grab" (widget)
+   function () set_global "grab -global" (widget)
+   function (GrabStatus) status "grab status" ()
+   function () release "grab release" (widget)
+}
+
 ##### lower
 function () lower "lower" (widget)
 # lower window ?belowThis? can't be written
@@ -916,6 +931,9 @@ module wait {
 type AtomId {
    AtomId (int)
    }
+
+## update
+function () update "update" ()
    
 module winfo {
    function (AtomId) atom "winfo atom" (string)
