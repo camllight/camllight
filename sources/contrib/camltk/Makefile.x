@@ -1,6 +1,8 @@
 # Edit this file to reflect your installation
 # save it as Makefile.config
 
+CC=cc
+
 ## Where the tcl.h and tk.h includes can be found
 TCLINCLDIR=/usr/local/lib/tcl/include
 TKINCLDIR=/usr/local/lib/tk/include
