@@ -99,10 +99,13 @@ let text_tag_bind widget tag eventsequence action =
   Send2Tk buf (widget_name widget ^ " tag bind " ^ (CAMLtoTKTextTag tag) ^ " " ^
       	   (CAMLtoTKEventSequence eventsequence));
   begin match action with
-     BindRemove -> Send2Tk buf " "
+     BindRemove -> Send2Tk buf "{}"
   |  BindSet (what, f) ->
       let CbId = register_callback (WrapEventInfo f what) in
         Send2Tk buf (" {camlcb " ^ CbId ^ (WriteEventField what) ^"}")
+  |  BindExtend (what, f) ->
+      let CbId = register_callback (WrapEventInfo f what) in
+        Send2Tk buf (" {+camlcb " ^ CbId ^ (WriteEventField what) ^"}")
   end;
   Send2TkEval buf
 ;;
