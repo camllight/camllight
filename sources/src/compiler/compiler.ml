@@ -45,13 +45,13 @@ let parse_phrase parsing_fun lexing_fun lexbuf =
            lexer__Illegal_character ->
              eprintf "%aIllegal character.\n" output_location l
          | lexer__Unterminated_comment ->
-             eprintf "%tComment not terminated.\n" output_input_name
+             eprintf "%aComment not terminated.\n" output_location l
          | lexer__Bad_char_constant ->
              eprintf "%aIll-formed character literal.\n"
                              output_location l
          | lexer__Unterminated_string ->
-             eprintf "%tString literal not terminated.\n"
-                             output_input_name
+             eprintf "%aString literal not terminated.\n"
+                             output_location l
          end;
          skip();
          raise Toplevel
