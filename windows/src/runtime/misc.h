@@ -47,7 +47,9 @@ void urge_major_slice P((void));
 void gc_message P((char *, unsigned long));
 void fatal_error P((char *));
 void fatal_error_arg P((char *, char *));
+#ifdef USING_MEMMOV
 void memmov P((char *, char *, unsigned long));
+#endif
 char * aligned_malloc P((asize_t, int));
 
 

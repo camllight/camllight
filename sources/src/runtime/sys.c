@@ -1,7 +1,11 @@
 /* Basic system calls */
 
 #include <errno.h>
+#ifdef __MWERKS__
+#include "myfcntl.h"
+#else
 #include <fcntl.h>
+#endif
 #include <signal.h>
 #include "config.h"
 #include "alloc.h"
@@ -14,6 +18,9 @@
 #include "stacks.h"
 #ifdef HAS_UI
 #include "ui.h"
+#endif
+#ifdef macintosh
+#include "mac_os.h"
 #endif
 
 #ifdef HAS_STRERROR
@@ -92,7 +99,6 @@ value sys_open(path, flags, perm) /* ML */
 {
   int ret;
 #ifdef macintosh
-  extern void set_file_type (char *name, long type);
   ret = open(String_val(path), convert_flag_list(flags, sys_open_flags));
   if (ret != -1 && convert_flag_list (flags, sys_text_flags))
     set_file_type (String_val (path), 'TEXT');
@@ -157,7 +163,7 @@ value sys_system_command(command)   /* ML */
      value command;
 {
 #ifdef macintosh
-  invalid_argument("system_command unavailable");
+  invalid_argument("system_command: not implemented");
 #else
   int retcode = system(String_val(command));
   if (retcode == -1) sys_error(String_val(command));

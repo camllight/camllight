@@ -568,7 +568,6 @@ static value intern_fast_val(chan, magic)
 value intern_val(chan)          /* ML */
      struct channel * chan;
 {
-  value res;
   unsigned long magic;
 
   magic = (uint32) getword(chan);
