@@ -6,6 +6,6 @@
 void sys_error P((char *));
 void raise_pending_signal P((void));
 void sys_init P((char **));
-void sys_exit P((value));
+value sys_exit P((value));
 
 #endif /* _sys_ */
