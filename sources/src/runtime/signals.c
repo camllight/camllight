@@ -1,35 +1,62 @@
 #include "alloc.h"
+#include "debugger.h"
 #include "misc.h"
 #include "mlvalues.h"
 #include "signals.h"
 #include "stacks.h"
 
-Volatile int signal_is_pending = 0;
-int in_blocking_section = 0;
-Volatile code_t signal_handler;
-Volatile int signal_number;
+Volatile int async_signal_mode = 0;
+Volatile code_t pending_signal_handler;
+Volatile int pending_signal = 0;
 
-void execute_signal()
+void execute_signal (signal_handler, signal_number)
+     code_t signal_handler;
+     int signal_number;
 {
-  if (in_blocking_section) {
-    value clos;
-    clos = alloc(2, Closure_tag);
-    Code_val(clos) = signal_handler;
-    Env_val(clos) = Atom(0);
-    callback(clos, Val_int(signal_number));
-  } else {
-    signal_is_pending = 1;
+  value clos;
+
+  Assert (!async_signal_mode);
+  clos = alloc(2, Closure_tag);
+  Code_val(clos) = signal_handler;
+  Env_val(clos) = Atom(0);
+  callback(clos, Val_int(signal_number));
+}
+
+void handle_signal(signal_handler, signal_number)
+     code_t signal_handler;
+     int signal_number;
+{
+  if (async_signal_mode){
+    leave_blocking_section ();
+    execute_signal (signal_handler, signal_number);
+    enter_blocking_section ();
+  }else{
+    pending_signal_handler = signal_handler;
+    /* If a signal arrives here, it will give the same value to
+       pending_signal_handler. */
+    pending_signal = signal_number;
     something_to_do = 1;
   }
 }
 
 void enter_blocking_section()
 {
-  in_blocking_section = 1;
-  if (signal_is_pending) execute_signal();
+  int temp;
+
+  while (1){
+    Assert (!async_signal_mode);
+    temp = pending_signal;
+    /* If a signal arrives here, it will be lost. */
+    pending_signal = 0;
+    if (temp) execute_signal (pending_signal_handler, temp);
+    async_signal_mode = 1;
+    if (!pending_signal) break;
+    async_signal_mode = 0;
+  }
 }
 
+/* This function may be called from outside a blocking section. */
 void leave_blocking_section()
 {
-  in_blocking_section = 0;
+  async_signal_mode = 0;
 }

@@ -12,7 +12,7 @@ value exn_bucket;
 void mlraise(v)
      value v;
 {
-  in_blocking_section = 0;
+  leave_blocking_section ();
   exn_bucket = v;
   longjmp(external_raise->buf, 1);
 }

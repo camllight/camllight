@@ -3,23 +3,10 @@
 
 #include "misc.h"
 
-#ifdef __STDC__
+extern Volatile code_t pending_signal_handler;
+extern Volatile int pending_signal;
 
-extern volatile int signal_is_pending;
-extern volatile code_t signal_handler;
-extern volatile int signal_number;
-extern int in_blocking_section;
-
-#else
-
-extern int signal_is_pending;
-extern code_t signal_handler;
-extern int signal_number;
-extern int in_blocking_section;
-
-#endif
-
-void execute_signal P((void));
+void handle_signal P((code_t, int));
 void enter_blocking_section P((void));
 void leave_blocking_section P((void));
 

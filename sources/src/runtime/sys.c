@@ -194,9 +194,7 @@ sighandler_return_type intr_handler(sig)
 #ifndef BSD_SIGNALS
   signal (SIGINT, intr_handler);
 #endif
-  signal_handler = raise_break_exn;
-  signal_number = 0;
-  execute_signal();
+  handle_signal(raise_break_exn, 1);
 }
 
 value sys_catch_break(onoff)    /* ML */
