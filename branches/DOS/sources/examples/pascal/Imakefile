@@ -1,0 +1,5 @@
+CamlProg(ipascal,lexuniv.zo syntaxe.zo valeur.zo envir.zo interp.zo typage.zo ipascal.zo,)
+CamlProg(cpascal,lexuniv.zo syntaxe.zo envir.zo typage.zo compil.zo cpascal.zo,)
+
+clean::
+	$(RM) *.asm *.o
