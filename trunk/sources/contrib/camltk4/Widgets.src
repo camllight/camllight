@@ -771,7 +771,7 @@ widget listbox {
    function (float,float) yview_get [widget(listbox); "yview"]
    function () xview_index [widget(listbox); "xview"; Index(listbox)]
    function () yview_index [widget(listbox); "yview"; Index(listbox)]
-   function () xview [widget(listbox); "yview"; ScrollValue]
+   function () xview [widget(listbox); "xview"; ScrollValue]
    function () yview [widget(listbox); "yview"; ScrollValue]
    }
 
