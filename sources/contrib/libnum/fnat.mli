@@ -91,8 +91,6 @@ value create_nat : int -> nat = 1 "create_nat"
   and decimal_of_string : int -> string -> int -> int -> string * int
   and unadjusted_string_of_nat : nat -> int -> int -> string
   and power_max : int -> nat
-  and sys_string_of_nat :
-      int -> string -> nat -> int -> int -> string -> string
   and debug_string_nat : nat -> string
   and sys_float_of_nat : nat -> int -> int -> float
   and float_of_nat : nat -> float
