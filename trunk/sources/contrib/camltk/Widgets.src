@@ -158,9 +158,13 @@ widget checkbutton {
 
    option Command "-command" (function ())
    option Height "-height" (Units)
+   option OffValue "-offvalue" (string)
+   option OnValue "-onvalue" (string)
    option Selector "-selector" (Color)
    option State "-state" (State)
    option Width "-width" (Units)
+   option Variable "-variable" (TextVariable)
+  
 
    function () activate "activate" ()
    function () configure "configure" (option(checkbutton) list)
@@ -194,6 +198,8 @@ widget radiobutton {
    option Height "-height" (Units)
    option Selector
    option State
+   option Value "-value" (string)
+   option Variable
    option Width "-width" (Units)
 
    function () activate "activate" ()
@@ -583,9 +589,9 @@ widget menu {
 
    function () activate "activate" (MenuIndex)
    function () add_cascade "add cascade" (option(menucascade) list)
-   function () add_checkbutton "add checkbutton" (option(menuothers) list)
-   function () add_command "add command" (option(menuothers) list)
-   function () add_radiobutton "add radiobutton" (option(menuothers) list)
+   function () add_checkbutton "add checkbutton" (option(menucheck) list)
+   function () add_command "add command" (option(menucommand) list)
+   function () add_radiobutton "add radiobutton" (option(menuradio) list)
    function () add_separator "add separator" ()
    function () configure "configure" (option(menu) list)
    function () delete "delete" (MenuIndex,MenuIndex)
@@ -594,11 +600,11 @@ widget menu {
    function () entryconfigure_cascade 
                     "entryconfigure" (MenuIndex, option (menucascade) list)
    function () entryconfigure_checkbutton 
-                    "entryconfigure" (MenuIndex, option (menuothers)list)
+                    "entryconfigure" (MenuIndex, option (menucheck)list)
    function () entryconfigure_command  
-                    "entryconfigure" (MenuIndex, option (menuothers) list)
+                    "entryconfigure" (MenuIndex, option (menucommand) list)
    function () entryconfigure_radiobutton 
-                    "entryconfigure" (MenuIndex, option (menuothers) list)
+                    "entryconfigure" (MenuIndex, option (menuradio) list)
    function (string) entryconfigure_get "entryconfigure" (MenuIndex)
    # none not supported
    function (int) index "index" (MenuIndex)
@@ -621,8 +627,21 @@ subtype option(menucascade) {
 	State "-state" (State)
 	UnderlinedChar
 	}
-# Options for other menu entries except separator
-subtype option(menuothers) {
+
+# Options for menu add radiobutton
+subtype option(menuradio) {
+	ActiveBackground Accelerator Background Bitmap
+	Command Font Label State UnderlinedChar
+	Value Variable
+	}
+# Options for menu add checkbutton
+subtype option(menucheck) {
+	ActiveBackground Accelerator Background Bitmap
+	Command Font Label State UnderlinedChar
+	OffValue OnValue Variable
+	}
+# Options for menu add command
+subtype option(menucommand) {
 	ActiveBackground Accelerator Background Bitmap
 	Command Font Label State UnderlinedChar
 	}
