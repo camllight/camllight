@@ -10,7 +10,7 @@ let convert_adress address =
   try
     let n = string_pos address `:` in
       let host = sub_string address 0 (n - 1)
-      and port = sub_string address (n + 1) (string_length address)
+      and port = sub_string address (n + 1) (string_length address - n - 1)
       in
         (PF_INET,
 	 ADDR_INET
