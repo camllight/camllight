@@ -20,7 +20,11 @@
 #ifdef ANSI
 #include <limits.h>
 #else
-#define LONG_MAX ((1L << (8 * sizeof (long) - 1)) - 1)
+#ifdef SIXTYFOUR
+#define LONG_MAX 0x7FFFFFFFFFFFFFFF
+#else
+#define LONG_MAX 0x7FFFFFFF
+#endif
 #endif
 
 int percent_free;

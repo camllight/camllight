@@ -85,7 +85,7 @@ value output_char(channel, ch)  /* ML */
 
 void putword(channel, w)
      struct channel * channel;
-     long w;
+     uint32 w;
 {
   putch(channel, w >> 24);
   putch(channel, w >> 16);
@@ -327,65 +327,43 @@ value close_in(channel)     /* ML */
   return Atom(0);
 }
 
-static value build_string(pref, start, end)
-     value pref;
-     char * start, * end;
-{
-  value res;
-  mlsize_t preflen;
-
-  if (Is_block(pref)) {
-    Push_roots(r, 1);
-    r[0] = pref;
-    preflen = string_length(pref);
-    res = alloc_string(preflen + end - start);
-    bcopy(&Byte(r[0], 0), &Byte(res, 0), preflen);
-    bcopy(start, &Byte(res, preflen), end - start);
-    Pop_roots();
-  } else {
-    res = alloc_string(end - start);
-    bcopy(start, &Byte(res, 0), end - start);
-    return res;
-  }
-  return res;
-}
-
-value input_line(channel)       /* ML */
+value input_scan_line(channel)       /* ML */
      struct channel * channel;
 {
-  char * start;
+  char * p;
   int n;
-  value res;
 
-  Push_roots(r, 1);
-#define prevstring r[0]
-  prevstring = Val_long(0);
-  start = channel->curr;
+  p = channel->curr;
   do {
-    if (channel->curr >= channel->max) { /* No more characters available */
-      if (start > channel->buff) {       /* First, make as much room */
-        bcopy(start, channel->buff, channel->max - start); /* as possible */
-        n = start - channel->buff;       /* in the buffer */
+    if (p >= channel->max) {
+      /* No more characters available in the buffer */
+      if (channel->curr > channel->buff) {
+        /* Try to make some room in the buffer by shifting the unread
+           portion at the beginning */
+        bcopy(channel->curr, channel->buff, channel->max - channel->curr);
+        n = channel->curr - channel->buff;
         channel->curr -= n;
-        channel->max  -= n;
-        start = channel->buff;
+        channel->max -= n;
+        p -= n;
       }
-      if (channel->curr >= channel->end) { /* Buffer full? */
-        prevstring = build_string(prevstring, start, channel->curr);
-        start = channel->buff;             /* Flush it in the heap */
-        channel->curr = channel->buff;
+      if (channel->max >= channel->end) {
+        /* Buffer is full, no room to read more characters from the input.
+           Return the number of characters in the buffer, with negative
+           sign to indicate that no newline was encountered. */
+        return Val_long(-(channel->max - channel->curr));
       }
-      n = really_read(channel->fd, channel->curr, channel->end-channel->curr);
+      /* Fill the buffer as much as possible */
+      n = really_read(channel->fd, channel->max, channel->end - channel->max);
       if (n == 0) {
-        Pop_roots();
-        mlraise(Atom(END_OF_FILE_EXN));
+        /* End-of-file encountered. Return the number of characters in the
+           buffer, with negative sign since we haven't encountered 
+           a newline. */
+        return Val_long(-(channel->max - channel->curr));
       }
       channel->offset += n;
-      channel->max = channel->curr + n;
+      channel->max += n;
     }
-  } while (*(channel->curr)++ != '\n');
-  res = build_string(prevstring, start, channel->curr - 1);
-  Pop_roots();
-  return res;
-#undef prevstring
+  } while (*p++ != '\n');
+  /* Found a newline. Return the length of the line, newline included. */
+  return Val_long(p - channel->curr);
 }
