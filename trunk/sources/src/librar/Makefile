@@ -50,8 +50,8 @@ version.ml: version.mlp ../version.h
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
-librar.zo: ../compiler/emit_phr.zo ../compiler/misc.zo \
-    ../compiler/interntl.zo 
-main.zo: librar.zo version.zo ../compiler/misc.zo ../linker/readword.zo \
-    ../compiler/interntl.zo ../compiler/config.zi 
+librar.zo: ../compiler/interntl.zo ../compiler/emit_phr.zo \
+    ../compiler/misc.zo 
+main.zo: ../compiler/interntl.zo version.zo ../compiler/config.zi \
+    ../linker/readword.zo ../compiler/misc.zo librar.zo 
 version.zo: ../compiler/interntl.zo 

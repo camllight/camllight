@@ -68,15 +68,15 @@ version.ml: version.mlp ../version.h
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
-link.zo: ../compiler/reloc.zo ../compiler/lambda.zo tr_const.zo \
-    ../compiler/interntl.zo ../compiler/config.zi ../compiler/const.zo \
-    ../compiler/misc.zo ../compiler/emit_phr.zo symtable.zo patch.zo \
+link.zo: ../compiler/interntl.zo patch.zo symtable.zo ../compiler/lambda.zo \
+    ../compiler/reloc.zo ../compiler/config.zi ../compiler/const.zo \
+    ../compiler/emit_phr.zo tr_const.zo ../compiler/misc.zo \
     ../compiler/opcodes.zo 
-main.zo: link.zo ../compiler/interntl.zo ../compiler/config.zi \
-    ../compiler/misc.zo version.zo symtable.zo readword.zo 
+main.zo: ../compiler/interntl.zo symtable.zo version.zo \
+    ../compiler/config.zi readword.zo ../compiler/misc.zo link.zo 
 patch.zo: symtable.zo ../compiler/reloc.zo 
 predef.zo: ../compiler/const.zo 
-symtable.zo: predef.zo ../compiler/misc.zo prim_c.zo \
-    ../compiler/interntl.zo ../compiler/const.zo 
+symtable.zo: ../compiler/interntl.zo predef.zo ../compiler/const.zo \
+    prim_c.zo ../compiler/misc.zo 
 tr_const.zo: symtable.zo ../compiler/const.zo 
 version.zo: ../compiler/interntl.zo 
