@@ -1,6 +1,14 @@
 (* Widget is an abstract type *)
 type Widget;;
+
+
 value default_toplevel_widget : Widget;;
+       (* The default toplevel widget is ".", of type "toplevel" *)
+
+value new_toplevel_widget : string -> Widget;;
+       (* the argument must be a valid window name: no 8bit char, start
+          with a lowercase, ... *)
+          
 value widget_name : Widget -> string;;
 value CAMLtoTKWidget : 'a -> Widget -> string;;
 value TKtoCAMLWidget : string -> Widget;;
