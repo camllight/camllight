@@ -5,21 +5,27 @@
 #
 # Usage:    camldep [-I path] <file> ...
 
-while ($#ARGV >= 0) {
-  $_ = shift(@ARGV);
+while ($#ARGS >= 0) {
+  $_ = shift(@ARGS);
   if (/^-I(.*)$/) {
-    $dir = $1 ? $1 : shift(@ARGV);
+    $dir = $1 ? $1 : shift(@ARGS);
     $dir =~ s|/$||;
     unshift(@path, $dir);
   }
-  elsif (/(.*)\.mli$/ || /(.*)\.zi$/) {
-    do scan_source ($_, "$1.zi");
-  }
-  elsif (/(.*)\.ml$/ || /(.*)\.zo$/) {
-    do scan_source ($_, "$1.zo");
-  }
   else {
     die "Don't know what to do with $_";
+  }
+}
+
+opendir(CDIR, ".");
+@files = readdir(CDIR);
+closedir(CDIR);
+foreach $_ (@files) {
+  if (/(.*)\.mli$/ || /(.*)\.zi$/) {
+    do scan_source ($_, "$1.zi");
+  }
+  if (/(.*)\.ml$/ || /(.*)\.zo$/) {
+    do scan_source ($_, "$1.zo");
   }
 }
 
@@ -34,14 +40,13 @@ sub scan_source {
     if (m/#\s*open\s*"([^"]*)"/) {
       $imports{$1} = 1;
     }
-    while(m/([a-zA-Z0-9_]+)__/) {
+    while (m/([a-zA-Z0-9_]+)__/g) {
       $imports{$1} = 1;
-      $_ = $';
     }
   }
   close(SRC);
   undef(@deps);
-  if ($target_name =~ m/(.*)\.zo$/ && -r ($source_name . "i")) {
+  if ($target_name =~ m/\.zo$/ && -r ($source_name . "i")) {
     push(@deps, "$1.zi");
   }
   foreach $modl (keys(%imports)) {
