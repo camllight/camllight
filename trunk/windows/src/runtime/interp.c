@@ -305,13 +305,14 @@ value interprete(prog)
     process_signal:
       something_to_do = 0;
       if (force_minor_flag){
+	force_minor_flag = 0;
 	Setup_for_gc;
 	minor_collection ();
 	Restore_after_gc;
       }
-      tmp = (value) pending_signal;
-      /* If a signal arrives here, it will be lost. */
-      pending_signal = 0;
+      /* If a signal arrives between the following two instructions,
+         it will be lost. */
+      tmp = (value) pending_signal;  pending_signal = 0;
       if ((int) tmp){
 	push_ret_frame();
 	retsp->pc = pc;
