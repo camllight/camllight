@@ -37,7 +37,7 @@ let module_panel parent =
       Toplevel -> begin
 	 dialog (support__new_toplevel_widget "error")
 	     "Caml Browser Error"
-	     ( "Cannot open module :" ^ n)
+	     ( "Cannot open module: " ^ n)
 	     (Predefined "error")
 	     0
 	     ["Ok"];
@@ -45,27 +45,33 @@ let module_panel parent =
 	end
 
   and close_module () =
-    do_list (fun s -> 
-	       let name = (listbox__get lb s) in
-	         modules__close_module name;
-		 listbox__delete lb s s)
-	    (listbox__curselection lb) in
+   let sels = listbox__curselection lb in
+    do_list (fun s -> modules__close_module (listbox__get lb s)) sels ;
+    (* Assume indexes of curselection in increasing order *)
+    do_list (fun s -> listbox__delete lb s s) (rev sels) in
 
   let c = button__create f
       [Text "Close Module"; Relief Raised;
-       Command close_module] in
-  let o = button__create f
+       Command close_module]
+  and o = button__create f
       [Text "Open Module"; Relief Raised; 
        Command (fun () -> 
                  open_list_req "Open a module" 
       	       	       	   (modlist__modules_of_path !load_path)
-      	       	       	   add_module)] in
+      	       	       	   add_module)]
+  and o1 = button__create f
+      [Text "Open and View Module"; Relief Raised; 
+       Command (fun () -> 
+                 open_list_req "Open and View a module" 
+      	       	       	   (modlist__modules_of_path !load_path)
+      	       	       	   (function n -> add_module n;
+      	       	       	       	       	  visual_module false n))] in
 
    pack [title] [Fill Fill_X];
     pack [lb] [Side Side_Left; Fill Fill_Both; Expand true];
     pack [sb] [Side Side_Right; Fill Fill_Y];
    pack [fls] [Fill Fill_Both; Expand true];
-   pack [c;o] [Side Side_Bottom; Anchor Center; Fill Fill_X];
+   pack [c;o1;o] [Side Side_Bottom; Anchor Center; Fill Fill_X];
 
    f, add_module
 ;;
@@ -83,9 +89,28 @@ let path_panel parent =
     scroll_listbox_link sb lb;
 
   let add_path n =
-      load_path := n :: !load_path;
-      listbox__insert lb (Number 0) [n];
-      read_tags n in
+    begin try
+      let dh = opendir n in 
+         closedir dh;
+	 load_path := n :: !load_path;
+	 listbox__insert lb (Number 0) [n];
+	 read_tags n
+    with
+      _ -> dialog (support__new_toplevel_widget "error")
+	     "Caml Browser Error"
+	     ( "Cannot open directory: " ^ n)
+	     (Predefined "error")
+	     0
+	     ["Ok"]; ()
+    end in
+
+  tk__bind lb [[Double], WhatButton 1] 
+     (BindSet ([], 
+       fun _ -> do_list (fun s ->
+	  open_list_req "Select a source file"
+            (set__elements (modlist__sources_of_directory (listbox__get lb s)))
+            display_file)
+        (listbox__curselection lb)));
 
   let o = button__create f
       [Text "Add Directory"; Relief Raised; 
@@ -120,13 +145,23 @@ let browsing_panel parent =
       pack [m] [Side Side_Left];
       pack [e] [Side Side_Left; Fill Fill_X];
 
+   let cb = checkbutton__create f
+      [Text "Source navigation with TAGS files";
+       Command (function _ ->
+		   use_tags := not !use_tags;
+		   if !use_tags then
+		     do_list read_tags ("." :: !load_path)
+		   else clear_tags ())] in
+   
    (* Loading a source file *)
    let o2 = button__create f
-      [Text "Open source file"; Relief Raised;
+      [Text "View source file"; Relief Raised;
        Command 
-        (fun () -> open_req "Open a source file" display_file)] in
+        (fun () -> open_list_req "Open a source file" 
+      	       	     (modlist__sources_of_path !load_path)
+      	       	     display_file)] in
 
-   pack [o2; enterf] [Side Side_Bottom; Fill Fill_X];
+   pack [cb; o2; enterf] [Side Side_Bottom; Fill Fill_X];
    f
 ;;
 
@@ -155,7 +190,6 @@ let main () =
     pack [browse] [Side Side_Top; Fill Fill_Both];
     pack [quitb] [Side Side_Bottom; Fill Fill_X];
     resizeable top;
-   (* focus__set e; *)
 
   (* The interface is now ready *)
   let libpath = ref (resource__get top "library_path" "library_path") 
@@ -169,7 +203,7 @@ let main () =
   reset_opened_modules();
   do_list add_module !default_used_modules;
 
-  do_list read_tags ("." :: !load_path) ;
+  read_tags ".";
 
   arg__parse [
        "-stdlib", arg__String 
