@@ -235,6 +235,8 @@ Expr :
           { make_expr(Zapply(make_expr(Zfunction $5), [$2])) }
       | MATCH Expr WITH Opt_bar Parser_match
           { make_expr(Zapply(make_expr(Zparser $5), [$2])) }
+      | WHEN Opt_bar When_match
+          { $3 }
       | LET Binding_list IN Expr  %prec prec_let
           { make_expr(Zlet(false, $2, $4)) }
       | LET REC Binding_list IN Expr  %prec prec_let
@@ -378,6 +380,16 @@ Try_match :
           { [$1, $2] }
 ;
 
+When_match :
+        Expr MINUSGREATER Expr BAR When_match
+          { make_expr(Zcondition($1, $3, $5)) }
+      | UNDERSCORE MINUSGREATER Expr
+	  { $3 }
+      | Expr MINUSGREATER Expr
+          { (make_expr
+              (Zcondition ($1, $3, make_expr(Zconstruct0(constr_void)))))}
+;
+
 Binding_list :
         Binding AND Binding_list
           { $1 :: $3 }
@@ -389,7 +401,7 @@ Binding :
         Pattern EQUAL Expr  %prec prec_define
           { ($1, $3) }
       | Ide Simple_pattern_list EQUAL Expr  %prec prec_define
-          { (make_pat(Zvarpat $1), make_expr(Zfunction [$2, $4])) }
+          { (pat_constr_or_var $1, make_expr(Zfunction [$2, $4])) }
 ;
 
 /* Patterns */
