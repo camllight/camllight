@@ -1,0 +1,94 @@
+#  Copyright     Digital Equipment Corporation & INRIA     1988, 1989
+#  BigNum For VMS - Version 1.0
+
+#  Last modified_on Thu Feb 20 18:46:39 GMT+1:00 1992 by shand
+#       modified_on Tue Oct  9 10:51:13 GMT+1:00 1990 by herve
+#       modified_on Tue Sep  5 18:00:00 GMT      1989 by esase::lawton
+#       modified_on Wed Jul  5 10:23:54 GMT+2:00 1989 by bertin 
+
+PATH_SOURCE=[.c]
+PATH_INCLUDE=[.h]
+PATH_OBJ=[.o]
+
+LIB = []BigNum.olb
+OBJECT = [.o]KerN.obj,\
+         [.o]bnInit.obj,[.o]bnDivide.obj,[.o]bnCmp.obj,\
+         [.o]bzf.obj,[.o]bz.obj # note bnMult.obj will be appended for C version
+KERNH = [.h]BigNum.h 
+
+CC = cc
+LINK = link
+CFLAGS = /include=[.h] /define="DIGITon32bits" /define="NOMEM" /nodebug 
+LKFLAGS = /nodebug #/debug=sys$library:pca$obj.obj 
+
+# extra entries :
+# all     - make all the stuff
+# tidy    - cleanup directories
+# scratch - start from scratch
+
+all : testKerN bztest
+	purge/noconfirm
+	@ write sys$output "All is done!"
+
+tidy :
+	@ if f$search("*.lis") .nes. "" then delete/noconfirm *.lis;*
+	@ if f$search("*.map") .nes. "" then delete/noconfirm *.map;*, 
+	@ if f$search("*.dia") .nes. "" then delete/noconfirm *.dia;*
+
+scratch : tidy 
+	@ if f$search("[.o]*.obj") .nes. "" then delete/noconfirm [.o]*.obj;*
+	@ if f$search("*.exe") .nes. "" then delete/noconfirm *.exe;*
+	@ if f$search("*.olb") .nes. "" then delete/noconfirm *.olb;*
+
+# build the BigNum library
+$(LIB) : $(OBJECT)
+	library/create $(LIB) $(OBJECT)
+
+# How to choose the machine dependent version. All produce KerN.obj
+[.o]KerN.obj : [.s]VaxKerN.mar Makefile 
+	@ write sys$output "The Default is KerN written in VAX-MACRO with digits on 32 bits"
+ 	macro [.s]vaxKerN.mar /object=[.o]KerN.obj
+
+Cint : scratch [.c]KerN.c Makefile
+	$(CC) [.c]KerN $(CFLAGS) /define ="VMS" /object=[.o]KerN.obj
+	mms /MACRO="OBJECT=$(OBJECT),[.o]bnMult.obj"
+
+Vax : scratch [.s]VAXKerN.mar Makefile
+ 	macro [.s]vaxKerN.mar /object=[.o]KerN.obj
+	mms
+
+# Level N
+[.o]bnInit.obj : [.c.bn]bnInit.c $(KERNH) 
+	$(CC) [.c.bn]bnInit.c /define="VMS" $(CFLAGS) /object=[.o]bnInit.obj 
+
+[.o]bnMult.obj : [.c.bn]bnMult.c $(KERNH) 
+	$(CC) [.c.bn]bnMult.c /define="VMS" $(CFLAGS) /object=[.o]bnMult.obj 
+
+[.o]bnDivide.obj : [.c.bn]bnDivide.c $(KERNH) 
+	$(CC) [.c.bn]bnDivide.c /define="VMS" $(CFLAGS) /object=[.o]bnDivide.obj 
+
+[.o]bnCmp.obj : [.c.bn]bnCmp.c $(KERNH) 
+	$(CC) [.c.bn]bnCmp.c /define="VMS" $(CFLAGS) /object=[.o]bnCmp.obj 
+
+# Level Z
+[.o]bz.obj : [.c]bz.c [.h]BigZ.h $(KERNH) 
+	$(CC) [.c]bz.c $(CFLAGS) /object=[.o]bz.obj
+
+# Some functions build with BigZ
+[.o]bzf.obj : [.c]bzf.c [.h]BigZ.h $(KERNH) 
+	$(CC) [.c]bzf.c $(CFLAGS) /object=[.o]bzf.obj
+
+# Tests Of KerN
+testKerN : Makefile [.o]testKerN.obj $(LIB)
+	$(LINK) $(LKFLAGS) [.o]testKerN.obj, $(LIB)/library
+
+[.o]testKerN.obj : [.c]testKerN.c $(KERNH) [.h]BntoBnn.h 
+	$(CC) [.c]testKerN.c $(CFLAGS) /object=[.o]testKerN.obj
+
+# Tests Of BigZ
+bztest : [.o]bztest.obj $(LIB)
+	$(LINK) $(LKFLAGS) [.o]bztest.obj, $(LIB)/library
+    
+[.o]bztest.obj : [.c]bztest.c [.h]BigZ.h $(KERNH) 
+	$(CC) [.c]bztest.c $(CFLAGS) /object=[.o]bztest.obj
+

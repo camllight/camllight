@@ -1,0 +1,36 @@
+The libunix library must have been installed before compiling and
+using this library.
+
+This library relies on configuration information found in files
+../../config/m.h and ../../config/s.h, as generated during the
+installation of the Caml Light system.
+
+Once the libunix library is installed, just edit the variable
+definitions at the beginning of the Makefile, and do
+
+        make
+
+If everything goes well, become superuser and do
+
+        make install
+
+Then, to use the graphics library from your programs, just do
+
+        camlc -custom <other options> \
+              unix.zo graphics.zo <other .zo and .ml files> \
+              -lgraph -lunix -lX11
+
+for the linking phase.
+
+If you'd like to have the graphics functions available at toplevel, just do
+
+        make camlgraph
+
+to build a special toplevel named "camlgraph" that includes the
+graphics functions.
+
+To run this toplevel, do
+
+        camllight camlgraph
+
+

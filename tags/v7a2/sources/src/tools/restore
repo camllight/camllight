@@ -1,0 +1,12 @@
+#!/bin/sh
+# Restore the given files from their backups and renumber previous backup files
+
+for f in $*; do
+  test -f $f.1 && mv $f.1 $f
+  n=1
+  while : ; do
+    m=`expr $n + 1`
+    if test -f $f.$m; then mv $f.$m $f.$n; else break; fi
+    n=$m
+  done
+done

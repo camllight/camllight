@@ -1,0 +1,4 @@
+/^  /           { printf("  &&lbl_%s\n", $1); ninstr++; }
+/^}/            { for (i = ninstr; i < 128; i++) { print ", &&lbl_STOP"; }
+                  for (i = 0; i < ninstr;   i++) { print ", &&lbl_EVENT"; }
+                  exit(0); }
