@@ -131,6 +131,8 @@ depend:
 	make depend
 	cd ..\toplevel
 	make depend
+	cd ..\yacc
+	make depend
 	cd ..\lex
 	make depend
 	cd ..

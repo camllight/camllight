@@ -27,12 +27,16 @@ let parse_phrase parsing_fun lexing_fun lexbuf =
       | _ -> skip()
     with lexer__Lexical_error(_,_,_) ->
       skip() in
+  let skip_maybe () =
+    if parsing__is_current_lookahead EOF
+    or parsing__is_current_lookahead SEMISEMI
+    then () else skip() in
   try
     parsing_fun lexing_fun lexbuf
-  with parsing__Parse_error f ->
+  with parsing__Parse_error ->
          let pos1 = lexing__get_lexeme_start lexbuf in
          let pos2 = lexing__get_lexeme_end lexbuf in
-         if f (obj__repr EOF) or f (obj__repr SEMISEMI) then () else skip();
+         skip_maybe();
          eprintf "%aSyntax error.\n" output_location (Loc(pos1, pos2));
          raise Toplevel
      | lexer__Lexical_error(errcode, pos1, pos2) ->
@@ -52,7 +56,7 @@ let parse_phrase parsing_fun lexing_fun lexbuf =
          skip();
          raise Toplevel
      | Toplevel ->
-         skip ();
+         skip_maybe();
          raise Toplevel
 ;;
 

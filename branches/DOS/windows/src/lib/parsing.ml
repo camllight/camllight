@@ -7,6 +7,7 @@
 #open "obj";;
 #open "lexing";;
 #open "iparsing";;
+#open "ref";;
 
 let env =
   { s_stack = make_vect 100 0;
@@ -48,6 +49,8 @@ let clear_parser() =
   env.lval <- repr ()
 ;;
 
+let current_lookahead_fun = ref (fun (x: obj) -> false);;
+
 let yyparse tables start lexer lexbuf =
   let rec loop cmd arg =
     match parse_engine tables env cmd arg with
@@ -57,8 +60,7 @@ let yyparse tables start lexer lexbuf =
         env.symb_end   <- lexbuf.lex_abs_pos + lexbuf.lex_curr_pos;
         loop Token_read t
     | Raise_parse_error ->
-        let c = env.curr_char in
-        raise (Parse_error (fun tok -> tables.transl.(obj_tag tok) == c))
+        raise Parse_error
     | Compute_semantic_action ->
         loop Semantic_action_computed (tables.actions.(env.rule_number) ())
     | Grow_stacks_1 ->
@@ -73,11 +75,18 @@ let yyparse tables start lexer lexbuf =
   try
     loop Start (repr ())
   with exn ->
+    let curr_char = env.curr_char in
     env.asp <- init_asp;
     env.sp <- init_sp;
     env.state <- init_state;
     env.curr_char <- init_curr_char;
-    match exn with yyexit v -> magic_obj v | _ -> raise exn
+    match exn with
+      yyexit v ->
+        magic_obj v
+    | _ ->
+        current_lookahead_fun :=
+          (fun tok -> tables.transl.(obj_tag tok) == curr_char);
+        raise exn
 ;;
 
 let peek_val n =
@@ -94,4 +103,8 @@ let rhs_start n =
   env.symb_start_stack.(env.asp - (env.rule_len - n))
 and rhs_end n =
   env.symb_end_stack.(env.asp - (env.rule_len - n))
+;;
+
+let is_current_lookahead tok =
+  (!current_lookahead_fun)(repr tok)
 ;;

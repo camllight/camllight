@@ -4,7 +4,6 @@
 #open "const";;
 #open "globals";;
 #open "syntax";;
-#open "location";;
 #open "builtins";;
 #open "modules";;
 #open "lambda";;
@@ -81,18 +80,7 @@ let rec size_of_expr expr =
 
 (* Default cases for partial matches *) 
 
-let partial_fun (Loc(start,stop) as loc) tsb =
-  if tsb then not_exhaustive_warning loc;
-  Lprim(Praise,
-       [Lconst(SCblock(match_failure_tag,
-                       [SCatom(ACstring !input_name);
-                        SCatom(ACint start);
-                        SCatom(ACint stop)]))])
-;;
-
-let partial_try (tsb : bool) =
-  Lprim(Praise, [Lvar 0])
-;;
+let partial_try = Lprim(Praise, [Lvar 0]);;
 
 (* Optimisation of generic comparisons *)
 
@@ -200,7 +188,7 @@ let rec translate_expr env =
   | Zapply({e_desc = Zfunction ((patl,_)::_ as case_list)} as funct, args) ->
       if list_length patl == list_length args then
         Llet(translate_let env args,
-             translate_match expr.e_loc env (partial_fun expr.e_loc) case_list)
+             translate_match expr.e_loc env case_list)
       else
       event__after env expr (Lapply(transl funct, map transl args))
   | Zapply({e_desc = Zident(ref (Zglobal g))} as fct, args) ->
@@ -231,8 +219,7 @@ let rec translate_expr env =
   | Zlet(false, pat_expr_list, body) ->
       let cas = map (fun (pat, _) -> pat) pat_expr_list in
         Llet(translate_bind env pat_expr_list,
-             translate_match expr.e_loc env
-                             (partial_fun expr.e_loc) [cas, body])
+             translate_match expr.e_loc env [cas, body])
   | Zlet(true, pat_expr_list, body) ->
       let new_env =
         add_let_rec_to_env env pat_expr_list in
@@ -245,7 +232,7 @@ let rec translate_expr env =
   | Zfunction((patl1,act1)::_ as case_list) ->
       let rec transl_fun debug_env = function
           [] ->
-            translate_match expr.e_loc env (partial_fun expr.e_loc) case_list
+            translate_match expr.e_loc env case_list
         | pat::patl ->
             let new_debug_env =
               if pat_irrefutable pat
@@ -256,7 +243,7 @@ let rec translate_expr env =
       transl_fun env patl1
   | Ztrywith(body, pat_expr_list) ->
       Lhandle(transl body,
-              translate_simple_match expr.e_loc env partial_try pat_expr_list)
+              translate_simple_match env partial_try pat_expr_list)
   | Zsequence(e1, e2) ->
       Lsequence(transl e1, event__before env e2 (transl e2))
   | Zcondition(eif, ethen, eelse) ->
@@ -314,19 +301,19 @@ let rec translate_expr env =
       guard_expression (transl e1) (transl e2)
   in transl
 
-and translate_match loc env failure_code casel =
+and translate_match loc env casel =
   let transl_action (patlist, expr) =
     let (new_env, add_lets) = add_pat_list_to_env env patlist in
       (patlist,
        add_lets(event__before new_env expr (translate_expr new_env expr))) in
-  translate_matching_check_failure failure_code loc (map transl_action casel)
+  translate_matching_check_failure loc (map transl_action casel)
 
-and translate_simple_match loc env failure_code pat_expr_list =
+and translate_simple_match env failure_code pat_expr_list =
   let transl_action (pat, expr) =
     let (new_env, add_lets) = add_pat_to_env env pat in
       ([pat],
        add_lets(event__before new_env expr (translate_expr new_env expr))) in
-  translate_matching failure_code loc (map transl_action pat_expr_list)
+  translate_matching failure_code (map transl_action pat_expr_list)
 
 and translate_let env = function
      [] ->  []
@@ -367,9 +354,8 @@ let translate_letdef loc pat_expr_list =
       Lprim(Pset_global {qual=modname; id=var},
             [translate_access var env]) in
     Llet(translate_bind Tnullenv pat_expr_list,
-         translate_matching
-           (partial_fun loc) loc
-           [pat_list, make_sequence store_global vars])
+         translate_matching_check_failure
+           loc [pat_list, make_sequence store_global vars])
 ;;
 
 (* Translation of toplevel let rec expressions *)
