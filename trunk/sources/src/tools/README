@@ -34,3 +34,6 @@ linkarch        sh      Builds a directory hierarchy that parallels
 
 make-jumptable  awk     Used to generate ../runtime/jumptbl.h and
 make-opcodes            ../compiler/opcodes.ml from ../runtime/instruct.h.
+
+clprepro        C       Use this as a replacement for cpp if your cpp is
+			too fussy (e.g. refuses 008 as a token)
