@@ -22,12 +22,6 @@ let load_program () =
 
 (*** Launching functions. ***)
 
-let shell () =
-  try
-    sys__getenv "SHELL"
-  with Not_found ->
-    "/bin/sh";;
-
 (* A generic function for launching the program *)
 let generic_exec exec =
   false,
@@ -46,7 +40,7 @@ let generic_exec exec =
        0 ->
          (try
        	    match fork () with
-              0 -> exec (shell ())
+              0 -> exec "/bin/sh"
 	    | _ -> exit 0
           with
             x ->
