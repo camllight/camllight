@@ -1,7 +1,56 @@
-Caml Light 0.71:
+Caml Light 0.72:
 ---------------
 
-* French version for the Macintosh (thanks to Jerome Kasparian).
+* Parsing: fixed precedence of alphanumeric user-defined infixes,
+  as well as lor, land, lxor; fixed location bug in error reporting
+  involving the empty list [].
+
+* Typing: better handling of constant or non-contractive type abbreviations
+  such as type 'a t == int or type 'a t == 'a.
+
+* Standard library:
+  - The type 'a option = None | Some of 'a is now a built-in type;
+  - Module "format": added ability to run several formatters with
+    different output channels in parallel;
+  - Module "genlex": better handling of comments and character literals;
+  - Module "hashtbl": fixed memory leak caused by hashtbl__remove;
+  - Module "int": added the constants max_int and min_int
+  - Module "printf": added the sprintf function to output to a string
+  - Module "stream": fixed unsharing bug in streams built by stream_from
+  - Module "string": added the "concat" function to catenate a list of strings.
+
+* Compilation: fixed handling of top-level exceptions in compilation
+  units (e.g. let x = raise Foo;;).
+
+* Run-time system: allocation bug for the Sys_error exception fixed;
+  fixed heap assignement bug in the parsing engine.
+
+* MS Windows port: numerous fixes in the interactive toplevel application;
+  fully automatic installation procedure.
+
+* Emacs editing mode for Caml replaced by Ian Zimmerman's caml-mode.
+  It's a complete reimplementation that offers fully automatic
+  indenting and much more.
+
+* caml-tex formatter: also available for LaTeX 2e
+  (contributed by Jens Kloecker).
+
+* X11 graphics primitives: bug fixes in event handling and
+  interaction between close_graph and image reclaimation.
+
+* MS Windows graphics primitives: blit_image, draw_image, get_image
+  now working properly; drawing area no longer limited to 600x400.
+
+* libnum: bug in suqare root fixed.
+
+* libstr: fixed bug in string_before when length = 0.
+
+* libunix: pipe bugs in open_process_in fixed; termios interface more
+  POSIX compliant.
+
+
+Caml Light 0.71:
+---------------
 
 * Port to MS Windows (3.1, 95, NT).
 
@@ -24,6 +73,7 @@ Caml Light 0.71:
 
 * libnum: bug in conversion to string fixed.
 
+* French version for the Macintosh (thanks to Jerome Kasparian).
 
 Caml Light 0.7:
 --------------
