@@ -2,7 +2,7 @@ Caml Light 0.7:
 --------------
 
 * Source-level debugger with replay capabilities. Compiler support for
-  the debugger added.
+  the debugger added. [Unix-only]
 
 * New contributed libraries and tools:
         - a complete X-windows toolkit based on TCL/TK.
