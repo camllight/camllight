@@ -268,6 +268,7 @@ value interprete(prog)
 	env = retsp->env;
 	cache_size = retsp->cache_size;
 	pop_ret_frame();
+        if (something_to_do) goto process_signal;
 	Next;
       }
       /* fall through APPTERM */
