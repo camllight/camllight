@@ -3,9 +3,9 @@
 value OpenTk : unit -> Widget
 and   OpenTkClass : string -> Widget
       (* Initialisation of the Tk interface, should be called only once.
-      	 Both functions will return the toplevel widget.
-	 [OpenTkClass "class"] lets you specify the (resource) class 
-      	 of the toplevel widget *)
+         Both functions will return the toplevel widget.
+         [OpenTkClass "class"] lets you specify the (resource) class 
+         of the toplevel widget *)
 ;;
 
 value MainLoop : unit -> unit 
@@ -31,6 +31,11 @@ value text_tag_bind : Widget -> string
       (* Binding events to tags in text widgets *)
 ;;
 
+value class_bind : Widget -> string
+     -> (Modifier list * XEvent) list -> BindAction -> unit
+      (* Binding events for widget classes *)
+;;
+  
 value add_fileinput : file_descr -> (unit -> unit) -> unit
 and remove_fileinput : file_descr -> unit
       (* Callbacks on Unix file descriptors *)
