@@ -63,7 +63,7 @@ let catch_parse_failure l =
   Lhandle(l, Lifthenelse(Lprim(Ptest Peq_test,
                                [Lprim(Ptag_of, [Lvar 0]);
                                 Lconst(SCatom(ACint parse_failure_tag))]),
-                         Lstaticfail,
+                         Lstaticfail 0,
                          Lprim(Praise, [Lvar 0])))
 ;;
 
@@ -86,7 +86,7 @@ let translate_parser translate_expr loc init_env case_list stream_type =
       [] ->
         translate_expr env act
     | Ztermpat pat :: rest ->
-        let (new_env, add_lets) = add_pat_to_env env pat in
+        let (new_env, add_lets, _) = add_pat_to_env env pat in
           Llet([Lapply(stream_oper "stream_require", [access_stream env])],
                translate_matching raise_parse_error
                  [[pat],
@@ -94,7 +94,7 @@ let translate_parser translate_expr loc init_env case_list stream_type =
                                                   [access_stream new_env]),
                                      transl_inner new_env (rest,act)))])
     | Znontermpat(parsexpr, pat) :: rest ->
-        let (new_env, add_lets) = add_pat_to_env env pat in
+        let (new_env, add_lets, _) = add_pat_to_env env pat in
           Llet([Lapply(stream_oper "parser_require",
                        [translate_expr env parsexpr; access_stream env])],
                translate_matching raise_parse_error
@@ -111,7 +111,7 @@ let translate_parser translate_expr loc init_env case_list stream_type =
         translate_expr env act
     | (Ztermpat _ :: _, _) :: _ ->
         let translate_line (pat, case) =
-          let (new_env, add_lets) = add_pat_to_env env pat in
+          let (new_env, add_lets, _) = add_pat_to_env env pat in
             ([pat],
              add_lets(Lsequence(Lapply(stream_oper "stream_junk",
                                                   [access_stream new_env]),
@@ -126,22 +126,22 @@ let translate_parser translate_expr loc init_env case_list stream_type =
               Llet(
                 [catch_parse_failure(Lapply(stream_oper "stream_peek",
                                         [access_stream env]))],
-                translate_matching Lstaticfail
+                translate_matching (Lstaticfail 0)
                    (map translate_line pat_case_list)),
               transl_top (Treserved env) rest)
         end
     | (Znontermpat(parsexpr, pat) :: spatl, act) :: [] ->
-        let (new_env, add_lets) = add_pat_to_env env pat in
+        let (new_env, add_lets, _) = add_pat_to_env env pat in
           Llet([Lapply(translate_expr env parsexpr, [access_stream env])],
                translate_matching raise_parse_failure
                  [[pat], add_lets(transl_inner new_env (spatl,act))])
     | (Znontermpat(parsexpr, pat) :: spatl, act) :: rest ->
-        let (new_env, add_lets) = add_pat_to_env env pat in
+        let (new_env, add_lets, _) = add_pat_to_env env pat in
           Lstatichandle(
             Llet(
               [catch_parse_failure(Lapply(translate_expr env parsexpr,
                                       [access_stream env]))],
-              translate_matching Lstaticfail
+              translate_matching (Lstaticfail 0)
                 [[pat], add_lets(transl_inner new_env (spatl,act))]),
             transl_top (Treserved env) rest)
     | (Zstreampat id :: spatl, act) :: _ ->

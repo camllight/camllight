@@ -190,7 +190,7 @@ let format_pp_token size = function
      | _ -> () (* No opened tabulation block *)
      end
 
-  | Pp_tbreak (n,off) ->
+  | Pp_tbreak (n, off) ->
       let insertion_point = !pp_margin - !pp_space_left in
       begin match !pp_tbox_stack with
          Pp_tbox tabs :: _ -> 
@@ -218,15 +218,16 @@ let format_pp_token size = function
      if !pp_current_indent != !pp_margin - !pp_space_left
       then pp_skip_token ()
 
-  | Pp_break (n,off) ->
+  | Pp_break (n, off) ->
      begin match !pp_format_stack with
        Format_elem (ty,width) :: _ ->
         begin match ty with
           Pp_hovbox ->
            if size > !pp_space_left then break_new_line off width else
            (* break the line here leads to new indentation ? *)
+           (*
            if (!pp_current_indent > !pp_margin - width + off)
-            then break_new_line off width else break_same_line n
+            then break_new_line off width else *) break_same_line n
         | Pp_hvbox -> break_new_line off width
         | Pp_fits -> break_same_line n
         | Pp_vbox  -> break_new_line off width

@@ -52,15 +52,13 @@ type lambda =
   | Lprim of primitive * lambda list
   | Lcond of lambda * (atomic_constant * lambda) list
   | Lswitch of int * lambda * (constr_tag * lambda) list
-  | Lstaticfail
+  | Lstaticfail of int
   | Lstatichandle of lambda * lambda
   | Lhandle of lambda * lambda
   | Lifthenelse of lambda * lambda * lambda
   | Lsequence of lambda * lambda
   | Lwhile of lambda * lambda
   | Lfor of lambda * lambda * bool * lambda
-  | Lsequand of lambda * lambda
-  | Lsequor of lambda * lambda
   | Lshared of lambda * int ref
   | Levent of event * lambda
 ;;
@@ -71,12 +69,12 @@ let share_lambda l =
 
 (* Guards *)
 let rec has_guard = function
-    Lifthenelse(l1, l2, Lstaticfail) -> true
+    Lifthenelse(l1, l2, Lstaticfail _) -> true
   | Levent(ev, l) -> has_guard l
   | Lshared(l, lbl) -> has_guard l
   | Llet(l1, l2) -> has_guard l2
   | _ -> false;;
 
-let guard_expression l1 l2 =  Lifthenelse(l1, l2, Lstaticfail);;
+let guard_expression l1 l2 npops =  Lifthenelse(l1, l2, Lstaticfail npops);;
 
 

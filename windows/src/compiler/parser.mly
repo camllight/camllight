@@ -201,13 +201,13 @@ Expr :
       | Expr EQUALEQUAL Expr
           { make_binop "==" $1 $3 }
       | Expr AMPERSAND Expr
-          { make_expr(Zsequand($1, $3)) }
+          { make_binop "&" $1 $3 }
       | Expr AMPERAMPER Expr
-          { make_expr(Zsequand($1, $3)) }
+          { make_binop "&&" $1 $3 }
       | Expr OR Expr
-          { make_expr(Zsequor($1, $3)) }
+          { make_binop "or" $1 $3 }
       | Expr BARBAR Expr
-          { make_expr(Zsequor($1, $3)) }
+          { make_binop "||" $1 $3 }
       | Simple_expr DOT Ext_ident LESSMINUS Expr
           { make_expr(Zrecord_update($1, find_label $3, $5)) }
       | Simple_expr DOTLPAREN Expr RPAREN LESSMINUS Expr
@@ -547,6 +547,8 @@ Infx :
       | COLONEQUAL      { ":=" }  | EQUAL         { "=" }
       | EQUALEQUAL      { "==" }  | NOT           { "not" }
       | SUBTRACTIVE     { $1 }    | PREFIX        { $1 }
+      | AMPERSAND       { "&" }   | AMPERAMPER    { "&&" }
+      | OR              { "or" }  | BARBAR        { "||" }
 ;
 
 Qual_ident :

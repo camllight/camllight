@@ -102,7 +102,7 @@ let compile_nbranch int_of_key casel =
     vect_length keyv in
   let extract_act start stop =
     let v =
-      make_vect (keyv.(stop) - keyv.(start) + 1) Lstaticfail in
+      make_vect (keyv.(stop) - keyv.(start) + 1) (Lstaticfail 0) in
     for i = start to stop do
       v.(keyv.(i) - keyv.(start)) <- actv.(i)
     done;
@@ -251,6 +251,35 @@ let rec compile_expr staticfail =
             compexp exp (Kbranchif lbl :: code')
         | _ ->
             compexp exp (Kprim Pnot :: code))
+  | Lprim(Psequand, [exp1; exp2]) ->
+       (match code with
+          Kbranch lbl :: _  ->
+            compexp exp1 (Kstrictbranchifnot lbl :: compexp exp2 code)
+        | Kbranchifnot lbl :: _ ->
+            compexp exp1 (Kbranchifnot lbl :: compexp exp2 code)
+        | Kbranchif lbl :: code' ->
+            let lbl1, code1 = label_code code' in
+              compexp exp1 (Kbranchifnot lbl1 ::
+                            compexp exp2 (Kbranchif lbl :: code1))
+        | _ ->
+            let lbl = new_label() in
+              compexp exp1 (Kstrictbranchifnot lbl ::
+                            compexp exp2 (Klabel lbl :: code)))
+  | Lprim(Psequor, [exp1; exp2]) ->
+       (match code with
+          Kbranch lbl :: _  ->
+            compexp exp1 (Kstrictbranchif lbl :: compexp exp2 code)
+        | Kbranchif lbl :: _  ->
+            compexp exp1 (Kbranchif lbl :: compexp exp2 code)
+        | Kbranchifnot lbl :: code' ->
+            let lbl1, code1 = label_code code' in
+              compexp exp1 (Kbranchif lbl1 ::
+                            compexp exp2 (Kbranchifnot lbl :: code1))
+        | _ ->
+            let lbl = new_label() in
+              compexp exp1 (Kstrictbranchif lbl ::
+                            compexp exp2 (Klabel lbl :: code)))
+
   | Lprim((Ptest tst as p), explist) ->
        (match code with
           Kbranchif lbl :: code' ->
@@ -263,15 +292,16 @@ let rec compile_expr staticfail =
         compexplist explist (Kprim Praise :: discard_dead_code code)
   | Lprim(p, explist) ->
         compexplist explist (Kprim p :: code)
-  | Lstatichandle(body, Lstaticfail) ->
+  | Lstatichandle(body, Lstaticfail 0) ->
         compexp body code
   | Lstatichandle(body, handler) ->
         let branch1, code1 = make_branch code
         and lbl2 = new_label() in
           compile_expr lbl2 body
                        (branch1 :: Klabel lbl2 :: compexp handler code1)
-  | Lstaticfail ->
-        Kbranch staticfail :: discard_dead_code code
+  | Lstaticfail n ->
+        let c = Kbranch staticfail :: discard_dead_code code in
+        if n = 0 then c else Kendlet n :: c
   | Lhandle(body, handler) ->
         let branch1, code1 = make_branch code in
         let lbl2 = new_label() in
@@ -305,35 +335,6 @@ let rec compile_expr staticfail =
                 Kbranch lbl_loop ::
                 Klabel lbl_end :: Kendlet 3 ::
                 Kquote(const_unit) :: code)))
-  | Lsequand(exp1, exp2) ->
-       (match code with
-          Kbranch lbl :: _  ->
-            compexp exp1 (Kstrictbranchifnot lbl :: compexp exp2 code)
-        | Kbranchifnot lbl :: _ ->
-            compexp exp1 (Kbranchifnot lbl :: compexp exp2 code)
-        | Kbranchif lbl :: code' ->
-            let lbl1, code1 = label_code code' in
-              compexp exp1 (Kbranchifnot lbl1 ::
-                            compexp exp2 (Kbranchif lbl :: code1))
-        | _ ->
-            let lbl = new_label() in
-              compexp exp1 (Kstrictbranchifnot lbl ::
-                            compexp exp2 (Klabel lbl :: code)))
-  | Lsequor(exp1, exp2) ->
-       (match code with
-          Kbranch lbl :: _  ->
-            compexp exp1 (Kstrictbranchif lbl :: compexp exp2 code)
-        | Kbranchif lbl :: _  ->
-            compexp exp1 (Kbranchif lbl :: compexp exp2 code)
-        | Kbranchifnot lbl :: code' ->
-            let lbl1, code1 = label_code code' in
-              compexp exp1 (Kbranchif lbl1 ::
-                            compexp exp2 (Kbranchifnot lbl :: code1))
-        | _ ->
-            let lbl = new_label() in
-              compexp exp1 (Kstrictbranchif lbl ::
-                            compexp exp2 (Klabel lbl :: code)))
-
   | Lcond(arg, casel) ->
         let code1 =
           if match casel with

@@ -157,7 +157,9 @@ let add_lets_to_expr varlist env expr =
 let add_pat_to_env env pat =
   let env' = Tenv(paths_of_pat Path_root pat, env) in
   let mut_vars = mutable_vars_of_pat false pat in
-    (add_lets_to_env mut_vars env', add_lets_to_expr mut_vars env')
+  (add_lets_to_env mut_vars env',
+   add_lets_to_expr mut_vars env',
+   list_length mut_vars)
 ;;
 
 let add_pat_list_to_env env patl =
@@ -165,7 +167,9 @@ let add_pat_list_to_env env patl =
     it_list (fun env pat -> Tenv(paths_of_pat Path_root pat, env)) env patl in
   let mut_vars =
     flat_map (mutable_vars_of_pat false) patl in
-  (add_lets_to_env mut_vars env', add_lets_to_expr mut_vars env')
+  (add_lets_to_env mut_vars env',
+   add_lets_to_expr mut_vars env',
+   list_length mut_vars)
 ;;
 
 (* The parameter of a "for" loop is let-bound with index 0.

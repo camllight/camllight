@@ -1,5 +1,6 @@
 (* Character operations, with sanity checks *)
 
+#open "bool";;
 #open "eq";;
 #open "exc";;
 

@@ -360,14 +360,6 @@ let rec type_expr env expr =
       type_expect env stop type_int;
       type_statement ((id,(type_int,Notmutable)) :: env) body;
       type_unit
-  | Zsequand (e1, e2) ->
-      type_expect env e1 type_bool;
-      type_expect env e2 type_bool;
-      type_bool
-  | Zsequor (e1, e2) ->
-      type_expect env e1 type_bool;
-      type_expect env e2 type_bool;
-      type_bool
   | Zconstraint (e, ty_expr) ->
       let ty' = type_of_type_expression false ty_expr in
       type_expect env e ty';
