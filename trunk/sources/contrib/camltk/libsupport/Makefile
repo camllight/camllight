@@ -38,12 +38,12 @@ libcamltk.a : camltk.o
 
 install: libcamltk.a support.zi textvariable.zi protocol.zi
 	if test -d $(LIBDIR); then : ; else mkdir $(LIBDIR); fi
-	cp -p support.zi $(LIBDIR)
-	cp -p support.zix $(LIBDIR)
-	cp -p textvariable.zi $(LIBDIR)
-	cp -p textvariable.zix $(LIBDIR)
-	cp -p protocol.zi $(LIBDIR)
-	cp -p libcamltk.a $(LIBDIR)
+	cp support.zi $(LIBDIR)
+	cp support.zix $(LIBDIR)
+	cp textvariable.zi $(LIBDIR)
+	cp textvariable.zix $(LIBDIR)
+	cp protocol.zi $(LIBDIR)
+	cp libcamltk.a $(LIBDIR)
 	chmod 644 $(LIBDIR)/*.zi $(LIBDIR)/libcamltk.a
 
 clean : 

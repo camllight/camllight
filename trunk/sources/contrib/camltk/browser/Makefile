@@ -68,8 +68,8 @@ clean :
 
 
 install: camlbrowser
-	cp -p camlbrowser $(BINDIR)
-	cp -p camlbrowser.man $(MANDIR)/camlbrowser.$(MANEXT)
+	cp camlbrowser $(BINDIR)
+	cp camlbrowser.man $(MANDIR)/camlbrowser.$(MANEXT)
 
 .SUFFIXES :
 .SUFFIXES : .mli .ml .zi .zo

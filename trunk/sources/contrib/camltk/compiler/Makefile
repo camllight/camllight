@@ -25,7 +25,7 @@ scratch :
 	rm -f *.z*  parser.ml lexer.ml tkcompiler
 
 install: 
-	cp -p tkcompiler $(BINDIR)
+	cp tkcompiler $(BINDIR)
 
 .SUFFIXES :
 .SUFFIXES : .mli .ml .zi .zo .mlp

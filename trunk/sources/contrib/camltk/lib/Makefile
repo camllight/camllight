@@ -63,7 +63,7 @@ clean :
 
 install: tklib.zo tklib2.zo  camltktop1 camltktop2
 	if test -d $(LIBDIR); then : ; else mkdir $(LIBDIR); fi
-	cp -p *.zi tklib*.zo camltktop* $(LIBDIR)
+	cp *.zi tklib*.zo camltktop* $(LIBDIR)
 	chmod 644 $(LIBDIR)/*.zi
 	chmod 644 $(LIBDIR)/tklib*.zo
 	chmod 755 $(LIBDIR)/camltktop*
