@@ -353,13 +353,16 @@ let write_command W def =
   (* Beginning of command *)
   begin match def.Result with
     Unit -> 
+        W  "\tSend2TkStart \"$PipeTkCallB\";\n";
         W ("\tSend2Tk(widget_name w);\n");
       	W ("\tSend2Tk \""^def.TkName^"\";\n")
   | String ->
+        W  "\tSend2TkStart \"$PipeTkResult\";\n";
       	W ("\tSend2Tk \"nputs $PipeTkResult [\";\n");
         W ("\tSend2Tk(widget_name w);\n");
         W ("\tSend2Tk \""^def.TkName^"\";\n")
   | _ -> 
+        W  "\tSend2TkStart \"$PipeTkResult\";\n";
       	W ("\tSend2Tk \"puts $PipeTkResult [\";\n");
         W ("\tSend2Tk(widget_name w);\n");
         W ("\tSend2Tk \""^def.TkName^"\";\n")
@@ -383,10 +386,13 @@ let write_function W def =
   (* Beginning of command *)
   begin match def.Result with
     Unit -> 
+        W  "\tSend2TkStart \"$PipeTkCallB\";\n";
       	W ("\tSend2Tk \""^def.TkName^"\";\n")
   | String ->
+        W  "\tSend2TkStart \"$PipeTkResult\";\n";
       	W ("\tSend2Tk \"nputs $PipeTkResult ["^def.TkName^"\";\n")
   | _ -> 
+        W  "\tSend2TkStart \"$PipeTkResult\";\n";
       	W ("\tSend2Tk \"puts $PipeTkResult ["^def.TkName^"\";\n")
   end;
   write_function_body W def names
@@ -394,6 +400,7 @@ let write_function W def =
 
 let write_create W class =
   W  "let create parent options =\n";
+  W  "   Send2TkStart \"$PipeTkCallB\";\n";
   W ("   Send2Tk \"" ^ class ^ "\";\n");
   W ("   let w = new_widget_atom \"" ^ class ^ "\" parent in\n");
   W ("      Send2Tk(widget_name w);\n");
