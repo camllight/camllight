@@ -179,12 +179,12 @@ let entry_bindings e =
 (**************************** Simple requester ********************)
 (* Note: grabs focus, thus always unique at one given moment      *)
 
-let open_req title action =
+let open_req title action memory =
   let t = toplevelw__create (support__new_toplevel_widget "open") [] in
   focus__set t;
   grab__set_local t;
   let tit = label__create t [Text title] in
-  let e = entry__create t [Relief Sunken] in
+  let e = entry__create t [Relief Sunken; TextVariable memory] in
     util__entry_bindings e;
     bind e [[], XKey "Return"]
       	(BindSet ([], fun _ -> action (entry__get e); destroy t));
@@ -228,6 +228,10 @@ let open_list_req title elements action =
     destroy t  in
 
   bind lb [[Double], WhatButton 1] (BindSet ([], activate));
+  bind lb [[Meta], XKey "a"] 
+      (BindSet([], function _ ->
+      	       	     listbox__select_from lb (Number 0);
+		     listbox__select_to lb End));
 
   complete__add_completion lb activate; 
 
