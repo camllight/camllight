@@ -15,9 +15,13 @@ original set of bytecode object files. That is, after running
         camllibr -o library.zo mod1.zo mod2.zo mod3.zi mod4.zo
 \end{verbatim}
 all calls to the linker with the form
-$$ "camlc " \ldots \verb| library.zo | \ldots $$
+\begin{verbatim}
+        camlc ... library.zo ...
+\end{verbatim}
 are exactly equivalent to
-$$ "camlc " \ldots \verb| mod1.zo mod2.zo mod3.zi mod4.zo | \ldots $$
+\begin{verbatim}
+        camlc ... mod1.zo mod2.zo mod3.zi mod4.zo ...
+\end{verbatim}
 
 The typical use of "camllibr" is to build a library composed of
 several modules: this way, users of the library have only one ".zo"
@@ -31,8 +35,10 @@ there is no problem with putting many modules, even rarely used ones,
 into one single library: this will not result in bigger executables.
 
 The usage for "camllibr" is:
-$$ "camllibr " \mbox{\it options} ~ \it file_1".zo" \ldots \it file_n".zo" $$
-where $\it file_1".zo"$ through $\it file_n".zo"$ are the object files to pack
+\begin{alltt}
+        camllibr \var{options} \nth{file}{1}.zo ... \nth{file}{n}.zo
+\end{alltt}
+where \nth{file}{1}.zo through \nth{file}{n}.zo are the object files to pack
 together. The order in which these file names are presented on the
 command line is relevant: the compiled phrases contained in the
 library will be executed in that order. (Remember that it is a

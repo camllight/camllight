@@ -12,7 +12,8 @@ $head = $1;
 $head =~ tr/A-Z/a-z/;
 $_ = $head . $2;
 print "\\mysection{{\\tt $modname}: $_}\n\n";
-print "\\label{s:$modname}\n";
+$label = $modname; $label =~ s/[^A-Za-z0-9]//g;
+print "\\label{s:$label}\n";
 print "\\index{$modname (module)@\\verb`$modname` (module)}%\n\n";
 
 $incomment = 0;

@@ -4,10 +4,6 @@ This chapter describes how user-defined primitives, written in C, can
 be added to the Caml Light runtime system and called from Caml Light
 code.
 
-\begin{mac} This facility is not implemented in the Macintosh version. \end{mac}
-
-\begin{pc} This facility is not implemented in the PC versions. \end{pc}
-
 \section{Overview and compilation information}
 
 \subsection{Declaring primitives}
