@@ -544,7 +544,7 @@ Ide :
 ;
 
 Infx :
-        INFIX0          { $1 }
+        INFIX           { $1 }    | INFIX0        { $1 } 
       | INFIX1          { $1 }    | INFIX2        { $1 }
       | INFIX3          { $1 }    | INFIX4        { $1 }
       | STAR            { "*" }   | COLONCOLON    { "::" }
