@@ -17,6 +17,7 @@
 #define UNIX_ERROR_EXN 8        /* "unix","Unix_error",1 */
 #define GRAPHIC_FAILURE_EXN 9   /* "graphics","Graphic_failure",1 */
 #define PARSE_FAILURE_EXN 10    /* "stream","Parse_failure",1 */
+#define TCL_ERROR_EXN 11        /* "protocol","TkError",1 */
 
 struct longjmp_buffer {
   jmp_buf buf;
