@@ -11,9 +11,11 @@
 #open "fmt_type";;
 #open "symtable";;
 
+exception Constr_not_found;;
+
 let rec find_constr tag = function
     [] ->
-      fatal_error "find_constr: unknown constructor for this type"
+      raise Constr_not_found
   | constr::rest ->
       match constr.info.cs_tag with
         ConstrRegular(t, _) ->
@@ -22,13 +24,19 @@ let rec find_constr tag = function
           fatal_error "find_constr: extensible"
 ;;
 
+exception Exception_not_found;;
+
 let find_exception tag =
   let (qualid, stamp) = get_exn_of_num tag in
   let rec select_exn = function
     [] ->
-      raise Not_found
-  | ({info = {cs_tag = ConstrExtensible(_,st)}} as desc) :: rest ->
-      if st == stamp then desc else select_exn rest in
+      raise Exception_not_found
+  | constr :: rest ->
+      match constr.info.cs_tag with
+        ConstrExtensible(_,st) ->
+          if st == stamp then constr else select_exn rest
+      | ConstrRegular(_,_) ->
+          fatal_error "find_exception: regular" in
   select_exn(hashtbl__find_all (find_module qualid.qual).mod_constrs qualid.id)
 ;;
 
@@ -160,7 +168,9 @@ and print_concrete_type prio depth obj cstr ty ty_list =
             close_box();
             if prio > 1 then print_string ")"
       with
-        Not_found ->
+        Constr_not_found ->
+          print_string "<unknown constructor>"
+      | Exception_not_found ->
           print_string "<local exception>"
       | Unify ->
           fatal_error "print_val: types should match"

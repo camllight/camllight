@@ -7,6 +7,7 @@ CAMLRUN=../camlrun
 INCLUDES=-stdlib ../lib -I ../compiler -I ../linker
 COMPFLAGS=-O fast $(INCLUDES)
 LINKFLAGS=-g $(INCLUDES)
+CPP=/lib/cpp -P
 
 EXTERNOBJS=config.zo misc.zo \
     const.zo prim.zo instruct.zo lambda.zo \
@@ -90,9 +91,9 @@ do_phr.zo: pr_value.zo ../compiler/typing.zo meta.zi \
     ../compiler/back.zo ../compiler/front.zo fmt_type.zo \
     ../linker/symtable.zo ../compiler/syntax.zo ../compiler/ty_decl.zo 
 expunge.zo: ../linker/symtable.zo ../compiler/const.zo 
-fmt_type.zo: ../compiler/misc.zo ../compiler/modules.zo \
-    ../compiler/builtins.zo ../compiler/globals.zo ../compiler/types.zo \
-    ../compiler/const.zo 
+fmt_type.zo: ../compiler/misc.zo ../compiler/pr_type.zo \
+    ../compiler/modules.zo ../compiler/builtins.zo ../compiler/globals.zo \
+    ../compiler/types.zo ../compiler/const.zo 
 load_phr.zo: pr_value.zo ../compiler/reloc.zo meta.zi ../linker/tr_const.zo \
     ../compiler/labels.zo ../compiler/misc.zo ../linker/symtable.zo \
     ../linker/patch.zo ../compiler/instruct.zo ../compiler/buffcode.zo \
