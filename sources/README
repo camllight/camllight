@@ -56,8 +56,9 @@ CONTENTS:
   COPYRIGHT             INRIA's copyright notice
   INSTALL               instructions for installation
   README                this file
-  CHANGES               what's new since release 0.5
+  CHANGES               what's new since release 0.3
   PORTING               hints on porting Caml Light to a non-Unix machine
+
 
 COPYRIGHT:
 
