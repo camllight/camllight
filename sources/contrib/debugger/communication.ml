@@ -4,7 +4,6 @@
 #open "misc";;
 #open "unix";;
 #open "unix_tools";;
-#open "value";;
 #open "primitives";;
 #open "input_handling";;
 
@@ -143,16 +142,6 @@ let get_global variable =
   putword variable;
   flush !current_output;
   getval ();;
-
-(* Set a global variable to the invalid value, to flag it as uninitialized *)
-
-let invalid_val = invalid_value();;
-
-let mark_global_uninitialized variable =
-  putch `I`;
-  putword variable;
-  putval invalid_val;
-  flush !current_output;;
 
 (* Get the value of the accumulator. *)
 let get_accu () =

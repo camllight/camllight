@@ -20,8 +20,6 @@ value selected_event : event OPTION ref;;
 (* Raise `Not_found' if not on an event. *)
 value selected_point : unit -> string * int;;
 
-value selected_event_is_before : unit -> bool;;
-
 (* Select a frame. *)
 (* Raise `Not_found' if no such frame. *)
 (* --- Assume the currents events have already been updated. *)

@@ -23,7 +23,7 @@
 #open "show_information";;
 #open "time_travel";;
 #open "events";;
-#open "fmt_type";;
+#open "pr_type";;
 #open "pr_value";;
 #open "variables";;
 #open "source";;
@@ -32,7 +32,6 @@
 #open "frames";;
 #open "value";;
 #open "pattern_matching";;
-#open "format";;
 
 (** Instructions, variables and infos lists. **)
 let instruction_list =
@@ -92,11 +91,11 @@ let find_ident name matcher action alternative lexbuf =
       | _ ->
           error ("Ambiguous " ^ name ^ ".");;
 
-let find_variable action alternative lexbuf =
-  find_ident "variable name" matching_variables action alternative lexbuf;;
+let find_variable =
+  find_ident "variable name" matching_variables;;
 
-let find_info action alternative lexbuf =
-  find_ident "info command" matching_infos action alternative lexbuf;;
+let find_info =
+  find_ident "info command" matching_infos;;
 
 let add_breakpoint_at_pc pc =
   try
@@ -189,28 +188,24 @@ let instr_dir lexbuf =
     else
       do_list (function x -> add_path (expand_path x)) (rev new_directory);
     print_string "Directories :";
-    do_list (function x -> print_space(); print_string x) !load_path;
+    do_list (function x -> print_string (" " ^ x)) !load_path;
     print_newline ();;
 
 let instr_kill lexbuf =
   end_of_line lexbuf;
   if not !loaded then
     (prerr_endline "The program is not being run."; raise Toplevel);
-  if (yes_or_no "Kill the program being debugged") then begin
-    kill_program ();
-    clear_ellipses()
-  end;;
+  if (yes_or_no "Kill the program being debugged") then
+    kill_program ();;
 
 let instr_run lexbuf =
   end_of_line lexbuf;
-  clear_ellipses();
   ensure_loaded ();
   run ();
   show_current_event ();;
 
 let instr_reverse lexbuf =
   end_of_line lexbuf;
-  clear_ellipses();
   ensure_loaded ();
   back_run ();
   show_current_event ();;
@@ -221,7 +216,6 @@ let instr_step lexbuf =
       None -> 1
     | Some x -> x
   in
-    clear_ellipses();
     ensure_loaded ();
     step step_count;
     show_current_event ();;
@@ -232,14 +226,12 @@ let instr_back lexbuf =
       None -> 1
     | Some x -> x
   in
-    clear_ellipses();
     ensure_loaded ();
     step (-step_count);
     show_current_event ();;
 
 let instr_finish lexbuf =
   end_of_line lexbuf;
-  clear_ellipses();
   ensure_loaded ();
   finish ();
   show_current_event ();;
@@ -250,14 +242,12 @@ let instr_next lexbuf =
       None -> 1
     | Some x -> x
   in
-    clear_ellipses();
     ensure_loaded ();
     next step_count;
     show_current_event ();;
 
 let instr_goto lexbuf =
   let time = Integer_eol Lexeme lexbuf in
-    clear_ellipses();
     ensure_loaded ();
     go_to time;
     show_current_event ();;
@@ -267,12 +257,12 @@ let instr_quit _ =
 
 let print_variable_list () =
   print_endline "List of variables :";
-  do_list (function (nm, _, _) -> print_string nm; print_space()) !variable_list;
+  do_list (function (nm, _, _) -> print_string (nm ^ " ")) !variable_list;
   print_newline ();;
 
 let print_info_list () =
   print_endline "List of info commands :";
-  do_list (function (nm, _, _) -> print_string nm; print_space()) !info_list;
+  do_list (function (nm, _, _) -> print_string (nm ^ " ")) !info_list;
   print_newline ();;
 
 let instr_help lexbuf =
@@ -328,19 +318,12 @@ let instr_print lexbuf =
     do_list
       (function x ->
       	 let (val, typ) = variable x in
-           open_hovbox 0;
       	   output_variable_name std_out x;
-           print_string " :"; print_space();
-           print_one_type typ; print_string " ="; print_space();
+           print_string " : ";
+           print_one_type typ; print_string " = ";
            print_value val typ;
-           close_box();
            print_newline ())
       variables;;
-
-let instr_more lexbuf =
-  let arguments = Integer_list_eol Lexeme lexbuf in
-    ensure_loaded ();
-    do_list pr_value__more arguments;;
 
 let instr_match lexbuf =
   let (var, pattern) = Match_arguments_eol Lexeme lexbuf in
@@ -349,14 +332,12 @@ let instr_match lexbuf =
       do_list
 	(function
 	   (name, val, typ) ->
-             open_hovbox 0;
 	     print_string name;
-	     print_string " :"; print_space();
+	     print_string " : ";
              print_one_type typ;
-             print_string " ="; print_space();
+             print_string " = ";
              print_value val typ;
-            close_box();
-            print_newline ())
+             print_newline ())
       	(pattern_matching pattern val typ);;
 
 let instr_source lexbuf =
@@ -430,13 +411,12 @@ let instr_break lexbuf =
         add_breakpoint_at_pc pc
     | BA_function var ->			(* break FUNCTION *)
         let (val, typ) = variable var in
-        begin match (type_repr typ).typ_desc with
+          (match (type_repr typ).typ_desc with
              Tarrow (_, _) ->
 	       add_breakpoint_at_pc (get_closure_code val)
            | _ ->
       	       prerr_endline "Not a function.";
-	       raise Toplevel
-        end
+	       raise Toplevel)
     | BA_pos1 (module, line, column) ->		(* break @ [MODULE] LINE [COL] *)
       	let module_name = convert_module module in
 	  new_breakpoint
@@ -603,7 +583,7 @@ let raw_vect_variable kill name =
   (function
     lexbuf ->
       let argument_list = Argument_list_eol Argument lexbuf in
-      	if not kill or (ask_kill_program ()) then
+      	if kill & (ask_kill_program ()) then
           name := vect_of_list argument_list),
   function
     () ->
@@ -614,7 +594,7 @@ let raw_variable kill name =
   (function
      lexbuf ->
        let argument = Argument_eol Argument lexbuf in
-      	 if not kill or (ask_kill_program ()) then
+      	 if kill & (ask_kill_program ()) then
            name := argument),
   function
     () ->
@@ -625,7 +605,7 @@ let integer_variable kill name =
   (function
     lexbuf ->
       let argument = Integer_eol Lexeme lexbuf in
-      	if not kill or (ask_kill_program ()) then
+      	if kill & (ask_kill_program ()) then
           name := argument),
   function
     () ->
@@ -641,7 +621,7 @@ let boolean_variable kill name =
         | "of" | "off" -> false
 	| _ -> error "Syntax error."
       in
-      	if not kill or (ask_kill_program ()) then
+      	if kill & (ask_kill_program ()) then
           name := argument),
   function
     () ->
@@ -652,7 +632,7 @@ let path_variable kill name =
   (function
      lexbuf ->
        let argument = Argument_eol Argument lexbuf in
-      	 if not kill or (ask_kill_program ()) then
+      	 if kill & (ask_kill_program ()) then
            name := (expand_path argument)),
   function
     () ->
@@ -685,13 +665,13 @@ let loading_mode_variable =
 let info_modules lexbuf =
   end_of_line lexbuf;
   print_endline "Used modules :";
-  do_list (function x -> print_string x; print_space()) !modules;
+  do_list (function x -> print_string (x ^ " ")) !modules;
   print_newline ();
   print_endline "Opened modules :";
-  if !opened_modules_names = [] then
+  if !used_modules = [] then
     print_endline "(no module opened)."
   else
-    (do_list (function x -> print_string x; print_space) !opened_modules_names;
+    (do_list (function x -> print_string (x.mod_name ^ " ")) !used_modules;
      print_newline ());;
 
 let info_checkpoints lexbuf =
@@ -738,16 +718,14 @@ let info_events lexbuf =
         | Some {ev_file = f} -> f
   in
     print_endline ("Module : " ^ module);
-    print_endline "   Address  Character   Kind";
+    print_endline "  Address  Character   Kind";
     do_list
       (function {ev_pos = pc; ev_char = char; ev_kind = kind} ->
     	 printf__printf
-      	   "%10d %10d  %s\n"
+      	   "%10d %10d %6s\n"
            pc
            char
-           (match kind with
-               Lbefore -> "before"
-             | Lafter _ -> "after"))
+           (if kind = Lbefore then "before" else "after"))
       (events_in_module module);;
 
 (** Initialization. **)
@@ -756,7 +734,7 @@ let initialize_interpreter () =
     (* function name, priority, function interpreter, can be repeated,
        help message *)
     ["cd", false, instr_cd, true,
-"set working directory to DIR for debugger and program being debugged.";
+"et working directory to DIR for debugger and program being debugged.";
      "pwd", false, instr_pwd, true,
 "print working directory.";
      "directory", false, instr_dir, false,
@@ -790,8 +768,6 @@ Skip over function calls.\n\
 Argument N means do this N times (or till program stops for another reason).";
      "print", false, instr_print, true,
 "print value of variables (`*' stand for the accumulator).";
-     "more", false, instr_more, true,
-"print more on given ellipsis (`<n>' stands for ellipsis number n).";
      "match", false, instr_match, true,
 "";
      "source", false, instr_source, true,
@@ -857,11 +833,7 @@ It can be either :
      "socket", raw_variable true socket_name,
 "name of the socket used by communications debugger-runtime.";
      "history", integer_variable false history__history_size,
-"history size.";
-     "print_depth", integer_variable false max_printer_depth,
-"maximal depth for printing of values.";
-     "print_length", integer_variable false max_printer_steps,
-"maximal number of value nodes printed."];
+"history size."];
   info_list :=
     (* info name, function, help *)
     ["modules", info_modules,

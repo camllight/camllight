@@ -1,3 +1,0 @@
-CamlProg(fib,fib.ml,)
-CamlProg(wc,wc.ml,)
-CamlProg(sieve,sieve.ml,)

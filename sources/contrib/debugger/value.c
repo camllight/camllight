@@ -36,17 +36,7 @@ value int_of_value(val)
   return res;
 }
 
-/* The invalid value used to flag uninitialized globals. */
-#define Invalid_value ((value) -4)
-
-value invalid_value()
-{
-  value res = alloc(1, Abstract_tag);
-  Field(res, 0) = Invalid_value;
-  return res;
-}
-
-/* Check the value of a global variable to see if it has been bound already. */
+/* Value of not yet bound global variables. */
 value valid_value(val)
      value val;
 {

@@ -3,7 +3,6 @@
 #open "unix_tools";;
 #open "debugger_config";;
 #open "misc";;
-#open "const";;
 #open "lambda";;
 #open "primitives";;
 #open "constants";;
@@ -44,8 +43,7 @@ let load_information file =
 	   raise Toplevel)
         else if (symbol_size = 0) or (debug_size = 0) then
 	  (prerr_endline
-      	     ("The file " ^ file ^ " does not contain enough debugging information.");
-           prerr_endline "Please recompile it with the '-g' option.";
+      	     ("The file " ^ file ^ " contain not enough debugging information.");
 	   close_in inchan;
            raise Toplevel);
       	seek_in
@@ -147,14 +145,6 @@ let install_events () =
     (print_string "Installing events..."; print_newline ());
   do_list (function {ev_pos = pos} -> set_event pos) !events;;
 
-let mark_globals () =
-  if !debug_loading then
-    (print_string "Marking global variables..."; print_newline ());
-  hashtbl__do_table
-    (fun qualid slot ->
-      if qualid.qual <> "sys" then mark_global_uninitialized slot)
-    (!global_table).num_tbl;;
-
 let initialize_loading () =
   if !debug_loading then
     (print_string "Loading debugging informations..."; print_newline ());
@@ -163,10 +153,7 @@ let initialize_loading () =
     (print_string "Opening a socket..."; print_newline ());
   open_connection
     !socket_name
-    (function () -> go_to 0;
-                    install_events ();
-                    mark_globals ();
-                    exit_main_loop ());;
+    (function () -> go_to 0; install_events (); exit_main_loop ());;
 
 (* Ensure the program is already loaded. *)
 let ensure_loaded () =
