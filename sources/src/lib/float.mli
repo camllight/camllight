@@ -48,16 +48,31 @@ value minus : float -> float = 1 "~float"
         (* Usual comparisons between floating-point numbers. *)
 ;;
 
-value exp : float -> float = 1 "exp_float"
-  and log : float -> float = 1 "log_float"
-  and sqrt : float -> float = 1 "sqrt_float"
-  and sin : float -> float = 1 "sin_float"
-  and cos : float -> float = 1 "cos_float"
-  and tan : float -> float = 1 "tan_float"
+value acos : float -> float = 1 "acos_float"
   and asin : float -> float = 1 "asin_float"
-  and acos : float -> float = 1 "acos_float"
   and atan : float -> float = 1 "atan_float"
   and atan2 : float -> float -> float = 2 "atan2_float"
+  and ceil : float -> float = 1 "ceil_float"
+  and cos : float -> float = 1 "cos_float"
+  and cosh : float -> float = 1 "cosh_float"
+  and exp : float -> float = 1 "exp_float"
+  and fabs : float -> float = 1 "fabs_float"
+  and floor : float -> float = 1 "floor_float"
+  and fmod : float -> float -> float = 2 "fmod_float"
+
+  and frexp : float -> float * int = 1 "frexp_float"
+  and ldexp : float -> int -> float = 2 "ldexp_float"
+
+  and log : float -> float = 1 "log_float"
+  and log10 : float -> float = 1 "log10_float"
+
+  and modf : float -> float * float = 1 "modf_float"
+
+  and sin : float -> float = 1 "sin_float"
+  and sinh : float -> float = 1 "sin_float"
+  and sqrt : float -> float = 1 "sqrt_float"
+  and tan : float -> float = 1 "tan_float"
+  and tanh : float -> float = 1 "tanh_float"
           (* Usual transcendental functions on floating-point numbers. *)
 ;;
 
