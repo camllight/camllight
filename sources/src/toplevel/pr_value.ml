@@ -41,96 +41,59 @@ let find_exception tag =
 ;;
 
 let printers = ref [
-  constr_type_int,
+  "", type_int,
     (fun x -> print_int (magic_obj x : int));
-  constr_type_float,
+  "", type_float,
     (fun x -> print_float(magic_obj x : float));
-  constr_type_char,
+  "", type_char,
     (fun x -> print_string "`";
               print_string (char_for_read (magic_obj x : char));
               print_string "`");
-  constr_type_string,
+  "", type_string,
    (fun x -> print_string "\"";
              print_string (string_for_read (magic_obj x : string));
              print_string "\"")
 ];;
 
-let printer_depth = ref 100
+let find_printer ty =
+  let rec find = function
+    [] -> raise Not_found
+  | (name, sch, printer) :: remainder ->
+      try
+        filter (type_instance sch, ty); printer
+      with Unify ->
+        find remainder
+  in find !printers
 ;;
 
-exception Ellipsis
-;;
+let printer_depth = ref 100;;
+
+exception Ellipsis;;
 
 let cautious f arg = try f arg with Ellipsis -> print_string "...";;
 
 let rec print_val prio depth obj ty =
   if depth < 0 then raise Ellipsis;
-  match (type_repr ty).typ_desc with
-    Tvar _ ->
-      print_string "<poly>"
-  | Tarrow(ty1, ty2) ->
-      print_string "<fun>"
-  | Tproduct(ty_list) ->
-      if prio > 0 then begin open_hovbox 1; print_string "(" end
-       else open_hovbox 0;
-      print_val_list 1 depth obj ty_list;
-      if prio > 0 then print_string ")";
-      close_box()
-  | Tconstr(cstr, ty_list) ->
-      if same_type_constr cstr constr_type_list then begin
-        let ty_arg = 
-          match ty_list with [ty] -> ty | _ -> fatal_error "print_val (list)"
-        in
-           let rec print_conses depth cons =
-            if obj_tag cons != 0 then begin
-              print_val 0 depth (obj_field cons 0) ty_arg;
-              if obj_tag (obj_field cons 1) != 0 then begin
-                print_string ";"; print_space();
-                print_conses (depth - 1) (obj_field cons 1)
-              end
-            end
-          in
-           begin
-            open_hovbox 1;
-            print_string "[";
-            cautious (print_conses (depth - 1)) obj;
-            print_string "]";
-            close_box()
-           end
-
-      end else if same_type_constr cstr constr_type_vect then begin
-        let ty_arg = 
-          match ty_list with [ty] -> ty | _ -> fatal_error "print_val (vect)"
-        in
-          let print_items depth obj =
-             for i = 0 to obj_size obj - 1 do
-              if i > 0 then print_string ";"; print_space();
-              print_val depth 0 (obj_field obj i) ty_arg
-             done
-         in
-          open_hovbox 2;
-          print_string "[|";
-          cautious (print_items (depth - 1)) obj;
-          print_string "|]";
-          close_box()
-      end else
-        try
-          let rec find_printer = function
-            [] ->
-              raise Not_found
-          | (cstr', f) :: rest ->
-              if same_type_constr cstr cstr'
-              then f obj
-              else find_printer rest
-          in
-            find_printer !printers
-        with Not_found ->
-               begin match cstr.info.ty_abbr with
-                 Tabbrev(params, body) ->
-                   cautious (print_val prio depth obj)
-                            (expand_abbrev params body ty_list)
-               | _ ->
-                   print_concrete_type prio depth obj cstr ty ty_list end
+  try
+    (find_printer ty) obj; ()
+  with Not_found ->
+    match (type_repr ty).typ_desc with
+      Tvar _ ->
+        print_string "<poly>"
+    | Tarrow(ty1, ty2) ->
+        print_string "<fun>"
+    | Tproduct(ty_list) ->
+        if prio > 0 then print_string "(";
+        print_val_list 1 depth obj ty_list;
+        if prio > 0 then print_string ")"
+    | Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, ty_list) ->
+        cautious (print_val prio depth obj) (expand_abbrev params body ty_list)
+    | Tconstr(cstr, [ty_arg]) when same_type_constr cstr constr_type_list ->
+        print_list depth obj ty_arg
+    | Tconstr(cstr, [ty_arg]) when same_type_constr cstr constr_type_vect ->
+        print_vect depth obj ty_arg
+    | Tconstr(cstr, ty_list) ->
+        print_concrete_type prio depth obj cstr ty ty_list
 
 and print_concrete_type prio depth obj cstr ty ty_list =
   let typ_descr =
@@ -219,6 +182,35 @@ and print_val_list prio depth obj ty_list =
        print_string ","; print_space();
        print_list depth (succ i) ty_list
   in cautious (print_list (depth - 1) 0) ty_list
+
+and print_list depth obj ty_arg =
+  let rec print_conses depth cons =
+   if obj_tag cons != 0 then begin
+     print_val 0 depth (obj_field cons 0) ty_arg;
+     if obj_tag (obj_field cons 1) != 0 then begin
+       print_string ";"; print_space();
+       print_conses (depth - 1) (obj_field cons 1)
+     end
+   end
+ in
+   open_hovbox 1;
+   print_string "[";
+   cautious (print_conses (depth - 1)) obj;
+   print_string "]";
+   close_box()
+
+and print_vect depth obj ty_arg =
+   let print_items depth obj =
+      for i = 0 to obj_size obj - 1 do
+       if i > 0 then print_string ";"; print_space();
+       print_val depth 0 (obj_field obj i) ty_arg
+      done
+  in
+    open_hovbox 2;
+    print_string "[|";
+    cautious (print_items (depth - 1)) obj;
+    print_string "|]";
+    close_box()
 ;;
 
 let print_value obj ty = print_val 0 !printer_depth obj ty

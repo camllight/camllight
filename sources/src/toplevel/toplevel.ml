@@ -219,29 +219,26 @@ let untrace name =
 
 (* To define specific printing functions. *)
 
-let new_printer name printer =
+let install_printer name =
   begin try
-    let typ_desc = find_type_desc (parse_global name) in
-    printers := (typ_desc.info.ty_constr, magic printer) :: !printers
-  with Not_found ->
-    eprintf "Unknown type %s.\n" name
+    let val_desc = find_value_desc (parse_global name) in
+    let (ty_arg, ty_res) = filter_arrow val_desc.info.val_typ in
+    let pos = get_slot_for_variable val_desc.qualid in
+    printers := (name, ty_arg, (magic_obj global_data.(pos) : obj -> unit))
+             :: !printers
+  with
+    Desc_not_found -> eprintf "Unknown function %s.\n" name
+  | Unify -> eprintf "%s is not a function.\n" name
   end;
   flush std_err
 ;;
 
-let default_printer name =
-  begin try
-    let ty_constr = (find_type_desc (parse_global name)).info.ty_constr in
-    let rec remove = function
-        [] -> []
-      | (ty,_ as pair)::rest ->
-          if same_type_constr ty ty_constr
-          then rest
-          else pair :: remove rest in
-    printers := remove !printers
-  with Not_found ->
-    eprintf "Unknown type %s.\n" name
-  end;
+let remove_printer name =
+  let rec remove = function
+    [] -> eprintf "No printer named %s.\n" name; []
+  | (pr_name, _, _ as printer) :: rem ->
+      if name = pr_name then rem else printer :: remove rem in
+  printers := remove !printers;
   flush std_err
 ;;
 
