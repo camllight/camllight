@@ -125,6 +125,20 @@ let read_token port =
   else str
 ;;
 
+(* Assumes the token is on a separate line *)
+let read_token_line port =
+  let str = read_string (function c -> c == `\n`) port in
+  if !debug then begin
+     prerr_string "Received: ";
+     prerr_string str;
+     prerr_string "\n"
+     end;
+  if str = "TkError"
+  then let errmsg = read_string newline port in 
+       raise (TkError errmsg)
+  else str
+;;
+
 let read_line port = 
   let str = read_string newline port in
   if !debug then begin
@@ -167,7 +181,10 @@ type callback_buffer == unit
 ;;
 
 (* Extracting callback arguments from the pipe *)
-let arg_GetTkToken () = GetTkToken !PipeTkCallB
+(* we know that arguments are one by line      *)
+(* if we use read_token, space-only tokens are dumped *)
+(* i.e. bindings callbacks with %A *)
+let arg_GetTkToken () = read_token_line !PipeTkCallB
 and arg_GetTkTokenList ()  = GetTkTokenList !PipeTkCallB
 and arg_GetTkString () = GetTkString !PipeTkCallB
 ;;
@@ -183,13 +200,13 @@ and res_GetTkString () = GetTkString !PipeTkResult
 
 
 (* Callback encoding *)
-(* this is bogus if arg of callback is a string *)
+(* this is bogus if arg of callback is a multi-line string *)
 let caml_callback = "
 proc camlcb {cbid args} {
   global PipeTkCallB;
   puts $PipeTkCallB $cbid;
   foreach i $args {
-   puts $PipeTkCallB $i
+   puts $PipeTkCallB \"$i\"
    };
   flush $PipeTkCallB;
   }
