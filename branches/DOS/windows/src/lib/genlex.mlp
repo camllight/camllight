@@ -62,7 +62,11 @@ let make_lexer keywords =
       with Not_found -> raise Parse_error in
 
   let rec next_token = function
+#ifdef FUSSY
+    [< '(*'*) ` `|`\010`|`\013`|`\t`|`\026`|`\012`; s >] ->
+#else
     [< '(*'*) ` `|`\010`|`\013`|`\009`|`\026`|`\012`; s >] ->
+#endif
       next_token s
   | [< '(*'*) `A`..`Z`|`a`..`z`|ACCENTED as c; s>] ->
       reset_buffer(); store c; ident s
@@ -73,7 +77,7 @@ let make_lexer keywords =
       reset_buffer(); store c; number s
   | [< '(*'*) `\``; char c; '(*'*) `\`` >] ->
       Char c
-  | [< ' `"` (*'*); s >] ->
+  | [< '(*'*) `"` (*"'"'*); s >] ->
       reset_buffer(); String(string s)
   | [< '(*'*) `-`; s >] ->
       neg_number s
@@ -132,7 +136,7 @@ let make_lexer keywords =
       Float(float_of_string(get_string()))
 
   and string = function
-    [< ' `"` (*'*) >] -> get_string()
+    [< '(*'*) `"` (*"'"'*) >] -> get_string()
   | [< '(*'*) `\\`; escape c; s >] -> store c; string s
   | [< '(*'*) c; s >] -> store c; string s
 

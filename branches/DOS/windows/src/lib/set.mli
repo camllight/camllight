@@ -52,4 +52,8 @@ value empty: ('a -> 'a -> int) -> 'a t
            where [x1 ... xN] are the elements of [s].
            The order in which elements of [s] are presented to [f] is
            not specified. *)
+  and choose: 'a t -> 'a
+        (* Return one element of the given set, or raise [Not_found] if
+           the set is empty. Which element is chosen is not specified,
+           but equal elements will be chosen for equal sets. *)
 ;;

@@ -18,6 +18,9 @@
 #ifdef HAS_UI
 #include "ui.h"
 #endif
+#if defined (macintosh) && !defined (HAS_UI)
+#include "spin.h"
+#endif
 
 #ifdef DEBUG
 static long icount = 0;
@@ -140,6 +143,18 @@ value interprete(prog)
    and don't put it in a register. 
    For GCC users, I've hand-assigned registers for some architectures. */
 
+#if defined(__GNUC__) && defined(__mips__)
+  register code_t pc asm("$16");
+  register value accu asm("$17");
+  register value * asp asm("$18");
+  register value * rsp asm("$19");
+#else
+#if defined(__GNUC__) && defined(__alpha__)
+  register code_t pc asm("$9");
+  register value accu asm("$10");
+  register value * asp asm("$11");
+  register value * rsp asm("$12");
+#else
 #if defined(__GNUC__) && defined(sparc)
   register code_t pc asm("%l0");
   register value accu asm("%l1");
@@ -166,6 +181,8 @@ value interprete(prog)
   register value accu;
   register value * asp;
   register value * rsp;
+#endif
+#endif
 #endif
 #endif
 #endif
@@ -475,7 +492,6 @@ value interprete(prog)
       if ((value *) tp >= trap_barrier) {
         Setup_for_gc;
         retsp->pc = pc;
-	extern_rsp = (value *) tp;
         debugger(TRAP_BARRIER);
         Restore_after_gc;
       }

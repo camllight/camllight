@@ -6,7 +6,15 @@
 *)
 
 (* The behaviour of pretty-printing commands is unspecified
-   if there is no opened pretty-printing box. *)
+   if there is no opened pretty-printing box. Each box opened via
+   one of the [open_] functions below must be closed using [close_box]
+   for proper formatting. Otherwise, some of the material printed in the
+   boxes may not be output, or may be formatted incorrectly. *)
+
+(* In case of interactive use, the system closes all opened boxes and
+   flushes all pending text (as with the [print_newline] function)
+   after each phrase. Each phrase is therefore executed in the initial
+   state of the pretty-printer. *)
 
 #open "io";;
 
@@ -146,8 +154,19 @@ value get_ellipsis_text : unit -> string;;
         (* Return the text of the ellipsis. *)
 
 (*** Redirecting formatter output *)
-value set_formatter_output : out_channel -> unit;;
+value set_formatter_output_channel : out_channel -> unit;;
         (* Redirect the pretty-printer output to the given channel. *)
-value get_formatter_output : unit -> out_channel;;
-        (* Return the channel connected to the pretty-printer. *)
+value set_formatter_output_functions :
+        (string -> int -> int -> unit) -> (unit -> unit) -> unit;;
+        (* [set_formatter_output_functions out flush] redirects the
+           pretty-printer output to the functions [out] and [flush].
+           The [out] function performs the pretty-printer output.
+           It is called with a string [s], a start position [p],
+           and a number of characters [n]; it is supposed to output
+           characters [p] to [p+n-1] of [s]. The [flush] function is
+           called whenever the pretty-printer is flushed using
+           [print_flush] or [print_newline]. *)
+value get_formatter_output_functions :
+        unit -> (string -> int -> int -> unit) * (unit -> unit);;
+        (* Return the current output functions of the pretty-printer. *)
 

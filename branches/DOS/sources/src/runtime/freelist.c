@@ -35,7 +35,7 @@ char *fl_merge = Fl_head;        /* Current insertion pointer.  Managed
 #define Next(b) (((block *) (b))->next_bp)
 
 #ifdef DEBUG
-void fl_verify ()
+void fl_check ()
 {
   char *cur, *prev;
   int prev_found = 0, merge_found = 0;
@@ -131,6 +131,9 @@ char *fl_allocate (wo_sz)
 void fl_init_merge ()
 {
   fl_merge = Fl_head;
+#ifdef DEBUG
+  fl_check ();
+#endif
 }
 
 /* [fl_merge_block] returns the head pointer of the next block after [bp],
@@ -183,7 +186,7 @@ char *fl_merge_block (bp)
     Hd_bp (bp) = not_random ();
 #endif
     Assert (fl_merge == prev);
-  }else if (Wosize_hd (hd) > 0){
+  }else if (Wosize_hd (hd) != 0){
     Hd_bp (bp) = Bluehd_hd (hd);
     Next (bp) = cur;
     Next (prev) = bp;

@@ -44,7 +44,7 @@ let printers = ref [
   "", type_int,
     (fun x -> print_int (magic_obj x : int));
   "", type_float,
-    (fun x -> print_float(magic_obj x : float));
+    (fun x -> print_float (magic_obj x : float));
   "", type_char,
     (fun x -> print_string "`";
               print_string (char_for_read (magic_obj x : char));
@@ -76,8 +76,8 @@ let cautious f arg = try f arg with Ellipsis -> print_string "...";;
 
 let rec print_val prio depth obj ty =
   decr printer_steps;
-  if !printer_steps < 0 then raise Ellipsis else
-  if depth < 0 then raise Ellipsis else
+  if !printer_steps <= 0 then raise Ellipsis else
+  if depth <= 0 then raise Ellipsis else
   try
     find_printer ty obj; ()
   with Not_found ->
@@ -160,8 +160,8 @@ and print_concrete_type prio depth obj cstr ty ty_list =
         with Unify ->
           fatal_error "print_val: types should match"
         end;
-        cautious (print_val 0 (depth - 1) (obj_field obj lbl.info.lbl_pos))
-                 ty_arg;
+        cautious (print_val 0 (depth - 1)
+                 (obj_field obj lbl.info.lbl_pos)) ty_arg;
         close_box() in
       let print_fields depth label_list =
           let rec loop depth b = function
@@ -177,8 +177,8 @@ and print_concrete_type prio depth obj cstr ty ty_list =
       cautious (print_fields depth) label_list;
       print_string "}";
       close_box()
-  | Abbrev_type(_,_) ->
-      print_string "<unknown abbrev>"
+  | Abbrev_type(params, body) ->
+      print_val prio depth obj (expand_abbrev params body ty_list)
 
 and print_val_list prio depth obj ty_list =
   let print_list depth i =

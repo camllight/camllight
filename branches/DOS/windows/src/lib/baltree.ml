@@ -1,40 +1,39 @@
-(* Weight-balanced binary trees.
-   These are binary trees such that one child of a node has at most N times
-   as many elements as the other child. We take N=3. *)
+(* Height-balanced binary trees.
+   These are binary trees such that the heights of the children
+   differ by at most 2. *)
 
 #open "int";;
 #open "eq";;
 #open "exc";;
 
-(* Compute the size (number of nodes and leaves) of a tree. *)
+(* Compute the height of a tree. *)
 
-let size = function
-    Empty -> 1
-  | Node(_, _, _, s) -> s;;
+let height = function
+    Empty -> 0
+  | Node(_, _, _, h) -> h;;
 
 (* Creates a new node with left son l, value x and right son r.
-   l and r must be balanced and size l / size r must be between 1/N and N.
-   Inline expansion of size for better speed. *)
+   l and r must be balanced and | height l - height r | <= 2.
+   Inline expansion of height for better speed. *)
 
 let new l x r =
   let sl = match l with Empty -> 0 | Node(_,_,_,s) -> s in
   let sr = match r with Empty -> 0 | Node(_,_,_,s) -> s in
-  Node(l, x, r, sl + sr + 1);;
+  Node(l, x, r, (if sl >= sr then succ sl else succ sr));;
 
-(* Same as new, but performs rebalancing if necessary.
-   Assumes l and r balanced, and size l / size r "reasonable"
-   (between 1/N^2 and N^2 ???).
+(* Same as new, but performs one step of rebalancing if necessary.
+   Assumes l and r balanced.
    Inline expansion of new for better speed in the most frequent case
    where no rebalancing is required. *)
 
 let bal l x r =
   let sl = match l with Empty -> 0 | Node(_,_,_,s) -> s in
   let sr = match r with Empty -> 0 | Node(_,_,_,s) -> s in
-  if sl > 3 * sr then begin
+  if sl > sr + 2 then begin
     match l with
       Empty -> invalid_arg "baltree__bal"
     | Node(ll, lv, lr, _) ->
-        if size ll >= size lr then
+        if height ll >= height lr then
           new ll lv (new lr x r)
         else begin
           match lr with
@@ -42,11 +41,11 @@ let bal l x r =
           | Node(lrl, lrv, lrr, _)->
               new (new ll lv lrl) lrv (new lrr x r)
         end
-  end else if sr > 3 * sl then begin
+  end else if sr > sl + 2 then begin
     match r with
       Empty -> invalid_arg "baltree__bal"
     | Node(rl, rv, rr, _) ->
-        if size rr >= size rl then
+        if height rr >= height rl then
           new (new l x rl) rv rr
         else begin
           match rl with
@@ -55,22 +54,21 @@ let bal l x r =
               new (new l x rll) rlv (new rlr rv rr)
         end
   end else
-    Node(l, x, r, sl + sr + 1);;
+    Node(l, x, r, (if sl >= sr then succ sl else succ sr));;
 
-(* Same as bal, but rebalance regardless of the original ratio
-   size l / size r *)
+(* Same as bal, but repeat rebalancing until the final result is balanced. *)
 
 let rec join l x r =
   match bal l x r with
     Empty -> invalid_arg "baltree__join"
   | Node(l', x', r', _) as t' ->
-      let sl = size l' and sr = size r' in
-      if sl > 3 * sr or sr > 3 * sl then join l' x' r' else t'
+      let d = height l' - height r' in
+      if d < -2 or d > 2 then join l' x' r' else t'
 ;;
 
 (* Merge two trees l and r into one.
    All elements of l must precede the elements of r.
-   Assumes size l / size r between 1/N and N. *)
+   Assumes | height l - height r | <= 2. *)
 
 let rec merge = fun
     Empty t -> t

@@ -6,6 +6,11 @@
 
 #ifdef DEBUG
 
+#include <stdio.h>
+#ifdef macintosh
+#include <Types.h>
+#endif
+
 #define LOG_BUFFER_SIZE 100
 extern code_t log_buffer[LOG_BUFFER_SIZE];
 extern code_t * log_ptr;
@@ -15,7 +20,7 @@ extern int trace_flag;
 
 #ifdef __STDC__
 #define Assert(x) if (!(x)) failed_assert ( #x , __FILE__, __LINE__)
-#define Dprintx(x) printf ("expression %s %ld\n", #x, (unsigned long) (x))
+#define Dprintx(x) fprintf (stderr, "%s = %lx\n", #x, (unsigned long) (x))
 #else
 #ifndef __LINE__
 #define __LINE__ 0
@@ -24,7 +29,7 @@ extern int trace_flag;
 #define __FILE__ "(?)"
 #endif
 #define Assert(x) if (!(x)) failed_assert ("(?)" , __FILE__, __LINE__)
-#define Dprintx(x) printf ("expression %ld\n", (unsigned long) (x))
+#define Dprintx(x) fprintf (stderr, "expression = %lx\n", (unsigned long) (x))
 #endif /* __STDC__ */
 
 void failed_assert P((char *, char *, int));

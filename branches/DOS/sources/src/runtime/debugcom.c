@@ -41,6 +41,7 @@ extern asize_t code_size;
 #define REP_BREAKPOINT 'b'
 #define REP_EXITED 'x'
 #define REP_TRAP 's'
+#define REP_UNCAUGHT_EXC 'u'
 #define REP_CHECKPOINT_DONE 'd'
 #define REP_CHECKPOINT_FAILED 'f'
 
@@ -197,6 +198,9 @@ int debugger(event)
     break;
   case TRAP_BARRIER:
     putch(dbg_out, REP_TRAP);
+    break;
+  case UNCAUGHT_EXC:
+    putch(dbg_out, REP_UNCAUGHT_EXC);
     break;
   }
   putword(dbg_out, event_count);

@@ -1,9 +1,14 @@
 /* Start-up code */
 
 #include <stdio.h>
+#ifdef __MWERKS__
+#include "myfcntl.h"
+#else
 #include <fcntl.h>
-#include "version.h"
+#endif
 #include "alloc.h"
+#include "debugcom.h"
+#include "debugger.h"
 #include "exec.h"
 #include "fail.h"
 #include "gc_ctrl.h"
@@ -14,13 +19,14 @@
 #include "mlvalues.h"
 #include "stacks.h"
 #include "sys.h"
-#include "debugcom.h"
+#include "version.h"
 
-#ifndef macintosh
+#ifdef macintosh
+#include "mac_os.h"
+#endif
 #ifndef __STDC__
 extern char *getenv ();
 #endif /* not __STDC__ */
-#endif /* not macintosh */
 
 extern value interprete();
 
@@ -117,9 +123,9 @@ Algorithm:
 */
 
 #ifdef HAS_UI
-int caml_main(argc, argv)
+caml_main(argc, argv)
 #else
-int main(argc, argv)
+main(argc, argv)
 #endif
      int argc;
      char * argv[];
@@ -137,6 +143,27 @@ int main(argc, argv)
   verbose_init = 1;
 #endif
 
+  /* Runtime options.  The option letter is the first letter of the
+     last word of the ML name of the option (see [lib/gc.mli]). */
+
+  {
+#if defined (macintosh) && defined (HAS_UI)
+    char *opt = get_env_resource ((char *) "\pCAMLRUNPARAM");
+#else
+    char *opt = getenv ("CAMLRUNPARAM");
+#endif
+    if (opt != NULL){
+      while (*opt != '\0'){
+	switch (*opt++){
+	case 's': sscanf (opt, "=%ld", &minor_heap_init); break;
+	case 'i': sscanf (opt, "=%ld", &heap_chunk_init); break;
+	case 'o': sscanf (opt, "=%d", &percent_free_init); break;
+	case 'v': sscanf (opt, "=%d", &verbose_init); break;
+	}
+      }
+    }
+  }
+
   i = 0;
   fd = attempt_open(&argv[0], &trail, 0);
 
@@ -146,7 +173,6 @@ int main(argc, argv)
       switch(argv[i][1]) {
 #ifdef DEBUG
       case 't': {
-        extern int trace_flag;
         trace_flag = 1;
         break;
       }
@@ -180,24 +206,6 @@ int main(argc, argv)
       break;
     }
   }
-
-#ifndef macintosh
-  /* Runtime options.  The option letter is the first letter of the
-     last word of the ML name of the option (see [lib/gc.mli]). */
-
-  { char *opt = getenv ("CAMLRUNPARAM");
-    if (opt != NULL){
-      while (*opt != '\0'){
-	switch (*opt++){
-	case 's': sscanf (opt, "=%ld", &minor_heap_init); break;
-	case 'i': sscanf (opt, "=%ld", &heap_chunk_init); break;
-	case 'o': sscanf (opt, "=%d", &percent_free_init); break;
-	case 'v': sscanf (opt, "=%d", &verbose_init); break;
-	}
-      }
-    }
-  }
-#endif /* not macintosh */
 
 #ifdef HAS_SOCKETS
   if (debugger_address == NULL)
@@ -236,6 +244,8 @@ int main(argc, argv)
     sys_exit(Val_int(0));
 
   } else {
+
+    debugger(UNCAUGHT_EXC);
 
     if (exn_bucket == Atom(OUT_OF_MEMORY_EXN))
       fatal_error ("Fatal error: out of memory.\n");
