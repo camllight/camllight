@@ -11,10 +11,10 @@ extern unsigned long inet_addr();
 value unix_inet_addr_of_string(s) /* ML */
      value s;
 {
-  unsigned long addr;
-  addr = inet_addr(String_val(s));
-  if (addr == (unsigned long) -1) failwith("inet_addr_of_string");
-  return alloc_inet_addr(addr);
+  unsigned long address;
+  address = inet_addr(String_val(s));
+  if (address == (unsigned long) -1) failwith("inet_addr_of_string");
+  return alloc_inet_addr(address);
 }
 
 #else
