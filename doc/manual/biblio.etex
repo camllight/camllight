@@ -123,10 +123,14 @@ shares many important points with ML (full functionality, polymorphic
 typing), but has interesting features of its own (dynamic overloading,
 also called type classes).
 
+\end{itemize}
+
 \section{Implementing functional programming languages}
 
 The references below are intended for those who are curious to learn
 how a language like Caml Light is compiled and implemented.
+
+\begin{itemize}
 
 \item Xavier Leroy. {\em The ZINC experiment: an economical
 implementation of the ML language.} Technical report~117, INRIA, 1990.

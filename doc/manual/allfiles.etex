@@ -26,15 +26,6 @@
 \input refman.tex
 \input exten.tex
 
-\part{The Caml Light library}
-\label{p:library}
-\input core.tex
-\input stdlib.tex
-\input graph.tex
-\input libunix.tex
-\input libnum.tex
-\input libstr.tex
-
 \part{The Caml Light commands}
 \label{p:commands}
 
@@ -47,6 +38,15 @@
 \input profil.tex
 \input emacs.tex
 \input intf-c.tex
+
+\part{The Caml Light library}
+\label{p:library}
+\input core.tex
+\input stdlib.tex
+\input graph.tex
+\input libunix.tex
+\input libnum.tex
+\input libstr.tex
 
 \part{Appendix}
 \label{p:appendix}
