@@ -51,13 +51,6 @@ The following command-line options are recognized by "camllibr".
 
 \begin{options}
 
-\item["-files" {\em response-file}]
-Process the files whose names are listed in file
-{\em response-file}, just as if these names appeared on the command line.
-File names in {\em response-file} are separated by blanks (spaces,
-tabs, newlines). This option allows to overcome silly limitations on
-the length of the command line.
-
 \item["-I" {\em directory}]
 Add the given directory to the list of directories searched for the
 input ".zo" files. By default, the current directory is searched
@@ -72,6 +65,17 @@ is searched last).
 Specify the name of the output file. The default is "library.zo".
 
 \end{options}
+
+\begin{pc} The following option is also supported:
+\begin{options}
+\item["@"\var{response-file}]
+Process the files whose names are listed in file
+\var{response-file}, just as if these names appeared on the command line.
+File names in \var{response-file} are separated by blanks (spaces,
+tabs, newlines). This option allows to overcome silly limitations on
+the length of the command line.
+\end{options}
+\end{pc}
 
 \section{Turning code into a library}
 
