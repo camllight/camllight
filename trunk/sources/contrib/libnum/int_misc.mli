@@ -14,4 +14,6 @@ value gcd_int: int -> int -> int
   and int_to_string : int -> string -> int ref -> int -> int -> unit
   and digits : string
   and base_digit_of_char : int -> char -> int
+
+  and check_base : int -> unit
 ;;
