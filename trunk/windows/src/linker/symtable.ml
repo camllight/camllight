@@ -44,13 +44,13 @@ let get_slot_for_variable qualid =
     find_in_numtable !global_table qualid
   with Not_found ->
     if string_length !object_name > 0 then
-      printf__eprintf
+      interntl__eprintf
         "The global value %s__%s is referenced (from %s) \
          before being defined.\n\
          Please link %s.zo before %s.\n"
         qualid.qual qualid.id !object_name qualid.qual !object_name
     else
-      printf__eprintf
+      interntl__eprintf
         "The global value %s__%s is referenced before being defined.\n\
          Please load an implementation of module %s first.\n"
         qualid.qual qualid.id qualid.qual;
@@ -125,7 +125,7 @@ let get_num_of_prim name =
     if !custom_runtime then
       enter_in_numtable !c_prim_table name
     else begin
-      printf__eprintf "The C primitive \"%s\" is not available.\n" name;
+      interntl__eprintf "The C primitive \"%s\" is not available.\n" name;
       raise Toplevel
     end
 ;;
