@@ -7,9 +7,10 @@
 
 (* Rule of thumb for casual users:
    use simple boxes (as obtained by [open_box 0]);
-   use simple break hints (as obtained by [print_cut ()] or by
-   [print_space ()] that ouputs a space);
-   once a box is opened, display material with basic printing
+   use simple break hints (as obtained by [print_cut ()] that outputs a
+   simple break hint, or by [print_space ()] that ouputs a space
+   indicating a break hint);
+   once a box is opened, display its material with basic printing
    functions (e. g. [print_int] and [print_string]);
    when the material for a box has been printed, call [close_box ()] to
    close the box;
@@ -195,12 +196,13 @@ value get_formatter_output_functions :
         unit -> (string -> int -> int -> unit) * (unit -> unit);;
         (* Return the current output functions of the pretty-printer. *)
 
+(*** Multiple formatted output *)
 type formatter;;
         (* Abstract data type corresponding to a pretty-printer and
            all its machinery.
            Defining new pretty-printers permits the output of
            material in parallel on several channels.
-           Parameters of the pretty-printer are local to the prety-printer:
+           Parameters of the pretty-printer are local to the pretty-printer:
            margin, maximum indentation limit, maximum number of boxes
            simultaneously opened, ellipsis, and so on, are specific to
            each pretty-printer and may be fixed independantly. *)
@@ -251,4 +253,10 @@ value pp_set_formatter_output_functions : formatter ->
         (string -> int -> int -> unit) -> (unit -> unit) -> unit;;
 value pp_get_formatter_output_functions :
         formatter -> unit -> (string -> int -> int -> unit) * (unit -> unit);;
-        (* The basic functions to use with formatters. *)
+        (* The basic functions to use with formatters.
+           These functions are the basic ones: usual functions
+           operating on the standard formatter are defined via partial
+           evaluation of these primitives. For instance,
+           [print_string] is equal to [pp_print_string std_formatter]. *)
+
+
