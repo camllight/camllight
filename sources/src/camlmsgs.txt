@@ -79,7 +79,7 @@ es:     %aEl identificador %s se ha definido varias veces en este patrón.\n
 
 src:	%aWarning: the variable %s starts with an upper case letter in this pattern.\n
 fr:	%aAttention: dans ce motif l'identificateur %s commence par une majuscule.\n
-es:     %aAviso: el identificador %s se ha definido varias veces en este patrón.\n
+es:     %aAviso: en este patrón el identificador %s comienza con una mayúscula.\n
 
 src:	%aA pattern with "|" must not bind variables.\n
 fr:	%aUn motif avec "|" ne doit pas lier d'identificateurs.\n
