@@ -47,18 +47,36 @@ The following command-line option is recognized by "camlrun".
 
 \begin{options}
 
-\item["-v"]
-Set up "camlrun" to print various diagnostic messages relative to
-memory allocation and garbage collection. Useful to debug
-memory-related problems.
+\item["-V"]
+Print out the "camlrun" version number.  Exit immediately without
+executing any byte-code file.
 
 \end{options}
 
+\noindent
 The following environment variable are also consulted:
 
 \begin{options}
-\item["CAMLRUNPARAM"] Set various parameters for the memory manager.
-(Description!).
+\item["CAMLRUNPARAM"] Set the garbage collection parameters.
+  This variable must be a sequence of parameter specifications.
+  A parameter specification is an option letter followed by an "="
+  sign and a decimal number.  There are four options,
+  corresponding to the four fields of the "control" record
+  documented in section~\ref{s:gc}:
+  \begin{options}
+  \item[s] ("minor_heap_size")  Size of the minor heap.
+  \item[i] ("major_heap_increment")  Minimum size increment for the
+  major heap.
+  \item[o] ("space_overhead")  The major GC speed setting.
+  \item[v] ("verbose")  Whether to print GC messages or not.  0 is
+  false; any other number is true.
+  \end{options}
+  For example, under "csh" the command
+\begin{alltt}
+        setenv CAMLRUNPARAM 's=250000 v=1'
+\end{alltt}
+  tells a subsequent "camlrun" to set its initial minor heap size to
+  1~megabyte (on a 32-bit machine) and to print its GC messages.
 
 \item["PATH"] List of directories searched to find the bytecode
 executable file.
