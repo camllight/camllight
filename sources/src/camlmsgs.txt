@@ -59,7 +59,7 @@ fr:	%aL'étiquette %a n'est pas définie.\n
 es:     %aLa etiqueta %a no está definida.\n
 
 src:	%aThe type constructor %a is unbound.\n
-fr:	%aLe constructeur de types %a n'est pas défini.\n
+fr:	%aLe constructeur de type %a n'est pas défini.\n
 es:     %aEl constructor de tipo %a no está definido.\n
 
 src:	%aThe type variable %s is unbound.\n
@@ -68,7 +68,7 @@ es:     %aLa variable de tipo %s no está ligada.\n
 
 src:	%aThe type constructor %a expects %d argument(s),\n\
 	but is here given %d argument(s).\n
-fr:	%aLe constructeur de types %a attend %d argument(s),\n\
+fr:	%aLe constructeur de type %a attend %d argument(s),\n\
 	mais reçoit ici %d argument(s).\n
 es:     %aEl constructor de tipo %a espera %d argumento(s),\n\
         pero aquí ha recibido %d argumento(s).\n
@@ -158,6 +158,10 @@ src:	%aThe label %a is not defined in this record.\n
 fr:	%aL'étiquette %a n'est pas définie dans cet enregistrement.\n
 es:     %aLa etiqueta %a no aparece definida en este registro.\n
 
+src:	%aThe label %a does not belong to the type %a.\n
+fr:	%aL'étiquette %a n'appartient pas au type %a.\n
+es:     %aLa etiqueta %a no pertenece al typo %a.\n
+
 src:	%aThe label %a is not mutable.\n
 fr:	%aL'étiquette %a n'est pas mutable.\n
 es:     %aLa etiqueta %a no es mutable.\n
@@ -183,7 +187,7 @@ src:	%aThis kind of expression is not allowed in \
 	right-hand sides of "let rec".\n
 fr:	%aCe genre d'expressions n'est pas autorisé comme \
 	membre droit d'un "let rec".\n
-es:     %aEste tipo de expresión no está permitido \
+es:     %aEsta forma de expresión no está permitida \
         en la parte derecha de un "let rec".\n
 
 src:	%aThe type %a is exported as an abstract type by this module\n\
@@ -297,6 +301,7 @@ es:     La función %s estará trazada de ahora en adelante.\n
 
 src:    The function %s is a primitive, it cannot be traced.\n
 fr:     La fonction %s est une fonction primitive, elle ne peut être tracée.\n
+es:     La función %s es una función primitiva, no puede ser trazada.\n
 
 src:	Unknown function %s.\n
 fr:	La fonction %s n'est pas définie.\n
