@@ -76,21 +76,29 @@ EMACSLISPDIR=/usr/lib/emacs/site-lisp
 
 # Name of the directories where the tcl.h and tk.h includes can be found.
 # Needed only for the "camltk" package.
-#TCLINCLDIR=/usr/local/lib/tcl7.4/include
-#TKINCLDIR=/usr/local/lib/tk4.0/include
+
+# /usr/local configuration
+#TCLINCLDIR=/usr/local/lib/tcl8.0/include
+#TKINCLDIR=/usr/local/lib/tk8.0/include
+# RedHat Linux configuration
 TCLINCLDIR=/usr/include
 TKINCLDIR=/usr/include
 
 # Name of the directories where the libtcl.a and libtk.a libraries can be found
 # Needed only for the "camltk" package.
-#TKLIBDIR=/usr/local/lib/tk4.0/lib
-#TCLLIBDIR=/usr/local/lib/tcl7.4/lib
+# /usr/local configuration
+#TKLIBDIR=/usr/local/lib/tk8.0/lib
+#TCLLIBDIR=/usr/local/lib/tcl8.0/lib
+# RedHat Linux configuration
 TKLIBDIR=/usr/lib
 TCLLIBDIR=/usr/lib
 
 # List of libraries required to link Tcl/Tk. This may help if you have
 # a custom Tcl/Tk with various extensions (such as Xpm)
 #TKLIBS=-ltk -ltcl -lX11
+# True64 Unix configuration
+#TKLIBS=-ltk8.0 -ltcl8.0 -lX11 -ldl -lm
+# RedHat Linux configuration
 TKLIBS=-ltk8.0 -ltcl8.0 -lX11 -ldl -lm
 
 # Some "make"s need this to ensure that they call /bin/sh, not /bin/csh
