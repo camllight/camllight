@@ -16,7 +16,7 @@
 (**) #open "fchar";;
 (**) #open "int_misc";;
 
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
 let length_of_digit = 64;;
 #else
 let length_of_digit = 32;;
@@ -219,7 +219,7 @@ let sqrt_nat nat off len =
 
 let power_base_max = make_nat 2;;
 
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
 set_digit_nat power_base_max 0 1000000000000000000;
 mult_digit_nat power_base_max 0 2 
                power_base_max 0 1 (nat_of_int 9) 0;;
@@ -266,7 +266,7 @@ and A_1 = make_nat 1
 and B_2 = make_nat 2 
 ;;
 
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
 let max_superscript_10_power_in_int = 18;;
 let max_power_10_power_in_int = nat_of_int 1000000000000000000;;
 #else

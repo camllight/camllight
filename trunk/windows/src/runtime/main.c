@@ -232,7 +232,7 @@ main(argc, argv)
     if (read(fd, (char *) start_code, code_size) != code_size)
       fatal_error("Fatal error: truncated bytecode file.\n");
 
-#if defined(BIG_ENDIAN) && !defined(ALIGNMENT)
+#if defined(CAML_BIG_ENDIAN) && !defined(CAML_ALIGNMENT)
     fixup_endianness(start_code, code_size);
 #endif
 

@@ -7,7 +7,7 @@ CC=gcc
 # Additional options to $(CC).
 # If you are using gcc, add -fno-defer-pop.
 # This option circumvents a gcc bug on some platforms (680x0, 80386).
-OPTS=#-fno-defer-pop
+OPTS=-fno-defer-pop
 
 # Extra libraries that have to be linked with the runtime system.
 # The math library "-lm" is linked by default.

@@ -17,7 +17,7 @@ set `sh ./runtest sizes.c`
 case "$1,$2,$3" in
   4,4,4) echo "OK, this is a regular 32 bit architecture.";;
   4,8,8) echo "Wow! A 64 bit architecture!"
-         echo "#define SIXTYFOUR" >> m.h;;
+         echo "#define CAML_SIXTYFOUR" >> m.h;;
   8,*,*) echo "Wow! A 64 bit architecture!"
          echo "Unfortunately, Caml Light does not handle the case"
          echo "sizeof(int) = 8."
@@ -73,15 +73,15 @@ esac
 sh ./runtest endian.c
 case $? in
   0) echo "This is a big-endian architecture."
-     echo "#define BIG_ENDIAN" >> m.h;;
+     echo "#define CAML_BIG_ENDIAN" >> m.h;;
   1) echo "This is a little-endian architecture."
-     echo "#undef BIG_ENDIAN" >> m.h;;
+     echo "#undef CAML_BIG_ENDIAN" >> m.h;;
   2) echo "This architecture seems to be neither big endian nor little endian."
      echo "Caml Light won't run on this architecture."
      exit 2;;
   *) echo "Something went wrong during endianness determination."
      echo "You'll have to figure out endianness yourself"
-     echo "(option BIG_ENDIAN in m.h).";;
+     echo "(option CAML_BIG_ENDIAN in m.h).";;
 esac
 
 # Determine alignment constraints
@@ -97,26 +97,26 @@ case $status in
 esac
 case $status in
     0) echo "This architecture has no alignment constraints."
-       echo "#undef ALIGNMENT" >> m.h;;
+       echo "#undef CAML_ALIGNMENT" >> m.h;;
     1) echo "This architecture has alignment constraints."
-       echo "#define ALIGNMENT" >> m.h;;
+       echo "#define CAML_ALIGNMENT" >> m.h;;
     *) echo "Something went wrong during alignment determination."
        echo "I'm going to assume this architecture has alignment constraints."
        echo "That's a safe bet: Caml Light will work even if it turns out that"
        echo "this architecture actually has no alignment constraints."
-       echo "#define ALIGNMENT" >> m.h;;
+       echo "#define CAML_ALIGNMENT" >> m.h;;
 esac
 
 sh ./runtest dblalign.c
 case $? in
   0) echo "Doubles can be word-aligned.";;
   1) echo "Doubles must be doubleword-aligned."
-     echo "#define ALIGN_DOUBLE" >> m.h;;
+     echo "#define CAML_ALIGN_DOUBLE" >> m.h;;
   *) echo "Something went wrong during alignment determination for doubles."
      echo "I'm going to assume this architecture has alignment constraints over doubles."
      echo "That's a safe bet: Caml Light will work even if it turns out that"
      echo "this architecture actually has no alignment constraints."
-     echo "#define ALIGN_DOUBLE" >> m.h;;
+     echo "#define CAML_ALIGN_DOUBLE" >> m.h;;
 esac
 
 # To find a good byte copy function

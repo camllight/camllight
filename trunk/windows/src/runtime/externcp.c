@@ -36,7 +36,7 @@ static void emit_compact(chan, v)
       output_number(chan, CODE_INT8, n, 8);
     } else if (n >= -(1 << 15) && n < (1 << 15)) {
       output_number(chan, CODE_INT16, n, 16);
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
     } else if (n < -(1L << 31) || n >= (1L << 31)) {
       output_number(chan, CODE_INT64, n, 64);
 #endif
@@ -101,7 +101,7 @@ static void emit_compact(chan, v)
           invalid_argument("output_compact_value: non-standard floats");
         putch(chan, CODE_DOUBLE);
         buffer = Double_val(v);
-#ifndef BIG_ENDIAN
+#ifndef CAML_BIG_ENDIAN
         Reverse_double(&buffer);
 #endif
         putblock(chan, (char *) &buffer, 8);
@@ -150,7 +150,7 @@ value extern_compact_val(chan, v) /* ML */
   size_32 = 0;
   size_64 = 0;
   emit_compact(chan, v);
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
   if (size_32 >= (1L << 32) || size_64 >= (1L << 32)) {
     /* The object is so big its size cannot be written in the header.
        Besides, some of the block sizes or string lengths or shared offsets

@@ -260,7 +260,7 @@ value input_int(channel)        /* ML */
 {
   long i;
   i = getword(channel);
-#ifdef SIXTYFOUR
+#ifdef CAML_SIXTYFOUR
   i = (i << 32) >> 32;          /* Force sign extension */
 #endif
   return Val_long(i);

@@ -5,7 +5,7 @@ main()
   long n[2];
   char * p, * bigendian, * littleendian;
 
-#ifndef SIXTYFOUR
+#ifndef CAML_SIXTYFOUR
     n[0] = 0x41424344L;
     bigendian = "ABCD";
     littleendian = "DCBA";

@@ -68,7 +68,7 @@ static void hash_aux(obj)
       /* For doubles, we inspect their binary representation, LSB first.
          The results are consistent among all platforms with IEEE floats. */
       hash_univ_count--;
-#ifdef BIG_ENDIAN
+#ifdef CAML_BIG_ENDIAN
       for (p = &Byte_u(obj, sizeof(double) - 1), i = sizeof(double);
            i > 0;
            p--, i--)
