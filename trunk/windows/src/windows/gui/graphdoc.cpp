@@ -42,8 +42,8 @@ IMPLEMENT_DYNCREATE(CGraphDoc, CDocument)
 CGraphDoc::CGraphDoc()
 {
 	m_DC = NULL;
-	m_sizeX=600;
-	m_sizeY=400;
+	m_sizeX=GetScreenWidth();
+	m_sizeY=GetScreenHeight();
 	m_sizeDoc=CSize(m_sizeX,m_sizeY);
 
 	m_logBrush = new LOGBRUSH;
