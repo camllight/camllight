@@ -71,17 +71,20 @@ let load_object name =
 let protect_current_module fct =
   let saved_defined_module = !defined_module
   and saved_opened_modules = !opened_modules
-  and saved_opened_modules_names = !opened_modules_names in
+  and saved_opened_modules_names = !opened_modules_names
+  and saved_used_opened_modules = !used_opened_modules in
   try
     fct();
     defined_module := saved_defined_module;
     opened_modules := saved_opened_modules;
-    opened_modules_names := saved_opened_modules_names
+    opened_modules_names := saved_opened_modules_names;
+    used_opened_modules := saved_used_opened_modules
   with x ->
     kill_module (compiled_module_name());
     defined_module := saved_defined_module;
     opened_modules := saved_opened_modules;
     opened_modules_names := saved_opened_modules_names;
+    used_opened_modules := saved_used_opened_modules;
     raise x
 ;;
 
