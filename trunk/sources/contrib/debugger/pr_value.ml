@@ -243,7 +243,9 @@ and print_vect depth obj ty_arg =
     close_box()
 ;;
 
-let print_value obj ty = print_val 0 !printer_depth obj ty
+let print_value obj ty =
+    try print_val 0 !printer_depth obj ty
+    with x -> print_newline(); flush std_err; raise x
 ;;
 
 let more m =
@@ -256,6 +258,7 @@ let more m =
           print_string "No such printing continuation."; force_newline();
           print_string "Available printing continuations: ";
           hashtbl__do_table (fun m _ -> print_int m; print_space()) evct;
-          print_newline();;
+          print_newline()
+       | x -> print_newline(); flush std_err; raise x;;
 
 let clear_ellipses () = hashtbl__clear evct;;
