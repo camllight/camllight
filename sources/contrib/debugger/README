@@ -1,0 +1,119 @@
+Parametrage
+===========
+
+regarder `debugger_config.ml'
+
+
+
+Ligne de commande
+=================
+
+camldebug [PROGRAM_NAME] [-s SOCKET_NAME] [-c CHECKPOINT_COUNT]
+	[-stdlib STDLIB] [-emacs] [-cd DIRECTORY]
+
+
+
+Commandes
+=========
+
+Mecanisme proche de celui de gdb : on peut ne taper que le debut des
+commandes s'il n'y a pas d'ambiguite. On peut abreger les commandes
+courantes meme s'il y a ambiguite. Par exemple, `s' est interprete
+comme `step' et non `set'.
+En general, appuyer sur RET repete la commande precedente.
+
+
+
+Aide en ligne
+=============
+
+commande `help'
+ex :	help : liste des commandes
+	help up
+	help set
+	help set program
+	...
+
+
+
+Liste des commandes (-> : nouvelles)
+===================================
+
+cd DIR, pwd
+directory DIR_LIST : choix des repertoires ou rechercher les .zi, .zo et .ml.
+run : execute le programme a partir de la position courante.
+reverse : meme chose, en arriere (s'arrete au premier point d'arret rencontre).
+step : avance d'un evenement.
+step N : avance de N evenements (N entier signe).
+backstep [N] : comme `step', en arriere.
+goto TIME : va au temps indique.
+finish : va au point de retour de la fonction courante.
+next : avance d'un evenement, ne rentre pas dans les fonctions.
+next N : comme `next', N fois.
+-> last N : revient en arriere de N pas dans l'historique.
+print VAR_LIST : donne la valeur de variables (`*' est l'accumulateur).
+-> match VAR PATTERN : `pattern matching'
+	pattern ::= _
+		  | pattern_variable  (* identifier *)
+		  | { label = pattern {; label = pattern} }
+		  | [ ]
+		  | [ pattern {; pattern} ]
+		  | # integer pattern
+		  | pattern :: pattern
+		  | pattern {, pattern}
+		  | ncconstr pattern
+		  | ( pattern )
+	exemples :
+		 `match a__t {x = # 10 k}' retourne le 11e element de a__t.x
+open MODULE, close MODULE : analogues a #open "MODULE",...
+break : pose un point d'arret a la position courante.
+break FUNCTION : pose un point d'arret au debut de FUNCTION.
+break ADDRESS : pose un point d'arret a l'adresse donnee.
+break @ MODULE LINE : point d'arret dans MODULE a la ligne LINE.
+break @ MODULE LINE COLUMN
+break @ MODULE CHARACTER : point d'arret dans MODULE au caractere CHARACTER
+delete NUM_LIST : supprime des points d'arret
+set VAR VAL, show VAR : valeur de variables du debugger
+info : donne des informations a propos du programme debugge
+	(ex: `info breakpoints')
+frame : Montre le `frame' courant.
+frame N : Va au `frame' N.
+backtrace, bt : affiche la pile (synonymes).
+	bt N : affiche les N premiers elements de la pile si N > 0
+	               les -N derniers si N < 0
+up [N] : selectionne le `frame' appelant
+down [N] : selectionne le `frame' appele.
+source FILE : execute un script.
+kill : tue le programe debugge.
+quit : equivalent a C-d.
+help : aide en ligne.
+->list [MODULE] [BEG] [END] :
+	affiche le source de MODULE entre les lignes BEG et END.
+	par defaut, affiche le module courant
+	affiche 20 lignes s'il n'y a pas de fin specifiee.
+	commence 10 lignes avant la marque si la position n'est pas specifiee.
+
+
+Commandes info
+==============
+
+modules : liste des modules utilises par le programme debugger
+		et de modules ouverts.
+checkpoints : liste des points de controle.
+breakpoints : liste des points d'arret.
+events [MODULE] : liste des evenement dans MODULE (ou dans le module courant).
+
+
+
+Variables (-> : nouvelles)
+=========================
+
+arguments : ligne de commande.
+program : nom du programme a debugger.
+->loadingmode : mode de chargement (automatique/manuel).
+->processcount : nombre de processus a garder au maximum.
+->checkpoints : (on/off) garder des points de controle ou non.
+->bigstep : intervalle entre les controles pendant les longs deplacements.
+->smallstep : idem pour les courts deplacements.
+->socket : nom de la socket.
+->history : longueur de l'historique.
