@@ -172,15 +172,19 @@ let rec trace_instr name val ty =
 let trace name =
   begin try
     let val_desc = find_value_desc (parse_global name) in
-    let pos = get_slot_for_variable val_desc.qualid in
-    if mem_assoc pos !trace_env then begin
-      eprintf "The function %s is already traced.\n" name        
-    end else begin
-      trace_env := (pos, global_data.(pos)) :: !trace_env;
-      global_data.(pos) <-
-        trace_instr name global_data.(pos) val_desc.info.val_typ;
-      eprintf "The function %s is now traced.\n" name
-    end
+    match val_desc.info.val_prim with
+      ValueNotPrim ->
+        let pos = get_slot_for_variable val_desc.qualid in
+        if mem_assoc pos !trace_env then begin
+          eprintf "The function %s is already traced.\n" name        
+        end else begin
+          trace_env := (pos, global_data.(pos)) :: !trace_env;
+          global_data.(pos) <-
+            trace_instr name global_data.(pos) val_desc.info.val_typ;
+          eprintf "The function %s is now traced.\n" name
+        end
+    | ValuePrim(_, _) ->
+        eprintf "The function %s is a primitive, it cannot be traced.\n" name
   with Desc_not_found ->
     eprintf "Unknown function %s.\n" name
   end

@@ -55,7 +55,9 @@ value quit : unit -> unit
            well as the exceptions escaping out of [foo], either raised
            by [foo] itself, or raised by one of the functions called
            from [foo]. If [foo] is a curried function, each argument
-           is printed as it is passed to the function. *)
+           is printed as it is passed to the function. 
+           Only functions implemented in ML can be traced; system primitives
+           such as [string_length] or user-supplied C functions cannot. *)
   and untrace : string -> unit
         (* Executing [untrace "foo"] stops all tracing over the global
            function named [foo]. *)
