@@ -18,8 +18,9 @@ Caml Light 0.7:
 
 * Partial matches and unused match cases are correctly detected now.
 
-* All error messages now go through printf, as a first move towards 
-  internationalization. More detailed error messages.
+* Internationalized error messages (controlled by the LANG environment
+  variable; known languages so far: american english, french).
+  More detailed error messages.
 
 * Various fixes in the garbage collector to fight fragmentation of the
   major heap, result in major speedups for some long-running programs.
