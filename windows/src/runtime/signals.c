@@ -45,9 +45,9 @@ void enter_blocking_section()
 
   while (1){
     Assert (!async_signal_mode);
-    temp = pending_signal;
-    /* If a signal arrives here, it will be lost. */
-    pending_signal = 0;
+    /* If a signal arrives between the next two instructions,
+       it will be lost. */
+    temp = pending_signal;   pending_signal = 0;
     if (temp) execute_signal (pending_signal_handler, temp);
     async_signal_mode = 1;
     if (!pending_signal) break;
