@@ -33,27 +33,27 @@ let badsubnat name nat off len =
              name off len (fnat__length_nat nat);;
 
 let check_subnat nat off len name =
- if lt_int off 0 then failwith (badoff_inf name off) else 
- if le_int len 0 then failwith (badlen name len) else 
+ if lt_int off 0 then invalid_arg (badoff_inf name off) else 
+ if le_int len 0 then invalid_arg (badlen name len) else 
  if gt_int (add_int off len) (fnat__length_nat nat) then
-    failwith (badsubnat name nat off len) else
+    invalid_arg (badsubnat name nat off len) else
  ();;
 
 let check_subnat0 nat off len name =
- if lt_int off 0 then failwith (badoff_inf name off) else 
- if lt_int len 0 then failwith (badlen0 name len) else 
+ if lt_int off 0 then invalid_arg (badoff_inf name off) else 
+ if lt_int len 0 then invalid_arg (badlen0 name len) else 
  if gt_int (add_int off len) (fnat__length_nat nat) then
-    failwith (badsubnat name nat off len) else
+    invalid_arg (badsubnat name nat off len) else
  ();;
 
 let check_offset nat off name =
- if lt_int off 0 then failwith (badoff_inf name off) else 
+ if lt_int off 0 then invalid_arg (badoff_inf name off) else 
  let len = fnat__length_nat nat in
- if ge_int off len then failwith (badoff_sup name off len) else
+ if ge_int off len then invalid_arg (badoff_sup name off len) else
  ();;
 
 let check_base b name =
- if b < 2 || b > 16 then failwith (sprintf "%s: invalid base %d" name b)
+ if b < 2 || b > 16 then invalid_arg (sprintf "%s: invalid base %d" name b)
  else ();; 
 
 let badsubstring name s off len = 
@@ -62,10 +62,10 @@ let badsubstring name s off len =
              name off len (string_length s);;
 
 let check_substring s off len name =
- if lt_int off 0 then failwith (badoff_inf name off) else 
- if le_int len 0 then failwith (badlen0 name len) else 
+ if lt_int off 0 then invalid_arg (badoff_inf name off) else 
+ if le_int len 0 then invalid_arg (badlen0 name len) else 
  if gt_int (add_int off len) (string_length s) then
-    failwith (badsubstring name s off len) else
+    invalid_arg (badsubstring name s off len) else
  ();;
 
 let baddigit name nat off = 
@@ -75,7 +75,7 @@ let baddigit name nat off =
 let check_digit nat off name =
   check_offset nat off name;
   if not (fnat__is_digit_int nat off) then
-     failwith (baddigit name nat off) 
+     invalid_arg (baddigit name nat off) 
   else ();;
 
 let badoff1 name off1 = 
@@ -91,9 +91,9 @@ let badoff4 name off4 =
 let max_nat_size = (8 * sys__max_string_length) / fnat__length_of_digit;;
 
 let create_nat len =
-   if le_int len 0 then failwith (badlen "create_nat" len) else
+   if le_int len 0 then invalid_arg (badlen "create_nat" len) else
    if lt_int len max_nat_size then fnat__create_nat len else
-        failwith "create_nat: number too long";;
+        invalid_arg "create_nat: number too long";;
 
 let num_digits_nat nat off len =
  check_subnat nat off len "num_digits_nat";
@@ -151,7 +151,7 @@ let num_leading_zero_bits_in_digit nat off =
 
 let check_carry carry name =
  if lt_int carry 0 || gt_int carry 1 then 
-    failwith (badcarry name carry) 
+    invalid_arg (badcarry name carry) 
  else ();;
 
 let incr_nat nat off len carry =
@@ -166,10 +166,10 @@ let add_nat nat1 off1 len1 nat2 off2 len2 carry =
  check_subnat nat1 off1 len1 "add_nat fst argument";
  check_subnat nat2 off2 len2 "add_nat snd argument";
  check_carry carry "add_nat";
- if gt_int len2 len1 then failwith (badresplen "add_nat" len1 len2) else
+ if gt_int len2 len1 then invalid_arg (badresplen "add_nat" len1 len2) else
  if nat1 == nat2 && gt_int off1 off2 && gt_int (add_int off2 len2) off1
    then
-     failwith 
+     invalid_arg 
       (sprintf
          "add_nat: First and second nat arguments are the same, \
           so offset (off2 = %d) should be greater than (off1 = %d), \
@@ -198,9 +198,9 @@ let sub_nat nat1 off1 len1 nat2 off2 len2 borrow =
  check_subnat0 nat2 off2 len2 "sub_nat snd argument";
  check_carry borrow "sub_nat";
  if gt_int len2 len1
-  then failwith (badresplen "sub_nat" len1 len2) else
+  then invalid_arg (badresplen "sub_nat" len1 len2) else
  if nat1 == nat2 && gt_int off1 off2
-  then failwith
+  then invalid_arg
    (sprintf 
      "sub_nat: First and second nat are the same so offset (off2 = %d) \
      should be greater than (off1 = %d)"
@@ -214,15 +214,16 @@ let mult_digit_nat nat1 off1 len1 nat2 off2 len2 nat3 off3 =
  check_subnat nat1 off1 len1 "mult_digit_nat fst argument";
  check_subnat0 nat2 off2 len2 "mult_digit_nat snd argument";
  check_offset nat3 off3 "mult_digit_nat third argument";
- if gt_int len2 len1 then failwith (badresplen "mult_digit_nat" len1 len2) else
+ if gt_int len2 len1
+ then invalid_arg (badresplen "mult_digit_nat" len1 len2) else
  if nat1 == nat2 && gt_int off1 off2
-  then failwith
+  then invalid_arg
    (sprintf 
     "mult_digit_nat: First and second nat arguments are the same, \
      so offset (off2 = %d) should be greater than (off1 = %d)"
     off2 off1) else
  if fnat__mult_digit_nat nat1 off1 len1 nat2 off2 len2 nat3 off3 == 0 then 0
- else failwith (badrespleneq "mult_digit_nat" len1);;
+ else invalid_arg (badrespleneq "mult_digit_nat" len1);;
 
 let set_mult_digit_nat nat1 off1 len1 nat2 off2 len2 nat3 off3 =
   let _ = mult_digit_nat nat1 off1 len1 nat2 off2 len2 nat3 off3 in
@@ -233,7 +234,7 @@ let mult_nat nat1 off1 len1 nat2 off2 len2 nat3 off3 len3 =
  check_subnat0 nat2 off2 len2 "mult_nat snd argument";
  check_subnat nat3 off3 len3 "mult_nat third argument";
  if lt_int len1 (add_int len2 len3)
-  then failwith
+  then invalid_arg
    (sprintf 
     "mult_nat: The length of the first argument \
      must be longer than the sum of the two others, \
@@ -242,11 +243,12 @@ let mult_nat nat1 off1 len1 nat2 off2 len2 nat3 off3 len3 =
  if nat1 == nat2 &&
     (le_int off1 off2 && gt_int (add_int off1 len1) (succ off2) ||
      le_int off2 off1 && gt_int (add_int off2 len2) (succ off1))
-  then failwith "mult_nat: First and second argument overlap themselves" else
+  then invalid_arg
+        "mult_nat: First and second argument overlap themselves" else
  if nat3 == nat1 &&
     (le_int off3 off1 && gt_int (add_int off3 len3) (succ off1) ||
      le_int off1 off3 && gt_int (add_int off1 len1) (succ off3))
-  then failwith "mult_nat: First and third argument overlap themselves" else
+  then invalid_arg "mult_nat: First and third argument overlap themselves" else
  fnat__mult_nat nat1 off1 len1 nat2 off2 len2 nat3 off3 len3;;
 
 let set_mult_nat nat1 off1 len1 nat2 off2 len2 nat3 off3 len3 =
@@ -257,7 +259,7 @@ let shift_left_nat nat1 off1 len1 nat2 off2 shift =
  check_subnat nat1 off1 len1 "shift_left_nat fst argument";
  check_offset nat2 off2 "shift_left_nat snd argument";
  if lt_int shift 0 || gt_int shift sys__word_size
-  then failwith (sprintf 
+  then invalid_arg (sprintf 
    "shift_left_nat: shift number out of range, shift = %d" shift)
  else fnat__shift_left_nat nat1 off1 len1 nat2 off2 shift;;
 
@@ -265,7 +267,7 @@ let shift_right_nat nat1 off1 len1 nat2 off2 shift =
  check_subnat nat1 off1 len1 "shift_right_nat fst argument";
  check_offset nat2 off2 "shift_right_nat snd argument";
  if lt_int shift 0 || gt_int shift fnat__length_of_digit
-  then failwith (sprintf 
+  then invalid_arg (sprintf 
    "shift_right_nat: shift value out of range, shift = %d" shift)
   else fnat__shift_right_nat nat1 off1 len1 nat2 off2 shift;;
 
@@ -273,7 +275,7 @@ let div_nat nat1 off1 len1 nat2 off2 len2 =
  check_subnat nat1 off1 len1 "div_nat fst argument";
  check_subnat nat2 off2 len2 "div_nat snd argument";
  if le_int len1 len2
-  then failwith
+  then invalid_arg
    (sprintf 
      "div_nat: length of the dividend = %d \
       must be greater than the divisor one's = %d" len1 len2) else
@@ -287,22 +289,23 @@ let div_nat nat1 off1 len1 nat2 off2 len2 =
           " must be greater than the dividend one's = " in
     let s2 = fnat__sys_string_of_nat 10 s1
           nat1 (add_int off1 len1) 1 "" in
-      failwith (s1 ^ s2)
+      invalid_arg (s1 ^ s2)
  else fnat__div_nat nat1 off1 len1 nat2 off2 len2;;
 
 let div_digit_nat nat1 off1 nat2 off2 nat3 off3 len nat4 off4 =
- if lt_int off1 0 then failwith (badoff1 "div_digit_nat" off1) else
+ if lt_int off1 0 then invalid_arg (badoff1 "div_digit_nat" off1) else
  if lt_int (fnat__length_nat nat1) (add_int off1 len)
-  then failwith (sprintf 
+  then invalid_arg (sprintf 
    "div_digit_nat: the quotient size = %d must be greater than or equal to %d" 
    (fnat__length_nat nat1) (add_int off1 len)) else
  check_offset nat2 off2 "div_digit_nat snd argument";
  if le_int len 1 
-  then failwith (sprintf 
+  then invalid_arg (sprintf 
    "div_digit_nat: Bad length must be greater than 1, len = %d" len) else
  check_subnat nat3 off3 len "div_digit_nat third argument";
- if lt_int off4 0 then failwith (badoff4 "div_digit_nat" off4) else
- if le_int (fnat__compare_digits_nat nat4 off4 nat3 (pred (add_int off3 len))) 0
+ if lt_int off4 0 then invalid_arg (badoff4 "div_digit_nat" off4) else
+ if le_int
+     (fnat__compare_digits_nat nat4 off4 nat3 (pred (add_int off3 len))) 0
   then 
     let s1 = fnat__sys_string_of_nat 10 
           " must be greater than the dividend one's = " 
@@ -310,7 +313,7 @@ let div_digit_nat nat1 off1 nat2 off2 nat3 off3 len nat4 off4 =
     let s2 = fnat__sys_string_of_nat 10 
           "div_digit_nat: most significant digit of the divisor = " 
           nat4 off4 1 s1 in
-    failwith (s1 ^ s2)
+    invalid_arg (s1 ^ s2)
  else fnat__div_digit_nat nat1 off1 nat2 off2 nat3 off3 len nat4 off4;;
 
 let compare_digits_nat nat1 off1 nat2 off2 =
@@ -328,10 +331,10 @@ let compare_nat nat1 off1 len1 nat2 off2 len2 =
     (fnat__compare_nat nat1 off1 (fnat__num_digits_nat nat1 off1 len1)
         nat2 off2 (fnat__num_digits_nat nat2 off2 len2)) then
   (if len1 <> (fnat__num_digits_nat nat1 off1 len1)
-      then failwith (sprintf 
+      then invalid_arg (sprintf 
        "compare_nat: The first subnat argument is shorter than the \
        length indicated and the result_int of this comparison is wrong")
-    else failwith  (sprintf 
+    else invalid_arg  (sprintf 
      "compare_nat: The second subnat argument is shorter than the \
      length indicated and the result_int of this comparison is wrong")) else
  fnat__compare_nat nat1 off1 len1 nat2 off2 len2;;
@@ -436,7 +439,7 @@ let eq_nat nat1 off1 len1 nat2 off2 len2 =
 
 let base_power_nat base n nat =  
  if base < 0 then
-    failwith (sprintf "%s base %d should be positive or null" 
+    invalid_arg (sprintf "%s base %d should be positive or null" 
               "base_power_nat" base) else 
  fnat__base_power_nat base n nat;;
 
@@ -453,19 +456,19 @@ let sqrt_nat nat off len =
 
 let power_base_int base int = 
  if base < 0 then 
-    failwith (sprintf "%s base %d should be positive or null" 
+    invalid_arg (sprintf "%s base %d should be positive or null" 
               "power_base_int" base) else 
  fnat__power_base_int base int;;
 
 let make_power_base base power_base = 
  if base < 0 then 
-    failwith (sprintf "%s base %d should be positive or null" 
+    invalid_arg (sprintf "%s base %d should be positive or null" 
               "make_power_base" base) else 
  fnat__make_power_base base power_base;;
 
 let power_max base =  
  if base < 0 then 
-    failwith (sprintf "%s base %d should be positive or null" 
+    invalid_arg (sprintf "%s base %d should be positive or null" 
               "power_max" base) else 
  fnat__power_max base;;
 
