@@ -21,8 +21,11 @@ value dummy_widget : Widget
 ;;
           
 value widget_name : Widget -> string
-      (* Return the name (tk "path") of a widget *)
+      (* Returns the name (tk "path") of a widget *)
+and  widget_class : Widget-> string
+      (* Returns the class of a widget *)
 ;;
+
 value new_widget_atom : string -> Widget -> Widget
 and   new_named_widget : string -> Widget -> string -> Widget
       (* Abstract creation functions *)

@@ -121,8 +121,8 @@ static Tk_Window mainWindow;
 #define RCNAME ".camltkrc"
 
 /* Initialisation */
-value camltk_opentk(name) /* ML */
-     value name;
+value camltk_opentk(display, name) /* ML */
+     value display,name;
 {
   /* Create an interpreter */
   tclinterp = Tcl_CreateInterp();  /* dies if error */
@@ -132,7 +132,7 @@ value camltk_opentk(name) /* ML */
 		    (ClientData)NULL,(Tcl_CmdDeleteProc *)NULL);
   /* Open main window */
   mainWindow = Tk_CreateMainWindow(tclinterp,
-				   getenv("DISPLAY"), /* screenname */
+				   String_val (display), /* screenname */
 				   String_val(name), /* basename */
 				   "Tk"  /* classname */
 				   );
