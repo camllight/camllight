@@ -105,6 +105,22 @@ let generalize_type ty =
   gen_type ty; ()
 ;;
 
+(* To lower the level of all generalizable variables of a type,
+   making them non-generalisable. *)
+   
+let rec nongen_type ty =
+  let ty = type_repr ty in
+  match ty.typ_desc with
+    Tvar _ ->
+      if ty.typ_level > !current_level then ty.typ_level <- !current_level
+  | Tarrow(t1, t2) ->
+      nongen_type t1; nongen_type t2
+  | Tproduct ty_list ->
+      do_list nongen_type ty_list
+  | Tconstr(cstr, ty_list) ->
+      do_list nongen_type ty_list
+;;
+
 (* To take an instance of a type *)
 
 (* Since a generic variable always has the "link" field empty (that is,

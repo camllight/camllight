@@ -87,6 +87,16 @@ let do_directive loc = function
       flush stderr
 ;;
 
+(* Warn for unused #open *)
+
+let check_unused_opens () =
+  hashtbl__do_table
+    (fun name used ->
+      if not !used & not (mem name !default_used_modules)
+      then unused_open_warning name)
+    used_opened_modules
+;;
+
 (* Compiling an interface *)
 
 let verbose = ref false;;
@@ -124,7 +134,8 @@ let compile_interface modname filename =
     with End_of_file ->
       close_in ic;
       write_compiled_interface oc;
-      close_out oc
+      close_out oc;
+      check_unused_opens()
     | x ->
       close_in ic;
       close_out oc;
@@ -183,7 +194,8 @@ let compile_impl modname filename suffix =
     with End_of_file ->
       end_emit_phrase oc;
       close_in ic;
-      close_out oc
+      close_out oc;
+      check_unused_opens()
     | x ->
       close_in ic;
       close_out oc;

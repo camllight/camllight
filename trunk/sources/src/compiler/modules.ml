@@ -100,6 +100,7 @@ let kill_module name =
 
 let opened_modules = ref (new_module "");;
 let opened_modules_names = ref ([]: string list);;
+let used_opened_modules = (hashtbl__new 13 : (string, bool ref) hashtbl__t);;
 
 let reset_opened_modules () =
   opened_modules :=
@@ -111,7 +112,8 @@ let reset_opened_modules () =
       mod_type_stamp = 0;
       mod_exc_stamp = 0;
       mod_persistent = false };
-  opened_modules_names := [];;
+  opened_modules_names := [];
+  hashtbl__clear used_opened_modules;;
 
 (* Open a module and add its definitions to the table of opened modules. *)
 
@@ -124,7 +126,8 @@ let open_module name =
   add_table module.mod_constrs (!opened_modules).mod_constrs;
   add_table module.mod_labels (!opened_modules).mod_labels;
   add_table module.mod_types (!opened_modules).mod_types;
-  opened_modules_names := name :: !opened_modules_names;;
+  opened_modules_names := name :: !opened_modules_names;
+  hashtbl__add used_opened_modules name (ref false);;
 
 (* Close a module and remove its definitions from the table of opened modules.
    To avoid heavy hashtbl hacking, we just rebuild the table from scratch.
@@ -186,8 +189,8 @@ and add_type = add_global_info types_of_module
 
 (* Find the descriptor for a reference to a global identifier.
    If the identifier is qualified (mod__name), just look into module mod.
-   If the identifier is not qualified, look into the current module,
-   then into the table of opened modules. *)
+   If the identifier is not qualified, look inside the current module,
+   then inside the table of opened modules. *)
 
 exception Desc_not_found;;
 
@@ -203,7 +206,10 @@ let find_desc sel_fct = function
         hashtbl__find (sel_fct !defined_module) s
       with Not_found ->
         try
-          hashtbl__find (sel_fct !opened_modules) s
+          let res = hashtbl__find (sel_fct !opened_modules) s in
+          (* Record the module as actually used *)
+          (hashtbl__find used_opened_modules res.qualid.qual) := true;
+          res
         with Not_found ->
           raise Desc_not_found
 ;;

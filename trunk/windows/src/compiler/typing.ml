@@ -481,9 +481,7 @@ and type_expect env exp expected_ty =
 (* Typing of "let" definitions *)
 
 and type_let_decl env rec_flag pat_expr_list =
-  let generalizable =
-    for_all (fun (pat, expr) -> is_nonexpansive expr) pat_expr_list in
-  if generalizable then push_type_level();
+  push_type_level();
   let ty_list =
     map (fun (pat, expr) -> new_type_var()) pat_expr_list in
   let add_env =
@@ -494,10 +492,12 @@ and type_let_decl env rec_flag pat_expr_list =
     (fun (pat, exp) ty ->
         type_expect (if rec_flag then new_env else env) exp ty)
     pat_expr_list ty_list;
-  if generalizable then begin
-    pop_type_level();
-    do_list generalize_type ty_list
-  end;
+  pop_type_level();
+  let gen_type =
+    map2 (fun (pat, expr) ty -> (is_nonexpansive expr, ty))
+         pat_expr_list ty_list in
+  do_list (fun (gen, ty) -> if not gen then nongen_type ty) gen_type;
+  do_list (fun (gen, ty) -> if gen then generalize_type ty) gen_type;
   new_env
 
 (* Typing of statements (expressions whose values are ignored) *)
