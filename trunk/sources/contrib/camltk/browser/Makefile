@@ -10,6 +10,7 @@ LINKFLAGS=-g -custom
 CAMLYACC=camlyacc -v
 CAMLLEX=camllex
 
+# We compile before the library has been installed
 CAMLTKDIR=../lib
 SUPPORTDIR=../libsupport
 UNIXDIR=../../libunix

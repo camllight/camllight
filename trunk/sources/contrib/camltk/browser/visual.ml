@@ -52,7 +52,7 @@ let rec visual_meta visual silent sym =
 	 dialog (support__new_toplevel_widget "error")
 	     "Caml Browser Error"
 	     ( "Cannot open module :" ^ sym)
-	     ""
+	     (Predefined "error")
 	     0
 	     ["Ok"];
 	 ()
@@ -62,7 +62,7 @@ let rec visual_meta visual silent sym =
 	  dialog (support__new_toplevel_widget "error")
 	      "Caml Browser Error"
 	      ( sym ^ " is undefined")
-	      ""
+	      (Predefined "error")
 	      0
 	      ["Ok"];
 	  ()

@@ -88,6 +88,6 @@ let display_file filename =
       begin dialog (support__new_toplevel_widget "error")
       	"Caml Browser Error"
 	("Cannot open " ^ filename )
-	"" 0 ["Ok"]; ()
+	(Predefined "error") 0 ["Ok"]; ()
       end
 ;;
