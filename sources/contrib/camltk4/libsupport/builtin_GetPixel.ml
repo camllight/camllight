@@ -18,7 +18,7 @@ let CAMLtoTKUnits = function
 let TKtoCAMLUnits str = 
   let len = string_length str in
   let num_part str = sub_string str 0 (len - 1) in
-  match nth_char str (pred len) with
+  match str.[pred len] with
     `c` -> Centimeters (float_of_string (num_part str))
   | `i` -> Inches (float_of_string (num_part str))
   | `m` -> Millimeters (float_of_string (num_part str))

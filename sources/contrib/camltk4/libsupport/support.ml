@@ -206,21 +206,22 @@ let catenate_sep sep =
 (* split a string according to char_sep predicate *)
 let split_str char_sep str =
   let len = string_length str in
-  let rec skip_sep cur =
-    if cur >= len then cur
-    else if char_sep (nth_char str cur) then skip_sep (succ cur)
-    else cur  in
-  let rec split beg cur =
-    if cur >= len then 
-      if beg = cur then []
-      else [sub_string str beg (len - beg)]
-    else if char_sep (nth_char str cur) 
-         then 
-      	   let nextw = skip_sep cur in
-      	    (sub_string str beg (cur - beg))
-      	      ::(split nextw nextw)
-	 else split beg (succ cur) in
-  let wstart = skip_sep 0 in
-  split wstart wstart
+  if len = 0 then [] else
+    let rec skip_sep cur =
+      if cur >= len then cur
+      else if char_sep str.[cur] then skip_sep (succ cur)
+      else cur  in
+    let rec split beg cur =
+      if cur >= len then 
+	if beg = cur then []
+	else [sub_string str beg (len - beg)]
+      else if char_sep str.[cur] 
+	   then 
+	     let nextw = skip_sep cur in
+	      (sub_string str beg (cur - beg))
+		::(split nextw nextw)
+	   else split beg (succ cur) in
+    let wstart = skip_sep 0 in
+    split wstart wstart
 ;;
 
