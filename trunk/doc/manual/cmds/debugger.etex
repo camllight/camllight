@@ -22,7 +22,7 @@ Compiling with "-g" entails no penalty on the running time of
 programs: ".zo" files and bytecode executable files are bigger and
 take slightly longer to produce, but the executable files run at
 exactly the same speed as if they had been compiled without "-g". It
-is therefore perfectly acceptable to always compile in "-g" mode.
+is therefore perfectly acceptable to compile always in "-g" mode.
 
 \section{Invocation}
 
@@ -53,7 +53,7 @@ instead of the current directory.
 
 \item["-emacs"]
 Tell the debugger it is executed under Emacs. (See
-section~\ref{s:debugger-emacs} for information on how to run the
+section~\ref{s:inf-debugger} for information on how to run the
 debugger under Emacs.)
 \end{options}
 
@@ -62,11 +62,11 @@ debugger under Emacs.)
 The command "quit" exits the debugger. You can also exit the debugger
 by typing an end-of-file character (usually "ctrl-D").
 
-Typing an interrupt character (often "ctrl-C") will not exit the
+Typing an interrupt character (usually "ctrl-C") will not exit the
 debugger, but will terminate the action of any debugger command that is in
 progress and return to the debugger command level. 
 
-\section{Commands}
+\section{Commands} \label{s:debugger-commands}
 
 A debugger command is a single line of input. It starts with a command
 name, which is followed by arguments depending on this name. Examples:
@@ -261,7 +261,7 @@ Set the size of the execution history.
 useful if you wish to recompile the program without leaving the debugger.
 \end{options}
 
-\section{Breakpoints}
+\section{Breakpoints} \label{s:breakpoints}
 
 A breakpoint causes the program to stop whenever a certain point in
 the program is reached. It can be set in several ways using the
@@ -280,8 +280,7 @@ when the functional value of the identifier \var{function} has been
 computed and assigned to the identifier. Hence this command cannot be
 used at the very beginning of the program execution, when all
 identifiers are still undefined. Moreover, C functions are not
-recognized by the debugger. See section~\ref{s:debugger-values} for
-the syntax of \var{function}.
+recognized by the debugger.
 
 \item["break \@" \optvar{module} \var{line}]
 Set a breakpoint in module \var{module} (or in the current module if
@@ -363,7 +362,7 @@ Variable names can be specified either fully qualified
 (\var{var-name}). Unqualified names either correspond to local
 variables, or are completed into fully qualified global names
 by looking at a list of ``opened'' modules that define the same name
-(see section~\ref{debugger-open} for how to open modules in the debugger.)
+(see section~\ref{s:debugger-open} for how to open modules in the debugger.)
 The completion follows the same rules as in the Caml Light language
 (see section~\ref{s:names}).
 
@@ -416,9 +415,9 @@ Limit the printing of values to at most \var{l} nodes printed.
 \subsection{Setting the program name and arguments}
 
 \begin{options}
-\item[set program \var{file}]
+\item["set program" \var{file}]
 Set the program name to \var{file}.
-\item[set arguments \var{arguments}]
+\item["set arguments" \var{arguments}]
 Give \var{arguments} as command-line arguments for the program.
 \end{options}
 
@@ -431,13 +430,13 @@ The "SHELL" environment variable controls which shell is used.
 The "loadingmode" variable controls how the program is executed.
 
 \begin{options}
-\item[set loadingmode direct]
+\item["set loadingmode direct"]
 The program is run directly by the debugger. This is the default mode.
-\item[set loadingmode runtime]
+\item["set loadingmode runtime"]
 The debugger execute the Caml Light runtime "camlrun" on the program.
 Rarely useful; moreover it prevents the debugging of programs compiled
 in ``custom runtime'' mode.
-\item[set loadingmode manual]
+\item["set loadingmode manual"]
 The user starts manually the program, when asked by the debugger.
 Allows remote debugging (see section~\ref{s:communication}).
 \end{options}
@@ -453,11 +452,11 @@ Whenever the search path is modified, the debugger will clear any
 information it may have cached about the files.
 
 \begin{options}
-\item[directory \var{directorynames}]
+\item["directory" \var{directorynames}]
 Add the given directories to the search path. These directories are
 added at the front, and will therefore be searched first.
 
-\item[directory]
+\item["directory"]
 Reset the search path. This requires confirmation.
 \end{options}
 
@@ -471,14 +470,14 @@ directory in the debugger with the "cd" command or the "-cd"
 command-line option.
 
 \begin{options}
-\item[cd \var{DIRECTORY}]
-Set the working directory for "camldebug" to \var{DIRECTORY}.
+\item["cd" \var{directory}]
+Set the working directory for "camldebug" to \var{directory}.
 
-\item[pwd]
+\item["pwd"]
 Print the working directory for "camldebug".
 \end{options}
 
-\subsection{Module management}
+\subsection{Module management} \label{s:debugger-open}
 
 Like the Caml Light compiler, the debugger maintains a list of opened
 modules in order to resolves variable name ambiguities. The opened
@@ -489,13 +488,13 @@ When a program is executed, the debugger automatically opens the
 modules of the standard library it uses.
 
 \begin{options}
-\item[open \var{modules}]
+\item["open" \var{modules}]
 Open the given modules.
 
-\item[close \var{modules}]
+\item["close" \var{modules}]
 Close the given modules.
 
-\item[info modules]
+\item["info modules"]
 List the modules used by the program, and the open modules.
 \end{options}
 
@@ -512,7 +511,7 @@ program (using the Unix system call "fork"). If the variable
 checkpoints.
 
 \begin{options}
-\item[set checkpoints \var{on/off}]
+\item["set checkpoints" \var{on/off}]
 Select whether the debugger makes checkpoints or not.
 \end{options}
 
@@ -524,12 +523,11 @@ Unix socket. You may need to change the socket name, for example if
 you need to run the debugger on a machine and your program on another.
 
 \begin{options}
-\item[set socket \var{socket}]
+\item["set socket" \var{socket}]
 Use \var{socket} for communication with the program. \var{socket} can be
 either a file name, or an Internet port specification
-\var{host}:\var{port}, where \var{host} is an Internet number in
-dot-notation (like "130.149.28.10") or a host name, and \var{port} is
-a port number on the host.
+\var{host}:\var{port}, where \var{host} is a host name or an Internet
+address in dot notation, and \var{port} is a port number on the host.
 \end{options}
 
 On the debugged program side, the socket name is passed either by the
@@ -542,7 +540,7 @@ Several variables enables to fine-tune the debugger. Reasonable
 defaults are provided, and you should normally not have to change them.
 
 \begin{options}
-\item[set processcount \var{count}]
+\item["set processcount" \var{count}]
 Set the maximum number of checkpoints to \var{count}. More checkpoints
 facilitate going far back in time, but use more memory and create more
 Unix processes.
@@ -559,9 +557,9 @@ and "smallstep" contain the number of events between two checkpoints
 in each case.
 
 \begin{options}
-\item[set bigstep \var{count}]
+\item["set bigstep" \var{count}]
 Set the number of events between two checkpoints for long displacements.
-\item[set smallstep \var{count}]
+\item["set smallstep" \var{count}]
 Set the number of events between two checkpoints for small
 displacements.
 \end{options}
@@ -569,9 +567,9 @@ displacements.
 The following commands display information on checkpoints and events:
 
 \begin{options}
-\item[info checkpoints]
+\item["info checkpoints"]
 Print a list of checkpoints.
-\item[info events \optvar{module}]
+\item["info events" \optvar{module}]
 Print the list of events in the given module (the current module, by default).
 \end{options}
 
