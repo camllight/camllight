@@ -63,6 +63,6 @@ let fprintf oc (fmt : ('a, out_channel, unit) printf__format) =
 ;;
 
 let printf fmt = fprintf std_out fmt
-and eprintf fmt = fprintf std_out fmt
+and eprintf fmt = fprintf std_err fmt
 ;;
 
