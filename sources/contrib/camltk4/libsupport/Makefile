@@ -38,6 +38,8 @@ install: libcamltk4.a support.zi textvariable.zi protocol.zi
 	cp textvariable.zix $(LIBDIR)
 	cp optionmenu.zi $(LIBDIR)
 	cp optionmenu.zix $(LIBDIR)
+	cp dialog.zi $(LIBDIR)
+	cp dialog.zix $(LIBDIR)
 	cp protocol.zi $(LIBDIR)
 	cp protocol.zix $(LIBDIR)
 	cp libcamltk4.a $(LIBDIR)
