@@ -10,7 +10,6 @@ PACKAGES=libunix libgraph debugger libnum libstr mletags \
 # caml-latex2e
 # camltk
 
-
 # Which C compiler to use.
 # Should be the same compiler used to compile the main system (../src).
 CC=gcc
@@ -46,12 +45,12 @@ MANDIR=/usr/local/man/man$(MANEXT)
 # The path to the include directory containing the X11/*.h includes
 # (usually /usr/include; for SunOS with OpenLook, /usr/openwin/include)
 # Needed for the "libgraph" and "camltk" packages.
-X11_INCLUDES=/usr/include/X11
+X11_INCLUDES=/usr/X11R6/include
 
 # The path to the directory containing the X11 libraries.
 # (usually /usr/lib; for SunOS with OpenLook, /usr/openwin/lib)
 # Needed for the "libgraph" and "camltk" packages.
-X11_LIB=/usr/lib/X11
+X11_LIB=/usr/X11R6/lib
 
 # Name of the target architecture.
 # Used only for the libnum library (arbitrary-precision arithmetic), to
@@ -62,7 +61,7 @@ X11_LIB=/usr/lib/X11
 # See the file libnum/README for more explanations.
 # If you don't know, leave BIGNUM_ARCH=C, which selects a portable
 # C implementation of these routines.
-BIGNUM_ARCH=alpha
+BIGNUM_ARCH=C
 
 # Name of the directory where LaTeX style files should be installed.
 # Needed only for the "caml-tex" and "caml-latex2e" packages.
