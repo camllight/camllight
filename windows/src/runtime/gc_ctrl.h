@@ -1,6 +1,7 @@
 #ifndef _gc_ctrl_
 #define _gc_ctrl_
 
+#include "misc.h"
 
 extern long
      stat_minor_words,
@@ -10,11 +11,7 @@ extern long
      stat_major_collections,
      stat_heap_size;
 
-#ifdef ANSI
-extern void init_gc (long, long, int, int);
-#else
-void init_gc ();
-#endif
+void init_gc P((long, long, int, int));
 
 
 #endif /* _gc_ctrl_ */
