@@ -90,6 +90,7 @@ int CamlCBCmd(clientdata, interp, argc, argv)
   return TCL_OK;
 }
 
+/* Note: raise_with_string WILL copy the error message */
 void tk_error(errmsg)
      char *errmsg;
 {
@@ -115,7 +116,7 @@ void invoke_pending_caml_signals (clientdata)
 }
 
 
-static Tcl_Interp *tclinterp;
+Tcl_Interp *cltclinterp = NULL;
 static Tk_Window mainWindow;
 
 #define RCNAME ".camltkrc"
@@ -124,49 +125,51 @@ static Tk_Window mainWindow;
 value camltk_opentk(display, name) /* ML */
      value display,name;
 {
-  /* Create an interpreter */
-  tclinterp = Tcl_CreateInterp();  /* dies if error */
+  /* Create an interpreter, dies if error */
+  cltclinterp = Tcl_CreateInterp();
   /* Create the camlcallback command */
-  Tcl_CreateCommand(tclinterp,
+  Tcl_CreateCommand(cltclinterp,
 		    "camlcb", CamlCBCmd, 
 		    (ClientData)NULL,(Tcl_CmdDeleteProc *)NULL);
   /* Open main window */
-  mainWindow = Tk_CreateMainWindow(tclinterp,
+  mainWindow = Tk_CreateMainWindow(cltclinterp,
 				   String_val (display), /* screenname */
 				   String_val(name), /* basename */
 				   "Tk"  /* classname */
 				   );
   if (NULL == mainWindow)
-    tk_error(tclinterp->result);
+    tk_error(cltclinterp->result);
   
   Tk_GeometryRequest(mainWindow,200,200);
-  if (Tcl_Init(tclinterp) != TCL_OK)
-    tk_error(tclinterp->result);
-  if (Tk_Init(tclinterp) != TCL_OK)
-    tk_error(tclinterp->result);
+  if (Tcl_Init(cltclinterp) != TCL_OK)
+    tk_error(cltclinterp->result);
+  if (Tk_Init(cltclinterp) != TCL_OK)
+    tk_error(cltclinterp->result);
 
   /* This is required by "unknown" and thus autoload */
-  Tcl_SetVar(tclinterp, "tcl_interactive", "0", TCL_GLOBAL_ONLY);
+  Tcl_SetVar(cltclinterp, "tcl_interactive", "0", TCL_GLOBAL_ONLY);
 	     
   /* Load the traditional rc file */
   {
     char *home = getenv("HOME");
     if (home != NULL) {
-      char *f = (char *)malloc(strlen(home)+strlen(RCNAME)+2);
-      if (f == NULL) goto finish;
+      char *f = stat_alloc(strlen(home)+strlen(RCNAME)+2);
       f[0]='\0';
       strcat(f, home);
       strcat(f, "/");
       strcat(f, RCNAME);
       if (0 == access(f,R_OK)) 
-	if (TCL_OK != Tcl_EvalFile(tclinterp,f))
-	  tk_error(tclinterp->result);
+	if (TCL_OK != Tcl_EvalFile(cltclinterp,f)) {
+	  stat_free(f);
+	  tk_error(cltclinterp->result);
+	};
+      stat_free(f);
     }
   }
 
- Tk_CreateTimerHandler(100, invoke_pending_caml_signals, NULL);
+  /* Initialise signal handling */
+  Tk_CreateTimerHandler(100, invoke_pending_caml_signals, NULL);
   
- finish:
   return Atom(0);
 }
 
@@ -179,12 +182,14 @@ value str;
 {
   int code;
 
-  code = Tcl_Eval(tclinterp,String_val(str));
+  if (!cltclinterp) tk_error("Tcl/Tk not initialised");
+
+  code = Tcl_Eval(cltclinterp,String_val(str));
   switch (code) {
   case TCL_OK:
-    return copy_string (tclinterp->result);
+    return copy_string (cltclinterp->result);
   case TCL_ERROR:
-    tk_error(tclinterp->result);
+    tk_error(cltclinterp->result);
   default:  /* TCL_BREAK, TCL_CONTINUE, TCL_RETURN */
     tk_error("bad tcl result");
   }
@@ -194,11 +199,11 @@ value str;
 /* 
  * Calling Tcl from Caml
  *   direct call, argument is TkArgs vect
-type TkArgs =
-    TkToken of string
-  | TkTokenList of TkArgs list		(* to be expanded *)
-  | TkQuote of TkArgs 	                (* mapped to Tcl list *)
-;;
+  type TkArgs =
+      TkToken of string
+    | TkTokenList of TkArgs list		(* to be expanded *)
+    | TkQuote of TkArgs 	                (* mapped to Tcl list *)
+  ;;
  */
 
 /* 
@@ -206,7 +211,7 @@ type TkArgs =
  * TkTokenList must be expanded,
  * TkQuote count for one.
  */
-int argv_size (v)
+int argv_size(v)
 value v;
 {
   switch (Tag_val(v)) {
@@ -225,12 +230,12 @@ value v;
 }
 
 /* 
-  Memory of allocated Tcl lists.
+ * Memory of allocated Tcl lists.
  */
-char *tcllists[64];
-int startfree = 0;
+static char *tcllists[64];
+static int startfree = 0;
 /* If size is lower, do not allocate */
-char *quotedargv[16];
+static char *quotedargv[16];
 
 /* Fill a preallocated vector arguments, doing expansion and all */
 int fill_args (argv, where, v) 
@@ -277,6 +282,8 @@ value v;
   Tcl_CmdInfo info;
   int wherewasi,whereami;       /* positions in tcllists array */
 
+  if (!cltclinterp) tk_error("Tcl/Tk not initialised");
+
   /* walk the array to compute final size for Tcl */
   for(i=0,size=0;i<Wosize_val(v);i++)
     size += argv_size(Field(v,i));
@@ -297,18 +304,18 @@ value v;
   whereami = startfree;
 
   /* Eval */
-  Tcl_ResetResult(tclinterp);
-  if (Tcl_GetCommandInfo(tclinterp,argv[0],&info)) { /* command found */
-    result = (*info.proc)(info.clientData,tclinterp,size,argv);
+  Tcl_ResetResult(cltclinterp);
+  if (Tcl_GetCommandInfo(cltclinterp,argv[0],&info)) { /* command found */
+    result = (*info.proc)(info.clientData,cltclinterp,size,argv);
   } else /* implement the autoload stuff */
-    if (Tcl_GetCommandInfo(tclinterp,"unknown",&info)) { /* unknown found */
+    if (Tcl_GetCommandInfo(cltclinterp,"unknown",&info)) { /* unknown found */
       for (i = size; i >= 0; i--)
 	argv[i+1] = argv[i];
       argv[0] = "unknown";
-      result = (*info.proc)(info.clientData,tclinterp,size+1,argv);
+      result = (*info.proc)(info.clientData,cltclinterp,size+1,argv);
     } else { /* ah, it isn't there at all */
       result = TCL_ERROR;
-      Tcl_AppendResult(tclinterp, "Unknown command \"", argv[0], "\"", NULL);
+      Tcl_AppendResult(cltclinterp, "Unknown command \"", argv[0], "\"", NULL);
     };
   /* Free the various things we allocated */
   stat_free((char *)argv);
@@ -318,9 +325,9 @@ value v;
   
   switch (result) {
   case TCL_OK:
-    return copy_string (tclinterp->result);
+    return copy_string (cltclinterp->result);
   case TCL_ERROR:
-    tk_error(tclinterp->result);
+    tk_error(cltclinterp->result);
   default:  /* TCL_BREAK, TCL_CONTINUE, TCL_RETURN */
     tk_error("bad tcl result");
   }
@@ -333,8 +340,10 @@ value camltk_splitlist (v) /* ML */
   int argc;
   char **argv;
   int result;
+
+  if (!cltclinterp) tk_error("Tcl/Tk not initialised");
   
-  result = Tcl_SplitList(tclinterp,String_val(v),&argc,&argv);
+  result = Tcl_SplitList(cltclinterp,String_val(v),&argc,&argv);
   switch(result) {
   case TCL_OK:
    { value res = copy_string_list(argc,argv);
@@ -343,7 +352,7 @@ value camltk_splitlist (v) /* ML */
    }
   case TCL_ERROR:
   default:
-    tk_error(tclinterp->result);
+    tk_error(cltclinterp->result);
   }
 }
 
