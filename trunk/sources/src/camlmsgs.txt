@@ -50,7 +50,7 @@ src:	Toplevel input:\n
 fr:	Entrée interactive:\n
 es:	Entrada interactiva:\n
 de:	Interaktive Eingabe:\n
-it:	Toplevel input:\n
+it:	Entrata interattiva:\n
 
 src:	File "%s", line 1:\n
 fr:	Fichier "%s", ligne 1:\n
