@@ -1,3 +1,20 @@
+(* Not a string as such, more like a symbol *)
+
+type TextMark == string ;;
+
+let CAMLtoTKTextMark  x =  x
+;;
+let TKtoCAMLTextMark x = x
+;;
+
+type TextTag == string ;;
+
+let CAMLtoTKTextTag  x =  x
+;;
+let TKtoCAMLTextTag x = x
+;;
+
+
 type TextModifier =
     CharOffset of int
   | LineOffset of int
@@ -25,11 +42,11 @@ let ppTextModifier = function
 
 type BaseTextIndex =
    TI_LineChar of int * int
- | TI_Mark of string
+ | TI_Mark of TextMark
  | TI_End 
  | TI_At of int * int
- | TI_TagFirst of string
- | TI_TagLast of string
+ | TI_TagFirst of TextTag
+ | TI_TagLast of TextTag
 ;;
 
 let CAMLtoTKBaseTextIndex = function
@@ -75,21 +92,6 @@ let CAMLtoTKTextIndex = function
      ^ "\""
 ;;
 
-
-(* Not a string as such, more like a symbol *)
-type TextTag == string ;;
-
-let CAMLtoTKTextTag  x =  x
-;;
-let TKtoCAMLTextTag x = x
-;;
-
-type TextMark == string ;;
-
-let CAMLtoTKTextMark  x =  x
-;;
-let TKtoCAMLTextMark x = x
-;;
 
 let text_tag_bind widget tag eventsequence action =
   check_widget_class widget "text";
