@@ -15,8 +15,35 @@ type stat = {
   largest_free : int;
   fragments : int
 };;
-        (* Memory allocation and garbage collection statistics,
-           as returned by the [stat] function. *)
+  (* The memory management counters are returned in a [stat] record.
+     All the numbers are computed since the start of the program.
+     The fields of this record are:
+-     [minor_words]  Number of words allocated in the minor heap.
+-     [promoted_words] Number of words allocated in the minor heap that
+             survived a minor collection and were moved to the major heap.
+-     [major_words]  Number of words allocated in the major heap, including
+             the promoted words.
+-     [minor_collections]  Number of minor collections.
+-     [major_collections]  Number of major collection cycles, not counting
+             the current cycle.
+-     [heap_size]  Total number of words in the major heap.
+-     [heap_chunks]  Number of times the major heap size was increased.
+-     [live_words]  Number of words of live data in the major heap, including
+             the header words.
+-     [live_blocks]  Number of live objects in the major heap.
+-     [free_words]  Number of words in the free list.
+-     [free_blocks]  Number of objects in the free list.
+-     [largest_free]  Size (in words) of the largest object in the free list.
+-     [fragments]  Number of wasted words due to fragmentation.  These are
+             1-words free blocks placed between two live objects.  They
+             cannot be inserted in the free list, thus they are not available
+             for allocation.
+
+-    The total amount of memory allocated by the program is (in words)
+     [minor_words + major_words - promoted_words].  Multiply by
+     the word size (4 on a 32-bit machine, 8 on a 64-bit machine) to get
+     the number of bytes.
+  *)
 
 type control = {
   mutable minor_heap_size : int;
@@ -24,18 +51,40 @@ type control = {
   mutable space_overhead : int;
   mutable verbose : bool
 };;
-	(* User-settable GC parameters. *)
+
+  (* The GC parameters are given as a [control] record.  The fields are:
+-     [minor_heap_size]  The size (in words) of the minor heap.  Changing
+             this parameter will trigger a minor collection.
+-     [major_heap_increment]  The minimum number of words to add to the
+             major heap when increasing it.
+-     [space_overhead]  The major GC speed is computed from this parameter.
+             This is the percentage of heap space that will be "wasted"
+             because the GC does not immediatly collect unreachable
+             objects.  The GC will work more (use more CPU time and collect
+             objects more eagerly) if [space_overhead] is smaller.
+             The computation of the GC speed assumes that the amount
+             of live data is constant.
+-     [verbose]  This flag controls the GC messages on standard error output.
+  *)
 
 value stat : unit -> stat = 1 "gc_stat";;
-        (* Return the current memory allocation and garbage collection 
-           statistics. *)
+  (* Return the current values of the memory management counters in a
+     [stat] record. *)
 value get : unit -> control = 1 "gc_get";;
-        (* Return the current values of the GC parameters. *)
+  (* Return the current values of the GC parameters in a [control] record. *)
 value set : control -> unit = 1 "gc_set";;
-        (* Set the values of the GC parameters. *)
+  (* [set r] changes the GC parameters according to the [control] record [r].
+     The normal usage is:
+     [
+       let r = gc__get () in    (* Get the current parameters. *)
+         r.verbose <- true;     (* Change some of them. *)
+         gc__set r              (* Set the new values. *)
+     ]
+  *)
 value minor : unit -> unit = 1 "gc_minor";;
-        (* Trigger a minor collection. *)
+  (* Trigger a minor collection. *)
 value major : unit -> unit = 1 "gc_major";;
-        (* Trigger a major collection cycle. *)
+  (* Finish the current major collection cycle. *)
 value full_major : unit -> unit = 1 "gc_full_major";;
-        (* Trigger a complete major collection. *)
+  (* Finish the current major collection cycle and perform a complete
+     new cycle.  This will collect all currently unreachable objects. *)
