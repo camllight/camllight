@@ -559,13 +559,13 @@ it:	%tIl valore %a è dichiarato con il tipo %a,\n\
 
 src:	Exception %s defined.\n
 fr:	L'exception %s est définie.\n
-es:	La excepción %s está definida.\n
+es:	La excepción %s es definida.\n
 de:	Die Ausnahme %s ist definiert.\n
 it:	L'eccezione %s è definita.\n
 
 src:	Type %s defined.\n
 fr:	Le type %s est défini.\n
-es:	El tipo %s está definido.\n
+es:	El tipo %s es definido.\n
 de:	Der Typ %s ist deklariert.\n
-it:	Il typo %s è definito.\n
+it:	Il tipo %s è definito.\n
 
