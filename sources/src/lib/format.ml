@@ -68,7 +68,7 @@ let pp_margin = ref 78
 ;;
 
 (* Minimal space left before margin, when opening a block *)
-let pp_min_space_left = ref 0;;
+let pp_min_space_left = ref 5;;
 (* maximum value of indentation:
    then no blocks can be opened *)
 let pp_max_indent = ref (!pp_margin - !pp_min_space_left)
@@ -151,6 +151,9 @@ let format_pp_token size = function
       let insertion_point = !pp_margin - !pp_space_left in
       if insertion_point > !pp_max_indent then
          (* can't open a block right there ! *)
+         pp_force_newline();
+         (* If block is rejected on the left current indentation will change *)
+      if size > !pp_space_left & !pp_current_indent < insertion_point then
          pp_force_newline();
       let offset = !pp_space_left - off in
       let bl_type =
