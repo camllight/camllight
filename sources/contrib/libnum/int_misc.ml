@@ -20,8 +20,7 @@ let compare_int n1 n2 =
   if n1 == n2 then 0 else if n1 > n2 then 1 else -1;;
 
 let rec gcd_int i1 i2 =
-  if i2 == 0 then abs i1 else gcd_int i2 (i1 mod i2)
-;;
+  if i2 == 0 then abs i1 else gcd_int i2 (i1 mod i2);;
 
 (* 
    int_to_string place la représentation de l' 'entier int en base base 

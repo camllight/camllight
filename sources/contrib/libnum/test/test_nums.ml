@@ -240,7 +240,7 @@ test 10
 eq_num (num_of_string "0.23", Ratio (ratio_of_string "0.23/1"));;
 
 failwith_test 11
-num_of_string ("frlshjkurty") (Failure "num_of_string");;
+num_of_string "frlshjkurty" (Failure "num_of_string");;
 
 (**************
 testing_function "immediate numbers";;
@@ -274,4 +274,5 @@ test 7 eq (f1 (1/2), false);;
 
 **************)
 (* From Jean-Christophe Filliatre *)
-(Int 2) **/ ((Int 2) **/ ((Int 2) **/ (Int 16)));;
+(* This should fail nicely (no more room ?) *)
+(* (Int 2) **/ ((Int 2) **/ ((Int 2) **/ (Int 16)));; *)
