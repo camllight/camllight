@@ -2,6 +2,7 @@
 
 #open "debugger_config";;
 #open "unix";;
+#open "unix_tools";;
 #open "misc";;
 #open "primitives";;
 #open "parameters";;
@@ -22,6 +23,12 @@ let load_program () =
 
 (*** Launching functions. ***)
 
+let shell () =
+  try
+    sys__getenv "SHELL"
+  with Not_found ->
+    "/bin/sh";;
+
 (* A generic function for launching the program *)
 let generic_exec exec =
   false,
@@ -40,7 +47,7 @@ let generic_exec exec =
        0 ->
          (try
        	    match fork () with
-              0 -> exec ()
+              0 -> exec (shell ())
 	    | _ -> exit 0
           with
             x ->
@@ -54,23 +61,31 @@ let generic_exec exec =
 (* Execute the runtime whith the right arguments *)
 let exec_with_runtime =
   generic_exec
-    (function () ->
+    (function shell ->
        execvp
-       	 runtime_program
-         (concat_vect
-            [| runtime_program; "-D"; !socket_name; !program_name|]
-            !arguments));;
+       	 shell
+         [|shell;
+	   "-c";
+	   "exec "
+      	     ^ runtime_program
+      	     ^ " -D " ^ !socket_name ^ " "
+      	     ^ !program_name ^ " "
+      	     ^ !arguments|]);;
 
 (* Excute a stand-alone program. *)
 let exec_custom =
   generic_exec
-    (function () ->
-      execve
-      	!program_name
-        (concat_vect [|!program_name|] !arguments)
-	(concat_vect
-	   [|"CAML_DEBUG_SOCKET=" ^ !socket_name|]
-	   (environment ())));;
+    (function shell ->
+       execve
+      	 shell
+	 [|shell;
+	   "-c";
+	   "exec "
+	     ^ !program_name ^ " "
+	     ^ !arguments|]
+	 (concat_vect
+	    [|"CAML_DEBUG_SOCKET=" ^ !socket_name|]
+	    (environment ())));;
 
 (* Ask the user. *)
 let exec_manual =

@@ -27,6 +27,12 @@
 %token		RBRACE			/* }  */
 %token		SEMI			/* ;  */
 %token		EQUAL			/* =  */
+%token		SUPERIOR		/* >  */
+%token		PREFIX			/* prefix */
+%token <string>	OPERATOR          	/* +   /   +.  -.  *.  /. */
+                              	       	/* ^   !   :=  <>  ==  != */
+      	       	       	       	       	/* <   <=  >=  <.  <=. >. */
+      	       	       	       	       	/* >=. 			  */
 %token		EOL
 
 %right COMMA
@@ -163,10 +169,26 @@ Variable_eol :
   Variable End_of_line
     { $1 };
 
-Variable :
+Local_name :
     IDENTIFIER
+      { $1 }
+  | PREFIX STAR
+      { "*" };
+  | PREFIX MINUS
+      { "-" }
+  | PREFIX AT
+      { "@" }
+  | PREFIX EQUAL
+      { "=" }
+  | PREFIX SUPERIOR
+      { ">" }
+  | PREFIX OPERATOR
+      { $2 };
+
+Variable :
+    Local_name
       { GRname $1 }
-  | IDENTIFIER UNDERUNDER IDENTIFIER
+  | IDENTIFIER UNDERUNDER Local_name
       { GRmodname {qual = $1; id = $3} }
   | STAR
       { GRname "" };
@@ -234,6 +256,8 @@ Pattern :
       { P_tuple ($1::$3) }
   | Variable Simple_pattern
       { P_constr ($1, $2) }
+  | SUPERIOR Simple_pattern
+      { P_constr (GRname "", $2) }
 ;
 
 Simple_pattern :

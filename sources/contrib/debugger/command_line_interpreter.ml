@@ -8,6 +8,7 @@
 #open "debugger_config";;
 #open "types";;
 #open "primitives";;
+#open "unix_tools";;
 #open "parser";;
 #open "parser_aux";;
 #open "lexer";;
@@ -24,6 +25,7 @@
 #open "time_travel";;
 #open "events";;
 #open "pr_type";;
+#open "string_of_type";;
 #open "pr_value";;
 #open "variables";;
 #open "source";;
@@ -119,7 +121,10 @@ let convert_module module =
       	raise Toplevel;;
 
 (** Toplevel. **)
+let current_line = ref "";;
+
 let interprete_line line =
+  current_line := line;
   let lexbuf = create_lexer_string line in
     try
       match Identifier_or_eol Lexeme lexbuf with
@@ -318,11 +323,18 @@ let instr_print lexbuf =
     do_list
       (function x ->
       	 let (val, typ) = variable x in
-      	   output_variable_name std_out x;
-           print_string " : ";
-           print_one_type typ; print_string " = ";
-           print_value val typ;
-           print_newline ())
+           let header =
+      	     (string_of_variable_name x)
+                ^ " : "
+                ^ (string_of_one_type typ)
+      	       	^ " ="
+           in
+	     if !emacs then
+      	       (print_string "\026\026p";
+	        print_endline !current_line);
+             print_value header val typ;
+	     if !emacs then print_endline "\026\026e";
+             flush std_out)
       variables;;
 
 let instr_match lexbuf =
@@ -332,12 +344,18 @@ let instr_match lexbuf =
       do_list
 	(function
 	   (name, val, typ) ->
-	     print_string name;
-	     print_string " : ";
-             print_one_type typ;
-             print_string " = ";
-             print_value val typ;
-             print_newline ())
+             let header =
+	       name
+	         ^ " : "
+                 ^ (string_of_one_type typ)
+                 ^ " ="
+             in
+	       if !emacs then
+	         (print_string "\026\026m";
+	          print_endline !current_line);
+               print_value header val typ;
+	       if !emacs then print_endline "\026\026e";
+               flush std_out)
       	(pattern_matching pattern val typ);;
 
 let instr_source lexbuf =
@@ -367,11 +385,15 @@ let instr_source lexbuf =
 
 let instr_open lexbuf =
   let modules = Argument_list_eol Argument lexbuf in
-    do_list open_module modules;;
+    do_list open_module modules;
+    if !emacs then
+      print_endline "\026\026f";;
 
 let instr_close lexbuf =
   let modules = Argument_list_eol Argument lexbuf in
-    do_list close_module modules;;
+    do_list close_module modules;
+    if !emacs then
+      print_endline "\026\026f";;
 
 let instr_set =
   find_variable
@@ -468,7 +490,7 @@ let instr_frame lexbuf =
     ensure_loaded ();
     try
       select_frame frame_number;
-      show_current_frame ()
+      show_current_frame true
     with
       Not_found ->
       	prerr_endline ("No frame number " ^ (string_of_int frame_number) ^ ".");
@@ -484,14 +506,14 @@ let instr_backtrace lexbuf =
     let rec show_end_of_stack n =
       try
 	select_frame n;
-	show_current_frame ();
+	show_current_frame false;
 	show_end_of_stack (n + 1)
       with
 	Not_found -> ()
     and show_beginning_of_stack n =
       try
 	select_frame n;
-	show_current_frame ();
+	show_current_frame false;
 	if n < number - 1 then
 	  show_beginning_of_stack (n + 1)
       with
@@ -519,7 +541,7 @@ let instr_up lexbuf =
     ensure_loaded ();
     try
       select_frame (!current_frame + offset);
-      show_current_frame ()
+      show_current_frame true
     with
       Not_found ->
       	prerr_endline "No such frame.";
@@ -534,7 +556,7 @@ let instr_down lexbuf =
     ensure_loaded ();
     try
       select_frame (!current_frame - offset);
-      show_current_frame ()
+      show_current_frame true
     with
       Not_found ->
       	prerr_endline "No such frame.";
@@ -579,34 +601,54 @@ let instr_list lexbuf =
 	      show_listing module beginning en (-1) true;;
 
 (** Variables. **)
-let raw_vect_variable kill name =
-  (function
-    lexbuf ->
-      let argument_list = Argument_list_eol Argument lexbuf in
-      	if kill & (ask_kill_program ()) then
-          name := vect_of_list argument_list),
-  function
-    () ->
-      do_vect (fun x -> print_string (x ^ " ")) !name;
-      print_newline ();;
-
 let raw_variable kill name =
   (function
      lexbuf ->
        let argument = Argument_eol Argument lexbuf in
-      	 if kill & (ask_kill_program ()) then
+      	 if (not kill) or (ask_kill_program ()) then
            name := argument),
   function
     () ->
       print_string !name;
       print_newline ();;
 
-let integer_variable kill name =
+let raw_line_variable kill name =
+  (function
+     lexbuf ->
+       let argument = Argument_eol Line_argument lexbuf in
+      	 if (not kill) or (ask_kill_program ()) then
+           name := argument),
+  function
+    () ->
+      print_string !name;
+      print_newline ();;
+
+let integer_variable kill min msg name =
   (function
     lexbuf ->
       let argument = Integer_eol Lexeme lexbuf in
-      	if kill & (ask_kill_program ()) then
-          name := argument),
+      	if argument < min then
+	  print_endline msg
+	else
+      	  if (not kill) or (ask_kill_program ()) then
+            name := argument),
+  function
+    () ->
+      print_int !name;
+      print_newline ();;
+
+(* Same as `integer_variable', but ask emacs to flush the value cache. *)
+let size_variable kill min msg name =
+  (function
+    lexbuf ->
+      let argument = Integer_eol Lexeme lexbuf in
+      	if argument < min then
+	  print_endline msg
+	else
+      	  if (not kill) or (ask_kill_program ()) then
+            (name := argument;
+             if !emacs then
+               print_endline "\026\026f")),
   function
     () ->
       print_int !name;
@@ -621,7 +663,7 @@ let boolean_variable kill name =
         | "of" | "off" -> false
 	| _ -> error "Syntax error."
       in
-      	if kill & (ask_kill_program ()) then
+      	if (not kill) or (ask_kill_program ()) then
           name := argument),
   function
     () ->
@@ -632,7 +674,7 @@ let path_variable kill name =
   (function
      lexbuf ->
        let argument = Argument_eol Argument lexbuf in
-      	 if kill & (ask_kill_program ()) then
+      	 if (not kill) or (ask_kill_program ()) then
            name := (expand_path argument)),
   function
     () ->
@@ -718,7 +760,7 @@ let info_events lexbuf =
         | Some {ev_file = f} -> f
   in
     print_endline ("Module : " ^ module);
-    print_endline "  Address  Character   Kind";
+    print_endline "   Address  Character   Kind";
     do_list
       (function {ev_pos = pc; ev_char = char; ev_kind = kind} ->
     	 printf__printf
@@ -734,7 +776,7 @@ let initialize_interpreter () =
     (* function name, priority, function interpreter, can be repeated,
        help message *)
     ["cd", false, instr_cd, true,
-"et working directory to DIR for debugger and program being debugged.";
+"set working directory to DIR for debugger and program being debugged.";
      "pwd", false, instr_pwd, true,
 "print working directory.";
      "directory", false, instr_dir, false,
@@ -769,7 +811,7 @@ Argument N means do this N times (or till program stops for another reason).";
      "print", false, instr_print, true,
 "print value of variables (`*' stand for the accumulator).";
      "match", false, instr_match, true,
-"";
+"match the value of a variable against a pattern.";
      "source", false, instr_source, true,
 "read command from file FILE.";
      "open", false, instr_open, false,
@@ -801,39 +843,43 @@ With a negative argument, print outermost -COUNT frames.";
      "up", false, instr_up, true,
 "select and print stack frame that called this one.\n\
 An argument says how many frames up to go.";
-     "down", false, instr_up, true,
+     "down", false, instr_down, true,
 "select and print stack frame called by this one.\n\
 An argument says how many frames down to go.";
-     "last", false, instr_last, true,
+     "last", true, instr_last, true,
 "go back to previous time.";
      "list", false, instr_list, true,
 "list the source code."
 ];
   variable_list :=
     (* variable name, (writing, reading), help reading, help writing *)
-    ["arguments", raw_vect_variable true arguments,
+    ["arguments", raw_line_variable true arguments,
 "arguments to give program being debugged when it is started.";
      "program", path_variable true program_name,
 "name of program to be debugged.";
      "loadingmode", loading_mode_variable,
-"select the mode of loading.\n\
+"mode of loading.\n\
 It can be either :
   direct : the program is directly called by the debugger.\n\
   runtime : the debugger execute `camlrun -D socket programname arguments'.\n\
   manual : the program is not launched by the debugger,\n\
     but manually by the user.";
-     "processcount", integer_variable false checkpoint_max_count,
+     "processcount", integer_variable false 1 "Must be > 1." checkpoint_max_count,
 "maximum number of process to keep.";
      "checkpoints", boolean_variable false make_checkpoints,
-"should we make checkpoints or not ?";
-     "bigstep", integer_variable false checkpoint_big_step,
+"whether to make checkpoints or not.";
+     "bigstep", integer_variable false 1 "Must be > 1." checkpoint_big_step,
 "step between checkpoints during long displacements.";
-     "smallstep", integer_variable false checkpoint_big_step,
+     "smallstep", integer_variable false 1 "Must be > 1." checkpoint_big_step,
 "step between checkpoints during small displacements.";
      "socket", raw_variable true socket_name,
 "name of the socket used by communications debugger-runtime.";
-     "history", integer_variable false history__history_size,
-"history size."];
+     "history", integer_variable false 0 "" history_size,
+"history size.";
+     "width", size_variable false 3 "Must be > 3." screen_width,
+"screen width.";
+     "height", size_variable false 1 "Must be > 1." max_height,
+"maximum number of lines used to print a value."];
   info_list :=
     (* info name, function, help *)
     ["modules", info_modules,

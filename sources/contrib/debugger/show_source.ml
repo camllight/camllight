@@ -21,10 +21,10 @@ let print_line buffer line_number beginning point before=
     next;;
 
 (* Print the line containing the point *)
-let show_point module point before =
-  if !emacs then
+let show_point module point before selected =
+  if !emacs & selected then
     let source = source_of_module module in
-      print_string "\026\026";
+      print_string "\026\026M";
       print_string source;
       print_string ":";
       print_int point;
@@ -40,6 +40,13 @@ let show_point module point before =
         prerr_endline "Position out of range."
     |  Toplevel -> ();;
 
+(* Tell Emacs we are nowhere in the source. *)
+let show_no_point () =
+  if !emacs then
+    (print_string "\026\026H";
+     print_newline ());;
+
+(* Display part of the source. *)
 let show_listing module beginning en point before =
   let buffer = get_buffer module in
     try

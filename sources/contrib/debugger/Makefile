@@ -2,7 +2,7 @@ CC		= gcc
 OPTS		= -DANSI
 CAMLCOMP	= camlc
 CAMLLEX		= camllex
-CAMLYACC	= camlyacc -v
+CAMLYACC	= camlyacc
 CFLAGS		= $(DEBUG) -Wall $(OPTS)
 INCLUDES	= -I ../compiler -I ../linker
 COMPFLAGS	= -c $(DEBUG) $(INCLUDES)
@@ -19,6 +19,7 @@ EXTERNOBJS = \
 	types.zo pr_type.zo \
 	tr_env.zo
 OBJS =	debugger_config.zo constants.zo primitives.zo unix_tools.zo \
+	pure_queue.zo \
 	modules2.zo \
 	parameters.zo \
 	lexer.zo \
@@ -27,6 +28,7 @@ OBJS =	debugger_config.zo constants.zo primitives.zo unix_tools.zo \
 	communication.zo communication.o \
 	value.zo value.o \
 	source.zo \
+	string_of_type.zo \
 	pr_value.zo \
 	checkpoints.zo \
 	events.zo \
@@ -62,8 +64,8 @@ dump_event: constants.zo dump_event.zo
 clean:
 #	rm -f $(NAME) *~
 	rm -f *.zi *.zix *.zo *.o
-	rm -f constants.ml
-
+	rm -f constants.ml constants
+	rm -f camldebug
 
 install:
 	cp camldebug $(BINDIR)
@@ -139,21 +141,22 @@ breakpoints.zo: breakpoints.zi source.zi primitives.zi checkpoints.zi \
     constants.zo communication.zi interruption.zi 
 checkpoints.zo: checkpoints.zi primitives.zi communication.zi 
 command_line_interpreter.zo: command_line_interpreter.zi breakpoints.zi \
-    time_travel.zi show_information.zo parameters.zi primitives.zi value.zi \
-    program_loading.zi program_management.zi checkpoints.zi events.zi \
-    debugger_config.zi variables.zi unix_tools.zi pattern_matching.zi \
-    frames.zi source.zi pr_value.zo parser_aux.zi input_handling.zi \
-    communication.zi modules2.zi 
+    show_source.zi time_travel.zi show_information.zi parameters.zi \
+    primitives.zi value.zi program_loading.zi program_management.zi \
+    checkpoints.zi events.zi debugger_config.zi string_of_type.zo \
+    variables.zi history.zi pattern_matching.zi frames.zi unix_tools.zi \
+    source.zi pr_value.zi parser_aux.zi input_handling.zi communication.zi \
+    modules2.zi 
 communication.zo: communication.zi primitives.zi input_handling.zi \
     unix_tools.zi 
 debugger_config.zo: debugger_config.zi 
 events.zo: events.zi checkpoints.zi primitives.zi communication.zi 
 frames.zo: frames.zi events.zi checkpoints.zi primitives.zi \
     communication.zi 
-history.zo: history.zi checkpoints.zi 
+history.zo: history.zi checkpoints.zi debugger_config.zi primitives.zi 
 input_handling.zo: input_handling.zi primitives.zi 
 interruption.zo: interruption.zi 
-main.zo: show_information.zo parameters.zi time_travel.zi primitives.zi \
+main.zo: show_information.zi parameters.zi time_travel.zi primitives.zi \
     program_loading.zi program_management.zi checkpoints.zi \
     command_line_interpreter.zi debugger_config.zi frames.zi \
     interruption.zi input_handling.zi version.zo communication.zi \
@@ -162,16 +165,19 @@ modules2.zo: modules2.zi
 parameters.zo: parameters.zi primitives.zi 
 pattern_matching.zo: pattern_matching.zi primitives.zi parser_aux.zi \
     value.zi 
-pr_value.zo: value.zi 
+pr_value.zo: pr_value.zi primitives.zi value.zi pure_queue.zi \
+    string_of_type.zo 
 primitives.zo: primitives.zi 
 program_loading.zo: program_loading.zi parameters.zi primitives.zi \
-    debugger_config.zi unix_tools.zi input_handling.zi 
+    debugger_config.zi input_handling.zi unix_tools.zi 
 program_management.zo: program_management.zi time_travel.zi parameters.zi \
     primitives.zi program_loading.zi input_handling.zi checkpoints.zi \
     events.zi debugger_config.zi constants.zo history.zi unix_tools.zi \
     communication.zi modules2.zi 
-show_information.zo: breakpoints.zi show_source.zi events.zi checkpoints.zi \
-    pr_value.zo primitives.zi frames.zi communication.zi 
+pure_queue.zo: pure_queue.zi 
+show_information.zo: show_information.zi breakpoints.zi show_source.zi \
+    events.zi checkpoints.zi pr_value.zi primitives.zi frames.zi \
+    communication.zi 
 show_source.zo: show_source.zi source.zi primitives.zi parameters.zi \
     debugger_config.zi 
 source.zo: source.zi primitives.zi 
