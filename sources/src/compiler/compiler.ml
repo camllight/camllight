@@ -228,6 +228,7 @@ let compile_implementation modname filename suffix =
     try
       start_compiling_interface modname;
       compile_impl modname filename suffix;
+      check_nongen_values();
       write_compiled_interface oc;
       close_out oc
     with x ->

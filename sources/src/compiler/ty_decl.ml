@@ -200,13 +200,6 @@ let type_letdef loc rec_flag pat_expr_list =
   if generalizable then begin
     pop_type_level();
     do_list generalize_type ty_list
-  end else begin
-    do_list
-      (fun (id, (ty, _)) ->
-          match free_type_vars ty with
-            [] -> ()
-          | _  -> cannot_generalize_err loc id ty)
-      env
   end;
   if not rec_flag then enter_val env;
   env

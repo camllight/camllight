@@ -143,11 +143,13 @@ let type_mismatch_err val_desc val_desc' =
   raise Toplevel
 ;;
 
-let cannot_generalize_err loc id ty =
-  eprintf "%aThe type inferred for the global identifier %s,\n\
+let cannot_generalize_err val_desc =
+  eprintf "%tThe type inferred for the value %a,\n\
            that is, %a,\n\
            contains type variables that cannot be generalized.\n"
-    output_location loc id output_one_type ty;
+    output_input_name
+    output_value val_desc
+    output_one_type (type_instance val_desc.info.val_typ);
   raise Toplevel
 ;;
 
