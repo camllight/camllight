@@ -65,7 +65,6 @@ let rename_module = function
  | s -> s
 ;;
 
-
 let compile () = 
   let oc = open_out_bin "lib/tkgen.ml" in
     let sorted_types = tsort__sort types_order in
@@ -113,11 +112,13 @@ let compile () =
             write_named_create (output_string oc) wname;
 	    write_create_p (output_string oc') wname;
 	    write_named_create_p (output_string oc') wname;
-      	    do_list (write_function (output_string oc)) wdef.Commands;
-	    do_list (write_function_type (output_string oc')) wdef.Commands
+	    let cmds = sort_components wdef.Commands in
+      	    do_list (write_function (output_string oc)) cmds;
+	    do_list (write_function_type (output_string oc')) cmds
         | Family ->
-	    do_list (write_function (output_string oc)) wdef.Commands;
-	    do_list (write_function_type (output_string oc')) wdef.Commands
+	    let cmds = sort_components wdef.Commands in
+	    do_list (write_function (output_string oc)) cmds;
+	    do_list (write_function_type (output_string oc')) cmds
         end;
 	close_out oc;
 	close_out oc'

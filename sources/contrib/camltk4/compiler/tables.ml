@@ -41,6 +41,10 @@ type FullComponent = {
   }
 ;;
 
+let sort_components =
+  sort__sort (fun c1 c2 -> le_string c1.MLName c2.MLName)
+;;
+
 (* Components are given either in full or abbreviated *)
 type Component = 
    Full of FullComponent
