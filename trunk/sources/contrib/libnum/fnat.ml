@@ -748,6 +748,8 @@ let nat_of_float f = nat_of_string (string_of_float f);;
 
 (* Nat printing *)
 
+#open "format";;
+
 let string_for_read_of_nat n =
     sys_string_of_nat 10 "#<" n 0 (length_nat n) ">";;
 
