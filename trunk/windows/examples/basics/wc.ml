@@ -32,6 +32,18 @@ let count_file name =
   close_in ic
 ;;
 
+let print_result () =
+  print_int !chars; print_string " characters, ";
+  print_int !words; print_string " words, ";
+  print_int !lines; print_string " lines";
+  print_newline()
+;;
+
+let count name =
+  count_file name;
+  print_result ()
+;;  
+
 if sys__interactive then () else
 try
   if vect_length sys__command_line <= 1 then
@@ -40,10 +52,7 @@ try
     for i = 1 to vect_length sys__command_line - 1 do
       count_file  sys__command_line.(i)
     done;
-  print_int !chars; print_string " characters, ";
-  print_int !words; print_string " words, ";
-  print_int !lines; print_string " lines";
-  print_newline()
+  print_result ();
 with sys__Sys_error s ->
   print_string "I/O error: ";
   print_string s;
