@@ -168,9 +168,9 @@ let reset_linker_tables () =
 (* To write and read linker tables to a file *)
 
 let save_linker_tables outstream =
-  output_value outstream !global_table;
-  output_value outstream !exn_tag_table;
-  output_value outstream !tag_exn_table
+  output_compact_value outstream !global_table;
+  output_compact_value outstream !exn_tag_table;
+  output_compact_value outstream !tag_exn_table
 
 and load_linker_tables instream =
   global_table := input_value instream;

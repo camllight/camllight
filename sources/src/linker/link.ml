@@ -16,33 +16,23 @@
 
 (* First pass : determine which phrases are required *)
 
-let missing_globals =
-    (hashtbl__new 263 : (qualified_ident, unit) hashtbl__t);;
+let compare_qualids q1 q2 =
+  let c = compare_strings q1.id q2.id in
+  if c != 0 then c else compare_strings q1.qual q2.qual;;
+
+let missing_globals = ref (set__empty compare_qualids);;
 
 let is_required = function
-    Reloc_setglobal id, _ ->
-      begin try
-        hashtbl__find missing_globals id; true
-      with Not_found ->
-        false
-      end
-  | _ ->
-      false
-;;
+    Reloc_setglobal id, _ -> set__mem id !missing_globals
+  | _ -> false;;
 
 let remove_required = function
-    Reloc_setglobal id, _ ->
-      hashtbl__remove missing_globals id
-  | _ ->
-      ()
-;;
+    Reloc_setglobal id, _ -> missing_globals := set__remove id !missing_globals
+  | _ -> ();;
 
 let add_required = function
-    Reloc_getglobal id, _ ->
-      hashtbl__add missing_globals id ()
-  | _ ->
-      ()
-;;
+    Reloc_getglobal id, _ -> missing_globals := set__add id !missing_globals
+  | _ -> ();;
 
 let scan_phrase tolink phr =
   if not phr.cph_pure or exists is_required phr.cph_reloc then begin
@@ -69,8 +59,7 @@ let scan_file tolink name =
 ;;
 
 let require_qualid qual id =
-  hashtbl__add missing_globals {qual=qual; id=id} ()
-;;
+  missing_globals := set__add {qual=qual; id=id} !missing_globals;;
 
 (* Second pass : link in the required phrases. *)
 
@@ -153,7 +142,7 @@ let link module_list exec_name =
     if !write_debug_info then save_linker_tables outchan;
     (* Debugging info (the events) *)
     let pos4 = pos_out outchan in
-    if !write_debug_info then output_value outchan !events;
+    if !write_debug_info then output_compact_value outchan !events;
     events := [];
     (* The trailer *)
     let pos5 = pos_out outchan in
@@ -161,7 +150,7 @@ let link module_list exec_name =
     output_binary_int outchan (pos3 - pos2);
     output_binary_int outchan (pos4 - pos3);
     output_binary_int outchan (pos5 - pos4);
-    output_string outchan "CL06";
+    output_string outchan "CL07";
     close_out outchan
   with x ->
     remove_file exec_name;
