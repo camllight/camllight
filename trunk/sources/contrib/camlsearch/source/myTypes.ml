@@ -10,18 +10,6 @@ type skel_typ =
   | Unit                                           (* The special constructor Unit *)
 ;;
 
-let reset_type_var_number, number_of_type_var =
-  let vars = ref []
-  and var_number = ref 0 in
-    (fun () -> vars := []; var_number := 0; ()),
-    (fun var ->
-       try
-         assq var !vars
-       with Not_found ->
-         incr var_number;
-         vars := (var, !var_number) :: !vars; !var_number)
-;;
-
 let fake_unit_constr =
   function
     {Module_name = ""; Local_name = "unit"} -> true
