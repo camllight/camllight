@@ -111,6 +111,7 @@ let main () =
     use_extended_interfaces := true;
     default_load_path := ["."; !stdlib];
     load_path := !default_load_path;
+    reset_opened_modules();
     initialize_interpreter ();
     current_prompt := debugger_prompt;
 
