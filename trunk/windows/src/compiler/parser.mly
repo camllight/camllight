@@ -317,11 +317,11 @@ Expr_label :
 ;
 
 Expr_label_list :
-        Expr_label SEMI Expr_label_list %prec prec_list
+        Expr_label SEMI Expr_label_list
           { $1 :: $3 }
-      | Expr_label %prec prec_list
+      | Expr_label
           { [$1] }
-      | Expr_label SEMI %prec prec_list
+      | Expr_label SEMI
           { [$1] }
 ;
 
@@ -481,9 +481,9 @@ Simple_pattern :
 /* Streams */
 
 Stream_expr :
-        Stream_expr_component SEMI Stream_expr  %prec prec_list
-          { $1 :: $3 }
-      | Stream_expr_component  %prec prec_list
+        Stream_expr SEMI Stream_expr_component
+          { $3 :: $1 }
+      | Stream_expr_component
           { [$1] }
       | Stream_expr SEMI
           { $1 }
@@ -501,19 +501,17 @@ Stream_expr_component :
 Stream_pattern :
         LBRACKETLESS Stream_pattern_component_list GREATERRBRACKET
           { $2 }
+      | LBRACKETLESS GREATERRBRACKET
+          { [] }
 ;
 
 Stream_pattern_component_list :
-        Stream_pattern_component SEMI Stream_pattern_component_list
-          { $1 :: $3 }
-      | Stream_pattern_component_list SEMI
-          { $1 }
-      | IDENT
+        IDENT
           { [Zstreampat $1] }
+      | Stream_pattern_component SEMI Stream_pattern_component_list
+          { $1 :: $3 }
       | Stream_pattern_component
           { [$1] }
-      | /*epsilon*/
-          { [] }
 ;
 
 Stream_pattern_component :
@@ -521,6 +519,8 @@ Stream_pattern_component :
           { Znontermpat($1, $2) }
       | QUOTE Pattern
           { Ztermpat $2 }
+      | Stream_pattern_component SEMI
+          { $1 }
 ;
 
 Parser_match :
