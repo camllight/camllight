@@ -35,7 +35,7 @@ camltop: toplib.zo provide expunge
 	$(CAMLRUN) ./provide -stdlib ../lib $(PERVASIVES) > required
 	$(CAMLLINK) $(LINKFLAGS) -o camltop1 -require required \
                 stdlib.zo toplib.zo
-	echo $(PERVASIVES) $(SPECIALS) | $(CAMLRUN) ./expunge camltop1 camltop
+	$(CAMLRUN) ./expunge camltop1 camltop $(PERVASIVES) $(SPECIALS)
 	rm -f camltop1 required
 	cp toplevel.zi ../lib
 
