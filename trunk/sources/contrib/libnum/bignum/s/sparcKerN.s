@@ -426,212 +426,183 @@ LMDexit:
 	ret
 	restore	%g0,%i5,%o0
 	.proc	14
-	.global	_BnnDivideDigit
+	.align 4
+	.global _BnnDivideDigit
+	.proc	016
 _BnnDivideDigit:
-!#PROLOGUE# 0
-!#PROLOGUE# 1
-	save	%sp,-112,%sp
-	call	_BnnNumLeadingZeroBitsInDigit,1
-	mov	%i3,%o0
-	mov	%o0,%o2
-	tst	%o2
-	be	L77225
-	st	%o2,[%fp-8]
-	ld	[%i0-4],%o4
-	st	%i2,[%fp-16]
-	st	%o4,[%fp-12]
-	mov	%i2,%o1
-	mov	%i1,%o0
-	call	_BnnShiftLeft,3
-	sll	%i3,%o2,%i3
-L77225:
-	sub	%i2,1,%l2
-	sethi	%hi(0xffff),%o1		! [internal]
-	or	%o1,%lo(0xffff),%o1	! [internal]
-	sll	%i2,2,%l3
-	add	%i1,%l3,%l3
-	dec	4,%l3
-	ld	[%l3],%i2
-	and	%i3,%o1,%l1
-	sll	%l2,2,%l4
-	tst	%l2
-	srl	%i3,16,%l6
-	mov	%o1,%l0
-	sll	%l1,16,%l7
-	add	%i0,%l4,%l4
-	be	L77249
-	add	%l6,1,%l5
-LY43:					! [internal]
-	dec	4,%l3
-	ld	[%l3],%i4
-	mov	%i2,%i5
-	mov	%i5,%o0
-	call	.udiv,2
-	mov	%l6,%o1
-	mov	%o0,%i1
-	mov	%l1,%o0
-	call	.umul,2
-	mov	%i1,%o1
-	mov	%o0,%i2
-	mov	%l6,%o0
-	call	.umul,2
-	mov	%i1,%o1
-	srl	%i2,16,%i0
-	add	%o0,%i0,%i0
-	cmp	%i0,%i5
-	dec	%l2
-	bgu	L77232
-	sll	%i2,16,%i2
-	cmp	%i0,%i5
-	bne	LY57
-	cmp	%i2,%i4
-LY54:					! [internal]
-	bleu,a	LY57
-	cmp	%i2,%i4
-L77232:
-	cmp	%l7,%i2
-LY55:					! [internal]
-	bleu	L77234
-	dec	%i1
-	sub	%i2,%l7,%i2
-	b	L77228
-	sub	%i0,%l5,%i0
-LY56:					! [internal]
-	ld	[%fp-4],%o3
-	ld	[%fp+68],%i0
-	ld	[%fp+80],%o1
-	dec	4,%o0
-	ld	[%o0],%o0
-	sll	%o3,32,%o3
-	call	.udiv,2
-	or	%o3,%o0,%o0
-	dec	4,%i0
-	st	%o0,[%i0]
-	ld	[%fp+76],%o0
-	tst	%o0
-	bne,a	LY56
-	ld	[%fp+72],%o0
-	b	L77259
-	ld	[%fp-4],%i2
-L77234:
-	sub	%i0,%l6,%i0
-	sub	%i2,%l7,%i2
-L77228:
-	cmp	%i0,%i5
-	bgu,a	LY55
-	cmp	%l7,%i2
-	cmp	%i0,%i5
-	be	LY54
-	cmp	%i2,%i4
-LY57:					! [internal]
-	bleu	LY47
-	sub	%i4,%i2,%i4
-	inc	%i0
-LY47:					! [internal]
-	sub	%i5,%i0,%i5
-	sll	%i5,16,%o0
-	srl	%i4,16,%o7
-	sll	%i1,16,%i1
-	dec	4,%l4
-	st	%i1,[%l4]
-	mov	%l6,%o1
-	or	%o0,%o7,%o0
-	call	.udiv,2
-	nop
-	mov	%o0,%i1
-	mov	%l1,%o0
-	call	.umul,2
-	mov	%i1,%o1
-	mov	%o0,%i2
-	mov	%l6,%o0
-	call	.umul,2
-	mov	%i1,%o1
-	mov	%o0,%i0
-	srl	%i2,16,%o0
-	add	%i0,%o0,%i0
-	and	%i0,%l0,%o2
-	srl	%i0,16,%i0
-	cmp	%i0,%i5
-	sll	%o2,16,%o2
-	and	%i2,%l0,%i2
-	bgu	L77244
-	or	%i2,%o2,%i2
-	cmp	%i0,%i5
-	bne,a	LY53
-	ld	[%l4],%o1
-	cmp	%i2,%i4
-LY51:					! [internal]
-	bleu,a	LY53
-	ld	[%l4],%o1
-L77244:
-	cmp	%i3,%i2
-LY52:					! [internal]
-	bleu	L77246
-	dec	%i1
-	sub	%i2,%i3,%i2
-	b	L77240
-	dec	%i0
-L77246:
-	sub	%i2,%i3,%i2
-L77240:
-	cmp	%i0,%i5
-	bgu,a	LY52
-	cmp	%i3,%i2
-	cmp	%i0,%i5
-	be,a	LY51
-	cmp	%i2,%i4
-	ld	[%l4],%o1
-LY53:					! [internal]
-	tst	%l2
-	or	%o1,%i1,%o1
-	sub	%i4,%i2,%i2
-	bne	LY43
-	st	%o1,[%l4]
-L77249:
-	ld	[%fp-8],%o2
-	tst	%o2
-	be,a	LY50
-	ld	[%fp-8],%o1
-	cmp	%l4,%l3
-	bleu,a	LY49
-	cmp	%l4,%l3
-	ld	[%fp-16],%o4
-	sll	%o4,2,%o4
-	add	%l3,%o4,%o4
-	cmp	%l4,%o4
-	bcc,a	LY49
-	cmp	%l4,%l3
-	sub	%l4,%l3,%i0
-	sra	%i0,2,%i0
-	mov	%i0,%o1
-	call	_BnnShiftRight,3
-	mov	%l3,%o0
-	ld	[%fp-12],%o4
-	dec	%i0
-	sll	%i0,2,%i0
-	b	L77258
-	st	%o4,[%l3+%i0]
-LY49:					! [internal]
-	bne,a	LY48
-	ld	[%fp-16],%o1
-	ld	[%fp-16],%o0
-	mov	1,%o1
-	dec	%o0
-	sll	%o0,2,%o0
-	b	LY42
-	add	%l3,%o0,%o0
-LY48:					! [internal]
-	mov	%l3,%o0
-LY42:					! [internal]
-	call	_BnnShiftRight,3
-	ld	[%fp-8],%o2
-L77258:
-	ld	[%fp-8],%o1
-LY50:					! [internal]
-	srl	%i2,%o1,%i2
-L77259:
+	!#PROLOGUE# 0
+	save %sp,-120,%sp
+	!#PROLOGUE# 1
+	mov %i0,%l3
+	call _BnnNumLeadingZeroBitsInDigit,0
+	mov %i3,%o0
+	orcc %o0,%g0,%l6
+	be L146
+	mov %i1,%o0
+	mov %i2,%l7
+	sll %i3,%l6,%i3
+	mov %l7,%o1
+	ld [%l3-4],%o3
+	mov %l6,%o2
+	call _BnnShiftLeft,0
+	st %o3,[%fp-20]
+L146:
+	sll %i2,2,%o0
+	add %i1,%o0,%i1
+	add %i2,-1,%i2
+	sll %i2,2,%o0
+	add %l3,%o0,%l3
+	add %i1,-4,%i1
+	ld [%i1],%i0
+	cmp %i2,0
+	srl %i3,16,%l4
+	sethi %hi(65535),%o0
+	or %o0,%lo(65535),%o0
+	be L148
+	and %i3,%o0,%i4
+	sll %i4,16,%l5
+	mov %o0,%i5
+L163:
+	add %i2,-1,%i2
+	mov %i0,%l1
+	add %i1,-4,%i1
+	ld [%i1],%i0
+	mov %l1,%o0
+	call .udiv,0
+	mov %l4,%o1
+	mov %o0,%l2
+	mov %i4,%o0
+	call .umul,0
+	mov %l2,%o1
+	mov %o0,%l0
+	mov %l4,%o0
+	call .umul,0
+	mov %l2,%o1
+	mov %o0,%o2
+	srl %l0,16,%o0
+	add %o2,%o0,%o2
+	b L149
+	sll %l0,16,%l0
+L154:
+	bleu L155
+	add %l1,-1,%o0
+	cmp %l5,%l0
+L172:
+	bleu L152
+	add %l2,-1,%l2
+	sub %l0,%l5,%l0
+	add %o2,-1,%o0
+	b L149
+	sub %o0,%l4,%o2
+L152:
+	sub %l0,%l5,%l0
+	sub %o2,%l4,%o2
+L149:
+	cmp %o2,%l1
+	bgu L172
+	cmp %l5,%l0
+	cmp %o2,%l1
+	be L154
+	cmp %l0,%i0
+	bleu L155
+	add %l1,-1,%o0
+	sub %i0,%l0,%i0
+	b L156
+	sub %o0,%o2,%l1
+L155:
+	sub %i0,%l0,%i0
+	sub %l1,%o2,%l1
+L156:
+	add %l3,-4,%l3
+	sll %l2,16,%o0
+	st %o0,[%l3]
+	sll %l1,16,%o0
+	srl %i0,16,%o1
+	or %o0,%o1,%o0
+	call .udiv,0
+	mov %l4,%o1
+	mov %o0,%l2
+	mov %i4,%o0
+	call .umul,0
+	mov %l2,%o1
+	mov %o0,%l0
+	mov %l4,%o0
+	call .umul,0
+	mov %l2,%o1
+	mov %o0,%o2
+	srl %l0,16,%o0
+	add %o2,%o0,%o2
+	and %l0,%i5,%o1
+	and %o2,%i5,%o0
+	sll %o0,16,%o0
+	or %o1,%o0,%l0
+	b L157
+	srl %o2,16,%o2
+L162:
+	bleu,a L173
+	sub %i0,%l0,%i0
+	cmp %i3,%l0
+L174:
+	bleu L160
+	add %l2,-1,%l2
+	sub %l0,%i3,%l0
+	b L157
+	add %o2,-1,%o2
+L160:
+	sub %l0,%i3,%l0
+L157:
+	cmp %o2,%l1
+	bgu L174
+	cmp %i3,%l0
+	cmp %o2,%l1
+	be L162
+	cmp %l0,%i0
+	sub %i0,%l0,%i0
+L173:
+	ld [%l3],%o0
+	cmp %i2,0
+	or %l2,%o0,%o0
+	bne L163
+	st %o0,[%l3]
+L148:
+	cmp %l6,0
+	be L164
+	cmp %l3,%i1
+	bleu L175
+	sll %l7,2,%o0
+	add %i1,%o0,%o0
+	cmp %l3,%o0
+	bgeu L165
+	sub %l3,%i1,%o0
+	sra %o0,2,%l7
+	mov %i1,%o0
+	mov %l7,%o1
+	call _BnnShiftRight,0
+	mov %l6,%o2
+	sll %l7,2,%o0
+	ld [%fp-20],%o3
+	add %o0,%i1,%o0
+	b L164
+	st %o3,[%o0-4]
+L165:
+	cmp %l3,%i1
+L175:
+	bne L167
+	mov %i1,%o0
+	sll %l7,2,%o0
+	add %o0,-4,%o0
+	add %i1,%o0,%o0
+	b L170
+	mov 1,%o1
+L167:
+	mov %l7,%o1
+L170:
+	call _BnnShiftRight,0
+	mov %l6,%o2
+L164:
+	srl %i0,%l6,%i0
 	ret
-	restore	%g0,%i2,%o0
+	restore
 	.seg	"data"			! [internal]
 _copyright:
 	.half	0x4028
