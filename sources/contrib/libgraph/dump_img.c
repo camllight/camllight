@@ -34,8 +34,10 @@ value gr_dump_image(image)
   width = Width_im(im);
   height = Height_im(im);
   m = gr_alloc_int_vect(height);
-  for (i = 0; i < height; i++)
-    modify(&Field(m, i), gr_alloc_int_vect(width));
+  for (i = 0; i < height; i++) {
+    value v = gr_alloc_int_vect(width);
+    modify(&Field(m, i), v);
+  }
   
   idata =
     XGetImage(grdisplay, Data_im(im), 0, 0, width, height, (-1), ZPixmap);
