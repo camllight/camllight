@@ -61,7 +61,7 @@ maintained:
         M-r and M-s     regexp search in the history
         C-c C-c         send a break to the Caml toplevel.
 
-After M-x run-caml, typing C-x C-e or M-C-x in a buffer in Caml mode
+After M-x run-caml, typing C-c C-e or M-C-x in a buffer in Caml mode
 sends the current phrase (containing the point) to the Caml toplevel,
 and evaluates it.
 
