@@ -39,6 +39,9 @@ value fprintf: out_channel -> string -> 'a
   and printf: string -> 'a
         (* Same as [fprintf], but output on [std_out]. *)
 
+  and eprintf: string -> 'a
+        (* Same as [fprintf], but output on [std_err]. *)
+
   and fprint: out_channel -> string -> unit
         (* Print the given string on the given output channel, without
            any formatting. *)
@@ -46,4 +49,15 @@ value fprintf: out_channel -> string -> 'a
   and print: string -> unit
         (* Print the given string on [std_out], without any formatting.
 	   This is the same function as [print_string] of module [io]. *)
+
+  and eprint: string -> unit
+        (* Print the given string on [std_err], without any formatting.
+	   This is the same function as [prerr_string] of module [io]. *)
+;;
+
+(*--*)
+
+value add_integer_format: char -> (out_channel -> int -> unit) -> unit
+  and add_string_format: char -> (out_channel -> string -> unit) -> unit
+  and add_format: char -> (out_channel -> 'a -> unit) -> unit
 ;;

@@ -8,13 +8,14 @@
 #open "io";;
 #open "obj";;
 
-let rec barf_if_more_args x =
-  invalid_arg "fprintf: too many arguments"
-;;
+let printf_formats = 
+  (hashtbl__new 13 : (char, out_channel -> obj -> unit) hashtbl__t);;
 
 let fprintf outchan format =
   let rec doprn i =
-    if i >= string_length format then magic barf_if_more_args else
+    if i >= string_length format then
+      magic(fun x -> invalid_arg "fprintf: too many arguments")
+    else
       match nth_char format i with
         `%` ->
           let j = skip_args (succ i) in
@@ -54,7 +55,7 @@ let fprintf outchan format =
                   output_char outchan c;
                   doprn (succ j)
                 end)
-          | `d` | `i` | `o` | `x` | `X` | `u` ->
+          | `d` | `o` | `x` | `X` | `u` ->
               magic(doint i j)
           | `f` | `e` | `E` | `g` | `G` ->
               magic(dofloat i j)
@@ -66,7 +67,12 @@ let fprintf outchan format =
                   invalid_arg "fprintf: boolean argument expected";
                 doprn (succ j))
           | c ->
-              invalid_arg ("fprintf: unknown format " ^ char_for_read c)
+              begin try
+                let f = hashtbl__find printf_formats c in
+                magic(fun arg -> f outchan arg; doprn (succ j))
+              with Not_found ->
+                invalid_arg ("fprintf: unknown format " ^ char_for_read c)
+              end
           end
       |  c  -> output_char outchan c; doprn (succ i)
 
@@ -102,9 +108,33 @@ let fprintf outchan format =
   in doprn 0
 ;;
 
+let add_format letter (action : out_channel -> 'a -> unit) =
+  hashtbl__add printf_formats letter (magic action)
+;;
+
+let add_integer_format letter (action : out_channel -> int -> unit) =
+  add_format letter 
+    (fun oc n ->
+      if is_block n then
+        invalid_arg "fprintf: integer argument expected"
+      else
+        action oc (magic n))
+;;
+
+let add_string_format letter (action : out_channel -> string -> unit) =
+  add_format letter 
+    (fun oc s ->
+      if is_block s & obj_tag s == 253 then
+        action oc (magic s)
+      else
+        invalid_arg "fprintf: string argument expected")
+;;
+
 let printf fmt = fprintf std_out fmt    (* Don't eta-reduce: this confuses *)
-;;                                      (* the intelligent linker *)
+and eprintf fmt = fprintf std_err fmt   (* the intelligent linker *)
+;;
 
 let fprint = output_string
 and print = print_string
+and eprint = prerr_string
 ;;

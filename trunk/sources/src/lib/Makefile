@@ -3,7 +3,7 @@
 CAMLCOMP=../camlrun ../camlcomp
 CAMLLIBR=../camlrun ../camllibr
 CPP=/lib/cpp -P
-COMPFLAGS=-stdlib . -O none
+COMPFLAGS=-stdlib . -O none -g
 
 # The list of all interfaces. Order irrelevant.
 
@@ -27,11 +27,11 @@ stdlib.zo: $(STD_IMPL)
 	$(CAMLLIBR) -o stdlib.zo $(STD_IMPL)
 
 clean:
-	rm -f *.zi *.zo
-	rm -f filename.ml vect.ml string.ml genlex.ml
+	rm -f *.zi *.zix *.zo
+	rm -f filename.ml genlex.ml
 
 install:
-	cp stdlib.zo *.zi *.mli $(LIBDIR)
+	cp stdlib.zo *.zi *.zix *.mli *.ml $(LIBDIR)
 	rm $(LIBDIR)/iparsing.mli
 
 .SUFFIXES :
@@ -46,15 +46,13 @@ install:
 	$(CPP) -Dunix $< > $@
 	@chmod a-w $@
 
-depend: filename.ml vect.ml string.ml
+depend: filename.ml genlex.ml
 	mv Makefile Makefile.bak
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
          ../tools/camldep *.mli *.ml) > Makefile
 	rm Makefile.bak
 
 filename.ml: filename.mlp
-vect.ml: vect.mlp
-string.ml: string.mlp
 genlex.ml: genlex.mlp
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
@@ -91,12 +89,12 @@ parsing.zo: parsing.zi exc.zi eq.zi iparsing.zi fvect.zi lexing.zi obj.zi \
     int.zi 
 printexc.zo: printexc.zi eq.zi exc.zi sys.zi io.zi fvect.zi obj.zi int.zi 
 printf.zo: printf.zi eq.zi exc.zi bool.zi fchar.zi fstring.zi io.zi obj.zi \
-    float.zi int.zi 
+    hashtbl.zi float.zi int.zi 
 queue.zo: queue.zi exc.zi ref.zi int.zi 
 random.zo: random.zi eq.zi float.zi fvect.zi ref.zi int.zi 
 set.zo: set.zi eq.zi baltree.zi int.zi 
 sort.zo: sort.zi 
 stack.zo: stack.zi exc.zi list.zi 
 stream.zo: stream.zi exc.zi fstring.zi io.zi ref.zi int.zi obj.zi 
-string.zo: string.zi exc.zi fstring.zi int.zi 
-vect.zo: vect.zi exc.zi fvect.zi int.zi 
+string.zo: string.zi exc.zi sys.zi fstring.zi int.zi 
+vect.zo: vect.zi exc.zi sys.zi fvect.zi int.zi 
