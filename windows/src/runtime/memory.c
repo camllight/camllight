@@ -138,7 +138,7 @@ value alloc_shr (wosize, tag)
     Hd_hp (hp) = Make_header (wosize, tag, White);
   }
   allocated_words += Whsize_wosize (wosize);
-  if (allocated_words > Wsize_bsize (minor_heap_size)) force_minor_gc = 1;
+  if (allocated_words > Wsize_bsize (minor_heap_size)) force_minor_gc ();
   return Val_hp (hp);
 }
 
@@ -159,10 +159,7 @@ void adjust_gc_speed (mem, max)
   if (extra_heap_memory > stat_heap_size){
     extra_heap_memory = stat_heap_size;
   }
-  if (extra_heap_memory > Wsize_bsize (minor_heap_size) / 2){
-    force_minor_gc = 1;
-    something_to_do = 1;
-  }
+  if (extra_heap_memory > Wsize_bsize (minor_heap_size) / 2) force_minor_gc ();
 }
 
 /* You must use [initialize] to store the initial value in a field of

@@ -304,7 +304,7 @@ value interprete(prog)
 
     process_signal:
       something_to_do = 0;
-      if (force_minor_gc){
+      if (force_minor_flag){
 	Setup_for_gc;
 	minor_collection ();
 	Restore_after_gc;

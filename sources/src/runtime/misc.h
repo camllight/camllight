@@ -48,7 +48,9 @@ typedef char * addr;
 
 extern int verb_gc;
 extern int Volatile something_to_do;
+extern int Volatile force_minor_flag;
 
+void force_minor_gc P((void));
 void gc_message P((char *, unsigned long));
 Noreturn fatal_error P((char *));
 Noreturn fatal_error_arg P((char *, char *));
