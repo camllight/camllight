@@ -3,6 +3,8 @@
 #open "big_int";;
 #open "int_misc";;
 
+let ignore _ = ();;
+
 testing_function "compare_big_int";;
 
 test 1
@@ -266,9 +268,11 @@ eq_big_int (gcd_big_int (big_int_of_int 12) (big_int_of_int 16),
 for i = 9 to 28 do
   let n1 = random__int 1000000000
   and n2 = random__int 100000 in
+  let _ =
     test i eq
       (int_of_big_int (gcd_big_int (big_int_of_int n1) (big_int_of_int n2)),
-       gcd_int n1 n2)
+       gcd_int n1 n2) in
+  ()
 done;;
 
 testing_function "int_of_big_int";;
@@ -279,11 +283,25 @@ test 2
 eq (is_int_big_int (big_int_of_int 1), true);;
 test 3
 eq (is_int_big_int (succ_big_int (big_int_of_int biggest_int)),false);;
+test 4
+eq (int_of_big_int (big_int_of_int monster_int), monster_int);;
 
 testing_function "sys_string_of_big_int";;
 
 test 1
 eq_string (string_of_big_int (big_int_of_int 1), "1");;
+
+
+testing_function "sys_big_int_of_string";;
+
+test 1
+eq_big_int (sys_big_int_of_string 10 "+1" 0 2, big_int_of_int 1);;
+test 2
+eq_big_int (sys_big_int_of_string 10 "-1" 0 2, big_int_of_int (-1));;
+test 3
+eq_big_int (sys_big_int_of_string 10 "1" 0 1, big_int_of_int 1);;
+test 4
+eq_big_int (sys_big_int_of_string 10 "0" 0 1, zero_big_int);;
 
 
 testing_function "big_int_of_string";;
@@ -330,13 +348,39 @@ let l = rev [
 "32"
 ] in
 
-let bi1=big_int_of_string (implode (rev l)) in
+let bi1 = big_int_of_string (implode (rev l)) in
 
-let bi2=big_int_of_string (implode (rev ("3"::tl l))) in
+let bi2 = big_int_of_string (implode (rev ("3" :: tl l))) in
 
 test 10
 eq_big_int (bi1, (add_big_int (mult_big_int bi2 (big_int_of_string "10")) 
-                              (big_int_of_string "2")));;
+                              (big_int_of_string "2"))) &&
+test 11
+eq_big_int (bi1, (add_big_int (mult_big_int bi2 (big_int_of_string "10e0"))
+                              (big_int_of_string "20e-1"))) &&
+test 12
+eq_big_int (minus_big_int bi1,
+            (add_big_int (mult_big_int bi2 (big_int_of_string "-10e0"))
+                         (big_int_of_string "-20e-1"))) &&
+test 13
+eq_big_int (bi1, (add_big_int (mult_big_int bi2 (big_int_of_string "+10e0"))
+                              (big_int_of_string "+20e-1"))) &&
+test 14
+eq_big_int (minus_big_int bi1,
+            (add_big_int (mult_big_int bi2 (big_int_of_string "-10e+0"))
+                         (big_int_of_string "-20e-1"))) &&
+test 15
+eq_big_int (minus_big_int bi1,
+            (add_big_int (mult_big_int bi2 (big_int_of_string "-1e+1"))
+                         (big_int_of_string "-2e-0"))) &&
+test 16
+eq_big_int (minus_big_int bi1,
+            (add_big_int (mult_big_int bi2 (big_int_of_string "-0.1e+2"))
+                         (big_int_of_string "-2.0e-0"))) &&
+test 17
+eq_big_int (minus_big_int bi1,
+            (add_big_int (mult_big_int bi2 (big_int_of_string "-1.000e+1"))
+                         (big_int_of_string "-0.02e2")));;
 
 testing_function "power_base_int";;
 
@@ -363,3 +407,14 @@ test 3
 eq_big_int (base_power_big_int 10 1 (big_int_of_int 123), big_int_of_int 1230)
 ;;
 
+
+testing_function "square_big_int";;
+
+test 1 eq_big_int
+ (square_big_int (big_int_of_string "0"), big_int_of_string"0");;
+test 2 eq_big_int
+ (square_big_int (big_int_of_string "1"), big_int_of_string"1");;
+test 3 eq_big_int
+ (square_big_int (big_int_of_string "-1"), big_int_of_string"1");;
+test 4 eq_big_int
+ (square_big_int (big_int_of_string "-7"), big_int_of_string"49");;
