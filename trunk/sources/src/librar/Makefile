@@ -5,6 +5,7 @@ CAMLLINK=../camlrun ../camllink
 INCLUDES=-stdlib ../lib -I ../compiler -I ../linker
 COMPFLAGS=-O fast $(INCLUDES)
 LINKFLAGS=-g $(INCLUDES)
+CPP=/lib/cpp -P
 
 EXTERNOBJS=config.zo misc.zo readword.zo
 
