@@ -113,9 +113,11 @@ let char_for_backslash = function
 ;;
 
 let char_for_decimal_code lexbuf i =
-  char_of_int(100 * (int_of_char(get_lexeme_char lexbuf i) - 48) +
-               10 * (int_of_char(get_lexeme_char lexbuf (i+1)) - 48) +
-                    (int_of_char(get_lexeme_char lexbuf (i+2)) - 48))
+  let c = 
+    100 * (int_of_char(get_lexeme_char lexbuf i) - 48) +
+     10 * (int_of_char(get_lexeme_char lexbuf (i+1)) - 48) +
+          (int_of_char(get_lexeme_char lexbuf (i+2)) - 48) in
+  char_of_int(c land 0xFF)
 ;;
 
 }
@@ -163,7 +165,11 @@ rule main = parse
   | "\""
       { reset_string_buffer();
         let string_start = lexbuf.lex_start_pos + lexbuf.lex_abs_pos in
-        string lexbuf;
+        begin try
+          string lexbuf
+        with Lexical_error(Unterminated_string, _, string_end) ->
+          raise(Lexical_error(Unterminated_string, string_start, string_end))
+        end;
         lexbuf.lex_start_pos <- string_start - lexbuf.lex_abs_pos;
         STRING (get_stored_string()) }
   | "`"
@@ -172,7 +178,15 @@ rule main = parse
         lexbuf.lex_start_pos <- char_start - lexbuf.lex_abs_pos;
         CHAR c }
   | "(*"
-      { comment_depth := 1; comment lexbuf; main lexbuf }
+      { let comment_start = lexbuf.lex_start_pos + lexbuf.lex_abs_pos in
+        comment_depth := 1;
+        begin try
+          comment lexbuf
+        with Lexical_error(Unterminated_comment, _, comment_end) ->
+          raise(Lexical_error(Unterminated_comment,
+                              comment_start, comment_end))
+        end;
+        main lexbuf }
   | "#" { SHARP }
   | "&" { AMPERSAND }
   | "'" { QUOTE }
@@ -234,7 +248,12 @@ and comment = parse
         if !comment_depth > 0 then comment lexbuf }
   | "\""
       { reset_string_buffer();
-        string lexbuf;
+        let string_start = lexbuf.lex_start_pos + lexbuf.lex_abs_pos in
+        begin try
+          string lexbuf
+        with Lexical_error(Unterminated_string, _, string_end) ->
+          raise(Lexical_error(Unterminated_string, string_start, string_end))
+        end;
         comment lexbuf }
   | "``"
       { comment lexbuf }
@@ -245,7 +264,8 @@ and comment = parse
   | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`] "`"
       { comment lexbuf }
   | End_of_file
-      { raise (Lexical_error(Unterminated_comment, -1, -1)) }
+      { raise(Lexical_error
+                (Unterminated_comment, 0, get_lexeme_start lexbuf)) }
   | _
       { comment lexbuf }
 
@@ -258,7 +278,8 @@ and char = parse
       { char_for_decimal_code lexbuf 1 }
   | [^ `\``] * ("`" | End_of_file)
       { raise (Lexical_error(Bad_char_constant,
-                            get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
+                            get_lexeme_start lexbuf - 1,
+                            get_lexeme_end lexbuf)) }
 
 and string = parse
     `"` (*"'"'*)
@@ -276,7 +297,8 @@ and string = parse
       { store_string_char(char_for_decimal_code lexbuf 1);
          string lexbuf }
   | End_of_file
-      { raise (Lexical_error(Unterminated_string, -1, -1)) }
+      { raise (Lexical_error
+                (Unterminated_string, 0, get_lexeme_start lexbuf)) }
   | _
       { store_string_char(get_lexeme_char lexbuf 0);
         string lexbuf }
