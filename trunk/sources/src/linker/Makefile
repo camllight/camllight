@@ -70,8 +70,8 @@ version.ml: version.mlp ../version.h
 ### DO NOT DELETE THIS LINE
 link.zo: ../compiler/reloc.zo ../compiler/lambda.zo tr_const.zo \
     ../compiler/interntl.zo ../compiler/config.zi ../compiler/const.zo \
-    ../compiler/emit_phr.zo ../compiler/misc.zo symtable.zo patch.zo \
-    ../compiler/instruct.zo ../compiler/opcodes.zo 
+    ../compiler/misc.zo ../compiler/emit_phr.zo symtable.zo patch.zo \
+    ../compiler/opcodes.zo 
 main.zo: link.zo ../compiler/interntl.zo ../compiler/config.zi \
     ../compiler/misc.zo version.zo symtable.zo readword.zo 
 patch.zo: symtable.zo ../compiler/reloc.zo 

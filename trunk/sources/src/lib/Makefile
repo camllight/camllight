@@ -68,8 +68,8 @@ parsing.zi: lexing.zi obj.zi
 printf.zi: io.zi 
 set.zi: eq.zi 
 stream.zi: io.zi 
-arg.zo: arg.zi eq.zi exc.zi sys.zi fchar.zi fstring.zi list.zi io.zi \
-    float.zi fvect.zi int.zi 
+arg.zo: arg.zi eq.zi exc.zi sys.zi fstring.zi list.zi io.zi float.zi \
+    fvect.zi int.zi 
 baltree.zo: baltree.zi exc.zi eq.zi int.zi 
 bool.zo: bool.zi 
 char.zo: char.zi exc.zi eq.zi fchar.zi 
@@ -77,31 +77,31 @@ eq.zo: eq.zi
 exc.zo: exc.zi 
 fchar.zo: fchar.zi fstring.zi int.zi 
 filename.zo: filename.zi exc.zi eq.zi fstring.zi int.zi 
-float.zo: float.zi exc.zi fchar.zi fstring.zi int.zi 
+float.zo: float.zi exc.zi fstring.zi int.zi 
 format.zo: format.zi eq.zi exc.zi bool.zi queue.zi fchar.zi fstring.zi \
     io.zi ref.zi float.zi int.zi 
 fstring.zo: fstring.zi eq.zi fchar.zi ref.zi int.zi 
 fvect.zo: fvect.zi eq.zi list.zi int.zi 
 genlex.zo: genlex.zi hashtbl.zi stream.zi exc.zi eq.zi fchar.zi float.zi \
     fstring.zi list.zi ref.zi int.zi 
-hashtbl.zo: hashtbl.zi eq.zi exc.zi fvect.zi ref.zi int.zi 
+hashtbl.zo: hashtbl.zi eq.zi exc.zi fvect.zi int.zi 
 int.zo: int.zi eq.zi 
-io.zo: io.zi exc.zi eq.zi sys.zi float.zi fstring.zi ref.zi int.zi 
-lexing.zo: lexing.zi exc.zi eq.zi fstring.zi io.zi ref.zi obj.zi int.zi 
+io.zo: io.zi exc.zi eq.zi sys.zi float.zi fstring.zi int.zi 
+lexing.zo: lexing.zi exc.zi eq.zi fstring.zi io.zi obj.zi int.zi 
 list.zo: list.zi eq.zi exc.zi int.zi 
-map.zo: map.zi eq.zi baltree.zi list.zi int.zi 
+map.zo: map.zi baltree.zi list.zi 
 pair.zo: pair.zi exc.zi 
 parsing.zo: parsing.zi exc.zi eq.zi iparsing.zi fvect.zi lexing.zi obj.zi \
     int.zi 
 printexc.zo: printexc.zi eq.zi exc.zi sys.zi bool.zi io.zi fvect.zi obj.zi \
     int.zi 
-printf.zo: printf.zi eq.zi exc.zi bool.zi fchar.zi fstring.zi io.zi obj.zi \
-    float.zi int.zi 
+printf.zo: printf.zi eq.zi exc.zi bool.zi fstring.zi io.zi obj.zi float.zi \
+    int.zi 
 queue.zo: queue.zi exc.zi ref.zi int.zi 
 random.zo: random.zi eq.zi float.zi fvect.zi ref.zi int.zi 
-set.zo: set.zi eq.zi baltree.zi int.zi 
+set.zo: set.zi eq.zi baltree.zi 
 sort.zo: sort.zi 
 stack.zo: stack.zi exc.zi list.zi 
-stream.zo: stream.zi exc.zi eq.zi fstring.zi io.zi ref.zi int.zi obj.zi 
+stream.zo: stream.zi exc.zi eq.zi fstring.zi io.zi ref.zi obj.zi 
 string.zo: string.zi exc.zi eq.zi sys.zi fstring.zi int.zi 
 vect.zo: vect.zi exc.zi eq.zi sys.zi fvect.zi int.zi 

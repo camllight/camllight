@@ -86,16 +86,14 @@ version.ml: version.mlp ../version.h
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
-do_phr.zo: pr_value.zo ../compiler/typing.zo meta.zi \
-    ../compiler/location.zi ../compiler/modules.zo ../compiler/compiler.zo \
-    ../compiler/const.zo ../compiler/misc.zo load_phr.zo \
-    ../compiler/back.zo ../compiler/front.zo fmt_type.zo \
+do_phr.zo: pr_value.zo ../compiler/typing.zo meta.zi ../compiler/modules.zo \
+    ../compiler/compiler.zo ../compiler/const.zo ../compiler/misc.zo \
+    load_phr.zo ../compiler/back.zo ../compiler/front.zo fmt_type.zo \
     ../linker/symtable.zo ../compiler/syntax.zo ../compiler/ty_decl.zo \
     ../compiler/types.zo 
 expunge.zo: ../linker/symtable.zo ../compiler/const.zo 
-fmt_type.zo: ../compiler/misc.zo ../compiler/modules.zo \
-    ../compiler/builtins.zo ../compiler/globals.zo ../compiler/types.zo \
-    ../compiler/const.zo 
+fmt_type.zo: ../compiler/modules.zo ../compiler/globals.zo \
+    ../compiler/types.zo ../compiler/const.zo 
 load_phr.zo: pr_value.zo ../compiler/reloc.zo meta.zi ../linker/tr_const.zo \
     ../compiler/interntl.zo ../compiler/labels.zo ../compiler/misc.zo \
     ../linker/symtable.zo ../linker/patch.zo ../compiler/instruct.zo \
@@ -112,9 +110,8 @@ provide.zo: ../compiler/prim.zo ../compiler/modules.zo \
     ../compiler/globals.zo 
 toplevel.zo: toplevel.zi meta.zi ../compiler/modules.zo \
     ../compiler/emit_phr.zo ../compiler/misc.zo ../compiler/event.zo \
-    ../linker/symtable.zo ../linker/patch.zo ../compiler/lexer.zi \
-    ../compiler/builtins.zo ../compiler/globals.zo pr_value.zo \
-    ../compiler/location.zi ../compiler/interntl.zo ../compiler/const.zo \
-    ../compiler/compiler.zo load_phr.zo do_phr.zo fmt_type.zo \
-    ../compiler/instruct.zo ../compiler/types.zo ../compiler/opcodes.zo 
+    ../linker/symtable.zo ../linker/patch.zo ../compiler/globals.zo \
+    ../compiler/builtins.zo pr_value.zo ../compiler/location.zi \
+    ../compiler/interntl.zo ../compiler/const.zo ../compiler/compiler.zo \
+    load_phr.zo do_phr.zo ../compiler/types.zo ../compiler/opcodes.zo 
 version.zo: ../compiler/interntl.zo 
