@@ -28,6 +28,11 @@ all: camlpro stdlibp.zo prodump.zo
 camlpro: $(OBJS)
 	camlc $(LINKFLAGS) -o camlpro $(COMPILEROBJS) $(OBJS)
 
+camlpro.ml: camlpro.mlp
+	@rm -f camlpro.ml
+	sed -e 's|LIBDIR|$(LIBDIR)|' camlpro.mlp > camlpro.ml
+	@chmod -w camlpro.ml
+
 prodump.zo: prodump.ml
 	camlc -c -O none prodump.ml
 
@@ -47,7 +52,7 @@ install:
 	cp stdlibp.zo prodump.zo profiler.zi $(LIBDIR)
 
 clean:
-	rm -f *.z[oi] camlinstr camlpro io.mli
+	rm -f *.z[oi] camlinstr camlpro io.mli camlpro.ml
 
 scratch:
 	rm -f *.z[oi] camlinstr camlpro io.mli
@@ -65,7 +70,7 @@ scratch:
 .mlp.ml:
 	$(CPP) -Dunix $< > $@
 
-depend:
+depend: camlpro.ml
 	mv Makefile Makefile.BAK; \
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.BAK; \
          ../../src/tools/camldep *.mli *.ml) > Makefile
@@ -73,6 +78,6 @@ depend:
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
 camlpro.zo: profiler.zi 
-io.zo: io.zi profiler.zi 
-prodump.zo: io.zi 
+io.zo: profiler.zi 
+prodump.zo: io.zo 
 profiler.zo: profiler.zi 
