@@ -3,7 +3,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <sys/stat.h>
 #include "config.h"
 #include "alloc.h"
 #include "debugcom.h"
@@ -213,6 +212,8 @@ value sys_catch_break(onoff)    /* ML */
 /* Search path function */
 
 #ifdef unix
+
+#include <sys/stat.h>
 
 char * searchpath(name)
      char * name;
