@@ -135,30 +135,34 @@ let rec compile_expr env expr reg =
       let (reg1, reg2) = compile_arguments env arg1 arg2 reg in      
       printf "%s r %d, r %d, r %d\n" (instr_pour_op op) reg1 reg2 reg
   | Accès_tableau(arg1, Constante cst) ->
-      let (Array(inf, sup, type_éléments)) = type_de env arg1 in
-      compile_expr env arg1 reg;
-      begin match type_éléments with
-      | Integer | Boolean ->
-          printf "load r %d, %d, r %d\n" reg
-                 ((val_const cst - inf) * taille_du_mot) reg
-      | Array(_, _, _) ->
-          let taille = taille_du_type type_éléments in
-          printf "add r %d, %d, r %d\n"
-                 reg ((val_const cst - inf) * taille) reg
-      end
+      begin match type_de env arg1 with
+      | Array(inf, sup, type_éléments) ->
+         compile_expr env arg1 reg;
+         begin match type_éléments with
+         | Integer | Boolean ->
+             printf "load r %d, %d, r %d\n" reg
+                    ((val_const cst - inf) * taille_du_mot) reg
+         | Array(_, _, _) ->
+             let taille = taille_du_type type_éléments in
+             printf "add r %d, %d, r %d\n"
+                    reg ((val_const cst - inf) * taille) reg
+         end
+      | _ -> failwith "Erreur dans le contrôleur de types" end
   | Accès_tableau(arg1, arg2) ->
-      let (Array(inf, sup, type_éléments)) = type_de env arg1 in
-      let (reg1, reg2) = compile_arguments env arg1 arg2 reg in
-      if inf <> 0 then printf "sub r %d, %d, r %d\n" reg2 inf reg2;
-      begin match type_éléments with
-      | Integer | Boolean ->
-          printf "mult r %d, %d, r %d\n" reg2 taille_du_mot reg2;
-          printf "load r %d, r %d, r %d\n" reg1 reg2 reg
-      | Array(_, _, typ) ->
-          let taille = taille_du_type type_éléments in
-          printf "mult r %d, %d, r %d\n" reg2 taille reg2;
-          printf "add r %d, r %d, r %d\n" reg1 reg2 reg
-      end
+      begin match type_de env arg1 with
+      | Array(inf, sup, type_éléments) ->
+         let (reg1, reg2) = compile_arguments env arg1 arg2 reg in
+         if inf <> 0 then printf "sub r %d, %d, r %d\n" reg2 inf reg2;
+         begin match type_éléments with
+         | Integer | Boolean ->
+             printf "mult r %d, %d, r %d\n" reg2 taille_du_mot reg2;
+             printf "load r %d, r %d, r %d\n" reg1 reg2 reg
+         | Array(_, _, typ) ->
+             let taille = taille_du_type type_éléments in
+             printf "mult r %d, %d, r %d\n" reg2 taille reg2;
+             printf "add r %d, r %d, r %d\n" reg1 reg2 reg
+         end
+      | _ -> failwith "Erreur dans le contrôleur de types" end
 
 and compile_arguments env arg1 arg2 reg_libre =
   let b1 = besoins env arg1 and b2 = besoins env arg2 in
@@ -194,17 +198,21 @@ let rec compile_instr env = function
       compile_expr env expr 1;
       affecte_var env nom_var 1
   | Affectation_tableau(expr1, Constante cst2, expr3) ->
-      let (Array(inf, sup, type_éléments)) = type_de env expr1 in
-      let (reg3, reg1) = compile_arguments env expr3 expr1 1 in
-      printf "store r %d, %d, r %d\n"
-             reg1 ((val_const cst2 - inf) * taille_du_mot) reg3
+      begin match type_de env expr1 with
+      | Array(inf, sup, type_éléments) ->
+         let (reg3, reg1) = compile_arguments env expr3 expr1 1 in
+         printf "store r %d, %d, r %d\n"
+                reg1 ((val_const cst2 - inf) * taille_du_mot) reg3
+      | _ -> failwith "Erreur dans le contrôleur de types" end
   | Affectation_tableau(expr1, expr2, expr3) ->
-      let (Array(inf, sup, type_éléments)) = type_de env expr1 in
-      compile_expr env expr3 1;
-      let (reg1, reg2) = compile_arguments env expr1 expr2 2 in
-      if inf <> 0 then printf "sub r %d, %d, r %d\n" reg2 inf reg2;
-      printf "mult r %d, %d, r %d\n" reg2 taille_du_mot reg2;
-      printf "store r %d, r %d, r %d\n" reg1 reg2 1
+      begin match type_de env expr1 with
+      | Array(inf, sup, type_éléments) ->
+         compile_expr env expr3 1;
+         let (reg1, reg2) = compile_arguments env expr1 expr2 2 in
+         if inf <> 0 then printf "sub r %d, %d, r %d\n" reg2 inf reg2;
+         printf "mult r %d, %d, r %d\n" reg2 taille_du_mot reg2;
+         printf "store r %d, r %d, r %d\n" reg1 reg2 1
+      | _ -> failwith "Erreur dans le contrôleur de types" end
   | Appel(proc, arguments) ->
       let nbr_args = list_length arguments in
       réserve_pile nbr_args;
