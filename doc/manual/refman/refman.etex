@@ -20,14 +20,13 @@ Commentary on Standard ML}, by Milner, Tofte and Harper, MIT Press.
 
 \section*{Warning}
 
-Even though there is currently only one implementation of the Caml
-Light language, this document carefully distinguishes the language and
-its implementation(s). Implementations can provide extra language
-constructs; moreover, all points left unspecified in this reference
-manual can be interpreted as the language implementor wishes. All
-these implementation-dependent features are of course subject to
-change in future releases; only the features specified in this
-reference manual can be relied upon.
+Several implementations of the Caml Light language are available,
+and they evolve at each release. Consequently, this document carefully
+distinguishes the language and its implementations. Implementations
+can provide extra language constructs; moreover, all points left
+unspecified in this reference manual can be interpreted differently by
+the implementations. The purpose of this reference manual is to
+specify those features that all implementations must provide.
 
 \section*{Notations}
 
