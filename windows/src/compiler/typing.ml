@@ -276,7 +276,9 @@ let rec type_expr env expr =
         Constr_constant ->
           type_instance cstr.info.cs_res
       | _ ->
-          non_constant_constr_err cstr expr.e_loc
+          let (ty_res, ty_arg) =
+            type_pair_instance (cstr.info.cs_res, cstr.info.cs_arg) in
+          type_arrow(ty_arg, ty_res)
       end            
   | Zconstruct1(cstr, arg) ->
       begin match cstr.info.cs_kind with

@@ -121,6 +121,16 @@ let comparison_table =
    "greaterequal", (Pint_test PTge, Pfloat_test PTge)]
 ;;
 
+(* Auxiliary to apply a superfluous constructor when the argument is an
+   already-allocated tuple (in Lvar 0) *)
+
+let alloc_superfluous_constr cstr n =
+  let rec extract_fields i =
+    if i >= n then [] else
+      Lprim(Pfield i, [Lvar 0]) :: extract_fields (succ i) in
+  Lprim(Pmakeblock cstr.info.cs_tag, extract_fields 0)
+;;
+
 (* Translation of expressions *)
 
 let rec translate_expr env =
@@ -152,7 +162,14 @@ let rec translate_expr env =
         Lprim(Pmakeblock(ConstrRegular(0,1)), tr_args)
       end
   | Zconstruct0(c) ->
-      Lconst(SCblock(c.info.cs_tag, []))
+      begin match c.info.cs_kind with
+        Constr_constant ->
+          Lconst(SCblock(c.info.cs_tag, []))
+      | Constr_regular ->
+          Lfunction(Lprim(Pmakeblock c.info.cs_tag, [Lvar 0]))
+      | Constr_superfluous n ->
+          Lfunction(alloc_superfluous_constr c n)
+      end
   | Zconstruct1(c,arg) ->
       begin match c.info.cs_kind with
         Constr_superfluous n ->
@@ -165,11 +182,7 @@ let rec translate_expr env =
                 Lprim(Pmakeblock c.info.cs_tag, tr_argl)
               end
           | _ ->
-              let rec extract_fields i =
-                if i >= n then [] else
-                  Lprim(Pfield i, [Lvar 0]) :: extract_fields (succ i) in
-              Llet([transl arg],
-                   Lprim(Pmakeblock c.info.cs_tag, extract_fields 0))
+              Llet([transl arg], alloc_superfluous_constr c n)
           end
       | _ ->
           let tr_arg = transl arg in
