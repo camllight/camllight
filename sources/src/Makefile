@@ -109,7 +109,8 @@ compile:
 
 # Install the Caml Light system
 install:
-	- mkdir $(LIBDIR) $(BINDIR)
+	if test -d $(BINDIR); then : ; else mkdir $(BINDIR); fi
+	if test -d $(LIBDIR); then : ; else mkdir $(LIBDIR); fi
 	cd runtime; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
 	cd launch; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
 	cd lib; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
