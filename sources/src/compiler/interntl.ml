@@ -56,15 +56,13 @@ let translate msg =
   end
 ;;
 
-let printf (fmt : ('a, out_channel, unit) printf__format) =
-  printf__fprintf stdout
+let fprintf oc (fmt : ('a, out_channel, unit) printf__format) =
+  printf__fprintf oc
     (obj__magic(translate(obj__magic fmt : string)) :
                                 ('a, out_channel, unit) printf__format)
 ;;
 
-let eprintf (fmt : ('a, out_channel, unit) printf__format) =
-  printf__fprintf stderr
-    (obj__magic(translate(obj__magic fmt : string)) :
-                                ('a, out_channel, unit) printf__format)
+let printf fmt = fprintf std_out fmt
+and eprintf fmt = fprintf std_out fmt
 ;;
 
