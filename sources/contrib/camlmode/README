@@ -3,9 +3,10 @@ DESCRIPTION:
 This directory contains files to help editing Caml code, running a
 Caml toplevel, and running the Caml debugger under the Gnu Emacs editor.
 
-AUTHOR:
+AUTHORS:
 
-Xavier Leroy (Xavier.Leroy@inria.fr).
+Xavier Leroy (Xavier.Leroy@inria.fr), Jerome Vouillon (Jerome.Vouillon@ens.fr).
+camldebug.el is derived from FSF code.
 
 CONTENTS:
 
@@ -75,7 +76,6 @@ available in this buffer:
         C-c >           down (select frame below current frame)
         C-c <           up (select frame above current frame)
         C-c C-f         finish (run till current function returns)
-        C-c C-c         camldebug-control-c-subjob
 
 In any buffer in caml mode, C-x SPC sets a breakpoint at the current position.
 
