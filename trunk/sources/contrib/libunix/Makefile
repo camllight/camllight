@@ -99,6 +99,7 @@ fchown.o : fchown.c unix.h
 fcntl.o : fcntl.c unix.h 
 fork.o : fork.c unix.h 
 ftruncate.o : ftruncate.c unix.h 
+getcwd.o : getcwd.c unix.h 
 getegid.o : getegid.c unix.h 
 getenv.o : getenv.c unix.h 
 geteuid.o : geteuid.c unix.h 

@@ -3,6 +3,7 @@
 #include <alloc.h>
 #include <memory.h>
 #include "unix.h"
+#include <stdio.h>
 #include <grp.h>
 
 static value alloc_group_entry(entry)
