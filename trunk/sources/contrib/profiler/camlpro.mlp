@@ -221,8 +221,6 @@ and rewrite_expr e =
       	 rewrite_expr e1; rewrite_expr e2;
       	 if !instr_loops then insert_profile e3; 
       	 rewrite_expr e3
-     | Zsequand (e1, e2) -> rewrite_expr e1; rewrite_expr e2
-     | Zsequor (e1, e2) -> rewrite_expr e1; rewrite_expr e2
      | Zconstraint (e, _) -> rewrite_expr e
      | Zvector l -> rewrite_expr_list l
      | Zassign (_, e) -> rewrite_expr e
