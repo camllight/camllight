@@ -138,7 +138,7 @@ char *aligned_malloc (size, modulo)
   char *raw_mem;
   unsigned long aligned_mem;
                                                  Assert (modulo < Page_size);
-  raw_mem = malloc (size + Page_size);
+  raw_mem = (char *) malloc (size + Page_size);
   if (raw_mem == NULL) return NULL;
   raw_mem += modulo;		/* Address to be aligned */
   aligned_mem = (((unsigned long) raw_mem / Page_size + 1) * Page_size);
