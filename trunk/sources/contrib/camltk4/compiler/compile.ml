@@ -96,23 +96,23 @@ let write_constructor_set w sep = function
 let write_type w name typdef =
   (* The type itself *)
   w ("type "^name^" =\n\t");
-  write_constructors w typdef.constructors;
+  write_constructors w (sort_components typdef.constructors);
   w "\n;;\n\n";
   (* Dynamic Subtyping *)
   if typdef.subtypes <> [] then begin
     (* The set of its constructors *)
     (* sp before "type" to avoid being picked up in documentation *)
     w (" type "^name^"_constrs =\n\t");
-    write_constructor_set w "\n\t| " typdef.constructors;
+    write_constructor_set w "\n\t| " (sort_components typdef.constructors);
     w "\n;;\n\n";
     (* The set of all constructors *)
     w ("let "^name^"_any_table = [");
-    write_constructor_set w "; " typdef.constructors;
+    write_constructor_set w "; " (sort_components typdef.constructors);
     w ("]\n;;\n");
     (* The subset of constructors for each subtype *)
     do_list (function (s,l) ->
       	       w ("let "^name^"_"^s^"_table = [");
-	       write_constructor_set w "; " l;
+	       write_constructor_set w "; " (sort_components l);
 	       w ("]\n;;\n"))
             typdef.subtypes
   end
