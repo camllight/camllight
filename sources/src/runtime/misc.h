@@ -5,11 +5,16 @@
 
 
 #include "config.h"
+
 #ifdef __STDC__
 #include <stddef.h>
 #endif
-#ifdef SIXTEEN
+
+#if defined(SIXTEEN) || defined(__STDC__)
 #include <stdlib.h>
+#else
+char *malloc ();
+double atof ();
 #endif
 
 #ifdef __STDC__

@@ -1,9 +1,10 @@
 #include <math.h>
 #include <stdio.h>
 #include "alloc.h"
+#include "debugger.h"
 #include "fail.h"
 #include "memory.h"
-#include "debugger.h"
+#include "misc.h"
 #include "mlvalues.h"
 
 #ifdef ALIGN_DOUBLE
@@ -73,7 +74,6 @@ value format_float(fmt, arg)    /* ML */
 value float_of_string(s)        /* ML */
      value s;
 {
-  extern double atof();
   return copy_double(atof(String_val(s)));
 }
 
