@@ -80,6 +80,11 @@ let compile () =
       	    sorted_types;
     do_list (write_function (output_string oc)) !function_table;
     close_out oc;
+  (* Write the interface for public functions *)
+  (* this interface is used only for documentation *)
+  let oc = open_out_bin "lib/tkgen.mli" in
+    do_list (write_function_p (output_string oc)) !function_table;
+    close_out oc;
   hashtbl__do_table 
     (fun wname wdef ->
       let modname = rename_module wname in
