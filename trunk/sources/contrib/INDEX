@@ -24,6 +24,16 @@ camltk
           and libtk.a, and the wish interpreter)
         - the "libunix" package
 
+camltk4
+-------
+  Same as camltk, but for Tk 4.0
+  Requirements:
+        - X11R5 or later
+        - Tk 4.0
+        - a full installation of Tcl/Tk (including the libraries libtcl.a
+          and libtk.a, and the wish interpreter)
+        - the "libunix" package
+
 libgraph
 --------
   An X Windows implementation of the portable drawing library "graphics".
