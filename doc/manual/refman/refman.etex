@@ -1,4 +1,4 @@
-\chapter{The core Caml Light language} \ref{c:refman}
+\chapter{The core Caml Light language} \label{c:refman}
 
 \section*{Foreword}
 
