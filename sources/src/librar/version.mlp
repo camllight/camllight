@@ -1,0 +1,5 @@
+#include "../version.h"
+
+let print_banner () =
+  printf__eprintf "The Caml Light librarian, version %d.%d\n" MAJOR MINOR
+;;
