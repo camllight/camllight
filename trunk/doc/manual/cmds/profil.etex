@@ -21,16 +21,16 @@ program should be profiled:
 
 %% description des options
 \begin{options}
-\item[a] all options
-\item[f] function calls : a count point is set at the beginning of
+\item["a"] all options
+\item["f"] function calls : a count point is set at the beginning of
 function bodies
-\item[i] {\bf if \ldots then \ldots else \ldots} : count points are set in
+\item["i"] {\bf if \ldots then \ldots else \ldots} : count points are set in
 both {\bf then} branch and {\bf else} branch
-\item[l] {\bf while, for} loops: a count point is set at the beginning of
+\item["l"] {\bf while, for} loops: a count point is set at the beginning of
 the loop body
-\item[m] {\bf match} branches: a count point is set at the beginning of the
+\item["m"] {\bf match} branches: a count point is set at the beginning of the
 body of each branch
-\item[t] {\bf try \ldots with \ldots} branches: a count point is set at the
+\item["t"] {\bf try \ldots with \ldots} branches: a count point is set at the
 beginning of the body of each branch
 \end{options}
 
@@ -49,7 +49,7 @@ and saves them in a file called "camlpro.dump" in the current directory.
 
 More precisely, the dump file "camlpro.dump" is written when the
 \verb|io__exit| function is called. 
-The linker, called with {\tt -p} option, adds \verb|io__exit 0| as the last
+The linker, called with the {\tt -p} option, adds \verb|io__exit 0| as the last
 phrase of the bytecode executable, in case the original program never calls
 \verb|io__exit|. 
 However, if the program terminates with an "uncaught exception", the dump
@@ -57,7 +57,8 @@ file will not be produced.
 
 If a compatible dump file already exists in the current directory, then the
 profiling information is accumulated in this dump file. This allows, for
-instance, the profiling of the compiler compiling a set of modules.
+instance, the profiling of several executions of a program on
+different inputs.
 
 \section{Printing profiling information}
 
@@ -74,10 +75,10 @@ since the profiling execution took place.
 The following options are recognized by "camlpro":
 
 \begin{options}
-\item[compiler options] {\tt -stdlib, -I, -include, -O, -open, -i, -lang}.
+\item[compiler options {\tt -stdlib, -I, -include, -O, -open, -i, -lang}]
 See chapter~\ref{c:camlc} for the detailed usage.
-\item["-f" \var{dumpfile}] specifies an alternate dump file of profiling
-information
+\item["-f" \var{dumpfile}] 
+Specifies an alternate dump file of profiling information
 \end{options}
 
 An additional argument specifies the output file. For instance
