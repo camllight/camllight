@@ -52,7 +52,9 @@ X11_LIB=/usr/lib
 # Name of the target architecture.
 # Used only for the libnum library (arbitrary-precision arithmetic), to
 # select assembly-language versions of time-critical low-level routines.
-# Known targets: 68K, vax, ns, mips, alpha, pyramid, i960, sparc, supersparc.
+# Known targets:
+#       68K     vax     ns      mips    alpha   pyramid i960
+#       sparc   supersparc      sparc-solaris   supersparc-solaris
 # See the file libnum/README for more explanations.
 # If you don't know, leave BIGNUM_ARCH=C, which selects a portable
 # C implementation of these routines.
