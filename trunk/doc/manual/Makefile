@@ -2,7 +2,7 @@ FILES=allfiles.tex biblio.tex foreword.tex
 DVI2TXT=../tools/dvi2txt
 TEXINPUTS=.:..:../refman:../library:../cmds:../../styles:/usr/local/lib/tex/inputs
 TEXFONTS=../../styles:/usr/local/lib/tex/fonts
-RELEASE=$$HOME/release/cl7
+RELEASE=$$HOME/release/$${RELEASENAME}
 
 manual: files
 	cd texstuff; \
@@ -28,21 +28,22 @@ scrolltext: files
 	$(DVI2TXT) -s -t texstuff/scrolltext.dvi
 
 files: $(FILES)
-	cd refman; make all
-	cd library; make all
-	cd cmds; make all
+	cd refman; $(MAKE) all
+	cd library; $(MAKE) all
+	cd cmds; $(MAKE) all
 
 all:
-	make manual plaintext
-	make manual plaintext
-	make index
-	make manual plaintext
+	$(MAKE) manual plaintext
+	$(MAKE) manual plaintext
+	$(MAKE) index
+	$(MAKE) manual plaintext
+	cd html; $(MAKE)
 
 clean:
 	rm $(FILES)
-	cd refman; make clean
-	cd library; make clean
-	cd cmds; make clean
+	cd refman; $(MAKE) clean
+	cd library; $(MAKE) clean
+	cd cmds; $(MAKE) clean
 	rm -f texstuff/*
 
 release:
@@ -50,6 +51,7 @@ release:
 	dvips -Pps -o '!gzip > $(RELEASE)refman.ps.gz' texstuff/manual.dvi
 	cp texstuff/plaintext.txt $(RELEASE)refman.txt
 	cp texstuff/plaintext.ipr $(RELEASE)refman.prn
+	cd html; $(MAKE) release
 
 .SUFFIXES:
 .SUFFIXES: .tex .etex
