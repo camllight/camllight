@@ -23,21 +23,26 @@ void gc_message (msg, arg)
   }
 }
 
-void fatal_error_arg (msg, arg)
-     char * msg, * arg;
+void fatal_error (msg)
+     char * msg;
 {
 #ifdef HAS_UI
-  ui_fatal_error(msg, arg);
+  ui_fatal_error("%s", msg);
 #else
-  fprintf (stderr, msg, arg);
+  fprintf (stderr, "%s", msg);
   exit(2);
 #endif
 }
 
-void fatal_error (msg)
-     char * msg;
+void fatal_error_arg (fmt, arg)
+     char * fmt, * arg;
 {
-  fatal_error_arg(msg, NULL);
+#ifdef HAS_UI
+  ui_fatal_error(fmt, arg);
+#else
+  fprintf (stderr, fmt, arg);
+  exit(2);
+#endif
 }
 
 #ifdef USING_MEMMOV
@@ -125,8 +130,9 @@ char *aligned_malloc (size, modulo)
 {
   char *raw_mem;
   unsigned long aligned_mem;
+  extern char * malloc();
                                                  Assert (modulo < Page_size);
-  raw_mem = (char *) malloc (size + Page_size);
+  raw_mem = malloc (size + Page_size);
   if (raw_mem == NULL) return NULL;
   raw_mem += modulo;		/* Address to be aligned */
   aligned_mem = (((unsigned long) raw_mem / Page_size + 1) * Page_size);
