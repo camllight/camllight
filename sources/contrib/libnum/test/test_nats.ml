@@ -112,6 +112,8 @@ nat_of_string s,
   nat))
 ;;
 
+test 22 eq_string (string_of_nat(nat_of_string "1073741824"), "1073741824");;
+
 testing_function "gcd_nat";;
 
 for i = 1 to 20 do
