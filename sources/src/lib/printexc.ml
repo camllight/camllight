@@ -1,5 +1,6 @@
 (* A catch-all exception handler *)
 
+#open "bool";;
 #open "exc";;
 #open "eq";;
 #open "int";;
@@ -23,44 +24,49 @@ let f fct arg =
         prerr_string "Pattern matching failed, file ";
         prerr_string file;
         prerr_string ", chars "; prerr_int first_char;
-        prerr_string "-"; prerr_int last_char
-    | Failure s ->
-        prerr_string "Evaluation failed : "; prerr_string s
-    | Invalid_argument s ->
-        prerr_string "Invalid argument : "; prerr_string s
-    | Sys_error msg ->
-        prerr_string "System call failed : ";
-        prerr_string msg
+        prerr_char `-`; prerr_int last_char
     | x ->
+        prerr_string "Uncaught exception: ";
         let tag = obj_tag (repr x) in
-          prerr_string "Uncaught exception ";
-          prerr_string (string_of_int tag);
-          begin try
-            let ic = open_in_bin command_line.(0) in
-            let pos_hdr = in_channel_length ic - 20 in
-            seek_in ic pos_hdr;
-            let size_code = input_binary_int ic in
-            let size_data = input_binary_int ic in
-            let size_symb = input_binary_int ic in
-            let size_debug = input_binary_int ic in
-              seek_in ic (pos_hdr - size_debug - size_symb);
-              input_value ic;
-              input_value ic;
-              let tag_exn_table = (input_value ic : (qualid * int) vect) in
-                if tag >= vect_length tag_exn_table then
-                  prerr_string " (never compiled)"
-                else begin
-                  let (q,s) = tag_exn_table.(tag) in
-                  prerr_string " (";
-                  prerr_string q.qual;
-                  prerr_string "__";
-                  prerr_string q.id;
-                  prerr_string ")"
-                end;
-            close_in ic
-          with _ ->
-            ()
-          end
+        begin try
+          let ic = open_in_bin command_line.(0) in
+          let pos_hdr = in_channel_length ic - 20 in
+          seek_in ic pos_hdr;
+          let size_code = input_binary_int ic in
+          let size_data = input_binary_int ic in
+          let size_symb = input_binary_int ic in
+          let size_debug = input_binary_int ic in
+          seek_in ic (pos_hdr - size_debug - size_symb);
+          input_value ic;
+          input_value ic;
+          let tag_exn_table = (input_value ic : (qualid * int) vect) in
+          close_in ic;
+          if tag >= vect_length tag_exn_table then raise Exit;
+          let (q,s) = tag_exn_table.(tag) in
+          prerr_string q.qual;
+          prerr_string "__";
+          prerr_string q.id;
+        with _ ->
+          prerr_char `<`;
+          prerr_int tag;
+          prerr_char `>`
+        end;
+        if obj_size (repr x) > 0 then begin
+          prerr_char `(`;
+          for i = 0 to obj_size (repr x) - 1 do
+            if i > 0 then prerr_string ", ";
+            let arg = obj_field (repr x) i in
+            if not (is_block arg) then
+              prerr_int (magic_obj arg : int)
+            else if obj_tag arg == 253 then begin
+              prerr_char `"`;
+              prerr_string (magic_obj arg : string);
+              prerr_char `"`
+            end else
+              prerr_char `_`
+          done;
+          prerr_char `)`
+        end
     end;
     prerr_char `\n`;
     io__exit 2
