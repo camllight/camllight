@@ -30,7 +30,7 @@ while :; do
       shift;;
     -o)
       output=$2; shift;;
-    -p)
+    -p*)
       perv="$perv profiler"; p=p;; 
     -stdlib)
       stdlib=$2; shift;;
