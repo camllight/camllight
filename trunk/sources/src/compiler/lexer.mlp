@@ -236,6 +236,14 @@ and comment = parse
       { reset_string_buffer();
         string lexbuf;
         comment lexbuf }
+  | "``"
+      { comment lexbuf }
+  | [^ `\\` `\``] "`"
+      { comment lexbuf }
+  | `\\` [`\\` `\`` `n` `t` `b` `r`] "`"
+      { comment lexbuf }
+  | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`] "`"
+      { comment lexbuf }
   | End_of_file
       { raise (Lexical_error(Unterminated_comment, -1, -1)) }
   | _
