@@ -11,11 +11,14 @@ RANLIB=ranlib
 MANEXT=1
 MANDIR=/usr/local/man/man$(MANEXT)
 X11_INCLUDES=/usr/include
-X11_LIB=/usr/lib
+X11_LIB=/usr/X11R6/lib
 TCLINCLDIR=/usr/local/lib/tcl7.4/include
 TKINCLDIR=/usr/local/lib/tk4.0/include
 TKLIBDIR=/usr/local/lib/tk4.0/lib
 TCLLIBDIR=/usr/local/lib/tcl7.4/lib
+#Does not work on SunOS
+#TKLIBS=-ltk4.0 -ltcl7.4 -lX11
+#Does not work on Linux with tcl/tk installed in /usr/lib
 TKLIBS=-ltk -ltcl -lX11
 
 MKF=\
@@ -45,7 +48,7 @@ all:
 	cd frx; $(MAKE) $(MKF)
 	cd browser; $(MAKE) $(MKF)
 
-EXDIRS=test browser
+EXDIRS=browser
 
 examples:
 	for d in $(EXDIRS); do \
@@ -67,7 +70,7 @@ install:
 #	cp -p Widgets.src $(LIBDIR)
 
 
-SUBDIRS=compiler libsupport lib $(EXDIRS)
+SUBDIRS=compiler libsupport lib frx $(EXDIRS)
 
 clean : 
 	for d in $(SUBDIRS); do \
