@@ -33,9 +33,13 @@ type Component =
  | Abbrev of string
 ;;
 
+(* requires_widget_context: the converter of the type MUST be passed
+   an additional argument of type Widget.
+*)
 type TypeDef = {
   mutable constructors : FullComponent list;
-  mutable subtypes : (string * FullComponent list) list
+  mutable subtypes : (string * FullComponent list) list;
+  mutable requires_widget_context : bool
 }
 ;;
 
@@ -45,6 +49,22 @@ let types_table = (hashtbl__new 37 : (string, TypeDef) hashtbl__t)
 let types_order = (tsort__new () : string tsort__porder)
 ;;
 let types_external = ref ([] : string list)
+;;
+
+let is_subtyped s =
+  s = "Widget" or
+  try  
+    let typdef = hashtbl__find types_table s
+    in typdef.subtypes <> []
+  with
+    Not_found -> false
+;;
+
+let requires_widget_context s = 
+  try  
+    (hashtbl__find types_table s).requires_widget_context
+  with
+    Not_found -> false
 ;;
 
 let enter_external_type s =
@@ -108,15 +128,19 @@ let enter_type typname constructors =
       raise (Duplicate_Definition ("type", typname))
   with Not_found ->
     tsort__add_element types_order typname;
-    let cs = ref [] in
+    let typdef = {constructors = []; subtypes = []; 
+      	       	  requires_widget_context = false} in
     do_list (function c ->
-		if not (check_duplicate_constr false c !cs)
+		if not (check_duplicate_constr false c typdef.constructors)
 		then begin 
-		   cs := c::!cs;
+		   typdef.constructors := c :: typdef.constructors;
 		   add_dependancies typname c.Arg
-		end)
+		end;
+      	       	match c.Arg with
+      	       	  Function _ -> typdef.requires_widget_context := true
+                | _ -> ())
             constructors;
-    hashtbl__add types_table typname {constructors = !cs; subtypes = []} 
+    hashtbl__add types_table typname typdef
 ;;
 
 (* Retrieve constructor *)
@@ -135,7 +159,8 @@ let enter_subtype typ subtyp constructors =
     with
       Not_found -> 
         tsort__add_element types_order typ;
-      	let typdef = {constructors = []; subtypes = []} in
+      	let typdef = {constructors = []; subtypes = [];
+      	       	      requires_widget_context = false} in
       	hashtbl__add types_table typ typdef;
 	typdef 
   in
@@ -150,6 +175,10 @@ let enter_subtype typ subtyp constructors =
 		       add_dependancies typ c.Arg;
 		       typdef.constructors <- c :: typdef.constructors
 		    end;
+                    begin match c.Arg with
+      	       	      Function _ -> typdef.requires_widget_context := true
+                    |  _ -> ()
+                    end;
                     c
                 | Abbrev name -> find_constructor name typdef.constructors
                 )
@@ -167,15 +196,6 @@ let retrieve_option optname =
   in find_constructor optname optiontyp.constructors
 ;;
   
-
-let is_subtyped s =
-  s = "Widget" or
-  try  
-    let typdef = hashtbl__find types_table s
-    in typdef.subtypes <> []
-  with
-    Not_found -> false
-;;
 
 (* Just enter a type *)
 let rec enter_argtype = function

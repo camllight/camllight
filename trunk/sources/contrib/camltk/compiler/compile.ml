@@ -257,31 +257,39 @@ let write_TKtoCAML w name typdef =
 (******************************)
 
 (* Produce an in-lined converter Caml -> Tk for simple *valid* type *)
-let rec converterCAMLtoTK argname = function
+let rec converterCAMLtoTK context_widget argname = function
     Int -> "string_of_int " ^ argname
  |  Char -> "char_for_read " ^ argname
  |  Float -> "string_of_float " ^ argname
  |  Bool -> "if "^argname^" then \"1\" else \"0\""
  |  String -> "quote_string " ^ argname
  |  UserDefined s -> 
-     if is_subtyped s then
-      "CAMLtoTK"^s^" "^s^"_any_table "^argname
-     else
-      "CAMLtoTK"^s^" "^argname
+       let name = "CAMLtoTK"^s^" " in
+       let args = argname in
+       let args =
+       	   if is_subtyped s then  (* unconstraint subtype *)
+	     s^"_any_table "^args
+	   else args in
+       let args = 
+       	   if requires_widget_context s then
+	     context_widget^" "^args
+           else args in
+       name^args
  |  List ty -> 
       "catenate_sep \" \" (map (function x -> " 
-             ^ (converterCAMLtoTK "x) " ty) ^ argname ^ ")"
+             ^ (converterCAMLtoTK context_widget "x) " ty) ^ argname ^ ")"
  |  Subtype (s,s') ->
-       "CAMLtoTK"^s^" "^s^"_"^s'^"_table "^argname
+       let name = "CAMLtoTK"^s^" " in
+       let args = s^"_"^s'^"_table "^argname in
+       let args = 
+       	   if requires_widget_context s then
+	     context_widget^" "^args
+           else args in
+       name^args
  | ty -> failwith "debug"
-
-and converterCAMLtoTKp argnames = function
-    Product tyl ->
-     catenate_sep "^\" \"^" (map2 converterCAMLtoTK argnames tyl)
-  | _ -> failwith "bug"
 ;;
 
-let write_clause w subtyp comp =
+let write_clause w context_widget subtyp comp =
   let warrow () = 
       w " -> ";
       if subtyp then 
@@ -294,7 +302,8 @@ let write_clause w subtyp comp =
        let vars = varnames "a" (list_length tyl) in
        	 w "( ";  w (catenate_sep ", " vars); w ")";
 	 warrow(); w "\""; w (quote_string comp.TkName); w "\"";
-	 do_list2 (fun v ty -> w "^\" \"^"; w (converterCAMLtoTK v ty))
+	 do_list2 (fun v ty -> w "^\" \"^"; 
+                               w (converterCAMLtoTK context_widget v ty))
 	          vars tyl
   | Function ty -> 
       let vars = match ty with
@@ -305,7 +314,7 @@ let write_clause w subtyp comp =
       w " f";
       warrow ();
       w "\""; w (quote_string comp.TkName); w "\"^\" \"^";
-      w  "let id = register_callback ";
+      w  "let id = register_callback w ";
       begin match ty with 
       	   Unit ->  w "(function _ -> f ())"
          | _ -> write_wrapper_code w "f" ty
@@ -316,33 +325,44 @@ let write_clause w subtyp comp =
       if comp.TkName <> "" then begin
       	  w "\""; w (quote_string comp.TkName); w "\"^\" \"^"
       end;
-      w (converterCAMLtoTK "x" ty)
+      w (converterCAMLtoTK context_widget "x" ty)
 ;;
 	 
 let write_CAMLtoTK w name typdef =
   w ("let CAMLtoTK"^name);
+  let context_widget = 
+      if typdef.requires_widget_context then begin
+      	w " w"; "w"
+        end
+      else
+      	"dummy_widget" in
   let subtyp = typdef.subtypes <> [] in
   if subtyp then 
     w " table";
   w(" = function\n\t");
-  write_clause w subtyp (hd typdef.constructors);
-  do_list (fun c -> w "\n\t| "; write_clause w subtyp c) (tl typdef.constructors);
+  write_clause w context_widget subtyp (hd typdef.constructors);
+  do_list (fun c -> w "\n\t| "; write_clause w context_widget subtyp c) 
+          (tl typdef.constructors);
   w "\n;;\n\n"
 ;;
 
-let write_function_body w def names =
+let write_function_body w def context_widget names =
   (* Argument passing *)
   begin match def.Arg with
     Unit -> ()
   | List ty -> 
-    w ("\tdo_list (function x -> Send2Tk buf (" ^ converterCAMLtoTK "x" ty ^ ")) " 
-                 ^ hd names ^";\n")
+    w ("\tdo_list (function x -> Send2Tk buf (" ^
+        converterCAMLtoTK context_widget "x" ty ^ 
+        ")) " ^ hd names ^";\n")
   | Product tyl ->
       do_list2 (fun v ty ->
-      	          w("\tSend2Tk buf (" ^ converterCAMLtoTK v ty ^ ");\n"))
+      	          w("\tSend2Tk buf (" ^ 
+      	       	    converterCAMLtoTK context_widget v ty ^ ");\n"))
 	       names tyl
   | ty ->
-      w("\tSend2Tk buf (" ^ converterCAMLtoTK (hd names) ty ^ ");\n")
+      w("\tSend2Tk buf (" ^ 
+        converterCAMLtoTK context_widget (hd names) ty ^ 
+        ");\n")
   end;
   (* Closing *)
   begin match def.Result with
@@ -377,7 +397,8 @@ let write_function_body w def names =
 ;;
 
 let write_command wclass w def =
-  w ("let "^def.MLName^" w ");
+  let context_widget = "w" in
+  w ("let "^def.MLName^" "^context_widget^" ");
   let names = 
     match def.Arg with
      Unit -> []
@@ -407,7 +428,7 @@ let write_command wclass w def =
         w ("\tSend2Tk buf (widget_name w);\n");
         w ("\tSend2Tk buf \""^(quote_string def.TkName)^"\";\n")
   end;
-  write_function_body w def names
+  write_function_body w def context_widget names
 ;;
 
 let write_function w def =
@@ -437,7 +458,7 @@ let write_function w def =
 	w  "\tSend2Tk buf result_header;\n";
 	w ("\tSend2Tk buf \""^(quote_string def.TkName)^"\";\n")
   end;
-  write_function_body w def names
+  write_function_body w def "dummy_widget" names
 ;;
 
 let write_create w class =
@@ -446,7 +467,8 @@ let write_create w class =
   w ("   Send2Tk buf \"" ^ class ^ "\";\n");
   w ("   let w = new_widget_atom \"" ^ class ^ "\" parent in\n");
   w ("      Send2Tk buf (widget_name w);\n");
-  w ("      Send2Tk buf (" ^ converterCAMLtoTK "options" (List(Subtype("option",class))) ^ ");\n");
+  w ("      Send2Tk buf (" ^ 
+     converterCAMLtoTK "w" "options" (List(Subtype("option",class))) ^ ");\n");
   w ("      Send2TkEval buf;\n");
   w ("      w\n;;\n")
 ;;
@@ -457,7 +479,8 @@ let write_named_create w class =
   w ("   Send2Tk buf \"" ^ class ^ "\";\n");
   w ("   let w = new_named_widget \"" ^ class ^ "\" parent name in\n");
   w ("      Send2Tk buf (widget_name w);\n");
-  w ("      Send2Tk buf (" ^ converterCAMLtoTK "options" (List(Subtype("option",class))) ^ ");\n");
+  w ("      Send2Tk buf (" ^ 
+     converterCAMLtoTK "w" "options" (List(Subtype("option",class))) ^ ");\n");
   w ("      Send2TkEval buf;\n");
   w ("      w\n;;\n")
 ;;
