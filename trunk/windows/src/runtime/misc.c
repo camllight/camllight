@@ -29,7 +29,7 @@ void fatal_error_arg (msg, arg)
 #ifdef HAS_UI
   ui_fatal_error(msg, arg);
 #else
-  fprintf (stderr, "%s", msg, arg);
+  fprintf (stderr, msg, arg);
   exit(2);
 #endif
 }
