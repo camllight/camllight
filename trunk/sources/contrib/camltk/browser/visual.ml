@@ -36,12 +36,16 @@ let rec visual_meta visual silent sym =
 
     let t = toplevelw__create 
       	       (new_toplevel_widget (new_visual_top ())) [] in
-    let title =
-      label__create t [Text (visual.titler object); Relief Raised] in
 
-    pack [title] [Fill Fill_X];
-    label__configure title [Cursor (XCursor "watch")];
-    update_idletasks(); (* should display the title ! *)
+    let titlestr = visual.titler object in
+    wm__title_set t titlestr;
+    (* busy *)
+    let title =
+         label__create t [Text titlestr; Relief Raised; 
+      	       	       	  Cursor (XCursor "watch")] in
+     pack [title][];
+     (* this should display the title, but it doesn't *)
+    update_idletasks();
 
     let f = frame__create t [] in
     let tx = 
@@ -63,12 +67,11 @@ let rec visual_meta visual silent sym =
     (* An easy way to quit *)
     bind tx [[Any],XKey "Escape"] 
       	     (BindSet([], (fun _ -> button__invoke q)));
-
+    pack__forget [title];
     pack [f] [Fill Fill_Both; Expand true];
      pack [edit] [Side Side_Left];
      pack [q] [Side Side_Right; Fill Fill_X; Expand true];
     pack [f2] [Side Side_Bottom; Fill Fill_X];
-    label__configure title [Cursor (XCursor "hand2")];
     util__resizeable t
    with   
     Toplevel -> begin

@@ -6,10 +6,22 @@ camlbrowser \- A Caml Light environment browser
 .SH SYNOPSIS
 .B camlbrowser
 [
+.B \-d|-display display
+]
+[
+.B \-mono
+]
+[
 .B \-stdlib stdlib-dir
 ]
 [
 .B \-I lib-dir
+]
+[
+.B \-O module-set
+]
+[
+.B \-tags
 ]
 .I module ...
 
@@ -39,7 +51,7 @@ directive in the Caml Light toplevel.
 
 .TP
 .B Load Path
-displays the list of directories in the load path. The current director (.)
+displays the list of directories in the load path. The current directory (.)
 is implicit and always first in the load path.
 Clicking on the
 .I Add Directory
@@ -110,6 +122,18 @@ file are loaded when a directory is added to the
 
 .SH OPTIONS
 .TP
+.B \-d|\-display \ display
+sets the display.
+
+.TP
+.B \-mono
+forces monochrome settings on color screens.
+
+.TP
+.B \-stdlib \ stdlib-dir
+Sets the standard library directory.
+
+.TP
 .B \-I \ lib-dir
 Adds
 .I lib-dir 
@@ -118,8 +142,13 @@ and source files .ml and .mli. The default is to search in the current
 directory first, then in the Caml Light library.
 
 .TP
-.B \-stdlib \ stdlib-dir
-Sets the standard library directory.
+.B \-O \ module_set
+selects the set of modules of the standard library to be loaded. Should be
+one of cautious, fast, none.
+
+.TP
+.B \-tags
+sets the source navigation mode at startup.
 
 .TP
 .B modules ...
@@ -138,4 +167,4 @@ Positioning a displayed source file on a given symbol according to a TAGS
 file does not always work (it doesn't work exactly like in Gnu-Emacs anyway).
 
 .B camlbrowser
-being the main test program for CamlTk, it is struck by creeping featurism.
+being the main test program for CamlTk, it is subject to creeping featurism.
