@@ -8,20 +8,20 @@ fr:	%aCaractère illégal.\n
 es:	%aCarácter incorrecto.\n
 de:	%aIllegales Zeichen.\n
 
-src:	%tComment not terminated.\n
-fr:	%tCommentaire sans fin.\n
-es:	%tComentario sin finalizar.\n
-de:	%tKommentar nicht abgeschlossen.\n
+src:	%aComment not terminated.\n
+fr:	%aCommentaire sans fin.\n
+es:	%aComentario sin finalizar.\n
+de:	%aKommentar nicht abgeschlossen.\n
 
 src:	%aIll-formed character literal.\n
 fr:	%aCaractère littéral mal formé.\n
 es:	%aCarácter literal mal formado.\n
 de:	%aFalsch formulierte Zeichen-Konstante.\n
 
-src:	%tString literal not terminated.\n
-fr:	%tChaîne littérale non terminée.\n
-es:	%tCadena literal sin terminar.\n
-de:	%tZeichenketten-Konstante nicht abgeschlossen.\n
+src:	%aString literal not terminated.\n
+fr:	%aChaîne littérale non terminée.\n
+es:	%aCadena literal sin terminar.\n
+de:	%aZeichenketten-Konstante nicht abgeschlossen.\n
 
 src:	, line %d-%d, characters %d-%d:\n
 fr:	, lignes %d-%d, caractères %d-%d:\n
