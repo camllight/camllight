@@ -1,13 +1,10 @@
-.TH CAMLLIBR 1  "7 September 1992"
+.TH CAMLLIBR 1
 
 .SH NAME
 camllibr \- Create libraries of Caml Light modules
 
 .SH SYNOPSIS
 .B camllibr
-[
-.BI \-files \ response-file
-]
 [
 .BI \-I \ lib-dir
 ]
@@ -34,14 +31,6 @@ before having initialized it.
 
 .SH OPTIONS
 
-.TP
-.BI \-files \ response-file
-Process the files whose names are listed in file
-.I response-file,
-just as if these names appeared on the command line. File names in
-.I response-file
-are separated by spaces and/or newlines. This option allows to
-overcome silly limitations on the length of the command line.
 .TP
 .BI \-I \ lib-dir
 Adds

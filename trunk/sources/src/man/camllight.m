@@ -1,4 +1,4 @@
-.TH CAMLLIGHT 1  "7 September 1992"
+.TH CAMLLIGHT 1
 
 .SH NAME
 camllight \- The Caml Light toplevel system
@@ -33,8 +33,9 @@ End-of-file on standard input terminates
 The optional
 .I special-toplevel
 argument is the name of a special toplevel system, as produced by
-.B camlmktop
-(1), that should be executed. When omitted, the standard toplevel system is executed.
+.BR camlmktop (1),
+that should be executed. When omitted, the standard toplevel system is
+executed.
 
 .SH OPTIONS
 
@@ -98,22 +99,3 @@ The Caml Light user's manual,
 .P
 chapter "The toplevel system".
 
-.SH BUGS
-
-There are very few debugging tools.
-
-Polymorphic references, and more generally mutable concrete types, are
-not safe: it is possible to create polymorphic references through a
-functional encoding.
-
-Structured input/output is not type-safe; nothing prevents the user
-from writing data of one type and reading it with another type.
-
-Various size limitations are not checked by the compiler: the size of
-a local environment should not exceed 256; the number of constructors
-in a concrete type should not exceed 253; the number of global values
-should be less than 65536; etc.
-
-The module system is not foolproof, since it relies on the (base) names
-of the files. Anything can happen if the user monkeys with the interface
-path, or renames compiled interfaces.

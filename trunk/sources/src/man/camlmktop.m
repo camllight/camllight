@@ -1,4 +1,4 @@
-.TH CAMLMKTOP 1 "7 September 1992"
+.TH CAMLMKTOP 1
 
 .SH NAME
 camlmktop \- Create custom Caml Light toplevel systems
@@ -19,9 +19,6 @@ camlmktop \- Create custom Caml Light toplevel systems
 ]
 [
 .BI \-O \ module-set
-]
-[
-.BI \-files \ response-file
 ]
 .I filename ...
 
@@ -45,14 +42,6 @@ output file that contains both the bytecode for the program and a
 runtime system that contains exactly those C primitives that are
 required by the program. This option is required when linking Caml
 Light code with user-defined C functions.
-.TP
-.BI \-files \ response-file
-Process the files whose names are listed in file
-.I response-file,
-just as if these names appeared on the command line. File names in
-.I response-file
-are separated by spaces and/or newlines. This option allows to
-overcome silly limitations on the length of the command line.
 .TP
 .BI \-I \ lib-dir
 Adds

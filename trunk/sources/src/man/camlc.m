@@ -1,4 +1,4 @@
-.TH CAMLC 1 "7 September 1992"
+.TH CAMLC 1
 
 .SH NAME
 camlc \- The Caml Light compiler
@@ -7,7 +7,7 @@ camlc \- The Caml Light compiler
 .SH SYNOPSIS
 .B camlc
 [
-.B \-cgiv
+.B \-cgipv
 ]
 [
 .B \-custom
@@ -20,9 +20,6 @@ camlc \- The Caml Light compiler
 ]
 [
 .BI \-O \ module-set
-]
-[
-.BI \-files \ response-file
 ]
 .I filename ...
 
@@ -111,35 +108,14 @@ bytecode interpreter
 Compile only. Suppresses the linking phase of the compilation.
 .TP
 .B \-custom
-Link in custom runtime mode. In this mode, the linker produces an output file that contains both the bytecode for the program and a runtime system that contains exactly those C primitives that are required by the program. This option is required when linking Caml Light code with user-defined C functions.
-.TP
-.BI \-files \ response-file
-Process the files whose names are listed in file
-.I response-file,
-just as if these names appeared on the command line. File names in
-.I response-file
-are separated by spaces and/or newlines. This option allows to
-overcome silly limitations on the length of the command line.
+Link in custom runtime mode. In this mode, the linker produces an
+output file that contains both the bytecode for the program and a
+runtime system that contains exactly those C primitives that are
+required by the program. This option is required when linking Caml
+Light code with user-defined C functions.
 .TP
 .B \-g
-Produce extra debugging information. During the linking phase, the
-.B \-g
-option adds a symbol table at the end of the executable bytecode file
-produced. This symbol table is needed by the catch-all exception
-handler provided by the printexc library module. During the
-compilation of an implementation (.ml file), the compiler writes a .zix
-file when the
-.B \-g
-option is set. This file describes the full interface to the module
-being compiled, including local functions and types. 
-Used in conjunction with the
-.B \-g
-option to the toplevel system
-.BR camllight ,
-the .zix file gives access to the
-local values of the module, making it possible to print or trace them. 
-The .zix file is not produced if the implementation file has no
-explicit interface, since, in this case, the module has no local values.
+Produce extra debugging information during compilation and linking.
 .TP
 .B \-i
 Cause the compiler to print on standard output the types, exceptions
@@ -151,11 +127,7 @@ Adds
 .I lib-dir 
 to the path of directories searched for compiled interface files .zi
 and compiled object files .zo. The default is to search in the current
-directory first, then in the Caml Light library (usually
-/usr/local/lib/caml-light). A directory added by -I is searched after
-the current directory, but before the library. This option takes
-effect for the compilation of subsequent .ml and .mli files, as well
-as for the final linking.
+directory first, then in the Caml Light library.
 .TP
 .BI \-o \ exec-file
 Specifies the name of the output executable file. The default is
@@ -177,6 +149,9 @@ is "cautious". The "-O none" option suppresses all default module
 opening; compilation starts in an (almost) empty environment, and
 no library code is linked. It is not of general use, except to
 compile the standard library itself.
+.TP
+.B \-p
+Compile and link in profiling mode.
 .TP
 .B \-v
 Prints the compiler version number.
@@ -209,12 +184,6 @@ chapter "Batch compilation".
 
 .SH BUGS
 
-There are very few debugging tools.
-
-Polymorphic references, and more generally mutable concrete types, are
-not safe: it is possible to create polymorphic references through a
-functional encoding.
-
 Structured input/output is not type-safe; nothing prevents the user
 from writing data of one type and reading it with another type.
 
@@ -225,4 +194,6 @@ should be less than 65536; etc.
 
 The module system is not foolproof, since it relies on the (base) names
 of the files. Anything can happen if the user monkeys with the interface
-path, or renames compiled interfaces.
+path, or renames compiled interfaces. Also, the linking phase does not
+check that compiled implementations are up to date w.r.t. compiled
+interfaces.

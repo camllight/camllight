@@ -1,4 +1,4 @@
-.TH CAMLRUN 1  "7 September 1992"
+.TH CAMLRUN 1
 
 .SH NAME
 camlrun \- The Caml Light runtime system and bytecode interpreter
