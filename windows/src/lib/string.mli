@@ -81,3 +81,22 @@ value string_for_read : string -> string
            by escape sequences, following the lexical conventions of
            Caml Light. *)
 ;;
+
+value index_char : string -> int -> int -> char -> int
+        (* [index_char s start len c] returns the number of character [c] in
+           the string [s], searching from character number [start] for
+           [len] characters towards the end of string [s]. 
+           Raise [Not_found] if [c] has not been found.
+           Raise [Invalid_argument "index_char"] if [start] and [len] do not
+           designate a valid substring of [s]. *)
+;;
+
+value rev_index_char : string -> int -> int -> char -> int
+        (* [rev_index_char s start len c] returns the number of
+           character [c] in the string [s], searching from character
+           number [start] for [len] characters towards the beginning
+           of string [s].
+           Raise [Not_found] if [c] has not been found.
+           Raise [Invalid_argument "rev_index_char"] if [start - len + 1]
+           and [len] do not designate a valid substring of [s]. *)
+;;
