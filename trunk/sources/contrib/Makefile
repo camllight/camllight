@@ -42,9 +42,9 @@ X11_INCLUDES=/usr/include/X11
 # Used only for the libnum library (arbitrary-precision arithmetic), to
 # select assembly-language versions of time-critical low-level routines.
 # Known targets: 68K, vax, ns, mips, alpha, pyramid, i960, sparc, supersparc.
-# If you don't know, leave TARGET_ARCH=C, which selects a portable
+# If you don't know, leave BIGNUM_ARCH=C, which selects a portable
 # C implementation of these routines.
-TARGET_ARCH=C
+BIGNUM_ARCH=C
 
 # Name of the directory where TeX input files should be installed.
 # Needed only for the "caml-tex" package.
@@ -64,7 +64,7 @@ SHELL=/bin/sh
 SUBDIRS=libunix libgraph debugger libnum libstr mletags search_isos \
   caml-tex camlmode
 
-DEFS=CC='$(CC)' OPTS='$(OPTS)' CPP='$(CPP)' BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) MANEXT=$(MANEXT) MANDIR=$(MANDIR) X11_INCLUDES=$(X11_INCLUDES) TARGET_ARCH=$(TARGET_ARCH) TEXINPUTDIR=$(TEXINPUTDIR) EMACSLISPDIR=$(EMACSLISPDIR)
+DEFS=CC='$(CC)' OPTS='$(OPTS)' CPP='$(CPP)' BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) MANEXT=$(MANEXT) MANDIR=$(MANDIR) X11_INCLUDES=$(X11_INCLUDES) BIGNUM_ARCH=$(BIGNUM_ARCH) TEXINPUTDIR=$(TEXINPUTDIR) EMACSLISPDIR=$(EMACSLISPDIR)
 
 # Compile everything
 all:
