@@ -2,9 +2,10 @@ MANDIR=/usr/man/man1
 BINDIR=/usr/local/bin
 
 CPP=/lib/cpp -P -Dunix
-CAMLCOMP=camlc -c -g
 
-COMPFLAGS=-I ../../src/compiler
+CAMLC=camlc
+CAMLCOMP=$(CAMLC) -c
+COMPFLAGS=-g -W -I ../../src/compiler
 LINKFLAGS=-g -I ../../src/compiler
 
 COMPILEROBJS=misc.zo config.zo

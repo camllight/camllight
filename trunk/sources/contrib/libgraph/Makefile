@@ -22,7 +22,7 @@ RANLIB=ranlib
 # The Caml Light compilers
 CAMLC=camlc
 CAMLMKTOP=camlmktop
-COMPFLAGS=-I ../libunix
+COMPFLAGS=-W -I ../libunix
 
 OBJS=open.o draw.o fill.o color.o text.o \
   image.o make_img.o dump_img.o point_col.o sound.o events.o

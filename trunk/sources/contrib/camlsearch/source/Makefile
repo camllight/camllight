@@ -3,7 +3,7 @@ CAMLLEX		=camllex
 CAMLYACC	=camlyacc
 CAMLTEX		=../tools/caml-tex-format
 CAMLDETEX	=../tools/caml-tex-extract
-COMPFLAGS	=-I $(UNIXLIBDIR) -I $(COMPLIBDIR) $(DEBUG)
+COMPFLAGS	=-I $(UNIXLIBDIR) -I $(COMPLIBDIR) $(DEBUG) -W
 LINKFLAGS	=-I $(COMPLIBDIR) -I $(COMPLIBDIR) -g
 YACCFLAGS	=# -v
 

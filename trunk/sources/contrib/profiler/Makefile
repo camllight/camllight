@@ -1,10 +1,11 @@
 CPP=/lib/cpp -P
 
-CAMLCOMP=camlc -c
+CAMLC=camlc
+CAMLCOMP=$(CAMLC) -c
 CAMLLEX=camllex
 CAMLYACC=camlyacc
 
-COMPFLAGS=-g -I ../../src/compiler
+COMPFLAGS=-W -g -I ../../src/compiler
 LINKFLAGS=-g -I ../../src/compiler
 
 # Pieces of the compiler required for parsing

@@ -15,6 +15,8 @@ RANLIB=ranlib
 # Compilation options
 CFLAGS=-O -I../../src/runtime -I./bignum/h
 CAMLC=camlc
+CAMLCOMP=$(CAMLC) -c
+COMPFLAGS=-W -O fast
 CAMLLIBR=camllibr
 CAMLMKTOP=camlmktop
 
@@ -56,10 +58,10 @@ nums.zo: $(ZOFILES)
 .SUFFIXES: .ml .mli .mlp .zi .zo
 
 .mli.zi:
-	$(CAMLC) -c $<
+	$(CAMLCOMP) $(COMPFLAGS) $<
 
 .ml.zo:
-	$(CAMLC) -c $<
+	$(CAMLCOMP) $(COMPFLAGS) $<
 
 .mlp.ml:
 	@rm -f $@

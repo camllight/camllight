@@ -1,7 +1,7 @@
 CAMLC=camlc
 CAMLCOMP=$(CAMLC) -c
 CPP=/lib/cpp -P -Dunix
-COMPFLAGS=-O fast -g
+COMPFLAGS=-W -O fast -g
 LINKFLAGS=-g
 CAMLYACC=camlyacc -v
 CAMLLEX=camllex

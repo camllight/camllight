@@ -21,7 +21,7 @@ TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
 
 CAMLDEP=../../../src/tools/camldep
 
-COMPFLAGS=-g -O fast -I $(CAMLTKDIR) -I $(SUPPORTDIR) -I $(UNIXDIR) \
+COMPFLAGS=-W -g -O fast -I $(CAMLTKDIR) -I $(SUPPORTDIR) -I $(UNIXDIR) \
           -I ../../../src/compiler
 
 COMPILEROBJS = config.zo misc.zo interntl.zo globals.zo modules.zo \

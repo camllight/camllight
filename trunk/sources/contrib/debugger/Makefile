@@ -11,7 +11,7 @@ CAMLC=camlc
 CAMLLEX=camllex
 CAMLYACC=camlyacc
 INCLUDES=-I ../libunix -I ../../src/compiler -I ../../src/linker -I ../../src/toplevel
-COMPFLAGS=$(INCLUDES)
+COMPFLAGS=-W $(INCLUDES)
 LINKFLAGS=$(INCLUDES)
 CFLAGS=$(OPTS) -O -I../../src/runtime
 

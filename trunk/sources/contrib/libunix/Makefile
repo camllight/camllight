@@ -14,6 +14,8 @@ RANLIB=ranlib
 # Compilation options
 CFLAGS=-I../../src/runtime $(OPTS)
 CAMLC=camlc
+CAMLCOMP=$(CAMLC) -c
+COMPFLAGS=-W
 CAMLMKTOP=camlmktop
 
 OBJS=accept.o access.o addrofstr.o alarm.o bind.o chdir.o chmod.o \
@@ -56,10 +58,10 @@ install:
 .SUFFIXES: .ml .mli .zo .zi
 
 .mli.zi:
-	$(CAMLC) -c $<
+	$(CAMLCOMP) $(COMPFLAGS) $<
 
 .ml.zo:
-	$(CAMLC) -c $<
+	$(CAMLCOMP) $(COMPFLAGS) $<
 
 lint:
 	lint -I../../src/runtime *.c > lint-blurb
