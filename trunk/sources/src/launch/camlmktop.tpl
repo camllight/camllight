@@ -4,7 +4,7 @@ stdlib=LIBDIR
 linkfiles=""
 custom=""
 includes=""
-cc=CC
+cc="CC"
 ccfiles=""
 cclib=""
 ccopt=""
@@ -61,7 +61,7 @@ rm -f /tmp/camlreq.$$ /tmp/camlout.$$
 if test -n "$custom"; then
   if mv $output /tmp/camlcode.$$ \
      && $cc -I$stdlib -o $output $ccopt /tmp/camlprim.$$.c $ccfiles  \
-            -L$stdlib $cclib -lcaml -lm \
+            -L$stdlib $cclib -lcaml LIBS -lm \
      && cat /tmp/camlcode.$$ >> $output
   then
     rm -f /tmp/camlprim.$$.c camlprim.$$.o /tmp/camlcode.$$

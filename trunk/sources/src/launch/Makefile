@@ -1,6 +1,8 @@
 CAMLCOMP=../camlrun ../camlcomp -stdlib ../lib
 CAMLLINK=../camlrun ../camllink -stdlib ../lib
 CC=cc
+OPTS=
+LIBS=
 
 all: camlc camllight camlmktop camlexec testprog 
 
@@ -23,16 +25,19 @@ install:
 	  chmod a+x $(BINDIR)/$$script; \
 	done
 
+SEDCOMMANDS=\
+  -e 's|LIBDIR|$(LIBDIR)|' -e 's|CC|$(CC) $(OPTS)|' -e 's|LIBS|$(LIBS)|'
+
 camlc: camlc.tpl ../version.h
-	sed -e 's|LIBDIR|$(LIBDIR)|' -e 's|CC|$(CC)|' \
+	sed  $(SEDCOMMANDS) \
             -e s/VERSION/`sed -e 's/#define VERSION //' ../version.h`/ \
             camlc.tpl > camlc
 
 camllight: camllight.tpl
-	sed -e 's|LIBDIR|$(LIBDIR)|' -e 's|CC|$(CC)|' camllight.tpl > camllight
+	sed $(SEDCOMMANDS) camllight.tpl > camllight
 
 camlmktop: camlmktop.tpl
-	sed -e 's|LIBDIR|$(LIBDIR)|' -e 's|CC|$(CC)|' camlmktop.tpl > camlmktop
+	sed $(SEDCOMMANDS) camlmktop.tpl > camlmktop
 
 testprog: testprog.ml
 	$(CAMLCOMP) testprog.ml

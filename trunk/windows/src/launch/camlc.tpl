@@ -7,7 +7,7 @@ compopt=""
 linkopt=""
 custom=""
 linkfiles=""
-cc=CC
+cc="CC"
 ccfiles=""
 cclib=""
 ccopt=""
@@ -109,7 +109,7 @@ if $linkalso && test -n "$linkfiles"; then
   if test -n "$custom"; then
     if mv $linkout /tmp/camlcode.$$ \
        && $cc -I$stdlib -o $linkout $ccopt /tmp/camlprim.$$.c $ccfiles  \
-              -L$stdlib $cclib -lcaml -lm \
+              -L$stdlib $cclib -lcaml LIBS -lm \
        && strip $linkout \
        && cat /tmp/camlcode.$$ >> $linkout
     then
