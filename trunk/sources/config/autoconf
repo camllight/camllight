@@ -8,6 +8,7 @@ export cc
 
 cd auto-aux
 rm -f s.h m.h
+touch s.h m.h
 
 # Check the sizes of data types
 
