@@ -15,7 +15,7 @@ type primitive =
   | Psetfield of int
   | Pccall of string * int
   | Praise
-  | Pnot
+  | Pnot | Psequand | Psequor
   | Pnegint | Psuccint | Ppredint
   | Paddint | Psubint | Pmulint | Pdivint | Pmodint
   | Pandint | Porint | Pxorint

@@ -236,7 +236,7 @@ let rec translate_expr env =
         | pat::patl ->
             let new_debug_env =
               if pat_irrefutable pat
-              then fst(add_pat_to_env debug_env pat)
+              then let (newenv, _, _) = add_pat_to_env debug_env pat in newenv
               else Treserved debug_env in
             Lfunction(event__after_pat new_debug_env pat
                         (transl_fun new_debug_env patl)) in
@@ -261,10 +261,6 @@ let rec translate_expr env =
            translate_expr (Treserved env) estop,
            up_flag,
            event__before new_env ebody (translate_expr new_env ebody))
-  | Zsequand(e1, e2) ->
-      Lsequand(transl e1, transl e2)
-  | Zsequor(e1, e2) ->
-      Lsequor(transl e1, transl e2)
   | Zconstraint(e, _) ->
       transl e
   | Zvector [] ->
@@ -274,7 +270,7 @@ let rec translate_expr env =
   | Zassign(id, e) ->
       translate_update id env (transl e)
   | Zrecord lbl_expr_list ->
-      let v = make_vect (list_length lbl_expr_list) Lstaticfail in
+      let v = make_vect (list_length lbl_expr_list) (Lconst const_unit) in
         do_list
           (fun (lbl, e) -> v.(lbl.info.lbl_pos) <- transl e)
           lbl_expr_list;
@@ -298,22 +294,26 @@ let rec translate_expr env =
       let (stream_type, _) = types__filter_arrow expr.e_typ in
       translate_parser translate_expr expr.e_loc env case_list stream_type
   | Zwhen(e1,e2) ->
-      guard_expression (transl e1) (transl e2)
+      fatal_error "front: Zwhen"
   in transl
 
+and transl_action env (patlist, expr) =
+  let (new_env, add_lets, num_pops) = add_pat_list_to_env env patlist in
+  let action =
+    match expr.e_desc with
+      Zwhen(e1, e2) ->
+        guard_expression
+          (translate_expr new_env e1) (translate_expr new_env e2) num_pops
+    | _ ->
+        translate_expr new_env expr in
+  (patlist, add_lets(event__before new_env expr action))
+
 and translate_match loc env casel =
-  let transl_action (patlist, expr) =
-    let (new_env, add_lets) = add_pat_list_to_env env patlist in
-      (patlist,
-       add_lets(event__before new_env expr (translate_expr new_env expr))) in
-  translate_matching_check_failure loc (map transl_action casel)
+  translate_matching_check_failure loc (map (transl_action env) casel)
 
 and translate_simple_match env failure_code pat_expr_list =
-  let transl_action (pat, expr) =
-    let (new_env, add_lets) = add_pat_to_env env pat in
-      ([pat],
-       add_lets(event__before new_env expr (translate_expr new_env expr))) in
-  translate_matching failure_code (map transl_action pat_expr_list)
+  translate_matching failure_code
+    (map (fun (pat, expr) -> transl_action env ([pat], expr)) pat_expr_list)
 
 and translate_let env = function
      [] ->  []

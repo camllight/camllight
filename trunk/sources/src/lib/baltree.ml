@@ -2,6 +2,7 @@
    These are binary trees such that the heights of the children
    differ by at most 2. *)
 
+#open "bool";;
 #open "int";;
 #open "eq";;
 #open "exc";;

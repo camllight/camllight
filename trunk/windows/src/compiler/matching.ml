@@ -235,7 +235,7 @@ let rec conquer_matching =
         ((key, lambda1) :: list2, total1 & total2)
   in function
     Matching([], _) ->
-      (Lstaticfail, false)
+      (Lstaticfail 0, false)
    | Matching(([], action) :: rest, pathl) ->
       if has_guard action then begin
         let (lambda2, total2) = conquer_matching (Matching (rest, pathl)) in

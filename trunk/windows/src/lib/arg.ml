@@ -1,5 +1,6 @@
 (* arg.ml *)
 
+#open "bool";;
 #open "exc";;
 #open "eq";;
 #open "int";;

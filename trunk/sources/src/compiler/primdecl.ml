@@ -17,6 +17,8 @@ let primitive_names = [
   "tag_of", Ptag_of;
   "raise", Praise;
   "not", Pnot;
+  "sequand", Psequand;
+  "sequor", Psequor;
   "succ", Psuccint;
   "pred", Ppredint;
   "~int", Pnegint;

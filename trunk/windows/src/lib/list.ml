@@ -1,5 +1,6 @@
 (* Operations on lists *)
 
+#open "bool";;
 #open "int";;
 #open "exc";;
 #open "eq";;

@@ -49,8 +49,6 @@ and expression_desc =
   | Zcondition of expression * expression * expression
   | Zwhile of expression * expression
   | Zfor of string * expression * expression * bool * expression
-  | Zsequand of expression * expression
-  | Zsequor of expression * expression
   | Zconstraint of expression * type_expression
   | Zvector of expression list
   | Zassign of string * expression
