@@ -1,6 +1,8 @@
 # Edit this file to reflect your installation
 # save it as Makefile.config
 
+## This should be the same compiler as for the rest
+## of the Caml Light system
 CC=cc
 
 ## Where the tcl.h and tk.h includes can be found
