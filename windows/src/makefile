@@ -8,8 +8,8 @@ DOCDIR=$(TOPDIR)\doc
 
 TXTFILES = copyrght.txt readme.txt install.txt
 
-DJGPP=C:/djgpp/bin
-DJGPPFILES=$(DJGPP)/cwsdpmi.exe $(DJGPP)/emu387.dxe
+DJGPPDIR=C:/djgpp/bin
+DJGPPFILES=$(DJGPPDIR)/cwsdpmi.exe $(DJGPPDIR)/emu387.dxe
 	
 all: world gui
 
