@@ -397,7 +397,9 @@ let write_CAMLtoTK w name typdef =
 
 (* Tcl does not really return "lists". It returns sp separated tokens *)
 let write_result_parsing w = function
-    List ty ->
+    List String ->
+      w "(splitlist res)"
+  | List ty ->
       w ("\tmap "^ converterTKtoCAML "(splitlist res)" ty)
   | Product tyl ->
       let rnames = varnames "r" (list_length tyl) in
