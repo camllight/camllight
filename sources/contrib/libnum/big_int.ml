@@ -588,7 +588,25 @@ let round_futur_last_digit s off_set length =
    else false
 ;; 
 
-(* Approximation with floating decimal point a` la approx_ratio_exp *)
+(* Approximation with floating decimal point a` la approx_ratio_exp
+   Proposition: l'exposant est la partie entière du log en base 10 du
+   nombre. On obtient une approximation de ce nombre à partir de la
+   partie entière du logarithme en base 2^32 du nombre en multipliant
+   par le facteur de conversion correspondant: 32 * log 2 / log 10
+   (environ 9.63295986125, qu'on obtient par division de 963295986 par
+   100000000).
+   On augmente la portabilité en introduisant word_size.
+ *)
+
+let exp_cv_factor_den, exp_cv_factor_num =
+  let exp_cv_factor = float_of_int word_size *. log 2.0 /. log 10.0 in
+  let denominator = 100000000.0 in
+  let numerator =
+   big_int_of_string
+    (string_of_float (floor (exp_cv_factor *. denominator))) in
+
+  numerator, big_int_of_float denominator;;
+
 let approx_big_int prec bi =
   let len_bi = num_digits_big_int bi in
   let n = 
@@ -597,8 +615,8 @@ let approx_big_int prec bi =
           add_int_big_int 
             (- prec) 
             (div_big_int (mult_big_int (big_int_of_int (pred len_bi)) 
-                                      (big_int_of_string "963295986")) 
-                        (big_int_of_string "100000000")))) in
+                                       exp_cv_factor_num) 
+                         (exp_cv_factor_den)))) in
   let s =
     string_of_big_int (div_big_int bi (power_int_positive_int 10 n)) in
   let (sign, off, len) = 

@@ -357,22 +357,22 @@ let ratio_of_num = function
 
 let sys_string_list_of_big_int_for_num base bi =
   if !approx_printing_flag && base == 10 
-     then [approx_big_int !floating_precision bi]
-     else let sl = sys_string_list_of_nat
-                    base (abs_value_big_int bi) 0 (num_digits_big_int bi) in
-            if sign_big_int bi == (-1) then "-" :: sl else sl
+  then [approx_big_int !floating_precision bi]
+  else let sl = sys_string_list_of_nat
+                 base (abs_value_big_int bi) 0 (num_digits_big_int bi) in
+       if sign_big_int bi == (-1) then "-" :: sl else sl
 ;;
 
 let sys_string_of_big_int_for_num base before bi after =
   if !approx_printing_flag && base == 10 
-     then approx_big_int !floating_precision bi
+  then approx_big_int !floating_precision bi
   else sys_string_of_big_int base before bi after
 ;;
 
 let string_of_big_int_for_num bi =
   if !approx_printing_flag 
-     then approx_big_int !floating_precision bi
-     else string_of_big_int bi
+  then approx_big_int !floating_precision bi
+  else string_of_big_int bi
 ;;
 
 (* Coercion with string type *)
@@ -418,15 +418,15 @@ let float_num n = num_of_float (float_of_num n);;
 
 let succ_num = function
 | Int i -> if i == biggest_int
-              then Big_int (succ_big_int (big_int_of_int i))
-              else Int (succ i)
+           then Big_int (succ_big_int (big_int_of_int i))
+           else Int (succ i)
 | Big_int bi -> num_of_big_int (succ_big_int bi)
 | Ratio r -> Ratio (add_int_ratio 1 r)
 
 and pred_num = function
 | Int i -> if i == monster_int
-              then Big_int (pred_big_int (big_int_of_int i))
-              else Int (pred i)
+           then Big_int (pred_big_int (big_int_of_int i))
+           else Int (pred i)
 | Big_int bi -> num_of_big_int (pred_big_int bi)
 | Ratio r -> Ratio (add_int_ratio (-1) r)
 ;;
@@ -460,8 +460,7 @@ let sys_print_num base before n after =
 
 let print_normalized_num = function
 | Int i -> print_int i
-| Big_int bi -> 
-    do_list print_string (sys_string_list_of_big_int_for_num 10 bi)
+| Big_int bi -> do_list print_string (sys_string_list_of_big_int_for_num 10 bi)
 | Ratio r -> print_ratio r
 ;;
 
