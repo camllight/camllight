@@ -132,7 +132,7 @@ type wait_flag =
 value execv : string -> string vect -> unit = 2 "unix_execv"
         (* [execv prog args] execute the program in file [prog], with
            the arguments [args], and the current process environment. *)
-  and execve : string -> string vect -> string vect -> unit = 2 "unix_execve"
+  and execve : string -> string vect -> string vect -> unit = 3 "unix_execve"
         (* Same as [execv], except that the third argument provides the
            environment to the program executed. *)
   and execvp : string -> string vect -> unit = 2 "unix_execvp"
@@ -145,9 +145,12 @@ value execv : string -> string vect -> unit = 2 "unix_execv"
            and termination status. *)
   and waitopt : wait_flag list -> int * process_status = 1 "unix_waitopt"
         (* Same as [wait], but takes a list of options to avoid blocking,
-           or report also stopped children. *)
-  and waitpid : wait_flag list -> int -> process_status = 2 "unix_waitpid"
-        (* Same as [waitopt], but waits for the process whose pid is given. *)
+           or also report stopped children. The pid returned is 0 if no
+           child has changed status. *)
+  and waitpid : wait_flag list -> int -> int * process_status
+           = 2 "unix_waitpid"
+        (* Same as [waitopt], but waits for the process whose pid is given.
+           Negative pid arguments represent process groups. *)
   and system : string -> process_status
         (* Execute the given command, wait until it terminates, and return
            its termination status. The string is interpreted by the shell
@@ -557,7 +560,7 @@ value getuid : unit -> int = 1 "unix_getuid"
         (* Return the effective group id under which the process runs. *)
   and setgid : int -> unit = 1 "unix_setgid"
         (* Set the real group id and effective group id for the process. *)
-  and getgroups : unit -> int list = 1 "unix_getgroups"
+  and getgroups : unit -> int vect = 1 "unix_getgroups"
         (* Return the list of groups to which the user executing the process
            belongs. *)
 ;;

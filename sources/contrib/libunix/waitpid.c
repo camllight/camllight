@@ -12,14 +12,17 @@ static int wait_flag_table[] = {
   WNOHANG, WUNTRACED
 };
 
-value unix_waitpid(flags, pid)
-     value flags, pid;
+value unix_waitpid(flags, pid_req)
+     value flags, pid_req;
 {
-  value st;
-  int status;
-  if (waitpid(Int_val(pid), &status, 
-              convert_flag_list(flags, wait_flag_table)) == -1)
-    uerror("waitpid", Nothing);
+  int pid, status;
+  value res;
+  Push_roots(r, 1);
+#define st r[0]
+  
+  pid = waitpid(Int_val(pid_req), &status, 
+                convert_flag_list(flags, wait_flag_table));
+  if (pid == -1) uerror("waitpid", Nothing);
   switch (status & 0xFF) {
   case 0:
     st = alloc(1, 0);
@@ -35,7 +38,11 @@ value unix_waitpid(flags, pid)
     Field(st, 1) = status & 0200 ? Val_true : Val_false;
     break;
   }
-  return st;
+  res = alloc_tuple(2);
+  Field(res, 0) = Val_int(pid);
+  Field(res, 1) = st;
+  Pop_roots();
+  return res;
 }
 
 #else
