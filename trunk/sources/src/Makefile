@@ -7,7 +7,9 @@ CC=gcc
 # Additional options to $(CC).
 # If you are using gcc, add -fno-defer-pop.
 # This option circumvents a gcc bug on some platforms (680x0, 80386).
-OPTS=-fno-defer-pop
+# If you are using Linux with libc6 (RedHat 5, Debian 2), add -D__FAVOR_BSD
+# This option avoids signal-related problems.
+OPTS=-fno-defer-pop -D__FAVOR_BSD
 
 # Extra libraries that have to be linked with the runtime system.
 # The math library "-lm" is linked by default.
@@ -24,7 +26,7 @@ LIBS=
 # not all Unix C preprocessors define it.
 # If your cpp is too fussy, make tools/clprepro and use this:
 # CPP=../../src/tools/clprepro -Dunix
-CPP=/lib/cpp -P -Dunix
+CPP=/lib/cpp -P -traditional -Dunix
 
 # The directory where public executables will be installed
 BINDIR=/usr/local/bin
