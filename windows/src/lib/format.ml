@@ -56,9 +56,7 @@ let pp_format_stack = ref ([] : pp_format_elem list);;
 let pp_tbox_stack = ref ([]:tblock list);;
 
 (* Large value for default tokens size *)
-(* Could be 1073741823 that is 2^30 - 1, that is the minimal upper bound
-   of integers *)
-let pp_infinity = 999999999;;
+let pp_infinity = 9999;;
 
 (* Global variables: default initialization is
    set_margin 78
@@ -463,17 +461,17 @@ and get_ellipsis_text () = !pp_ellipsis;;
 
 (* To set the margin of pretty-formater *)
 let set_min_space_left n =
-    if n >= 1 && n < pp_infinity then
+    if n >= 1 then
      begin
       pp_min_space_left := n;
       pp_max_indent := !pp_margin - !pp_min_space_left;
-      pp_rinit() end;;
+      pp_rinit () end;;
 
 let set_max_indent n = set_min_space_left (!pp_margin - n);;
 let get_max_indent () = !pp_max_indent;;
 
 let set_margin n =
-    if n >= 1 && n < pp_infinity then
+    if n >= 1 then
      begin
       pp_margin := n;
       let new_max_indent =
@@ -484,7 +482,8 @@ let set_margin n =
              new margin, if it is greater than 1 *)
            max (max (!pp_margin - !pp_min_space_left) (!pp_margin / 2)) 1 in
       (* Rebuild invariants *)
-      set_max_indent new_max_indent end;;
+      set_max_indent new_max_indent;
+      pp_rinit () end;;
 
 let get_margin () = !pp_margin;;
 

@@ -16,7 +16,6 @@
 #open "symtable";;
 #open "load_phr";;
 #open "compiler";;
-#open "interntl";;
 
 (* Executing phrases *)
 
@@ -63,13 +62,13 @@ let do_toplevel_phrase phr =
   | Ztypedef decl ->
       let _ = type_typedecl phr.im_loc decl in
       do_list
-        (fun (name, _, _) -> eprintf "Type %s defined.\n" name)
+        (fun (name, _, _) -> printf__printf "Type %s defined.\n" name)
         decl
   | Zexcdef decl ->
       let _ = type_excdecl phr.im_loc decl in
       do_list
         (fun decl ->
-            eprintf "Exception %s defined.\n"
+            printf__printf "Exception %s defined.\n"
                              (match decl with Zconstr0decl name -> name
                                             | Zconstr1decl(name,_,_) -> name))
         decl
