@@ -569,6 +569,8 @@ Infx :
       | COLONEQUAL      { () }    | EQUAL         { () }
       | EQUALEQUAL      { () }    | NOT           { () }
       | SUBTRACTIVE     { () }    | PREFIX        { () }
+      | AMPERSAND       { () }    | AMPERAMPER    { () }
+      | OR              { () }    | BARBAR        { () }
 ;
 
 Qual_ident :
