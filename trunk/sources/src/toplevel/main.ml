@@ -3,7 +3,6 @@
 #open "config";;
 #open "misc";;
 #open "modules";;
-#open "sys";;
 #open "symtable";;
 #open "location";;
 #open "do_phr";;
@@ -45,7 +44,7 @@ try
   default_used_modules := "toplevel" :: !default_used_modules;
   version__print_banner();
   print_newline();
-  let ic = open_in_bin command_line.(0) in
+  let ic = open_in_bin sys__command_line.(0) in
     seek_in ic (in_channel_length ic - 20);
     let size_code = input_binary_int ic in
     let size_data = input_binary_int ic in
@@ -57,7 +56,7 @@ try
     close_in ic;
     meta__global_data.(16) <- obj__repr true; (* 16: cf ../runtime/globals.h *)
     start_compiling_interface "top";
-    catch_break true;
+    sys__catch_break true;
     let lexbuf = lexing__create_lexer_channel std_in in
     input_lexbuf := lexbuf;
     while true do
