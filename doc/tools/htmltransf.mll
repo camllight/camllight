@@ -58,7 +58,10 @@ and syntax = parse
       end;
       syntax lexbuf }
   | [`_` `^`] _ {
-      print_char (get_lexeme_char lexbuf 1);
+      let subscript = get_lexeme_char lexbuf 1 in
+      if subscript >= `a` & subscript <= `z`
+      then print_char(char_of_int(int_of_char subscript - 32))
+      else print_char subscript;
       syntax lexbuf }
   | ":" {
       print_string ":\n      ";
