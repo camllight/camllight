@@ -1,7 +1,7 @@
 (* The lexer definition *)
 
 {
-/**/ #open "parser";;
+(**) #open "parser";;
 
 let input_chan = ref std_in;;
 let current_line = ref 0;;            (* current line number in file *)
