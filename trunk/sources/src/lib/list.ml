@@ -41,7 +41,7 @@ let rev l = rev_append l []
 
 let do_list f = do_list_f
  where rec do_list_f = function
-     [] -> () | x::l -> f x; do_list_f l
+     [] -> () | [x] -> f x | x::l -> f x; do_list_f l
 ;;
 
 let do_list2 f =

@@ -16,6 +16,8 @@ let make_matrix dimx dimy init =
   then invalid_arg "make_matrix"
   else fvect__make_matrix dimx dimy init
 ;;
+let init_vect = fvect__init_vect
+;;
 let vect_item v i =
   if i < 0 || i >= vect_length v
   then invalid_arg "vect_item"

@@ -11,6 +11,14 @@ let make_matrix dimx dimy init =
   res
 ;;  
 
+let init_vect l f =
+  if l = 0 then [||] else
+   let res = make_vect l (f 0) in
+   for i = 1 to pred l do
+     res.(i) <- f i
+   done;
+   res;;
+
 let blit_vect v1 start1 v2 start2 len =
   if start1 < start2 then
     (* Top-down copy *)

@@ -18,6 +18,7 @@ value vect_item : 'a vect -> int -> 'a = 2 "get_vect_item"
 value make_vect : int -> 'a -> 'a vect = 2 "make_vect"
   and make_matrix : int -> int -> 'a -> 'a vect vect
 ;;
+value init_vect : int -> (int -> 'a) -> 'a vect;;
 value concat_vect : 'a vect -> 'a vect -> 'a vect
   and sub_vect : 'a vect -> int -> int -> 'a vect
   and copy_vect: 'a vect -> 'a vect

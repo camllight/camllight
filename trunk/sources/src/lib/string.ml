@@ -22,30 +22,11 @@ let nth_char s n =
   then invalid_arg "nth_char"
   else fstring__nth_char s n
 ;;
+
 let set_nth_char s n c =
   if n < 0 || n >= string_length s
   then invalid_arg "set_nth_char"
   else fstring__set_nth_char s n c
-;;
-
-let index_char s start len c =
-  let l = string_length s
-  and lim = start + len in
-  if start < 0 || len < 0 || lim > l then invalid_arg "index_char" else
-  let rec pos p =
-   if p >= lim then raise Not_found else
-   if s.[p] == c then p else pos (succ p) in
-  pos start
-;;
-
-let rev_index_char s start len c =
-  let l = string_length s
-  and lim = start - len in
-  if lim < -1 || len < 0 || start >= l then invalid_arg "rev_index_char" else
-  let rec pos p =
-   if p <= lim then raise Not_found else
-   if s.[p] == c then p else pos (pred p) in
-  pos start
 ;;
 
 let fill_string s start len c =
@@ -81,4 +62,16 @@ let replace_string dest src pos =
 ;;
 
 let string_for_read = fstring__string_for_read
+;;
+
+let index_char_from = fstring__index_char_from
+;;
+
+let index_char = fstring__index_char
+;;
+
+let rindex_char_from = fstring__rindex_char_from
+;;
+
+let rindex_char = fstring__rindex_char
 ;;
