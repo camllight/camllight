@@ -2,9 +2,8 @@
 LIBDIR=/usr/local/lib/caml-light
 BINDIR=/usr/local/bin
 
-PROFILING=${CAMLPROF}
 CAMLC=camlc
-CAMLCOMP=$(CAMLC) -c $(PROFILING)
+CAMLCOMP=$(CAMLC) -c
 CPP=/lib/cpp -P -Dunix
 
 CAMLYACC=camlyacc -v
@@ -22,14 +21,13 @@ TKLIBDIR=/usr/local/lib/tk4.0/lib
 TKLIBS=-ltk -ltcl -lX11
 
 TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
-	  -ccopt -L$(SUPPORTDIR) \
-	   -lcamltk4 $(TKLIBS)
+	  -ccopt -L$(SUPPORTDIR) -lcamltk4 $(TKLIBS)
 
 CAMLDEP=../../../src/tools/camldep
 
 COMPFLAGS=-W -g -O cautious -I $(CAMLTKDIR) -I $(SUPPORTDIR) -I $(UNIXDIR) \
           -I ../../../src/compiler -I ../frx
-LINKFLAGS=-g -custom $(PROFILING) -I ../frx
+LINKFLAGS=-g -custom -I ../frx
 
 COMPILEROBJS = config.zo misc.zo interntl.zo globals.zo modules.zo \
                location.zo types.zo \
