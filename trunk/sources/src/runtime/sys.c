@@ -9,6 +9,7 @@
 #include <sys\stat.h>
 #endif
 #include "alloc.h"
+#include "debugcom.h"
 #include "fail.h"
 #include "globals.h"
 #include "instruct.h"
@@ -50,6 +51,7 @@ void sys_error()
 void sys_exit(retcode)          /* ML */
      value retcode;
 {
+  debugger(PROGRAM_EXIT);
   exit(Int_val(retcode));
 }
 
@@ -160,6 +162,9 @@ void sys_init(argv)
   for (i = SYS__S_IRUSR; i <= SYS__S_IXALL; i++)
     Field(global_data, i) = Val_long(sys_var_init[i - SYS__S_IRUSR]);
   Field(global_data, SYS__INTERACTIVE) = Val_false;
+  Field(global_data, SYS__MAX_VECT_LENGTH) = Val_long(Max_wosize);
+  Field(global_data, SYS__MAX_STRING_LENGTH) =
+    Val_long((Max_wosize + 1) * sizeof(value) - 2);
 }
 
 /* Handling of user interrupts */

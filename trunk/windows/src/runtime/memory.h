@@ -13,29 +13,14 @@
 
 extern value *c_roots_head;
 
-#ifdef ANSI
-
-extern void init_memory (asize_t, asize_t);
-extern value raw_alloc_shr (mlsize_t, tag_t);
-extern value alloc_shr (mlsize_t, tag_t);
-extern void modify (value *, value);
-extern void initialize (value *, value);
-extern char * stat_alloc (asize_t);	        /* Size in bytes. */
-extern void stat_free (char *);
-extern char * stat_resize (char *, asize_t);     /* Size in bytes. */
-
-#else
-
-void init_memory ();
-value raw_alloc_shr ();
-value alloc_shr ();
-void modify ();
-void initialize ();
-char * stat_alloc ();		/* Size in bytes. */
-void stat_free ();
-char * stat_resize ();		/* Size in bytes. */
-
-#endif /* ANSI */
+void init_memory P((asize_t, asize_t));
+value raw_alloc_shr P((mlsize_t, tag_t));
+value alloc_shr P((mlsize_t, tag_t));
+void modify P((value *, value));
+void initialize P((value *, value));
+char * stat_alloc P((asize_t));	             /* Size in bytes. */
+void stat_free P((char *));
+char * stat_resize P((char *, asize_t));     /* Size in bytes. */
 
 #define Alloc_small(result, wosize, tag) {				      \
   char *_res_ = young_ptr;						      \

@@ -4,6 +4,7 @@
 #define _io_
 
 
+#include "misc.h"
 #include "mlvalues.h"
 
 #ifndef IO_BUFFER_SIZE
@@ -35,29 +36,15 @@ struct channel {
    ? refill(channel)                                                          \
    : (unsigned char) *((channel))->curr++)
 
-#ifdef ANSI
-
-extern struct channel * open_descriptor(value);
-extern value flush(struct channel *);
-extern void putword(struct channel *, long);
-extern void putblock(struct channel *, char *, unsigned);
-extern unsigned char refill(struct channel *);
-extern long getword(struct channel *);
-extern unsigned getblock(struct channel *, char *, unsigned);
-extern value close_in (struct channel *);
-
-#else
-
-struct channel * open_descriptor();
-value flush();
-void putword();
-void putblock();
-unsigned char refill();
-long getword();
-unsigned getblock();
-value close_in ();
-
-#endif
+struct channel * open_descriptor P((value));
+value flush P((struct channel *));
+void putword P((struct channel *, int32));
+void putblock P((struct channel *, char *, unsigned));
+unsigned char refill P((struct channel *));
+uint32 getword P((struct channel *));
+unsigned getblock P((struct channel *, char *, unsigned));
+int really_getblock P((struct channel *, char *, unsigned long));
+value close_in P((struct channel *));
 
 
 #endif /* _io_ */

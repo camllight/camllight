@@ -263,7 +263,7 @@ void init_major_heap (heap_size)
   heap_start = aligned_malloc (total_heap_size + sizeof (heap_chunk_head),
 			       sizeof (heap_chunk_head));
   if (heap_start == NULL)
-    fatal_unix_error ("cannot allocate the initial heap", "");
+    fatal_error ("Fatal error: not enough memory for the initial heap.\n");
   heap_start += sizeof (heap_chunk_head);
   Assert ((unsigned long) heap_start % Page_size == 0);
   (((heap_chunk_head *) heap_start) [-1]).size = total_heap_size;
@@ -277,7 +277,7 @@ void init_major_heap (heap_size)
 #endif
   page_table = (char *) malloc (page_table_size);
   if (page_table == NULL)
-    fatal_unix_error ("cannot allocate the initial heap", "");
+    fatal_error ("Fatal error: not enough memory for the initial heap.\n");
   for (i = 0; i < page_table_size; i++) {
     page_table [i] = Not_in_heap;
   }

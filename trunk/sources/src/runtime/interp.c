@@ -13,6 +13,7 @@
 #include "stacks.h"
 #include "str.h"
 #include "unalignd.h"
+#include "debugcom.h"
 #ifdef macintosh
 #include <CursorCtl.h>
 #endif
@@ -138,17 +139,17 @@ value interprete(prog)
    and don't put it in a register. 
    For GCC users, I've hand-assigned registers for some architectures. */
 
-#if defined(__GNUC__) && defined(mc68000)
-  register code_t pc asm("a5");
-  register value accu;
-  register value * asp;
-  register value * rsp;
-#else
 #if defined(__GNUC__) && defined(sparc)
   register code_t pc asm("%l0");
   register value accu asm("%l1");
   register value * asp asm("%l2");
   register value * rsp asm("%l3");
+#else
+#if defined(__GNUC__) && defined(mc68000)
+  register code_t pc asm("a5");
+  register value accu;
+  register value * asp;
+  register value * rsp;
 #else
 #if defined(__GNUC__) && defined(i386)
 #if defined(MSDOS)
@@ -167,6 +168,7 @@ value interprete(prog)
 #endif
 #endif
 #endif
+  int cur_instr;
   int cache_size;
   value env;
   value tmp;
@@ -192,6 +194,8 @@ value interprete(prog)
   if (setjmp(raise_buf.buf)) {
     c_roots_head = initial_c_roots_head;
     accu = exn_bucket;
+    asp = extern_asp;
+    rsp = extern_rsp;
     goto raise;
   }
   initial_external_raise = external_raise;
@@ -204,7 +208,7 @@ value interprete(prog)
 
 #ifdef DIRECT_JUMP
 # define Instruct(name) lbl_##name
-# define Next goto *jumptable[*pc++]
+# define Next cur_instr = *pc++; goto *jumptable[cur_instr]
 #else
 # define Instruct(name) case name
 # define Next break
@@ -225,7 +229,9 @@ value interprete(prog)
     Assert(rsp >= ret_stack_low);
     Assert(rsp <= ret_stack_high);
 #endif
-    switch (*pc++) {
+    cur_instr = *pc++;
+  decode_instruction:
+    switch (cur_instr) {
 #endif
 
     Instruct(STOP):
@@ -456,6 +462,12 @@ value interprete(prog)
     raise:			/* An external raise jumps here */
 
     Instruct(RAISE):
+      if ((value *) tp >= trap_barrier) {
+        Setup_for_gc;
+        retsp->pc = pc;
+        debugger(TRAP_BARRIER);
+        Restore_after_gc;
+      }
       rsp = (value *) tp;
       if (rsp >= (value *)((char *) ret_stack_high - initial_rsp_offset)) {
         exn_bucket = accu;
@@ -476,7 +488,7 @@ value interprete(prog)
       if (signal_is_pending) {
         /* We must check here so that if a signal is pending and its
            handler triggers an exception, the exception is trapped
-           by the current try...with, not the englobing one. */
+           by the current try...with, not the enclosing one. */
         pc--; /* restart the POPTRAP after processing the signal */
         goto process_signal;
       }
@@ -873,9 +885,35 @@ value interprete(prog)
       tmp = Long_val(*asp++);
       goto setfield;
 
-#ifdef DEBUG
+    Instruct(BREAK):
+      Setup_for_gc;
+      retsp->pc = pc - 1;
+      cur_instr = debugger(BREAKPOINT);
+      if (cur_instr == -1) cur_instr = pc[-1];
+      Restore_after_gc;
+#ifdef DIRECT_JUMP
+      goto *jumptable[cur_instr & 0x7F];
+#else
+      cur_instr &= 0x7F;
+      goto decode_instruction;
+#endif
+
+#ifdef DIRECT_JUMP
+    lbl_EVENT:
+#else
     default:
-      fatal_error("unknown opcode");
+#endif
+      if (--event_count == 0) {
+        Setup_for_gc;
+        retsp->pc = pc - 1;
+        debugger(EVENT);
+        Restore_after_gc;
+      }
+#ifdef DIRECT_JUMP
+      goto *jumptable[cur_instr & 0x7F];
+#else
+      cur_instr &= 0x7F;
+      goto decode_instruction;
 #endif
 
 #ifndef DIRECT_JUMP

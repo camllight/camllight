@@ -81,7 +81,7 @@ void minor_collection ()
   struct longjmp_buffer *old_external_raise;
 
   if (setjmp(raise_buf.buf)) {
-    fatal_error ("out of memory");
+    fatal_error ("Fatal error: out of memory.\n");
   }
   old_external_raise = external_raise;
   external_raise = &raise_buf;
@@ -110,7 +110,7 @@ void realloc_ref_table ()
 #endif
   ref_table = (value **) realloc ((char *) ref_table,
 				  ref_table_size * 2 * sizeof (value *));
-  if (ref_table == NULL) fatal_error ("ref_table overflow");
+  if (ref_table == NULL) fatal_error ("Fatal error: out of memory.\n");
   ref_table_ptr = ref_table + ref_table_size;
   ref_table_size *= 2;
   ref_table_end = ref_table + ref_table_size;

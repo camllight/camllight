@@ -217,11 +217,11 @@ value input_char(channel)       /* ML */
   return Val_long(c);
 }
 
-long getword(channel)
+uint32 getword(channel)
      struct channel * channel;
 {
   int i;
-  long res;
+  uint32 res;
 
   res = 0;
   for(i = 0; i < 4; i++) {
@@ -233,7 +233,12 @@ long getword(channel)
 value input_int(channel)        /* ML */
      struct channel * channel;
 {
-  return Val_long(getword(channel));
+  long i;
+  i = getword(channel);
+#ifdef SIXTYFOUR
+  i = (i << 32) >> 32;          /* Force sign extension */
+#endif
+  return Val_long(i);
 }
 
 unsigned getblock(channel, p, n)
@@ -267,6 +272,20 @@ unsigned getblock(channel, p, n)
   }
 }
 
+int really_getblock(chan, p, n)
+     struct channel * chan;
+     char * p;
+     unsigned long n;
+{
+  unsigned r;
+  while (n > 0) {
+    r = getblock(chan, p, (unsigned) n);
+    if (r == 0) return 0;
+    p += r;
+    n -= r;
+  }
+  return 1;
+}
 
 value input(channel, buff, start, length) /* ML */
      value channel, buff, start, length;

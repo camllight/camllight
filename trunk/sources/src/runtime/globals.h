@@ -25,5 +25,7 @@ extern value global_data;
 #define SYS__S_IXALL 14         /* "sys","s_ixall" */
 #define SYS__COMMAND_LINE 15    /* "sys","command_line" */
 #define SYS__INTERACTIVE 16     /* "sys","interactive" */
+#define SYS__MAX_STRING_LENGTH 17 /* "sys","max_string_length" */
+#define SYS__MAX_VECT_LENGTH 18   /* "sys","max_vect_length" */
 
 #endif /* _globals_ */

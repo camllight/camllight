@@ -1,7 +1,7 @@
 #ifndef _debugger_
 #define _debugger_
 
-
+#include "misc.h"
 #include "mlvalues.h"
 
 #ifdef DEBUG
@@ -13,7 +13,7 @@ extern int trace_flag;
 
 #define Debug(x) x
 
-#ifdef ANSI
+#ifdef __STDC__
 #define Assert(x) if (!(x)) failed_assert ( #x , __FILE__, __LINE__)
 #define Dprintx(x) printf ("expression %s %ld\n", #x, (unsigned long) (x))
 #else
@@ -25,21 +25,13 @@ extern int trace_flag;
 #endif
 #define Assert(x) if (!(x)) failed_assert ("(?)" , __FILE__, __LINE__)
 #define Dprintx(x) printf ("expression %ld\n", (unsigned long) (x))
-#endif /* ANSI */
+#endif /* __STDC__ */
 
-#ifdef ANSI
-extern void failed_assert (char *, char *, int);
-extern void print_value(value);
-extern code_t disasm_instr(code_t);
-extern void post_mortem(int);
-extern unsigned long not_random (void);
-#else
-void failed_assert ();
-void print_value();
-code_t disasm_instr();
-void post_mortem();
-unsigned long not_random ();
-#endif /* ANSI */
+void failed_assert P((char *, char *, int));
+void print_value P((value));
+code_t disasm_instr P((code_t));
+void post_mortem P((int));
+unsigned long not_random P((void));
 
 #else /* DEBUG */
 

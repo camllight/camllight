@@ -3,6 +3,7 @@
 
 
 #include <setjmp.h>
+#include "misc.h"
 #include "mlvalues.h"
 
 #define OUT_OF_MEMORY_EXN 0     /* "exc","Out_of_memory",1 */
@@ -24,25 +25,11 @@ struct longjmp_buffer {
 extern struct longjmp_buffer * external_raise;
 extern value exn_bucket;
 
-#ifdef ANSI
-
-extern void mlraise(value);
-extern void raise_with_arg(tag_t tag, value arg);
-extern void raise_with_string(tag_t tag, char * msg);
-extern void failwith (char *);
-extern void invalid_argument (char *);
-extern void raise_out_of_memory (void);
-
-#else /* ANSI */
-
-void mlraise();
-void raise_with_arg();
-void raise_with_string();
-void failwith ();
-void invalid_argument ();
-void raise_out_of_memory ();
-
-#endif /* ANSI */
-
+void mlraise P((value));
+void raise_with_arg P((tag_t tag, value arg));
+void raise_with_string P((tag_t tag, char * msg));
+void failwith P((char *));
+void invalid_argument P((char *));
+void raise_out_of_memory P((void));
 
 #endif /* _fail_ */

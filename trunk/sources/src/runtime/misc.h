@@ -5,15 +5,20 @@
 
 
 #include "config.h"
-#ifdef ANSI
+#ifdef __STDC__
 #include <stddef.h>
 #endif
-
 #ifdef SIXTEEN
 #include <stdlib.h>
 #endif
 
-#ifdef ANSI
+#ifdef __STDC__
+#define P(x) x
+#else
+#define P(x) ()
+#endif
+
+#ifdef __STDC__
 typedef size_t asize_t;
 #else
 typedef int asize_t;
@@ -31,19 +36,10 @@ typedef char * addr;
 
 extern int verb_gc;
 
-#ifdef ANSI
-extern void gc_message (char *, unsigned long);
-extern void fatal_error (char *);
-extern void fatal_unix_error (char *, char *);
-extern void memmov (char *, char *, unsigned long);
-extern char * aligned_malloc (asize_t, int);
-#else
-void gc_message ();
-void fatal_error ();
-void fatal_unix_error ();
-void memmov ();
-char * aligned_malloc ();
-#endif /* ANSI */
+void gc_message P((char *, unsigned long));
+void fatal_error P((char *));
+void memmov P((char *, char *, unsigned long));
+char * aligned_malloc P((asize_t, int));
 
 
 #endif /* _misc_ */

@@ -37,19 +37,11 @@ extern char *gc_sweep_hp;
 #define Is_in_heap(p) (page_table [Page (p)] == In_heap)
 #endif
 
-#ifdef ANSI
-extern void init_major_heap (asize_t);
-extern asize_t round_heap_chunk_size (asize_t);
-extern void darken (value);
-extern void major_collection_slice (void);
-extern unsigned long major_collection (void);
-#else
-void init_heap ();
-asize_t round_heap_chunk_size ();
-void darken ();
-void major_collection_slice ();
-unsigned long major_collection ();
-#endif
+void init_major_heap P((asize_t));
+asize_t round_heap_chunk_size P((asize_t));
+void darken P((value));
+void major_collection_slice P((void));
+unsigned long major_collection P((void));
 
 
 #endif /* _major_gc_ */

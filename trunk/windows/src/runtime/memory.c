@@ -51,7 +51,7 @@ static char *expand_heap (request)
     new_page_table_size = page_table_size + more_pages;
     new_page_table = (char *) malloc (new_page_table_size);
     if (new_page_table == NULL){
-      gc_message ("no room.\n", 0);
+      gc_message ("No room.\n", 0);
       free (mem);
       return NULL;
     }
