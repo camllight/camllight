@@ -26,7 +26,7 @@ let do_code may_free code entrypoint len =
         (sys__Break | misc__Toplevel | misc__Zinc _) as sys_exn ->
           raise sys_exn
       | Out_of_memory ->
-          gc(); gc(); ()
+          gc__full_major(); ()
       | _ ->
           ()
       end;

@@ -48,6 +48,18 @@ value alloc_string (len)
   return result;
 }
 
+value alloc_final (len, fun, mem, max)
+     mlsize_t len;
+     final_fun fun;
+     mlsize_t mem, max;
+{
+  value result = alloc_shr (len, Final_tag);
+
+  Field (result, 0) = (value) fun;
+  adjust_gc_speed (mem, max);
+  return result;
+}
+
 value copy_double(d)
      double d;
 {

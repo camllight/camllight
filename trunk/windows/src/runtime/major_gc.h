@@ -10,9 +10,9 @@ typedef struct {
   char *next;
 } heap_chunk_head;
 
-extern free_list_t master_fl;
 extern int gc_phase;
 extern unsigned long allocated_words;
+extern unsigned long extra_heap_memory;
 
 #define Phase_mark 0
 #define Phase_sweep 1
@@ -41,7 +41,8 @@ void init_major_heap P((asize_t));
 asize_t round_heap_chunk_size P((asize_t));
 void darken P((value));
 void major_collection_slice P((void));
-unsigned long major_collection P((void));
+void major_collection P((void));
+void finish_major_cycle P((void));
 
 
 #endif /* _major_gc_ */

@@ -224,10 +224,6 @@ let default_printer name =
   flush std_err
 ;;
 
-(* Trigger a GC *)
-
-let gc () = meta__gc ();;
-
 (* Change the current working directory *)
 
 let cd s = sys__chdir s;;

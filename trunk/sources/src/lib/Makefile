@@ -11,7 +11,7 @@ STD_INTF= arg.zi bool.zi char.zi string.zi vect.zi eq.zi exc.zi \
     fchar.zi filename.zi float.zi fstring.zi fvect.zi hashtbl.zi \
     int.zi io.zi lexing.zi list.zi obj.zi pair.zi parsing.zi printexc.zi \
     ref.zi sort.zi sys.zi printf.zi stream.zi stack.zi queue.zi random.zi \
-    genlex.zi baltree.zi set.zi map.zi
+    genlex.zi baltree.zi set.zi map.zi gc.zi
 
 # The list of all implementations. In dependency order.
 

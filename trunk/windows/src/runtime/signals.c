@@ -1,6 +1,7 @@
+#include "alloc.h"
+#include "misc.h"
 #include "mlvalues.h"
 #include "signals.h"
-#include "alloc.h"
 #include "stacks.h"
 
 #ifdef __STDC__
@@ -29,6 +30,7 @@ void execute_signal()
     callback(clos, Val_int(signal_number));
   } else {
     signal_is_pending = 1;
+    something_to_do = 1;
   }
 }
 

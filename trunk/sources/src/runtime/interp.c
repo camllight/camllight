@@ -6,6 +6,7 @@
 #include "fail.h"
 #include "instruct.h"
 #include "memory.h"
+#include "minor_gc.h"
 #include "misc.h"
 #include "mlvalues.h"
 #include "prims.h"
@@ -219,8 +220,7 @@ value interprete(prog)
 #else
   while (1) {
 #ifdef DEBUG
-    --icount;
-    if (icount == 0) stop_here ();
+    if (icount-- == 0) stop_here ();
     *log_ptr++ = pc;
     if (log_ptr >= log_buffer + LOG_BUFFER_SIZE) log_ptr = log_buffer;
     if (trace_flag) disasm_instr(pc);
@@ -301,26 +301,34 @@ value interprete(prog)
         if (--poll_count == 0) { poll_count = 500; poll_break(); }
       }
 #endif
-      if (signal_is_pending) goto process_signal;
+      if (something_to_do) goto process_signal;
       Next;
 
     process_signal:
-      signal_is_pending = 0;
-      push_ret_frame();
-      retsp->pc = pc;
-      retsp->env = env;
-      retsp->cache_size = cache_size;
-      *--asp = MARK;
-      *--asp = accu;
-      *--asp = MARK;
-      env = Atom(0);
-      push_ret_frame();
-      retsp->pc = return_from_interrupt;
-      retsp->env = env;
-      retsp->cache_size = 0;
-      *--rsp = Val_int(signal_number);
-      cache_size = 1;
-      pc = signal_handler;
+      something_to_do = 0;
+      if (force_minor_gc){
+	Setup_for_gc;
+	minor_collection ();
+	Restore_after_gc;
+      }
+      if (signal_is_pending){
+	signal_is_pending = 0;
+	push_ret_frame();
+	retsp->pc = pc;
+	retsp->env = env;
+	retsp->cache_size = cache_size;
+	*--asp = MARK;
+	*--asp = accu;
+	*--asp = MARK;
+	env = Atom(0);
+	push_ret_frame();
+	retsp->pc = return_from_interrupt;
+	retsp->env = env;
+	retsp->cache_size = 0;
+	*--rsp = Val_int(signal_number);
+	cache_size = 1;
+	pc = signal_handler;
+      }
       Next;
 
     Instruct(PUSH_GETGLOBAL_APPLY):
