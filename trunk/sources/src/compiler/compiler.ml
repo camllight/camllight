@@ -2,6 +2,7 @@
 
 #open "obj";;
 #open "misc";;
+#open "interntl";;
 #open "const";;
 #open "lexer";;
 #open "parser";;
@@ -39,20 +40,20 @@ let parse_phrase parsing_fun lexing_fun lexbuf =
          let pos1 = lexing__get_lexeme_start lexbuf in
          let pos2 = lexing__get_lexeme_end lexbuf in
          if f (obj__repr EOF) or f (obj__repr SEMISEMI) then () else skip();
-         printf__eprintf "%aSyntax error.\n" output_location (Loc(pos1, pos2));
+         eprintf "%aSyntax error.\n" output_location (Loc(pos1, pos2));
          raise Toplevel
      | lexer__Lexical_error(errcode, pos1, pos2) ->
          let l = Loc(pos1, pos2) in
          begin match errcode with
            lexer__Illegal_character ->
-             printf__eprintf "%aIllegal character.\n" output_location l
+             eprintf "%aIllegal character.\n" output_location l
          | lexer__Unterminated_comment ->
-             printf__eprintf "%tComment not terminated.\n" output_input_name
+             eprintf "%tComment not terminated.\n" output_input_name
          | lexer__Bad_char_constant ->
-             printf__eprintf "%aIll-formed character literal.\n"
+             eprintf "%aIll-formed character literal.\n"
                              output_location l
          | lexer__Unterminated_string ->
-             printf__eprintf "%tString literal not terminated.\n"
+             eprintf "%tString literal not terminated.\n"
                              output_input_name
          end;
          skip();
@@ -80,7 +81,7 @@ let do_directive loc = function
   | Zdir("directory", dirname) ->
       load_path := dirname :: !load_path
   | Zdir(d, name) ->
-      printf__eprintf 
+      eprintf 
         "%aWarning: unknown directive \"#%s\", ignored.\n"
         output_location loc d;
       flush stderr
@@ -197,7 +198,7 @@ let compile_implementation modname filename suffix =
   if file_exists (filename ^ ".mli") then begin
     try
       if not (file_exists (filename ^ ".zi")) then begin
-        printf__eprintf
+        eprintf
           "Cannot find file %s.zi. Please compile %s.mli first.\n"
           filename filename;
         raise Toplevel

@@ -33,6 +33,8 @@ and show_types_flag () =
   compiler__verbose := true
 and debug_option () =
   event__record_events := true; compiler__write_extended_intf := true
+and set_language lang =
+  interntl__language := lang
 ;;
 
 let main() =
@@ -49,16 +51,17 @@ try
               "-version", arg__Unit show_version;
               "-i", arg__Unit show_types_flag;
               "-g", arg__Unit debug_option;
+              "-lang", arg__String set_language;
               "-", arg__String anonymous]
              anonymous;
   exit 0
 with Toplevel -> exit 2
    | sys__Break -> exit 2
    | sys__Sys_error msg ->
-      printf__eprintf "Input/output error: %s.\n" msg;
+      interntl__eprintf "Input/output error: %s.\n" msg;
       exit 2
    | Zinc s ->
-      printf__eprintf "Internal error: %s.\nPlease report it.\n" s;
+      interntl__eprintf "Internal error: %s.\nPlease report it.\n" s;
       exit 100
 ;;
 

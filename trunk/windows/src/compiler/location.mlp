@@ -5,6 +5,7 @@
 (**) #open "lexing";;
 (**) #open "parsing";;
 (**) #open "misc";;
+(**) #open "interntl";;
 
 let input_name = ref ""                 (* Input file name. *)
 and input_chan = ref std_in             (* The channel opened on the input. *)
@@ -133,7 +134,7 @@ let output_location oc loc =
       loc;
     seek_in !input_chan p
   end else begin
-    output_string oc "Toplevel input:\n";
+    fprintf oc "Toplevel input:\n";
     let curr_pos = ref 0 in
     let input () =
       let c =
