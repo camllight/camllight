@@ -6,9 +6,6 @@
 value nothing : 'a -> unit;;
 
 (*** Types and exceptions. ***)
-type 'a OPTION =
-    None
-  | Some of 'a;;
 
 exception Out_of_range;;
 exception Exit;;

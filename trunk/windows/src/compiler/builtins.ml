@@ -27,6 +27,8 @@ and constr_type_list =
   builtin "list" {ty_stamp=9; ty_abbr=Tnotabbrev}
 and constr_type_vect =
   builtin "vect" {ty_stamp=10; ty_abbr=Tnotabbrev}
+and constr_type_option =
+  builtin "option" {ty_stamp=11; ty_abbr=Tnotabbrev}
 and constr_type_stream =
   {qualid = {qual="stream"; id="stream"};
    info   = {ty_stamp=1; ty_abbr=Tnotabbrev}}
@@ -94,6 +96,27 @@ and constr_cons =
       cs_kind= Constr_superfluous 2}
 ;;
 
+let constr_none =
+  let arg = {typ_desc=Tvar(Tnolink); typ_level=generic} in
+  builtin "None"
+    { cs_res =
+       {typ_desc=Tconstr(constr_type_option, [arg]); typ_level=generic};
+      cs_arg = type_unit;
+      cs_tag = ConstrRegular(0,2);
+      cs_mut = Notmutable;
+      cs_kind= Constr_constant }
+
+and constr_some =
+  let arg = {typ_desc=Tvar(Tnolink); typ_level=generic} in
+  builtin "Some"
+    { cs_res =
+       {typ_desc=Tconstr(constr_type_option, [arg]); typ_level=generic};
+      cs_arg = arg;
+      cs_tag = ConstrRegular(1,2);
+      cs_mut = Notmutable;
+      cs_kind= Constr_regular }
+;;
+
 let constr_false =
   builtin "false"
     { cs_res = {typ_desc=Tconstr(constr_type_bool,[]); typ_level=notgeneric};
@@ -152,14 +175,18 @@ do_list
     {ty_constr=constr_type_list; ty_arity=1;
      ty_desc=Variant_type [constr_nil; constr_cons]};
    "vect",
-    {ty_constr=constr_type_vect; ty_arity=1; ty_desc=Abstract_type}
+    {ty_constr=constr_type_vect; ty_arity=1; ty_desc=Abstract_type};
+   "option",
+    {ty_constr=constr_type_option; ty_arity=1;
+     ty_desc=Variant_type [constr_none; constr_some]};
    ]
 ;;
 (* The type "stream" is defined in the "stream" module *)
 
 do_list
   (fun desc -> hashtbl__add module_builtin.mod_constrs desc.qualid.id desc)
-  [constr_void; constr_nil; constr_cons; constr_true; constr_false;
+  [constr_void; constr_nil; constr_cons; constr_none; constr_some;
+   constr_true; constr_false;
    constr_match_failure ]
 ;;
 

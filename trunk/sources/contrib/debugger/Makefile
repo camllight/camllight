@@ -108,14 +108,10 @@ depend: $(GENFILES)
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
-breakpoints.zi: primitives.zi 
 checkpoints.zi: primitives.zi communication.zi 
 communication.zi: primitives.zi value.zi 
-events.zi: primitives.zi 
-frames.zi: primitives.zi 
 input_handling.zi: primitives.zi 
-parser.zi: parser_aux.zi primitives.zi 
-parser_aux.zi: primitives.zi 
+parser.zi: parser_aux.zi 
 pattern_matching.zi: parser_aux.zi value.zi 
 pr_value.zi: value.zi 
 program_loading.zi: primitives.zi 
@@ -133,8 +129,7 @@ command_line_interpreter.zo: command_line_interpreter.zi breakpoints.zi \
 communication.zo: communication.zi primitives.zi value.zi input_handling.zi 
 debugger_config.zo: debugger_config.zi 
 events.zo: events.zi checkpoints.zi primitives.zi 
-frames.zo: frames.zi events.zi checkpoints.zi primitives.zi \
-    communication.zi 
+frames.zo: frames.zi events.zi checkpoints.zi communication.zi 
 history.zo: history.zi checkpoints.zi debugger_config.zi primitives.zi 
 input_handling.zo: input_handling.zi primitives.zi lexer.zo 
 interruption.zo: interruption.zi 
@@ -144,7 +139,7 @@ main.zo: show_information.zi parameters.zi time_travel.zi input_handling.zi \
     checkpoints.zi debugger_config.zi frames.zi interruption.zi 
 modules2.zo: modules2.zi 
 parameters.zo: parameters.zi 
-parser.zo: parser.zi parser_aux.zi primitives.zi input_handling.zi 
+parser.zo: parser.zi parser_aux.zi input_handling.zi 
 pattern_matching.zo: pattern_matching.zi parser_aux.zi primitives.zi \
     value.zi 
 pr_value.zo: pr_value.zi value.zi 
@@ -156,8 +151,7 @@ program_management.zo: program_management.zi time_travel.zi parameters.zi \
     history.zi unix_tools.zi input_handling.zi constants.zo \
     communication.zi modules2.zi 
 show_information.zo: show_information.zi breakpoints.zi show_source.zi \
-    events.zi checkpoints.zi pr_value.zi primitives.zi frames.zi \
-    communication.zi 
+    events.zi checkpoints.zi pr_value.zi frames.zi communication.zi 
 show_source.zo: show_source.zi source.zi primitives.zi parameters.zi \
     debugger_config.zi 
 source.zo: source.zi primitives.zi 
@@ -168,13 +162,20 @@ trap_barrier.zo: trap_barrier.zi checkpoints.zi communication.zi \
     interruption.zi 
 unix_tools.zo: unix_tools.zi primitives.zi 
 value.zo: value.zi constants.zo communication.zi 
-variables.zo: variables.zi primitives.zi value.zi frames.zi \
-    communication.zi 
-communication.o : communication.c ../../src/runtime/../runtime/mlvalues.h ../../src/runtime/../runtime/config.h \
-  ../../src/runtime/../runtime/../../config/m.h ../../src/runtime/../runtime/../../config/s.h \
-  ../../src/runtime/../runtime/misc.h ../../src/runtime/../runtime/fail.h ../../src/runtime/../runtime/io.h \
-  ../../src/runtime/../runtime/alloc.h 
-constants.o : constants.c 
-value.o : value.c ../../src/runtime/../runtime/mlvalues.h ../../src/runtime/../runtime/config.h \
-  ../../src/runtime/../runtime/../../config/m.h ../../src/runtime/../runtime/../../config/s.h \
-  ../../src/runtime/../runtime/misc.h ../../src/runtime/../runtime/fail.h ../../src/runtime/../runtime/alloc.h 
+variables.zo: variables.zi value.zi frames.zi communication.zi 
+communication.o: communication.c \
+ ../../src/runtime/../runtime/mlvalues.h \
+ ../../src/runtime/../runtime/config.h \
+ ../../src/runtime/../runtime/../../config/m.h \
+ ../../src/runtime/../runtime/../../config/s.h \
+ ../../src/runtime/../runtime/misc.h \
+ ../../src/runtime/../runtime/fail.h ../../src/runtime/../runtime/io.h \
+ ../../src/runtime/../runtime/alloc.h
+constants.o: constants.c
+value.o: value.c ../../src/runtime/../runtime/mlvalues.h \
+ ../../src/runtime/../runtime/config.h \
+ ../../src/runtime/../runtime/../../config/m.h \
+ ../../src/runtime/../runtime/../../config/s.h \
+ ../../src/runtime/../runtime/misc.h \
+ ../../src/runtime/../runtime/fail.h \
+ ../../src/runtime/../runtime/alloc.h

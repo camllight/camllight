@@ -15,7 +15,7 @@ let modules = ref ([] : string list);;
 (* Previous `pc'. *)
 (* Save time if `update_current_event' is called *)
 (* several times at the same point. *)
-let old_pc = ref (None : int OPTION);;
+let old_pc = ref (None : int option);;
 
 (* Load the event list. *)
 let load_events inchan =
@@ -76,7 +76,7 @@ let current_events =
 
 (* The main event of the previous list. *)
 let current_event = 
-  ref (None : event OPTION);;
+  ref (None : event option);;
 
 (* Recompute the data above. *)
 let update_current_event () =

@@ -57,7 +57,7 @@ let load_information file =
 (*** Connection opening and control. ***)
 
 (* Name of the file if the socket is in the unix domain.*)
-let file_name = ref (None : string OPTION);;
+let file_name = ref (None : string option);;
 
 (* Default connection handler. *)
 let buffer = create_string 1024;;

@@ -1,13 +1,12 @@
 #open "globals";;
-#open "primitives";;
 
 type BREAK_ARG =
     BA_none				(* break *)
   | BA_pc of int			(* break PC *)
   | BA_function of global_reference	(* break FUNCTION *)
-  | BA_pos1 of string OPTION * int * int OPTION
+  | BA_pos1 of string option * int * int option
 					(* break @ [MODULE] LINE [POS] *)
-  | BA_pos2 of string OPTION * int;;	(* break @ [MODULE] # OFFSET *)
+  | BA_pos2 of string option * int;;	(* break @ [MODULE] # OFFSET *)
 
 type PATTERN =
     P_dummy				(* _ *)

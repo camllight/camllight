@@ -1,5 +1,4 @@
 #open "lambda";;
-#open "primitives";;
 
 (*** Events list. ***)
 value events : event list ref;;
@@ -32,7 +31,7 @@ value current_events : event list ref;;
 (* The main event of the previous list. *)
 (* --- It is the element of the list, `Lafter' if some are, *)
 (* --- whose position in the source is the greatest. *)
-value current_event : event OPTION ref;;
+value current_event : event option ref;;
 
 (* Recompute the data above. *)
 value update_current_event : unit -> unit;;
