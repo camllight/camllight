@@ -5,8 +5,8 @@
 #open "eq";;
 #open "fvect";;
 
-(* We do dynamic hashing, and we double the size of the table when
-   buckets become too long, but without re-hashing the elements. *)
+(* We do dynamic hashing, and resize the table and rehash the elements
+   when buckets become too long. *)
 
 type ('a, 'b) t =
   { mutable max_len: int;                    (* max length of a bucket *)
@@ -18,7 +18,7 @@ and ('a, 'b) bucketlist =
 ;;
 
 let new initial_size =
-  { max_len = 2; data = make_vect initial_size Empty }
+  { max_len = 3; data = make_vect initial_size Empty }
 ;;
 
 let clear h =
@@ -27,13 +27,22 @@ let clear h =
   done
 ;;
 
-let resize h =
-  let n = vect_length h.data in
-  let newdata = make_vect (n+n) Empty in
-    blit_vect h.data 0 newdata 0 n;
-    blit_vect h.data 0 newdata n n;
-    h.data <- newdata;
-    h.max_len <- 2 * h.max_len
+let resize tbl =
+  let odata = tbl.data in
+  let osize = vect_length odata in
+  let nsize = 2 * osize + 1 in
+  let ndata = make_vect nsize Empty in
+  let rec insert_bucket idx = function
+      Empty -> ()
+    | Cons(key, data, rest) ->
+        insert_bucket idx rest; (* preserve original order of elements *)
+        let nidx = hash_param 10 100 key mod nsize in
+        ndata.(nidx) <- Cons(key, data, ndata.(nidx)) in
+  for i = 0 to osize - 1 do
+    insert_bucket i odata.(i)
+  done;
+  tbl.data <- ndata;
+  tbl.max_len <- 2 * tbl.max_len
 ;;
 
 let rec bucket_too_long n bucket =
@@ -106,14 +115,12 @@ let do_table f h =
 ;;
 
 let do_table_rev f h =
-  let len = vect_length h.data in
+  let rec do_bucket = function
+      Empty ->
+        ()
+    | Cons(k, d, rest) ->
+        f k d; do_bucket rest in
   for i = 0 to vect_length h.data - 1 do
-    let rec do_bucket = function
-        Empty ->
-          ()
-      | Cons(k, d, rest) ->
-          do_bucket rest;
-          if (hash_param 10 100 k) mod len == i then begin f k d; () end in
     do_bucket h.data.(i)
   done
 ;;
