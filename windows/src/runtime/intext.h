@@ -68,12 +68,12 @@ struct extern_obj {
 };
 
 extern struct extern_obj * extern_table;
-extern asize_t extern_table_size, extern_table_used;
+extern unsigned long extern_table_size, extern_table_used;
 
 #ifdef SIXTYFOUR
-#define Hash(v) (((asize_t) ((v) >> 3)) % extern_table_size)
+#define Hash(v) (((unsigned long) ((v) >> 3)) % extern_table_size)
 #else
-#define Hash(v) (((asize_t) ((v) >> 2)) % extern_table_size)
+#define Hash(v) (((unsigned long) ((v) >> 2)) % extern_table_size)
 #endif
 
 void alloc_extern_table P((void));

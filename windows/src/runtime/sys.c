@@ -22,6 +22,10 @@
 #ifdef macintosh
 #include "mac_os.h"
 #endif
+#ifdef MSDOS
+#include <io.h>
+#include <sys\stat.h>
+#endif
 
 #ifdef HAS_STRERROR
 
@@ -68,7 +72,7 @@ void sys_error(arg)
   raise_with_arg(SYS_ERROR_EXN, str);
 }
 
-void sys_exit(retcode)          /* ML */
+value sys_exit(retcode)          /* ML */
      value retcode;
 {
   debugger(PROGRAM_EXIT);
@@ -77,6 +81,7 @@ void sys_exit(retcode)          /* ML */
 #else
   exit(Int_val(retcode));
 #endif
+  return Val_unit;
 }
 
 #ifndef O_BINARY
@@ -173,6 +178,7 @@ value sys_system_command(command)   /* ML */
 #endif
 }
 
+#ifndef MSDOS
 static int sys_var_init[] = {
   0400, 0200, 0100,
   0040, 0020, 0010,
@@ -180,6 +186,15 @@ static int sys_var_init[] = {
   04000, 02000,
   0444, 0222, 0111
 };
+#else
+static int sys_var_init[] = {
+  S_IWRITE, S_IREAD, S_IEXEC,
+  S_IWRITE, S_IREAD, S_IEXEC,
+  S_IWRITE, S_IREAD, S_IEXEC, 
+  0, 0,
+  S_IWRITE, S_IREAD, S_IEXEC
+};
+#endif
 
 void sys_init(argv)
      char ** argv;
@@ -198,8 +213,6 @@ void sys_init(argv)
 }
 
 /* Handling of user interrupts */
-
-#ifndef MSDOS
 
 unsigned char raise_break_exn[] = { ATOM, BREAK_EXN, RAISE };
 
@@ -221,8 +234,6 @@ value sys_catch_break(onoff)    /* ML */
     signal(SIGINT, SIG_DFL);
   return Atom(0);
 }
-
-#endif
 
 /* Search path function */
 

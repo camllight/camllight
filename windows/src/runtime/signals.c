@@ -26,11 +26,15 @@ void handle_signal(signal_handler, signal_number)
      code_t signal_handler;
      int signal_number;
 {
+#ifndef MSDOS   /* Not legal to longjmp() out of a sighandler in MSWindows */
   if (async_signal_mode){
     leave_blocking_section ();
     execute_signal (signal_handler, signal_number);
     enter_blocking_section ();
-  }else{
+  }
+  else
+#endif
+  {
     pending_signal_handler = signal_handler;
     /* If a signal arrives here, it will give the same value to
        pending_signal_handler. */
