@@ -16,7 +16,7 @@ value list_length : 'a list -> int
         (* [map f [a1; ...; an]] applies function [f] to [a1, ..., an],
            and builds the list [[f a1; ...; f an]]
            with the results returned by [f]. *)
-  and do_list : ('a -> 'b) -> 'a list -> unit
+  and do_list : ('a -> unit) -> 'a list -> unit
         (* [do_list f [a1; ...; an]] applies function [f] in turn to
            [a1; ...; an], discarding all the results. It is equivalent to
 	   [begin f a1; f a2; ...; f an; () end]. *)
@@ -28,7 +28,7 @@ value list_length : 'a list -> int
         (* [map2 f [a1; ...; an] [b1; ...; bn]] is [[f a1 b1; ...; f an bn]].
 	   Raise [Invalid_argument "map2"] if the two lists have
            different lengths. *)
-  and do_list2 : ('a -> 'b -> 'c) -> 'a list -> 'b list -> unit
+  and do_list2 : ('a -> 'b -> unit) -> 'a list -> 'b list -> unit
         (* [do_list2 f [a1; ...; an] [b1; ...; bn]] calls in turn
            [f a1 b1; ...; f an bn], discarding the results.
 	   Raise [Invalid_argument "do_list2"] if the two lists have

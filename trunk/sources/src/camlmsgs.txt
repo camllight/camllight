@@ -151,6 +151,17 @@ de:	%aDieser Ausdruck ist vom Typ %a,\n\
 it:	%aQuesta espressione è di tipo %a,\n\
 	ma è usata con tipo %a.\n
 
+src:	%aWarning: this expression has type %a,\n\
+	but is used with type unit.\n
+fr:	%aAttention: cette expression est de type %a,\n\
+	mais est utilisée avec le type unit.\n
+es:	%a¡Cuidado!: esta expresión es de tipo %a,\n\
+	pero se ha utilizado con tipo unit.\n
+de:	%aAchtung: dieser Ausdruck ist vom Typ %a,\n\
+	wurde hier aber als Typ unit verwendet.\n
+it:	%aAttenzione: questa espressione è di tipo %a,\n\
+	ma è usata con tipo unit.\n
+
 src:	%aThis function is applied to too many arguments.\n
 fr:	%aCette fonction reçoit trop d'arguments.\n
 es:	%aEsta función se aplica a demasiados argumentos.\n

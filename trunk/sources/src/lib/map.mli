@@ -34,7 +34,7 @@ value empty: ('a -> 'a -> int) -> ('a, 'b) t
            as [m] except the current binding for [x]. The previous
            binding for [x] is restored if it exists. [m] is returned
            unchanged if [x] is not bound in [m]. *)
-  and iter: ('a -> 'b -> 'c) -> ('a, 'b) t -> unit
+  and iter: ('a -> 'b -> unit) -> ('a, 'b) t -> unit
         (* [iter f m] applies [f] to all bindings in map [m],
 	   discarding the results.
            [f] receives the key as first argument, and the associated value

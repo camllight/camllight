@@ -43,7 +43,7 @@ value empty: ('a -> 'a -> int) -> 'a t
   and elements: 'a t -> 'a list
         (* Return the list of all elements of the given set.
            The elements appear in the list in some non-specified order. *)
-  and iter: ('a -> 'b) -> 'a t -> unit
+  and iter: ('a -> unit) -> 'a t -> unit
         (* [iter f s] applies [f] in turn to all elements of [s], and
            discards the results. The elements of [s] are presented to [f]
            in a non-specified order. *)

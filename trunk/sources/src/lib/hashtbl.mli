@@ -36,7 +36,7 @@ value new : int -> ('a,'b) t
            restoring the previous binding if it exists.
            It does nothing if [x] is not bound in [tbl]. *)
 
-  and do_table : ('a -> 'b -> 'c) -> ('a, 'b) t -> unit
+  and do_table : ('a -> 'b -> unit) -> ('a, 'b) t -> unit
         (* [do_table f tbl] applies [f] to all bindings in table [tbl],
 	   discarding all the results.
            [f] receives the key as first argument, and the associated value
@@ -47,7 +47,7 @@ value new : int -> ('a,'b) t
            key are presented in reverse chronological order 
            (most recent first). *)
 
-  and do_table_rev : ('a -> 'b -> 'c) -> ('a, 'b) t -> unit
+  and do_table_rev : ('a -> 'b -> unit) -> ('a, 'b) t -> unit
         (* Same as [do_table], except that successive bindings for the same
            key are presented in chronological order (oldest first). *)
 ;;

@@ -22,7 +22,7 @@ value new: unit -> 'a t
         (* Discard all elements from a queue. *)
   and length: 'a t -> int
         (* Return the number of elements in a queue. *)
-  and iter: ('a -> 'b) -> 'a t -> unit
+  and iter: ('a -> unit) -> 'a t -> unit
         (* [iter f q] applies [f] in turn to all elements of [q], from the
            least recently entered to the most recently entered.
            The queue itself is unchanged. *)

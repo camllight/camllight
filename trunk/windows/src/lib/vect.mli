@@ -77,7 +77,7 @@ value map_vect : ('a -> 'b) -> 'a vect -> 'b vect
         (* [map_vect_list f v] applies function [f] to all the elements of [v],
            and builds a list with the results returned by [f]:
            [[ f v.(0); f v.(1); ...; f v.(vect_length v - 1) ]]. *)
-  and do_vect : ('a -> 'b) -> 'a vect -> unit
+  and do_vect : ('a -> unit) -> 'a vect -> unit
         (* [do_vect f v] applies function [f] in turn to all the elements of [v],
 	   discarding all the results:
            [f v.(0); f v.(1); ...; f v.(vect_length v - 1); ()]. *)

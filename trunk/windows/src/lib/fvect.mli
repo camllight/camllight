@@ -28,7 +28,7 @@ value fill_vect : 'a vect -> int -> int -> 'a -> unit
 value list_of_vect : 'a vect -> 'a list
   and vect_of_list : 'a list -> 'a vect
 ;;
-value do_vect : ('a -> 'b) -> 'a vect -> unit
+value do_vect : ('a -> unit) -> 'a vect -> unit
   and map_vect : ('a -> 'b) -> 'a vect -> 'b vect
   and map_vect_list : ('a -> 'b) -> 'a vect -> 'b list
 ;;

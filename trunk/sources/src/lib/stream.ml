@@ -101,7 +101,7 @@ let stream_check p strm =
 ;;
 
 let end_of_stream strm =
-  if try stream_peek strm; false with Parse_failure -> true
+  if try let _ = stream_peek strm in false with Parse_failure -> true
   then ()
   else raise Parse_failure
 ;;
