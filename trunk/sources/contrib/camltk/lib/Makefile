@@ -10,22 +10,22 @@ CAMLYACC=camlyacc -v
 CAMLLEX=camllex
 CAMLDEP=../../../src/tools/camldep
 
+
+X11_LIB=/usr/X11R6/lib
+TCLLIBDIR=/usr/local/lib/tcl/lib
+TKLIBDIR=/usr/local/lib/tk/lib
+TKLIBS=-ltcl -ltk -lX11
+
 TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
 	   $(SUPPORTDIR)/camltk.o -lcaml $(TKLIBS)
 
-
-SUPPORT1=$(SUPPORTDIR)/support.zo $(SUPPORTDIR)/protocol1.zo \
-         $(SUPPORTDIR)/textvariable.zo
-
-SUPPORT2=$(SUPPORTDIR)/support.zo $(SUPPORTDIR)/protocol2.zo \
-         $(SUPPORTDIR)/textvariable.zo
-
-SUPPORT=support.zo protocol.zo textvariable.zo
+SUPPORT=../libsupport/support.zo ../libsupport/protocol.zo \
+   ../libsupport/textvariable.zo
 
 # two-process protocol not supported anymore
 all : tklib.zo toplevels
 
-toplevels: camltktop1
+toplevels: camltktop
 
 tkgen.ml: ../Widgets.src
 	cd ..; compiler/tkcompiler
@@ -39,35 +39,23 @@ tk.ml : tkgen.ml $(SUPPORTDIR)/report.ml $(SUPPORTDIR)/builtin_*.ml
 	 cat tkgen.ml; \
          cat $(SUPPORTDIR)/builtina_*.ml) > tk.ml
 
-tklib.zo : $(SUPPORT1) $(WIDGETOBJS) tk.zo 
-	camllibr -o tklib.zo $(SUPPORT1) tk.zo $(WIDGETOBJS)
+tklib.zo : $(SUPPORT) $(WIDGETOBJS) tk.zo 
+	camllibr -o tklib.zo $(SUPPORT) tk.zo $(WIDGETOBJS)
 
-tklib2.zo : $(SUPPORT2) $(WIDGETOBJS) tk.zo
-	camllibr -o tklib2.zo $(SUPPORT2) tk.zo $(WIDGETOBJS)
-
-camltktop1 : $(WIDGETOBJS) $(SUPPORT1)
-	cp -p $(SUPPORTDIR)/protocol1.zo $(SUPPORTDIR)/protocol.zo
-	camlmktop -o camltktop1 -I $(SUPPORTDIR) $(PROFILING) \
+camltktop : $(WIDGETOBJS) $(SUPPORT)
+	camlmktop -o camltktop -I $(SUPPORTDIR) $(PROFILING) \
 	          -custom $(SUPPORT) tk.zo $(WIDGETOBJS) \
 		                $(TKLINKOPT)
-
-
-camltktop2 : $(WIDGETOBJS) $(SUPPORT2)
-	cp -p $(SUPPORTDIR)/protocol2.zo $(SUPPORTDIR)/protocol.zo
-	camlmktop -o camltktop2 -I $(SUPPORTDIR) $(PROFILING) \
-	            -custom $(UNIXDIR)/unix.zo $(SUPPORT) tk.zo $(WIDGETOBJS) \
-                    $(UNIXDIR)/libunix.a
-
 
 clean : 
 	rm -f *.z* *.ml *.mli tklib*.zo  camltktop*
 
-install: tklib.zo tklib2.zo  camltktop1 camltktop2
+install: tklib.zo camltktop
 	if test -d $(LIBDIR); then : ; else mkdir $(LIBDIR); fi
-	cp *.zi tklib*.zo camltktop* $(LIBDIR)
+	cp *.zi tklib.zo camltktop $(LIBDIR)
 	chmod 644 $(LIBDIR)/*.zi
-	chmod 644 $(LIBDIR)/tklib*.zo
-	chmod 755 $(LIBDIR)/camltktop*
+	chmod 644 $(LIBDIR)/tklib.zo
+	chmod 755 $(LIBDIR)/camltktop
 
 
 .SUFFIXES :
