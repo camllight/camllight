@@ -4,9 +4,9 @@
 #include "misc.h"
 #include "mlvalues.h"
 
-unsigned long event_count;
-value * trap_barrier;
-int enable_sigint;
+extern unsigned long event_count;
+extern value * trap_barrier;
+extern int enable_sigint;
 
 enum { EVENT, BREAKPOINT, PROGRAM_START, PROGRAM_EXIT, TRAP_BARRIER };
 

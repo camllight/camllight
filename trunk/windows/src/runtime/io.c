@@ -16,17 +16,23 @@
 
 /* Common functions. */
 
-struct channel * open_descriptor(fd)       /* ML */
-     value fd;
+struct channel * open_descr(fd)
+     int fd;
 {
   struct channel * channel;
 
   channel = (struct channel *) stat_alloc(sizeof(struct channel));
-  channel->fd = Long_val(fd);
+  channel->fd = fd;
   channel->offset = 0;
   channel->curr = channel->max = channel->buff;
   channel->end = channel->buff + IO_BUFFER_SIZE;
   return channel;
+}
+
+value open_descriptor(fd)       /* ML */
+     value fd;
+{
+  return (value) open_descr(Int_val(fd));
 }
 
 value channel_descriptor(channel)   /* ML */

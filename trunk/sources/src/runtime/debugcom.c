@@ -9,6 +9,10 @@
 #include "io.h"
 #include "debugcom.h"
 
+unsigned long event_count;
+value * trap_barrier;
+int enable_sigint;
+
 #ifndef HAS_SOCKETS
 
 void debugger_init(address)
@@ -71,7 +75,6 @@ static int dbg_socket = -1;     /* The socket connected to the debugger */
 static struct channel * dbg_in; /* Input channel on the socket */
 static struct channel * dbg_out;/* Output channel on the socket */
 
-
 #define CONNECT_STARTUP 1
 #define CONNECT_CHILD 0
 
@@ -87,8 +90,8 @@ static void open_connection(connect_type)
     perror("connection to debugger failed");
     exit(2);
   }
-  dbg_in = open_descriptor(Val_int(dbg_socket));
-  dbg_out = open_descriptor(Val_int(dbg_socket));
+  dbg_in = open_descr(dbg_socket);
+  dbg_out = open_descr(dbg_socket);
   if (connect_type)
     putword(dbg_out, 0);
   putword(dbg_out, getpid());
