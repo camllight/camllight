@@ -11,6 +11,8 @@ and   set : TextVariable -> string -> unit
       (* Setting the value of a TextVariable *)
 and   get : TextVariable -> string
       (* Reading the value of a TextVariable *)
+and   name : TextVariable -> string
+      (* Its tcl name *)
 ;;
 
 value CAMLtoTKTextVariable : TextVariable -> TkArgs
