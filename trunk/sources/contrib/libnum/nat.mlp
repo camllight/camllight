@@ -1,5 +1,5 @@
-(* nat: fonctions auxiliaires et d'impression pour le type nat.
-   Derive de nats.ml de Caml V3.1, Vale'rie Me'nissier.
+(* nat: fonctions auxiliaires et d impression pour le type nat.
+   Derive de nats.ml de Caml V3.1, Valerie Menissier.
    Adapte a Caml Light par Xavier Leroy. *)
 
 (*
@@ -199,7 +199,7 @@ set_digit_nat power_base_max 0 1000000000;;
 let pmax = 9;;
 #endif
 
-(* XL: j'ai specialise le code ci-dessous aux cas length_of_digit = 32
+(* XL: ai specialise le code ci-dessous aux cas length_of_digit = 32
    et length_of_digit = 64 *)
 
 (****
@@ -297,8 +297,8 @@ let string_of_digit nat =
 let digits = "0123456789ABCDEF";;
 
 (*
-   make_power_base affecte power_base des puissances successives de base a` 
-   partir de la puissance 1-ie`me.
+   make_power_base affecte power_base des puissances successives de base a 
+   partir de la puissance 1-ieme.
    A la fin de la boucle i-1 est la plus grande puissance de la base qui tient 
    sur un seul digit et j est la plus grande puissance de la base qui tient 
    sur un int.
@@ -316,9 +316,9 @@ let make_power_base base power_base =
   (!i - 2, !j);;
 
 (* 
-   int_to_string place la repre'sentation de l'entier int en base base 
-   dans la chaine s en le rangeant de la fin indique'e par pos vers le 
-   debut, sur times places et affecte a` pos sa nouvelle valeur. 
+   int_to_string place la representation de l entier int en base base 
+   dans la chaine s en le rangeant de la fin indiquee par pos vers le 
+   debut, sur times places et affecte a pos sa nouvelle valeur. 
 *)
 let int_to_string int s pos_ref base times = 
   let i = ref int 
@@ -385,8 +385,8 @@ let power_base_int base i =
     --                               --
 *)
 
-(* XL: j'ai specialise le code d'origine a length_of_digit = 32. *)
-(* Puis je l'ai supprime (inutile?) *)
+(* XL: ai specialise le code d origine a length_of_digit = 32. *)
+(* Puis suppression (inutile?) *)
 
 (******
 let num_digits_max_vector = 
@@ -498,8 +498,8 @@ let base_digit_of_char c base =
 ;;
 
 (* 
-   La sous-chaine (s, off, len) repre'sente un nat en base base que 
-   l'on de'termine ici 
+   La sous-chaine (s, off, len) represente un nat en base base que 
+   on determine ici 
 *)
 let sys_nat_of_string base s off len = 
   let power_base = make_nat (succ length_of_digit) in
@@ -518,7 +518,7 @@ let sys_nat_of_string base s off len =
   for i = off to bound do
     (* 
        on lit pint (au maximum) chiffres, on en fait un int 
-       et on l'inte`gre au nombre
+       et on l integre au nombre
      *)
       let c = nth_char s i  in
         begin match c with 
