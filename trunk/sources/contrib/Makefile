@@ -45,12 +45,14 @@ MANDIR=/usr/local/man/man$(MANEXT)
 # The path to the include directory containing the X11/*.h includes
 # (usually /usr/include; for SunOS with OpenLook, /usr/openwin/include)
 # Needed for the "libgraph" and "camltk" packages.
-X11_INCLUDES=/usr/X11R6/include
+#X11_INCLUDES=/usr/X11R6/include
+X11_INCLUDES=/usr/include/X11
 
 # The path to the directory containing the X11 libraries.
 # (usually /usr/lib; for SunOS with OpenLook, /usr/openwin/lib)
 # Needed for the "libgraph" and "camltk" packages.
-X11_LIB=/usr/X11R6/lib
+#X11_LIB=/usr/X11R6/lib
+X11_LIB=/usr/lib/X11
 
 # Name of the target architecture.
 # Used only for the libnum library (arbitrary-precision arithmetic), to
