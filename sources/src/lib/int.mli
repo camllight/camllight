@@ -45,6 +45,11 @@ value abs : int -> int
         (* Return the absolute value of the argument. *)
 ;;
 
+value max_int : int
+  and min_int : int
+        (* The greatest and smallest integer values. *)
+;;
+
 (*** Bitwise operations *)
 
 value prefix land : int -> int -> int = 2 "and"
