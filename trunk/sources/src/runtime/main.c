@@ -17,11 +17,9 @@
 #include "debugcom.h"
 
 #ifndef macintosh
-#ifdef __STDC__
-#include <stdlib.h>
-#else
+#ifndef __STDC__
 extern char *getenv ();
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 #endif /* not macintosh */
 
 extern value interprete();
