@@ -167,8 +167,8 @@ let compile_impl_phrase outstream phr =
   end
 ;;
 
-let compile_impl modname filename =
-  let source_name = filename ^ ".ml"
+let compile_impl modname filename suffix =
+  let source_name = filename ^ suffix
   and obj_name = filename ^ ".zo" in
   let ic = open_in_bin source_name
   (* The source file must be opened in binary mode, so that the absolute
@@ -197,7 +197,7 @@ let compile_impl modname filename =
 
 let write_extended_intf = ref false;;
 
-let compile_implementation modname filename =
+let compile_implementation modname filename suffix =
   external_types := [];
   if file_exists (filename ^ ".mli") then begin
     try
@@ -210,7 +210,7 @@ let compile_implementation modname filename =
       let intf = read_module modname (filename ^ ".zi") in
       start_compiling_implementation modname intf;
       enter_interface_definitions intf;
-      compile_impl modname filename;
+      compile_impl modname filename suffix;
       check_interface intf;
       if !write_extended_intf then begin
         let ext_intf_name = filename ^ ".zix" in
@@ -232,7 +232,7 @@ let compile_implementation modname filename =
     let oc = open_out_bin intf_name in
     try
       start_compiling_interface modname;
-      compile_impl modname filename;
+      compile_impl modname filename suffix;
       write_compiled_interface oc;
       close_out oc
     with x ->

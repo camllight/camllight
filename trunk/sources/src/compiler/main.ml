@@ -8,7 +8,10 @@
 let anonymous s =
   if filename__check_suffix s ".ml" then
     let filename = filename__chop_suffix s ".ml" in
-    compile_implementation (filename__basename filename) filename
+    compile_implementation (filename__basename filename) filename ".ml"
+  else if filename__check_suffix s ".mlt" then (* profiler temp files *)
+    let filename = filename__chop_suffix s ".mlt" in
+    compile_implementation (filename__basename filename) filename ".mlt"
   else if filename__check_suffix s ".mli" then
     let filename = filename__chop_suffix s ".mli" in
     compile_interface (filename__basename filename) filename
