@@ -4,8 +4,9 @@
 #open "hyper_printers";;
 #open "tk";;
 
-let cnter = ref 0;;
-let new_visual_top () =  
+let new_visual_top =
+  let cnter = ref 0 in
+  function () ->
    incr cnter; "global" ^ string_of_int !cnter
 ;;
 
@@ -32,6 +33,8 @@ let rec visual_meta visual silent sym =
       util__scroll_text_link sb tx;
       pack [tx] [Side Side_Left; Fill Fill_Both; Expand true];
       pack [sb] [Side Side_Left; Fill Fill_Y];
+      (* This does not work at the moment *)
+      util__navigation_keys tx sb;
 
     let q = 
       button__create t [Text "Ok"; Relief Raised; 
