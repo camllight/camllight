@@ -8,8 +8,10 @@
 
 (* "is_return" determines if we're in tail call position. *)
 
-let is_return =
-  function Kreturn :: _ -> true | _ -> false
+let rec is_return = function
+    Kreturn :: _ -> true
+  | Klabel lbl :: c -> is_return c
+  | _ -> false
 ;;
 
 (* Label generation *)
