@@ -1,6 +1,7 @@
 /* Communication with a debugger. */
 
 #include <stdio.h>
+#include <string.h>
 #include "misc.h"
 #include "debugger.h"
 #include "mlvalues.h"
@@ -204,8 +205,13 @@ int debugger(event)
     break;
   }
   putword(dbg_out, event_count);
-  putword(dbg_out, ret_stack_high - extern_rsp);
-  putword(dbg_out, Pc(extern_rsp) - start_code);
+  if (event == EVENT || event == BREAKPOINT){
+    putword(dbg_out, ret_stack_high - extern_rsp);
+    putword(dbg_out, Pc(extern_rsp) - start_code);
+  }else{
+    putword(dbg_out, 0);
+    putword(dbg_out, 0);
+  }
   flush(dbg_out);
 
  command_loop:

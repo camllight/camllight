@@ -3,6 +3,8 @@
    2. Convenience functions related to allocation.
 */
 
+#include <string.h>
+
 #include "alloc.h"
 #include "debugger.h"
 #include "major_gc.h"
