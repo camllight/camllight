@@ -30,13 +30,13 @@ type pattern_matching =
 
 (* Simple pattern manipulations *)
 
-let make_path = fun
-  n (path::pathl) ->
-    let rec make i =
-      if i >= n then pathl else Lprim(Pfield i, [path]) :: make (i+1)
-    in
+let make_path n = function
+    (path::pathl) ->
+      let rec make i =
+        if i >= n then pathl else Lprim(Pfield i, [path]) :: make (i+1) in
       make 0
-| _ _ -> fatal_error "make_path"
+  | _ ->
+      fatal_error "make_path"
 ;;
 
 let add_to_match (Matching(casel,pathl)) cas =
@@ -153,23 +153,9 @@ let divide_var_matching = function
 | _ -> fatal_error "divide_var_matching"
 ;;
 
-let divide_record_matching (Matching(casel, pathl)) =
-  let max_pos = ref 0 in
-  let rec max_size = function
-      {p_desc = Zaliaspat(pat,v)} -> max_size pat
-    | {p_desc = Zconstraintpat(pat,ty)} -> max_size pat
-    | {p_desc = Zorpat(pat1,pat2)} -> max_size pat1; max_size pat2
-    | {p_desc = Zrecordpat pat_expr_list} ->
-        do_list
-          (fun (lbl,p) ->
-            if lbl.info.lbl_pos > !max_pos then
-              (max_pos := lbl.info.lbl_pos; ()))
-          pat_expr_list
-    | _ -> () in
-  do_list
-    (function (pat::patl, act) -> max_size pat
-            | _ -> fatal_error "divide_record_matching")
-    casel;
+let divide_record_matching ty_record (Matching(casel, pathl)) =
+  let labels = types__labels_of_type ty_record in
+  let num_labels = list_length labels in
   let rec divide_rec = function
       ({p_desc = Zaliaspat(pat,v)} :: patl, action) :: rest ->
         divide_rec ((pat::patl, action) :: rest)
@@ -182,11 +168,11 @@ let divide_record_matching (Matching(casel, pathl)) =
     | ({p_desc = (Zwildpat | Zvarpat _)} :: patl, action) :: rest ->
         divide_rec_cont [] patl action rest
     | [] ->
-        Matching([], make_path (succ !max_pos) pathl)
+        Matching([], make_path num_labels pathl)
     | _ ->
         fatal_error "divide_record_matching"
   and divide_rec_cont pat_expr_list patl action rest =
-    let v = make_vect (succ !max_pos) wildcard_pat in
+    let v = make_vect num_labels wildcard_pat in
     do_list (fun (lbl, pat) -> v.(lbl.info.lbl_pos) <- pat) pat_expr_list;
     add_to_match (divide_rec rest) (list_of_vect v @ patl, action)
   in
@@ -286,8 +272,8 @@ let rec conquer_matching =
             and lambda2, partial2 = conquer_matching vars in
               Lstatichandle(Lcond(path, condlist1), lambda2),
               partial2
-      | {p_desc = Zrecordpat _} ->
-          conquer_matching (divide_record_matching matching)
+      | {p_desc = Zrecordpat _} as pat -> (* ; p_typ = ty} -> *)
+          conquer_matching (divide_record_matching pat.p_typ matching)
       | _ ->
           fatal_error "conquer_matching 2"
       end
