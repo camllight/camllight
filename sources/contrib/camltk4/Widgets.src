@@ -4,7 +4,33 @@ type Widget external
 type symbol external
 
 ##### Some types for standard options of widgets
-type Color external   # because required by Cursor, external
+type Anchor { 
+    NW ["nw"]       N ["n"]           NE ["ne"]
+    W  ["w"]   Center ["center"]      E  ["e"]
+    SW ["sw"]       S ["s"]           SE ["se"]
+}
+
+type Bitmap external    # builtin_GetBitmap.ml
+type Cursor external    # builtin_GetCursor.ml
+type Color external     # builtin_GetCursor.ml
+
+type ImageBitmap {
+  BitmapImage [string]
+  }
+type ImagePhoto {
+  PhotoImage [string]
+  }
+
+type Justification { 
+   Justify_Left   ["left"]
+   Justify_Center ["center"]
+   Justify_Right  ["right"]
+}
+
+type Orientation { 
+    Vertical ["vertical"]
+    Horizontal ["horizontal"] 
+}
 
 type Relief { 
    Raised ["raised"]
@@ -14,26 +40,11 @@ type Relief {
    Groove ["groove"]
 }
 
-type Anchor { 
-    NW ["nw"]       N ["n"]           NE ["ne"]
-    W  ["w"]   Center ["center"]      E  ["e"]
-    SW ["sw"]       S ["s"]           SE ["se"]
-}
+type TextVariable external	# textvariable.ml
+type Units external		# builtin_GetPixel.ml
 
-type Orientation { 
-    Vertical ["vertical"]
-    Horizontal ["horizontal"] 
-}
-
-# builtins types 
-type TextVariable external # textvariable
-type Units external	# builtin_GetPixel
-type Bitmap external    # builtin_GetBitmap
-type Cursor external    # builtina_GetCursor
-
-
-### options(n)
-# define the standard options, so they can be used implicitly further on
+##### The standard options, as defined in man page options(n)
+##### The subtype is never used
 subtype option(standard) {
    ActiveBackground		["-activebackground"; Color]
    ActiveBorderWidth		["-activeborderwidth"; Units]
@@ -41,23 +52,27 @@ subtype option(standard) {
    Anchor			["-anchor"; Anchor]
    Background			["-background"; Color]
    Bitmap			["-bitmap"; Bitmap]
-   Borderwidth			["-borderwidth"; Units]
+   BorderWidth			["-borderwidth"; Units]
    Cursor			["-cursor";  Cursor]
-   # cheat with NamedColor ""
    DisabledForeground		["-disabledforeground"; Color]
    ExportSelection		["-exportselection"; bool]
    Font				["-font"; string]
    Foreground			["-foreground"; Color]
-   Geometry			["-geometry"; string]     # Too variable to encode
-   HighlightBackground          ["highllightbackground"; Color]
+   Geometry			["-geometry"; string]  # Too variable to encode
+   HighlightBackground          ["-highlightbackground"; Color]
    HighlightColor               ["-highlightcolor"; Color]
-   HighlightThickness           ["highlightthickness"; int]
+   HighlightThickness           ["-highlightthickness"; Units]
+   # images are split, to do additionnal static typing
+   ImageBitmap                  ["-image"; ImageBitmap]
+   ImagePhoto			["-image"; ImagePhoto]
    InsertBackground		["-insertbackground"; Color]
    InsertBorderWidth		["-insertborderwidth"; Units]
    InsertOffTime		["-insertofftime"; int]   # Positive only
    InsertOnTime			["-insertontime"; int]    # Idem
    InsertWidth			["-insertwidth"; Units]
-   Orientation			["-orient"; Orientation]
+   Jump				["-jump"; bool]
+   Justify			["-justify"; Justification]
+   Orient			["-orient"; Orientation]
    PadX				["-padx"; Units]
    PadY				["-pady"; Units]
    Relief			["-relief"; Relief]
@@ -67,57 +82,83 @@ subtype option(standard) {
    SelectBorderWidth		["-selectborderwidth"; Units]
    SelectForeground		["-selectforeground"; Color]
    SetGrid			["-setgrid"; bool]
+   # incomplete description of TakeFocus
+   TakeFocus                    ["-takefocus"; bool]
    Text				["-text"; string]
    TextVariable			["-textvariable"; TextVariable]
+   ThroughColor			["-troughcolor"; Color]
    UnderlinedChar		["-underline"; int]
-   XScrollCommand		["-xscrollcommand"; function(float, float)]   # Before 4.0 : (int,int,int,int)
-   YScrollCommand		["-yscrollcommand"; function(float, float)]   # Before 4.0 : (int,int,int,int)
-   TakeFocus                    ["-takefocus"; bool]
-   WrapLength                   ["-wraplength"; int]
+   WrapLength                   ["-wraplength"; Units]
+   # Major incompatibility with Tk3.6 where it was function(int,int,int,int)
+   XScrollCommand		["-xscrollcommand"; function(float, float)]
+   YScrollCommand		["-yscrollcommand"; function(float, float)]
 }
 
+#### Some other common types
+type Index external   # builtin_index.ml
+# Almost equal to
+#   Number [int]
+#   End ["end"]
+#   Insert ["insert"]
+#   SelFirst ["sel.first"]
+#   SelLast ["sel.last"]
+#   At [int]         # @x
+#   AtXY [int;int]   # @x,y
+#   Active ["active"]
+#   Anchorage [Anchor]
 
-# for messages dans canvas text
-type Justification { 
-   Justify_Left   ["left"]
-   Justify_Center ["center"]
-   Justify_Right  ["right"]
-}
+# type sequence ScrollValue {
+#   MoveTo ["moveto"; float]
+#   ScrollUnit ["scroll"; int; "unit"]
+#   ScrollPage ["scroll"; int; "page"]
+#   }
+
+type sequence ScrollValue external   # builtin_ScrollValue.ml
 
 
-# New for TK 4.0
-type Visual {
-    ClassVisual [[string; int]]
-    DefaultVisual ["default"]
-    WidgetVisual [widget]
-    BestDepth [["best"; int]]
-    Best ["best"]
-    }
-# End new
+##### bell(n)
+module bell {
+  function () ring ["bell"]
+  function () ring_displayof ["bell"; "-displayof" ; widget]
+  }
 
-widget frame {
-   option Background
-   option Borderwidth
-   option Cursor
-   # option Geometry       Not supported by TK 4.0
-   option Relief
-   option Height ["-height"; Units]
-   option Width  ["-width"; Units]
-   option Class  ["-class"; string]
-   # New for TK 4.0
-   option Colormap ["-colormap"; string]
-   option HighlightColor
-   option HighlightBackground
-   option HighlightThickness
-   option TakeFocus
-   option Visual ["-visual"; Visual]
-   # End new
+##### bind(n)
+# builtin_bind.ml
 
-   # -class not checked  
-   function () configure [widget(frame); "configure"; option(frame) list]
-   function (string) configure_get [widget(frame); "configure"]
+
+##### bindtags(n)
+type Bindings {
+   TagBindings [string]
+   WidgetBindings [widget]
    }
 
+function () bindtags ["bindtags"; widget; [Bindings list]]
+
+
+
+
+##### bitmap(n)
+subtype option(bitmapimage) {
+  Background
+  Data ["-data"; string]
+  File ["-file"; string]
+  Foreground
+  Maskdata ["-maskdata"; string]
+  Maskfile ["-maskfile"; string]
+  }
+
+module imagebitmap {
+  function (ImageBitmap) create ["image"; "create"; "bitmap"; option(bitmapimage) list]
+  function (ImageBitmap) create_named ["image"; "create"; "bitmap"; ImageBitmap; option(bitmapimage) list]
+  function () configure [ImageBitmap; "configure"; option(bitmapimage) list]
+  function (string) configure_get [ImageBitmap; "configure"]
+  # Functions inherited from the "image" TK class
+  function () delete ["image"; "delete"; ImageBitmap]
+  function (int) height ["image"; "height"; ImageBitmap]
+  function (int) width ["image"; "width"; ImageBitmap]
+  }
+
+##### button(n)
 type State { 
    Normal ["normal"]
    Active ["active"]
@@ -125,365 +166,80 @@ type State {
 }
 
 widget button {
+   # Standard options
    option ActiveBackground
    option ActiveForeground
    option Anchor
    option Background
    option Bitmap
-   option Borderwidth
+   option BorderWidth
    option Cursor
    option DisabledForeground
    option Font
    option Foreground
-   option PadX
-   option PadY
-   option Relief
-   option Text
-   option TextVariable
-   option Command ["-command"; function ()]
-   option Height ["-height"; Units]
-   option State ["-state"; State]
-   option Width ["-width"; Units]
-   # New for TK V4.0
-   option TakeFocus ["-takefocus"; bool]
-   option UnderlinedChar
-   option WrapLength ["-wraplength"; int]
-   option ImageBitmap ["-image"; ImageBitmap]   # Because 2 types for images
-   option ImagePhoto ["-image"; ImagePhoto]
-
-
-   # function () activate [widget(button); "activate"]  Not supported by TK 4.0
-   # function () deactivate [widget(button); "deactivate"]  Not supported by TK 4.0
-   function () flash      [widget(button); "flash"]
-   function () invoke     [widget(button); "invoke"]
-   function () configure  [widget(button); "configure"; option(button) list]
-   function (string) configure_get [widget(button); "configure"]
-   }
-
-
-
-
-widget checkbutton {	
-   option ActiveBackground
-   option ActiveForeground
-   option Anchor
-   option Background
-   option Bitmap
-   option Borderwidth
-   option Cursor
-   option DisabledForeground
-   option Font
-   option Foreground
-   option PadX
-   option PadY
-   option Relief
-   option Text
-   option TextVariable
-   option Command  ["-command"; function ()]
-   option Height   ["-height"; Units]
-   option OffValue ["-offvalue"; string]
-   option OnValue  ["-onvalue"; string]
-   # option Selector ["-selector"; Color]   Not supported by TK 4.0
-   option State    ["-state"; State]
-   option Width    ["-width"; Units]
-   option Variable ["-variable"; TextVariable]
-   # New for TK 4.0
-   option HighlightColor
-   option HighlightBackground
-   option HighlightThickness
-   option ImageBitmap    # Because 2 types for images
-   option ImagePhoto
-   option TakeFocus
-   option WrapLength
-   option UnderlinedChar
-   option IndicatorOn ["-indicatoron"; bool]
-   option SelectColor ["-selectcolor"; Color]
-   option SelectImageBitmap ["-selectimage"; ImageBitmap]   # Because 2 types for images
-   option SelectImagePhoto ["-selectimage"; ImagePhoto]
-   # End new
-
-
-   # function () activate [widget(checkbutton); "activate"]        Not supported by TK 4.0
-   function () configure [widget(checkbutton); "configure"; option(checkbutton) list]
-   function (string) configure_get [widget(checkbutton); "configure"]
-   # function () deactivate [widget(checkbutton); "deactivate"]    Not supported byt TK 4.0
-   function () deselect [widget(checkbutton);  "deselect"]
-   function () flash [widget(checkbutton); "flash"]
-   function () invoke [widget(checkbutton); "invoke"]
-   function () select [widget(checkbutton); "select"]
-   function () toggle [widget(checkbutton); "toggle"]
-   }
-
-widget radiobutton {
-   option ActiveBackground
-   option ActiveForeground
-   option Anchor
-   option Background
-   option Bitmap
-   option Borderwidth
-   option Cursor
-   option DisabledForeground
-   option Font
-   option Foreground
-   option PadX
-   option PadY
-   option Relief
-   option Text
-   option TextVariable
-   option Command ["-command"; function()]
-   option Height  ["-height"; Units]
-   # option Selector  Not supported by TK 4.0
-   option State
-   option Value   ["-value"; string]
-   option Variable
-   option Width   ["-width"; Units]
-   # New for TK 4.0
-   option UnderlinedChar
-   option TakeFocus
-   option WrapLength
    option HighlightColor
    option HighlightBackground
    option HighlightThickness
    option ImageBitmap
    option ImagePhoto
-   option IndicatorOn
-   option SelectColor
-   option SelectImageBitmap
-   option SelectImagePhoto
-   # End new
-
-   # function () activate [widget(radiobutton); "activate"]         Not supported by TK 4.0
-   function () configure [widget(radiobutton); "configure"; option(radiobutton) list]
-   function (string) configure_get [widget(radiobutton); "configure"]
-   # function () deactivate [widget(radiobutton); "deactivate"]     Not supported by TK 4.0
-   function () deselect [widget(radiobutton); "deselect"]
-   function () flash [widget(radiobutton); "flash"]
-   function () invoke [widget(radiobutton); "invoke"]
-   function () select [widget(radiobutton); "select"]
-   }
-
-type Index external   # builtin_index
-# Almost equal to
-#   Number (int)
-#   End "end"
-#   Insert "insert"
-#   SelFirst "sel.first"
-#   SelLast "sel.last" 
-#   At "@" (int)
-#   AtXY "@" (int)
-
-# Defined internally
-# subtype Index(entry) {
-#    Number End Insert SelFirst SelLast At
-# }
-
-widget entry {
-   option Background
-   option Borderwidth
-   option Cursor
-   option ExportSelection
-   option Font
-   option Foreground
-   option InsertBackground
-   option InsertBorderWidth
-   option InsertOffTime
-   option InsertOnTime
-   option InsertWidth
+   option Justify
+   option PadX
+   option PadY
    option Relief
-   # option ScrollCommand   Not Supported by TK 4.0 and not supplied for CamlTk with TK 3.6
-   option SelectBackground
-   option SelectBorderWidth
-   option SelectForeground
-   option TextVariable
-   option XScrollCommand
-   option State     ["-state"; State]
-   option TextWidth ["-width"; int]
-   # New for TK 4.0
-   option HighlightColor
-   option HighlightBackground
-   option HighlightThickness
    option TakeFocus
-   option Justify ["-justify"; Justification]
-   option XScrollCommand
-   option Show ["-show"; char]
-   # End new
+   option Text
+   option TextVariable
+   option UnderlinedChar
+   option WrapLength
+   # Widget specific options
+   option Command ["-command"; function ()]
+   option Height ["-height"; Units]
+   option State ["-state"; State]
+   option Width ["-width"; Units]
 
-
-   function () configure [widget(entry); "configure"; option(entry) list]
-   function (string) configure_get [widget(entry); "configure"]
-   function () delete [widget(entry); "delete"; Index(entry); Index(entry)]
-   function (string) get [widget(entry); "get"]
-   function () icursor [widget(entry); "icursor"; Index(entry)]
-   function (int) index [widget(entry); "index"; Index(entry)]
-   function () insert [widget(entry); "insert"; Index(entry); string]
-   function () scan_mark [widget(entry); "scan"; "mark"; int]
-   function () scan_dragto [widget(entry); "scan"; "dragto"; int]
-   # select_xx Not supported by TK 4.0
-   # New for TK 4.0
-   function () selection_adjust [widget(entry); "selection"; "adjust"; Index(entry)]
-   function () selection_clear [widget(entry); "selection"; "clear" ]
-   function () selection_from [widget(entry); "selection"; "from"; Index(entry)]
-   function () selection_to [widget(entry); "selection"; "to"; Index(entry)]
-   function (int) selection_present [widget(entry); "selection"; "present"]
-   function () selection_range [widget(entry); "selection"; "range"; Index(entry) ; Index(entry)]
-   function () xview_scroll [widget(entry); "xview"; ScrollValue]
-   function (float, float) get_xview [widget(entry); "xview"]
-   # End new
-   function () xview [widget(entry); "xview"; Index(entry)]
+   function ()	configure [widget(button); "configure"; option(button) list]
+   function (string) configure_get [widget(button); "configure"]
+   function () flash [widget(button); "flash"]
+   function () invoke [widget(button); "invoke"]
    }
 
 
-######################### Canvases
-# type TagOrId external # because of builtins
+###### canvas(n)
+# Item ids and tags
 type TagOrId {
   Tag [string]
   Id  [int]
 }
 
-# type SearchSpec external	# builtin_canvas
-type SearchSpec {
-  Above ["above"; TagOrId]
-  All	["all"]
-  Below ["below"; TagOrId]
-  Closest ["closest"; int; int]
-  Enclosed ["enclosed"; int;int;int;int]
-  Overlapping ["overlapping"; int;int;int;int]
-  Withtag ["withtag"; TagOrId]
-}
-
-
-# defined internally
+# Indices: defined internally
 # subtype Index(canvas) {
 #   Number End Insert SelFirst SelLast AtXY
 #   }
 
-
-type ArcStyle {
-   Pieslice ["pieslice"]
-   Chord ["chord"]
-   Arc ["arc"]
+type SearchSpec {
+  Above ["above"; TagOrId]
+  All	["all"]
+  Below ["below"; TagOrId]
+  Closest ["closest"; Units; Units]
+  ClosestHalo ["closest"; Units; Units; Units]
+  ClosestHaloStart ["closest"; Units; Units; Units; TagOrId]
+  Enclosed ["enclosed"; Units;Units;Units;Units]
+  Overlapping ["overlapping"; int;int;int;int]
+  Withtag ["withtag"; TagOrId]
 }
-
-subtype option (arc) {
-   Extent ["-extent"; float]
-   FillColor ["-fill"; Color]
-   Outline ["-outline"; Color]
-   # New for TK 4.0
-   OutLineStipple ["-outlinestipple"; Bitmap]
-   # End new
-   Start ["-start"; float]
-   Stipple ["-stipple"; Bitmap]
-   ArcStyle ["-style"; ArcStyle]
-   Tags ["-tags"; TagOrId list]
-   Width
-  }
-
-subtype option (bitmap) {
-   Anchor
-   Background
-   Bitmap
-   Foreground
-   Tags
-}
-
-# New for TK 4.0
-subtype option (imageitem) {
-   Anchor ["-anchor"; Anchor]
-   ImagePhoto ["-image"; ImagePhoto]
-   ImageBitMap ["-image"; ImageBitmap]
-   Tags
-}
-# End new
-
-type ArrowStyle { 
-   Arrow_None ["none"]
-   Arrow_First ["first"]
-   Arrow_Last ["last"]
-   Arrow_Both ["both"]
-}
-
-type CapStyle { 
-   CS_Butt ["butt"]
-   CS_Projecting ["projecting"]
-   CS_Round ["round"]
-}
-
-type JoinStyle { 
-   JS_Bevel ["bevel"]
-   JS_Miter ["miter"]
-   JS_Round ["round"]
-}
-
-subtype option(line) {
-   ArrowStyle ["-arrow"; ArrowStyle]
-   ArrowShape ["-arrowshape"; [Units; Units; Units]]
-   CapStyle ["-capstyle"; CapStyle]
-   FillColor
-   JoinStyle ["-joinstyle"; JoinStyle]
-   Smooth ["-smooth"; bool]
-   SplineSteps ["-splinesteps"; int]
-   Stipple ["-stipple"; Bitmap]
-   Tags
-   Width
-   }
-
-subtype option(oval) {
-   FillColor
-   Outline
-   Stipple
-   Tags
-   Width
-   }
-
-subtype option(polygon) {
-   FillColor
-   Smooth
-   # New for TK 4.0
-   Outline
-   Width
-   # End new
-   SplineSteps
-   Stipple
-   Tags
-   }
-
-subtype option(rectangle) {
-   FillColor
-   Outline
-   Stipple
-   Tags
-   Width
-   }
-
-subtype option(canvastext) {
-   Anchor
-   FillColor
-   Font
-   Justify ["-justify"; Justification]
-   Stipple
-   Tags
-   Text
-   Width
-   }
-
-subtype option(window) {
-   Anchor
-   Height
-   Tags
-   Width
-   Window ["-window"; widget]
-   }
 
 type ColorMode { 
-   Colormode ["color"]
+   Color ["color"]
    Gray ["gray"]
    Mono ["mono"]
 }
+
 subtype option(postscript) {
-   Colormap ["-colormap"; string]
+   # Cannot support this withouth array variables
+   # Colormap ["-colormap"; TextVariable]
    Colormode ["-colormode"; ColorMode]
-   # File: not used
-   Fontmap ["-fontmap"; string]
+   File ["-file"; string]
+   # Fontmap ["-fontmap"; TextVariable]
    Height
    PageAnchor ["-pageanchor"; Anchor]
    PageHeight ["-pageheight"; Units]
@@ -496,21 +252,127 @@ subtype option(postscript) {
    Y ["-y"; Units]
    }
 
+
+# Arc item configuration
+type ArcStyle {
+   Arc ["arc"]
+   Chord ["chord"]
+   PieSlice ["pieslice"]
+}
+
+subtype option(arc) {
+   Extent ["-extent"; float]
+   # Fill is used by packer
+   FillColor ["-fill"; Color]
+   Outline ["-outline"; Color]
+   OutlineStipple ["-outlinestipple"; Bitmap]
+   Start ["-start"; float]
+   Stipple ["-stipple"; Bitmap]
+   ArcStyle ["-style"; ArcStyle]
+   Tags ["-tags"; TagOrId list]
+   Width
+  }
+
+# Bitmap item configuration
+subtype option(bitmap) {
+   Anchor
+   Background
+   Bitmap
+   Foreground
+   Tags
+}
+
+# Image item configuration
+subtype option(image) {
+   Anchor
+   ImagePhoto
+   ImageBitmap
+   Tags
+}
+
+# Line item configuration
+type ArrowStyle { 
+   Arrow_None ["none"]
+   Arrow_First ["first"]
+   Arrow_Last ["last"]
+   Arrow_Both ["both"]
+}
+
+type CapStyle { 
+   Cap_Butt ["butt"]
+   Cap_Projecting ["projecting"]
+   Cap_Round ["round"]
+}
+
+type JoinStyle { 
+   Join_Bevel ["bevel"]
+   Join_Miter ["miter"]
+   Join_Round ["round"]
+}
+
+subtype option(line) {
+   ArrowStyle ["-arrow"; ArrowStyle]
+   ArrowShape ["-arrowshape"; [Units; Units; Units]]
+   CapStyle ["-capstyle"; CapStyle]
+   FillColor
+   JoinStyle ["-joinstyle"; JoinStyle]
+   Smooth ["-smooth"; bool]
+   SplineSteps ["-splinesteps"; int]
+   Stipple
+   Tags
+   Width
+   }
+
+# Oval item configuration
+subtype option(oval) {
+   FillColor Outline Stipple Tags Width
+   }
+
+# Polygon item configuration
+subtype option(polygon) {
+   FillColor Outline Smooth SplineSteps
+   Stipple Tags Width
+   }
+
+# Rectangle item configuration
+subtype option(rectangle) {
+   FillColor Outline Stipple Tags Width
+   }
+
+# Text item configuration
+subtype option(canvastext) {
+   Anchor FillColor Font Justify
+   Stipple Tags Text Width
+   }
+
+# Window item configuration
+subtype option(window) {
+   Anchor Height Tags Width
+   Window ["-window"; widget]
+   }
+
+# Types of items
 type CanvasItem {
    Arc_item ["arc"]
-   Line_item ["line"]
-   Rectangle_item ["rectangle"]
-   Oval_item ["oval"]
    Bitmap_item ["bitmap"]
+   Image_item ["image"]
+   Line_item ["line"]
+   Oval_item ["oval"]
    Polygon_item ["polygon"]
+   Rectangle_item ["rectangle"]
    Text_item ["text"]
    Window_item ["window"]
+   User_item [string]
 }
 
 widget canvas {
+   # Standard options
    option Background
-   option Borderwidth
+   option BorderWidth
    option Cursor
+   option HighlightColor
+   option HighlightBackground
+   option HighlightThickness
    option InsertBackground
    option InsertBorderWidth
    option InsertOffTime
@@ -520,375 +382,820 @@ widget canvas {
    option SelectBackground
    option SelectBorderWidth
    option SelectForeground
+   option TakeFocus
    option XScrollCommand
    option YScrollCommand
+   # Widget specific options
    option CloseEnough ["-closeenough"; float]
    option Confine ["-confine"; bool]
    option Height ["-height"; Units]
-   # option ScrollIncrement ["-scrollincrement"; Units]       Not supported by TK V 4.0
    option ScrollRegion ["-scrollregion"; [Units;Units;Units;Units]]
    option Width ["-width"; Units]
-   # New for TK V 4.0
-   option HighlightColor ["-highlightcolor"; Color]
-   option HighlightBackground ["highllightbackground"; Color]
-   option HighlightThickness ["highlightthickness"; int]
-   option TakeFocus
-   option xScrollIncrement ["-xscrollincrement"; float]
-   option yScrollIncrement ["-yscrollincrement"; float]
-   # End new
+   option XScrollIncrement ["-xscrollincrement"; Units]
+   option YScrollIncrement ["-yscrollincrement"; Units]
 
 
-   function () addtag [widget(canvas); "addtag"; TagOrId; SearchSpec]     # Tag only
+   function () addtag [widget(canvas); "addtag"; TagOrId; SearchSpec list]     # Tag only
    # bbox not fully supported. should be builtin because of ambiguous result
-   # function (float, float, float, float) bbox [widget(canvas); "bbox"; TagOrId list]
-   function (int list) bbox [widget(canvas); "bbox"; TagOrId list]
+   # will raise protocol__TkError if no items match TagOrId
+   function (int,int,int,int) bbox [widget(canvas); "bbox"; TagOrId list]
    # bind is builtin
-   function (int) canvasx [widget(canvas); "canvasx"; Units; Units]
-   function (int) canvasy [widget(canvas); "canvasy"; Units; Units]
-   function () configure [widget(canvas); "configure"; option (canvas) list]
+   function (int) canvasx [widget(canvas); "canvasx"; Units]
+   function (int) canvasx_grid [widget(canvas); "canvasx"; Units; Units]
+   function (int) canvasy [widget(canvas); "canvasy"; Units]
+   function (int) canvasy_grid [widget(canvas); "canvasy"; Units; Units]
+   function () configure [widget(canvas); "configure"; option(canvas) list]
    function (string) configure_get [widget(canvas); "configure"]
    # TODO: check result
    function (int list) coords_get [widget(canvas); "coords"; TagOrId]
    function () coords_set [widget(canvas); "coords"; TagOrId; Units list]
+   # create variations (see below)
    function () dchars [widget(canvas); "dchars"; TagOrId; Index(canvas); Index(canvas)]
    function () delete [widget(canvas); "delete"; TagOrId list]
    function () dtag [widget(canvas); "dtag"; TagOrId; TagOrId]     # 2d arg is tag only 
-   function (TagOrId list) find [widget(canvas); "find"; SearchSpec]
-   function () focus_reset [widget(canvas); "focus" ]
+   function (TagOrId list) find [widget(canvas); "find"; SearchSpec list]
+   # focus variations
+   function () focus_reset [widget(canvas); "focus"; ""]
+   function (TagOrId) focus_get [widget(canvas); "focus"]
    function () focus [widget(canvas); "focus"; TagOrId]
    function (TagOrId list) gettags [widget(canvas); "gettags"; TagOrId]
    function () icursor [widget(canvas); "icursor"; TagOrId; Index(canvas)]
    function (int) index [widget(canvas); "index"; TagOrId; Index(canvas)]
    function () insert [widget(canvas); "insert"; TagOrId; Index(canvas); string]
-   function (string) item_configure_get [widget(canvas); "itemconfigure"; TagOrId]
-   function () arc_configure [widget(canvas); "itemconfigure"; TagOrId; option (arc) list]
-   function () bitmap_configure [widget(canvas); "itemconfigure"; TagOrId; option (bitmap) list]
-   function () line_configure [widget(canvas); "itemconfigure"; TagOrId; option (line) list]
-   function () oval_configure [widget(canvas); "itemconfigure"; TagOrId; option (oval) list]
-   function () polygon_configure [widget(canvas); "itemconfigure"; TagOrId; option (polygon) list]
-   function () rectangle_configure [widget(canvas); "itemconfigure"; TagOrId; option (rectangle) list]
-   function () text_configure [widget(canvas); "itemconfigure"; TagOrId; option (canvastext) list]
-   function () window_configure [widget(canvas); "itemconfigure"; TagOrId; option (window) list]
-   function () lower [widget(canvas); "lower"; TagOrId; TagOrId]
-   function () lowest [widget(canvas); "lower"; TagOrId]
+   # configure variations, see below
+   function () lower_below [widget(canvas); "lower"; TagOrId; TagOrId]
+   function () lower_bot   [widget(canvas); "lower"; TagOrId]
    function () move [widget(canvas); "move"; TagOrId; Units; Units]
-   function (string) postscript [widget(canvas); "postscript"; option (postscript) list]
-   function () postscript_file [widget(canvas); "postscript"; "-file"; string; option(postscript) list]
+   function (string) postscript [widget(canvas); "postscript"; option(postscript) list]
    # do not use raise !
-   function () raiseabove [widget(canvas); "raise"; TagOrId; TagOrId]
-   function () raisetop [widget(canvas); "raise"; TagOrId]
+   function () raise_above [widget(canvas); "raise"; TagOrId; TagOrId]
+   function () raise_top [widget(canvas); "raise"; TagOrId]
    function () scale [widget(canvas); "scale"; TagOrId; Units; Units; float; float]
+   # For scan, use x:int and y:int since comme usage is with mouse coordinates
    function () scan_mark [widget(canvas); "scan"; "mark"; int; int]
    function () scan_dragto [widget(canvas); "scan"; "dragto"; int; int]
-   function () select_adjust [widget(canvas); "select"; "adjust"; TagOrId ;Index(canvas)]
-   function () select_clear [widget(canvas); "select"; "clear" ]
+   # select variations
+   function () select_adjust [widget(canvas); "select"; "adjust"; TagOrId; Index(canvas)]
+   function () select_clear [widget(canvas); "select"; "clear"]
    function () select_from [widget(canvas); "select"; "from"; TagOrId; Index(canvas)]
-   function (TagOrId) select_item [widget(canvas); "select"; "item" ]
+   function (TagOrId) select_item [widget(canvas); "select"; "item"]
    function () select_to  [widget(canvas); "select"; "to"; TagOrId; Index(canvas)]
+
    function (CanvasItem) typeof [widget(canvas); "type"; TagOrId]
-   function () xview [widget(canvas); "xview"; Index(canvas)]
-   function () yview [widget(canvas); "yview"; Index(canvas)]
-   # New for TK V4.0
-   function () xview_scroll [widget(canvas); "xview"; ScrollValue]
-   function () yview_scroll [widget(canvas); "yview"; ScrollValue]
-   # End new
-   function (TagOrId) createarc [widget(canvas); "create"; "arc"; Units; Units; Units; Units; option (arc) list]
-   function (TagOrId) createbitmap [widget(canvas); "create"; "bitmap"; Units; Units; option (bitmap) list]
-   function (TagOrId) createline [widget(canvas); "create"; "line"; Units list; option (line) list]
-   function (TagOrId) createoval [widget(canvas); "create"; "oval"; Units; Units; Units; Units; option (oval) list]
-   function (TagOrId) createpolygon [widget(canvas); "create"; "polygon"; Units list; option (polygon) list]
-   function (TagOrId) createrectangle [widget(canvas); "create"; "rectangle"; Units; Units; Units; Units; option (rectangle) list]
-   function (TagOrId) createtext [widget(canvas); "create"; "text"; Units; Units; option (canvastext) list]
-   function (TagOrId) createwindow [widget(canvas); "create"; "window"; Units; Units; option (window) list]
-   function () move [widget(canvas); "move"; TagOrId; Units; Units]
+   function (float,float) xview_get [widget(canvas); "xview"]
+   function (float,float) yview_get [widget(canvas); "yview"]
+   function () xview [widget(canvas); "xview"; ScrollValue]
+   function () yview [widget(canvas); "yview"; ScrollValue]
+
+   # create and configure variations
+   function (TagOrId) create_arc [widget(canvas); "create"; "arc"; Units; Units; Units; Units; option(arc) list]
+   function (TagOrId) create_bitmap [widget(canvas); "create"; "bitmap"; Units; Units; option(bitmap) list]
+   function (TagOrId) create_image [widget(canvas); "create"; "image"; Units; Units; option(image) list]
+   function (TagOrId) create_line [widget(canvas); "create"; "line"; Units list; option(line) list]
+   function (TagOrId) create_oval [widget(canvas); "create"; "oval"; Units; Units; Units; Units; option(oval) list]
+   function (TagOrId) create_polygon [widget(canvas); "create"; "polygon"; Units list; option(polygon) list]
+   function (TagOrId) create_rectangle [widget(canvas); "create"; "rectangle"; Units; Units; Units; Units; option(rectangle) list]
+   function (TagOrId) create_text [widget(canvas); "create"; "text"; Units; Units; option(canvastext) list]
+   function (TagOrId) create_window [widget(canvas); "create"; "window"; Units; Units; option(window) list]
+
+   function (string) itemconfigure_get [widget(canvas); "itemconfigure"; TagOrId]
+
+   function () configure_arg [widget(canvas); "itemconfigure"; TagOrId; option(arc) list]
+   function () configure_bitmap [widget(canvas); "itemconfigure"; TagOrId; option(bitmap) list]
+   function () configure_image [widget(canvas); "itemconfigure"; TagOrId; option(image) list]
+   function () configure_line [widget(canvas); "itemconfigure"; TagOrId; option(line) list]
+   function () configure_oval [widget(canvas); "itemconfigure"; TagOrId; option(oval) list]
+   function () configure_polygon [widget(canvas); "itemconfigure"; TagOrId; option(polygon) list]
+   function () configure_rectangle [widget(canvas); "itemconfigure"; TagOrId; option(rectangle) list]
+   function () configure_text [widget(canvas); "itemconfigure"; TagOrId; option(canvastext) list]
+   function () configure_window [widget(canvas); "itemconfigure"; TagOrId; option(window) list]
    }
 
-widget label {
+
+##### checkbutton(n)
+widget checkbutton {	
+   # Standard options
+   option ActiveBackground
+   option ActiveForeground
    option Anchor
    option Background
    option Bitmap
-   option Borderwidth
+   option BorderWidth
    option Cursor
+   option DisabledForeground
    option Font
    option Foreground
+   option HighlightBackground
+   option HighlightColor
+   option HighlightThickness
+   option ImageBitmap
+   option ImagePhoto
+   option Justify
    option PadX
    option PadY
    option Relief
+   option TakeFocus
    option Text
    option TextVariable
+   option UnderlinedChar
+   option WrapLength
+   # Widget specific options
+   option Command
    option Height
-   # use the option corresponding to the label contents (echh)
+   option IndicatorOn ["-indicatoron"; bool]
+   option OffValue ["-offvalue"; string]
+   option OnValue  ["-onvalue"; string]
+   option SelectColor ["-selectcolor"; Color]
+   option SelectImageBitmap ["-selectimage"; ImageBitmap]
+   option SelectImagePhoto ["-selectimage"; ImagePhoto]
+   option State    ["-state"; State]
+   option Variable ["-variable"; TextVariable]
+   option Width
+
+   function () configure [widget(checkbutton); "configure"; option(checkbutton) list]
+   function (string) configure_get [widget(checkbutton); "configure"]
+   function () deselect [widget(checkbutton);  "deselect"]
+   function () flash [widget(checkbutton); "flash"]
+   function () invoke [widget(checkbutton); "invoke"]
+   function () select [widget(checkbutton); "select"]
+   function () toggle [widget(checkbutton); "toggle"]
+   }
+
+##### clipboard(n)
+subtype icccm(clipboard_clear) {
+  DisplayOf ["-displayof"; Widget]
+  }
+
+subtype icccm(clipboard_append) {
+  DisplayOf ["-displayof"; Widget]
+  ICCCMFormat ["-format"; string]
+  ICCCMType ["-type"; string]
+  }
+
+module clipboard {
+  function () clear ["clipboard"; "clear"; icccm(clipboard_clear) list]
+  function () append ["clipboard"; "append"; icccm(clipboard_append) list; "--"; string]
+  }
+
+##### destroy(n)
+function () destroy ["destroy"; widget]
+
+##### tk_dialog(n)
+# Use Predefined "" for empty bitmap
+function (int) dialog ["tk_dialog"; widget; string; string; Bitmap; int; string list]
+
+##### entry(n)
+# Defined internally
+# subtype Index(entry) {
+#    Number End Insert SelFirst SelLast At AnchorPoint
+# }
+
+
+widget entry {
+   # Standard options
+   option Background
+   option BorderWidth
+   option Cursor
+   option ExportSelection
+   option Font
+   option Foreground
+   option HighlightBackground
+   option HighlightColor
+   option HighlightThickness
+   option InsertBackground
+   option InsertBorderWidth
+   option InsertOffTime
+   option InsertOnTime
+   option InsertWidth
+   option Justify
+   option Relief
+   option SelectBackground
+   option SelectBorderWidth
+   option SelectForeground
+   option TakeFocus
+   option TextVariable
+   option XScrollCommand
+
+   # Widget specific options
+   option Show ["-show"; char]
+   option State
+   option TextWidth ["-width"; int]
+
+   function () configure [widget(entry); "configure"; option(entry) list]
+   function (string) configure_get [widget(entry); "configure"]
+   function () delete_single [widget(entry); "delete"; Index(entry)]
+   function () delete_range [widget(entry); "delete"; Index(entry); Index(entry)]
+   function (string) get [widget(entry); "get"]
+   function () icursor [widget(entry); "icursor"; Index(entry)]
+   function (int) index [widget(entry); "index"; Index(entry)]
+   function () insert [widget(entry); "insert"; Index(entry); string]
+   function () scan_mark [widget(entry); "scan"; "mark"; int]
+   function () scan_dragto [widget(entry); "scan"; "dragto"; int]
+   # selection variation
+   function () selection_adjust [widget(entry); "selection"; "adjust"; Index(entry)]
+   function () selection_clear [widget(entry); "selection"; "clear"]
+   function () selection_from [widget(entry); "selection"; "from"; Index(entry)]
+   function (bool) selection_present [widget(entry); "selection"; "present"]
+   function () selection_range [widget(entry); "selection"; "range"; Index(entry) ; Index(entry)]
+   function () selection_to [widget(entry); "selection"; "to"; Index(entry)]
+
+   function () xview [widget(entry); "xview"; ScrollValue]
+   function () xview_index [widget(entry); "xview"; Index(entry)]
+   function (float, float) xview_get [widget(entry); "xview"]
+   }
+
+
+##### focus(n)
+##### tk_focusNext(n)
+module focus {
+  function (widget) get ["focus"]
+  function ()       set ["focus"; widget]
+  function (widget) displayof ["focus"; "-displayof"; widget]
+  function ()       force ["focus"; "-force"; widget]
+  function (widget) lastfor ["focus"; "-lastfor"; widget]
+  function (widget) next ["tk_focusNext"; widget]
+  function (widget) prev ["tk_focusPrev"; widget]
+  function ()       follows_mouse ["tk_focusFollowsMouse"]
+}
+
+
+##### frame(n)
+type Colormap {
+  NewColormap ["new"]
+  WidgetColormap [widget]
+  }
+
+# Visual classes are: directcolor, grayscale, greyscale, pseudocolor,
+#                     staticcolor, staticgray, staticgrey, truecolor
+type Visual {
+  ClassVisual [[string; int]]  
+  DefaultVisual ["default"]
+  WidgetVisual [widget]
+  BestDepth [["best"; int]]
+  Best ["best"]
+  }
+
+widget frame {
+   # Standard options
+   option BorderWidth
+   option Cursor
+   option HighlightBackground
+   option HighlightColor
+   option HighlightThickness
+   option Relief
+   option TakeFocus
+
+   # Widget specific options
+   option Background
+   option Class  ["-class"; string]
+   option Colormap ["-colormap"; Colormap]
+   option Height
+   option Visual ["-visual"; Visual]
+   option Width
+
+   # Class and Colormap and Visual cannot be changed
+   function () configure [widget(frame); "configure"; option(frame) list]
+   function (string) configure_get [widget(frame); "configure"]
+   }
+
+
+
+##### grab(n)
+type GrabStatus {
+   GrabNone ["none"]
+   GrabLocal ["local"]
+   GrabGlobal ["global"]
+}
+module grab {
+   function () set ["grab"; widget]
+   function () set_global ["grab"; "-global"; widget]
+   function (widget list) current ["grab"; "current"; widget]
+   function (widget list) all_current ["grab"; "current"]
+   function () release ["grab"; "release"; widget]
+   function (GrabStatus) status ["grab"; "status"; widget]
+}
+
+##### image(n)
+##### cf bitmap(n) and photo(n)
+# Some functions on images are not implemented
+# names, types
+
+
+##### label(n)
+widget label {
+   # Standard options
+   option Anchor
+   option Background
+   option Bitmap
+   option BorderWidth
+   option Cursor
+   option Font
+   option Foreground
+   option HighlightBackground
+   option HighlightColor
+   option HighlightThickness
+   option ImageBitmap
+   option ImagePhoto
+   option Justify
+   option PadX
+   option PadY
+   option Relief
+   option TakeFocus
+   option Text
+   option TextVariable
+   option UnderlinedChar
+   option WrapLength
+
+   # Widget specific options
+   option Height
+   # use according to label contents
    option Width
    option TextWidth
-   # New for TK 4.0
-   option HighlightColor
-   option HighlightBackground
-   option HighlightThickness
-   option TakeFocus
-   option WrapLength
-   option UnderlinedChar
-   option Justify
-   option ImageBitmap        # Because 2 types for images
-   option ImagePhoto
-   # End new
 
-
-   function () configure [widget(label); "configure"; option (label) list]
+   function () configure [widget(label); "configure"; option(label) list]
    function (string) configure_get [widget(label); "configure"]
    }
 
+
+##### listbox(n)
+
 # Defined internally
 # subtype Index(listbox) {
-#   Number End  
+#   Number Active AnchorPoint End AtXY
 #}
 
-# New for TK 4.0
 type SelectModeType {
    Single ["single"]
    Browse ["browse"]
    Multiple ["multiple"]
    Extended ["extended"]
    }
-# End new
 
 
 widget listbox {
+   # Standard options
    option Background
-   option Borderwidth
+   option BorderWidth
    option Cursor
    option ExportSelection
    option Foreground
    option Font
-   # option Geometry    Not supported by TK 4.0
+   option HighlightBackground
+   option HighlightColor
+   option HighlightThickness
    option Relief
    option SelectBackground
    option SelectBorderWidth
    option SelectForeground
    option SetGrid
+   option TakeFocus
    option XScrollCommand
    option YScrollCommand
-   # New for TK 4.0
-   option HighlightColor
-   option HighlightBackground
-   option HighlightThickness
-   option TakeFocus
-   option Height
-   option Width
+   # Widget specific options
+   option TextHeight ["-height"; int]
+   option TextWidth
    option SelectMode ["-selectmode"; SelectModeType]
-   # End new
 
-
+   function () activate [widget(listbox); "activate"; Index(listbox)]
+   function (int,int,int,int) bbox [widget(listbox); "bbox"; Index(listbox)]
    function () configure [widget(listbox); "configure"; option(listbox) list]
-   function (string) configure_get [widget(listbox); "configure" ]
-   # TODO: pb with returning empty list ?
-   function (Index list) curselection [widget(listbox); "curselection" ]
+   function (string) configure_get [widget(listbox); "configure"]
+   function (Index list) curselection [widget(listbox); "curselection"]
    function () delete [widget(listbox); "delete"; Index(listbox); Index(listbox)]
    function (string) get [widget(listbox); "get"; Index(listbox)]
+   function (string list) get_range [widget(listbox); "get"; Index(listbox); Index(listbox)]
+   function (int) index [widget(listbox); "index"; Index(listbox)]
    function () insert [widget(listbox); "insert"; Index(listbox); string list]
    function (Index) nearest [widget(listbox); "nearest"; int]
    function () scan_mark [widget(listbox); "scan"; "mark"; int; int]
    function () scan_dragto [widget(listbox); "scan"; "dragto"; int; int]
-   # function () select_adjust [widget(listbox); "select"; "adjust"; Index(listbox)]  Not supported by TK 4.0
-   # function () select_clear [widget(listbox); "select"; "clear" ]                  Not supported by TK 4.0
-   # function () select_from [widget(listbox); "select"; "from"; Index(listbox)]    Not supported by TK 4.0
-   # function () select_to [widget(listbox); "select"; "to"; Index(listbox)]       Not supported by TK 4.0
-   function (int) size [widget(listbox); "size"]
-   # ATTENTION: Use this for manual scrolling (without scrollbar)
-   function () xview [widget(listbox); "xview"; Index(listbox)]
-   function () yview [widget(listbox); "yview"; Index(listbox)]
-   function () SingleSelect ["tk_listboxSingleSelect"; widget(listbox) list]
-   # New for Tk V4.0
-   # ATTENTION: Use this when linking with scrollbar
-   function () xview_scroll [widget(listbox); "yview"; ScrollValue]
-   function () yview_scroll [widget(listbox); "yview"; ScrollValue]
-   # End ATTENTION
-   function () activate [widget(listbox); "activate"; Index(listbox)]
-   # For below: Bbox returns an int list instead of 4 int because if it doesn't find the text
-   # at the asked position, it returns nothing (empty string)...
-   function (int list) Bbox [widget(listbox); "bbox"; Index(listbox)]
-   function (int) Index2Number [widget(listbox); "index"; Index(listbox)]
    function () see [widget(listbox); "see"; Index(listbox)]
    function () selection_anchor [widget(listbox); "selection"; "anchor"; Index(listbox)]
    function () selection_clear [widget(listbox); "selection"; "clear"; Index(listbox); Index(listbox)]
    function (bool) selection_includes [widget(listbox); "selection"; "includes"; Index(listbox)]
    function () selection_set [widget(listbox); "selection"; "set"; Index(listbox); Index(listbox)]
-   # End new
+   function (int) size [widget(listbox); "size"]
+
+   function (float,float) xview_get [widget(listbox); "xview"]
+   function (float,float) yview_get [widget(listbox); "yview"]
+   function () xview_index [widget(listbox); "xview"; Index(listbox)]
+   function () yview_index [widget(listbox); "yview"; Index(listbox)]
+   function () xview [widget(listbox); "yview"; ScrollValue]
+   function () yview [widget(listbox); "yview"; ScrollValue]
    }
 
-widget menubutton {
-   option ActiveBackground
-   option ActiveForeground
-   option Anchor
-   option Background
-   option Bitmap
-   option Borderwidth
-   option Cursor
-   option DisabledForeground
-   option Font
-   option Foreground
-   option PadX
-   option PadY
-   option Relief
-   option Text
-   option TextVariable
-   option UnderlinedChar
-   option Height
-   option Menu ["-menu"; widget(menu)]
-   option State ["-state"; State]
-   option Width
-   # New for TK 4.0
-   option HighlightColor
-   option HighlightBackground
-   option HighlightThickness
-   option TakeFocus
-   option WrapLength
-   option ImageBitmap        # Because 2 types for images
-   option ImagePhoto
-   option Justify
-   option IndicatorOn
-   # End new
+##### lower(n)
+function () lower_window ["lower"; widget]
+function () lower_window_below ["lower"; widget; widget]
 
 
-   function () configure [widget(menubutton); "configure"; option(menubutton) list]
-   function (string) configure_get [widget(menubutton); "configure" ]
-   function () activate [widget(menubutton); "activate" ]
-   # function () deactivate [widget(menubutton); "deactivate" ]    Not supported by TK 4.0
+##### menu(n)
+##### tk_popup(n)
+# defined internally
+# subtype Index(menu) {
+#   Number Active End Last None At Pattern
+#   }
+
+type MenuItem {
+   Cascade_Item ["cascade"]
+   Checkbutton_Item ["checkbutton"]
+   Command_Item ["command"]
+   Radiobutton_Item ["radiobutton"]
+   Separator_Item ["separator"]
+   TearOff_Item ["tearoff"]
+}
+
+# notused as a subtype. just for cleaning up the rest.
+subtype option(menuentry) {
+   ActiveBackground
+   ActiveForeground
+   Accelerator ["-accelerator"; string]
+   Background    
+   Bitmap
+   Command
+   Font
+   Foreground
+   ImageBitmap
+   ImagePhoto
+   IndicatorOn
+   Label ["-label"; string]
+   Menu ["-menu"; widget(menu)]
+   OffValue
+   OnValue
+   SelectColor
+   SelectImageBitmap
+   SelectImagePhoto
+   State
+   UnderlinedChar
+   Value ["-value"; string]
+   Variable
    }
 
-type MenuIndex external
+# Options for cascade entry
+subtype option(menucascade) {
+   ActiveBackground ActiveForeground Accelerator
+   Background Bitmap Command Font Foreground
+   ImageBitmap ImagePhoto Label Menu State UnderlinedChar
+   }
 
+# Options for radiobutton entry
+subtype option(menuradio) {
+   ActiveBackground ActiveForeground Accelerator
+   Background Bitmap Command Font Foreground
+   ImageBitmap ImagePhoto IndicatorOn Label
+   SelectColor SelectImageBitmap SelectImagePhoto
+   State UnderlinedChar Value Variable
+   }
+
+# Options for checkbutton entry
+subtype option(menucheck) {
+   ActiveBackground ActiveForeground Accelerator
+   Background Bitmap Command Font Foreground
+   ImageBitmap ImagePhoto IndicatorOn Label
+   OffValue OnValue SelectColor SelectImageBitmap
+   SelectImagePhoto State UnderlinedChar Variable
+   }
+
+# Options for command entry
+subtype option(menucommand) {
+   ActiveBackground ActiveForeground Accelerator
+   Background Bitmap Command Font Foreground
+   ImageBitmap ImagePhoto Label State UnderlinedChar
+   }
+
+# Separators and tearoffs don't have options
 
 widget menu {
+   # Standard options
    option ActiveBackground
    option ActiveBorderWidth
    option ActiveForeground
    option Background
-   option Borderwidth
+   option BorderWidth
    option Cursor
    option DisabledForeground
    option Font
    option Foreground
-   option PostCommand ["-postcommand"; function()]
-   # option Selector                 Not supported by TK 4.0
-   # New for TK 4.0
    option Relief
    option TakeFocus
-   option SelectColor ["-selectcolor"; Color]
+   # Widget specific options
+   option PostCommand ["-postcommand"; function()]
+   option SelectColor
    option TearOff ["-tearoff"; bool]
-   # End new
 
-
-   function () activate [widget(menu); "activate"; MenuIndex]
+   function () activate [widget(menu); "activate"; Index(menu)]
+   # add variations
    function () add_cascade [widget(menu); "add"; "cascade"; option(menucascade) list]
    function () add_checkbutton [widget(menu); "add"; "checkbutton"; option(menucheck) list]
    function () add_command [widget(menu); "add"; "command"; option(menucommand) list]
    function () add_radiobutton [widget(menu); "add"; "radiobutton"; option(menuradio) list]
    function () add_separator [widget(menu); "add"; "separator"]
    function () configure [widget(menu); "configure"; option(menu) list]
-   function () delete [widget(menu); "delete"; MenuIndex; MenuIndex]
-   # function () disable [widget(menu); "disable"; MenuIndex]	Not supported by TK 4.0
-   # function () enable [widget(menu); "enable"; MenuIndex]     Not supported by TK 4.0
-   function () entryconfigure_cascade [widget(menu); "entryconfigure"; MenuIndex; option (menucascade) list]
-   function () entryconfigure_checkbutton [widget(menu); "entryconfigure"; MenuIndex; option (menucheck) list]
-   function () entryconfigure_command [widget(menu); "entryconfigure"; MenuIndex; option (menucommand) list]
-   function () entryconfigure_radiobutton [widget(menu); "entryconfigure"; MenuIndex; option (menuradio) list]
-   function (string) entryconfigure_get [widget(menu); "entryconfigure"; MenuIndex]
-   # none not supported
-   function (int) index [widget(menu); "index"; MenuIndex]
-   function (string) invoke [widget(menu); "invoke"; MenuIndex]
+   function (string) configure_get [widget(menu); "configure"]
+   function () delete [widget(menu); "delete"; Index(menu); Index(menu)]
+   function () configure_cascade [widget(menu); "entryconfigure"; Index(menu); option(menucascade) list]
+   function () configure_checkbutton [widget(menu); "entryconfigure"; Index(menu); option(menucheck) list]
+   function () configure_command [widget(menu); "entryconfigure"; Index(menu); option(menucommand) list]
+   function () configure_radiobutton [widget(menu); "entryconfigure"; Index(menu); option(menuradio) list]
+   function (string) entryconfigure_get [widget(menu); "entryconfigure"; Index(menu)]
+   function (int) index [widget(menu); "index"; Index(menu)]
+   function () insert_cascade [widget(menu); "insert"; Index(menu); "cascade"; option(menucascade) list]
+   function () insert_checkbutton [widget(menu); "insert"; Index(menu); "checkbutton"; option(menucheck) list]
+   function () insert_command [widget(menu); "insert"; Index(menu); "command"; option(menucommand) list]
+   function () insert_radiobutton [widget(menu); "insert"; Index(menu); "radiobutton"; option(menuradio) list]
+   function () insert_separator [widget(menu); "insert"; Index(menu); "separator"]
+   function (string) invoke [widget(menu); "invoke"; Index(menu)]
    function () post [widget(menu); "post"; int; int]
+   function () postcascade [widget(menu); "postcascade"; Index(menu)]
+   # can't use type of course
+   function (MenuItem) typeof [widget(menu); "type"; Index(menu)]
    function () unpost [widget(menu); "unpost"]
-   function (int) yposition [widget(menu); "yposition"; MenuIndex]
-   # New for TK 4.0
-   function () insert_cascade [widget(menu); "insert"; widget(menu); "cascade"; option(menucascade) list]
-   function () insert_checkbutton [widget(menu); "insert"; widget(menu); "checkbutton"; option(menucheck) list]
-   function () insert_command [widget(menu); "insert"; widget(menu); "command"; option(menucommand) list]
-   function () insert_radiobutton [widget(menu); "insert"; widget(menu); "radiobutton"; option(menuradio) list]
-   function () insert_separator [widget(menu); "insert"; widget(menu); "separator"]
-   function () postcascade [widget(menu); "postcascade"; MenuIndex]
-   # function type is not useful because Camllight types all values. So () type not implemented
-   # End new
-   function () post_popup ["tk_popup"; widget(menu); int; int]
-   function () post_popup_numentry ["tk_popup"; widget(menu); int; int; int]
+   function (int) yposition [widget(menu); "yposition"; Index(menu)]
+
+   function () popup ["tk_popup"; widget(menu); int; int]
+   function () popup_entry ["tk_popup"; widget(menu); int; int; Index(menu)]
    }
 
-# Options for menu add cascade
-subtype option(menucascade) {
-	ActiveBackground
-	Accelerator ["-accelerator"; string]
-	Background    
-	Bitmap
-	Command ["-command"; function() ]
-	Font ["-font"; string]
-	Label ["-label"; string]
-	Menu ["-menu"; widget(menu)]
-	State ["-state"; State]
-	UnderlinedChar
-        ActiveForeground
-        Foreground
-        ImageBitmap
-        ImagePhoto
-	}
 
-# Options for menu add radiobutton
-subtype option(menuradio) {
-	ActiveBackground Accelerator Background Bitmap
-	Command Font Label State UnderlinedChar
-	Value Variable ActiveForeground Foreground
-        ImageBitmap ImagePhoto
-        SelectColor SelectImageBitmap SelectImagePhoto
-	}
+##### menubutton(n)
 
-# Options for menu add checkbutton
-subtype option(menucheck) {
-	ActiveBackground Accelerator Background Bitmap
-	Command Font Label State UnderlinedChar
-	OffValue OnValue Variable ActiveForeground Foreground
-        ImageBitmap ImagePhoto
-        SelectColor SelectImageBitmap SelectImagePhoto
-	}
-
-# Options for menu add command
-subtype option(menucommand) {
-	ActiveBackground Accelerator Background Bitmap
-	Command Font Label State UnderlinedChar ActiveForeground
-        Foreground ImageBitmap ImagePhoto
-	}
-
-##### Menubar
-module menubar {
-  function (widget list) get ["tk_menuBar"; widget(frame)]
-  function () set ["tk_menuBar"; widget(frame); widget list]
-# clear ?
-  }
-
-widget message {
+widget menubutton {
+   # Standard options
+   option ActiveBackground
+   option ActiveForeground
    option Anchor
    option Background
-   option Borderwidth
+   option Bitmap
+   option BorderWidth
    option Cursor
+   option DisabledForeground
    option Font
    option Foreground
+   option HighlightBackground
+   option HighlightColor
+   option HighlightThickness
+   option ImageBitmap
+   option ImagePhoto
+   option Justify
    option PadX
    option PadY
    option Relief
+   option TakeFocus
    option Text
    option TextVariable
+   option UnderlinedChar
+   option WrapLength
+   # Widget specific options
+   option Height
+   option IndicatorOn
+   option Menu ["-menu"; widget(menu)]
+   option State
    option Width
-   option Aspect ["-aspect"; int]
-   option Justify ["-justify"; Justification]
-   option HighlightColor
-   option HighlightBackground
-   option HighlightThickness
-   option TakeFocus
 
+   function () configure [widget(menubutton); "configure"; option(menubutton) list]
+   function (string) configure_get [widget(menubutton); "configure"]
+   }
+
+
+
+##### message(n)
+widget message {
+   # Standard options
+   option Anchor
+   option Background
+   option BorderWidth
+   option Cursor
+   option Font
+   option Foreground
+   option HighlightBackground
+   option HighlightColor
+   option HighlightThickness
+   option PadX
+   option PadY
+   option Relief
+   option TakeFocus
+   option Text
+   option TextVariable
+   # Widget specific options
+   option Aspect ["-aspect"; int]
+   option Justify
+   option Width
 
    function () configure [widget(message); "configure"; option(message) list]
    function (string) configure_get [widget(message); "configure"]
    }
 
-# #####
-# Type of the componants of a scale
+
+##### option(n)
+type OptionPriority {
+   WidgetDefault  ["widgetDefault"]
+   StartupFile    ["startupFile"]
+   UserDefault    ["userDefault"]
+   Interactive    ["interactive"]
+   Priority      [int]
+   }
+
+##### name it resource since option is a kw here. arg.
+module resource {
+   function () add ["option"; "add"; string; string; OptionPriority]
+   function () clear ["option"; "clear"]
+   function (string) get ["option"; "get"; widget; string; string]
+   function () readfile ["option"; "readfile"; string; OptionPriority]
+   }
+
+##### tk_optionMenu(n)
+# is implemented as optionmenu__create
+
+
+##### pack(n)
+type Side { 
+   Side_Left ["left"]
+   Side_Right ["right"]
+   Side_Top ["top"]
+   Side_Bottom ["bottom"]
+}
+
+type FillMode { 
+   Fill_None ["none"]
+   Fill_X ["x"]
+   Fill_Y ["y"]
+   Fill_Both ["both"]
+}
+
+subtype option(pack) {
+   After ["-after"; widget]
+   Anchor
+   Before ["-before"; widget]
+   Expand ["-expand"; bool]
+   Fill ["-fill"; FillMode]
+   In ["-in"; widget]
+   IPadX ["-ipadx"; Units]
+   IPadY ["-ipady"; Units]
+   PadX
+   PadY
+   Side ["-side"; Side]
+}
+
+function ()  pack ["pack"; widget list; option(pack) list]
+
+module pack {
+    function () configure ["pack"; "configure"; widget list; option(pack) list]
+    function () forget ["pack"; "forget"; widget list]
+    function (bool) propagate_get ["pack"; "propagate"; widget]
+    function () propagate_set ["pack"; "propagate"; widget; bool]
+    function (widget list) slaves ["pack"; "slaves"; widget]
+    }
+
+##### tk_setPalette(n)
+#### can't simply encode general form of tk_setPalette
+module palette {
+  function () set_background ["tk_setPalette"; Color]
+  function () bisque ["tk_bisque"]
+  }
+
+##### photo(n)
+type PaletteType external  # builtin_palette.ml
+
+subtype option(photoimage) {
+  Data
+  Format ["-format"; string]
+  File
+  Gamma ["-gamma"; float]
+  Height
+  Palette ["-palette"; PaletteType]
+  Width
+  }
+
+subtype photo(copy) {
+  ImgFrom ["-from"; int; int; int; int]
+  ImgTo   ["-to"; int; int; int; int]
+  Shrink  ["-shrink"]
+  Zoom    ["-zoom"; int; int]
+  Subsample ["-subsample"; int; int]
+  }
+
+subtype photo(put) {
+  ImgTo 
+  }
+
+subtype photo(read) {
+  ImgFormat ["-format"; string]
+  ImgFrom
+  Shrink
+  TopLeft ["-to"; int; int]
+  }
+
+subtype photo(write) {
+  ImgFormat ImgFrom
+  }
+
+module imagephoto {
+  function (ImagePhoto) create ["image"; "create"; "photo"; option(photoimage) list]
+  function () blank [ImagePhoto; "blank"]
+  function () configure [ImagePhoto; "configure"; option(photoimage) list]
+  function (string) configure_get [ImagePhoto; "configure"]
+  function () copy [ImagePhoto; "copy"; ImagePhoto; photo(copy) list]
+  function (int, int, int) get [ImagePhoto; "get"; int; int]
+# can't express nested lists ?
+#  function () put [ImagePhoto; "put"; [[Color list] list]; photo(put) list]
+  function () read [ImagePhoto; "read"; string; photo(read) list]
+  function () redither [ImagePhoto; "redither"]
+  function () write [ImagePhoto; "write"; photo(write) list]
+  # Functions inherited from the "image" TK class
+  function () delete ["image"; "delete"; ImagePhoto]
+  function (int) height ["image"; "height"; ImagePhoto]
+  function (int) width ["image"; "width"; ImagePhoto]
+  }
+
+
+##### place(n)
+type BorderMode {
+  Inside ["inside"]
+  Outside ["outside"]
+  Ignore ["ignore"]
+}
+
+subtype option(place) {
+  In 
+  X 
+  RelX ["-relx"; float]
+  Y
+  RelY ["-rely"; float]
+  Anchor
+  Width
+  RelWidth ["-relwidth"; float]
+  Height
+  RelHeigth ["-relheight"; float]
+  BorderMode ["-bordermode"; BorderMode]
+}
+
+function () place ["place"; widget; option(place) list]
+
+module place {
+    function ()	configure ["place"; "configure"; widget; option(place) list]
+    function () forget ["place"; "forget"; widget]
+    function (string) info ["place"; "info"; widget]
+    function (widget list) slaves ["place"; "slaves"; widget]
+}
+
+
+##### radiobutton(n)
+
+widget radiobutton {
+   # Standard options
+   option ActiveBackground
+   option ActiveForeground
+   option Anchor
+   option Background
+   option Bitmap
+   option BorderWidth
+   option Cursor
+   option DisabledForeground
+   option Font
+   option Foreground
+   option HighlightBackground
+   option HighlightColor
+   option HighlightThickness
+   option ImageBitmap
+   option ImagePhoto
+   option Justify
+   option PadX
+   option PadY
+   option Relief
+   option TakeFocus
+   option Text
+   option TextVariable
+   option UnderlinedChar
+   option WrapLength
+
+   # Widget specific options
+   option Command
+   option Height
+   option IndicatorOn
+   option SelectColor
+   option SelectImageBitmap
+   option SelectImagePhoto
+   option State
+   option Value
+   option Variable
+   option Width
+
+   function () configure [widget(radiobutton); "configure"; option(radiobutton) list]
+   function (string) configure_get [widget(radiobutton); "configure"]
+   function () deselect [widget(radiobutton); "deselect"]
+   function () flash [widget(radiobutton); "flash"]
+   function () invoke [widget(radiobutton); "invoke"]
+   function () select [widget(radiobutton); "select"]
+   }
+
+
+##### raise(n)
+function () raise_window ["raise"; widget]
+function () raise_window_above ["raise"; widget; widget]
+
+
+##### scale(n)
+## shared with scrollbars
 subtype WidgetElement(scale) {
   Slider ["slider"]
   Trough1 ["trough1"]
@@ -897,58 +1204,50 @@ subtype WidgetElement(scale) {
   }
 
 widget scale {
-   option ActiveForeground
+   # Standard options
+   option ActiveBackground
    option Background
-   option Borderwidth
+   option BorderWidth
    option Cursor
    option Font
    option Foreground
-   option Orientation
+   option HighlightBackground
+   option HighlightColor
+   option HighlightThickness
+   option Orient
    option Relief
+   option RepeatDelay
+   option RepeatInterval
+   option TakeFocus
+   option ThroughColor
+
+   # Widget specific options
    # cannot be called Command
-   option Scalecommand ["-command"; function (float)]   # OK
-   option From ["-from"; int]
+   option BigIncrement ["-bigincrement"; float]
+   option ScaleCommand ["-command"; function (float)]
+   option Digits ["-digits"; int]
+   option From ["-from"; float]
    option Label ["-label"; string]
    option Length ["-length"; Units]
-   option ShowValue ["-showvalue"; bool]
-   # option SliderForeground ["-sliderforeground"; Color]          Not supported by TK 4.0
-   option SliderLength ["-sliderlength"; Units]
-   option State ["-state"; State]	# except Active
-   option TickInterval ["-tickinterval"; int]
-   option To ["-to"; int]
-   option Width
-   # New for TK 4.0
-   option HighlightColor
-   option HighlightBackground
-   option HighlightThickness
-   option TakeFocus
-   option RepeatDelay
-   option TroughColor ["-troughcolor"; Color]
-   option Digits ["-digits"; int]
    option Resolution ["-resolution"; float]
-   # End New
-
+   option ShowValue ["-showvalue"; bool]
+   option SliderLength ["-sliderlength"; Units]
+   option State
+   option TickInterval ["-tickinterval"; float]
+   option To ["-to"; float]
+   option Variable
+   option Width
 
    function () configure [widget(scale); "configure"; option(scale) list]
    function (string) configure_get [widget(scale); "configure"]
-   function (float) get [widget(scale); "get" ]        # Change since TK<4.0 : returns a <<float>>, not an int
-   function () set [widget(scale); "set"; float]       # Change since TK<4.0 : takes a <<float>>, not an int
-   # New for TK 4.0
-   function (float) get_at_pos [widget(scale); "get"; int; int]
+   function (float) get [widget(scale); "get"]
+   function (float) get_xy [widget(scale); "get"; int; int]
    function (WidgetElement) identify [widget(scale); int; int]
-   # End new
+   function () set [widget(scale); "set"; float]
    }
 
-# builtin_ScrollValue.ml, because hand-made parser
-# type sequence ScrollValue {
-#   MoveTo ["moveto"; float]
-#   ScrollUnit ["scroll"; int; "unit"]
-#   ScrollPage ["scroll"; int; "page"]
-#   }
 
-type sequence ScrollValue external
-########
-# Type od the componants of a scrollbar
+##### scrollbar(n)
 subtype WidgetElement(scrollbar) {
   Arrow1 ["arrow1"]
   Trough1
@@ -959,73 +1258,87 @@ subtype WidgetElement(scrollbar) {
   }
 
 widget scrollbar {
-   option ActiveForeground
+   # Standard options
+   option ActiveBackground
    option Background
-   option Borderwidth
+   option BorderWidth
    option Cursor
-   # option Foreground      Not supported by TK 4.0
-   option Orientation
+   option HighlightBackground
+   option HighlightColor
+   option HighlightThickness
+   option Jump
+   option Orient
    option Relief
    option RepeatDelay
    option RepeatInterval
-   option ScrollCommand ["-command"; function(ScrollValue)]
-   option Width
-   # New for TK 4.0
-   option ActiveBackground
-   option HighlightColor
-   option HighlightBackground
-   option HighlightThickness
    option TakeFocus
-   option TroughColor
+   option ThroughColor
+   # Widget specific options
+   option ActiveRelief ["-activerelief"; Relief]
+   option ScrollCommand ["-command"; function(ScrollValue)]
    option ElementBorderWidth ["-elementborderwidth"; Units]
-   # End new
+   option Width
 
-
+   function () activate [widget(scrollbar); "activate"; WidgetElement(scrollbar)]
+   function (WidgetElement) activate_get [widget(scrollbar); "activate"]
    function () configure [widget(scrollbar); "configure"; option(scrollbar) list]
    function (string) configure_get [widget(scrollbar); "configure"]
-   function (int, int, int, int) get [widget(scrollbar); "get"]
-   function (float, float) new_get [widget(scrollbar); "get"]
-   # ATTENTION: <<use>> THIS when linking with other elements - DO NOT use old_set
-   function () set [widget(scrollbar); "set"; float; float]        # Before TK 4.0 : int; int; int; int
-   # New for TK 4.0
-   function () activate [widget(scrollbar); "activate"; WidgetElement(scrollbar)]
    function (float) delta [widget(scrollbar); "delta"; int; int]
    function (float) fraction [widget(scrollbar); "fraction"; int; int]
-   # ATTENTION: only for backward compatibility - DO NOT use any more
-   # Must be used in case where the scrollbar was "set" with a 4-piece retult format
-   # i.e : when "set" was done manualy. Don't use when linking with other elements
-   # such as lisbox, canvas, and so on ...
+   function (float, float) get [widget(scrollbar); "get"]
+   function (int, int, int, int) old_get [widget(scrollbar); "get"]
+   function (WidgetElement) identify [widget(scale); "identify"; int; int]
+   function () set [widget(scrollbar); "set"; float; float]
    function () old_set [widget(scrollbar); "set"; int; int; int; int]
-   # End ATTENTION
-   function (WidgetElement) identify [widget(scale); "identify"]
-   # End New
    }
 
 
+##### selection(n)
 
-################# Text Widget 
+subtype icccm(selection_clear) {
+  DisplayOf
+  Selection ["-selection"; string]
+  }
+
+subtype icccm(selection_get) {
+  DisplayOf
+  Selection
+  ICCCMType
+  }
+
+subtype icccm(selection_ownset) {
+  SelectionCommand ["-command"; function()]
+  Selection
+  }
+
+module selection {
+   function () clear ["selection"; "clear"; icccm(selection_clear) list]
+   function (string) get ["selection"; "get"; icccm(selection_get) list]
+   # handle is not supported
+   function (widget) own_get ["selection"; "own"; icccm(selection_clear) list]
+   function () own_set ["selection"; "own"; icccm(selection_ownset) list; widget]
+   }
+
+
+##### text(n)
+
 type TextIndex external
 type TextTag external
-type BaseTextIndex external
 type TextMark external
 
-# New for TK 4.0
+
 type TabType {
   TabLeft [Units; "left"]
   TabRight [Units; "right"]
   TabCenter [Units; "center"]
   TabNumeric [Units; "numeric"]
-  TabStd [Units; ""]
   }
-# End new
 
 type WrapMode { 
   WrapNone ["none"]
   WrapChar ["char"]
   WrapWord ["word"]
 }
-
-# ...
 
 type Comparison { 
   GT ["<"]
@@ -1037,7 +1350,6 @@ type Comparison {
 }
 
 
-# New for TK 4.0
 type MarkDirection {
   Mark_Left ["left"]
   Mark_Right ["right"]
@@ -1056,28 +1368,29 @@ subtype option(embeddedw) {
   PadX
   PadY
   Stretch ["-stretch"; bool]
-  Window ["-window"; widget]  
+  Window
   }
 
-subtype option(search) {
+type TextSearch {
   Forwards ["-forwards"]
-  Backwards ["backwards"]
-  Exact ["exact"]
-  Regexp ["regexp"]
-  Nocase ["nocase"]
-  Count ["count"]
+  Backwards ["-backwards"]
+  Exact ["-exact"]
+  Regexp ["-regexp"]
+  Nocase ["-nocase"]
+  Count ["-count"; TextVariable]
   }
-
-# End new
-
 
 widget text {
+   # Standard options
    option Background
-   option Borderwidth
+   option BorderWidth
    option Cursor
    option ExportSelection
    option Font
    option Foreground
+   option HighlightBackground
+   option HighlightColor
+   option HighlightThickness
    option InsertBackground
    option InsertBorderWidth
    option InsertOffTime
@@ -1090,323 +1403,174 @@ widget text {
    option SelectBorderWidth
    option SelectForeground
    option SetGrid
-   option YScrollCommand
-   option TextHeight ["-height"; int]
-   option State ["-state"; State]
-   option TextWidth ["-width"; int]
-   option Wrap ["-wrap"; WrapMode]
-   # New for TK 4.0
-   option HighlightColor
-   option HighlightBackground
-   option HighlightThickness
    option TakeFocus
    option XScrollCommand
+   option YScrollCommand
+
+   # Widget specific options
+   option TextHeight
    option Spacing1 ["-spacing1"; Units]
    option Spacing2 ["-spacing2"; Units]
    option Spacing3 ["-spacing3"; Units]
+   option State
    option Tabs ["-tabs"; [TabType list]]
-   # End new
+   option TextWidth
+   option Wrap ["-wrap"; WrapMode]
 
-
+   function (int,int,int,int) bbox [widget(listbox); "bbox"; TextIndex]
    function (bool) compare [widget(text); "compare"; TextIndex; Comparison; TextIndex]
    function () configure [widget(text); "configure"; option(text) list]
    function (string) configure_get [widget(text); "configure"]
    function () debug [widget(text); "debug"; bool]
    function () delete [widget(text); "delete"; TextIndex; TextIndex]
    function () delete_char [widget(text); "delete"; TextIndex]
+   function (int, int, int, int, int) dlineinfo [ widget(text); "dlineinfo"; TextIndex]
    function (string) get [widget(text); "get"; TextIndex; TextIndex]
    function (string) get_char [widget(text); "get"; TextIndex]
-   function (BaseTextIndex) index [widget(text); "index"; TextIndex]
-   function () insert [widget(text); "insert"; TextIndex; string]
+   function (Index) index [widget(text); "index"; TextIndex]
+   function () insert [widget(text); "insert"; TextIndex; string; TextTag list]
    # Mark 
+   function () mark_gravity_set [widget(text); "mark"; "gravity"; TextMark; MarkDirection]
+   function (MarkDirection) mark_gravity_get [widget(text); "mark"; "gravity"; TextMark]
    function (TextMark list) mark_names [widget(text); "mark"; "names"]
    function () mark_set [widget(text); "mark"; "set"; TextMark; TextIndex]
    function () mark_unset [widget(text); "mark"; "unset"; TextMark list]
    # Scan 
-   function (int) scan_mark [widget(text); "scan"; "mark"; int]
-   function (int) scan_dragto [widget(text); "scan"; "dragto"; int]
+   function () scan_mark [widget(text); "scan"; "mark"; int; int]
+   function () scan_dragto [widget(text); "scan"; "dragto"; int; int]
+   function (Index) search [widget(text); "search"; TextSearch list; "--"; string; TextIndex; TextIndex]
+   function () see [widget(text); "see"; TextIndex]
    # Tags
    function () tag_add [widget(text); "tag"; "add"; TextTag; TextIndex; TextIndex]
    function () tag_add_char [widget(text); "tag"; "add"; TextTag; TextIndex]
    # tag_bind is builtin. beware: text_tag_bind
-   function () tag_configure [widget(text); "tag"; "configure"; TextTag; option (texttag) list]
+   function () tag_configure [widget(text); "tag"; "configure"; TextTag; option(texttag) list]
    function () tag_delete [widget(text); "tag"; "delete"; TextTag list]
-   function () tag_lower [widget(text); "tag";  "lower"; TextTag; TextTag]
-   function () tag_lowest [widget(text); "tag"; "lower"; TextTag]
+   function () tag_lower_below [widget(text); "tag";  "lower"; TextTag; TextTag]
+   function () tag_lower_bot [widget(text); "tag"; "lower"; TextTag]
    function (TextTag list) tag_allnames [widget(text); "tag"; "names"]
    function (TextTag list) tag_indexnames [widget(text); "tag"; "names"; TextIndex]
-   function (BaseTextIndex, BaseTextIndex) tag_nextrange [widget(text); "tag"; "nextrange"; TextTag; TextIndex; TextIndex]
-   function () tag_raise [widget(text); "tag"; "raise"; TextTag]
-   function () tag_raisetop [widget(text); "tag"; "raise"]
-   function (BaseTextIndex list) tag_ranges [widget(text); "tag"; "ranges"; TextTag]
+   function (Index, Index) tag_nextrange [widget(text); "tag"; "nextrange"; TextTag; TextIndex; TextIndex]
+   function () tag_raise_above [widget(text); "tag"; "raise"; TextTag]
+   function () tag_raise_top [widget(text); "tag"; "raise"]
+   function (Index list) tag_ranges [widget(text); "tag"; "ranges"; TextTag]
    function () tag_remove [widget(text); "tag"; "remove"; TextTag; TextIndex; TextIndex]
    function () tag_remove_char [widget(text); "tag"; "remove"; TextTag; TextIndex]
-   function () yview [widget(text); "yview"; TextIndex]
-   function () yview_scroll [widget(text); "yview"; ScrollValue]
-   function () yview_line [widget(text); "yview"; int]
-   function () yview_pickplace [widget(text); "yview"; "-pickplace"; TextIndex]
-   function () yview_pickplace_line [widget(text); "yview"; "-pickplace"; int]
-   # New for TK 4.0
-   function (int list) Bbox [widget(listbox); "bbox"; TextIndex]
-   function (int, int, int, int, int) DLineinfo ["dlineinfo"; TextIndex]
-   function (MarkDirection) mark_gravity [widget(text); "mark"; "gravity"; TextMark]
-   function (BaseTextIndex) search [widget(text); option(search) list; string; "--"; TextIndex; TextIndex]
-   function () see [widget(text); "see"; TextIndex]
-   function () window_configure [widget(text); "window"; "configure"; TextTag; option (embeddedw) list]
+   function () window_configure [widget(text); "window"; "configure"; TextTag; option(embeddedw) list]
    function () window_create [widget(text); "window"; "create"; TextIndex; option(embeddedw) list]
    function (widget list) window_names [widget(text); "window"; "names"]
-   function () xview_scroll [widget(text); "xview"; ScrollValue]
-   # End new
+   # scrolling
+   function (float,float) xview_get [widget(text); "xview"]
+   function (float,float) yview_get [widget(text); "yview"]
+   function () xview [widget(text); "xview"; ScrollValue]
+   function () yview [widget(text); "yview"; ScrollValue]
+   function () yview_index [widget(text); "yview"; TextIndex]
+   function () yview_index_pickplace [widget(text); "yview"; "-pickplace"; TextIndex]
+   function () yview_line [widget(text); "yview"; int]      # obsolete
    }
-
 
 subtype option(texttag) {
    Background
    BgStipple ["-bgstipple"; Bitmap]
-   Borderwidth
+   BorderWidth
    FgStipple ["-fgstipple"; Bitmap]
    Font
    Foreground
-   Relief
-   Underline ["-underline"; bool]
-   # New for TK 4.0
    Justify
    LMargin1 ["-lmargin1"; Units]
    LMargin2 ["-lmargin2"; Units]
    Offset ["-offset"; Units]
    OverStrike ["-overstrike"; bool]
+   Relief
    RMargin ["-rmargin"; Units]
    Spacing1
    Spacing2
    Spacing3
-   Tabs
+   Tabs 
+   Underline ["-underline"; bool]
    Wrap ["-wrap"; WrapMode]
-   # End new
    }
 
 
+##### tk(n)
+function () appname_set ["tk"; "appname"; string]
+function (string) appname_get ["tk"; "appname"]
+
+##### tkwait(n)
+module tkwait {
+   function () variable ["tkwait"; "variable"; TextVariable]
+   function () visibility ["tkwait"; "visibility"; widget]
+   function () window ["tkwait"; "window"; widget]
+   }
+
+
+##### toplevel(n)
 # This module will be renamed "toplevelw" to avoid collision with
 # Caml Light standard toplevel module.
 widget toplevel {
-   option Background
-   option Borderwidth
-   # option Geometry     Not supported by TK 4.0
-   option Relief
-   option Screen ["-screen"; string]
-   option Class ["-class"; string]
-   # New for TK 4.0
+   # Standard options
+   option BorderWidth
    option Cursor
-   option HighlightColor
    option HighlightBackground
+   option HighlightColor
    option HighlightThickness
+   option Relief
    option TakeFocus
+
+   # Widget specific options
+   option Background
    option Class
    option Colormap
    option Height
    option Screen ["-screen"; string]
    option Visual
    option Width
-   # End new
-
 
    function () configure [widget(toplevel); "configure"; option(toplevel) list]
    function (string) configure_get [widget(toplevel); "configure"]
    }
 
-################### Various functions
-function () destroy ["destroy"; widget]
-# Use Predefined "" for empty bitmap
-function (int) dialog ["tk_dialog"; widget; string; string; Bitmap; int; string list]
-# Also in listbox
-function () listboxSingleSelect ["tk_listboxSingleSelect"; widget(listbox) list]
 
-	
-##### focus variations
-module focus {
-  function (widget) get ["focus"]
-  function ()       set ["focus"; widget]
-  # bogus when "none"; is returned
-  # function (widget) default_get ["focus"; "default"]             Not supported by TK 4.0
-  # function ()       default_set ["focus"; "default"; widget]     Not supported by TK 4.0
-  # function () none ["focus"; "none"]                             Not supported by TK 4.0
-  # New for TK 4.0
-  function (widget) get_displayof ["focus"; "-displayof"; widget]
-  function () set_force ["focus"; "-force"; widget]
-  function (widget) get_lastfor ["focus"; "-lastfor"; widget]
-  function (widget) next ["tk_focusNext"; widget]
-  function (widget) prev ["tk_focusPrev"; widget]
-  function () follow_mouse ["tk_focusFollowsMouse"]
-  # End new
-}
-
-type GrabStatus {
-   GrabNone ["none"]
-   GrabLocal ["local"]
-   GrabGlobal ["global"]
-}
-
-##### grab (current is missing)
-module grab {
-   function () set_local ["grab"; widget]
-   function () set_global ["grab"; "-global"; widget]
-   function (GrabStatus) status ["grab"; "status"]
-   function () release ["grab"; "release"; widget]
-}
-
-##### lower
-function () lower ["lower"; widget]
-# lower window ?belowThis? can't be written
+##### update(n)
+function () update ["update"]
+function () update_idletasks ["update"; "idletasks"]
 
 
-
-############ Options
-type OptionPriority {
-   WidgetDefault  ["widgetDefault"]
-   StartupFile    ["startupFile"]
-   UserDefault    ["userDefault"]
-   Interactive    ["interactive"]
-#  Priority (int)
-   }
-
-module resource {
-   function () add ["option"; "add"; string; string; OptionPriority]
-   function () clear ["option"; "clear"]
-   function (string) get ["option";  "get"; widget; string; string]
-   function () readfile ["option"; "readfile"; string; OptionPriority]
-   }
-
-
-########### Pack
-type Side { 
-   Side_Left ["left"]
-   Side_Right ["right"]
-   Side_Top ["top"]
-   Side_Bottom ["bottom"]
-}
-
-type FillMode { 
-   Fill_None ["none"]
-   Fill_X ["x"]
-   Fill_Y ["y"]
-   Fill_Both ["both"]
-}
-
-subtype option(pack) {
-	After ["-after"; widget]
-	Anchor
-	Before ["-before"; widget]
-	Expand ["-expand"; bool]
-	Fill ["-fill"; FillMode]
-	In ["-in"; widget]
-	PadX
-	PadY
-	IPadX ["-ipadx"; Units]
-	IPadY ["-ipady"; Units]
-	Side ["-side"; Side]
-	}
-
-function ()  pack ["pack"; widget list; option(pack) list]
-
-module pack {
-    function () configure ["pack"; "configure"; widget list; option(pack) list]
-    function () forget ["pack"; "forget"; widget list]
-    function (bool) propagate_get ["pack"; "propagate"; widget]
-    function () propagate_set ["pack"; "propagate"; widget; bool]
-    function (widget list) slaves ["pack"; "slaves"; widget]
-    }
-
-
-type BorderMode {
-  BorderInside ["inside"]
-  BorderOutside ["outside"]
-  BorderIgnore ["ignore"]
-}
-
-subtype option(place) {
-	In X Y Anchor Width Height
-	RelX ["-relx"; Units]
-	RelY ["-rely"; Units]
-	RelWidth ["-relwidth"; float]
-	RelHeigth ["-relheight"; float]
-	BorderMode ["-bordermode"; BorderMode]
-}
-
-function () place ["place"; widget; option(place) list]
-module place {
-    function ()	configure ["place"; "configure"; widget; option(place) list]
-    function () forget ["place"; "forget"; widget]
-    function (string) info ["place"; "info"; widget]
-    function (widget list) slaves ["place"; "slaves"; widget]
-}
-
-
-# New for TK 4.0
-
-subtype option(selection_clear) {
-  DisplayOf ["-displayof"; widget]
-  Selection ["-selection"; string]
-  }
-
-subtype option(selection_get) {
-  DisplayOf
-  Selection
-  Type ["type"; string]
-  }
-
-subtype option(selection_handle) {
-  Selection
-  Type
-  Format ["-format"; string]
-  }
-
-subtype option(selection_ownset) {
-  Command
-  Selection
-  }
-# End new
-
-module selection {
-   function () clear ["selection"; "clear"; option(selection_clear)]
-   function (string) get ["selection"; "get"]
-   function (widget) own_get ["selection"; "own"; option(selection_clear)]
-   function () own_set ["selection"; "own"; option(selection_ownset) list; widget]
-   }
-
-module wait {
-   function () visibility ["tkwait"; "visibility"; widget]
-   function () window ["tkwait"; "window"; widget]
-   }
+##### winfo(n)
 
 type AtomId {
    AtomId [int]
    }
 
-## update
-function () update ["update"]
-function () update_idletasks ["update"; "idletasks"]
-
-
-
-   
 module winfo {
    function (AtomId) atom ["winfo"; "atom"; string]
+   function (AtomId) atom_displayof ["winfo"; "atom"; "-displayof"; widget; string]
    function (string) atomname ["winfo"; "atomname"; AtomId]
+   function (string) atomname_displayof ["winfo"; "atomname"; "-displayof"; widget; AtomId]
    function (int) cells ["winfo"; "cells"; widget]
    function (widget list) children ["winfo"; "children"; widget]
    function (string) class ["winfo"; "class"; widget]
+   function (bool) colormapfull ["winfo"; "colormapfull"; widget]
    function (widget) containing ["winfo"; "containing"; int; int]
+   function (widget) containing_displayof ["winfo"; "containing"; "-displayof"; widget; int; int]
    function (int) depth ["winfo"; "depth"; widget]
    function (bool) exists ["winfo"; "exists"; widget]
-   function (float) fpixels ["winfo"; "fpixels"; widget; int]
+   function (float) fpixels ["winfo"; "fpixels"; widget; Units]
    function (string) geometry ["winfo"; "geometry"; widget]
    function (int) height ["winfo"; "height"; widget]
    function (string) id ["winfo"; "id"; widget]
-   function (symbol list) interps ["winfo"; "interps"]
+   function (string list) interps ["winfo"; "interps"]
+   function (string list) interps_displayof ["winfo"; "interps"; "-displayof"; widget]
    function (bool) ismapped ["winfo"; "ismapped"; widget]
+   function (string) manager ["winfo"; "manager"; widget]
    function (string) name ["winfo"; "name"; widget]
    function (widget) parent ["winfo"; "parent"; widget]        # bogus for top
    function (widget) pathname ["winfo"; "pathname"; string]
-   function (int) pixels ["winfo"; "pixels"; widget; int]
+   function (widget) pathname_displayof ["winfo"; "pathname"; "-displayof"; widget; string]
+   function (int) pixels ["winfo"; "pixels"; widget; Units]
+   function (int) pointerx ["winfo"; "pointerx"; widget]
+   function (int) pointery ["winfo"; "pointery"; widget]
+   function (int, int) pointerxy ["winfo"; "pointerxy"; widget]
    function (int) reqheight ["winfo"; "reqheight"; widget]
    function (int) reqwidth ["winfo"; "reqwidth"; widget]
    function (int,int,int) rgb ["winfo"; "rgb"; widget; Color]
@@ -1420,8 +1584,12 @@ module winfo {
    function (int) screenmmheight ["winfo"; "screenmmheight"; widget]
    function (string) screenvisual ["winfo"; "screenvisual"; widget]
    function (int) screenwidth ["winfo"; "screenwidth"; widget]
+   function (string) server ["winfo"; "server"; widget]
    function (widget) toplevel ["winfo"; "toplevel"; widget]
+   function (bool) viewable ["winfo"; "viewable"; widget]
    function (string) visual ["winfo"; "visual"; widget]
+   # not so
+   function (string) visualsavailable ["winfo"; "visualsavailable"; widget]
    function (int) vrootheight ["winfo"; "vrootheight"; widget]
    function (int) vrootwidth ["winfo"; "vrootwidth"; widget]
    function (int) vrootx ["winfo"; "vrootx"; widget]
@@ -1429,22 +1597,10 @@ module winfo {
    function (int) width ["winfo"; "width"; widget]
    function (int) x ["winfo"; "x"; widget]
    function (int) y ["winfo"; "y"; widget]
-   # New for TK 4.0
-   function (AtomId) atom_displayof ["winfo"; "atom"; "-displayof"; widget; string]
-   function (string) atomname_displayof ["winfo"; "atomname"; "-displayof"; widget; AtomId]
-   function (bool) colormapfull ["winfo"; "colormapfull"; widget]
-   function (widget) containing_displayof ["winfo"; "containing"; "-displayof"; widget; int; int]
-   function (symbol list) interps_displayof ["winfo"; "interps"; "-displayof"; widget]
-   function (string) manager ["winfo"; "manager"; widget]
-   function (widget) pathname_displayof ["winfo"; "pathname"; "-displayof"; widget; string]
-   function (int) pointerx ["winfo"; "pointerx"; widget]
-   function (int) pointery ["winfo"; "pointery"; widget]
-   function (int, int) pointerxy ["winfo"; "pointerxy"; widget]
-   function (string) server ["winfo"; "server"; widget]
-   function (bool) viewable ["winfo"; "viewable"; widget]
-   function (string) visualsavailable ["winfo"; "visualsavailable"; widget]
-   # End new
 }
+
+
+##### wm(n)
 
 type FocusModel {
    FocusActive ["active"]
@@ -1537,144 +1693,7 @@ module wm {
 # Don't forget to run a tclsh or wish and type 
 # auto_mkindex /path/to/contrib *.tcl
 # or something equivalent (man library(n) in tcl docs)
-module contrib {
-   # File Dialog by Sven Delmas
-   function (string) FSBox ["FSBox"]
-   }
-
-
-
-# #####################
-# New stuff for TK V4.0
-#######################
-
-type Bindings {
-   TagBindings [string]
-   WidgetBindings [widget]
-   }
-
-function () bindtags ["bindtags"; widget; [Bindings list]]
-
-
-# ##########
-# Bell ringing...
-module bell {
-  function () ring ["bell"]
-  function () ring_displayof ["bell"; "-displayof" ; widget]
-  }
-
-# ###########
-# Bitmap editor program
-module bitmapeditor {
-  function () edit_bitmap ["bitmap"]
-  }
-
-# ##########
-# Bitmap images module (only 2 color-images)
-type ImageBitmap {
-  ImageBitmap [string]
-  }
-
-subtype option(bitmapimage) {
-  Background
-  Data ["-data"; string]
-  File ["-file"; string]
-  Foreground
-  Maskdata ["-maskdata"; string]
-  Maskfile ["-maskfile"; string]
-  }
-
-module imagebitmap {
-  function (ImageBitmap) create ["image"; "create"; "bitmap"; option(bitmapimage) list]
-  function (string) configure [ImageBitmap; "configure"; option(bitmapimage) list]
-  # Functions herited from the "image" TK class
-  function () delete ["image"; "delete"; ImageBitmap]
-  function (int) height ["image"; "height"; ImageBitmap]
-  # function type (from TK's "image type") isn't useful
-  function (int) width ["image"; "width"; ImageBitmap]
-  }
-
-# #########
-# Photo images module (color-images)
-type ImagePhoto {
-  ImagePhoto [string]
-  }
-
-type PaletteType external  # builtin_palette.ml
-
-subtype option(photoimage) {
-  Data ["-data"; string]
-  Format ["-format"; string]
-  File ["-file"; string]
-  Gamma ["-gamma"; float]
-  Height
-  Palette ["-palette"; PaletteType]
-  Width
-  }
-
-subtype option(photocopy) {
-  Copyfrom ["-from"; int; int; int; int]
-  Copyto ["-to"; int; int; int; int]
-  Shrink ["-shrink"]
-  Zoom ["-zoom"; int]
-  Subsample ["-subsample"; int; int]
-  }
-
-subtype option(photoread) {
-  Readformat ["-format"; string]
-  Readfrom ["-from"; int; int; int; int]
-  Shrink ["-shrink"]
-  ReadTo ["-to"; int; int]
-  }
-
-subtype option(photoput) {
-  Putto ["-to"; int; int; int; int]
-  }
-
-subtype option(photowrite) {
-  WriteFormat ["-format"; string]
-  Writefrom ["-from"; int; int; int; int]
-  }
-
-module imagephoto {
-  function (ImagePhoto) create ["image"; "create"; "photo"; option(photoimage) list]
-  function () blank [ImagePhoto; "blank"]
-  function (string) configure [ImagePhoto; "configure"; option(photoimage) list]
-  function () copy [ImagePhoto; "copy"; ImagePhoto; option(photocopy) list]
-  function (int, int, int) get [ImagePhoto; "get"; int; int]
-  function () put [ImagePhoto; "put"; string; option(photoput) list]
-  function () read [ImagePhoto; "read"; string; option(photoread) list]
-  function () redither [ImagePhoto; "redither"]
-  function () write [ImagePhoto; "write"; option(photowrite) list]
-  # Functions herited from the "image" TK class
-  function () delete ["image"; "delete"; ImagePhoto]
-  function (int) height ["image"; "height"; ImagePhoto]
-  # function type (from TK's "image type")     Isn't useful
-  function (int) width ["image"; "width"; ImagePhoto]
-  }
-
-
-#type ReturnType {
-#  StringType ["STRING"]
-#  FilenameType ["FILE_NAME"]
-#  }
-
-subtype option(clipboard_append) {
-  DisplayOf ["-displayof"; Widget]
-  Format ["-format"; string]
-#  Type ["-type"; ReturnType]
-  }
-
-module clipboard {
-  function () clear ["clipboard"; "clear"]
-  function () clear_displayof ["clipboard"; "clear"; "-displayof"; widget]
-  function () append ["clipboard"; "append"; option(clipboard_append) list; string]
-  }
-
-module palette {
-  function () set_background ["tk_setPalette"; Color]
-  function () oldcolor ["tk_bisque"]
-  }
-
-
-
+# module contrib {
+#   # File Dialog by Sven Delmas
+#   function (string) FSBox ["FSBox"]
+#   }
