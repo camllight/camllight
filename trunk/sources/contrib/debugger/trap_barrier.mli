@@ -1,7 +1,5 @@
 (***************************** Trap barrier ********************************)
 
-#open "checkpoints";;
-
 value install_trap_barrier : int -> unit;;
 
 value remove_trap_barrier : unit -> unit;;

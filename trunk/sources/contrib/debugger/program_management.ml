@@ -14,7 +14,6 @@
 #open "program_loading";;
 #open "modules2";;
 #open "events";;
-#open "checkpoints";;
 #open "time_travel";;
 
 (*** Load debugging information. ***)

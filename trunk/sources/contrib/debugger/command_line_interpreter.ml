@@ -1,7 +1,6 @@
 (************************ Reading and executing commands ***************)
 
 #open "format";;
-#open "const";;
 #open "globals";;
 #open "misc";;
 #open "lambda";;
@@ -20,7 +19,6 @@
 #open "lexing";;
 #open "parameters";;
 #open "modules";;
-#open "modules2";;
 #open "show_source";;
 #open "show_information";;
 #open "time_travel";;
@@ -32,7 +30,6 @@
 #open "breakpoints";;
 #open "checkpoints";;
 #open "frames";;
-#open "value";;
 #open "pattern_matching";;
 
 (** Instructions, variables and infos lists. **)

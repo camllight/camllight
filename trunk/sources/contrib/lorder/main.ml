@@ -1,6 +1,5 @@
 #open "sys";;
 #open "filename";;
-#open "tsort";;
 
 (* Pieces from the compiler *)
 #open "config";;

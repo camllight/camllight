@@ -1,8 +1,5 @@
 (************************ Source management ****************************)
 
-#open "misc";;
-#open "primitives";;
-
 (*** Conversion function. ***)
 
 value source_of_module: string -> string;;
