@@ -7,6 +7,8 @@
 #include <fcntl.h>
 #endif
 #include <signal.h>
+#include <string.h>
+
 #include "alloc.h"
 #include "config.h"
 #include "debugcom.h"

@@ -34,7 +34,7 @@ static void stop_here () {}
 	rsp  	the stack pointer for the return stack (grows downward)
 	tp  	pointer to the current trap frame
 	env  	the remanent part (heap-allocated) of the environment
-     cache_size the nymber of entries in the volatile part of the environment
+     cache_size the number of entries in the volatile part of the environment
 	accu  	the accumulator
 
 "asp" and "rsp" are local copies of the global variables
@@ -207,7 +207,10 @@ value interprete(prog)
   env = null_env;
   cache_size = 0;
   accu = Val_long(0);
+
   initial_c_roots_head = c_roots_head;
+  initial_external_raise = external_raise;
+  initial_rsp_offset = (char *) ret_stack_high - (char *) rsp;
 
   if (setjmp(raise_buf.buf)) {
     c_roots_head = initial_c_roots_head;
@@ -216,9 +219,7 @@ value interprete(prog)
     rsp = extern_rsp;
     goto raise;
   }
-  initial_external_raise = external_raise;
   external_raise = &raise_buf;
-  initial_rsp_offset = (char *) ret_stack_high - (char *) rsp;
 
 #ifdef DEBUG
   log_ptr = log_buffer;
@@ -489,12 +490,7 @@ value interprete(prog)
     raise:			/* An external raise jumps here */
 
     Instruct(RAISE):
-      if ((value *) tp >= trap_barrier) {
-        Setup_for_gc;
-        retsp->pc = pc;
-        debugger(TRAP_BARRIER);
-        Restore_after_gc;
-      }
+      if ((value *) tp >= trap_barrier) debugger(TRAP_BARRIER);
       rsp = (value *) tp;
       if (rsp >= (value *)((char *) ret_stack_high - initial_rsp_offset)) {
         exn_bucket = accu;
