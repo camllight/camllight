@@ -49,7 +49,7 @@ let rec types_of_template = function
 (* Produce a documentation version of a template *)
 let rec ppTemplate = function
     StringArg s -> s
-  | TypeArg t -> "<" ^ ppMLtype t ^ ">"
+  | TypeArg t -> "[" ^ ppMLtype t ^ "]"
   | ListArg l -> "{" ^ (catenate_sep " " (map ppTemplate l)) ^ "}"
 ;;
 
@@ -99,7 +99,7 @@ let write_type w name typdef =
   w "(* type *)\n";
   w ("type "^name^" =\n\t");
   write_constructors w (sort_components typdef.constructors);
-  w "\n;;(* /type *)\n\n";
+  w "\n;;\n(* /type *)\n\n";
   (* Dynamic Subtyping *)
   if typdef.subtypes <> [] then begin
     (* The set of its constructors *)
