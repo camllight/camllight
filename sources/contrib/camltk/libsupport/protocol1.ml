@@ -29,17 +29,14 @@ let new_buffer () = {
    }
 ;;
 
-let rec print_in_buffer buf s =
+let print_in_buffer buf s =
   let l = string_length s in
-  if buf.pos + l >= buf.len then begin
-    buf.buffer <- buf.buffer ^ (create_string 128);
-    buf.len <- buf.len + 128;
-    print_in_buffer buf s
-    end
-  else begin
-    blit_string s 0 buf.buffer buf.pos l;
-    buf.pos <- buf.pos + l
-    end
+  if buf.pos + l > buf.len then begin
+    buf.buffer <- buf.buffer ^ (create_string (l+128));
+    buf.len <- buf.len + 128 + l;
+    end;
+  blit_string s 0 buf.buffer buf.pos l;
+  buf.pos <- buf.pos + l
 ;;
 
 let get_buffer buf = 

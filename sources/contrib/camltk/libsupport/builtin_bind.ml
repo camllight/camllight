@@ -286,9 +286,9 @@ let WrapEventInfo f what =
 
 let rec WriteEventField = function
     [] -> ""
-  | H::q ->
+  | field::rest ->
     begin
-    match H with
+    match field with
       | Ev_Above ->     " %a"
       | Ev_ButtonNumber ->" %b"
       | Ev_Count ->     " %c"
@@ -319,7 +319,7 @@ let rec WriteEventField = function
       | Ev_RootX ->     " %X"
       | Ev_RootY ->     " %Y"
     end 
-    ^ WriteEventField q;;
+    ^ WriteEventField rest;;
 
 
 type BindAction =
