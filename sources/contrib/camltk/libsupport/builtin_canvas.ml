@@ -71,10 +71,10 @@ let canvas_bind widget tag eventsequence action =
   begin match action with
      BindRemove -> Send2Tk buf "{}"
   |  BindSet (what, f) ->
-      let CbId = register_callback (WrapEventInfo f what) in
+      let CbId = register_callback widget (WrapEventInfo f what) in
         Send2Tk buf (" {camlcb " ^ CbId ^ (WriteEventField what) ^"}")
   |  BindExtend (what, f) ->
-      let CbId = register_callback (WrapEventInfo f what) in
+      let CbId = register_callback widget (WrapEventInfo f what) in
         Send2Tk buf (" {+camlcb " ^ CbId ^ (WriteEventField what) ^"}")
   end;
   Send2TkEval buf

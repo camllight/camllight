@@ -1,8 +1,10 @@
+# Set environment variable PROF to -p to obtained profiled version
+PROFILING=${CAMLPROF}
 CAMLC=camlc
-CAMLCOMP=$(CAMLC) -c
+CAMLCOMP=$(CAMLC) -c $(PROFILING)
 CPP=/lib/cpp -P -Dunix
 COMPFLAGS=-W -O fast -g -I ../../libunix
-LINKFLAGS=-g
+LINKFLAGS=-g $(PROFILING)
 CAMLYACC=camlyacc -v
 CAMLLEX=camllex
 CAMLDEP=../../../src/tools/camldep
@@ -37,7 +39,9 @@ libcamltk.a : camltk.o
 install: libcamltk.a support.zi textvariable.zi protocol.zi
 	if test -d $(LIBDIR); then : ; else mkdir $(LIBDIR); fi
 	cp -p support.zi $(LIBDIR)
+	cp -p support.zix $(LIBDIR)
 	cp -p textvariable.zi $(LIBDIR)
+	cp -p textvariable.zix $(LIBDIR)
 	cp -p protocol.zi $(LIBDIR)
 	cp -p libcamltk.a $(LIBDIR)
 	chmod 644 $(LIBDIR)/*.zi $(LIBDIR)/libcamltk.a

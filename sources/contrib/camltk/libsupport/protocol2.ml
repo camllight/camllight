@@ -300,7 +300,7 @@ let new_function_id =
 ;;
 
 
-let register_callback f =
+let register_callback _ f =
   let id = new_function_id () in
     hashtbl__add callback_table id f;
     id

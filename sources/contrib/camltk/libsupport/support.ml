@@ -17,6 +17,10 @@ let widget_name = function
  |  Typed (s,_) -> s
 ;;
 
+let remove_widget w =
+  hashtbl__remove widget_table (widget_name w)
+;;
+
 (* Normally all widgets are known *)
 (* this is a provision for send commands to external tk processes *)
 let widget_class = function
@@ -24,12 +28,23 @@ let widget_class = function
   | Typed (_,c) -> c
 ;;
 
+(* This one is almost (?) created by opentk *)
 let default_toplevel_widget =
   let wname = "." in
   let w = Typed (wname, "toplevel") in
     hashtbl__add widget_table wname w;
     w
 ;;
+
+(* Dummy widget to which global callbacks are associated *)
+(* also passed around by CAMLtoTKoption when no widget in context *)
+let dummy_widget = 
+  let wname = "dummy" in
+  let w = Untyped wname in
+    hashtbl__add widget_table wname w;
+    w
+;;
+
 
 let new_toplevel_widget s =
   let wname = "."^s in
@@ -75,6 +90,8 @@ let Widget_any_table =  map fst widget_naming_scheme
 let Widget_menu_table = [ "menu" ]
 ;;
 let Widget_frame_table = [ "frame" ]
+;;
+let Widget_entry_table = [ "entry" ]
 ;;
 
 
@@ -137,43 +154,60 @@ let chk_sub errname table c =
 (* The CAMLtoTKstring converter *)
 (* []/$ are still substituted inside "" *) 
 
-let cindex p s start = find start
-  where rec find i =
-    if i >= string_length s 
-    then raise Not_found
-    else if p (nth_char s i) then i 
-    else find (i+1) 
-;;
-
-let must_quote c = 
-    c == `[` or c == `]` or c == `$` or c == `{` or c == `}`
-;;
-
 let tcl_string_for_read s =
-  let s = string_for_read s in
-  let rec sfr cur res =
-      try
-      	let n = cindex must_quote s cur in
-	let repl = match nth_char s n with
-	            `[` -> "\["
-		  | `]` -> "\]"
-		  | `$` -> "\$" 
-      	       	  | `{` -> "\{"
-      	       	  | `}` -> "\}"
-      	       	  |  c ->  failwith "subliminal" (* never happens *) in
-	let res' = res ^ (sub_string s cur (n-cur)) ^ repl in
-	  sfr (succ n) res'
-      with Not_found ->
-      	res ^ (sub_string s cur (string_length s - cur)) in
-  sfr 0 ""
+  let n = ref 0 in
+    for i = 0 to string_length s - 1 do
+      n := !n +
+        (match nth_char s i with
+           `"` | `\\` | `\n` | `\t` | `[` | `]` | `$` | `{` | `}` -> 2
+          | c -> if is_printable c then 1 else 4)
+    done;
+    if !n == string_length s then s else begin
+      let s' = create_string !n in
+        n := 0;
+        for i = 0 to string_length s - 1 do
+          begin
+            match nth_char s i with
+              `"` -> s'.[!n] := `\\`; incr n; s'.[!n] := `"`
+            | `\\` -> s'.[!n] := `\\`; incr n; s'.[!n] := `\\`
+            | `\n` -> s'.[!n] := `\\`; incr n; s'.[!n] := `n`
+            | `\t` -> s'.[!n] := `\\`; incr n; s'.[!n] := `t`
+            | `[` -> s'.[!n] := `\\`; incr n; s'.[!n] := `[`
+            | `]` -> s'.[!n] := `\\`; incr n; s'.[!n] := `]`
+            | `$` -> s'.[!n] := `\\`; incr n; s'.[!n] := `$`
+            | `{` -> s'.[!n] := `\\`; incr n; s'.[!n] := `{`
+            | `}` -> s'.[!n] := `\\`; incr n; s'.[!n] := `}`
+            | c ->
+                if is_printable c then
+                  s'.[!n] := c
+                else begin
+                  let a = int_of_char c in
+                  s'.[!n] := `\\`;
+                  incr n;
+                  s'.[!n] := (char_of_int (48 + a / 100));
+                  incr n;
+                  s'.[!n] := (char_of_int (48 + (a / 10) mod 10));
+                  incr n;
+                  s'.[!n] := (char_of_int (48 + a mod 10))
+                end
+          end;
+          incr n
+        done;
+        s'
+      end
 ;;
 
 let quote_string x =
-  "\"" ^ (tcl_string_for_read x) ^ "\""
+  let n = string_length x + 2 in
+  let s = create_string n in
+    s.[0] := ` `;
+    s.[n-1] := ` `;
+    blit_string x 0 s 1 (n-2);
+  let s' = tcl_string_for_read s in
+    s'.[0] := `"`;
+    s'.[string_length s'-1] := `"`;
+   s'
 ;;
-
-
-
 
 
 (* strings assumed to be atomic (no space, no special char) *)
@@ -183,13 +217,47 @@ let TKtoCAMLsymbol x = x
 ;;
 
 
+(* Extensible buffers *)
+type extensible_buffer = {
+    mutable buffer : string;
+    mutable pos : int;
+    mutable len : int}
+;;
+
+let new_buffer () = {
+   buffer = create_string 128;
+   pos = 0;
+   len = 128
+   }
+;;
+
+let print_in_buffer buf s =
+  let l = string_length s in
+  if buf.pos + l > buf.len then begin
+    buf.buffer <- buf.buffer ^ (create_string (l+128));
+    buf.len <- buf.len + 128 + l;
+    end;
+  blit_string s 0 buf.buffer buf.pos l;
+  buf.pos <- buf.pos + l
+;;
+
+let get_buffer buf = 
+  sub_string buf.buffer 0 buf.pos
+;;
+
+
+
 (* Used by list converters *)
 let catenate_sep sep =
   function 
     [] -> ""
-  | x::l -> it_list (fun s s' -> s^sep^s') x l
+  | [x] -> x
+  | x::l -> 
+      let b = new_buffer() in
+      	print_in_buffer b x;
+	do_list (function s -> print_in_buffer b sep; print_in_buffer b s) l;
+      get_buffer b
 ;;
-
 
 (* Parsing results of Tcl *)
 (* split a string according to char_sep predicate *)

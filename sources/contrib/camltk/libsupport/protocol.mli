@@ -37,7 +37,7 @@ and   res_GetTkTokenList: result_buffer -> string list
       (* Extracting results of function call *)
 ;;
 
-value register_callback : (callback_buffer -> unit) -> string
+value register_callback : Widget -> (callback_buffer -> unit) -> string
       (* Callback support *)
 ;;
 
