@@ -21,6 +21,9 @@
 #include "sys.h"
 #include "version.h"
 
+#ifdef HAS_UI
+#include "ui.h"
+#endif
 #ifdef macintosh
 #include "mac_os.h"
 #endif
