@@ -10,7 +10,7 @@
 #open "fchar";;
 #open "pair";;
 #open "int_misc";;
-#open "fnat";;
+#open "nat";;
 
 type big_int = 
     { Sign : int; 
@@ -25,7 +25,7 @@ let create_big_int sign nat =
  if sign == 1 || sign == -1 ||
     (sign == 0 &&
      is_zero_nat nat 0 (num_digits_nat nat 0 (length_nat nat)))
- then { Sign = sign; 
+ then { Sign = sign;
         Abs_Value = nat }
  else invalid_arg "create_big_int"
 ;;
@@ -42,7 +42,7 @@ let unit_big_int =
 
 (* Number of digits in a big_int *)
 let num_digits_big_int bi = 
- num_digits_nat (bi.Abs_Value) 0 (length_nat bi.Abs_Value) ;;
+ num_digits_nat (bi.Abs_Value) 0 (length_nat bi.Abs_Value);;
 
 (* Opposite of a big_int *)
 let minus_big_int bi = 
@@ -138,9 +138,9 @@ let add_big_int bi1 bi2 =
                 (blit_nat res 0 (bi2.Abs_Value) 0 size_bi2; 
                  set_digit_nat res size_bi2 0;
                  set_add_nat res 0 (succ size_bi2)
-                                (bi1.Abs_Value) 0 size_bi1 0;
+                             (bi1.Abs_Value) 0 size_bi1 0;
                  res)
-       | _  -> let res = create_nat (succ size_bi1) in
+       | _ -> let res = create_nat (succ size_bi1) in
                (blit_nat res 0 (bi1.Abs_Value) 0 size_bi1;
                 set_digit_nat res size_bi1 0;
                 set_add_nat res 0 (succ size_bi1)
@@ -161,7 +161,7 @@ let add_big_int bi1 bi2 =
              Abs_Value = 
               let res = copy_nat (bi2.Abs_Value) 0 size_bi2 in
               set_sub_nat res 0 size_bi2 
-                       (bi1.Abs_Value) 0 size_bi1 1;
+                          (bi1.Abs_Value) 0 size_bi1 1;
               res }
 ;;
 
@@ -189,12 +189,12 @@ let mult_int_big_int i bi =
      then let res = create_nat size_res in
             blit_nat res 0 (bi.Abs_Value) 0 size_bi;
             set_mult_digit_nat res 0 size_res (bi.Abs_Value) 0 size_bi 
-                            (nat_of_int biggest_int) 0;
+                           (nat_of_int biggest_int) 0;
             { Sign = - (sign_big_int bi);
               Abs_Value = res }             
      else let res = make_nat (size_res) in
           set_mult_digit_nat res 0 size_res (bi.Abs_Value) 0 size_bi 
-                          (nat_of_int (abs i)) 0;
+                         (nat_of_int (abs i)) 0;
           { Sign = (sign_int i) * (sign_big_int bi);
             Abs_Value = res } 
 ;;
@@ -208,10 +208,10 @@ let mult_big_int bi1 bi2 =
     Abs_Value = 
       (if size_bi2 > size_bi1
        then set_mult_nat res 0 size_res (bi2.Abs_Value) 0 size_bi2 
-                     (bi1.Abs_Value) 0 size_bi1
+                      (bi1.Abs_Value) 0 size_bi1
        else set_mult_nat res 0 size_res (bi1.Abs_Value) 0 size_bi1 
-                     (bi2.Abs_Value) 0 size_bi2;
-      res) }
+                      (bi2.Abs_Value) 0 size_bi2;
+       res) }
 ;;
 
 (* (quotient, rest) of the euclidian division of 2 big_int *)
@@ -395,12 +395,12 @@ let power_base_nat base nat off len =
          if n land !p > 0
          then (set_to_zero_nat res 0 len;
                set_mult_digit_nat res 0 succ_len2 
-                               res2 0 len2 
-                               power_base pmax)
-          else blit_nat res 0 res2 0 len2
-         end;
-         set_to_zero_nat res2 0 len2;
-         p := !p lsr 1
+                              res2 0 len2 
+                              power_base pmax)
+         else blit_nat res 0 res2 0 len2
+        end;
+        set_to_zero_nat res2 0 len2;
+        p := !p lsr 1
       done;
     if rem > 0
      then (set_mult_digit_nat res2 0 (succ n)
@@ -437,14 +437,14 @@ let power_big_int_positive_int bi n =
              let len2 = min res_len (2 * len) in
              let succ_len2 = succ len2 in
              set_square_nat res2 0 len2 res 0 len;
-               (if n land !p > 0 
-                   then (set_to_zero_nat res 0 len;
-                         set_mult_nat res 0 succ_len2 
-                                   res2 0 len2 (bi.Abs_Value) 0 bi_len;
-                         set_to_zero_nat res2 0 len2)
-                   else blit_nat res 0 res2 0 len2;
-                   set_to_zero_nat res2 0 len2);
-               p := !p lsr 1
+             (if n land !p > 0 
+                 then (set_to_zero_nat res 0 len;
+                       set_mult_nat res 0 succ_len2 
+                                 res2 0 len2 (bi.Abs_Value) 0 bi_len;
+                       set_to_zero_nat res2 0 len2)
+                 else blit_nat res 0 res2 0 len2;
+                 set_to_zero_nat res2 0 len2);
+             p := !p lsr 1
            done;
            {Sign = if bi.Sign >= 0 then bi.Sign else
                    if n land 1 == 0 then 1 else -1;
@@ -455,7 +455,7 @@ let power_int_positive_big_int i bi =
   match sign_big_int bi with
   | 0 -> unit_big_int
   | -1 -> invalid_arg "power_int_positive_big_int"
-  | _ -> let nat = power_base_nat 
+  | _ -> let nat = power_base_nat
                      (abs i) (bi.Abs_Value) 0 (num_digits_big_int bi) in
            { Sign = if i >= 0 then sign_int i else
                     if is_digit_odd (bi.Abs_Value) 0 then -1 else 1;
@@ -489,7 +489,7 @@ let power_big_int_positive_big_int bi1 bi2 =
                         set_to_zero_nat res2 0 len2)
                   else (set_to_zero_nat res 0 len;
                         set_mult_nat res 0 succ_len2 
-                                  res2 0 len2 (bi1.Abs_Value) 0 bi1_len;
+                                 res2 0 len2 (bi1.Abs_Value) 0 bi1_len;
                         set_to_zero_nat res2 0 len2);
                p := !p lsr 1
            done;
@@ -581,12 +581,12 @@ let round_futur_last_digit s off_set length =
         then
          (s.[l] <- `0`;
           if l == off_set then true else round_rec (pred l))
-        else 
-         (s.[l] <- (char_of_int (succ (int_of_char current_char)));
+        else
+         (s.[l] <- char_of_int (succ (int_of_char current_char));
           false)
      in round_rec (pred l)
    else false
-;; 
+;;
 
 (* Approximation with floating decimal point a` la approx_ratio_exp
    Proposition: l'exposant est la partie entière du log en base 10 du
@@ -612,22 +612,20 @@ let approx_big_int prec bi =
     max 0
         (int_of_big_int (
           add_int_big_int 
-            (- prec) 
-            (div_big_int (mult_big_int (big_int_of_int (pred len_bi)) 
-                                       exp_cv_factor_num) 
+            (- prec)
+            (div_big_int (mult_big_int (big_int_of_int (pred len_bi))
+                                       exp_cv_factor_num)
                          (exp_cv_factor_den)))) in
   let s =
     string_of_big_int (div_big_int bi (power_int_positive_int 10 n)) in
-  let (sign, off, len) = 
-    if s.[0] == `-`
-       then ("-", 1, succ prec)
-       else ("", 0, prec) in
+  let (sign, off, len) =
+    if s.[0] == `-` then ("-", 1, succ prec) else ("", 0, prec) in
   if round_futur_last_digit s off (succ prec)
-       then (sign ^ "1." ^ make_string prec `0` ^ "e" ^
-             string_of_int (n + 1 - off + string_length s))
-       else (sign ^ sub_string s off 1 ^ "." ^
-             sub_string s (succ off) (pred prec) ^ "e" ^
-             string_of_int (n - succ off + string_length s))
+  then sign ^ "1." ^ make_string prec `0` ^ "e" ^
+       string_of_int (n + 1 - off + string_length s)
+  else sign ^ sub_string s off 1 ^ "." ^
+       sub_string s (succ off) (pred prec) ^ "e" ^
+       string_of_int (n - succ off + string_length s)
 ;;
 
 (* Big_int printing *)

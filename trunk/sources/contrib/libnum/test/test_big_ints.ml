@@ -443,6 +443,12 @@ eq_big_int
  (power_int_positive_big_int 2 (big_int_of_int 65),
   big_int_of_string "36893488147419103232");;
 
+test 3
+eq_big_int
+ (power_int_positive_big_int 3 (big_int_of_string "47"),
+  big_int_of_string "26588814358957503287787");;
+
+
 testing_function "power_big_int_positive_big_int";;
 
 test 1
@@ -455,13 +461,19 @@ eq_big_int
  (power_big_int_positive_big_int (big_int_of_int 2) (big_int_of_int 65),
   big_int_of_string "36893488147419103232");;
 
+test 3
+eq_big_int
+ (power_big_int_positive_big_int
+   (big_int_of_string "3") (big_int_of_string "47"),
+  big_int_of_string "26588814358957503287787");;
+
 testing_function "square_big_int";;
 
 test 1 eq_big_int
- (square_big_int (big_int_of_string "0"), big_int_of_string"0");;
+ (square_big_int (big_int_of_string "0"), big_int_of_string "0");;
 test 2 eq_big_int
- (square_big_int (big_int_of_string "1"), big_int_of_string"1");;
+ (square_big_int (big_int_of_string "1"), big_int_of_string "1");;
 test 3 eq_big_int
- (square_big_int (big_int_of_string "-1"), big_int_of_string"1");;
+ (square_big_int (big_int_of_string "-1"), big_int_of_string "1");;
 test 4 eq_big_int
- (square_big_int (big_int_of_string "-7"), big_int_of_string"49");;
+ (square_big_int (big_int_of_string "-7"), big_int_of_string "49");;
