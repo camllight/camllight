@@ -65,13 +65,9 @@ char *string_to_c(s)
   extern mlsize_t string_length();
 #endif
   int l = string_length(s);
-  char *res = (char *)malloc(string_length(s) + 1);
-  if (NULL == res) 
-    raise_out_of_memory();
-  else {
-    bcopy(String_val(s),res,l);
-    res[l] = '\0';
-  }
+  char *res = stat_alloc(l + 1);
+  bcopy(String_val(s),res,l);
+  res[l] = '\0';
   return res;
 }
 
@@ -368,9 +364,8 @@ void FileProc(clientdata, mask)
      ClientData clientdata;
      int mask;
 {
-  static char *arg[3] = {"camlcb", NULL, NULL};
+  char *arg[2] = {"camlcb", (char *)clientdata};
 
-  arg[1] = (char *)clientdata;
   camltk_dispatch_callback(copy_string_list(2,arg));
 }
 
@@ -395,7 +390,7 @@ value camltk_rem_file_input(fd) /* ML */
 {
   Tk_DeleteFileHandler(Int_val(fd));
   if (file_cbids[Int_val(fd)]) {
-    free(file_cbids[Int_val(fd)]);
+    stat_free(file_cbids[Int_val(fd)]);
     file_cbids[Int_val(fd)] = NULL;
   };
   return Atom(0);
@@ -415,11 +410,11 @@ value camltk_tk_mainloop() /* ML */
 
 void TimerProc (ClientData clientdata)
 {
-  static char *arg[3] = {"camlcb", NULL, NULL};
+  char *arg[] = {"camlcb", (char *)clientdata};
+  value callback_list = copy_string_list(2,arg);
 
-  arg[1] = (char *)clientdata;
-  camltk_dispatch_callback(copy_string_list(2,arg));
-  free(arg[1]);
+  stat_free((char *)clientdata);
+  camltk_dispatch_callback(callback_list);
 }
 
 value camltk_add_timer(milli, cbid) /* ML */
