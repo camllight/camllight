@@ -6,7 +6,7 @@ TOOLSDIR=$(SOURCEDIR)\tools
 GUIDIR=..\gui
 CC=cl
 INCLUDES=-I$(RUNTIMEDIR) -I$(SOURCEDIR) -I$(GUIDIR)
-CFLAGS=$(INCLUDES) -DHAS_UI -Ox -G3 -MT -Zi
+CFLAGS=/nologo $(INCLUDES) -DHAS_UI -Ox -G3 -MT -Zi
 PERL=perl
 BIGNUMLIB=$(RUNTIMEDIR)\bignum\bignum.lib
 
@@ -26,7 +26,7 @@ GENSOURCES=prims prims.c opnames.h jumptbl.h
 all: libcaml.lib
 
 libcaml.lib: $(OBJS)
-	lib /out:libcaml.lib $(OBJS)
+	lib /nologo /out:libcaml.lib $(OBJS)
 
 prims: $(PRIMS)
     $(PERL) $(TOOLSDIR)/findprim prims <<

@@ -1,14 +1,18 @@
 (* big_int: arithmetique exacte sur grands entiers signes.
    Derive de big_ints.ml de Caml V3.1, Vale'rie Me'nissier. *)
 
-#open "eq";;
 #open "exc";;
-#open "int";;
 #open "bool";;
-#open "ref";;
 #open "fstring";;
 #open "fchar";;
+#open "fvect";;
+#open "list";;
 #open "pair";;
+#open "ref";;
+#open "float";;
+#open "int";;
+#open "eq";;
+#open "io";;
 #open "int_misc";;
 #open "fnat";;
 

@@ -6,7 +6,7 @@ EXDIR_SLASH=$(EXDIR:\=/)
 INFODIR =$(TOPDIR)\info
 DOCDIR=$(TOPDIR)\doc
 
-TXTFILES = copyrght.txt readme.txt install.txt
+TXTFILES = copyrght.txt readme.txt install.txt lisezmoi.txt
 
 DJGPPDIR=C:/djgpp/bin
 DJGPPFILES=$(DJGPPDIR)/cwsdpmi.exe $(DJGPPDIR)/emu387.dxe

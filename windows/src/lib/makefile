@@ -57,33 +57,25 @@ install:
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
-arg.zo: arg.zi eq.zi exc.zi sys.zi bool.zi fstring.zi list.zi io.zi \
-    float.zi fvect.zi int.zi 
 baltree.zo: baltree.zi exc.zi eq.zi bool.zi int.zi 
 bool.zo: bool.zi 
-char.zo: char.zi exc.zi eq.zi bool.zi fchar.zi 
 eq.zo: eq.zi 
 exc.zo: exc.zi 
 fchar.zo: fchar.zi fstring.zi int.zi 
 filename.zi: sys.zi 
-float.zo: float.zi exc.zi fstring.zi int.zi 
-format.zo: format.zi eq.zi exc.zi bool.zi fstring.zi io.zi ref.zi float.zi \
-    int.zi 
-format.zi: io.zi 
-fvect.zo: fvect.zi eq.zi list.zi int.zi 
 gc.zo: gc.zi printf.zi 
 gc.zi: io.zi 
+arg.zo: arg.zi eq.zi exc.zi sys.zi bool.zi fstring.zi list.zi io.zi \
+    float.zi fvect.zi int.zi 
 genlex.zi: stream.zi 
-hashtbl.zo: hashtbl.zi eq.zi exc.zi fvect.zi int.zi 
+printf.zo: printf.zi eq.zi exc.zi bool.zi fstring.zi list.zi io.zi ref.zi \
+    obj.zi float.zi int.zi 
+map.zo: map.zi baltree.zi 
 int.zo: int.zi eq.zi 
-io.zo: io.zi exc.zi eq.zi sys.zi bool.zi fstring.zi float.zi int.zi 
 io.zi: sys.zi 
 iparsing.zi: parsing.zi obj.zi 
 lexing.zo: lexing.zi exc.zi eq.zi fstring.zi io.zi obj.zi int.zi 
 lexing.zi: io.zi obj.zi 
-list.zo: list.zi eq.zi exc.zi bool.zi int.zi 
-map.zo: map.zi baltree.zi list.zi 
-map.zi: eq.zi 
 pair.zo: pair.zi exc.zi 
 parsing.zo: parsing.zi exc.zi eq.zi iparsing.zi fvect.zi ref.zi lexing.zi \
     obj.zi int.zi 
@@ -93,33 +85,44 @@ printexc.zo: printexc.zi eq.zi exc.zi sys.zi bool.zi io.zi fvect.zi obj.zi \
 queue.zo: queue.zi exc.zi ref.zi int.zi 
 random.zo: random.zi eq.zi float.zi fvect.zi ref.zi int.zi 
 set.zo: set.zi exc.zi eq.zi baltree.zi 
-set.zi: eq.zi 
 sort.zo: sort.zi 
 stack.zo: stack.zi exc.zi list.zi 
-stream.zo: stream.zi exc.zi eq.zi fstring.zi io.zi ref.zi obj.zi 
-stream.zi: io.zi 
-vect.zo: vect.zi exc.zi eq.zi sys.zi bool.zi fvect.zi int.zi 
 arflags.zo: arflags.zi bool.zi ref.zi int.zi 
 arflags.zi: ref.zi 
 arstatus.zo: arstatus.zi arflags.zi bool.zi io.zi ref.zi int.zi 
-big_int.zo: big_int.zi exc.zi eq.zi pair.zi bool.zi float.zi int_misc.zi \
-    fchar.zi nat.zi fstring.zi ref.zi int.zi 
-big_int.zi: nat.zi 
 graphics.zo: graphics.zi eq.zi fstring.zi int.zi 
-num.zo: num.zi exc.zi eq.zi bool.zi int_misc.zi nat.zi big_int.zi ref.zi \
-    ratio.zi arflags.zi float.zi int.zi 
-num.zi: ratio.zi nat.zi big_int.zi ref.zi 
-ratio.zo: ratio.zi exc.zi eq.zi bool.zi int_misc.zi fchar.zi nat.zi \
-    fstring.zi big_int.zi ref.zi arflags.zi float.zi int.zi 
-ratio.zi: nat.zi big_int.zi ref.zi 
+printf.zi: io.zi 
+char.zo: char.zi exc.zi eq.zi bool.zi fchar.zi fstring.zi 
+float.zo: float.zi exc.zi fstring.zi int.zi 
+format.zo: format.zi eq.zi exc.zi bool.zi fstring.zi io.zi obj.zi ref.zi \
+    float.zi int.zi 
+format.zi: io.zi printf.zi 
+fstring.zo: fstring.zi exc.zi eq.zi fchar.zi ref.zi int.zi 
+fvect.zo: fvect.zi eq.zi list.zi int.zi 
+hashtbl.zo: hashtbl.zi eq.zi exc.zi fvect.zi int.zi 
+io.zo: io.zi exc.zi eq.zi sys.zi bool.zi fstring.zi float.zi int.zi 
+list.zo: list.zi eq.zi exc.zi bool.zi int.zi 
+map.zi: eq.zi 
+set.zi: eq.zi 
+stream.zo: stream.zi exc.zi eq.zi fstring.zi io.zi ref.zi obj.zi 
+stream.zi: io.zi 
+string.zo: string.zi exc.zi eq.zi sys.zi bool.zi fstring.zi int.zi 
+vect.zo: vect.zi exc.zi eq.zi sys.zi bool.zi fvect.zi int.zi 
 filename.zo: filename.zi exc.zi eq.zi bool.zi fchar.zi fstring.zi int.zi 
 genlex.zo: genlex.zi hashtbl.zi stream.zi exc.zi eq.zi fchar.zi float.zi \
     fstring.zi list.zi ref.zi int.zi 
-int_misc.zo: int_misc.zi eq.zi int.zi 
-nat.zo: nat.zi exc.zi eq.zi bool.zi int_misc.zi fchar.zi fstring.zi ref.zi \
-    float.zi fvect.zi int.zi 
-fstring.zo: fstring.zi eq.zi fchar.zi ref.zi int.zi 
-printf.zo: printf.zi eq.zi exc.zi bool.zi fstring.zi list.zi io.zi ref.zi \
-    obj.zi float.zi int.zi 
-printf.zi: io.zi 
-string.zo: string.zi exc.zi eq.zi sys.zi bool.zi fstring.zi int.zi 
+big_int.zo: big_int.zi exc.zi eq.zi bool.zi int_misc.zi fchar.zi nat.zi \
+    fstring.zi ref.zi fnat.zi pair.zi float.zi int.zi 
+big_int.zi: nat.zi 
+fnat.zo: fnat.zi exc.zi eq.zi sys.zi bool.zi int_misc.zi fchar.zi \
+    fstring.zi ref.zi fvect.zi format.zi int.zi 
+nat.zi: fnat.zi 
+num.zo: num.zi exc.zi eq.zi bool.zi int_misc.zi big_int.zi ref.zi ratio.zi \
+    fnat.zi arflags.zi float.zi format.zi int.zi 
+num.zi: ratio.zi nat.zi big_int.zi ref.zi 
+ratio.zo: ratio.zi exc.zi eq.zi bool.zi int_misc.zi fchar.zi fstring.zi \
+    big_int.zi ref.zi fnat.zi arflags.zi float.zi int.zi 
+ratio.zi: nat.zi big_int.zi ref.zi 
+nat.zo: nat.zi sys.zi fnat.zi printf.zi 
+int_misc.zi: ref.zi 
+int_misc.zo: int_misc.zi eq.zi sys.zi bool.zi int.zi 

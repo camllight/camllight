@@ -3,14 +3,18 @@
    Adapte a Caml Light par Xavier Leroy & Pierre Weis.
    Portage 64 bits: Pierre Weis. *)
 
-#open "eq";;
 #open "exc";;
-#open "int";;
 #open "bool";;
-#open "ref";;
 #open "fstring";;
-#open "fvect";;
 #open "fchar";;
+#open "fvect";;
+#open "list";;
+#open "pair";;
+#open "ref";;
+#open "float";;
+#open "int";;
+#open "eq";;
+#open "io";;
 #open "int_misc";;
 
 (* Nat temporaries *)

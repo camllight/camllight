@@ -1,5 +1,7 @@
 (* Some extra operations on integers *)
 
+#open "ref";;
+
 value gcd_int: int -> int -> int
   and num_bits_int: int -> int
   and compare_int: int -> int -> int
