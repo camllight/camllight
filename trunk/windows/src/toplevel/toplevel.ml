@@ -67,15 +67,18 @@ let load_object name =
 
 let protect_current_module fct =
   let saved_defined_module = !defined_module
-  and saved_used_modules = !used_modules in
+  and saved_opened_modules = !opened_modules
+  and saved_opened_modules_names = !opened_modules_names in
   try
     fct();
     defined_module := saved_defined_module;
-    used_modules := saved_used_modules
+    opened_modules := saved_opened_modules;
+    opened_modules_names := saved_opened_modules_names
   with x ->
     kill_module (compiled_module_name());
     defined_module := saved_defined_module;
-    used_modules := saved_used_modules;
+    opened_modules := saved_opened_modules;
+    opened_modules_names := saved_opened_modules_names;
     raise x
 ;;
 
@@ -98,7 +101,12 @@ let protect_current_input fct =
 (* Loading an ML source file *)
 
 let loadfile filename =
-  let truename = find_in_path filename in
+  let truename =
+    try
+      find_in_path filename
+    with Cannot_find_file name ->
+      printf__eprintf "Cannot find file %s\n" name;
+      raise Toplevel in
   let ic = open_in truename in
   let lexbuf = lexing__create_lexer_channel ic in
   try
@@ -193,7 +201,7 @@ let untrace name =
     let pos = get_slot_for_variable val_desc.qualid in
     let rec except = function
       [] ->
-        eprintf "The function %s was not traced.\n";
+        eprintf "The function %s was not traced.\n" name;
         []
     | (pos',obj as pair)::rest ->
         if pos == pos' then begin
@@ -274,6 +282,7 @@ let verbose_mode status =
   compiler__verbose := status
 ;;
 
-(* Set the depth of the recursive descent into values done by the printer *)
-let set_printer_depth n = if n >= 0 then pr_value__printer_depth := n;;
+(* Set the maximal depth for printing values. *)
 
+let set_print_depth n =
+  if n >= 0 then pr_value__printer_depth := n;;
