@@ -407,32 +407,23 @@ LMDexit:
 _BnnDivideDigit:
 !	BnnDivideDigit(qq, nn, nl, d)
 
-#define	qqarg %i0
-#define nn %i1
-#define nl %i2
-#define d %i3
-#define qq %i5
-#define hi %i0
-#define low %i4
-#define q %l0
-#define plow %l1
-	save	%sp,-96,%sp
-	mov	qqarg, qq
-	deccc nl		! --nl;
-	sll	nl, 2, nl
+       	save	%sp,-96,%sp
+	mov	%i0, %i5
+	deccc %i2		! --%i2;
+	sll	%i2, 2, %i2
 	blt	bnnout
-	ld	[nn+nl], hi	! X(hight) = nn[nl];
+	ld	[%i1+%i2], %i0	! X(hight) = %i1[%i2];
 bnndivloop:
 
-	deccc	4, nl		! --nl;
+	deccc	4, %i2		! --%i2;
 ! condition code remains unchanged until bgt at loop end
-	ld	[nn+nl], low	! X(low) = nn[nl];
-	mov	hi, %y
-	udiv	low, d, q	! q = hi,low / d;
-	umul	q, d, plow	! plow = q * d;
-	sub	low, plow, hi	! hi = hi,low % d;
-	bgt	bnndivloop	! if (nl > 0) goto divloop;
-	st	q,[qq+nl]	! qq[nl] = q;
+	ld	[%i1+%i2], %i4	! X(%i4) = %i1[%i2];
+	mov	%i0, %y
+	udiv	%i4, %i3, %l0	! %l0 = %i0,%i4 / %i3;
+	umul	%l0, %i3, %l1	! %l1 = %l0 * %i3;
+	sub	%i4, %l1, %i0	! %i0 = %i0,%i4 % %i3;
+	bgt	bnndivloop	! if (%i2 > 0) goto divloop;
+	st	%l0,[%i5+%i2]	! %i5[%i2] = %l0;
 bnnout:
 	ret
 	restore
