@@ -139,9 +139,9 @@ let num_of_digits digits =
 
 let approx_pi10 digits = approx_pi_nat (num_of_digits digits);;
 
-let pi1000 = approx_pi10 1000;;
+let pi10000 = approx_pi10 10000;;
 
-let pi1000_nat = approx_ratio_fix 1000 pi1000;;
+let pi10000_nat = approx_ratio_fix 10000 pi10000;;
 
 (*
 Test à 10000 chiffres (un peu lent):
@@ -155,7 +155,7 @@ test 1 eq_string (pi10000_nat, pi_dec);;
 
 (* Le code ci-dessus est spécialisé à 32 bits. *)
 match length_of_int with
-| 30 -> test 1 eq_string (pi1000_nat, pi_dec_1000)
+| 30 -> test 1 eq_string (pi10000_nat, pi_dec)
 | _ -> test 1 eq_string (pi_dec, pi_dec);;
 
 
