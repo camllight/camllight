@@ -165,7 +165,7 @@ and print_concrete_type prio depth obj cstr ty ty_list =
       let print_field depth lbl =
         open_hovbox 1;
         output_label lbl;
-        print_string "="; print_cut();
+        print_string " ="; print_space();
         let (ty_res, ty_arg) =
           type_pair_instance (lbl.info.lbl_res, lbl.info.lbl_arg) in
         begin try
