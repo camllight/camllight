@@ -8,22 +8,22 @@ exception TkError of string
 ;;
 
 value debug : bool ref 
-      (* When set to true, displays intermediate Tcl code *)
+      (* When set to true, displays approximation of intermediate Tcl code *)
 ;;
 
-type write_buffer
-      (* Buffer for sending Tcl code *)
+type callback_buffer
+      (* Buffer for reading callback arguments *)
 and result_buffer
       (* Buffer for reading Tcl results *)
-and callback_buffer
-      (* Buffer for reading callback arguments *)
 ;;
 
-value Send2TkStart : bool -> write_buffer
-and   Send2Tk : write_buffer -> string -> unit
-and   Send2TkEval : write_buffer -> result_buffer
-      (* Protocol for evaluating Tcl code *)
+type TkArgs =
+    TkToken of string
+  | TkTokenList of TkArgs list		(* to be expanded *)
+  | TkQuote of TkArgs			(* mapped to Tcl list *)
 ;;
+
+
 
 value arg_GetTkToken : callback_buffer -> string
 and arg_GetTkString : callback_buffer -> string
@@ -47,11 +47,7 @@ value remove_callbacks: Widget -> unit
 	 Destroy event binding *)
 ;;
 
-value result_header : string
-and   result_string_header: string
-and   result_footer : string
-      (* Internal *)
-;;
+
 
 value OpenTk : unit -> Widget
 and   OpenTkClass: string -> Widget
@@ -61,4 +57,5 @@ and   MainLoop : unit -> unit
 and   add_fileinput : file_descr -> (unit -> unit) -> unit
 and   remove_fileinput: file_descr -> unit
       (* see [tk] module *)
+and   TkEval : TkArgs vect -> result_buffer
 ;;

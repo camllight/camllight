@@ -145,9 +145,10 @@ value camltk_opentk(display, name) /* ML */
   if (Tk_Init(tclinterp) != TCL_OK)
     tk_error(tclinterp->result);
 
-  /* This is required by "unknown" */
+  /* This is required by "unknown" and thus autoload */
   Tcl_SetVar(tclinterp, "tcl_interactive", "0", TCL_GLOBAL_ONLY);
 	     
+  /* Load the traditional rc file */
   {
     char *home = getenv("HOME");
     if (home != NULL) {
@@ -169,8 +170,10 @@ value camltk_opentk(display, name) /* ML */
   return Atom(0);
 }
 
-/* calling tcl from Caml */
-/* type: string -> string */
+/*
+ * Calling Tcl from Caml
+ *   this version works on an arbitrary Tcl command
+ */
 value camltk_tcl_eval(str) /* ML */
 value str; 
 {
@@ -187,10 +190,147 @@ value str;
   }
 }
 
-/*********** File descriptor callbacks **************/
-/* It's not possible to call non-global ML code, so use general 
-   callback stuff for fd. 
-*/
+
+/* 
+ * Calling Tcl from Caml
+ *   direct call, argument is TkArgs vect
+type TkArgs =
+    TkToken of string
+  | TkTokenList of TkArgs list		(* to be expanded *)
+  | TkQuote of TkArgs 	                (* mapped to Tcl list *)
+;;
+ */
+
+/* 
+ * Compute the size of the argument (of type TkArgs). 
+ * TkTokenList must be expanded,
+ * TkQuote count for one.
+ */
+int argv_size (v)
+value v;
+{
+  switch (Tag_val(v)) {
+  case 0:			/* TkToken */
+    return 1;
+  case 1:			/* TkTokenList */
+    { int n;
+      value l;
+      for (l=Field(v,0),n=0;Tag_val(l)==1;l=Field(l,1))
+	n+=argv_size(Field(l,0));
+      return n;
+    }
+  case 2:			/* TkQuote */
+    return 1;
+  }
+}
+
+/* 
+  Memory of allocated Tcl lists.
+ */
+char *tcllists[64];
+int startfree = 0;
+/* If size is lower, do not allocate */
+char *quotedargv[16];
+
+/* Fill a preallocated vector arguments, doing expansion and all */
+int fill_args (argv, where, v) 
+char ** argv;
+int where;
+value v;
+{
+  switch (Tag_val(v)) {
+  case 0:
+    argv[where] = String_val(Field(v,0));
+    return (where + 1);
+  case 1:
+    { value l;
+      for (l=Field(v,0);Tag_val(l)==1;l=Field(l,1))
+	where = fill_args(argv,where,Field(l,0));
+      return where;
+    }
+  case 2:
+    { char **tmpargv;
+      int size = argv_size(Field(v,0));
+      if (size < 16)
+	tmpargv = &quotedargv[0];
+      else
+	tmpargv = (char **)stat_alloc((size + 1) * sizeof(char *));
+      fill_args(tmpargv,0,Field(v,0));
+      tmpargv[size] = NULL;
+      argv[where] = Tcl_Merge(size,tmpargv);
+      tcllists[startfree++] = argv[where]; /* so we can free it later */
+      if (size >= 16) 
+	stat_free((char *)tmpargv);
+      return (where + 1);
+    }
+  }
+}
+
+
+value camltk_tcl_direct_eval(v) /* ML */
+value v; 
+{
+  int i;
+  int size;			/* size of argv */
+  char **argv;
+  int result;
+  Tcl_CmdInfo info;
+  int wherewasi,whereami;       /* positions in tcllists array */
+
+  /* walk the array to compute final size for Tcl */
+  for(i=0,size=0;i<Wosize_val(v);i++)
+    size += argv_size(Field(v,i));
+
+  /* one slot for NULL, one slot for "unknown" if command not found */
+  argv = (char **)stat_alloc((size + 2) * sizeof(char *));
+
+  wherewasi = startfree;
+
+  /* Copy */
+  {
+    int where;			/*  */
+    for(i=0, where=0;i<Wosize_val(v);i++)
+      where = fill_args(argv,where,Field(v,i));
+    argv[size] = NULL;
+  }
+
+  whereami = startfree;
+
+  /* Eval */
+  Tcl_ResetResult(tclinterp);
+  if (Tcl_GetCommandInfo(tclinterp,argv[0],&info)) { /* command found */
+    result = (*info.proc)(info.clientData,tclinterp,size,argv);
+  } else /* implement the autoload stuff */
+    if (Tcl_GetCommandInfo(tclinterp,"unknown",&info)) { /* unknown found */
+      for (i = size; i >= 0; i--)
+	argv[i+1] = argv[i];
+      argv[0] = "unknown";
+      result = (*info.proc)(info.clientData,tclinterp,size+1,argv);
+    } else { /* ah, it isn't there at all */
+      result = TCL_ERROR;
+      Tcl_AppendResult(tclinterp, "Unknown command \"", argv[0], "\"", NULL);
+    };
+  /* Free the various things we allocated */
+  stat_free((char *)argv);
+  for (i=wherewasi; i<whereami; i++)
+    free(tcllists[i]);
+  startfree = wherewasi;
+  
+  switch (result) {
+  case TCL_OK:
+    return copy_string (tclinterp->result);
+  case TCL_ERROR:
+    tk_error(tclinterp->result);
+  default:  /* TCL_BREAK, TCL_CONTINUE, TCL_RETURN */
+    tk_error("bad tcl result");
+  }
+}
+
+/*
+ * File descriptor callbacks
+ * It's not possible to call non-global ML code, so use general 
+ *  callback stuff for fd. 
+ */
 
 void FileProc(clientdata, mask)
      ClientData clientdata;
@@ -228,3 +368,4 @@ value camltk_tk_mainloop() /* ML */
   Tk_MainLoop();
   return Atom(0);
 }
+

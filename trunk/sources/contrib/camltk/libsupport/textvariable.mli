@@ -1,4 +1,5 @@
 (* Support for Tk -textvariable option *)
+#open "protocol";;
 
 type TextVariable
       (* TextVariable is an abstract type *)
@@ -12,6 +13,6 @@ and   get : TextVariable -> string
       (* Reading the value of a TextVariable *)
 ;;
 
-value CAMLtoTKTextVariable : TextVariable -> string
+value CAMLtoTKTextVariable : TextVariable -> TkArgs
       (* Internal conversion function *)
 ;;

@@ -17,10 +17,6 @@ let widget_name = function
  |  Typed (s,_) -> s
 ;;
 
-let remove_widget w =
-  hashtbl__remove widget_table (widget_name w)
-;;
-
 (* Normally all widgets are known *)
 (* this is a provision for send commands to external tk processes *)
 let widget_class = function
@@ -28,7 +24,7 @@ let widget_class = function
   | Typed (_,c) -> c
 ;;
 
-(* This one is almost (?) created by opentk *)
+(* This one is always created by opentk *)
 let default_toplevel_widget =
   let wname = "." in
   let w = Typed (wname, "toplevel") in
@@ -39,12 +35,12 @@ let default_toplevel_widget =
 (* Dummy widget to which global callbacks are associated *)
 (* also passed around by CAMLtoTKoption when no widget in context *)
 let dummy_widget = 
-  let wname = "dummy" in
-  let w = Untyped wname in
-    hashtbl__add widget_table wname w;
-    w
+  default_toplevel_widget
 ;;
 
+let toplevel_widget_atom s = 
+  Typed("."^s, "toplevel")
+;;
 
 let new_toplevel_widget s =
   let wname = "."^s in
@@ -53,10 +49,12 @@ let new_toplevel_widget s =
     w
 ;;
 
-(* Note: there are subtypes *)
-let CAMLtoTKWidget _ = widget_name
-
+let remove_widget w =
+  hashtbl__remove widget_table (widget_name w)
 ;;
+
+
+
 (* Retype widgets returned from Tk *)
 let TKtoCAMLWidget s =
   try
@@ -86,11 +84,22 @@ let widget_naming_scheme = [
 
 let Widget_any_table =  map fst widget_naming_scheme
 ;;
-(* subtypes at this time *)
-let Widget_menu_table = [ "menu" ]
-and Widget_frame_table = [ "frame" ]
+(* subtypes *)
+let Widget_button_table = [ "button" ]
+and Widget_canvas_table = [ "canvas" ]
+and Widget_checkbutton_table = [ "checkbutton" ]
 and Widget_entry_table = [ "entry" ]
+and Widget_frame_table = [ "frame" ]
+and Widget_label_table = [ "label" ]
 and Widget_listbox_table = [ "listbox" ]
+and Widget_menu_table = [ "menu" ]
+and Widget_menubutton_table = [ "menubutton" ]
+and Widget_message_table = [ "message" ]
+and Widget_radiobutton_table = [ "radiobutton" ]
+and Widget_scale_table = [ "scale" ]
+and Widget_scrollbar_table = [ "scrollbar" ]
+and Widget_text_table = [ "text" ]
+and Widget_toplevel_table = [ "toplevel" ]
 ;;
 
 let new_suffix class n =
@@ -132,12 +141,11 @@ let new_named_widget class parent name =
   
 
 
-(* Redundant with subtyping of Widget *)
-(* but used to check types *)
+(* Redundant with subtyping of Widget, backward compatibility *)
 let check_widget_class = fun
     (Untyped _) _ -> () (* assume run-time check by tk*)
- |  (Typed(_,c)) c' ->
-       	 if eq_string c c' then ()
+ |  (Typed(_,c)) l ->
+       	 if mem c l then ()
       	 else raise (IllegalWidgetType c)
 ;;
 
@@ -148,9 +156,11 @@ let chk_sub errname table c =
   else raise (Invalid_argument errname)
 ;;
 
-(* Other builtin types and utilities *)
-(* The CAMLtoTKstring converter *)
-(* []/$ are still substituted inside "" *) 
+(* 
+ * Other builtin types and utilities
+ *   The CAMLtoTKstring converter : []/$ are still substituted inside "" 
+ *   Dead code since we now bypass Tcl_Eval
+ *) 
 
 let tcl_string_for_read s =
   let n = ref 0 in
