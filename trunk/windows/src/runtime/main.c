@@ -69,22 +69,54 @@ static int read_trailer(fd, trail)
 
 extern char * searchpath();
 
-int attempt_open(name, trail)
+int attempt_open(name, trail, do_open_script)
      char ** name;
      struct exec_trailer * trail;
+     int do_open_script;
 {
   char * truename;
   int fd;
   int err;
+  char buf [2];
 
   truename = searchpath(*name);
   if (truename == 0) truename = *name; else *name = truename;
   fd = open(truename, O_RDONLY | O_BINARY);
   if (fd == -1) return FILE_NOT_FOUND;
+  if (!do_open_script){
+    err = read (fd, buf, 2);
+    if (err < 2) return TRUNCATED_FILE;
+    if (buf [0] == '#' && buf [1] == '!') return BAD_MAGIC_NUM;
+  }
   err = read_trailer(fd, trail);
   if (err != 0) { close(fd); return err; }
   return fd;
 }
+
+/* Invocation of camlrun: 4 cases.
+
+   1.  runtime + bytecode
+       user types:  camlrun [options] bytecode args...
+       arguments:  camlrun [options] bytecode args...
+
+   2.  bytecode script
+       user types:  bytecode args...
+   2a  (kernel 1) arguments:  camlrun ./bytecode args...
+   2b  (kernel 2) arguments:  bytecode bytecode args...
+
+   3.  concatenated runtime and bytecode
+       user types:  composite args...
+       arguments:  composite args...
+
+Algorithm:
+  1-  If argument 0 is a valid byte-code file that does not start with #!,
+      then we are in case 3 and we pass the same command line to the
+      Caml Light program.
+  2-  In all other cases, we parse the command line as:
+        (whatever) [options] bytecode args...
+      and we strip "(whatever) [options]" from the command line.
+
+*/
 
 #ifdef HAS_UI
 int caml_main(argc, argv)
@@ -108,7 +140,7 @@ int main(argc, argv)
 #endif
 
   i = 0;
-  fd = attempt_open(&argv[0], &trail);
+  fd = attempt_open(&argv[0], &trail, 0);
 
   if (fd < 0) {
 
@@ -136,7 +168,7 @@ int main(argc, argv)
     if (argv[i] == 0)
       fatal_error("No bytecode file specified.\n");
 
-    fd = attempt_open(&argv[i], &trail);
+    fd = attempt_open(&argv[i], &trail, 1);
 
     switch(fd) {
     case FILE_NOT_FOUND:

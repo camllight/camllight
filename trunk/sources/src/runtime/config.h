@@ -142,7 +142,7 @@ typedef char schar;
 #define Heap_chunk_min (2 * Page_size)
 #define Heap_chunk_max (1 << 24)
 #define Heap_chunk_def (126 * Page_size)
-#define Percent_free_def 30
+#define Percent_free_def 20
 
 #endif /* SMALL */
 #endif /* SIXTEEN */
