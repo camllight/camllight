@@ -16,7 +16,7 @@ type 'a stream =
   | Scons of 'a * 'a stream
   | Sapp of 'a stream * 'a stream
   | Sfunc of (unit -> 'a stream) * unit
-  | Sgen of (unit -> 'a) * 'a current_value
+  | Sgen of (unit -> 'a) * 'a current_value ref
 ;;
 
 let rec stream_peek = function
@@ -33,14 +33,14 @@ let rec stream_peek = function
       update (repr s) (repr (f ()));
       stream_peek s
   | Sgen(prod,curr) as s ->
-      match curr with
+      match !curr with
         Vcurr x -> x
       | Veos -> raise Parse_failure
       | Vundef ->
           begin try
-            let t = prod() in set_obj_field (repr s) 1 (repr (Vcurr t)); t
+            let t = prod() in curr := Vcurr t; t
           with End_of_file | Parse_failure ->
-            set_obj_field (repr s) 1 (repr Veos); raise Parse_failure
+            curr := Veos; raise Parse_failure
           end
 ;;
 
@@ -50,7 +50,7 @@ let rec stream_junk = function
   | Sapp(s1,_) ->
       stream_junk s1
   | Sgen(prod,curr) as s ->
-      set_obj_field (repr s) 1 (repr Vundef)
+      curr := Vundef
   | _ ->
       ()
 ;;
@@ -72,7 +72,7 @@ let stream_next s =
 ;;
 
 let stream_from rf =
-   Sgen(rf, Vundef)
+   Sgen(rf, ref Vundef)
 ;;
 
 let stream_of_string s =
@@ -121,15 +121,15 @@ let rec stream_get = function
       update (repr s) (repr (f()));
       stream_get s
   | Sgen(prod, curr) as s ->
-      match curr with
+      match !curr with
         Vcurr x ->
-          let s' = Sgen(prod, Vundef) in
+          let s' = Sgen(prod, ref Vundef) in
           update (repr s) (repr (Scons (x, s')));
           (x, s')
       | Vundef ->
           begin try
             let t = prod() in
-            let s' = Sgen(prod, Vundef) in
+            let s' = Sgen(prod, ref Vundef) in
             update (repr s) (repr (Scons (t, s')));
             (t, s')
           with End_of_file | Parse_failure ->
