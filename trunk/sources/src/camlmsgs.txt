@@ -1,70 +1,87 @@
 src:	%aSyntax error.\n
 fr:	%aErreur de syntaxe.\n
 es:     %aError de sintaxis.\n
+de:     %aSyntaxfehler.\n
 
 src:	%aIllegal character.\n
 fr:	%aCaractère illégal.\n
 es:     %aCarácter incorrecto.\n
+de:     %aNicht erkanntes Zeichen.\n
 
 src:	%tComment not terminated.\n
 fr:	%tCommentaire sans fin.\n
 es:     %tComentario sin finalizar.\n
+de:     %tUnbeendetes Kommentar.\n
 
 src:	%aIll-formed character literal.\n
 fr:	%aCaractère littéral mal formé.\n
 es:     %aCarácter literal mal formado.\n
+de:     %aUnerlaubtes Zeichen.\n
 
 src:	%tString literal not terminated.\n
 fr:	%tChaîne littérale non terminée.\n
 es:     %tCadena literal sin terminar.\n
+de:     %tUnbeendete String-Konstante.\n
 
 src:	, line %d-%d, characters %d-%d:\n
 fr:	, lignes %d-%d, caractères %d-%d:\n
 es:     , líneas %d-%d, caracteres %d-%d:\n
+de:     , Zeilen %d-%d, Zeichen %d-%d:\n
 
 src:	, line %d, characters %d-%d:\n
 fr:	, ligne %d, caractères %d-%d:\n
 es:     , línea %d, caracteres %d-%d:\n
+de:     , Zeile %d, Zeichen %d-%d:\n
 
 src:	File "%s"
 fr:	Fichier "%s"
 es:     Fichero "%s"
+de:     Datei "%s"
 
 src:	Toplevel input:\n
 fr:	Entrée interactive:\n
 es:     Entrada interactiva:\n
+de:     Toplevel Eingabe:\n
 
 src:	File "%s", line 1:\n
 fr:	Fichier "%s", ligne 1:\n
 es:     Fichero "%s", línea 1:\n
+de:     Datei "%s", Zeile 1:\n
 
 src:	%aWarning: unknown directive "#%s", ignored.\n
 fr:	%aAttention: la directive "#%s" est inconnue, je l'ignore.\n
 es:     %a¡Cuidado!: la directiva "#%s" es desconocida, será ignorada.\n
+de:     %aAchtung: die Directive "#%s" ist unbekannt und wird ignoriert.\n
 
 src:	Cannot find file %s.zi. Please compile %s.mli first.\n
 fr:	Le fichier %s.zi est introuvable. Veuillez compiler %s.mli d'abord.\n
 es:     No se encuentra el fichero %s.zi. Compile %s.mli previamente.\n
+de:     Datei %s.zi nicht gefunden.  Compilieren sie erst %s.mli.\n
 
 src:	%aThe value identifier %a is unbound.\n
 fr:	%aL'identificateur %a n'est pas défini.\n
 es:     %aEl identificador %a no está definido.\n
+de:     %aDer Variablename %a ist nicht definiert.\n
 
 src:	%aThe constructor %a is unbound.\n
 fr:	%aLe constructeur %a n'est pas défini.\n
 es:     %aEl constructor %a no está definido.\n
+de:     %aDer Constructor %a ist nicht definiert.\n
 
 src:	%aThe label %a is unbound.\n
 fr:	%aL'étiquette %a n'est pas définie.\n
 es:     %aLa etiqueta %a no está definida.\n
+de:     %aDas Label %a ist nicht definiert.\n
 
 src:	%aThe type constructor %a is unbound.\n
 fr:	%aLe constructeur de type %a n'est pas défini.\n
 es:     %aEl constructor de tipo %a no está definido.\n
+de:     %aDer Typ-Constructor %a ist nicht definiert.\n
 
 src:	%aThe type variable %s is unbound.\n
 fr:	%aLa variable de type %s n'est pas liée.\n
 es:     %aLa variable de tipo %s no está ligada.\n
+de:     %aDie Typ-Variable  %s ist ungebunden.\n
 
 src:	%aThe type constructor %a expects %d argument(s),\n\
 	but is here given %d argument(s).\n
@@ -72,18 +89,23 @@ fr:	%aLe constructeur de type %a attend %d argument(s),\n\
 	mais reçoit ici %d argument(s).\n
 es:     %aEl constructor de tipo %a espera %d argumento(s),\n\
         pero aquí ha recibido %d argumento(s).\n
+de:     %aDer Typ-Constructor %a erwartet  %d Argument(e),\n\
+        bekommt hier aber nur %d Argument(e).\n
 
 src:	%aThe variable %s is bound several times in this pattern.\n
-fr:	%aL'identificateur %s est défini plusieurs fois dans ce motif.\n
-es:     %aEl identificador %s se ha definido varias veces en este patrón.\n
+fr:	%aLa variable %s est défini plusieurs fois dans ce motif.\n
+es:     %aLa variable %s se ha definido varias veces en este patrón.\n
+de:     %aDer Name %s ist in diesem Pattern mehrmals gebunden.\n
 
 src:	%aWarning: the variable %s starts with an upper case letter in this pattern.\n
-fr:	%aAttention: dans ce motif l'identificateur %s commence par une majuscule.\n
-es:     %a¡Cuidado!: en este patrón el identificador %s comienza con una mayúscula.\n
+fr:	%aAttention: dans ce motif la variable %s commence par une majuscule.\n
+es:     %a¡Cuidado!: en este patrón la variable %s comienza con una mayúscula.\n
+de:     %aAchtung!: in diesem Pattern beginnt der Name %s mit einem Großbuchstaben.\n
 
 src:	%aA pattern with "|" must not bind variables.\n
 fr:	%aUn motif avec "|" ne doit pas lier d'identificateurs.\n
 es:     %aUn patrón con "|" no debe ligar identificadores.\n
+de:     %aEin Pattern mit "|" darf keine Namen binden.\n
 
 src:	%aThis pattern matches values of type %a,\n\
 	but should match values of type %a.\n
@@ -91,6 +113,8 @@ fr:	%aCe motif filtre des valeurs de type %a,\n\
 	pas des valeurs de type %a.\n
 es:     %aEste patrón filtra valores de tipo %a,\n\
         pero no valores de tipo %a.\n 
+de:     %aDieses Pattern erwartet Werte von Typ %a,\n\
+        und nicht Werte von Typ %a.\n 
 
 src:	%aThis expression has type %a,\n\
 	but is used with type %a.\n
