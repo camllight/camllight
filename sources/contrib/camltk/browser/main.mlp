@@ -7,50 +7,11 @@
 #open "hyper_printers";;
 #open "visual";;
 #open "source";;
-
+#open "util";;
 
 let bye () = 
   CloseTk();
   exit 0
-;;
-
-(* Open generic requester *)
-let new_open_top = 
-  let cnter = ref 0 in
-  function () ->
-   incr cnter; "open" ^ string_of_int !cnter
-;;
-
-
-let open title action =
-  let t = toplevelw__create (support__new_toplevel_widget "open") [] in
-  focus__set t;
-  grab__set_local t;
-  let tit = label__create t [Text title] in
-  let e = entry__create t [Relief Sunken] in
-    util__entry_bindings e;
-    tk__bind e [[], XKey "Return"]
-      	(BindSet ([], fun _ -> action (entry__get e); destroy t));
-
-  let f = frame__create t [] in
-  let bok = button__create f
-      	    [Text "Ok"; 
-      	     Command (fun () -> action (entry__get e); destroy t)] in
-  let bcancel = button__create f
-      	    [Text "Cancel"; 
-      	     Command (fun () -> destroy t)] in
-
-    tk__bind t [[], XKey "Return"]
-      	 (BindSet ([], (fun _ -> button__invoke bok)));
-    tk__bind t [[], XKey "Escape"]
-      	 (BindSet ([], (fun _ -> button__invoke bcancel)));
-    tk__bind e [[], XKey "Escape"]
-      	 (BindSet ([], (fun _ -> button__invoke bcancel)));
-    pack [bok; bcancel] [Side Side_Left; Fill Fill_X; Expand true];
-    pack [tit;e] [Fill Fill_X];
-    pack [f] [Side Side_Bottom; Fill Fill_X];
-    util__resizeable t;
-    focus__set e
 ;;
 
 (******* Modules *********)
@@ -62,7 +23,7 @@ let module_panel parent =
   let fls = frame__create f [Relief Sunken; Borderwidth (Pixels 2)] in 
   let lb = listbox__create fls [] in
   let sb = scrollbar__create fls [] in
-    util__scroll_listbox_link sb lb;
+    scroll_listbox_link sb lb;
     tk__bind lb [[Double], WhatButton 1] 
            (BindSet ([], fun _ ->
                           do_list (fun s ->
@@ -95,7 +56,10 @@ let module_panel parent =
        Command close_module] in
   let o = button__create f
       [Text "Open Module"; Relief Raised; 
-       Command (fun () -> open "Open a module" add_module)] in
+       Command (fun () -> 
+                 open_list_req "Open a module" 
+      	       	       	   (modlist__modules_of_path !load_path)
+      	       	       	   add_module)] in
 
    pack [title] [Fill Fill_X];
     pack [lb] [Side Side_Left; Fill Fill_Both; Expand true];
@@ -116,7 +80,7 @@ let path_panel parent =
   let fls = frame__create f [Relief Sunken; Borderwidth (Pixels 2)] in 
   let lb = listbox__create fls [] in
   let sb = scrollbar__create fls [] in
-    util__scroll_listbox_link sb lb;
+    scroll_listbox_link sb lb;
 
   let add_path n =
       load_path := n :: !load_path;
@@ -125,7 +89,7 @@ let path_panel parent =
   let o = button__create f
       [Text "Add Directory"; Relief Raised; 
        Command (fun () ->
-      	       	 open "Add a directory to the load path" add_path)] in
+      	       	 open_req "Add a directory to the load path" add_path)] in
 
    pack [title] [Fill Fill_X];
     pack [lb] [Side Side_Left; Fill Fill_Both; Expand true];
@@ -142,7 +106,7 @@ let browsing_panel parent =
    let enterf = frame__create f [] in
    let m = label__create enterf [Text "Enter a global symbol:"] in
    let e = entry__create enterf [Relief Sunken] in
-      util__entry_bindings e;
+      entry_bindings e;
       tk__bind e [[], XKey "Return"]
                  (BindSet ([], (fun _ -> visual_search_any 
       	       	       	       	       	  (entry__get e))));
@@ -158,7 +122,7 @@ let browsing_panel parent =
    (* Loading a source file *)
    let o2 = button__create f
       [Text "Open source file"; Relief Raised;
-       Command (fun () -> open "Open a source file" display_file)] in
+       Command (fun () -> open_req "Open a source file" display_file)] in
 
    pack [o2; enterf] [Side Side_Bottom; Fill Fill_X];
    f
@@ -194,7 +158,7 @@ let main () =
     pack [g] [Side Side_Top; Fill Fill_Both; Expand true];
     pack [browse] [Side Side_Top; Fill Fill_Both];
     pack [quitb] [Side Side_Bottom; Fill Fill_X];
-    util__resizeable top;
+    resizeable top;
    (* focus__set e; *)
 
   (* The interface is now ready *)
@@ -206,6 +170,7 @@ let main () =
   load_path := [];
   path_library := !libpath;
   add_path !path_library;
+  reset_opened_modules();
   do_list add_module !default_used_modules;
 
   arg__parse [
@@ -231,8 +196,6 @@ let main () =
 	 end
    | ex -> begin CloseTk(); raise ex end
 ;;
-
-(* protocol__debug := true;; *)
 
 
 printexc__f (handle_unix_error main) ()
