@@ -168,15 +168,16 @@ let add_pat_list_to_env env patl =
   (add_lets_to_env mut_vars env', add_lets_to_expr mut_vars env')
 ;;
 
-(* The parameter of a "for" loop is stored as a reference, with index 1.
-   The variable with index 0 is the end-of-loop value. *)
+(* The parameter of a "for" loop is let-bound with index 0.
+   The variable with index 1 is the end-of-loop value.
+   The variable with index 2 is the reference itself. *)
 
 let add_for_parameter_to_env env id =
   let var =
     {var_name = id;
-     var_path = Path_son(0, Path_root);
+     var_path = Path_root;
      var_typ = builtins__type_int} in
-  Treserved(Tenv([var], env))
+  Tenv([var], Treserved(Treserved(env)))
 ;;
 
 (* Used for expansion of stream expressions *)

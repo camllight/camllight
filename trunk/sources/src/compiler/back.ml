@@ -296,12 +296,14 @@ let rec compile_expr staticfail =
             Kmakeblock(ConstrRegular(0,1), 1) :: Klet ::
             compexp stop (
               Klet :: Klabel lbl_loop :: Kcheck_signals ::
-              Kaccess 1 :: Kprim(Pfield 0) :: Kpush :: Kaccess 0 ::
+              Kaccess 1 :: Kprim(Pfield 0) :: Klet :: 
+              Kpush :: Kaccess 1 ::
               Ktest(Pint_test(if up_flag then PTlt else PTgt), lbl_end) ::
               compexp body (
+                Kendlet 1 ::
                 Kaccess 1 :: Kprim(if up_flag then Pincr else Pdecr) ::
                 Kbranch lbl_loop ::
-                Klabel lbl_end :: Kendlet 2 ::
+                Klabel lbl_end :: Kendlet 3 ::
                 Kquote(const_unit) :: code)))
   | Lsequand(exp1, exp2) ->
        (match code with
