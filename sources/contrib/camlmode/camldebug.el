@@ -210,21 +210,28 @@ the camldebug commands `cd DIR' and `directory'."
       (if (= (aref string 1) ?\032)
 	  (let ((end (string-match "\n" string)))
 	    (if end
-		(progn
-		  (let* ((first-colon (string-match ":" string 2))
-			 (second-colon
-			  (string-match ":" string (1+ first-colon))))
-		    (setq camldebug-last-frame
-			  (cons (substring string 2 first-colon)
-				(cons       (string-to-int
-					     (substring string (1+ first-colon)
-							second-colon))
-					    (equal "before"
-						   (substring string
-							      (1+ second-colon)
-							      end))))))
-		  (setq camldebug-last-frame-displayed-p nil)
-		  (camldebug-filter-scan-input proc
+                (let ((cmd (aref string 2)))
+                  (cond
+                   ((eq cmd ?M)         ; Insert mark
+                    (let* ((first-colon (string-match ":" string 3))
+                           (second-colon
+                            (string-match ":" string (1+ first-colon))))
+                      (setq camldebug-last-frame
+                            (cons (substring string 3 first-colon)
+                                  (cons (string-to-int
+                                         (substring string
+                                                    (1+ first-colon)
+                                                    second-colon))
+                                        (equal "before"
+                                               (substring string
+                                                          (1+ second-colon)
+                                                          end))))))
+                    (setq camldebug-last-frame-displayed-p nil))
+                   ((eq cmd ?H)         ; Hide mark
+		    (setq camldebug-last-frame nil)
+		    (setq camldebug-last-frame-displayed-p t)
+		    (camldebug-remove-current-event)))
+                  (camldebug-filter-scan-input proc
 					       (substring string (1+ end))))
 	      (setq camldebug-filter-accumulator string)))
 	(camldebug-filter-insert proc "\032")
@@ -271,11 +278,11 @@ the camldebug commands `cd DIR' and `directory'."
   (cond ((null (buffer-name (process-buffer proc)))
 	 ;; buffer killed
 	 ;; Stop displaying an arrow in a source file.
-	 (camldebug-remove-events)
+	 (camldebug-remove-current-event)
 	 (set-process-buffer proc nil))
 	((memq (process-status proc) '(signal exit))
 	 ;; Stop displaying an arrow in a source file.
-	 (camldebug-remove-events)
+	 (camldebug-remove-current-event)
 	 ;; Fix the mode line.
 	 (setq mode-line-process
 	       (concat ": "
@@ -343,7 +350,7 @@ Obeying it means displaying in another window the specified file and line."
 
 ;;; Events.
 
-(defun camldebug-remove-events ()
+(defun camldebug-remove-current-event ()
   (if (and camldebug-emacs-19 window-system)
       (progn
         (delete-overlay camldebug-overlay-event)
