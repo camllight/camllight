@@ -185,35 +185,36 @@ type EventField =
 
 (* TODO: check types ! *)
 
-let FillEventInfo ev = function 
-    Above 	-> ev.Ev_Above 		<- int_of_string (GetTkToken !PipeTkCallB)
-  | ButtonNumber -> ev.Ev_ButtonNumber 	<- int_of_string (GetTkToken !PipeTkCallB)
-  | Count 	-> ev.Ev_Count 		<- int_of_string (GetTkToken !PipeTkCallB)
-  | Detail 	-> ev.Ev_Detail 	<- GetTkToken !PipeTkCallB
-  | Focus 	-> ev.Ev_Focus 		<- GetTkToken !PipeTkCallB = "1"
-  | Height 	-> ev.Ev_Height 	<- int_of_string (GetTkToken !PipeTkCallB)
-  | KeyCode 	-> ev.Ev_KeyCode 	<- int_of_string (GetTkToken !PipeTkCallB)
-  | Mode 	-> ev.Ev_Mode 		<- GetTkToken !PipeTkCallB
-  | State 	-> ev.Ev_State 		<- GetTkToken !PipeTkCallB
-  | ValueMask	-> ev.Ev_ValueMask 	<- int_of_string (GetTkToken !PipeTkCallB)
-  | Width 	-> ev.Ev_Width 		<- int_of_string (GetTkToken !PipeTkCallB)
-  | MouseX 	-> ev.Ev_MouseX 	<- int_of_string (GetTkToken !PipeTkCallB)
-  | MouseY 	-> ev.Ev_MouseY 	<- int_of_string (GetTkToken !PipeTkCallB)
-  | WidgetName 	-> ev.Ev_WidgetName 	<- GetTkToken !PipeTkCallB
-  | Time 	-> ev.Ev_Time  		<- GetTkToken !PipeTkCallB
-  | OverrideRedirect -> ev.Ev_OverrideRedirect <- GetTkToken !PipeTkCallB
-  | Place 	-> ev.Ev_Place 		<- GetTkToken !PipeTkCallB
-  | Char 	-> ev.Ev_Char 		<- GetTkString !PipeTkCallB
-  | BorderWidth -> ev.Ev_BorderWidth 	<- int_of_string (GetTkToken !PipeTkCallB)
-  | Display 	-> ev.Ev_Display 	<- int_of_string (GetTkToken !PipeTkCallB)
-  | SendEvent 	-> ev.Ev_SendEvent 	<- int_of_string (GetTkToken !PipeTkCallB)
-  | KeySymString -> ev.Ev_KeySymString 	<- GetTkToken !PipeTkCallB
-  | KeySymInt 	-> ev.Ev_KeySymInt 	<- int_of_string (GetTkToken !PipeTkCallB)
-  | RootWindow 	-> ev.Ev_RootWindow 	<- int_of_string (GetTkToken !PipeTkCallB)
-  | SubWindow 	-> ev.Ev_SubWindow 	<- int_of_string (GetTkToken !PipeTkCallB)
-  | Type 	-> ev.Ev_Type 		<- int_of_string (GetTkToken !PipeTkCallB)
-  | RootX 	-> ev.Ev_RootX 		<- int_of_string (GetTkToken !PipeTkCallB)
-  | RootY 	-> ev.Ev_RootY 		<- int_of_string (GetTkToken !PipeTkCallB);;
+let FillEventInfo ev args = function 
+    Above 	-> ev.Ev_Above 		<- int_of_string (arg_GetTkToken args)
+  | ButtonNumber -> ev.Ev_ButtonNumber 	<- int_of_string (arg_GetTkToken args)
+  | Count 	-> ev.Ev_Count 		<- int_of_string (arg_GetTkToken args)
+  | Detail 	-> ev.Ev_Detail 	<- arg_GetTkToken args
+  | Focus 	-> ev.Ev_Focus 		<- arg_GetTkToken args = "1"
+  | Height 	-> ev.Ev_Height 	<- int_of_string (arg_GetTkToken args)
+  | KeyCode 	-> ev.Ev_KeyCode 	<- int_of_string (arg_GetTkToken args)
+  | Mode 	-> ev.Ev_Mode 		<- arg_GetTkToken args
+  | State 	-> ev.Ev_State 		<- arg_GetTkToken args
+  | ValueMask	-> ev.Ev_ValueMask 	<- int_of_string (arg_GetTkToken args)
+  | Width 	-> ev.Ev_Width 		<- int_of_string (arg_GetTkToken args)
+  | MouseX 	-> ev.Ev_MouseX 	<- int_of_string (arg_GetTkToken args)
+  | MouseY 	-> ev.Ev_MouseY 	<- int_of_string (arg_GetTkToken args)
+  | WidgetName 	-> ev.Ev_WidgetName 	<- arg_GetTkToken args
+  | Time 	-> ev.Ev_Time  		<- arg_GetTkToken args
+  | OverrideRedirect -> ev.Ev_OverrideRedirect <- arg_GetTkToken args
+  | Place 	-> ev.Ev_Place 		<- arg_GetTkToken args
+  | Char 	-> ev.Ev_Char 		<- arg_GetTkToken args (* WARNING *)
+  | BorderWidth -> ev.Ev_BorderWidth 	<- int_of_string (arg_GetTkToken args)
+  | Display 	-> ev.Ev_Display 	<- int_of_string (arg_GetTkToken args)
+  | SendEvent 	-> ev.Ev_SendEvent 	<- int_of_string (arg_GetTkToken args)
+  | KeySymString -> ev.Ev_KeySymString 	<- arg_GetTkToken args
+  | KeySymInt 	-> ev.Ev_KeySymInt 	<- int_of_string (arg_GetTkToken args)
+  | RootWindow 	-> ev.Ev_RootWindow 	<- int_of_string (arg_GetTkToken args)
+  | SubWindow 	-> ev.Ev_SubWindow 	<- int_of_string (arg_GetTkToken args)
+  | Type 	-> ev.Ev_Type 		<- int_of_string (arg_GetTkToken args)
+  | RootX 	-> ev.Ev_RootX 		<- int_of_string (arg_GetTkToken args)
+  | RootY 	-> ev.Ev_RootY 		<- int_of_string (arg_GetTkToken args)
+;;
 
 
 let WrapEventInfo f what =
@@ -246,8 +247,8 @@ let WrapEventInfo f what =
     Ev_Type = 0;
     Ev_RootX = 0;
     Ev_RootY = 0 } in
-     function () ->
-       do_list (FillEventInfo ev) what;
+     function args ->
+       do_list (FillEventInfo ev args) what;
        f ev
 ;;
 
@@ -258,34 +259,34 @@ let rec WriteEventField = function
   | H::q ->
     begin
     match H with
-      Above -> "puts $PipeTkCallB %a;"
-      | ButtonNumber -> "puts $PipeTkCallB %b;"
-      | Count -> "puts $PipeTkCallB %c;"
-      | Detail -> "puts $PipeTkCallB %d;"
-      | Focus -> "puts $PipeTkCallB %f;"
-      | Height -> "puts $PipeTkCallB %h;"
-      | KeyCode -> "puts $PipeTkCallB %k;"
-      | Mode -> "puts $PipeTkCallB %m;"
-      | State -> "puts $PipeTkCallB %s;"
-      | ValueMask -> "puts $PipeTkCallB %v;"
-      | Width -> "puts $PipeTkCallB %w;"
-      | MouseX -> "puts $PipeTkCallB %x;"
-      | MouseY -> "puts $PipeTkCallB %y;"
-      | WidgetName -> "puts $PipeTkCallB %W;"
-      | Time -> "puts $PipeTkCallB %t;"
-      | OverrideRedirect -> "puts $PipeTkCallB %o;"
-      | Place -> "puts $PipeTkCallB %p;"
-      | Char -> "nputs $PipeTkCallB %A;"
-      | BorderWidth -> "puts $PipeTkCallB %B;"
-      | Display -> "puts $PipeTkCallB %D;"
-      | SendEvent -> "puts $PipeTkCallB %E;"
-      | KeySymString -> "puts $PipeTkCallB %K;"
-      | KeySymInt -> "puts $PipeTkCallB %N;"
-      | RootWindow -> "puts $PipeTkCallB %R;"
-      | SubWindow -> "puts $PipeTkCallB %S;"
-      | Type -> "puts $PipeTkCallB %T;"
-      | RootX -> "puts $PipeTkCallB %X;"
-      | RootY -> "puts $PipeTkCallB %Y;"
+        Above -> 	" %a"
+      | ButtonNumber -> " %b"
+      | Count -> 	" %c"
+      | Detail -> 	" %d"
+      | Focus -> 	" %f"
+      | Height -> 	" %h"
+      | KeyCode -> 	" %k"
+      | Mode -> 	" %m"
+      | State -> 	" %s"
+      | ValueMask -> 	" %v"
+      | Width -> 	" %w"
+      | MouseX -> 	" %x"
+      | MouseY -> 	" %y"
+      | WidgetName -> 	" %W"
+      | Time -> 	" %t"
+      | OverrideRedirect -> " %o"
+      | Place -> 	" %p"
+      | Char -> 	" %A"
+      | BorderWidth -> 	" %B"
+      | Display -> 	" %D"
+      | SendEvent -> 	" %E"
+      | KeySymString -> " %K"
+      | KeySymInt -> 	" %N"
+      | RootWindow -> 	" %R"
+      | SubWindow -> 	" %S"
+      | Type -> 	" %T"
+      | RootX -> 	" %X"
+      | RootY -> 	" %Y"
     end 
     ^ WriteEventField q;;
 
@@ -299,16 +300,14 @@ type BindAction =
 (* bind: Widget -> (Modifier list * XEvent) list -> BindAction -> unit *)
 
 let bind widget eventsequence action =
-  Send2TkStart "$PipeTkCallB";
-  Send2Tk ("bind "^ widget_name widget^ " " ^ (CAMLtoTKEventSequence eventsequence));
+  let buf = Send2TkStart false in
+  Send2Tk buf ("bind "^ widget_name widget^" "
+      	              ^ (CAMLtoTKEventSequence eventsequence));
   begin match action with
-     BindRemove -> Send2Tk " "
+     BindRemove -> Send2Tk buf " "
   |  BindSet (what, f) ->
       let CbId = register_callback (WrapEventInfo f what) in
-      let proc = " {global PipeTkCallB; puts $PipeTkCallB "^CbId^";"
-             ^ (WriteEventField what) ^ "flush $PipeTkCallB;}" in
-        Send2Tk proc
+        Send2Tk buf (" {camlcb " ^ CbId ^ (WriteEventField what) ^"}")
   end;
-  Send2TkEval()
+  Send2TkEval buf
 ;;
-

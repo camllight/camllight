@@ -95,16 +95,14 @@ let CAMLtoTKTextIndex = function
 
 let text_tag_bind widget tag eventsequence action =
   check_widget_class widget "text";
-  Send2TkStart "$PipeTkCallB";
-  Send2Tk (widget_name widget ^ " tag bind " ^ (CAMLtoTKTextTag tag) ^ " " ^
+  let buf = Send2TkStart false in
+  Send2Tk buf (widget_name widget ^ " tag bind " ^ (CAMLtoTKTextTag tag) ^ " " ^
       	   (CAMLtoTKEventSequence eventsequence));
   begin match action with
-     BindRemove -> Send2Tk " "
+     BindRemove -> Send2Tk buf " "
   |  BindSet (what, f) ->
       let CbId = register_callback (WrapEventInfo f what) in
-      let proc = " {global PipeTkCallB; puts $PipeTkCallB "^CbId^";"
-             ^ (WriteEventField what) ^ "flush $PipeTkCallB;}" in
-        Send2Tk proc
+        Send2Tk buf (" {camlcb " ^ CbId ^ (WriteEventField what) ^"}")
   end;
-  Send2TkEval()
+  Send2TkEval buf
 ;;

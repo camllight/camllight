@@ -13,21 +13,22 @@ let new =
 ;;
 
 let set v x =
-  Send2TkStart "$PipeTkCallB";
-  Send2Tk "set";
-  Send2Tk v;
-  Send2Tk (quote_string x);
-  Send2TkEval();
+  let buf = Send2TkStart false in
+  Send2Tk buf "set";
+  Send2Tk buf v;
+  Send2Tk buf (quote_string x);
+  Send2TkEval buf;
   ()
 ;;
 
 let get v =
-  Send2TkStart "$PipeTkResult";
-  Send2Tk "nputs $PipeTkResult";
-  Send2Tk ("$" ^ v);
-  Send2Tk "; flush $PipeTkResult";
-  Send2TkEval();
-  GetTkString !PipeTkResult;;
+  let buf = Send2TkStart true in
+  Send2Tk buf result_string_header;
+  Send2Tk buf ("set " ^ v);
+  Send2Tk buf result_footer;
+  let res = Send2TkEval buf in
+    res_GetTkString res
+;;
 
 let CAMLtoTKTextVariable s = s
 ;;
