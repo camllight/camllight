@@ -74,9 +74,9 @@ let do_directive loc = function
   | Zdir("close", name) ->
       close_module name
   | Zdir("infix", name) ->
-      add_infix name; ()
+      add_infix name
   | Zdir("uninfix", name) ->
-      remove_infix name; ()
+      remove_infix name
   | Zdir("directory", dirname) ->
       load_path := dirname :: !load_path
   | Zdir(d, name) ->
