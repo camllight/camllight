@@ -3,8 +3,12 @@
 # These options are overriden when called from ../Makefile
 CC=cc
 OPTS=
-X11_INCLUDES=/usr/include/X11
+X11_INCLUDES=/usr/include
+X11_LIB=/usr/lib
 CPP=/lib/cpp -P
+
+BINDIR=/usr/local/bin
+LIBDIR=/usr/local/lib/caml-light
 
 # Compilation options
 CFLAGS=$(OPTS) -I../../src/runtime -I$(X11_INCLUDES)

@@ -66,7 +66,7 @@ let find_printer ty =
   in find !printers
 ;;
 
-let printer_depth = ref 100;;
+let max_printer_depth = ref 100;;
 let max_printer_steps = ref 300;;
 let printer_steps = ref !max_printer_steps;;
 
@@ -228,7 +228,7 @@ and print_vect depth obj ty_arg =
 
 let print_value obj ty =
     printer_steps := !max_printer_steps;
-    try print_val 0 !printer_depth obj ty
+    try print_val 0 !max_printer_depth obj ty
     with x -> print_newline(); flush std_err; raise x
 ;;
 
