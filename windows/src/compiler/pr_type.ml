@@ -77,7 +77,7 @@ let rec output_typ oc priority ty =
 
 and output_typ_list oc priority sep = function
     [] ->
-      fatal_error "output_typ_list"
+      ()
   | [ty] ->
       output_typ oc priority ty
   | ty::rest ->
@@ -90,7 +90,3 @@ let output_type oc ty = output_typ oc 0 ty;;
 
 let output_one_type oc ty = reset_type_var_name(); output_typ oc 0 ty;;
 
-(*******
-printf__add_format `t` output_type;
-printf__add_format `v` output_one_type;;
-*******)
