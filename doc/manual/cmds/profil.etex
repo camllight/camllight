@@ -79,6 +79,11 @@ The following options are recognized by "camlpro":
 See chapter~\ref{c:camlc} for the detailed usage.
 \item["-f" \var{dumpfile}] 
 Specifies an alternate dump file of profiling information
+\item["-F" \var{string}]
+Specifies an additional string to be output with profiling information.
+By default, {\sf camlpro} will annotate progams with comments of the form
+{\tt (* n *)} where {\tt n} is the counter value for a profiling point. With
+option {\tt -F s}, the annotation will be {\tt (* sn *)}.
 \end{options}
 
 An additional argument specifies the output file. For instance
@@ -95,4 +100,5 @@ The following situation (file \verb|x.ml|)
 let a = 1;;
 x__a ;;
 \end{verbatim} 
-will break the profiler.
+will break the profiler. More precisely, one should avoid to refer to
+symbols of the current module with the qualified symbol syntax.
