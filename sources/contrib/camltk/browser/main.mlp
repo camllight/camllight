@@ -8,11 +8,6 @@
 #open "tags";;
 #open "util";;
 
-let bye () = 
-  CloseTk();
-  exit 0
-;;
-
 (******* Modules *********)
 (* returns: panel widget, add *)
 let module_panel parent selected_paths =
@@ -161,6 +156,8 @@ let browsing_panel parent =
 		   if !use_tags then
 		     do_list read_tags ("." :: !load_path)
 		   else clear_tags ())] in
+   (* when -tags was used *)
+   if !use_tags then checkbutton__select cb;		  
    
    (* Loading a source file *)
    let o2 = button__create f
@@ -174,17 +171,44 @@ let browsing_panel parent =
    f
 ;;
 
+let bye () = 
+  CloseTk();
+  exit 0
+;;
+
 let main () = 
-  let top = OpenTkClass "CamlBrowser" in
+  let display = ref (try sys__getenv("DISPLAY") with Not_found -> "")
+  and ask_monochrome = ref false
+  and libpath = ref "LIBDIR" 
+  and initial_path = ref [] 
+  and module_set = ref "cautious" 
+  and initial_modules = ref [] 
+  in
+
+  (* we must parse first to find display ... *)
+  arg__parse [
+    "-d", arg__String (fun s -> display := s);
+    "-display", arg__String (fun s -> display := s);
+    "-mono", arg__Unit (function () -> ask_monochrome := true);
+    "-stdlib", arg__String (fun s -> libpath := s);
+    "-I", arg__String (fun s -> initial_path := !initial_path @ [s]);
+    "-O", arg__String (fun s -> module_set := s);
+    "-tags", arg__Unit (function () -> use_tags := true);
+    ]
+    (fun s -> initial_modules := s :: !initial_modules);
+    
+  let top = OpenTkDisplayClass !display "CamlBrowser" in
      signal SIGINT (Signal_handle bye);
      signal SIGTERM (Signal_handle bye);
-  resource__add "*library_path" "LIBDIR" WidgetDefault;
-  resource__add "*module_set" "cautious" WidgetDefault;
+
   begin match colormodel__get top with
-     Color -> use_color_attribs ()
+     Color -> if !ask_monochrome then begin
+      	       	 colormodel__set top Monochrome;
+      	       	 use_monochrome_attribs()
+		 end
+	      else use_color_attribs ()
    | Monochrome -> use_monochrome_attribs ()
   end;
-  let t = label__create top [Text "Caml Browser"; Relief Raised] in
 
   let g = frame__create top [] in (* hgroup *)
     let dirs, add_path, selected_paths = path_panel g in
@@ -194,16 +218,11 @@ let main () =
   let browse = browsing_panel top
   and quitb = button__create top [Text "Quit"; Relief Raised; Command bye] in
 
-    pack [t] [Side Side_Top; Fill Fill_X];
     pack [g] [Side Side_Top; Fill Fill_Both; Expand true];
     pack [browse] [Side Side_Top; Fill Fill_Both];
     pack [quitb] [Side Side_Bottom; Fill Fill_X];
     resizeable top;
 
-  (* The interface is now ready *)
-  let libpath = ref (resource__get top "library_path" "library_path") 
-  and module_set = ref (resource__get top "module_set" "module_set") 
-  and initial_modules = ref ([] : string list) in
   (* Initialisation of the module machinery *)
   default_used_modules := assoc !module_set default_used_interfaces;
   load_path := [];
@@ -211,17 +230,9 @@ let main () =
   add_path !path_library;
   reset_opened_modules();
   do_list add_module !default_used_modules;
+  do_list add_path !initial_path;
 
-  read_tags ".";
-
-  arg__parse [
-       "-stdlib", arg__String 
-      	   (fun s -> path_library := s; add_path s);
-       "-I", arg__String add_path;
-       "-mono", arg__Unit (function () -> colormodel__set top Monochrome;
-      	       	       	       	       	  use_monochrome_attribs())
-       ]
-       (fun s -> initial_modules := s :: !initial_modules);
+  read_tags "."; (* . is implicit in load_path *)
 
    try
      do_list (function m -> if add_module m then visual_module false m) 

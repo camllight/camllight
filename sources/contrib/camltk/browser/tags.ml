@@ -78,6 +78,9 @@ let read_tags dir =
      sys__Sys_error _ -> 
        printf__fprintf stderr "Cannot open %s\n" tagfile;
        flush stderr
+  | End_of_file ->
+       printf__fprintf stderr "I say %s is empty\n" tagfile;
+       flush stderr
 ;;
 
 let clear_tags () =

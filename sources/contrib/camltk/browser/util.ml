@@ -186,13 +186,16 @@ let open_req title action memory =
   let tit = label__create t [Text title] in
   let e = entry__create t [Relief Sunken; TextVariable memory] in
     util__entry_bindings e;
-    bind e [[], XKey "Return"]
-      	(BindSet ([], fun _ -> action (entry__get e); destroy t));
+
+  let activate _ =
+      grab__release t;
+      action (entry__get e);
+      destroy t in
+  
+    bind e [[], XKey "Return"] (BindSet ([], activate));
 
   let f = frame__create t [] in
-  let bok = button__create f
-      	    [Text "Ok"; 
-      	     Command (fun () -> action (entry__get e); destroy t)] in
+  let bok = button__create f [Text "Ok"; Command activate] in
   let bcancel = button__create f
       	    [Text "Cancel"; 
       	     Command (fun () -> destroy t)] in
@@ -223,6 +226,7 @@ let open_list_req title elements action =
     scroll_listbox_link sb lb;
     listbox__insert lb End elements;
   let activate _ =
+    grab__release t;
     do_list (fun s -> action (listbox__get lb s))
       	    (listbox__curselection lb);
     destroy t  in
