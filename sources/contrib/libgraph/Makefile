@@ -11,7 +11,7 @@ BINDIR=/usr/local/bin
 LIBDIR=/usr/local/lib/caml-light
 
 # Compilation options
-CFLAGS=$(OPTS) -I../../src/runtime -I$(X11_INCLUDES)
+CFLAGS=$(OPTS) -I../../src/runtime -I$(X11_INCLUDES) -O
 
 # Test to see whether ranlib exists on the machine
 RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib

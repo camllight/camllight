@@ -12,7 +12,7 @@ RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
 RANLIB=ranlib
 
 # Compilation options
-CFLAGS=-I../../src/runtime $(OPTS)
+CFLAGS=-I../../src/runtime -O $(OPTS)
 CAMLC=camlc
 CAMLCOMP=$(CAMLC) -c
 COMPFLAGS=-W
