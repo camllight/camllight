@@ -16,7 +16,6 @@
 (* Equal.ml	Interface to search by isomorphism functions             *)
 (*		Roberto Di Cosmo and Pierre Weis			 *)
 
-#open "external_type";;
 #open "myTypes";;
 #open "TypeRewrite";;
 #open "LC_unify";;

@@ -1,23 +1,17 @@
-#open "misc";;
-#open "unix";;
-#open "interruption";;
-#open "lambda";;
-#open "input_handling";;
-#open "communication";;
-#open "lexing";;
-#open "command_line_interpreter";;
-#open "lexer";;
-#open "primitives";;
-#open "debugger_config";;
-#open "checkpoints";;
-#open "time_travel";;
-#open "parameters";;
-#open "program_loading";;
-#open "program_management";;
-#open "modules";;
-#open "modules2";;
-#open "frames";;
-#open "show_information";;
+(**) #open "misc";;
+(**) #open "unix";;
+(**) #open "interruption";;
+(**) #open "input_handling";;
+(**) #open "lexing";;
+(**) #open "command_line_interpreter";;
+(**) #open "debugger_config";;
+(**) #open "checkpoints";;
+(**) #open "time_travel";;
+(**) #open "parameters";;
+(**) #open "program_management";;
+(**) #open "modules";;
+(**) #open "frames";;
+(**) #open "show_information";;
 
 let toplevel_loop () =
   let line_buffer = create_lexer read_user_input in

@@ -1,7 +1,6 @@
 (***************************** Checkpoints *******************************)
 
 #open "primitives";;
-#open "unix";;
 #open "communication";;
 
 (*** Pseudo-checkpoint `root'. ***)

@@ -16,7 +16,6 @@
 (* LC_unify.ml	Unification modulo left commutativity                    *)
 (*		Roberto Di Cosmo                 			 *)
 
-#open "TypeRewrite";;
 #open "myTypes";;
 
 (* type 'a option =

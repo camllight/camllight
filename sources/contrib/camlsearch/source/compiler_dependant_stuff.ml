@@ -4,7 +4,6 @@
 #open "builtins";;
 #open "types";;
 
-#open "unix";;
 #open "hashtbl";;
 
 #open "external_type";;

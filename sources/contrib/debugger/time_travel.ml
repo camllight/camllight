@@ -2,7 +2,6 @@
 
 #open "debugger_config";;
 #open "misc";;
-#open "unix";;
 #open "primitives";;
 #open "interruption";;
 #open "communication";;

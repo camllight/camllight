@@ -1,8 +1,5 @@
 (****************************** Variables **********************************)
 
-#open "const";;
-#open "primitives";;
-#open "lambda";;
 #open "globals";;
 #open "value";;
 

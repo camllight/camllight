@@ -1,9 +1,7 @@
 (******************************** Events ******************************)
 
-#open "const";;
 #open "lambda";;
 #open "primitives";;
-#open "communication";;
 #open "checkpoints";;
 
 (*** Events list. ***)

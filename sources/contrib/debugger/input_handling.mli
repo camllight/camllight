@@ -1,6 +1,5 @@
 (***************************** Input control *****************************)
 
-#open "unix";;
 #open "primitives";;
 
 (*** Actives files. ***)

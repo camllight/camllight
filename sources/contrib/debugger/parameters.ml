@@ -1,6 +1,5 @@
 (****************** Miscellaneous parameters *******************************)
 
-#open "primitives";;
 #open "misc";;
 
 let program_loaded = ref false;;

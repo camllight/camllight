@@ -116,9 +116,8 @@ matching_on_bases.zi: type_for_matching.zi
 normalization.zi: external_type.zi type_for_matching.zi 
 operations_on_types.zi: type_for_matching.zi comparisons.zi 
 output.zi: external_type.zi 
-Equal.zo: Equal.zi TypeRewrite.zi external_type.zi LC_unify.zi myTypes.zo \
-    output.zi 
-LC_unify.zo: LC_unify.zi TypeRewrite.zi myTypes.zo 
+Equal.zo: Equal.zi TypeRewrite.zi LC_unify.zi myTypes.zo output.zi 
+LC_unify.zo: LC_unify.zi myTypes.zo 
 TypeRewrite.zo: TypeRewrite.zi myTypes.zo 
 camlsearch.zo: camlsearch.zi TypeRewrite.zi Equal.zi \
     compiler_dependant_stuff.zi normalization.zi directory_and_file.zi \

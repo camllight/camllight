@@ -119,48 +119,42 @@ parser_aux.zi: primitives.zi
 pattern_matching.zi: parser_aux.zi value.zi 
 pr_value.zi: value.zi 
 program_loading.zi: primitives.zi 
-source.zi: primitives.zi 
-time_travel.zi: primitives.zi communication.zi 
-trap_barrier.zi: checkpoints.zi 
-variables.zi: primitives.zi value.zi 
+time_travel.zi: primitives.zi 
+variables.zi: value.zi 
 breakpoints.zo: breakpoints.zi source.zi primitives.zi checkpoints.zi \
     constants.zo communication.zi interruption.zi 
 checkpoints.zo: checkpoints.zi primitives.zi communication.zi 
 command_line_interpreter.zo: command_line_interpreter.zi breakpoints.zi \
     show_source.zi time_travel.zi show_information.zi parameters.zi \
-    primitives.zi value.zi program_loading.zi program_management.zi \
-    checkpoints.zi events.zi debugger_config.zi lexer.zo variables.zi \
-    history.zi pattern_matching.zi frames.zi unix_tools.zi source.zi \
-    pr_value.zi parser_aux.zi parser.zi input_handling.zi communication.zi \
-    modules2.zi 
-communication.zo: communication.zi primitives.zi value.zi input_handling.zi \
-    unix_tools.zi 
+    primitives.zi program_loading.zi program_management.zi checkpoints.zi \
+    events.zi debugger_config.zi lexer.zo variables.zi history.zi \
+    pattern_matching.zi frames.zi unix_tools.zi source.zi pr_value.zi \
+    parser_aux.zi parser.zi input_handling.zi communication.zi 
+communication.zo: communication.zi primitives.zi value.zi input_handling.zi 
 debugger_config.zo: debugger_config.zi 
-events.zo: events.zi primitives.zi checkpoints.zi communication.zi 
+events.zo: events.zi checkpoints.zi primitives.zi 
 frames.zo: frames.zi events.zi checkpoints.zi primitives.zi \
     communication.zi 
 history.zo: history.zi checkpoints.zi debugger_config.zi primitives.zi 
 input_handling.zo: input_handling.zi primitives.zi lexer.zo 
 interruption.zo: interruption.zi 
 lexer.zo: primitives.zi parser.zi 
-main.zo: show_information.zi parameters.zi time_travel.zi primitives.zi \
-    program_loading.zi program_management.zi checkpoints.zi \
-    command_line_interpreter.zi debugger_config.zi lexer.zo frames.zi \
-    interruption.zi input_handling.zi version.zo communication.zi \
-    modules2.zi 
+main.zo: show_information.zi parameters.zi time_travel.zi input_handling.zi \
+    version.zo program_management.zi command_line_interpreter.zi \
+    checkpoints.zi debugger_config.zi frames.zi interruption.zi 
 modules2.zo: modules2.zi 
-parameters.zo: parameters.zi primitives.zi 
+parameters.zo: parameters.zi 
 parser.zo: parser.zi parser_aux.zi primitives.zi input_handling.zi 
 pattern_matching.zo: pattern_matching.zi parser_aux.zi primitives.zi \
     value.zi 
 pr_value.zo: pr_value.zi value.zi 
 primitives.zo: primitives.zi 
 program_loading.zo: program_loading.zi parameters.zi primitives.zi \
-    debugger_config.zi input_handling.zi unix_tools.zi 
+    debugger_config.zi unix_tools.zi input_handling.zi 
 program_management.zo: program_management.zi time_travel.zi parameters.zi \
-    primitives.zi program_loading.zi checkpoints.zi events.zi \
-    debugger_config.zi history.zi unix_tools.zi input_handling.zi \
-    constants.zo communication.zi modules2.zi 
+    primitives.zi program_loading.zi events.zi debugger_config.zi \
+    history.zi unix_tools.zi input_handling.zi constants.zo \
+    communication.zi modules2.zi 
 show_information.zo: show_information.zi breakpoints.zi show_source.zi \
     events.zi checkpoints.zi pr_value.zi primitives.zi frames.zi \
     communication.zi 

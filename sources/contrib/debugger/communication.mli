@@ -2,7 +2,6 @@
 
 #open "obj";;
 #open "value";;
-#open "unix";;
 #open "primitives";;
 
 (*** Writing/reading data (values and objects). ***)

@@ -27,8 +27,12 @@ let find_exception tag =
   let rec select_exn = function
     [] ->
       raise Not_found
-  | ({info = {cs_tag = ConstrExtensible(_,st)}} as desc) :: rest ->
-      if st == stamp then desc else select_exn rest in
+  | constr :: rest ->
+      match constr.info.cs_tag with
+        ConstrExtensible(_,st) ->
+          if st == stamp then constr else select_exn rest
+      | ConstrRegular(_,_) ->
+          fatal_error "find_exception: regular" in
   select_exn(hashtbl__find_all (find_module qualid.qual).mod_constrs qualid.id)
 ;;
 

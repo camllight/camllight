@@ -6,7 +6,6 @@
 #open "exc";;
 #open "float";;
 #open "int";;
-#open "fstring";;
 #open "ref";;
 #open "int_misc";;
 #open "nat";;
