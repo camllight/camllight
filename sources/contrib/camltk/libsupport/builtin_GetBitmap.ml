@@ -1,7 +1,7 @@
 (* Tk_GetBitmap emulation *)
 type Bitmap =
-   BitmapFile of string
- | Predefined of string
+   BitmapFile of string                 (* path of file *)
+ | Predefined of string                 (* bitmap  name *)
 ;;
 
 let CAMLtoTKBitmap = function

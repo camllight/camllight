@@ -1,3 +1,8 @@
+(* Various indexes
+    canvas
+    entry
+    listbox
+*)
 type Index =
 	  Number of int		(* tk keyword:  *)
 	| End		        (* tk keyword: end *)
@@ -5,32 +10,45 @@ type Index =
 	| SelFirst		(* tk keyword: sel.first *)
 	| SelLast		(* tk keyword: sel.last *)
         | At of int		(* tk keyword: @n *)
+        | AtXY of int * int     (* tk keyword: @x,y *)
 ;;
 
-type Index_constrs =
+(* sp to avoid being picked up by doc scripts *)
+ type Index_constrs =
 	  CNumber
 	| CEnd
 	| CInsert
 	| CSelFirst
 	| CSelLast
         | CAt
+        | CAtXY
 ;;
 
-let Index_any_table = [CNumber; CEnd; CInsert; CSelFirst; CSelLast; CAt]
+let Index_any_table = 
+  [CNumber; CEnd; CInsert; CSelFirst; CSelLast; CAt; CAtXY]
 ;;
-let Index_listbox_table = [CNumber; CEnd; CInsert]
+let Index_listbox_table = 
+  [CNumber; CEnd; CInsert]
 ;;
-let Index_entry_table = [CNumber; CEnd; CInsert; CSelFirst; CSelLast; CAt]
+let Index_entry_table = 
+  [CNumber; CEnd; CInsert; CSelFirst; CSelLast; CAt]
 ;;
+let Index_canvas_table =
+  [CNumber; CEnd; CInsert; CSelFirst; CSelLast; CAtXY]
+;;
+ 
 let CAMLtoTKIndex table = function
-	  Number x -> chk_sub "Number" table CNumber; string_of_int x
-	| End -> chk_sub "End" table CEnd; "end"
-	| Insert -> chk_sub "Insert" table CInsert; "insert"
-	| SelFirst -> chk_sub "SelFirst" table CSelFirst; "sel.first"
-	| SelLast -> chk_sub "SelLast" table CSelLast; "sel.last"
-	| At n -> chk_sub "At" table CAt; "@"^(string_of_int n)
+   Number x -> chk_sub "Number" table CNumber; string_of_int x
+ | End -> chk_sub "End" table CEnd; "end"
+ | Insert -> chk_sub "Insert" table CInsert; "insert"
+ | SelFirst -> chk_sub "SelFirst" table CSelFirst; "sel.first"
+ | SelLast -> chk_sub "SelLast" table CSelLast; "sel.last"
+ | At n -> chk_sub "At" table CAt; "@"^(string_of_int n)
+ | AtXY (x,y) -> chk_sub "AtXY" table CAtXY; 
+                 "@"^(string_of_int x)^","^(string_of_int y)
 ;;
 
+(* In fact, returned values are probably only numerical indexes *)
 let TKtoCAMLIndex = function
      "" -> raise (Invalid_argument "TKtoCAMLIndex")
    | "sel.last" -> SelLast
