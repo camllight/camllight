@@ -62,7 +62,7 @@ SHELL=/bin/sh
 ### End of configuration section
 
 SUBDIRS=libunix libgraph debugger libnum libstr mletags search_isos \
-  caml-tex camlmode
+  caml-tex camlmode lorder profiler
 
 DEFS=CC='$(CC)' OPTS='$(OPTS)' CPP='$(CPP)' BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) MANEXT=$(MANEXT) MANDIR=$(MANDIR) X11_INCLUDES=$(X11_INCLUDES) BIGNUM_ARCH=$(BIGNUM_ARCH) TEXINPUTDIR=$(TEXINPUTDIR) EMACSLISPDIR=$(EMACSLISPDIR)
 
