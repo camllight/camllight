@@ -314,7 +314,8 @@ let bind widget eventsequence action =
       let CbId = register_callback (WrapEventInfo f what) in
         Send2Tk buf (" {+camlcb " ^ CbId ^ (WriteEventField what) ^"}")
   end;
-  Send2TkEval buf
+  Send2TkEval buf;
+  ()
 ;;
 
 (* class_bind : string -> (Modifier list * XEvent) list -> BindAction -> unit 
@@ -332,5 +333,6 @@ let class_bind class eventsequence action =
       let CbId = register_callback (WrapEventInfo f what) in
         Send2Tk buf (" {+camlcb " ^ CbId ^ (WriteEventField what) ^"}")
   end;
-  Send2TkEval buf
+  Send2TkEval buf;
+  ()
 ;;
