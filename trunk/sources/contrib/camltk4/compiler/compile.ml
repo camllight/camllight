@@ -34,9 +34,9 @@ let rec ppMLtype =
   | UserDefined s -> s
   | Subtype (s,_) -> s
   | Function (Product tyl) -> 
-      	(catenate_sep " -> " (map ppMLtype tyl))^ " -> unit"
+      	"(" ^ (catenate_sep " -> " (map ppMLtype tyl))^ " -> unit)"
   | Function ty ->
-      	(ppMLtype ty) ^ " -> unit"
+      	"(" ^ (ppMLtype ty) ^ " -> unit)"
 ;;
 
 (* Extract all types from a template *)
@@ -63,7 +63,7 @@ let doc_of_template = function
  *)
 
 (* Write an ML constructor *)
-let write_constructor w {MLName = mlconstr; Template = t} =
+let write_constructor w {ml_name = mlconstr; template = t} =
    w mlconstr;
    begin match types_of_template t with
        [] -> ()
@@ -85,26 +85,34 @@ let write_constructors w = function
 (* List of constructors, for runtime subtyping *)
 let write_constructor_set w sep = function
     [] -> fatal_error "empty type"
-  | x::l -> w ("C" ^ x.MLName);
+  | x::l -> w ("C" ^ x.ml_name);
       	    do_list (function x ->
 		       w sep;
-		       w ("C" ^ x.MLName))
+		       w ("C" ^ x.ml_name))
                      l
 ;;
 
 (* Definition of a type *)	    
 let write_type w name typdef =
   (* The type itself *)
+  (* Put markers for extraction *)
+  w "(* type *)\n";
   w ("type "^name^" =\n\t");
   write_constructors w (sort_components typdef.constructors);
-  w "\n;;\n\n";
+  w "\n;;(* /type *)\n\n";
   (* Dynamic Subtyping *)
   if typdef.subtypes <> [] then begin
     (* The set of its constructors *)
     (* sp before "type" to avoid being picked up in documentation *)
-    w (" type "^name^"_constrs =\n\t");
+    if name = "options" then begin
+      w "(* type *)\n";
+      w ("type "^name^"_constrs =\n\t")
+      end
+    else
+      w (" type "^name^"_constrs =\n\t");
     write_constructor_set w "\n\t| " (sort_components typdef.constructors);
-    w "\n;;\n\n";
+    if name = "options" then w "\n;;(* /type *)\n\n"
+    else w "\n;;\n\n";
     (* The set of all constructors *)
     w ("let "^name^"_any_table = [");
     write_constructor_set w "; " (sort_components typdef.constructors);
@@ -128,11 +136,11 @@ let rec converterTKtoCAML argname = function
  | Bool -> "(match " ^ argname ^" with
        	     \"1\" -> true
            | \"0\" -> false
-           | s -> raise (Invalid_argument (\"TKtoCAMLbool\" ^ s)))"
+           | s -> raise (Invalid_argument (\"cTKtoCAMLbool\" ^ s)))"
  | Char -> "nth_char "^argname ^" 0"
  | String -> argname
- | UserDefined s -> "TKtoCAML"^s^" "^argname
- | Subtype (s,s') -> "TKtoCAML"^s^" "^argname
+ | UserDefined s -> "cTKtoCAML"^s^" "^argname
+ | Subtype (s,s') -> "cTKtoCAML"^s^" "^argname
  | List ty ->
     begin match type_parser_arity ty with
       OneToken -> 
@@ -175,10 +183,10 @@ let wrapper_code fname = function
       	  map2 (fun v ty ->
 	         match type_parser_arity ty with
 		  OneToken ->
-       	       	   "let "^v^",args = "^
+       	       	   "let ("^v^",args) = "^
                      (converterTKtoCAML "(hd args)"  ty) ^", tl args in\n\t\t"
 		 | MultipleToken ->
-       	       	   "let "^v^",args = "^
+       	       	   "let ("^v^",args) = "^
                      (converterTKtoCAML "args"  ty) ^ "in\n\t\t"
 		 ) 
                vnames tyl in
@@ -193,7 +201,7 @@ let wrapper_code fname = function
 	    OneToken -> 
       	      fname ^"("^ converterTKtoCAML "(hd args)" ty ^")"
 	  | MultipleToken ->
-	      "let v,_ = "^ converterTKtoCAML "args" ty ^" in\n\t\t" ^ fname ^" v"
+	      "let (v,_) = "^ converterTKtoCAML "args" ty ^" in\n\t\t" ^ fname ^" v"
           end
        end ^ ")"
 ;;
@@ -209,32 +217,32 @@ let wrapper_code fname = function
 (* Can we generate a "parser" ?
    -> all constructors are unit and at most one int and one string, with null constr
 *)
-type ParserPieces =
+type parser_pieces =
     { mutable zeroary : (string * string) list ; (* kw string, ml name *)
       mutable intpar : string list; (* one at most, mlname *)
       mutable stringpar : string list (* idem *)
     }
 ;;
 
-type MiniParser = 
+type mini_parser = 
    NoParser 
- | ParserPieces of ParserPieces
+ | ParserPieces of parser_pieces
 ;;
 
 let can_generate_parser constructors =
   let pp = {zeroary = []; intpar = []; stringpar = []} in
   if (for_all (function c ->
-      	    match c.Template with
-	      ListArg [StringArg s] -> pp.zeroary <- (s,c.MLName):: pp.zeroary; true
+      	    match c.template with
+	      ListArg [StringArg s] -> pp.zeroary <- (s,c.ml_name):: pp.zeroary; true
             | ListArg [TypeArg(Int)] | ListArg[TypeArg(Float)] -> 
       	       	if pp.intpar <> [] then false
 	        else begin
-		   pp.intpar <- [c.MLName]; true
+		   pp.intpar <- [c.ml_name]; true
 		end
             | ListArg [TypeArg(String)] ->
       	       	if pp.stringpar <> [] then false
 	        else begin
-		   pp.stringpar <- [c.MLName]; true
+		   pp.stringpar <- [c.ml_name]; true
 		end
             | _ -> false)
            constructors)
@@ -247,14 +255,14 @@ let can_generate_parser constructors =
 (* we should avoid multiple walks *)
 let write_TKtoCAML w name typdef =
   if typdef.parser_arity = MultipleToken then
-    prerr_string ("You must write TKtoCAML" ^ name ^
+    prerr_string ("You must write cTKtoCAML" ^ name ^
                             " : string list ->"^name^" * string list\n")
   else match can_generate_parser typdef.constructors with
     NoParser ->
       prerr_string
-      	("You must write TKtoCAML" ^ name ^" : string ->"^name^"\n")
+      	("You must write cTKtoCAML" ^ name ^" : string ->"^name^"\n")
   | ParserPieces pp -> begin
-      w ("let TKtoCAML"^name^" n =\n");
+      w ("let cTKtoCAML"^name^" n =\n");
       (* First check integer *)
        if pp.intpar <> [] then begin
       	 w ("   try " ^ (hd pp.intpar) ^ " (int_of_string n)\n");
@@ -269,7 +277,7 @@ let write_TKtoCAML w name typdef =
   	       pp.zeroary ;
       let final = if pp.stringpar <> [] then
             "n -> " ^ hd pp.stringpar ^ " n"
-         else " s -> raise (Invalid_argument (\"TKtoCAML" ^ name ^ ": \" ^s))"
+         else " s -> raise (Invalid_argument (\"cTKtoCAML" ^ name ^ ": \" ^s))"
       in
       if not !first then w "\t| " else w "\t";
       w final;
@@ -290,7 +298,7 @@ let rec converterCAMLtoTK context_widget argname = function
  |  Char -> "TkToken (char_for_read " ^ argname ^ ")"
  |  String -> "TkToken " ^ argname
  |  UserDefined s -> 
-       let name = "CAMLtoTK"^s^" " in
+       let name = "cCAMLtoTK"^s^" " in
        let args = argname in
        let args =
        	   if is_subtyped s then  (* unconstraint subtype *)
@@ -302,7 +310,7 @@ let rec converterCAMLtoTK context_widget argname = function
            else args in
        name^args
  |  Subtype (s,s') ->
-       let name = "CAMLtoTK"^s^" " in
+       let name = "cCAMLtoTK"^s^" " in
        let args = s^"_"^s'^"_table "^argname in
        let args = 
        	   if requires_widget_context s then
@@ -361,12 +369,12 @@ let write_clause w context_widget subtyp comp =
   let warrow () = 
       w " -> ";
       if subtyp then 
-         w ("chk_sub \""^comp.MLName^"\" table C" ^ comp.MLName ^ "; ");
+         w ("chk_sub \""^comp.ml_name^"\" table C" ^ comp.ml_name ^ "; ")
   in
 
-  w comp.MLName;
+  w comp.ml_name;
 
-  let code, variables = code_of_template false context_widget comp.Template in
+  let code, variables = code_of_template false context_widget comp.template in
   begin match variables with
      [] -> warrow()
    | [x] -> w " "; w x; warrow()
@@ -378,7 +386,7 @@ let write_clause w context_widget subtyp comp =
 
 (* The full converter *)	 
 let write_CAMLtoTK w name typdef =
-  w ("let CAMLtoTK"^name);
+  w ("let cCAMLtoTK"^name);
   let context_widget = 
       if typdef.requires_widget_context then begin
       	w " w"; "w"
@@ -429,22 +437,22 @@ let write_result_parsing w = function
 ;;
 
 let write_function w def =
-  w ("let "^def.MLName^" ");
+  w ("let "^def.ml_name^" ");
   (* a bit approximative *)
-  let context_widget = match def.Template with
-    ListArg (TypeArg(UserDefined("Widget"))::_) -> "v1"
-  | ListArg (TypeArg(Subtype("Widget",_))::_) -> "v1"
+  let context_widget = match def.template with
+    ListArg (TypeArg(UserDefined("widget"))::_) -> "v1"
+  | ListArg (TypeArg(Subtype("widget",_))::_) -> "v1"
   | _ -> "dummy_widget" in
 
-  let code,variables = code_of_template true context_widget def.Template in
+  let code,variables = code_of_template true context_widget def.template in
   (* Arguments *)
   begin match variables with
     [] -> w "() =\n"
   | l -> w (catenate_sep " " l); w " =\n"
   end;
-  begin match def.Result with
-    Unit ->  w "TkEval ";  w code; w ";()\n"
-  | ty -> w "let res = TkEval "; w code ; w " in \n";
+  begin match def.result with
+    Unit ->  w "tkEval ";  w code; w ";()\n"
+  | ty -> w "let res = tkEval "; w code ; w " in \n";
       	  write_result_parsing w ty
   end;
   w ";;\n\n"
@@ -453,11 +461,11 @@ let write_function w def =
 let write_create w class =
   w  "let create parent options =\n";
   w ("   let w = new_widget_atom \"" ^ class ^ "\" parent in\n");
-  w  "     TkEval [|";
+  w  "     tkEval [|";
   w ("TkToken \"" ^ class ^ "\";\n");
   w ("              TkToken (widget_name w);\n");
   w ("              TkTokenList (map (function x -> "^
-                                        converterCAMLtoTK "w" "x" (Subtype("option",class)) ^ ") options);\n");
+                                        converterCAMLtoTK "w" "x" (Subtype("options",class)) ^ ") options);\n");
   w ("             |];\n");
   w ("      w\n;;\n")
 ;;
@@ -465,11 +473,29 @@ let write_create w class =
 let write_named_create w class =
   w  "let create_named parent name options =\n";
   w ("   let w = new_named_widget \"" ^ class ^ "\" parent name in\n");
-  w  "     TkEval [|";
+  w  "     tkEval [|";
   w ("TkToken \"" ^ class ^ "\";\n");
   w ("              TkToken (widget_name w);\n");
   w ("              TkTokenList (map (function x -> "^
-                                        converterCAMLtoTK "w" "x" (Subtype("option",class)) ^ ") options);\n");
+                                        converterCAMLtoTK "w" "x" (Subtype("options",class)) ^ ") options);\n");
   w ("             |];\n");
   w ("      w\n;;\n")
+;;
+
+
+(* builtin-code: the file (without suffix) is in .template... *)
+(* not efficient, but hell *)
+let write_external w def =
+  match def.template with
+    StringArg fname ->
+      let ic = open_in_bin (fname ^ ".ml") in
+      	begin try
+	 while true do
+	   w (input_line ic);
+	   w "\n"
+	 done
+        with
+	 End_of_file -> close_in ic
+        end
+  | _ -> raise (Compiler_Error "invalid external definition")
 ;;

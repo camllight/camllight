@@ -1,53 +1,57 @@
 (* Internal compiler errors *)
 
-exception Compiler_Error of string ;;
-let fatal_error s = raise (Compiler_Error s);;
+exception Compiler_Error of string
+;;
+let fatal_error s = raise (Compiler_Error s)
+;;
 
 
 (* Types of the description language *)
-type MLtype =
+type mltype =
    Unit
  | Int
  | Float
  | Bool
  | Char
  | String
- | List of MLtype
- | Product of MLtype list
+ | List of mltype
+ | Product of mltype list
  | UserDefined of string
  | Subtype of string * string
- | Function of MLtype			(* arg type only *)
+ | Function of mltype			(* arg type only *)
 ;;
 
-type Template =
+type template =
    StringArg of string
- | TypeArg of MLtype
- | ListArg of Template list
+ | TypeArg of mltype
+ | ListArg of template list
 ;;
 
 
 (* Sorts of components *)
-type ComponentType =
+type component_type =
    Constructor
  | Command
+ | External
 ;;
 
 (* Full definition of a component *)
-type FullComponent = {
-  Component : ComponentType;
-  MLName : string;
-  Template : Template;
-  Result   : MLtype
+type fullcomponent = {
+  component : component_type;
+  ml_name : string;
+  template : template;
+  result   : mltype;
+  safe : bool
   }
 ;;
 
 let sort_components =
-  sort__sort (fun c1 c2 -> le_string c1.MLName c2.MLName)
+  sort__sort (fun c1 c2 -> le_string c1.ml_name c2.ml_name)
 ;;
 
-(* Components are given either in full or abbreviated *)
-type Component = 
-   Full of FullComponent
+(* components are given either in full or abbreviated *)
+type component = 
+   Full of fullcomponent
  | Abbrev of string
 ;;
 
@@ -57,37 +61,38 @@ type Component =
    an additional argument of type Widget.
 *)
 
-type ParserArity =
+type parser_arity =
   OneToken
 | MultipleToken
 ;;
 
-type TypeDef = {
-  parser_arity : ParserArity;
-  mutable constructors : FullComponent list;
-  mutable subtypes : (string * FullComponent list) list;
+type type_def = {
+  parser_arity : parser_arity;
+  mutable constructors : fullcomponent list;
+  mutable subtypes : (string * fullcomponent list) list;
   mutable requires_widget_context : bool
 }
 ;;
 
-type ModuleType =
+type module_type =
     Widget
   | Family
 ;;
 
-type ModuleDef = {
-  ModuleType : ModuleType;
-  Commands : FullComponent list
+type module_def = {
+  module_type : module_type;
+  commands : fullcomponent list;
+  externals : fullcomponent list
 }
 ;;
 
 (******************** The tables ********************)
 
 (* the table of all explicitly defined types *)
-let types_table = (hashtbl__new 37 : (string, TypeDef) hashtbl__t)
+let types_table = (hashtbl__new 37 : (string, type_def) hashtbl__t)
 ;;
 (* "builtin" types *)
-let types_external = ref ([] : (string * ParserArity) list)
+let types_external = ref ([] : (string * parser_arity) list)
 ;;
 (* dependancy order *)
 let types_order = (tsort__new () : string tsort__porder)
@@ -96,10 +101,10 @@ let types_order = (tsort__new () : string tsort__porder)
 let types_returned = ref  ([] : string list)
 ;;
 (* Function table *)
-let function_table = ref ([] : FullComponent list)
+let function_table = ref ([] : fullcomponent list)
 ;;
 (* Widget/Module table *)
-let module_table = (hashtbl__new 37 : (string, ModuleDef) hashtbl__t)
+let module_table = (hashtbl__new 37 : (string, module_def) hashtbl__t)
 ;;
 
 
@@ -119,7 +124,7 @@ let new_type typname arity =
 (* Assume that types not yet defined are not subtyped *)
 (* Widget is builtin and implicitly subtyped *)
 let is_subtyped s =
-  s = "Widget" or
+  s = "widget" or
   try  
     let typdef = hashtbl__find types_table s in
       typdef.subtypes <> []
@@ -144,7 +149,7 @@ let declared_type_parser_arity s =
       	Not_found ->
 	   prerr_string "Type "; prerr_string s;
 	   prerr_string " is undeclared external or undefined\n";
-	   prerr_string ("Assuming TKtoCAML"^s^" : string -> "^s^"\n");
+	   prerr_string ("Assuming cTKtoCAML"^s^" : string -> "^s^"\n");
 	   OneToken
 ;;
 
@@ -231,7 +236,7 @@ let rec add_return_type = function
 ;;
 
 (*** Update tables for a component ***)
-let enter_component_types {Template = t; Result = r} =
+let enter_component_types {template = t; result = r} =
   add_return_type r;
   enter_argtype r;
   enter_template_types t
@@ -247,18 +252,18 @@ let rec check_duplicate_constr allowed c =
   function
     [] -> false		(* not defined *)
   | c'::rest -> 
-    if c.MLName = c'.MLName then  (* defined *)
+    if c.ml_name = c'.ml_name then  (* defined *)
       if allowed then 
-      	if c.Template = c'.Template then true (* same arg *)
-	else raise (Duplicate_Definition ("constructor",c.MLName))
-      else raise (Duplicate_Definition ("constructor", c.MLName))
+      	if c.template = c'.template then true (* same arg *)
+	else raise (Duplicate_Definition ("constructor",c.ml_name))
+      else raise (Duplicate_Definition ("constructor", c.ml_name))
     else check_duplicate_constr allowed c rest
 ;;
 
 (* Retrieve constructor *)
 let rec find_constructor cname = function
    [] -> raise (Invalid_implicit_constructor cname)
- | c::l -> if c.MLName = cname then c
+ | c::l -> if c.ml_name = cname then c
        	   else find_constructor cname l
 ;;
 
@@ -273,12 +278,12 @@ let enter_type typname arity constructors =
 		if not (check_duplicate_constr false c typdef.constructors)
 		then begin 
 		   typdef.constructors <- c :: typdef.constructors;
-		   add_template_dependancies typname c.Template
+		   add_template_dependancies typname c.template
 		end;
 		(* Callbacks require widget context *)
 		typdef.requires_widget_context <- 
       	       	  typdef.requires_widget_context or
-                  has_callback c.Template)
+                  has_callback c.template)
             constructors
 ;;
 
@@ -297,12 +302,12 @@ let enter_subtype typ arity subtyp constructors =
       	       	  Full c -> 
 		    if not (check_duplicate_constr true c typdef.constructors)
 		    then begin
-		       add_template_dependancies typ c.Template;
+		       add_template_dependancies typ c.template;
 		       typdef.constructors <- c :: typdef.constructors
 		    end;
 		    typdef.requires_widget_context <-
       	       	       typdef.requires_widget_context or
-      	       	       has_callback c.Template;
+      	       	       has_callback c.template;
                     c
                | Abbrev name -> find_constructor name typdef.constructors
                 )
@@ -317,7 +322,7 @@ let enter_subtype typ arity subtyp constructors =
    all components are assumed to be in Full form *)
 let retrieve_option optname =
   let optiontyp =
-    try hashtbl__find types_table "option"
+    try hashtbl__find types_table "options"
     with 
       Not_found -> raise (Invalid_implicit_constructor optname)
   in find_constructor optname optiontyp.constructors
@@ -325,9 +330,9 @@ let retrieve_option optname =
   
 (* Sort components by type *)
 let rec add_sort = fun
-   [] obj -> [obj.Component ,[obj]]
+   [] obj -> [obj.component ,[obj]]
 |  ((s',l)::rest) obj ->
-     if obj.Component = s' then
+     if obj.component = s' then
        (s',obj::l)::rest
      else 
        (s',l)::(add_sort rest obj)
@@ -345,17 +350,22 @@ let enter_widget name components =
   do_list 
        (function 
       	 Constructor, l ->
-	   enter_subtype "option" MultipleToken 
+	   enter_subtype "options" MultipleToken 
       	       	name (map (function c -> Full c) l)
        | Command, l -> 
 	   do_list enter_component_types l
+       | External, _ -> ()
        )
       sorted_components;
   let commands = 
       try assoc Command sorted_components
       with Not_found -> [] 
+  and externals = 
+      try assoc External sorted_components
+      with Not_found -> []
   in
-  hashtbl__add module_table name {ModuleType = Widget; Commands = commands}
+  hashtbl__add module_table name 
+    {module_type = Widget; commands = commands; externals = externals}
 ;;
   
 (******************** Functions ********************)
@@ -371,7 +381,22 @@ let enter_module name components =
     hashtbl__find module_table name;
     raise (Duplicate_Definition ("widget/module", name))
   with Not_found ->
-    do_list enter_component_types components;
-    hashtbl__add module_table name {ModuleType = Family; Commands = components}
+  let sorted_components = separate_components components in
+  do_list
+       (function 
+      	 Constructor, l -> fatal_error "unexpected Constructor"
+       | Command, l -> do_list enter_component_types l
+       | External, _ -> ()
+       )
+      sorted_components;
+  let commands = 
+      try assoc Command sorted_components
+      with Not_found -> [] 
+  and externals = 
+      try assoc External sorted_components
+      with Not_found -> []
+  in
+    hashtbl__add module_table name 
+      {module_type = Family; commands = commands; externals = externals}
 ;;
 

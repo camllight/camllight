@@ -1,7 +1,8 @@
 (* Events and bindings *)
 
 (* Builtin types *)
-type XEvent =
+(* type *)
+type xEvent =
     ButtonPress (* also Button, but we omit it *)
   | ButtonPressDetail of int
   | ButtonRelease
@@ -27,8 +28,9 @@ type XEvent =
   | Unmap
   | Visibility 
 ;;
+(* /type *)
 
-let CAMLtoTKXEvent = function
+let cCAMLtoTKxEvent = function
     ButtonPress -> "ButtonPress"
   | ButtonPressDetail n -> "ButtonPress-"^string_of_int n
   | ButtonRelease -> "ButtonRelease"
@@ -55,7 +57,8 @@ let CAMLtoTKXEvent = function
   | Visibility -> "Visibility" 
 ;;
 
-type Modifier =
+(* type *)
+type modifier =
     Control
   | Shift
   | Lock
@@ -74,8 +77,9 @@ type Modifier =
   | Meta
   | Alt 
 ;;
+(* /type *)
 
-let CAMLtoTKModifier = function
+let cCAMLtoTKmodifier = function
    Control -> "Control-"
  | Shift -> "Shift-"
  | Lock -> "Lock-"
@@ -96,53 +100,57 @@ let CAMLtoTKModifier = function
 ;;
 
 
-(* type Event = Modifier list * XEvent *)
-let CAMLtoTKEvent (ml, xe) =
-  "<" ^ (catenate_sep " " (map CAMLtoTKModifier ml))  
-      ^ (CAMLtoTKXEvent xe) ^ ">"
+(* type event = modifier list * xEvent *)
+let cCAMLtoTKevent (ml, xe) =
+  "<" ^ (catenate_sep " " (map cCAMLtoTKmodifier ml))  
+      ^ (cCAMLtoTKxEvent xe) ^ ">"
 ;;
   
-(* type EventSequence == (Modifier list * XEvent) list *)
-let CAMLtoTKEventSequence l =
-  TkToken(it_list (prefix ^) "" (map CAMLtoTKEvent l))
+(* type eventSequence == (modifier list * xEvent) list *)
+let cCAMLtoTKeventSequence l =
+  TkToken(it_list (prefix ^) "" (map cCAMLtoTKevent l))
 ;;
 
 (* Event structure, passed to bounded functions *)
 
-type EventInfo = {
-  mutable Ev_Above : int;               (* tk: %a *)
-  mutable Ev_ButtonNumber : int;        (* tk: %b *)
-  mutable Ev_Count : int;               (* tk: %c *)
-  mutable Ev_Detail : string;           (* tk: %d *)
-  mutable Ev_Focus : bool;              (* tk: %f *)
-  mutable Ev_Height : int;              (* tk: %h *)
-  mutable Ev_KeyCode : int;             (* tk: %k *)
-  mutable Ev_Mode : string;             (* tk: %m *)
-  mutable Ev_OverrideRedirect : bool;   (* tk: %o *)
-  mutable Ev_Place : string;            (* tk: %p *)
-  mutable Ev_State : string;            (* tk: %s *)
-  mutable Ev_Time : int;                (* tk: %t *)
-  mutable Ev_Width : int;               (* tk: %w *)
-  mutable Ev_MouseX : int;              (* tk: %x *)
-  mutable Ev_MouseY : int;              (* tk: %y *)
-  mutable Ev_Char : string;             (* tk: %A *)
-  mutable Ev_BorderWidth : int;         (* tk: %B *)
-  mutable Ev_SendEvent : bool;          (* tk: %E *)
-  mutable Ev_KeySymString : string;     (* tk: %K *)
-  mutable Ev_KeySymInt : int;           (* tk: %N *)
-  mutable Ev_RootWindow : int;          (* tk: %R *)
-  mutable Ev_SubWindow : int;           (* tk: %S *)
-  mutable Ev_Type : int;                (* tk: %T *)
-  mutable Ev_Widget : Widget;           (* tk: %W *)
-  mutable Ev_RootX : int;               (* tk: %X *)
-  mutable Ev_RootY : int                (* tk: %Y *)
+(* type *)
+type eventInfo =
+  {
+  mutable ev_Above : int;               (* tk: %a *)
+  mutable ev_ButtonNumber : int;        (* tk: %b *)
+  mutable ev_Count : int;               (* tk: %c *)
+  mutable ev_Detail : string;           (* tk: %d *)
+  mutable ev_Focus : bool;              (* tk: %f *)
+  mutable ev_Height : int;              (* tk: %h *)
+  mutable ev_KeyCode : int;             (* tk: %k *)
+  mutable ev_Mode : string;             (* tk: %m *)
+  mutable ev_OverrideRedirect : bool;   (* tk: %o *)
+  mutable ev_Place : string;            (* tk: %p *)
+  mutable ev_State : string;            (* tk: %s *)
+  mutable ev_Time : int;                (* tk: %t *)
+  mutable ev_Width : int;               (* tk: %w *)
+  mutable ev_MouseX : int;              (* tk: %x *)
+  mutable ev_MouseY : int;              (* tk: %y *)
+  mutable ev_Char : string;             (* tk: %A *)
+  mutable ev_BorderWidth : int;         (* tk: %B *)
+  mutable ev_SendEvent : bool;          (* tk: %E *)
+  mutable ev_KeySymString : string;     (* tk: %K *)
+  mutable ev_KeySymInt : int;           (* tk: %N *)
+  mutable ev_RootWindow : int;          (* tk: %R *)
+  mutable ev_SubWindow : int;           (* tk: %S *)
+  mutable ev_Type : int;                (* tk: %T *)
+  mutable ev_Widget : widget;           (* tk: %W *)
+  mutable ev_RootX : int;               (* tk: %X *)
+  mutable ev_RootY : int                (* tk: %Y *)
   }
 ;;
+(* /type *)
 
 
 (* To avoid collision with other constructors (Width, State), 
    use Ev_ prefix *)
-type EventField =
+(* type *)
+type eventField =
     Ev_Above
   | Ev_ButtonNumber
   | Ev_Count
@@ -170,82 +178,83 @@ type EventField =
   | Ev_RootX
   | Ev_RootY
 ;;
+(* /type *)
 
-let FillEventInfo ev v = function 
-    Ev_Above    -> 	ev.Ev_Above <- int_of_string v
-  | Ev_ButtonNumber -> 	ev.Ev_ButtonNumber <- int_of_string v
-  | Ev_Count -> 	ev.Ev_Count <- int_of_string v
-  | Ev_Detail -> 	ev.Ev_Detail <- v
-  | Ev_Focus -> 	ev.Ev_Focus <- v = "1"
-  | Ev_Height -> 	ev.Ev_Height <- int_of_string v
-  | Ev_KeyCode -> 	ev.Ev_KeyCode <- int_of_string v
-  | Ev_Mode -> 		ev.Ev_Mode <- v
-  | Ev_OverrideRedirect -> ev.Ev_OverrideRedirect <- v = "1"
-  | Ev_Place -> 	ev.Ev_Place <- v
-  | Ev_State -> 	ev.Ev_State <- v
-  | Ev_Time -> 		ev.Ev_Time <- int_of_string v
-  | Ev_Width -> 	ev.Ev_Width <- int_of_string v
-  | Ev_MouseX -> 	ev.Ev_MouseX <- int_of_string v
-  | Ev_MouseY -> 	ev.Ev_MouseY <- int_of_string v
-  | Ev_Char -> 		ev.Ev_Char <- v
-  | Ev_BorderWidth -> 	ev.Ev_BorderWidth <- int_of_string v
-  | Ev_SendEvent -> 	ev.Ev_SendEvent <- v = "1"
-  | Ev_KeySymString -> 	ev.Ev_KeySymString <- v
-  | Ev_KeySymInt -> 	ev.Ev_KeySymInt <- int_of_string v
-  | Ev_RootWindow -> 	ev.Ev_RootWindow <- int_of_string v
-  | Ev_SubWindow -> 	ev.Ev_SubWindow <- int_of_string v
-  | Ev_Type -> 		ev.Ev_Type <- int_of_string v
-  | Ev_Widget -> 	ev.Ev_Widget <- TKtoCAMLWidget v
-  | Ev_RootX -> 	ev.Ev_RootX <- int_of_string v
-  | Ev_RootY -> 	ev.Ev_RootY <- int_of_string v
+let filleventInfo ev v = function 
+    Ev_Above    -> 	ev.ev_Above <- int_of_string v
+  | Ev_ButtonNumber -> 	ev.ev_ButtonNumber <- int_of_string v
+  | Ev_Count -> 	ev.ev_Count <- int_of_string v
+  | Ev_Detail -> 	ev.ev_Detail <- v
+  | Ev_Focus -> 	ev.ev_Focus <- v = "1"
+  | Ev_Height -> 	ev.ev_Height <- int_of_string v
+  | Ev_KeyCode -> 	ev.ev_KeyCode <- int_of_string v
+  | Ev_Mode -> 		ev.ev_Mode <- v
+  | Ev_OverrideRedirect -> ev.ev_OverrideRedirect <- v = "1"
+  | Ev_Place -> 	ev.ev_Place <- v
+  | Ev_State -> 	ev.ev_State <- v
+  | Ev_Time -> 		ev.ev_Time <- int_of_string v
+  | Ev_Width -> 	ev.ev_Width <- int_of_string v
+  | Ev_MouseX -> 	ev.ev_MouseX <- int_of_string v
+  | Ev_MouseY -> 	ev.ev_MouseY <- int_of_string v
+  | Ev_Char -> 		ev.ev_Char <- v
+  | Ev_BorderWidth -> 	ev.ev_BorderWidth <- int_of_string v
+  | Ev_SendEvent -> 	ev.ev_SendEvent <- v = "1"
+  | Ev_KeySymString -> 	ev.ev_KeySymString <- v
+  | Ev_KeySymInt -> 	ev.ev_KeySymInt <- int_of_string v
+  | Ev_RootWindow -> 	ev.ev_RootWindow <- int_of_string v
+  | Ev_SubWindow -> 	ev.ev_SubWindow <- int_of_string v
+  | Ev_Type -> 		ev.ev_Type <- int_of_string v
+  | Ev_Widget -> 	ev.ev_Widget <- cTKtoCAMLwidget v
+  | Ev_RootX -> 	ev.ev_RootX <- int_of_string v
+  | Ev_RootY -> 	ev.ev_RootY <- int_of_string v
 ;;
 
-let WrapEventInfo f what =
+let wrapeventInfo f what =
   let ev = {
-    Ev_Above = 0;
-    Ev_ButtonNumber = 0;
-    Ev_Count = 0;
-    Ev_Detail = "";
-    Ev_Focus = false;
-    Ev_Height = 0;
-    Ev_KeyCode = 0;
-    Ev_Mode = "";
-    Ev_OverrideRedirect = false;
-    Ev_Place = "";
-    Ev_State = "";
-    Ev_Time = 0;
-    Ev_Width = 0;
-    Ev_MouseX = 0;
-    Ev_MouseY = 0;
-    Ev_Char = "";
-    Ev_BorderWidth = 0;
-    Ev_SendEvent = false;
-    Ev_KeySymString = "";
-    Ev_KeySymInt = 0;
-    Ev_RootWindow = 0;
-    Ev_SubWindow = 0;
-    Ev_Type = 0;
-    Ev_Widget = default_toplevel_widget;
-    Ev_RootX = 0;
-    Ev_RootY = 0 } in
+    ev_Above = 0;
+    ev_ButtonNumber = 0;
+    ev_Count = 0;
+    ev_Detail = "";
+    ev_Focus = false;
+    ev_Height = 0;
+    ev_KeyCode = 0;
+    ev_Mode = "";
+    ev_OverrideRedirect = false;
+    ev_Place = "";
+    ev_State = "";
+    ev_Time = 0;
+    ev_Width = 0;
+    ev_MouseX = 0;
+    ev_MouseY = 0;
+    ev_Char = "";
+    ev_BorderWidth = 0;
+    ev_SendEvent = false;
+    ev_KeySymString = "";
+    ev_KeySymInt = 0;
+    ev_RootWindow = 0;
+    ev_SubWindow = 0;
+    ev_Type = 0;
+    ev_Widget = default_toplevel_widget;
+    ev_RootX = 0;
+    ev_RootY = 0 } in
      function args ->
        let l = ref args in
          do_list (function field ->
 	            match !l with
 		      [] -> ()
-		    | v::rest -> FillEventInfo ev v field; l:=rest)
+		    | v::rest -> filleventInfo ev v field; l:=rest)
                  what;
        f ev
 ;;
 
 
 
-let rec WriteEventField = function
+let rec writeeventField = function
     [] -> ""
   | field::rest ->
     begin
     match field with
-      | Ev_Above ->     " %a"
+        Ev_Above ->     " %a"
       | Ev_ButtonNumber ->" %b"
       | Ev_Count ->     " %c"
       | Ev_Detail ->    " %d"
@@ -273,75 +282,100 @@ let rec WriteEventField = function
       | Ev_RootX ->     " %X"
       | Ev_RootY ->     " %Y"
     end 
-    ^ WriteEventField rest;;
-
-
-type BindAction =
-   BindSet of EventField list *  (EventInfo -> unit)
- | BindSetBreakable of EventField list *  (EventInfo -> unit)
- | BindRemove
- | BindExtend of EventField list *  (EventInfo -> unit)
+    ^ writeeventField rest
 ;;
 
 
-(* bind: Widget -> (Modifier list * XEvent) list -> BindAction -> unit *)
+(* type *)
+type bindAction =
+   BindSet of eventField list *  (eventInfo -> unit)
+ | BindSetBreakable of eventField list *  (eventInfo -> unit)
+ | BindRemove
+ | BindExtend of eventField list *  (eventInfo -> unit)
+;;
+(* /type *)
 
+(*
+FUNCTION
+ val bind: 
+    widget -> (modifier list * xEvent) list -> bindAction -> unit
+/FUNCTION
+*)
 let bind widget eventsequence action =
-  TkEval [| TkToken "bind";
+  tkEval [| TkToken "bind";
       	    TkToken (widget_name widget);
-	    CAMLtoTKEventSequence eventsequence;
+	    cCAMLtoTKeventSequence eventsequence;
   begin match action with
      BindRemove -> TkToken ""
   |  BindSet (what, f) ->
-      let CbId = register_callback widget (WrapEventInfo f what) in
-        TkToken ("camlcb " ^ CbId ^ (WriteEventField what))
+      let cbId = register_callback widget (wrapeventInfo f what) in
+        TkToken ("camlcb " ^ cbId ^ (writeeventField what))
   |  BindSetBreakable (what, f) ->
-      let CbId = register_callback widget (WrapEventInfo f what) in
-        TkToken ("camlcb " ^ CbId ^ (WriteEventField what)^
+      let cbId = register_callback widget (wrapeventInfo f what) in
+        TkToken ("camlcb " ^ cbId ^ (writeeventField what)^
                  " ; if { $BreakBindingsSequence == 1 } then { break ;} ; set BreakBindingsSequence 0"
                 )
   |  BindExtend (what, f) ->
-      let CbId = register_callback widget (WrapEventInfo f what) in
-        TkToken ("+camlcb " ^ CbId ^ (WriteEventField what))
+      let cbId = register_callback widget (wrapeventInfo f what) in
+        TkToken ("+camlcb " ^ cbId ^ (writeeventField what))
       
   end
   |];
   ()
 ;;
 
-(* class_bind : string -> (Modifier list * XEvent) list -> BindAction -> unit 
-      class arg is not constrained *)
+(* 
+FUNCTION
+(* unsafe *)
+ val class_bind : 
+    string -> (modifier list * xEvent) list -> bindAction -> unit 
+(* /unsafe *)
+/FUNCTION
+ class arg is not constrained
+*)
 let class_bind class eventsequence action =
-  TkEval [| TkToken "bind";
+  tkEval [| TkToken "bind";
       	    TkToken class;
-	    CAMLtoTKEventSequence eventsequence;
+	    cCAMLtoTKeventSequence eventsequence;
   begin match action with
      BindRemove -> TkToken ""
   |  BindSet (what, f) ->
-      let CbId = register_callback dummy_widget (WrapEventInfo f what) in
-        TkToken ("camlcb " ^ CbId ^ (WriteEventField what))
+      let cbId = register_callback dummy_widget (wrapeventInfo f what) in
+        TkToken ("camlcb " ^ cbId ^ (writeeventField what))
   |  BindSetBreakable (what, f) ->
-      let CbId = register_callback dummy_widget (WrapEventInfo f what) in
-        TkToken ("camlcb " ^ CbId ^ (WriteEventField what)^
+      let cbId = register_callback dummy_widget (wrapeventInfo f what) in
+        TkToken ("camlcb " ^ cbId ^ (writeeventField what)^
                  " ; if { $BreakBindingsSequence == 1 } then { break ;} ; set BreakBindingsSequence 0"
                 )
   |  BindExtend (what, f) ->
-      let CbId = register_callback dummy_widget (WrapEventInfo f what) in
-        TkToken ("+camlcb " ^ CbId ^ (WriteEventField what))
+      let cbId = register_callback dummy_widget (wrapeventInfo f what) in
+        TkToken ("+camlcb " ^ cbId ^ (writeeventField what))
       
   end
  |];
   ()
 ;;
 
-(* tag_bind : string -> (Modifier list * XEvent) list -> BindAction -> unit 
-      tag name arg is not constrained *)
+(* 
+FUNCTION
+(* unsafe *)
+ val tag_bind : 
+    string -> (modifier list * xEvent) list -> bindAction -> unit 
+(* /unsafe *)
+/FUNCTION
+ tag name arg is not constrained 
+*)
+
 let tag_bind = class_bind
 ;;
 
 
-(* break : unit -> unit *)
+(*
+FUNCTION
+  val break : unit -> unit
+/FUNCTION
+*)
 let break = function () ->
-  TkEval [| TkToken "set" ; TkToken "BreakBindingsSequence" ; TkToken "1" |];
+  tkEval [| TkToken "set" ; TkToken "BreakBindingsSequence" ; TkToken "1" |];
   ()
 ;;

@@ -1,23 +1,27 @@
 (* Not a string as such, more like a symbol *)
 
-type TextMark == string
+(* type *)
+type textMark == string
+;;
+(* /type *)
+
+let cCAMLtoTKtextMark  x =  TkToken x
+;;
+let cTKtoCAMLtextMark x = x
 ;;
 
-let CAMLtoTKTextMark  x =  TkToken x
+(* type *)
+type textTag == string
 ;;
-let TKtoCAMLTextMark x = x
+(* /type *)
+
+let cCAMLtoTKtextTag  x =  TkToken x
+;;
+let cTKtoCAMLtextTag x = x
 ;;
 
-type TextTag == string
-;;
-
-let CAMLtoTKTextTag  x =  TkToken x
-;;
-let TKtoCAMLTextTag x = x
-;;
-
-
-type TextModifier =
+(* type *)
+type textModifier =
     CharOffset of int		(* tk keyword: +/- Xchars *)
   | LineOffset of int		(* tk keyword: +/- Xlines *)
   | LineStart			(* tk keyword: linestart *)
@@ -25,6 +29,7 @@ type TextModifier =
   | WordStart			(* tk keyword: wordstart *)
   | WordEnd 			(* tk keyword: wordend *)
 ;;
+(* /type *)
 
 (* TextModifiers are never returned by Tk *)
 let ppTextModifier = function
@@ -42,46 +47,21 @@ let ppTextModifier = function
  | WordEnd -> " wordend"
 ;;
 
-type TextIndex =
-   TextIndex of Index * TextModifier list
+(* type *)
+type textIndex =
+   TextIndex of index * textModifier list
  | TextIndexNone
 ;;
+(* /type *)
 
 let ppTextIndex = function
    TextIndexNone -> ""
  | TextIndex (base, ml) -> 
-     let (TkToken ppbase) = CAMLtoTKIndex Index_text_table base in 
+     let (TkToken ppbase) = cCAMLtoTKindex index_text_table base in 
        it_list (prefix ^) ppbase (map ppTextModifier ml)
 ;;
 
-let CAMLtoTKTextIndex i = 
+let cCAMLtoTKtextIndex i = 
   TkToken (ppTextIndex i)
 ;;
-
-
-let text_tag_bind widget tag eventsequence action =
-  check_widget_class widget Widget_text_table;
-  TkEval [| CAMLtoTKWidget Widget_text_table widget;
-            TkToken "tag";
-            TkToken "bind";
-            CAMLtoTKTextTag tag;
-      	    CAMLtoTKEventSequence eventsequence;
-  begin match action with
-     BindRemove -> TkToken ""
-  |  BindSet (what, f) ->
-      let CbId = register_callback widget (WrapEventInfo f what) in
-        TkToken ("camlcb " ^ CbId ^ (WriteEventField what))
-  |  BindSetBreakable (what, f) ->
-      let CbId = register_callback widget (WrapEventInfo f what) in
-        TkToken ("camlcb " ^ CbId ^ (WriteEventField what)^
-                 " ; if { $BreakBindingsSequence == 1 } then { break ;} ; set BreakBindingsSequence 0"
-                )
-  |  BindExtend (what, f) ->
-      let CbId = register_callback widget (WrapEventInfo f what) in
-        TkToken ("+camlcb " ^ CbId ^ (WriteEventField what))
-  end
-  |];
-  ()
-;;
-
 

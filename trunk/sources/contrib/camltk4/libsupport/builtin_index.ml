@@ -1,9 +1,17 @@
+(* Various indexes
+    canvas
+    entry
+    listbox
+*)
+
+
 (* A large type for all indices in all widgets *)
 (* a bit overkill though *)
 
-type Index =
+(* type *)
+type index =
 	  Number of int		(* no keyword  *)
-        | Active                (* tk keyword: active *)
+        | ActiveElement         (* tk keyword: active *)
 	| End		        (* tk keyword: end *)
         | Last			(* tk keyword: last *)
         | NoIndex		(* tk keyword: none *)
@@ -18,13 +26,14 @@ type Index =
         | Mark of string        (* no keyword *)
         | TagFirst of string    (* tk keyword: tag.first *)
         | TagLast of string     (* tk keyword: tag.last *)
-        | Embedded of Widget	(* no keyword *)
+        | Embedded of widget	(* no keyword *)
 ;;
+(* /type *)
 
 (* sp to avoid being picked up by doc scripts *)
- type Index_constrs =
+ type index_constrs =
 	  CNumber
-        | CActive
+        | CActiveElement
 	| CEnd
 	| CLast
 	| CNoIndex
@@ -42,33 +51,33 @@ type Index =
 	| CEmbedded
 ;;
 
-let Index_any_table = 
- [CNumber; CActive; CEnd; CLast; CNoIndex; CInsert; CSelFirst;
+let index_any_table = 
+ [CNumber; CActiveElement; CEnd; CLast; CNoIndex; CInsert; CSelFirst;
   CSelLast; CAt; CAtXY; CAnchorPoint; CPattern; CLineChar;
   CMark; CTagFirst; CTagLast; CEmbedded]
 ;;
 
-let Index_canvas_table =
+let index_canvas_table =
   [CNumber; CEnd; CInsert; CSelFirst; CSelLast; CAtXY]
 ;;
-let Index_entry_table = 
+let index_entry_table = 
   [CNumber; CAnchorPoint; CEnd; CInsert; CSelFirst; CSelLast; CAt]
 ;;
-let Index_listbox_table = 
-  [CNumber; CActive; CAnchorPoint; CEnd; CAtXY]
+let index_listbox_table = 
+  [CNumber; CActiveElement; CAnchorPoint; CEnd; CAtXY]
 ;;
-let Index_menu_table =
-  [CNumber; CActive; CEnd; CLast; CNoIndex; CAt; CPattern]
+let index_menu_table =
+  [CNumber; CActiveElement; CEnd; CLast; CNoIndex; CAt; CPattern]
 ;;
 
-let Index_text_table =
+let index_text_table =
   [CLineChar; CAtXY; CEnd; CMark; CTagFirst; CTagLast; CEmbedded]
 ;;
 
 
-let CAMLtoTKIndex table = function
+let cCAMLtoTKindex table = function
    Number x -> chk_sub "Number" table CNumber; TkToken (string_of_int x)
- | Active -> chk_sub "Active" table CActive; TkToken "active"
+ | ActiveElement -> chk_sub "ActiveElement" table CActiveElement; TkToken "active"
  | End -> chk_sub "End" table CEnd; TkToken "end"
  | Last -> chk_sub "Last" table CLast; TkToken "last"
  | NoIndex -> chk_sub "NoIndex" table CNoIndex; TkToken "none"
@@ -88,7 +97,7 @@ let CAMLtoTKIndex table = function
  | TagLast t -> chk_sub "TagLast" table CTagLast;
       	   TkToken (t^".last")
  | Embedded w -> chk_sub "Embedded" table CEmbedded;
-       	   CAMLtoTKWidget Widget_any_table w
+       	   cCAMLtoTKwidget widget_any_table w
 ;;
 
 let char_index c s = 
@@ -102,7 +111,7 @@ let char_index c s =
 
 (* Assume returned values are only numerical and l.c *)
 (* .menu index returns none if arg is none, but blast it *)
-let TKtoCAMLIndex s =
+let cTKtoCAMLindex s =
   try
    let p = char_index `.` s in
     LineChar(int_of_string (sub_string s 0 p), 
@@ -110,5 +119,5 @@ let TKtoCAMLIndex s =
   with
     Not_found ->
       try Number (int_of_string s)
-      with _ -> raise (Invalid_argument ("TKtoCAMLIndex: "^s))
+      with _ -> raise (Invalid_argument ("TKtoCAMLindex: "^s))
 ;;

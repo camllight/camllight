@@ -2,7 +2,6 @@
 
 let version = "$Id$"
 ;;
-
 (* 
  * Link a scrollbar and a listbox
  *)
@@ -12,7 +11,6 @@ let scroll_link sb lb =
   scrollbar__configure sb 
         [ScrollCommand (listbox__yview lb)]
 ;;
-
 (* 
  * Completion for listboxes, Macintosh style. 
  * As long as you type fast enough, the listbox is repositioned to the
@@ -38,7 +36,7 @@ let add_completion lb action =
      listbox__selection_clear lb (Number 0) End;
      (* Set it to our unique element *)
      listbox__selection_set lb element element;
-     (* Activate it, to keep consistent with Up/Down.
+     (* Activate it, to keep consistent with Up/down.
         You have to be in Extended or Browse mode *)
      listbox__activate lb element;
      listbox__selection_anchor lb element;
@@ -49,7 +47,7 @@ let add_completion lb action =
       prefx := !prefx ^ s
     else begin (* reset *)
       current := 0;
-      prefx := s;
+      prefx := s
     end;
     lastevent := time;
     move_forward();
@@ -62,7 +60,7 @@ let add_completion lb action =
 	     (* consider only keys producing characters. The callback is called
 	      * even if you press Shift.
               *)
-      	     if ev.Ev_Char <> "" then complete ev.Ev_Time ev.Ev_Char)));
+      	     if ev.ev_Char <> "" then complete ev.ev_Time ev.ev_Char)));
   (* Key specific bindings override KeyPress *)
   bind lb [[], KeyPressDetail "Return"] (BindSet([], action));
   (* Finally, we have to set focus, otherwise events dont get through *)

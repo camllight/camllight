@@ -1,7 +1,13 @@
-############## Standard Tk Widgets and functions ##############
-## $Id$
+############## Standard Tk4.0 Widgets and functions ##############
 type Widget external
-type symbol external
+
+# cget will probably never be implemented with verifications
+function (string) cgets [widget; "cget"; string]
+# another version with some hack is 
+type options_constrs external
+function (string) cget [widget; "cget"; options_constrs]
+# constructors of type options_constrs are of the form C<c> 
+# where <c> is an option constructor  (e.g. CBackground)
 
 ##### Some types for standard options of widgets
 type Anchor { 
@@ -96,24 +102,13 @@ subtype option(standard) {
 
 #### Some other common types
 type Index external   # builtin_index.ml
-# Almost equal to
-#   Number [int]
-#   End ["end"]
-#   Insert ["insert"]
-#   SelFirst ["sel.first"]
-#   SelLast ["sel.last"]
-#   At [int]         # @x
-#   AtXY [int;int]   # @x,y
-#   Active ["active"]
-#   Anchorage [Anchor]
-
+type sequence ScrollValue external   # builtin_ScrollValue.ml
 # type sequence ScrollValue {
 #   MoveTo ["moveto"; float]
 #   ScrollUnit ["scroll"; int; "unit"]
 #   ScrollPage ["scroll"; int; "page"]
 #   }
 
-type sequence ScrollValue external   # builtin_ScrollValue.ml
 
 
 ##### bell(n)
@@ -127,15 +122,15 @@ module bell {
 
 
 ##### bindtags(n)
-type Bindings {
-   TagBindings [string]
-   WidgetBindings [widget]
-   }
+#type Bindings {
+#   TagBindings [string]
+#   WidgetBindings [widget]
+#   }
+
+type Bindings external
 
 function () bindtags ["bindtags"; widget; [Bindings list]]
-
-
-
+function (Bindings list) bindtags_get ["bindtags"; widget]
 
 ##### bitmap(n)
 subtype option(bitmapimage) {
@@ -235,7 +230,7 @@ type ColorMode {
 }
 
 subtype option(postscript) {
-   # Cannot support this withouth array variables
+   # Cannot support this without array variables
    # Colormap ["-colormap"; TextVariable]
    Colormode ["-colormode"; ColorMode]
    File ["-file"; string]
@@ -269,7 +264,7 @@ subtype option(arc) {
    Start ["-start"; float]
    Stipple ["-stipple"; Bitmap]
    ArcStyle ["-style"; ArcStyle]
-   Tags ["-tags"; TagOrId list]
+   Tags ["-tags"; [TagOrId list]]
    Width
   }
 
@@ -399,15 +394,15 @@ widget canvas {
    # bbox not fully supported. should be builtin because of ambiguous result
    # will raise protocol__TkError if no items match TagOrId
    function (int,int,int,int) bbox [widget(canvas); "bbox"; TagOrId list]
-   # bind is builtin
-   function (int) canvasx [widget(canvas); "canvasx"; Units]
-   function (int) canvasx_grid [widget(canvas); "canvasx"; Units; Units]
-   function (int) canvasy [widget(canvas); "canvasy"; Units]
-   function (int) canvasy_grid [widget(canvas); "canvasy"; Units; Units]
+   external bind "libsupport/canvas_bind"
+   function (float) canvasx [widget(canvas); "canvasx"; Units]
+   function (float) canvasx_grid [widget(canvas); "canvasx"; Units; Units]
+   function (float) canvasy [widget(canvas); "canvasy"; Units]
+   function (float) canvasy_grid [widget(canvas); "canvasy"; Units; Units]
    function () configure [widget(canvas); "configure"; option(canvas) list]
    function (string) configure_get [widget(canvas); "configure"]
    # TODO: check result
-   function (int list) coords_get [widget(canvas); "coords"; TagOrId]
+   function (float list) coords_get [widget(canvas); "coords"; TagOrId]
    function () coords_set [widget(canvas); "coords"; TagOrId; Units list]
    # create variations (see below)
    function () dchars [widget(canvas); "dchars"; TagOrId; Index(canvas); Index(canvas)]
@@ -426,12 +421,12 @@ widget canvas {
    function () lower_below [widget(canvas); "lower"; TagOrId; TagOrId]
    function () lower_bot   [widget(canvas); "lower"; TagOrId]
    function () move [widget(canvas); "move"; TagOrId; Units; Units]
-   function (string) postscript [widget(canvas); "postscript"; option(postscript) list]
+   unsafe function (string) postscript [widget(canvas); "postscript"; option(postscript) list]
    # do not use raise !
    function () raise_above [widget(canvas); "raise"; TagOrId; TagOrId]
    function () raise_top [widget(canvas); "raise"; TagOrId]
    function () scale [widget(canvas); "scale"; TagOrId; Units; Units; float; float]
-   # For scan, use x:int and y:int since comme usage is with mouse coordinates
+   # For scan, use x:int and y:int since common usage is with mouse coordinates
    function () scan_mark [widget(canvas); "scan"; "mark"; int; int]
    function () scan_dragto [widget(canvas); "scan"; "dragto"; int; int]
    # select variations
@@ -460,7 +455,7 @@ widget canvas {
 
    function (string) itemconfigure_get [widget(canvas); "itemconfigure"; TagOrId]
 
-   function () configure_arg [widget(canvas); "itemconfigure"; TagOrId; option(arc) list]
+   function () configure_arc [widget(canvas); "itemconfigure"; TagOrId; option(arc) list]
    function () configure_bitmap [widget(canvas); "itemconfigure"; TagOrId; option(bitmap) list]
    function () configure_image [widget(canvas); "itemconfigure"; TagOrId; option(image) list]
    function () configure_line [widget(canvas); "itemconfigure"; TagOrId; option(line) list]
@@ -540,10 +535,6 @@ module clipboard {
 ##### destroy(n)
 function () destroy ["destroy"; widget]
 
-##### tk_dialog(n)
-# Use Predefined "" for empty bitmap
-function (int) dialog ["tk_dialog"; widget; string; string; Bitmap; int; string list]
-
 ##### entry(n)
 # Defined internally
 # subtype Index(entry) {
@@ -608,13 +599,13 @@ widget entry {
 ##### focus(n)
 ##### tk_focusNext(n)
 module focus {
-  function (widget) get ["focus"]
+  unsafe function (widget) get ["focus"]
   function ()       set ["focus"; widget]
-  function (widget) displayof ["focus"; "-displayof"; widget]
+  unsafe function (widget) displayof ["focus"; "-displayof"; widget]
   function ()       force ["focus"; "-force"; widget]
-  function (widget) lastfor ["focus"; "-lastfor"; widget]
-  function (widget) next ["tk_focusNext"; widget]
-  function (widget) prev ["tk_focusPrev"; widget]
+  unsafe function (widget) lastfor ["focus"; "-lastfor"; widget]
+  unsafe function (widget) next ["tk_focusNext"; widget]
+  unsafe function (widget) prev ["tk_focusPrev"; widget]
   function ()       follows_mouse ["tk_focusFollowsMouse"]
 }
 
@@ -669,8 +660,8 @@ type GrabStatus {
 module grab {
    function () set ["grab"; widget]
    function () set_global ["grab"; "-global"; widget]
-   function (widget list) current ["grab"; "current"; widget]
-   function (widget list) all_current ["grab"; "current"]
+   unsafe function (widget list) current ["grab"; "current"; widget]
+   unsafe function (widget list) all_current ["grab"; "current"]
    function () release ["grab"; "release"; widget]
    function (GrabStatus) status ["grab"; "status"; widget]
 }
@@ -892,6 +883,7 @@ widget menu {
    function () add_separator [widget(menu); "add"; "separator"]
    function () configure [widget(menu); "configure"; option(menu) list]
    function (string) configure_get [widget(menu); "configure"]
+   # beware of possible callback leak when deleting menu entries
    function () delete [widget(menu); "delete"; Index(menu); Index(menu)]
    function () configure_cascade [widget(menu); "entryconfigure"; Index(menu); option(menucascade) list]
    function () configure_checkbutton [widget(menu); "entryconfigure"; Index(menu); option(menucheck) list]
@@ -951,6 +943,7 @@ widget menubutton {
    option Menu ["-menu"; widget(menu)]
    option State
    option Width
+   option TextWidth
 
    function () configure [widget(menubutton); "configure"; option(menubutton) list]
    function (string) configure_get [widget(menubutton); "configure"]
@@ -997,10 +990,10 @@ type OptionPriority {
 
 ##### name it resource since option is a kw here. arg.
 module resource {
-   function () add ["option"; "add"; string; string; OptionPriority]
+   unsafe function () add ["option"; "add"; string; string; OptionPriority]
    function () clear ["option"; "clear"]
    function (string) get ["option"; "get"; widget; string; string]
-   function () readfile ["option"; "readfile"; string; OptionPriority]
+   unsafe function () readfile ["option"; "readfile"; string; OptionPriority]
    }
 
 ##### tk_optionMenu(n)
@@ -1125,7 +1118,7 @@ subtype option(place) {
   Width
   RelWidth ["-relwidth"; float]
   Height
-  RelHeigth ["-relheight"; float]
+  RelHeight ["-relheight"; float]
   BorderMode ["-bordermode"; BorderMode]
 }
 
@@ -1222,7 +1215,6 @@ widget scale {
    option ThroughColor
 
    # Widget specific options
-   # cannot be called Command
    option BigIncrement ["-bigincrement"; float]
    option ScaleCommand ["-command"; function (float)]
    option Digits ["-digits"; int]
@@ -1307,16 +1299,25 @@ subtype icccm(selection_get) {
   }
 
 subtype icccm(selection_ownset) {
-  SelectionCommand ["-command"; function()]
+  LostCommand ["-command"; function()]
   Selection
+  }
+
+subtype icccm(selection_handle) {
+  Selection ICCCMType 
+  ICCCMFormat ["-format"; string]
   }
 
 module selection {
    function () clear ["selection"; "clear"; icccm(selection_clear) list]
    function (string) get ["selection"; "get"; icccm(selection_get) list]
-   # handle is not supported
-   function (widget) own_get ["selection"; "own"; icccm(selection_clear) list]
-   function () own_set ["selection"; "own"; icccm(selection_ownset) list; widget]
+   
+   # function () handle_set ["selection"; "handle"; icccm(selection_handle) list; widget; function(int,int)
+   external handle_set "libsupport/selection_handle_set"
+   unsafe function (widget) own_get ["selection"; "own"; icccm(selection_clear) list]
+   # builtin
+   # function () own_set ["selection"; "own"; icccm(selection_ownset) list; widget]
+   external own_set "libsupport/selection_own_set"
    }
 
 
@@ -1341,11 +1342,11 @@ type WrapMode {
 }
 
 type Comparison { 
-  GT ["<"]
-  GE ["<="]
+  LT ["<"]
+  LE ["<="]
   EQ ["=="]
-  LE ["=>"]
-  LT [">"]
+  GE [">="]
+  GT [">"]
   NEQ ["!="]
 }
 
@@ -1417,7 +1418,7 @@ widget text {
    option TextWidth
    option Wrap ["-wrap"; WrapMode]
 
-   function (int,int,int,int) bbox [widget(listbox); "bbox"; TextIndex]
+   function (int,int,int,int) bbox [widget(text); "bbox"; TextIndex]
    function (bool) compare [widget(text); "compare"; TextIndex; Comparison; TextIndex]
    function () configure [widget(text); "configure"; option(text) list]
    function (string) configure_get [widget(text); "configure"]
@@ -1443,7 +1444,7 @@ widget text {
    # Tags
    function () tag_add [widget(text); "tag"; "add"; TextTag; TextIndex; TextIndex]
    function () tag_add_char [widget(text); "tag"; "add"; TextTag; TextIndex]
-   # tag_bind is builtin. beware: text_tag_bind
+   external tag_bind "libsupport/text_tag_bind"
    function () tag_configure [widget(text); "tag"; "configure"; TextTag; option(texttag) list]
    function () tag_delete [widget(text); "tag"; "delete"; TextTag list]
    function () tag_lower_below [widget(text); "tag";  "lower"; TextTag; TextTag]
@@ -1451,8 +1452,8 @@ widget text {
    function (TextTag list) tag_allnames [widget(text); "tag"; "names"]
    function (TextTag list) tag_indexnames [widget(text); "tag"; "names"; TextIndex]
    function (Index, Index) tag_nextrange [widget(text); "tag"; "nextrange"; TextTag; TextIndex; TextIndex]
-   function () tag_raise_above [widget(text); "tag"; "raise"; TextTag]
-   function () tag_raise_top [widget(text); "tag"; "raise"]
+   function () tag_raise_above [widget(text); "tag"; "raise"; TextTag; TextTag]
+   function () tag_raise_top [widget(text); "tag"; "raise"; TextTag]
    function (Index list) tag_ranges [widget(text); "tag"; "ranges"; TextTag]
    function () tag_remove [widget(text); "tag"; "remove"; TextTag; TextIndex; TextIndex]
    function () tag_remove_char [widget(text); "tag"; "remove"; TextTag; TextIndex]
@@ -1543,30 +1544,32 @@ type AtomId {
    }
 
 module winfo {
-   function (AtomId) atom ["winfo"; "atom"; string]
-   function (AtomId) atom_displayof ["winfo"; "atom"; "-displayof"; widget; string]
-   function (string) atomname ["winfo"; "atomname"; AtomId]
-   function (string) atomname_displayof ["winfo"; "atomname"; "-displayof"; widget; AtomId]
+   unsafe function (AtomId) atom ["winfo"; "atom"; string]
+   unsafe function (AtomId) atom_displayof ["winfo"; "atom"; "-displayof"; widget; string]
+   unsafe function (string) atomname ["winfo"; "atomname"; AtomId]
+   unsafe function (string) atomname_displayof ["winfo"; "atomname"; "-displayof"; widget; AtomId]
    function (int) cells ["winfo"; "cells"; widget]
    function (widget list) children ["winfo"; "children"; widget]
    function (string) class ["winfo"; "class"; widget]
    function (bool) colormapfull ["winfo"; "colormapfull"; widget]
-   function (widget) containing ["winfo"; "containing"; int; int]
-   function (widget) containing_displayof ["winfo"; "containing"; "-displayof"; widget; int; int]
+   unsafe function (widget) containing ["winfo"; "containing"; int; int]
+   # addition for applets
+   external contained "libsupport/winfo_contained"
+   unsafe function (widget) containing_displayof ["winfo"; "containing"; "-displayof"; widget; int; int]
    function (int) depth ["winfo"; "depth"; widget]
    function (bool) exists ["winfo"; "exists"; widget]
    function (float) fpixels ["winfo"; "fpixels"; widget; Units]
    function (string) geometry ["winfo"; "geometry"; widget]
    function (int) height ["winfo"; "height"; widget]
-   function (string) id ["winfo"; "id"; widget]
-   function (string list) interps ["winfo"; "interps"]
-   function (string list) interps_displayof ["winfo"; "interps"; "-displayof"; widget]
+   unsafe function (string) id ["winfo"; "id"; widget]
+   unsafe function (string list) interps ["winfo"; "interps"]
+   unsafe function (string list) interps_displayof ["winfo"; "interps"; "-displayof"; widget]
    function (bool) ismapped ["winfo"; "ismapped"; widget]
    function (string) manager ["winfo"; "manager"; widget]
    function (string) name ["winfo"; "name"; widget]
-   function (widget) parent ["winfo"; "parent"; widget]        # bogus for top
-   function (widget) pathname ["winfo"; "pathname"; string]
-   function (widget) pathname_displayof ["winfo"; "pathname"; "-displayof"; widget; string]
+   unsafe function (widget) parent ["winfo"; "parent"; widget]        # bogus for top
+   unsafe function (widget) pathname ["winfo"; "pathname"; string]
+   unsafe function (widget) pathname_displayof ["winfo"; "pathname"; "-displayof"; widget; string]
    function (int) pixels ["winfo"; "pixels"; widget; Units]
    function (int) pointerx ["winfo"; "pointerx"; widget]
    function (int) pointery ["winfo"; "pointery"; widget]
@@ -1584,8 +1587,8 @@ module winfo {
    function (int) screenmmheight ["winfo"; "screenmmheight"; widget]
    function (string) screenvisual ["winfo"; "screenvisual"; widget]
    function (int) screenwidth ["winfo"; "screenwidth"; widget]
-   function (string) server ["winfo"; "server"; widget]
-   function (widget) toplevel ["winfo"; "toplevel"; widget]
+   unsafe function (string) server ["winfo"; "server"; widget]
+   unsafe function (widget) toplevel ["winfo"; "toplevel"; widget]
    function (bool) viewable ["winfo"; "viewable"; widget]
    function (string) visual ["winfo"; "visual"; widget]
    # not so
@@ -1607,18 +1610,28 @@ type FocusModel {
    FocusPassive ["passive"]
 }
 
+type WmFrom {
+   FromUser ["user"]
+   FromProgram ["program"]
+}
+
 module wm {
 ### Aspect
    function () aspect_set ["wm"; "aspect"; widget;int;int;int;int]
    # aspect: problem with empty return
    function (int,int,int,int) aspect_get ["wm"; "aspect"; widget]
-   # clear missing
 ### WM_CLIENT_MACHINE
    function () client_set ["wm"; "client"; widget; string]
    function (string) client_get ["wm"; "client"; widget]
-   # clear missing
+### WM_COLORMAP_WINDOWS
+   function () colormapwindows_set 
+        ["wm"; "colormapwindows"; widget; [widget list]]
+   unsafe function (widget list) colormapwindows_get
+	["wm"; "colormapwindows"; widget]
 ### WM_COMMAND
-   # command requires lists
+   function () command_clear ["wm"; "command"; widget; ""]
+   function () command_set ["wm"; "command"; widget; [string list]]
+   function (string list) command_get ["wm"; "command"; widget]
 
    function () deiconify ["wm"; "deiconify"; widget]
 
@@ -1629,71 +1642,76 @@ module wm {
    function (string) frame ["wm"; "frame"; widget]
 
 ### Geometry
-   # geometry should be a type
    function () geometry_set ["wm"; "geometry"; widget; string]
    function (string) geometry_get ["wm"; "geometry"; widget]
 
-   # grid is missing
+### Grid
+   function () grid_clear ["wm"; "grid"; widget; ""; ""; ""; ""]
+   function () grid_set ["wm"; "grid"; widget; int; int; int; int]
+   function (int,int,int,int) grid_get ["wm"; "grid"; widget]
 
 ### Groups
+   function () group_clear ["wm"; "group"; widget; ""]
    function () group_set ["wm"; "group"; widget; widget]
-   # group: problem with empty return
-   function (string) group_get ["wm"; "group"; widget]
+   unsafe function (widget) group_get ["wm"; "group"; widget]
 ### Icon bitmap
+   function () iconbitmap_clear ["wm"; "iconbitmap"; widget; ""]
    function () iconbitmap_set ["wm"; "iconbitmap"; widget; Bitmap]
-   # iconbitmap: problem with empty return
    function (Bitmap) iconbitmap_get ["wm"; "iconbitmap"; widget]
-   # clear missing
 
    function () iconify ["wm"; "iconify"; widget]
 
 ### Icon mask
+   function () iconmask_clear ["wm"; "iconmask"; widget; ""]
    function () iconmask_set ["wm"; "iconmask"; widget; Bitmap]
-   # iconmask: problem with empty return
    function (Bitmap) iconmask_get ["wm"; "iconmask"; widget]
-   # clear missing
+
 ### Icon name
    function () iconname_set ["wm"; "iconname"; widget; string]
    function (string) iconname_get ["wm"; "iconname"; widget]
 ### Icon position
+   function () iconposition_clear ["wm"; "iconposition"; widget; ""; ""]
    function () iconposition_set ["wm"; "iconposition"; widget; int; int]
-   # iconposition: problem with empty return
    function (int,int) iconposition_get ["wm"; "iconposition"; widget]
 ### Icon window
+   function () iconwindow_clear ["wm"; "iconwindow"; widget; ""]
    function () iconwindow_set ["wm"; "iconwindow"; widget; widget]
-   # iconwindow: problem with empty return
-   function (widget) iconwindow_get ["wm"; "iconwindow"; widget]
-   # clear missing
+   unsafe function (widget) iconwindow_get ["wm"; "iconwindow"; widget]
+
 ### Sizes
    function () maxsize_set ["wm"; "maxsize"; widget; int; int]
    function (int,int) maxsize_get ["wm"; "maxsize"; widget]
-   # clear missing
    function () minsize_set ["wm"; "minsize"; widget; int; int]
    function (int,int) minsize_get ["wm"; "minsize"; widget]
 ### Override
    function () overrideredirect_set ["wm"; "overrideredirect"; widget; bool]
    function (bool) overrideredirect_get ["wm"; "overrideredirect"; widget]
+### Position
+   function () positionfrom_clear ["wm"; "positionfrom"; widget; ""]
+   function () positionfrom_set ["wm"; "positionfrom"; widget; WmFrom]
+   function (WmFrom) positionfrom_get ["wm"; "positionfrom"; widget]
+### Protocols
+   function () protocol_set ["wm"; "protocol"; widget; string; function()]
+   function () protocol_clear ["wm"; "protocol"; widget; string; ""]
+   function (string list) protocols ["wm"; "protocol"; widget]
+### Resize
+   function () resizable_set ["wm"; "resizable"; widget(toplevel); bool; bool]
+   function (bool, bool) resizable_get ["wm"; "resizable"; widget(toplevel)]
+### Sizefrom
+   function () sizefrom_clear ["wm"; "sizefrom"; widget; ""]
+   function () sizefrom_set ["wm"; "sizefrom"; widget; WmFrom]
+   function (WmFrom) sizefrom_get ["wm"; "sizefrom"; widget]
+
    function (string) state ["wm"; "state"; widget]
+
+### Title
    function (string) title_get ["wm"; "title"; widget]
    function () title_set ["wm"; "title"; widget; string]
-   function () withdraw ["wm"; "withdraw"; widget]
-   # New for Tk 4.0
-   function (widget list) colormapwindows_get ["wm"; "colormapwindows"; widget]
-   function () colormapwindows_set ["wm"; "colormapwindows"; widget; [widget list]]
-   function (bool, bool) resizable_get ["wm"; "resizable"; widget(toplevel)]
-   function () resizable_set ["wm"; "resizable"; widget(toplevel); bool; bool]
-   # End new
-}
+### Transient
+   function () transient_clear ["wm"; "transient"; widget; ""]
+   function () transient_set ["wm"; "transient"; widget; widget(toplevel)]
+   unsafe function (widget) transient_get ["wm"; "transient"; widget]
 
-################ This stuff is not native Tk
-# The corresponding source must have been installed in $tk_library
-# and the auto_load index must have been updated
-# Alternatively, you can add in your .wishrc or .camltkrc a line
-# lappend auto_path /path/to/contrib
-# Don't forget to run a tclsh or wish and type 
-# auto_mkindex /path/to/contrib *.tcl
-# or something equivalent (man library(n) in tcl docs)
-# module contrib {
-#   # File Dialog by Sven Delmas
-#   function (string) FSBox ["FSBox"]
-#   }
+   function () withdraw ["wm"; "withdraw"; widget]
+
+}

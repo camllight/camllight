@@ -26,7 +26,8 @@ do_list (fun (str,tok) -> hashtbl__add keyword_table str tok) [
   "function", FUNCTION;
   "module", MODULE;
   "external", EXTERNAL;
-  "sequence", SEQUENCE
+  "sequence", SEQUENCE;
+  "unsafe", UNSAFE
 ];;
 
 

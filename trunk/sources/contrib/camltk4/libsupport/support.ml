@@ -3,13 +3,13 @@
 (***************************************************)
 (* Widgets *)
 (***************************************************)
-type Widget =
+type widget =
   Untyped of string
 | Typed of string * string
 ;;
 
 (* table of widgets *)
-let widget_table = (hashtbl__new 37 : (string,Widget) hashtbl__t)
+let widget_table = (hashtblc__new 401 : (string,widget) hashtblc__t)
 ;;
 
 let widget_name = function
@@ -28,24 +28,25 @@ let widget_class = function
 let default_toplevel_widget =
   let wname = "." in
   let w = Typed (wname, "toplevel") in
-    hashtbl__add widget_table wname w;
+    hashtblc__add widget_table wname w;
     w
 ;;
 
 (* Dummy widget to which global callbacks are associated *)
 (* also passed around by CAMLtoTKoption when no widget in context *)
 let dummy_widget = 
-  default_toplevel_widget
+  Untyped "dummy"
 ;;
 
 let remove_widget w =
-  hashtbl__remove widget_table (widget_name w)
+  hashtblc__remove widget_table (widget_name w)
 ;;
 
 (* Retype widgets returned from Tk *)
-let TKtoCAMLWidget s =
+(* JPF report: sometime s is "", see Protocol.cTKtoCAMLwidget *)
+let get_widget_atom s =
   try
-    hashtbl__find widget_table s
+    hashtblc__find widget_table s
   with
     Not_found -> Untyped s
 ;;
@@ -69,24 +70,24 @@ let widget_naming_scheme = [
 ;;
 
 
-let Widget_any_table =  map fst widget_naming_scheme
+let widget_any_table =  map fst widget_naming_scheme
 ;;
 (* subtypes *)
-let Widget_button_table = [ "button" ]
-and Widget_canvas_table = [ "canvas" ]
-and Widget_checkbutton_table = [ "checkbutton" ]
-and Widget_entry_table = [ "entry" ]
-and Widget_frame_table = [ "frame" ]
-and Widget_label_table = [ "label" ]
-and Widget_listbox_table = [ "listbox" ]
-and Widget_menu_table = [ "menu" ]
-and Widget_menubutton_table = [ "menubutton" ]
-and Widget_message_table = [ "message" ]
-and Widget_radiobutton_table = [ "radiobutton" ]
-and Widget_scale_table = [ "scale" ]
-and Widget_scrollbar_table = [ "scrollbar" ]
-and Widget_text_table = [ "text" ]
-and Widget_toplevel_table = [ "toplevel" ]
+let widget_button_table = [ "button" ]
+and widget_canvas_table = [ "canvas" ]
+and widget_checkbutton_table = [ "checkbutton" ]
+and widget_entry_table = [ "entry" ]
+and widget_frame_table = [ "frame" ]
+and widget_label_table = [ "label" ]
+and widget_listbox_table = [ "listbox" ]
+and widget_menu_table = [ "menu" ]
+and widget_menubutton_table = [ "menubutton" ]
+and widget_message_table = [ "message" ]
+and widget_radiobutton_table = [ "radiobutton" ]
+and widget_scale_table = [ "scale" ]
+and widget_scrollbar_table = [ "scrollbar" ]
+and widget_text_table = [ "text" ]
+and widget_toplevel_table = [ "toplevel" ]
 ;;
 
 let new_suffix class n =
@@ -109,7 +110,7 @@ let new_widget_atom =
 	 else parentpath ^ "." ^ (new_suffix class !counter)
         in
       let w = Typed(path,class) in
-	hashtbl__add widget_table path w;
+	hashtblc__add widget_table path w;
 	w
 ;;
 
@@ -121,7 +122,7 @@ let new_named_widget class parent name =
     then "." ^ name
     else parentpath ^ "." ^ name in
   let w = Typed(path,class) in
-	hashtbl__add widget_table path w;
+	hashtblc__add widget_table path w;
 	w
 ;;
   
@@ -138,7 +139,7 @@ let widget_atom parent name =
 
 
 
-(* Redundant with subtyping of Widget, backward compatibility *)
+(* Redundant with subtyping of widget, backward compatibility *)
 let check_widget_class = fun
     (Untyped _) _ -> () (* assume run-time check by tk*)
  |  (Typed(_,c)) l ->
@@ -154,9 +155,9 @@ let chk_sub errname table c =
 ;;
 
 (* strings assumed to be atomic (no space, no special char) *)
-let CAMLtoTKsymbol x = x
+let cCAMLtoTKsymbol x = x
 ;;
-let TKtoCAMLsymbol x = x
+let cTKtoCAMLsymbol x = x
 ;;
 
 

@@ -7,7 +7,6 @@ let okcolor = NamedColor "#3cb371"
 and kocolor = NamedColor "#dc5c5c"
 ;;
 
-
 let new_vertical parent w h =
   let f = frame__create parent 
       	    [Width (Pixels w); Height (Pixels h); 
@@ -51,4 +50,3 @@ let new_horizontal parent w h =
 		  frame__configure ffill [Width (Pixels wf)];
 		  frame__configure fempty [Width (Pixels (w - wf))])
 ;;
-

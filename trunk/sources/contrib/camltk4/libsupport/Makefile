@@ -15,7 +15,7 @@ X11_INCLUDES=/usr/include
 TCLINCLDIR=/usr/local/lib/tcl7.4/include
 TKINCLDIR=/usr/local/lib/tk4.0/include
 
-all: hashtblc.zo support.zo protocol.zo textvariable.zo optionmenu.zo \
+all: catchexc.zo hashtblc.zo support.zo protocol.zo textvariable.zo optionmenu.zo \
      camltk.zi libcamltk4.a
 
 camltk.o : camltk.c
@@ -39,8 +39,9 @@ install: libcamltk4.a support.zi textvariable.zi protocol.zi
 	cp optionmenu.zi $(LIBDIR)
 	cp optionmenu.zix $(LIBDIR)
 	cp protocol.zi $(LIBDIR)
+	cp protocol.zix $(LIBDIR)
 	cp libcamltk4.a $(LIBDIR)
-	chmod 644 $(LIBDIR)/*.zi $(LIBDIR)/libcamltk4.a
+	chmod 644 $(LIBDIR)/*.zi* $(LIBDIR)/libcamltk4.a
 
 clean : 
 	rm -f *.z* *.o *.a
@@ -56,19 +57,6 @@ clean :
 
 
 depend: 
-	mv Makefile Makefile.bak
-	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
-	 $(CAMLDEP) *.mli *.ml) > Makefile
+	$(CAMLDEP) *.mli *.ml > .depend
 
-### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
-### DO NOT DELETE THIS LINE
-camltk.zi: protocol.zi 
-optionmenu.zi: support.zi textvariable.zi 
-protocol.zi: support.zi 
-textvariable.zi: protocol.zi 
-hashtblc.zo: hashtblc.zi 
-mainloop.zo: protocol.zi 
-optionmenu.zo: optionmenu.zi protocol.zi support.zi textvariable.zi 
-protocol.zo: protocol.zi hashtblc.zi support.zi camltk.zi 
-support.zo: support.zi 
-textvariable.zo: textvariable.zi protocol.zi 
+include .depend

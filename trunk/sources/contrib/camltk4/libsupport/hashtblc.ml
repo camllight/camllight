@@ -31,7 +31,7 @@ let clear h =
 let resize h =
   let n = vect_length h.data
   and olddata = h.data in
-  let deuxn = n+n in
+  let deuxn = n+n+1 in
   let newdata = make_vect deuxn Empty in
     h.data <- newdata;
     h.max_len <- 2 * h.max_len;

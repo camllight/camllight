@@ -1,12 +1,14 @@
 CAMLC=camlc
 CAMLCOMP=$(CAMLC) -c
 
-CAMLDEP=camldep
+CAMLDEP=../../../src/tools/camldep
 
 COMPFLAGS=-W -g -I ../lib -I ../libsupport
 
-OBJS= frx_widget.zo frx_font.zo frx_entry.zo frx_text.zo \
-      frx_listbox.zo frx_req.zo frx_fillbox.zo frx_focus.zo
+OBJS= frx_misc.zo frx_widget.zo frx_font.zo frx_entry.zo frx_text.zo \
+      frx_listbox.zo frx_req.zo frx_fillbox.zo frx_focus.zo \
+      frx_dialog.zo frx_mem.zo frx_rpc.zo frx_synth.zo frx_selection.zo \
+      frx_after.zo frx_fit.zo frx_ctext.zo
 UNUSED=frx_toplevel.zo frx_lbutton.zo
 
 all: libfrx.zo
@@ -28,16 +30,6 @@ clean:
 
 
 depend: 
-	mv Makefile Makefile.bak
-	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
-	 $(CAMLDEP) *.mli *.ml) > Makefile
+	$(CAMLDEP) *.mli *.ml > .depend
 
-
-### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
-### DO NOT DELETE THIS LINE
-frx_font.zo: frx_font.zi 
-frx_lbutton.zo: frx_lbutton.zi 
-frx_req.zo: frx_listbox.zo frx_widget.zi 
-frx_text.zo: frx_entry.zo 
-frx_toplevel.zo: frx_toplevel.zi 
-frx_widget.zo: frx_widget.zi 
+include .depend

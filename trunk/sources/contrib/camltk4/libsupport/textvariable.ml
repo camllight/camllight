@@ -1,26 +1,74 @@
 #open "protocol";;
 
-type TextVariable == string
+type textVariable == string
+;;
+
+let counter = ref 0
+;;
+
+let freelist = ref (set__empty compare_strings)
+and memo = hashtblc__new 101
+;;
+
+(* Added a variable v referenced by widget w *)
+let add w v =
+  let r = 
+    try hashtblc__find memo w 
+    with
+      Not_found -> 
+      	let r = ref (set__empty compare_strings) in
+	  hashtblc__add memo w r;
+	  r in
+   r := set__add v !r
+;;
+
+
+(* Free a widget *)
+let free w =
+  try
+    let r = hashtblc__find memo w in
+      freelist := set__union !freelist !r;
+      hashtblc__remove memo w 
+  with
+    Not_found -> ()
+;;
+
+add_destroy_hook free
+;;
+
+(* Allocate a new variable *)
+let getv () = 
+  let v = 
+    if set__is_empty !freelist then begin
+      incr counter; 
+      "camlv("^ string_of_int !counter ^")"
+      end
+    else
+      let v = set__choose !freelist in
+	freelist := set__remove v !freelist;
+	v in
+    tkEval [| TkToken "set"; TkToken v; TkToken "" |];
+    v
+;;
+
+let new_temporary w =
+  let v = getv() in
+    add w v;
+    v
 ;;
 
 (* Initialize the variable to avoid error *)
-let new =
-  let counter = ref 0 in
-  function () ->
-    incr counter;
-    let v = "textv"^ string_of_int !counter in
-      TkEval [| TkToken "set"; TkToken v; TkToken "" |];
-      v
+let new () = getv ()
 ;;
 
 let set v x =
-  TkEval [| TkToken "set"; TkToken v; TkToken x |]; ()
+  tkEval [| TkToken "set"; TkToken v; TkToken x |]; ()
 ;;
 let get v =
-  TkEval [| TkToken "set"; TkToken v |]
+  tkEval [| TkToken "set"; TkToken v |]
 ;;
 
-let CAMLtoTKTextVariable s = TkToken s
+let cCAMLtoTKtextVariable s = TkToken s
 ;;
 
 let name s = s

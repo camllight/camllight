@@ -1,0 +1,59 @@
+bell.zi: tk.zo 
+button.zi: tk.zo 
+canvas.zi: tk.zo 
+checkbutton.zi: tk.zo 
+clipboard.zi: tk.zo 
+entry.zi: tk.zo 
+focus.zi: tk.zo 
+frame.zi: tk.zo 
+grab.zi: tk.zo 
+imagebitmap.zi: tk.zo 
+imagephoto.zi: tk.zo 
+label.zi: tk.zo 
+listbox.zi: tk.zo 
+menu.zi: tk.zo 
+menubutton.zi: tk.zo 
+message.zi: tk.zo 
+pack.zi: tk.zo 
+palette.zi: tk.zo 
+place.zi: tk.zo 
+radiobutton.zi: tk.zo 
+resource.zi: tk.zo 
+scale.zi: tk.zo 
+scrollbar.zi: tk.zo 
+selection.zi: tk.zo 
+text.zi: tk.zo 
+tkwait.zi: tk.zo 
+toplevelw.zi: tk.zo 
+winfo.zi: tk.zo 
+wm.zi: tk.zo 
+bell.zo: bell.zi tk.zo 
+button.zo: button.zi tk.zo 
+canvas.zo: canvas.zi tk.zo 
+checkbutton.zo: checkbutton.zi tk.zo 
+clipboard.zo: clipboard.zi tk.zo 
+entry.zo: entry.zi tk.zo 
+focus.zo: focus.zi tk.zo 
+frame.zo: frame.zi tk.zo 
+grab.zo: grab.zi tk.zo 
+imagebitmap.zo: imagebitmap.zi tk.zo 
+imagephoto.zo: imagephoto.zi tk.zo 
+label.zo: label.zi tk.zo 
+listbox.zo: listbox.zi tk.zo 
+menu.zo: menu.zi tk.zo 
+menubutton.zo: menubutton.zi tk.zo 
+message.zo: message.zi tk.zo 
+pack.zo: pack.zi tk.zo 
+palette.zo: palette.zi tk.zo 
+place.zo: place.zi tk.zo 
+radiobutton.zo: radiobutton.zi tk.zo 
+resource.zo: resource.zi tk.zo 
+scale.zo: scale.zi tk.zo 
+scrollbar.zo: scrollbar.zi tk.zo 
+selection.zo: selection.zi tk.zo 
+text.zo: text.zi tk.zo 
+tkgen.zo: tkgen.zi 
+tkwait.zo: tkwait.zi tk.zo 
+toplevelw.zo: toplevelw.zi tk.zo 
+winfo.zo: winfo.zi tk.zo 
+wm.zo: wm.zi tk.zo 

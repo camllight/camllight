@@ -318,7 +318,7 @@ let abs_index n =
 (* Navigation properties *)
 (* we allow several tags with different display and actions *)
 type hypernav = {
-  anchor_attribs : (string * option list) list;    (* chrome *)
+  anchor_attribs : (string * options list) list;    (* chrome *)
   navigators: (string * (string -> unit)) list     (* hyper actions *)
   }
 ;;
@@ -372,7 +372,7 @@ let hypertext top hn ht =
            bind t [[Double], ButtonPressDetail 1] 
 	     (BindExtend ([], fun _ -> action (get_current_anchor "")))
        | (tagname, action) ->
-      	   text_tag_bind t tagname [[Double], ButtonPressDetail 1]
+      	   text__tag_bind t tagname [[Double], ButtonPressDetail 1]
 	     (BindSet ([], function _ -> action (get_current_anchor tagname))))
       hn.navigators;
     

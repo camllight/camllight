@@ -1,6 +1,13 @@
 %{
 #open "tables";;
 
+let lowercase s =
+  let r = create_string (string_length s) in
+  blit_string s 0 r 0 (string_length s);
+  let c = s.[0] in
+  if c >= `A` & c <= `Z` then r.[0] <- char_of_int(int_of_char c + 32);
+  r
+;;
 %}
 
 /* Tokens */
@@ -32,11 +39,16 @@
 %token FUNCTION		/* "function" */
 %token MODULE		/* "module" */
 %token EXTERNAL		/* "external" */
+%token UNSAFE		/* "unsafe" */
 /* Entry points */
-%start Entry
-%type <unit> Entry
+%start entry
+%type <unit> entry
 
 %%
+TypeName:
+   IDENT { lowercase $1 }
+ | WIDGET { "widget" }
+;
 /* Atomic types */
 Type0 :
     TYINT
@@ -49,9 +61,7 @@ Type0 :
       { Char }
   | TYSTRING
       { String }
-  | WIDGET
-      { UserDefined("Widget") }
-  | IDENT
+  | TypeName
       { UserDefined $1 }
 ;
 
@@ -59,12 +69,12 @@ Type0 :
 Type1 : 
     Type0
       { $1 }
-  | IDENT LPAREN IDENT RPAREN
+  | TypeName LPAREN IDENT RPAREN
      { Subtype ($1, $3) }
   | WIDGET LPAREN IDENT RPAREN
-     { Subtype ("Widget", $3) }
+     { Subtype ("widget", $3) }
   | OPTION LPAREN IDENT RPAREN
-     { Subtype ("option", $3) }
+     { Subtype ("options", $3) }
 ;
 
 /* with list constructors */
@@ -128,10 +138,11 @@ Template :
 /* Constructors for type declarations */
 Constructor :
     IDENT Template
-      {{ Component = Constructor; 
-         MLName = $1; 
-	 Template = $2;
-         Result = Unit }}
+      {{ component = Constructor; 
+         ml_name = $1; 
+	 template = $2;
+         result = Unit;
+         safe = true }}
 ;
 
 AbbrevConstructor :
@@ -155,30 +166,41 @@ AbbrevConstructors :
    { [$1] }
 ;
 
+Safe:
+   /* */
+  { true }
+ | UNSAFE
+  { false }
+
 Command :
-  FUNCTION FType IDENT Template
-     {{Component = Command; MLName = $3; Template = $4; Result = $2 }}
+   Safe FUNCTION FType IDENT Template
+     {{component = Command; ml_name = $4; 
+       template = $5; result = $3; safe = $1 }}
+;
+
+External :
+  Safe EXTERNAL IDENT STRING
+     {{component = External; ml_name = $3;
+       template = StringArg $4; result = Unit; safe = $1}}
 ;
 
 Option :
    OPTION IDENT Template
-     {{Component = Constructor; MLName = $2; Template = $3; Result = Unit }}
+     {{component = Constructor; ml_name = $2; 
+       template = $3; result = Unit; safe = true }}
    /* Abbreviated */
 |  OPTION IDENT
      { retrieve_option $2 }
 ;
 
-WidgetComponent :
-   Command
-      { $1 }
- | Option
-      { $1 }
-;
-
 WidgetComponents :
   /* */
   { [] }
- | WidgetComponent WidgetComponents
+ | Command WidgetComponents
+  { $1 :: $2 }
+ | Option WidgetComponents
+  { $1 :: $2 }
+ | External WidgetComponents
   { $1 :: $2 }
 ;
 
@@ -186,6 +208,8 @@ ModuleComponents :
   /* */
   { [] }
  | Command ModuleComponents
+  { $1 :: $2 }
+ | External ModuleComponents
   { $1 :: $2 }
 ;
 
@@ -196,19 +220,19 @@ ParserArity :
   { MultipleToken }
 ;
 
-Entry :
-  WIDGET IDENT LBRACE WidgetComponents RBRACE
-    { enter_widget $2 $4 }
-| Command 
-    { enter_function $1 }
-| TYPE ParserArity IDENT LBRACE Constructors RBRACE
+entry :
+  TYPE ParserArity TypeName LBRACE Constructors RBRACE
     { enter_type $3 $2 $5 }
-| TYPE ParserArity IDENT EXTERNAL
+| TYPE ParserArity TypeName EXTERNAL
     { enter_external_type $3 $2 }
 | SUBTYPE ParserArity OPTION LPAREN IDENT RPAREN LBRACE AbbrevConstructors RBRACE
-    { enter_subtype "option" $2 $5 $8 }
-| SUBTYPE ParserArity IDENT LPAREN IDENT RPAREN LBRACE AbbrevConstructors RBRACE
+    { enter_subtype "options" $2 $5 $8 }
+| SUBTYPE ParserArity TypeName LPAREN IDENT RPAREN LBRACE AbbrevConstructors RBRACE
     { enter_subtype $3 $2 $5 $8 }
+| Command 
+    { enter_function $1 }
+| WIDGET IDENT LBRACE WidgetComponents RBRACE
+    { enter_widget $2 $4 }
 | MODULE IDENT LBRACE ModuleComponents RBRACE
     { enter_module $2 $4 }
 | EOF

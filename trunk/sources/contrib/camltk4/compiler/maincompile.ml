@@ -27,7 +27,7 @@ let parse_file filename =
   try
     let lexbuf = lexing__create_lexer_channel ic in
       while true do
-       Entry Main lexbuf
+       entry Main lexbuf
       done
   with
     parsing__Parse_error ->
@@ -65,6 +65,29 @@ let rename_module = function
  | s -> s
 ;;
 
+(* hack to provoke production of cCAMLtoTKoptions_constrs *)
+let option_hack oc =
+  try
+   let typdef = hashtbl__find types_table "options" in
+   let hack = {parser_arity = OneToken;
+     constructors = 
+      map (fun c -> 
+      	{ component = Constructor;
+      	  ml_name = "C" ^ c.ml_name;
+      	  template = begin match c.template with
+      	      ListArg (x::_) -> x
+	    | _ -> fatal_error "bogus hack"
+      	    end;
+      	  result = UserDefined "options_constrs";
+          safe = true}) 
+        typdef.constructors;
+     subtypes = [];
+     requires_widget_context = false} in
+    write_CAMLtoTK (output_string oc) "options_constrs" hack
+   with
+     Not_found -> ()
+;;
+
 let compile () = 
   let oc = open_out_bin "lib/tkgen.ml" in
     let sorted_types = tsort__sort types_order in
@@ -83,6 +106,7 @@ let compile () =
       	       	  prerr_string " is undeclared external or undefined\n"
                 end)
       	    sorted_types;
+    option_hack oc;
     do_list (write_function (output_string oc)) !function_table;
     close_out oc;
   (* Write the interface for public functions *)
@@ -95,7 +119,7 @@ let compile () =
       let modname = rename_module wname in
       let oc = open_out_bin ("lib/" ^ modname ^ ".ml") 
       and oc' = open_out_bin ("lib/" ^ modname ^ ".mli") in
-      	begin match wdef.ModuleType with
+      	begin match wdef.module_type with
 	  Widget -> output_string oc' ("(* The "^wname^" widget *)\n")
 	| Family -> output_string oc' ("(* The "^wname^" commands  *)\n")
 	end;
@@ -106,19 +130,26 @@ let compile () =
       	output_string oc' "#open\"support\";;\n";
       	output_string oc "#open\"textvariable\";;\n";
       	output_string oc' "#open\"textvariable\";;\n";
-	begin match wdef.ModuleType with
+	begin match wdef.module_type with
 	  Widget ->
             write_create (output_string oc) wname;
             write_named_create (output_string oc) wname;
 	    write_create_p (output_string oc') wname;
 	    write_named_create_p (output_string oc') wname;
-	    let cmds = sort_components wdef.Commands in
+	    let cmds = sort_components wdef.commands in
       	    do_list (write_function (output_string oc)) cmds;
-	    do_list (write_function_type (output_string oc')) cmds
+	    do_list (write_function_type (output_string oc')) cmds;
+	    let exts = sort_components wdef.externals in
+	    do_list (write_external (output_string oc)) exts;
+	    do_list (write_external_type (output_string oc')) exts
         | Family ->
-	    let cmds = sort_components wdef.Commands in
+	    let cmds = sort_components wdef.commands in
 	    do_list (write_function (output_string oc)) cmds;
-	    do_list (write_function_type (output_string oc')) cmds
+	    do_list (write_function_type (output_string oc')) cmds;
+	    let exts = sort_components wdef.externals in
+	    do_list (write_external (output_string oc)) exts;
+	    do_list (write_external_type (output_string oc')) exts
+
         end;
 	close_out oc;
 	close_out oc'

@@ -1,59 +1,57 @@
 (* Support for widget manipulations *)
-type Widget
-      	(* Widget is an abstract type *)
+type widget
+      	(* widget is an abstract type *)
 ;;
 
-value default_toplevel_widget : Widget
+value default_toplevel_widget : widget
       	(* The default toplevel widget is ".", of type "toplevel" *)
 ;;
 
-value widget_atom : Widget -> string -> Widget
+value widget_atom : widget -> string -> widget
 ;;
 
 (* The following functions are used internally.
    There is normally no need for them in users programs *)
 
-value dummy_widget : Widget
+value dummy_widget : widget
       	(* used as context *)
 ;;
           
-value widget_name : Widget -> string
+value widget_name : widget -> string
       (* Returns the name (tk "path") of a widget *)
-and  widget_class : Widget-> string
+and  widget_class : widget-> string
       (* Returns the class of a widget *)
 ;;
 
-value new_widget_atom : string -> Widget -> Widget
-and   new_named_widget : string -> Widget -> string -> Widget
+value new_widget_atom : string -> widget -> widget
+and   new_named_widget : string -> widget -> string -> widget
       (* Abstract creation functions *)
+and get_widget_atom : string -> widget
 ;;
 
-value remove_widget : Widget -> unit
+value remove_widget : widget -> unit
 ;;
 
-value   TKtoCAMLWidget : string -> Widget
-      (* Conversion functions *)
-;;
 
-value Widget_any_table : string list
-and Widget_button_table : string list
-and Widget_canvas_table : string list
-and Widget_checkbutton_table : string list
-and Widget_entry_table : string list
-and Widget_frame_table : string list
-and Widget_label_table : string list
-and Widget_listbox_table : string list
-and Widget_menu_table : string list
-and Widget_menubutton_table : string list
-and Widget_message_table : string list
-and Widget_radiobutton_table : string list
-and Widget_scale_table : string list
-and Widget_scrollbar_table : string list
-and Widget_text_table : string list
-and Widget_toplevel_table : string list
+value widget_any_table : string list
+and widget_button_table : string list
+and widget_canvas_table : string list
+and widget_checkbutton_table : string list
+and widget_entry_table : string list
+and widget_frame_table : string list
+and widget_label_table : string list
+and widget_listbox_table : string list
+and widget_menu_table : string list
+and widget_menubutton_table : string list
+and widget_message_table : string list
+and widget_radiobutton_table : string list
+and widget_scale_table : string list
+and widget_scrollbar_table : string list
+and widget_text_table : string list
+and widget_toplevel_table : string list
 and chk_sub : string -> 'a list -> 'a -> unit
-and check_widget_class : Widget -> string list -> unit
-      (* Widget subtyping *)
+and check_widget_class : widget -> string list -> unit
+      (* widget subtyping *)
 ;;
 exception IllegalWidgetType of string
       (* Raised when widget command applied illegally*)
@@ -78,6 +76,6 @@ type symbol == string
       (* A simpler "string" type *)
 ;;
 
-value CAMLtoTKsymbol : symbol -> string
-and   TKtoCAMLsymbol : string -> symbol
+value cCAMLtoTKsymbol : symbol -> string
+and   cTKtoCAMLsymbol : string -> symbol
 ;;

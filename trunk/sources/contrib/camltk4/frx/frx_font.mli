@@ -1,4 +1,2 @@
-value version : string
-;;
-value find : string -> string -> string -> int -> string
-;;
+value version : string;;
+value find : string -> string -> string -> int -> string;;
