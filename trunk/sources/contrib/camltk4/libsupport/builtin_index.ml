@@ -123,12 +123,13 @@ let CAMLtoTKIndex table = function
        	   CAMLtoTKWidget Widget_any_table w
 ;;
 
-let char_index c s = find 0
-  where rec find i =
-    if i >= string_length s 
-    then raise Not_found
-    else if nth_char s i = c then i 
-    else find (i+1) 
+let char_index c s = 
+  let l = string_length s in
+  let rec pos i =
+    if i >= l then raise Not_found
+    else if s.[i] == c then i
+    else pos (succ i) in
+  pos 0
 ;;
 
 (* Assume returned values are only numerical and l.c *)

@@ -10,7 +10,8 @@ let CAMLtoTKBitmap = function
 ;;
 
 let TKtoCAMLBitmap s = 
- if nth_char s 0 = `@`
+ if s = "" then Predefined ""
+ else if s.[0] = `@`
  then BitmapFile (sub_string s 1 (string_length s - 1))
  else Predefined s
 ;;
