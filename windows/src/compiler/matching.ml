@@ -3,6 +3,8 @@
 #open "misc";;
 #open "const";;
 #open "globals";;
+#open "builtins";;
+#open "error";;
 #open "syntax";;
 #open "location";;
 #open "lambda";;
@@ -219,60 +221,54 @@ let tristate_or = function
 
 (* The main compilation function.
    Input: a pattern-matching,
-   Output: a lambda term, a "partial" flag, a list of used cases. *)
+   Output: a lambda term and a "total" flag.
+   The "total" flag is approximated: it is true if the matching is
+   guaranteed to be total, and false otherwise. *)
 
 let rec conquer_matching =
   let rec conquer_divided_matching = function
     [] ->
-      [], False
+      ([], true)
   | (key, matchref) :: rest ->
-      let lambda1, partial1 = conquer_matching !matchref
-      and list2,   partial2 = conquer_divided_matching rest in
-        (key, lambda1) :: list2,
-        tristate_or(partial1,partial2)
+      let (lambda1, total1) = conquer_matching !matchref
+      and (list2,   total2) = conquer_divided_matching rest in
+        ((key, lambda1) :: list2, total1 & total2)
   in function
     Matching([], _) ->
-      Lstaticfail, True
+      (Lstaticfail, false)
    | Matching(([], action) :: rest, pathl) ->
-      begin match action with
-        Lwhen(cond, act) ->
-          let lambda2, partial2 = conquer_matching (Matching (rest, pathl)) in
-          (Lifthenelse(cond, act, lambda2), partial2)
-      | _ ->
-          (action, False)
-      end
+      if has_guard action then begin
+        let (lambda2, total2) = conquer_matching (Matching (rest, pathl)) in
+        (Lstatichandle(action, lambda2), total2)
+      end else
+        (action, true)
   | Matching(_, (path :: _)) as matching ->
       begin match upper_left_pattern matching with
         {p_desc = (Zwildpat | Zvarpat _)} ->
           let vars, rest = divide_var_matching matching in
-          let lambda1, partial1 = conquer_matching vars
-          and lambda2, partial2 = conquer_matching rest in
-            if partial1 == False then
-              lambda1, False
-            else
-	      Lstatichandle(lambda1, lambda2),
-              (if partial2 == False then False else Maybe)
+          let lambda1, total1 = conquer_matching vars
+          and lambda2, total2 = conquer_matching rest in
+            if total1
+            then (lambda1, true)
+            else (Lstatichandle(lambda1, lambda2), total2)
       | {p_desc = Ztuplepat patl} ->
           conquer_matching (divide_tuple_matching (list_length patl) matching)
       | {p_desc = (Zconstruct0pat(_) | Zconstruct1pat(_,_))} ->
           let constrs, vars = divide_construct_matching matching in
-          let switchlst, partial1 = conquer_divided_matching constrs
-          and lambda,    partial2 = conquer_matching vars in
+          let (switchlst, total1) = conquer_divided_matching constrs
+          and (lambda,    total2) = conquer_matching vars in
           let span = get_span_of_matching matching
           and num_cstr = list_length constrs in
-            if num_cstr == span & partial1 == False then
-              Lswitch(span, path, switchlst), False
+            if num_cstr = span & total1 then
+              (Lswitch(span, path, switchlst), true)
             else
-              Lstatichandle(Lswitch(span, path, switchlst), lambda),
-              (if partial2 == False then False
-               else if num_cstr < span & partial2 == True then True
-               else Maybe)
+              (Lstatichandle(Lswitch(span, path, switchlst), lambda),
+               total2)
       | {p_desc = Zconstantpat _} ->
           let constants, vars = divide_constant_matching matching in
             let condlist1, _ = conquer_divided_matching constants
-            and lambda2, partial2 = conquer_matching vars in
-              Lstatichandle(Lcond(path, condlist1), lambda2),
-              partial2
+            and lambda2, total2 = conquer_matching vars in
+              (Lstatichandle(Lcond(path, condlist1), lambda2), total2)
       | {p_desc = Zrecordpat _; p_typ = ty} ->
           conquer_matching (divide_record_matching ty matching)
       | _ ->
@@ -280,6 +276,8 @@ let rec conquer_matching =
       end
   | _ -> fatal_error "conquer_matching 1"
 ;;
+
+(* Auxiliaries to build the initial matching *)
 
 let make_initial_matching = function
     [] ->
@@ -291,26 +289,25 @@ let make_initial_matching = function
         Matching(casel, make_path(list_length patl))
 ;;
 
-(* The entry point *)
+let partial_fun (Loc(start, stop)) =
+  Lprim(Praise,
+    [Lconst(SCblock(match_failure_tag,
+      [SCatom(ACstring !input_name);SCatom(ACint start);SCatom(ACint stop)]))])
+;;
 
-let translate_match check_partial_match failure_code loc casel =
+(* The entry points *)
+
+let translate_matching_check_failure loc casel =
   let casel' =
     map (fun (patl, act) -> (patl, share_lambda act)) (check_unused casel) in
-  let (lambda, partial) =
-    conquer_matching (make_initial_matching casel') in
-  if check_partial_match & partial_match casel then
-    Lstatichandle(lambda, failure_code true)
-  else
-    match partial with
-      False -> lambda
-    | _     -> Lstatichandle (lambda, failure_code false)
-        (* produces dead code *)
+  if partial_match casel then not_exhaustive_warning loc;
+  let (lambda, total) = conquer_matching (make_initial_matching casel') in
+  if total then lambda else Lstatichandle(lambda, partial_fun loc)
 ;;
 
-let translate_matching_check_failure failure_code loc casel =
-  translate_match true failure_code loc casel
-;;
-
-let translate_matching failure_code loc casel =
-  translate_match false failure_code loc casel
+let translate_matching failure_code casel =
+  let casel' =
+    map (fun (patl, act) -> (patl, share_lambda act)) (check_unused casel) in
+  let (lambda, total) = conquer_matching (make_initial_matching casel') in
+  if total then lambda else Lstatichandle(lambda, failure_code)
 ;;
