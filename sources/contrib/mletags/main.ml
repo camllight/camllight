@@ -26,8 +26,8 @@ let parse_phrase parsing_fun lexing_fun lexbuf =
          failwith "lexer"
 ;;
 
-let parse_impl_phrase = parse_phrase Implementation Main
-and parse_intf_phrase = parse_phrase Interface Main
+let parse_impl_phrase = parse_phrase Implementation main
+and parse_intf_phrase = parse_phrase Interface main
 ;;
 
 

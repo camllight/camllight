@@ -24,22 +24,25 @@ let do_directive =
 
 /* Tokens */
 
+/* Identifiers, prefixes, infixes */
 %token <string> IDENT
-%token <string> INFIX
+%token <string> PREFIX
+%token <string> INFIX1
+%token <string> INFIX2
+%token <string> SUBTRACTIVE
+%token <string> INFIX3
+%token <string> INFIX4
+/* Literals */
 %token <int> INT
 %token <char> CHAR
 %token <float> FLOAT
 %token <string> STRING
+/* The end-of-file marker */
 %token EOF
-%token <string> MULTIPLICATIVE /* "/" "*." "/." */
-%token <string> ADDITIVE       /* "+" "+." */
-%token <string> SUBTRACTIVE    /* "-" "-." */
-%token <string> CONCATENATION  /* "^" "@" */
-%token <string> COMPARISON     /* "<>" "!=" "<" "<=" ">" ">=" etc */
+/* Special symbols */
 %token EQUAL          /* "=" */
 %token EQUALEQUAL     /* "==" */
 %token SHARP          /* "#" */
-%token BANG           /* "!" */
 %token AMPERSAND      /* "&" */
 %token QUOTE          /* "'" */
 %token LPAREN         /* "(" */
@@ -50,15 +53,16 @@ let do_directive =
 %token DOT            /* "." */
 %token DOTDOT         /* ".." */
 %token DOTLPAREN      /* ".(" */
+%token DOTLBRACKET    /* ".[" */
 %token COLON          /* ":" */
 %token COLONCOLON     /* "::" */
 %token COLONEQUAL     /* ":=" */
 %token SEMI           /* ";" */
 %token SEMISEMI       /* ";;" */
-%token LESSMINUS      /* "<-" */
 %token LBRACKET       /* "[" */
 %token LBRACKETBAR    /* "[|" */
 %token LBRACKETLESS   /* "[<" */
+%token LESSMINUS      /* "<-" */
 %token RBRACKET       /* "]" */
 %token UNDERSCORE     /* "_" */
 %token UNDERUNDER     /* "__" */
@@ -67,6 +71,9 @@ let do_directive =
 %token BARRBRACKET    /* "|]" */
 %token GREATERRBRACKET/* ">]" */
 %token RBRACE         /* "}" */
+%token SLASHBACKSLASH /* "/\" */
+%token BACKSLASHSLASH /* "\/" */
+/* Keywords */
 %token AND            /* "and" */
 %token AS             /* "as" */
 %token BEGIN          /* "begin" */
@@ -87,13 +94,14 @@ let do_directive =
 %token NOT            /* "not" */
 %token OF             /* "of" */
 %token OR             /* "or" */
-%token PREFIX         /* "prefix" */
+%token PREF           /* "prefix" */
 %token REC            /* "rec" */
 %token THEN           /* "then" */
 %token TO             /* "to" */
 %token TRY            /* "try" */
 %token TYPE           /* "type" */
 %token VALUE          /* "value" */
+%token WHEN           /* "when" */
 %token WHERE          /* "where" */
 %token WHILE          /* "while" */
 %token WITH           /* "with" */
@@ -102,28 +110,28 @@ let do_directive =
 
 %right prec_let
 %right prec_define
-%right WHERE prec_where
+%right MINUSGREATER
+%right WHERE
+%right AND
 %right SEMI
 %right prec_list
 %right prec_if
 %right COLONEQUAL LESSMINUS
 %left  AS
 %left  BAR
-%right COMMA
-%right OR
-%left  AMPERSAND
+%left  COMMA
+%left  OR BACKSLASHSLASH
+%left  AMPERSAND SLASHBACKSLASH
 %left  NOT
-%left  COMPARISON EQUAL EQUALEQUAL
-%right CONCATENATION
-%right COLONCOLON
-%left  ADDITIVE SUBTRACTIVE
-%right prec_typearrow
-%left  STAR MULTIPLICATIVE
-%left  INFIX
+%left  INFIX1 EQUAL EQUALEQUAL          /* comparisons, concatenations */
+%right COLONCOLON                       /* cons */
+%left  INFIX2 SUBTRACTIVE               /* additives, subtractives */
+%left  STAR INFIX3                      /* multiplicatives */
+%right INFIX4                           /* exponentiations */
 %right prec_uminus
 %right prec_app
-%left  DOT DOTLPAREN
-%right BANG
+%left  DOT DOTLPAREN DOTLBRACKET
+%right PREFIX                           /* prefix operators, e.g. ! */
 
 /* Entry points */
 
@@ -160,7 +168,7 @@ Interface :
           { $2 }
       | TYPE Type_decl SEMISEMI
           { $2 }
-      | EXCEPTION Exc_decl  SEMISEMI
+      | EXCEPTION Exc_decl SEMISEMI
           { $2 }
       | SHARP Directive SEMISEMI
           { [] }
@@ -168,8 +176,133 @@ Interface :
           { raise End_of_file }
 ;
 
-/* Auxiliaries for expressions. Must appear before Expr, for correct
-   resolution of reduce/reduce conflicts. */
+/* Expressions */
+
+Expr :
+        Simple_expr
+          { () }
+      | Simple_expr Simple_expr_list   %prec prec_app
+          { () }
+      | Expr_comma_list
+          { () }
+      | SUBTRACTIVE Expr  %prec prec_uminus
+          { () }
+      | NOT Expr
+          { () }
+      | Ide LESSMINUS Expr
+          { () }
+      | Expr INFIX4 Expr
+          { () }
+      | Expr INFIX3 Expr
+          { () }
+      | Expr INFIX2 Expr
+          { () }
+      | Expr SUBTRACTIVE Expr
+          { () }
+      | Expr INFIX1 Expr
+          { () }
+      | Expr STAR Expr
+          { () }
+      | Expr COLONCOLON Expr
+          { () }
+      | Expr EQUAL Expr
+          { () }
+      | Expr EQUALEQUAL Expr
+          { () }
+      | Expr AMPERSAND Expr
+          { () }
+      | Expr SLASHBACKSLASH Expr
+          { () }
+      | Expr OR Expr
+          { () }
+      | Expr BACKSLASHSLASH Expr
+          { () }
+      | Simple_expr DOT Ext_ident LESSMINUS Expr
+          { () }
+      | Simple_expr DOT Ext_ident COLONEQUAL Expr
+          { () }
+      | Simple_expr DOTLPAREN Expr RPAREN LESSMINUS Expr
+          { () }
+      | Simple_expr DOTLPAREN Expr RPAREN COLONEQUAL Expr
+          { () }
+      | Simple_expr DOTLBRACKET Expr RBRACKET LESSMINUS Expr
+          { () }
+      | Simple_expr DOTLBRACKET Expr RBRACKET COLONEQUAL Expr
+          { () }
+      | Expr COLONEQUAL Expr
+          { () }
+      | IF Expr THEN Expr ELSE Expr  %prec prec_if
+          { () }
+      | IF Expr THEN Expr  %prec prec_if
+          { () }
+      | WHILE Expr DO Expr Opt_semi DONE
+          { () }
+      | FOR Ide EQUAL Expr TO Expr DO Expr Opt_semi DONE
+          { () }
+      | FOR Ide EQUAL Expr DOWNTO Expr DO Expr Opt_semi DONE
+          { () }
+      | Expr SEMI Expr
+          { () }
+      | Expr SEMI Expr SEMI
+          { () }
+      | MATCH Expr WITH Opt_bar Function_match
+          { () }
+      | MATCH Expr WITH Opt_bar Parser_match
+          { () }
+      | LET Binding_list IN Expr  %prec prec_let
+          { () }
+      | LET REC Binding_list IN Expr  %prec prec_let
+          { () }
+      | FUN Opt_bar Fun_match
+          { () }
+      | FUNCTION Opt_bar Function_match
+          { () }
+      | FUNCTION Opt_bar Parser_match
+          { () }
+      | TRY Expr WITH Opt_bar Try_match
+	  { () }
+      | Expr WHERE Binding_list
+          { () }
+      | Expr WHERE REC Binding_list  %prec WHERE
+          { () }
+;
+
+Simple_expr :
+        Struct_constant
+          { () }
+      | Ext_ident
+          { () }
+      | LPAREN RPAREN
+          { () }
+      | LBRACKET Expr_sm_list Opt_semi RBRACKET
+          { () }
+      | LBRACKET RBRACKET
+          { () }
+      | LBRACKETBAR Expr_sm_list Opt_semi BARRBRACKET
+          { () }
+      | LBRACKETBAR BARRBRACKET
+          { () }
+      | LBRACKETLESS Stream_expr Opt_semi GREATERRBRACKET
+          { () }
+      | LBRACKETLESS GREATERRBRACKET
+          { () }
+      | LPAREN Expr COLON Type RPAREN
+          { () }
+      | LPAREN Expr RPAREN
+          { () }
+      | BEGIN Expr Opt_semi END
+          { () }
+      | LBRACE Expr_label_list Opt_semi RBRACE
+          { () }
+      | PREFIX Simple_expr
+          { () }
+      | Simple_expr DOT Ext_ident %prec COLONEQUAL
+          { () }
+      | Simple_expr DOTLPAREN Expr RPAREN  %prec COLONEQUAL
+          { () }
+      | Simple_expr DOTLBRACKET Expr RBRACKET  %prec COLONEQUAL
+          { () }
+;
 
 Simple_expr_list :
         Simple_expr Simple_expr_list
@@ -179,9 +312,9 @@ Simple_expr_list :
 ;
 
 Expr_comma_list :
-        Expr COMMA Expr_comma_list
+        Expr_comma_list COMMA Expr
           { () }
-      | Expr  %prec COMMA
+      | Expr COMMA Expr
           { () }
 ;
 
@@ -190,6 +323,11 @@ Expr_sm_list :
           { () }
       | Expr  %prec prec_list
           { () }
+;
+
+Opt_semi :
+        SEMI            { () }
+      | /*epsilon*/     { () }
 ;
 
 Expr_label :
@@ -201,120 +339,6 @@ Expr_label_list :
         Expr_label_list SEMI Expr_label  %prec prec_list
           { () }
       | Expr_label  %prec prec_list
-          { () }
-;
-
-/* Expressions */
-
-Expr :
-        Simple_expr
-          { () }
-      | Simple_expr Simple_expr_list   %prec prec_app
-          { () }
-      | Expr COMMA Expr_comma_list
-          { () }
-      | SUBTRACTIVE Expr  %prec prec_uminus
-          { () }
-      | NOT Expr
-          { () }
-      | Ide LESSMINUS Expr
-          { () }
-      | Expr INFIX Expr
-          { () }
-      | Expr MULTIPLICATIVE Expr
-          { () }
-      | Expr STAR Expr
-          { () }
-      | Expr ADDITIVE Expr
-          { () }
-      | Expr SUBTRACTIVE Expr
-          { () }
-      | Expr COLONCOLON Expr
-          { () }
-      | Expr CONCATENATION Expr
-          { () }
-      | Expr COMPARISON Expr
-          { () }
-      | Expr EQUAL Expr
-          { () }
-      | Expr EQUALEQUAL Expr
-          { () }
-      | Expr COLONEQUAL Expr
-          { () }
-      | Expr AMPERSAND Expr 
-          { () }
-      | Expr OR Expr
-          { () }
-      | Simple_expr DOT Ext_ident LESSMINUS Expr
-          { () }
-      | Simple_expr DOTLPAREN Expr RPAREN LESSMINUS Expr
-          { () }
-      | IF Expr THEN Expr ELSE Expr  %prec prec_if
-          { () }
-      | IF Expr THEN Expr  %prec prec_if
-          { () }
-      | WHILE Expr DO Expr DONE
-          { () }
-      | FOR Ide EQUAL Expr TO Expr DO Expr DONE
-          { () }
-      | FOR Ide EQUAL Expr DOWNTO Expr DO Expr DONE
-          { () }
-      | Expr SEMI Expr
-          { () }
-      | MATCH Expr WITH Function_match
-          { () }
-      | MATCH Expr WITH Parser_match
-          { () }
-      | LET Binding_list IN Expr  %prec prec_let
-          { () }
-      | LET REC Binding_list IN Expr  %prec prec_let
-          { () }
-      | FUN Fun_match
-          { () }
-      | FUNCTION Function_match
-          { () }
-      | FUNCTION Parser_match
-          { () }
-      | TRY Expr WITH Try_match
-	  { () }
-      | Expr WHERE Binding_list  %prec prec_where
-          { () }
-      | Expr WHERE REC Binding_list  %prec prec_where
-          { () }
-;
-
-Simple_expr :
-        Struct_constant
-          { () }
-      | Ext_ident
-          { () }
-      | LPAREN RPAREN
-          { () }
-      | LBRACKET Expr_sm_list RBRACKET
-          { () }
-      | LBRACKET RBRACKET
-          { () }
-      | LBRACKETBAR Expr_sm_list BARRBRACKET
-          { () }
-      | LBRACKETBAR BARRBRACKET
-          { () }
-      | LBRACKETLESS Stream_expr GREATERRBRACKET
-          { () }
-      | LBRACKETLESS GREATERRBRACKET
-          { () }
-      | LPAREN Expr COLON Type RPAREN
-          { () }
-      | LPAREN Expr RPAREN
-          { () }
-      | BEGIN Expr END
-          { () }
-      | LBRACE Expr_label_list RBRACE
-          { () }
-      | BANG Simple_expr
-          { () }
-      | Simple_expr DOT Ext_ident
-          { () }
-      | Simple_expr DOTLPAREN Expr RPAREN  %prec DOT
           { () }
 ;
 
@@ -338,24 +362,36 @@ Atomic_constant :
 
 /* Definitions by pattern matchings */
 
-Fun_match :
-        Simple_pattern_list MINUSGREATER Expr BAR Fun_match
+Opt_bar:
+        BAR             { () }
+      | /*epsilon*/     { () }
+;
+
+Action :
+        MINUSGREATER Expr
+          { $2 }
+      | WHEN Expr MINUSGREATER Expr
           { () }
-      | Simple_pattern_list MINUSGREATER Expr
+;
+
+Fun_match :
+        Simple_pattern_list Action BAR Fun_match
+          { () }
+      | Simple_pattern_list Action
 	  { () }
 ;
 
 Function_match :
-        Pattern MINUSGREATER Expr BAR Function_match
+        Pattern Action BAR Function_match
           { () }
-      | Pattern MINUSGREATER Expr
+      | Pattern Action
 	  { () }
 ;
 
 Try_match :
-        Pattern MINUSGREATER Expr BAR Try_match
+        Pattern Action BAR Try_match
           { () }
-      | Pattern MINUSGREATER Expr
+      | Pattern Action
           { () }
 ;
 
@@ -406,9 +442,9 @@ Pattern_label :
 ;
 
 Pattern_comma_list :
-        Pattern COMMA Pattern_comma_list
+        Pattern_comma_list COMMA Pattern
           { () }
-      | Pattern  %prec COMMA
+      | Pattern COMMA Pattern
           { () }
 ;
   
@@ -426,7 +462,7 @@ Pattern :
           { () }
       | Pattern COLONCOLON Pattern
           { () }
-      | Pattern COMMA Pattern_comma_list
+      | Pattern_comma_list
           { () }
       | Ext_ident Simple_pattern
           { () }
@@ -451,11 +487,11 @@ Simple_pattern :
           { () }
       | LBRACKET RBRACKET
           { () }
-      | LBRACKET Pattern_sm_list RBRACKET
+      | LBRACKET Pattern_sm_list Opt_semi RBRACKET
           { () }
       | LPAREN Pattern COLON Type RPAREN
           { () }
-      | LBRACE Pattern_label_list RBRACE
+      | LBRACE Pattern_label_list Opt_semi RBRACE
           { () }
       | LPAREN Pattern RPAREN
           { () }
@@ -482,7 +518,7 @@ Stream_expr_component :
 Stream_pattern :
         LBRACKETLESS GREATERRBRACKET
           { () }
-      | LBRACKETLESS Stream_pattern_component_list GREATERRBRACKET
+      | LBRACKETLESS Stream_pattern_component_list Opt_semi GREATERRBRACKET
           { () }
 ;
 
@@ -514,19 +550,17 @@ Parser_match :
 Ide :
         IDENT
           { () }
-      | PREFIX Infx
+      | PREF Infx
           { () }
 ;
 
 Infx :
-        INFIX           { () }
-      | ADDITIVE        { () }    | SUBTRACTIVE   { () }
-      | MULTIPLICATIVE  { () }     | STAR          { () }
-      | CONCATENATION   { () }
-      | COMPARISON      { () }    | COLONCOLON    { () }
-      | COLONEQUAL      { () }  | EQUAL         { () }
-      | EQUALEQUAL      { () }  | NOT           { () }
-      | BANG            { () }
+        INFIX1          { () }    | INFIX2        { () }
+      | INFIX3          { () }    | INFIX4        { () }
+      | STAR            { () }    | COLONCOLON    { () }
+      | COLONEQUAL      { () }    | EQUAL         { () }
+      | EQUALEQUAL      { () }    | NOT           { () }
+      | SUBTRACTIVE     { () }    | PREFIX        { () }
 ;
 
 Qual_ident :
@@ -546,9 +580,9 @@ Ext_ident :
 Type :
         Simple_type
           { () }
-      | Type STAR Type_star_list
+      | Type_star_list
           { () }
-      | Type MINUSGREATER Type  %prec prec_typearrow
+      | Type MINUSGREATER Type
           { () }
 ;
 
@@ -566,9 +600,9 @@ Simple_type :
 ;
 
 Type_star_list :
-        Simple_type
+        Type_star_list STAR Simple_type
           { () }
-      | Simple_type STAR Type_star_list
+      | Simple_type STAR Simple_type
           { () }
 ;
 
@@ -645,11 +679,9 @@ Type1_decl :
 Type1_def :
         /* epsilon */
           { [] }
-      | MUTABLE
-          { [] }
-      | EQUAL Constr_decl
+      | EQUAL Opt_bar Constr_decl
           { $2 }
-      | EQUAL LBRACE Label_decl RBRACE
+      | EQUAL LBRACE Label_decl Opt_semi RBRACE
           { $3 }
       | EQUALEQUAL Type
           { [] }

@@ -7,19 +7,6 @@ let input_chan = ref std_in;;
 let current_line = ref 0;;            (* current line number in file *)
 let current_beg = ref 0;;             (* offset of previous newline  *)
 
-#ifdef macintosh
-#define NEWLINE_CHAR `\013`
-#define RETURN_CHAR `\010`
-#else
-#define NEWLINE_CHAR `\010`
-#define RETURN_CHAR `\013`
-#endif
-
-(* To report lexical errors *)
-
-exception Lexical_error of string * int * int
-;;
-
 (* For nested comments *)
 
 let comment_depth = ref 0;;
@@ -50,29 +37,36 @@ do_list (fun (str,tok) -> hashtbl__add keyword_table str tok) [
   "not", NOT;
   "of", OF;
   "or", OR;
-  "prefix", PREFIX;
+  "prefix", PREF;
   "rec", REC;
   "then", THEN;
   "to", TO;
   "try", TRY;
   "type", TYPE;
   "value", VALUE;
+  "when", WHEN;
   "where", WHERE;
   "while", WHILE;
-  "with", WITH
+  "with", WITH;
+
+  "quo", INFIX3("quo");
+  "mod", INFIX3("mod");
+  "land", INFIX3("land");
+  "lor", INFIX3("lor");
+  "lxor", INFIX3("lxor");
+  "lsl", INFIX4("lsl");
+  "lsr", INFIX4("lsr");
+  "asr", INFIX4("asr")
 ];;
 
 let add_infix s =
-  hashtbl__add keyword_table s (INFIX s)
+  hashtbl__add keyword_table s (INFIX2 s)
 ;;
 
 let remove_infix s =
   hashtbl__remove keyword_table s
 ;;
 
-do_list add_infix
-  ["quo"; "mod"; "land"; "lor"; "lxor"; "lsl"; "lsr"; "asr"]
-;;
 
 (* To buffer string literals *)
 
@@ -105,8 +99,13 @@ let get_stored_string () =
 (* To translate escape sequences *)
 
 let char_for_backslash = function
-    `n` -> NEWLINE_CHAR
-  | `r` -> RETURN_CHAR
+#ifdef macintosh
+    `n` -> `\013`
+  | `r` -> `\010`
+#else
+    `n` -> `\010`
+  | `r` -> `\013`
+#endif
   | `b` -> `\008`
   | `t` -> `\009`
   | c   -> c
@@ -117,8 +116,6 @@ let char_for_decimal_code lexbuf i =
                10 * (int_of_char(get_lexeme_char lexbuf (i+1)) - 48) +
                     (int_of_char(get_lexeme_char lexbuf (i+2)) - 48))
 ;;
-
-let saved_string_start = ref 0;;
 
 }
 
@@ -132,13 +129,15 @@ let saved_string_start = ref 0;;
 #define ACCENTED `\128`-`\154` `\160`-`\165`
 #endif
 
-rule Main = parse
-    NEWLINE_CHAR
-      { incr current_line; 
-        current_beg := get_lexeme_start lexbuf; 
-        Main lexbuf }
-  | [` ` RETURN_CHAR `\009` `\026` `\012`] +
-      { Main lexbuf }
+#define SYMBOLS \
+    `!` `%` `&` `*` `+` `-` `.` `/` `:` `<` `=` `>` `?` `@` `^` `|` `~`
+
+rule main = parse
+    `\010`
+      { incr current_line; current_beg := get_lexeme_start lexbuf; 
+        main lexbuf }
+  | [` ` `\013` `\009` `\026` `\012`] +
+      { main lexbuf }
   | [`A`-`Z` `a`-`z` ACCENTED ]
     ( `_` ? [`A`-`Z` `a`-`z` ACCENTED `'` (*'*) `0`-`9` ] ) *
       { let s = get_lexeme lexbuf in
@@ -155,99 +154,85 @@ rule Main = parse
       { FLOAT (float_of_string(get_lexeme lexbuf)) }
   | "\""
       { reset_string_buffer();
-        (* Start of token is start of string. *)
-        saved_string_start := lexbuf.lex_start_pos;
-        String lexbuf;
-        lexbuf.lex_start_pos <- !saved_string_start;
+        let string_start = lexbuf.lex_start_pos + lexbuf.lex_abs_pos in
+        string lexbuf;
+        lexbuf.lex_start_pos <- string_start - lexbuf.lex_abs_pos;
         STRING (get_stored_string()) }
   | "`"
-      { CHAR (Char lexbuf) }
+      { let char_start = lexbuf.lex_start_pos + lexbuf.lex_abs_pos in
+        let c = char lexbuf in
+        lexbuf.lex_start_pos <- char_start - lexbuf.lex_abs_pos;
+        CHAR c }
   | "(*"
-      { comment_depth := 1; Comment lexbuf; Main lexbuf }
+      { comment_depth := 1; comment lexbuf; main lexbuf }
   | "#" { SHARP }
-  | "!" { BANG }
-  | "!=" { COMPARISON "!=" }
   | "&" { AMPERSAND }
   | "'" { QUOTE }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "*" { STAR }
-  | "*." { MULTIPLICATIVE "*." }
-  | "+" { ADDITIVE "+" }
-  | "+." { ADDITIVE "+." }
   | "," { COMMA }
-  | "-" { SUBTRACTIVE "-" }
-  | "-." { SUBTRACTIVE "-." }
   | "->" { MINUSGREATER }
   | "." { DOT }
   | ".." { DOTDOT }
   | ".(" { DOTLPAREN }
-  | "/" { MULTIPLICATIVE "/" }
-  | "/." { MULTIPLICATIVE "/." }
+  | ".[" { DOTLBRACKET }
   | ":" { COLON }
   | "::" { COLONCOLON }
   | ":=" { COLONEQUAL }
   | ";" { SEMI }
   | ";;" { SEMISEMI }
-  | "<" { COMPARISON "<" }
-  | "<." { COMPARISON "<." }
   | "<-" { LESSMINUS }
-  | "<=" { COMPARISON "<=" }
-  | "<=." { COMPARISON "<=." }
-  | "<>" { COMPARISON "<>" }
-  | "<>." { COMPARISON "<>." }
   | "=" { EQUAL }
-  | "=." { COMPARISON "=." }
   | "==" { EQUALEQUAL }
-  | ">" { COMPARISON ">" }
-  | ">." { COMPARISON ">." }
-  | ">=" { COMPARISON ">=" }
-  | ">=." { COMPARISON ">=." }
   | ">]" { GREATERRBRACKET }
-  | "@" { CONCATENATION "@" }
   | "[" { LBRACKET }
   | "[|" { LBRACKETBAR }
   | "[<" { LBRACKETLESS }
   | "]" { RBRACKET }
-  | "^" { CONCATENATION "^" }
   | "_" { UNDERSCORE }
   | "__" { UNDERUNDER }
   | "{" { LBRACE }
   | "|" { BAR }
   | "|]" { BARRBRACKET }
   | "}" { RBRACE }
+  | "/\\" { SLASHBACKSLASH }
+  | "\\/" { BACKSLASHSLASH }
+
+  | "!="    { INFIX1 "!=" }
+  | "-"     { SUBTRACTIVE "-" }
+  | "-."    { SUBTRACTIVE "-." }
+
+  | [ `!` `?` ] [ SYMBOLS ] *
+            { PREFIX(get_lexeme lexbuf) }
+  | [ `=` `<` `>` `@` `^` `|` `&` `~` ] [ SYMBOLS ] *
+            { INFIX1(get_lexeme lexbuf) }
+  | [ `+` `-` ] [ SYMBOLS ] *
+            { INFIX2(get_lexeme lexbuf) }
+  | "**" [ SYMBOLS ] *
+            { INFIX4(get_lexeme lexbuf) }
+  | [ `*` `/` `%` ] [ SYMBOLS ] *
+            { INFIX3(get_lexeme lexbuf) }
   | eof { EOF }
   | _
-      { raise (Lexical_error("illegal character",
+      { raise (Lexical_error(Illegal_character,
                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
 
-and Comment = parse
+and comment = parse
     "(*"
-      { comment_depth := succ !comment_depth; Comment lexbuf }
+      { comment_depth := succ !comment_depth; comment lexbuf }
   | "*)"
       { comment_depth := pred !comment_depth;
-        if !comment_depth > 0 then Comment lexbuf }
-  | "\""
-      { reset_string_buffer();
-        String lexbuf;
-        reset_string_buffer();
-        Comment lexbuf }
-  | "`" [^ `\\` `\``] "`"
-      { Comment lexbuf }
-  | "`" `\\` [`\\` `\`` `n` `t` `b` `r`] "`"
-      { Comment lexbuf }
-  | "`" `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`] "`"
-      { Comment lexbuf }
+        if !comment_depth > 0 then comment lexbuf }
   | eof
-      { raise (Lexical_error("comment not terminated", -1, -1)) }
-  | NEWLINE_CHAR
-      { incr current_line; 
-        current_beg := get_lexeme_start lexbuf;
-        Comment lexbuf }
-   | _
-      { Comment lexbuf }
+      { raise (Lexical_error(Unterminated_comment, -1, -1)) }
+  | `\010`
+      { incr current_line; current_beg := get_lexeme_start lexbuf;
+        comment lexbuf }
+  | _
+      { comment lexbuf }
 
-and Char = parse
+and char = parse
     [^ `\\` `\``] "`"
       { get_lexeme_char lexbuf 0 }
   | `\\` [`\\` `\`` `n` `t` `b` `r`] "`"
@@ -255,28 +240,28 @@ and Char = parse
   | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`] "`"
       { char_for_decimal_code lexbuf 1 }
   | _
-      { raise (Lexical_error("bad character constant",
+      { raise (Lexical_error(Bad_char_constant,
                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
 
-and String = parse
+and string = parse
     `"`
       { () }
   | `\\` [` ` `\010` `\013` `\009` `\026` `\012`] +
-      { String lexbuf }
+      { string lexbuf }
   | `\\` [`\\` `"` `n` `t` `b` `r`]
       { store_string_char(char_for_backslash(get_lexeme_char lexbuf 1));
-        String lexbuf }
+        string lexbuf }
   | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`]
       { store_string_char(char_for_decimal_code lexbuf 1);
-         String lexbuf }
+         string lexbuf }
   | eof
-      { raise (Lexical_error("string not terminated", -1, -1)) }
-  | NEWLINE_CHAR
+      { raise (Lexical_error(Unterminated_string, -1, -1)) }
+  | `\010`
       { incr current_line; 
         store_string_char(get_lexeme_char lexbuf 0);
         current_beg := get_lexeme_start lexbuf;
-        String lexbuf }
+        string lexbuf }
   | _
       { store_string_char(get_lexeme_char lexbuf 0);
-        String lexbuf }
+        string lexbuf }
 ;;
