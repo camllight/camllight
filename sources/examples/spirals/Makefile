@@ -2,12 +2,16 @@ CAMLC=camlc
 CAMLLIBR=camllibr
 CAMLLEX=camllex
 CAMLYACC=camlyacc
-CAMLDEP=perl /caml386/src/tools/camldep
+COMPFLAGS=-W
+CAMLDEP=perl /caml/src/tools/camldep
 
-all: spir.exe
+all: spir.exe spir-bw.exe
 
 spir.exe: spir.ml
 	$(CAMLC) $(LINKFLAGS) -o spir.exe spir.ml
+
+spir-bw.exe: spir-bw.ml
+	$(CAMLC) $(LINKFLAGS) -o spir-bw.exe spir-bw.ml
 
 clean:
 	del *.exe

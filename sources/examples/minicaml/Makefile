@@ -2,7 +2,8 @@ CAMLC=camlc
 CAMLLIBR=camllibr
 CAMLLEX=camllex
 CAMLYACC=camlyacc
-CAMLDEP=perl /caml386/src/tools/camldep
+COMPFLAGS=-W
+CAMLDEP=perl /caml/src/tools/camldep
 
 all: minicaml.exe
 
@@ -24,14 +25,14 @@ clean:
 depend:
 	$(CAMLDEP) >> makefile
 
+caml.zo: eval.zi syntaxe.zi synthese.zi types.zi 
+eval.zo: eval.zi syntaxe.zi 
+eval.zi: syntaxe.zi 
 interpre.zo: eval.zi syntaxe.zi 
 lexuniv.zo: lexuniv.zi 
 loadall.zo: caml.zo 
+syntaxe.zo: syntaxe.zi lexuniv.zi 
 synthese.zo: synthese.zi syntaxe.zi types.zi 
+synthese.zi: syntaxe.zi types.zi 
 types.zo: types.zi 
 typeur.zo: eval.zi syntaxe.zi synthese.zi types.zi 
-synthese.zi: syntaxe.zi types.zi 
-caml.zo: eval.zi syntaxe.zi synthese.zi types.zi 
-eval.zi: syntaxe.zi 
-eval.zo: eval.zi syntaxe.zi 
-syntaxe.zo: syntaxe.zi lexuniv.zi 
