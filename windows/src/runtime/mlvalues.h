@@ -44,7 +44,6 @@ typedef unsigned long mlsize_t;
 #endif
 typedef unsigned int tag_t;             /* Actually, an unsigned char */
 typedef unsigned long color_t;
-typedef unsigned long mark_t;
 
 #ifdef SIXTYFOUR
 typedef int int32;            /* Not portable, but checked by autoconf. */
