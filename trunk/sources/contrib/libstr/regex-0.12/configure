@@ -430,7 +430,7 @@ EOF
 cat >> config.status <<\EOF
 
 top_srcdir=$srcdir
-for file in .. Makefile doc/Makefile test/Makefile; do if [ "x$file" != "x.." ]; then
+for file in .. Makefile; do if [ "x$file" != "x.." ]; then
   srcdir=$top_srcdir
   # Remove last slash and all that follows it.  Not all systems have dirname.
   dir=`echo $file|sed 's%/[^/][^/]*$%%'`
