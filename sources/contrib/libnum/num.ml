@@ -448,6 +448,9 @@ and decr_num r = r := pred_num !r
 ;;
 
 (* Nums printing *)
+
+#open "format";;
+
 let sys_print_num base before n after = 
   match cautious_normalize_num_when_printing n with 
   | Int i -> print_string (sys_string_of_int base before i after)

@@ -673,6 +673,7 @@ let power_ratio_positive_big_int r bi =
 ;;
 
 (* Ratios printing *)
+
 let sys_print_ratio base before r after =
  let norm = cautious_normalize_ratio_when_printing r in
  let n = norm.Numerator 

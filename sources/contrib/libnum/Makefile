@@ -31,8 +31,8 @@ OBJFILES=nat_stubs.o
 
 all: libnums.a nums.zo $(ZIFILESD) camlnum ${ZOFILESD} ${ZIFILESD}
 
-camlnum: libnums.a $(ZOFILESD)
-	$(CAMLMKTOP) -o camlnum -custom $(ZOFILES) libnums.a
+camlnum: libnums.a $(ZOFILES) numprint.zo
+	$(CAMLMKTOP) -o camlnum -custom $(ZOFILES) numprint.zo libnums.a
 
 libnums.a: bignum/libbignum.a $(OBJFILES)
 	cp bignum/libbignum.a libnums.a
@@ -88,4 +88,5 @@ int_misc.zo: int_misc.zi
 ltx_num.zo: ltx_num.zi num.zi nat.zi big_int.zi int_misc.zi ratio.zi 
 nat.zo: nat.zi fnat.zi 
 num.zo: num.zi arith_flags.zi int_misc.zi fnat.zi big_int.zi ratio.zi 
+numprint.zo: num.zi nat.zi big_int.zi ratio.zi 
 ratio.zo: ratio.zi arith_flags.zi int_misc.zi fnat.zi big_int.zi 
