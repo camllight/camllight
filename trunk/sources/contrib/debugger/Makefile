@@ -10,7 +10,7 @@ CPP=/lib/cpp -P
 CAMLC=camlc
 CAMLLEX=camllex
 CAMLYACC=camlyacc
-INCLUDES=-I ../libunix -I ../../src/compiler -I ../../src/linker
+INCLUDES=-I ../libunix -I ../../src/compiler -I ../../src/linker -I ../../src/toplevel
 COMPFLAGS=$(INCLUDES)
 LINKFLAGS=$(INCLUDES)
 CFLAGS=$(OPTS) -O -I../../src/runtime
@@ -19,7 +19,7 @@ CFLAGS=$(OPTS) -O -I../../src/runtime
 EXTERNOBJS = \
 	config.zo globals.zo misc.zo \
 	symtable.zo modules.zo builtins.zo \
-	types.zo pr_type.zo \
+	types.zo fmt_type.zo \
 	tr_env.zo 
 OBJS =	debugger_config.zo constants.zo primitives.zo unix_tools.zo \
 	modules2.zo \

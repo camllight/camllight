@@ -23,7 +23,7 @@
 #open "show_information";;
 #open "time_travel";;
 #open "events";;
-#open "pr_type";;
+#open "fmt_type";;
 #open "pr_value";;
 #open "variables";;
 #open "source";;
@@ -32,6 +32,7 @@
 #open "frames";;
 #open "value";;
 #open "pattern_matching";;
+#open "format";;
 
 (** Instructions, variables and infos lists. **)
 let instruction_list =
@@ -188,7 +189,7 @@ let instr_dir lexbuf =
     else
       do_list (function x -> add_path (expand_path x)) (rev new_directory);
     print_string "Directories :";
-    do_list (function x -> print_string (" " ^ x)) !load_path;
+    do_list (function x -> print_space(); print_string x) !load_path;
     print_newline ();;
 
 let instr_kill lexbuf =
@@ -257,12 +258,12 @@ let instr_quit _ =
 
 let print_variable_list () =
   print_endline "List of variables :";
-  do_list (function (nm, _, _) -> print_string (nm ^ " ")) !variable_list;
+  do_list (function (nm, _, _) -> print_string nm; print_space()) !variable_list;
   print_newline ();;
 
 let print_info_list () =
   print_endline "List of info commands :";
-  do_list (function (nm, _, _) -> print_string (nm ^ " ")) !info_list;
+  do_list (function (nm, _, _) -> print_string nm; print_space()) !info_list;
   print_newline ();;
 
 let instr_help lexbuf =
@@ -318,12 +319,19 @@ let instr_print lexbuf =
     do_list
       (function x ->
       	 let (val, typ) = variable x in
+           open_hovbox 0;
       	   output_variable_name std_out x;
-           print_string " : ";
-           output_one_type std_out typ; print_string " = ";
+           print_string " :"; print_space();
+           print_one_type typ; print_string " ="; print_space();
            print_value val typ;
+           close_box();
            print_newline ())
       variables;;
+
+let instr_more lexbuf =
+  let arguments = Integer_list_eol Lexeme lexbuf in
+    ensure_loaded ();
+    do_list pr_value__more arguments;;
 
 let instr_match lexbuf =
   let (var, pattern) = Match_arguments_eol Lexeme lexbuf in
@@ -332,12 +340,14 @@ let instr_match lexbuf =
       do_list
 	(function
 	   (name, val, typ) ->
+             open_hovbox 0;
 	     print_string name;
-	     print_string " : ";
-             output_one_type std_out typ;
-             print_string " = ";
+	     print_string " :"; print_space();
+             print_one_type typ;
+             print_string " ="; print_space();
              print_value val typ;
-             print_newline ())
+            close_box();
+            print_newline ())
       	(pattern_matching pattern val typ);;
 
 let instr_source lexbuf =
@@ -665,13 +675,13 @@ let loading_mode_variable =
 let info_modules lexbuf =
   end_of_line lexbuf;
   print_endline "Used modules :";
-  do_list (function x -> print_string (x ^ " ")) !modules;
+  do_list (function x -> print_string x; print_space()) !modules;
   print_newline ();
   print_endline "Opened modules :";
   if !opened_modules_names = [] then
     print_endline "(no module opened)."
   else
-    (do_list (function x -> print_string (x ^ " ")) !opened_modules_names;
+    (do_list (function x -> print_string x; print_space) !opened_modules_names;
      print_newline ());;
 
 let info_checkpoints lexbuf =
@@ -768,6 +778,8 @@ Skip over function calls.\n\
 Argument N means do this N times (or till program stops for another reason).";
      "print", false, instr_print, true,
 "print value of variables (`*' stand for the accumulator).";
+     "more", false, instr_more, true,
+"print more on given ellipsis (`<n>' stands for ellipsis number n).";
      "match", false, instr_match, true,
 "";
      "source", false, instr_source, true,
