@@ -34,7 +34,7 @@ do_list (fun (str,tok) -> hashtbl__add keyword_table str tok) [
   "not", NOT;
   "of", OF;
   "or", OR;
-  "prefix", PREFIX;
+  "prefix", PREF;
   "rec", REC;
   "then", THEN;
   "to", TO;
@@ -44,20 +44,26 @@ do_list (fun (str,tok) -> hashtbl__add keyword_table str tok) [
   "when", WHEN;
   "where", WHERE;
   "while", WHILE;
-  "with", WITH
+  "with", WITH;
+
+  "quo", INFIX3("quo");
+  "mod", INFIX3("mod");
+  "land", INFIX3("land");
+  "lor", INFIX3("lor");
+  "lxor", INFIX3("lxor");
+  "lsl", INFIX4("lsl");
+  "lsr", INFIX4("lsr");
+  "asr", INFIX4("asr")
 ];;
 
 let add_infix s =
-  hashtbl__add keyword_table s (INFIX s)
+  hashtbl__add keyword_table s (INFIX2 s)
 ;;
 
 let remove_infix s =
   hashtbl__remove keyword_table s
 ;;
 
-do_list add_infix
-  ["quo"; "mod"; "land"; "lor"; "lxor"; "lsl"; "lsr"; "asr"]
-;;
 
 (* To buffer string literals *)
 
@@ -122,6 +128,10 @@ let saved_string_start = ref 0;;
 #define ACCENTED `\128`-`\154` `\160`-`\165`
 #endif
 
+#define SYMBOLS \
+    `!` `$` `%` `&` `*` `+` `-` `.` `/` `:` `;` \
+    `<` `=` `>` `?` `@` `^` `|` `~`
+
 rule main = parse
     [` ` `\010` `\013` `\009` `\012`] +
       { main lexbuf }
@@ -154,54 +164,31 @@ rule main = parse
   | "(*"
       { comment_depth := 1; comment lexbuf; main lexbuf }
   | "#" { SHARP }
-  | "!" { BANG }
-  | "!=" { COMPARISON "!=" }
   | "&" { AMPERSAND }
   | "&&" { AMPERAMPER }
   | "'" { QUOTE }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | "*" { STAR }
-  | "*." { MULTIPLICATIVE "*." }
-  | "**" { EXPONENTIATION "**" }
-  | "+" { ADDITIVE "+" }
-  | "+." { ADDITIVE "+." }
   | "," { COMMA }
-  | "-" { SUBTRACTIVE "-" }
-  | "-." { SUBTRACTIVE "-." }
   | "->" { MINUSGREATER }
   | "." { DOT }
   | ".." { DOTDOT }
   | ".(" { DOTLPAREN }
   | ".[" { DOTLBRACKET }
-  | "/" { MULTIPLICATIVE "/" }
-  | "/." { MULTIPLICATIVE "/." }
   | ":" { COLON }
   | "::" { COLONCOLON }
   | ":=" { COLONEQUAL }
   | ";" { SEMI }
   | ";;" { SEMISEMI }
-  | "<" { COMPARISON "<" }
-  | "<." { COMPARISON "<." }
   | "<-" { LESSMINUS }
-  | "<=" { COMPARISON "<=" }
-  | "<=." { COMPARISON "<=." }
-  | "<>" { COMPARISON "<>" }
-  | "<>." { COMPARISON "<>." }
   | "=" { EQUAL }
-  | "=." { COMPARISON "=." }
   | "==" { EQUALEQUAL }
-  | ">" { COMPARISON ">" }
-  | ">." { COMPARISON ">." }
-  | ">=" { COMPARISON ">=" }
-  | ">=." { COMPARISON ">=." }
   | ">]" { GREATERRBRACKET }
-  | "@" { CONCATENATION "@" }
   | "[" { LBRACKET }
   | "[|" { LBRACKETBAR }
   | "[<" { LBRACKETLESS }
   | "]" { RBRACKET }
-  | "^" { CONCATENATION "^" }
   | "_" { UNDERSCORE }
   | "__" { UNDERUNDER }
   | "{" { LBRACE }
@@ -209,6 +196,21 @@ rule main = parse
   | "||" { BARBAR }
   | "|]" { BARRBRACKET }
   | "}" { RBRACE }
+
+  | "!="    { INFIX1 "!=" }
+  | "-"     { SUBTRACTIVE "-" }
+  | "-."    { SUBTRACTIVE "-." }
+
+  | [ `!` `?` ] [ SYMBOLS ] *
+            { PREFIX(get_lexeme lexbuf) }
+  | [ `=` `<` `>` `@` `^` `|` `&` `~` ] [ SYMBOLS ] *
+            { INFIX1(get_lexeme lexbuf) }
+  | [ `+` `-` ] [ SYMBOLS ] *
+            { INFIX2(get_lexeme lexbuf) }
+  | "**" [ SYMBOLS ] *
+            { INFIX4(get_lexeme lexbuf) }
+  | [ `*` `/` `%` ] [ SYMBOLS ] *
+            { INFIX3(get_lexeme lexbuf) }
   | eof { EOF }
   | _
       { raise (Lexical_error(Illegal_character,

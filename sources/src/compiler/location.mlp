@@ -146,8 +146,7 @@ let output_location oc loc =
       in
         incr curr_pos; c
     and seek pos =
-      let new_pos = pos - !input_lexbuf.lex_abs_pos in
-      curr_pos := if new_pos >= 0 then new_pos else 0
+      curr_pos := pos - !input_lexbuf.lex_abs_pos
     in
       output_loc oc input seek false loc
   end
