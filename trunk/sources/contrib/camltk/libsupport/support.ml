@@ -88,12 +88,10 @@ let Widget_any_table =  map fst widget_naming_scheme
 ;;
 (* subtypes at this time *)
 let Widget_menu_table = [ "menu" ]
+and Widget_frame_table = [ "frame" ]
+and Widget_entry_table = [ "entry" ]
+and Widget_listbox_table = [ "listbox" ]
 ;;
-let Widget_frame_table = [ "frame" ]
-;;
-let Widget_entry_table = [ "entry" ]
-;;
-
 
 let new_suffix class n =
   try 
