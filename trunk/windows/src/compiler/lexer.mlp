@@ -102,10 +102,11 @@ let char_for_backslash = function
     `n` -> `\010`
   | `r` -> `\013`
 #endif
-  | `b` -> `\008`
 #ifdef FUSSY
+  | `b` -> `\b`
   | `t` -> `\t`
 #else
+  | `b` -> `\008`
   | `t` -> `\009`
 #endif
   | c   -> c
