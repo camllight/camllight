@@ -11,7 +11,7 @@ let new =
 ;;
 
 let set v x =
-  TkEval [| TkToken "set"; TkToken v; TkToken x |]; ()
+  let _ = TkEval [| TkToken "set"; TkToken v; TkToken x |] in ()
 ;;
 let get v =
   TkEval [| TkToken "set"; TkToken v |]

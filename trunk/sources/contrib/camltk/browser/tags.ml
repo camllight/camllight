@@ -49,7 +49,7 @@ let dotmli_emacs_tags = hashtbl__new 17
 ;;
 
 let read_tag_file ic =
- input_line ic; (* dump first line, assumed "\012" *)
+ let _ = input_line ic in (* dump first line, assumed "\012" *)
   try
    while true do
       let file_line = input_line ic in

@@ -226,7 +226,7 @@ let rec find_constructor cname = function
 (* Enter a type, must not be previously defined *)
 let enter_type typname constructors =
   try
-      hashtbl__find types_table typname;
+      let _ = hashtbl__find types_table typname in
       raise (Duplicate_Definition ("type", typname))
   with Not_found ->
     let typdef = new_type typname in
@@ -299,7 +299,7 @@ let separate_components =  it_list add_sort []
 
 let enter_widget name components =
   try 
-    hashtbl__find module_table name;
+    let _ = hashtbl__find module_table name in
     raise (Duplicate_Definition ("widget/module", name))
   with Not_found ->
   let sorted_components = separate_components components in
@@ -328,7 +328,7 @@ let enter_function comp =
 (******************** Modules ********************)
 let enter_module name components = 
   try 
-    hashtbl__find module_table name;
+    let _ = hashtbl__find module_table name in
     raise (Duplicate_Definition ("widget/module", name))
   with Not_found ->
     do_list enter_component_types components;

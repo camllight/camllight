@@ -1,5 +1,6 @@
 (* TODO: restrict event fields *)
 let canvas_bind widget tag eventsequence action =
+ let _ =
   TkEval [| CAMLtoTKWidget Widget_canvas_table widget;
       	    TkToken "bind";
       	    CAMLtoTKTagOrId tag;
@@ -13,7 +14,7 @@ let canvas_bind widget tag eventsequence action =
       let CbId = register_callback widget (WrapEventInfo f what) in
         TkToken ("+camlcb " ^ CbId ^ (WriteEventField what))
 
-  end |];
+  end |] in
   ()
 ;;
 
