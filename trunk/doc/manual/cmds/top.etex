@@ -333,7 +333,7 @@ code preloaded at start-up.
 \begin{mac} This command is not available in the Macintosh version.
 \end{mac}
 
-\begin{pc} This command is not available in the PC versions.
+\begin{pc} This command is not available in the PC version.
 \end{pc}
 
 The "camlmktop" command takes as argument a set of ".zo" files, and
