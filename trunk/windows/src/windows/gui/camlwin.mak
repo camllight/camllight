@@ -32,9 +32,9 @@ NULL=nul
 ################################################################################
 # Begin Project
 # PROP Target_Last_Scanned "Camlwin - Win32 Release"
+CPP=cl.exe
 RSC=rc.exe
 MTL=mktyplib.exe
-CPP=cl.exe
 
 !IF  "$(CFG)" == "Camlwin - Win32 Debug"
 
@@ -49,7 +49,7 @@ CPP=cl.exe
 OUTDIR=.\WinDebug
 INTDIR=.\WinDebug
 
-ALL : "$(OUTDIR)\camlwin.exe"
+ALL : "$(OUTDIR)\camlwin.exe" "$(OUTDIR)\camlwin.bsc"
 
 CLEAN : 
 	-@erase ".\WinDebug\vc40.pdb"
@@ -71,6 +71,19 @@ CLEAN :
 	-@erase ".\WinDebug\CAMLWIN.res"
 	-@erase ".\WinDebug\camlwin.ilk"
 	-@erase ".\WinDebug\camlwin.pdb"
+	-@erase ".\WinDebug\camlwin.bsc"
+	-@erase ".\WinDebug\STDAFX.SBR"
+	-@erase ".\WinDebug\camlwin.sbr"
+	-@erase ".\WinDebug\mainfrm.sbr"
+	-@erase ".\WinDebug\txtrmdoc.sbr"
+	-@erase ".\WinDebug\txtrmfr.sbr"
+	-@erase ".\WinDebug\xeditvw.sbr"
+	-@erase ".\WinDebug\histdoc.sbr"
+	-@erase ".\WinDebug\prefsdlg.sbr"
+	-@erase ".\WinDebug\ui.sbr"
+	-@erase ".\WinDebug\graphvw.sbr"
+	-@erase ".\WinDebug\graphdoc.sbr"
+	-@erase ".\WinDebug\graphfrm.sbr"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
@@ -92,12 +105,11 @@ CLEAN :
 .cxx{$(CPP_SBRS)}.sbr:
 
 # ADD BASE CPP /nologo /G3 /MT /W3 /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /YX /c
-# ADD CPP /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /c
-# SUBTRACT CPP /Fr
+# ADD CPP /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /Fr /c
 CPP_PROJ=/nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
- "_WINDOWS" /D "_MBCS" /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c 
+ "_WINDOWS" /D "_MBCS" /Fr"$(INTDIR)/" /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c 
 CPP_OBJS=.\WinDebug/
-CPP_SBRS=
+CPP_SBRS=.\WinDebug/
 # ADD BASE MTL /nologo /D "_DEBUG" /win32
 # ADD MTL /nologo /D "_DEBUG" /win32
 MTL_PROJ=/nologo /D "_DEBUG" /win32 
@@ -108,7 +120,25 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 BSC32_FLAGS=/nologo /o"$(OUTDIR)/camlwin.bsc" 
-BSC32_SBRS=
+BSC32_SBRS= \
+	"$(INTDIR)/STDAFX.SBR" \
+	"$(INTDIR)/camlwin.sbr" \
+	"$(INTDIR)/mainfrm.sbr" \
+	"$(INTDIR)/txtrmdoc.sbr" \
+	"$(INTDIR)/txtrmfr.sbr" \
+	"$(INTDIR)/xeditvw.sbr" \
+	"$(INTDIR)/histdoc.sbr" \
+	"$(INTDIR)/prefsdlg.sbr" \
+	"$(INTDIR)/ui.sbr" \
+	"$(INTDIR)/graphvw.sbr" \
+	"$(INTDIR)/graphdoc.sbr" \
+	"$(INTDIR)/graphfrm.sbr"
+
+"$(OUTDIR)\camlwin.bsc" : "$(OUTDIR)" $(BSC32_SBRS)
+    $(BSC32) @<<
+  $(BSC32_FLAGS) $(BSC32_SBRS)
+<<
+
 LINK32=link.exe
 # ADD BASE LINK32 oldnames.lib /nologo /stack:0x11240 /subsystem:windows /debug /machine:IX86
 # ADD LINK32 ..\runtime\libcaml.lib /nologo /stack:0x11240 /subsystem:windows /debug /machine:IX86
@@ -179,13 +209,13 @@ CLEAN :
 
 .c{$(CPP_OBJS)}.obj:
 
-.cpp{$(CPP_OBJS)}.obj:
-
-.cxx{$(CPP_OBJS)}.obj:
-
 .c{$(CPP_SBRS)}.sbr:
 
+.cpp{$(CPP_OBJS)}.obj:
+
 .cpp{$(CPP_SBRS)}.sbr:
+
+.cxx{$(CPP_OBJS)}.obj:
 
 .cxx{$(CPP_SBRS)}.sbr:
 
@@ -293,11 +323,14 @@ DEP_CPP_STDAF=\
 
 BuildCmds= \
 	$(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
- "_WINDOWS" /D "_MBCS" /Fp"$(INTDIR)/camlwin.pch" /Yc"STDAFX.H" /Fo"$(INTDIR)/"\
- /Fd"$(INTDIR)/" /c $(SOURCE) \
+ "_WINDOWS" /D "_MBCS" /Fr"$(INTDIR)/" /Fp"$(INTDIR)/camlwin.pch" /Yc"STDAFX.H"\
+ /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c $(SOURCE) \
 	
 
 "$(INTDIR)\STDAFX.OBJ" : $(SOURCE) $(DEP_CPP_STDAF) "$(INTDIR)"
+   $(BuildCmds)
+
+"$(INTDIR)\STDAFX.SBR" : $(SOURCE) $(DEP_CPP_STDAF) "$(INTDIR)"
    $(BuildCmds)
 
 "$(INTDIR)\camlwin.pch" : $(SOURCE) $(DEP_CPP_STDAF) "$(INTDIR)"
@@ -345,12 +378,19 @@ DEP_CPP_CAMLW=\
 # ADD BASE CPP /Yu"STDAFX.H"
 # ADD CPP /Yu"STDAFX.H"
 
+BuildCmds= \
+	$(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
+ "_WINDOWS" /D "_MBCS" /Fr"$(INTDIR)/" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H"\
+ /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c $(SOURCE) \
+	
+
 "$(INTDIR)\camlwin.obj" : $(SOURCE) $(DEP_CPP_CAMLW) "$(INTDIR)"\
  "$(INTDIR)\camlwin.pch"
-   $(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
- "_WINDOWS" /D "_MBCS" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H" /Fo"$(INTDIR)/"\
- /Fd"$(INTDIR)/" /c $(SOURCE)
+   $(BuildCmds)
 
+"$(INTDIR)\camlwin.sbr" : $(SOURCE) $(DEP_CPP_CAMLW) "$(INTDIR)"\
+ "$(INTDIR)\camlwin.pch"
+   $(BuildCmds)
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
 
@@ -384,12 +424,19 @@ DEP_CPP_MAINF=\
 # ADD BASE CPP /Yu"STDAFX.H"
 # ADD CPP /Yu"STDAFX.H"
 
+BuildCmds= \
+	$(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
+ "_WINDOWS" /D "_MBCS" /Fr"$(INTDIR)/" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H"\
+ /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c $(SOURCE) \
+	
+
 "$(INTDIR)\mainfrm.obj" : $(SOURCE) $(DEP_CPP_MAINF) "$(INTDIR)"\
  "$(INTDIR)\camlwin.pch"
-   $(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
- "_WINDOWS" /D "_MBCS" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H" /Fo"$(INTDIR)/"\
- /Fd"$(INTDIR)/" /c $(SOURCE)
+   $(BuildCmds)
 
+"$(INTDIR)\mainfrm.sbr" : $(SOURCE) $(DEP_CPP_MAINF) "$(INTDIR)"\
+ "$(INTDIR)\camlwin.pch"
+   $(BuildCmds)
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
 
@@ -421,12 +468,19 @@ DEP_CPP_TXTRM=\
 # ADD BASE CPP /Yu"STDAFX.H"
 # ADD CPP /Yu"STDAFX.H"
 
+BuildCmds= \
+	$(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
+ "_WINDOWS" /D "_MBCS" /Fr"$(INTDIR)/" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H"\
+ /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c $(SOURCE) \
+	
+
 "$(INTDIR)\txtrmdoc.obj" : $(SOURCE) $(DEP_CPP_TXTRM) "$(INTDIR)"\
  "$(INTDIR)\camlwin.pch"
-   $(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
- "_WINDOWS" /D "_MBCS" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H" /Fo"$(INTDIR)/"\
- /Fd"$(INTDIR)/" /c $(SOURCE)
+   $(BuildCmds)
 
+"$(INTDIR)\txtrmdoc.sbr" : $(SOURCE) $(DEP_CPP_TXTRM) "$(INTDIR)"\
+ "$(INTDIR)\camlwin.pch"
+   $(BuildCmds)
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
 
@@ -458,12 +512,19 @@ DEP_CPP_TXTRMF=\
 # ADD BASE CPP /Yu"STDAFX.H"
 # ADD CPP /Yu"STDAFX.H"
 
+BuildCmds= \
+	$(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
+ "_WINDOWS" /D "_MBCS" /Fr"$(INTDIR)/" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H"\
+ /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c $(SOURCE) \
+	
+
 "$(INTDIR)\txtrmfr.obj" : $(SOURCE) $(DEP_CPP_TXTRMF) "$(INTDIR)"\
  "$(INTDIR)\camlwin.pch"
-   $(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
- "_WINDOWS" /D "_MBCS" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H" /Fo"$(INTDIR)/"\
- /Fd"$(INTDIR)/" /c $(SOURCE)
+   $(BuildCmds)
 
+"$(INTDIR)\txtrmfr.sbr" : $(SOURCE) $(DEP_CPP_TXTRMF) "$(INTDIR)"\
+ "$(INTDIR)\camlwin.pch"
+   $(BuildCmds)
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
 
@@ -494,12 +555,19 @@ DEP_CPP_XEDIT=\
 # ADD BASE CPP /Yu"STDAFX.H"
 # ADD CPP /Yu"STDAFX.H"
 
+BuildCmds= \
+	$(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
+ "_WINDOWS" /D "_MBCS" /Fr"$(INTDIR)/" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H"\
+ /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c $(SOURCE) \
+	
+
 "$(INTDIR)\xeditvw.obj" : $(SOURCE) $(DEP_CPP_XEDIT) "$(INTDIR)"\
  "$(INTDIR)\camlwin.pch"
-   $(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
- "_WINDOWS" /D "_MBCS" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H" /Fo"$(INTDIR)/"\
- /Fd"$(INTDIR)/" /c $(SOURCE)
+   $(BuildCmds)
 
+"$(INTDIR)\xeditvw.sbr" : $(SOURCE) $(DEP_CPP_XEDIT) "$(INTDIR)"\
+ "$(INTDIR)\camlwin.pch"
+   $(BuildCmds)
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
 
@@ -531,12 +599,19 @@ DEP_CPP_HISTD=\
 # ADD BASE CPP /Yu"STDAFX.H"
 # ADD CPP /Yu"STDAFX.H"
 
+BuildCmds= \
+	$(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
+ "_WINDOWS" /D "_MBCS" /Fr"$(INTDIR)/" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H"\
+ /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c $(SOURCE) \
+	
+
 "$(INTDIR)\histdoc.obj" : $(SOURCE) $(DEP_CPP_HISTD) "$(INTDIR)"\
  "$(INTDIR)\camlwin.pch"
-   $(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
- "_WINDOWS" /D "_MBCS" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H" /Fo"$(INTDIR)/"\
- /Fd"$(INTDIR)/" /c $(SOURCE)
+   $(BuildCmds)
 
+"$(INTDIR)\histdoc.sbr" : $(SOURCE) $(DEP_CPP_HISTD) "$(INTDIR)"\
+ "$(INTDIR)\camlwin.pch"
+   $(BuildCmds)
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
 
@@ -567,12 +642,19 @@ DEP_CPP_PREFS=\
 # ADD BASE CPP /Yu"STDAFX.H"
 # ADD CPP /Yu"STDAFX.H"
 
+BuildCmds= \
+	$(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
+ "_WINDOWS" /D "_MBCS" /Fr"$(INTDIR)/" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H"\
+ /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c $(SOURCE) \
+	
+
 "$(INTDIR)\prefsdlg.obj" : $(SOURCE) $(DEP_CPP_PREFS) "$(INTDIR)"\
  "$(INTDIR)\camlwin.pch"
-   $(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
- "_WINDOWS" /D "_MBCS" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H" /Fo"$(INTDIR)/"\
- /Fd"$(INTDIR)/" /c $(SOURCE)
+   $(BuildCmds)
 
+"$(INTDIR)\prefsdlg.sbr" : $(SOURCE) $(DEP_CPP_PREFS) "$(INTDIR)"\
+ "$(INTDIR)\camlwin.pch"
+   $(BuildCmds)
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
 
@@ -602,12 +684,19 @@ DEP_CPP_UI_CP=\
 # ADD BASE CPP /Yu"STDAFX.H"
 # ADD CPP /Yu"STDAFX.H"
 
+BuildCmds= \
+	$(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
+ "_WINDOWS" /D "_MBCS" /Fr"$(INTDIR)/" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H"\
+ /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c $(SOURCE) \
+	
+
 "$(INTDIR)\ui.obj" : $(SOURCE) $(DEP_CPP_UI_CP) "$(INTDIR)"\
  "$(INTDIR)\camlwin.pch"
-   $(CPP) /nologo /G3 /MTd /W4 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D\
- "_WINDOWS" /D "_MBCS" /Fp"$(INTDIR)/camlwin.pch" /Yu"STDAFX.H" /Fo"$(INTDIR)/"\
- /Fd"$(INTDIR)/" /c $(SOURCE)
+   $(BuildCmds)
 
+"$(INTDIR)\ui.sbr" : $(SOURCE) $(DEP_CPP_UI_CP) "$(INTDIR)"\
+ "$(INTDIR)\camlwin.pch"
+   $(BuildCmds)
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
 
@@ -646,8 +735,21 @@ DEP_CPP_GRAPH=\
 	".\graphdoc.h"\
 	
 
+!IF  "$(CFG)" == "Camlwin - Win32 Debug"
+
+
 "$(INTDIR)\graphvw.obj" : $(SOURCE) $(DEP_CPP_GRAPH) "$(INTDIR)"
 
+"$(INTDIR)\graphvw.sbr" : $(SOURCE) $(DEP_CPP_GRAPH) "$(INTDIR)"
+
+
+!ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
+
+
+"$(INTDIR)\graphvw.obj" : $(SOURCE) $(DEP_CPP_GRAPH) "$(INTDIR)"
+
+
+!ENDIF 
 
 # End Source File
 ################################################################################
@@ -669,19 +771,32 @@ DEP_CPP_GRAPHD=\
 	".\..\..\RUNTIME\signals.h"\
 	".\..\..\RUNTIME\str.h"\
 	".\colors.h"\
-	"..\..\RUNTIME\misc.h"\
-	"..\..\RUNTIME\mlvalues.h"\
-	"..\..\RUNTIME\config.h"\
-	"..\..\..\config\m.h"\
-	"..\..\..\config\s.h"\
-	"..\..\RUNTIME\gc.h"\
-	"..\..\RUNTIME\major_gc.h"\
-	"..\..\RUNTIME\minor_gc.h"\
-	"..\..\RUNTIME\freelist.h"\
+	".\..\..\RUNTIME\misc.h"\
+	".\..\..\RUNTIME\mlvalues.h"\
+	".\..\..\RUNTIME\config.h"\
+	".\..\..\..\config\m.h"\
+	".\..\..\..\config\s.h"\
+	".\..\..\RUNTIME\gc.h"\
+	".\..\..\RUNTIME\major_gc.h"\
+	".\..\..\RUNTIME\minor_gc.h"\
+	".\..\..\RUNTIME\freelist.h"\
 	
+
+!IF  "$(CFG)" == "Camlwin - Win32 Debug"
+
 
 "$(INTDIR)\graphdoc.obj" : $(SOURCE) $(DEP_CPP_GRAPHD) "$(INTDIR)"
 
+"$(INTDIR)\graphdoc.sbr" : $(SOURCE) $(DEP_CPP_GRAPHD) "$(INTDIR)"
+
+
+!ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
+
+
+"$(INTDIR)\graphdoc.obj" : $(SOURCE) $(DEP_CPP_GRAPHD) "$(INTDIR)"
+
+
+!ENDIF 
 
 # End Source File
 ################################################################################
@@ -694,8 +809,21 @@ DEP_CPP_GRAPHF=\
 	".\graphfrm.h"\
 	
 
+!IF  "$(CFG)" == "Camlwin - Win32 Debug"
+
+
 "$(INTDIR)\graphfrm.obj" : $(SOURCE) $(DEP_CPP_GRAPHF) "$(INTDIR)"
 
+"$(INTDIR)\graphfrm.sbr" : $(SOURCE) $(DEP_CPP_GRAPHF) "$(INTDIR)"
+
+
+!ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
+
+
+"$(INTDIR)\graphfrm.obj" : $(SOURCE) $(DEP_CPP_GRAPHF) "$(INTDIR)"
+
+
+!ENDIF 
 
 # End Source File
 # End Target
