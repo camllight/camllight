@@ -528,7 +528,7 @@ static value intern_fast_val(chan, magic)
       }
     }
     whsize = size_after_shrinkage(block, whsize64);
-    if (whsize == -1) {
+    if (whsize == 0) {
       stat_free((char *) block);
       failwith("intern: 64-bit component not representable");
     }
