@@ -1,18 +1,14 @@
-# Where the caml-tex command resides
+# Overriden when called from ../Makefile
 BINDIR=/usr/local/bin
-
-# Where the TeX input files reside
-INPUTDIR=/usr/local/lib/tex/inputs
-
-# In which section of the manual the man page must be installed
+TEXINPUTDIR=/usr/local/tex/inputs
 MANEXT=1
+MANDIR=/usr/local/man/man$(MANEXT)
 
-# Where the man page resides
-MANDIR=/usr/man/man$(MANEXT)
+all:
 
 install:
 	cp caml-tex $(BINDIR)/caml-tex
-	cp caml.sty caml-sl.sty $(INPUTDIR)
+	cp caml.sty caml-sl.sty $(TEXINPUTDIR)
 	cp caml-tex.1 $(MANDIR)/caml-tex.$(MANEXT)
 
 caml-tex.doc: caml-tex.1
