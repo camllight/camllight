@@ -65,6 +65,9 @@ clean :
 install: camlbrowser
 	cp camlbrowser $(BINDIR)
 	cp camlbrowser.man $(MANDIR)/camlbrowser.$(MANEXT)
+	-MLETAGS=`pwd`/../../mletags/mletags; \
+	cd $(LIBDIR); \
+	$${MLETAGS} *.ml *.mli
 
 .SUFFIXES :
 .SUFFIXES : .mli .ml .zi .zo
