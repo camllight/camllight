@@ -493,7 +493,7 @@ value interprete(prog)
       Next;
       
     Instruct(POPTRAP):
-      if (signal_is_pending) {
+      if (something_to_do) {
         /* We must check here so that if a signal is pending and its
            handler triggers an exception, the exception is trapped
            by the current try...with, not the enclosing one. */

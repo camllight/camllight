@@ -126,8 +126,8 @@ int main(argc, argv)
 #endif
       case 'V':
         { extern int major_version, minor_version;
-          fprintf(stderr, "The Caml Light runtime system, version %d.%d.\n",
-                  MAJOR, MINOR);
+          fprintf(stderr, "The Caml Light runtime system, version %s\n",
+                  VERSION);
           exit(0);
         }
       default:

@@ -50,9 +50,9 @@ value gc_stat (v) /* ML */
 	  Assert (prev_hp == NULL
 		  || (Color_hp (prev_hp) != Blue
 		      && Wosize_hp (prev_hp) > 0));
-	  Assert (Next (hp) == chunk_end
-		  || (Color_hp (Next (hp)) != Blue
-		      && Wosize_hp (Next (hp)) > 0));
+	  Assert (Next (cur_hp) == chunk_end
+		  || (Color_hp (Next (cur_hp)) != Blue
+		      && Wosize_hp (Next (cur_hp)) > 0));
 	  break;
 	}
 	/* FALLTHROUGH */
@@ -71,9 +71,9 @@ value gc_stat (v) /* ML */
 	Assert (prev_hp == NULL
 		|| (Color_hp (prev_hp) != Blue
 		    && Wosize_hp (prev_hp) > 0));
-	Assert (Next (hp) == chunk_end
-		|| (Color_hp (Next (hp)) != Blue
-		    && Wosize_hp (Next (hp)) > 0));
+	Assert (Next (cur_hp) == chunk_end
+		|| (Color_hp (Next (cur_hp)) != Blue
+		    && Wosize_hp (Next (cur_hp)) > 0));
 	break;
       }
       prev_hp = cur_hp;

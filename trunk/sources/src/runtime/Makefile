@@ -18,15 +18,15 @@ RANLIB=ranlib
 #========== End of configuration section
 
 
-OBJS=interp.o equal.o ints.o floats.o str.o io.o intext.o \
-        hash.o sys.o meta.o freelist.o major_gc.o minor_gc.o \
-        memory.o misc.o alloc.o fail.o main.o stacks.o \
-        fix_code.o roots.o parsing.o lexing.o signals.o debugcom.o gc_ctrl.o
+OBJS=interp.o misc.o stacks.o fix_code.o main.o fail.o signals.o debugcom.o \
+  freelist.o major_gc.o minor_gc.o memory.o alloc.o roots.o \
+  equal.o ints.o floats.o str.o io.o extern.o externcp.o intern.o interncp.o \
+  hash.o sys.o meta.o parsing.o lexing.o gc_ctrl.o
 
 DOBJS=$(OBJS:.o=.d.o) debugger.d.o
 
-PRIMS=interp.c equal.c ints.c floats.c str.c gc_ctrl.c \
-        io.c intext.c hash.c sys.c meta.c parsing.c lexing.c
+PRIMS=equal.c extern.c externcp.c floats.c gc_ctrl.c hash.c intern.c \
+  interncp.c interp.c ints.c io.c lexing.c meta.c parsing.c str.c sys.c
 
 all: camlrun libcaml.a
 
@@ -100,9 +100,149 @@ jumptbl.h : instruct.h
 depend : prims.c opnames.h jumptbl.h
 	mv Makefile Makefile.bak
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak;	 \
-         gcc -MM $(OPTS) *.c; \
-         gcc -MM $(OPTS) -DDEBUG *.c | sed -e 's/\.o/.d.o/') > Makefile
+         gcc -MM -I.. $(OPTS) *.c; \
+         gcc -MM -I.. $(OPTS) -DDEBUG *.c | sed -e 's/\.o/.d.o/') > Makefile
 	rm Makefile.bak
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT WILL BE ERASED WITHOUT WARNING
 ### DO NOT DELETE THIS LINE
+alloc.o : alloc.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h debugger.h major_gc.h freelist.h memory.h gc.h minor_gc.h stacks.h 
+debugcom.o : debugcom.c misc.h config.h ../../config/m.h ../../config/s.h debugger.h \
+  mlvalues.h fail.h stacks.h memory.h gc.h major_gc.h freelist.h minor_gc.h io.h \
+  debugcom.h 
+debugger.o : debugger.c 
+equal.o : equal.c fail.h misc.h config.h ../../config/m.h ../../config/s.h mlvalues.h \
+  memory.h gc.h major_gc.h freelist.h minor_gc.h str.h 
+extern.o : extern.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h fail.h gc.h intext.h io.h memory.h major_gc.h freelist.h minor_gc.h 
+externcp.o : externcp.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h fail.h gc.h intext.h io.h memory.h major_gc.h freelist.h minor_gc.h \
+  reverse.h 
+fail.o : fail.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h fail.h memory.h gc.h major_gc.h freelist.h minor_gc.h signals.h 
+fix_code.o : fix_code.c config.h ../../config/m.h ../../config/s.h misc.h mlvalues.h \
+  instruct.h reverse.h 
+floats.o : floats.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h fail.h memory.h gc.h major_gc.h freelist.h minor_gc.h debugger.h 
+freelist.o : freelist.c config.h ../../config/m.h ../../config/s.h debugger.h \
+  misc.h mlvalues.h freelist.h gc.h gc_ctrl.h major_gc.h 
+gc_ctrl.o : gc_ctrl.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h debugger.h gc.h gc_ctrl.h major_gc.h freelist.h minor_gc.h 
+hash.o : hash.c mlvalues.h config.h ../../config/m.h ../../config/s.h misc.h \
+  memory.h gc.h major_gc.h freelist.h minor_gc.h str.h 
+intern.o : intern.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h fail.h gc.h intext.h io.h memory.h major_gc.h freelist.h minor_gc.h \
+  reverse.h 
+interncp.o : interncp.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h fail.h gc.h intext.h io.h memory.h major_gc.h freelist.h minor_gc.h \
+  reverse.h 
+interp.o : interp.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h debugger.h fail.h instruct.h memory.h gc.h major_gc.h freelist.h minor_gc.h \
+  prims.h signals.h stacks.h str.h unalignd.h debugcom.h jumptbl.h 
+ints.o : ints.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h fail.h memory.h gc.h major_gc.h freelist.h minor_gc.h 
+io.o : io.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h misc.h \
+  fail.h io.h memory.h gc.h major_gc.h freelist.h minor_gc.h signals.h sys.h 
+lexing.o : lexing.c mlvalues.h config.h ../../config/m.h ../../config/s.h misc.h \
+  stacks.h memory.h gc.h major_gc.h freelist.h minor_gc.h str.h 
+main.o : main.c ../version.h alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h exec.h fail.h gc.h globals.h intext.h io.h stacks.h memory.h major_gc.h \
+  freelist.h minor_gc.h sys.h debugcom.h 
+major_gc.o : major_gc.c config.h ../../config/m.h ../../config/s.h debugger.h \
+  misc.h mlvalues.h fail.h freelist.h gc.h gc_ctrl.h globals.h major_gc.h roots.h 
+memory.o : memory.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h fail.h freelist.h gc.h gc_ctrl.h major_gc.h memory.h minor_gc.h 
+meta.o : meta.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h globals.h major_gc.h freelist.h memory.h gc.h minor_gc.h prims.h 
+minor_gc.o : minor_gc.c config.h ../../config/m.h ../../config/s.h debugger.h \
+  misc.h mlvalues.h fail.h gc.h gc_ctrl.h major_gc.h freelist.h memory.h minor_gc.h \
+  roots.h 
+misc.o : misc.c config.h ../../config/m.h ../../config/s.h debugger.h misc.h \
+  mlvalues.h 
+parsing.o : parsing.c config.h ../../config/m.h ../../config/s.h mlvalues.h \
+  misc.h memory.h gc.h major_gc.h freelist.h minor_gc.h 
+prims.o : prims.c mlvalues.h config.h ../../config/m.h ../../config/s.h misc.h \
+  prims.h 
+roots.o : roots.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h memory.h gc.h major_gc.h freelist.h minor_gc.h stacks.h 
+signals.o : signals.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h signals.h stacks.h memory.h gc.h major_gc.h freelist.h minor_gc.h 
+stacks.o : stacks.c config.h ../../config/m.h ../../config/s.h debugger.h misc.h \
+  mlvalues.h debugcom.h fail.h stacks.h memory.h gc.h major_gc.h freelist.h minor_gc.h 
+str.o : str.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h debugger.h 
+sys.o : sys.c config.h ../../config/m.h ../../config/s.h alloc.h mlvalues.h \
+  misc.h debugcom.h fail.h globals.h instruct.h signals.h stacks.h memory.h gc.h \
+  major_gc.h freelist.h minor_gc.h 
+alloc.d.o : alloc.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h debugger.h major_gc.h freelist.h memory.h gc.h minor_gc.h stacks.h 
+debugcom.d.o : debugcom.c misc.h config.h ../../config/m.h ../../config/s.h debugger.h \
+  mlvalues.h fail.h stacks.h memory.h gc.h major_gc.h freelist.h minor_gc.h io.h \
+  debugcom.h 
+debugger.d.o : debugger.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h instruct.h memory.h gc.h major_gc.h freelist.h minor_gc.h opnames.h \
+  stacks.h unalignd.h 
+equal.d.o : equal.c fail.h misc.h config.h ../../config/m.h ../../config/s.h mlvalues.h \
+  memory.h gc.h major_gc.h freelist.h minor_gc.h str.h 
+extern.d.o : extern.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h fail.h gc.h intext.h io.h memory.h major_gc.h freelist.h minor_gc.h 
+externcp.d.o : externcp.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h fail.h gc.h intext.h io.h memory.h major_gc.h freelist.h minor_gc.h \
+  reverse.h 
+fail.d.o : fail.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h fail.h memory.h gc.h major_gc.h freelist.h minor_gc.h signals.h 
+fix_code.d.o : fix_code.c config.h ../../config/m.h ../../config/s.h misc.h mlvalues.h \
+  instruct.h reverse.h 
+floats.d.o : floats.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h fail.h memory.h gc.h major_gc.h freelist.h minor_gc.h debugger.h 
+freelist.d.o : freelist.c config.h ../../config/m.h ../../config/s.h debugger.h \
+  misc.h mlvalues.h freelist.h gc.h gc_ctrl.h major_gc.h 
+gc_ctrl.d.o : gc_ctrl.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h debugger.h gc.h gc_ctrl.h major_gc.h freelist.h minor_gc.h 
+hash.d.o : hash.c mlvalues.h config.h ../../config/m.h ../../config/s.h misc.h \
+  memory.h gc.h major_gc.h freelist.h minor_gc.h str.h 
+intern.d.o : intern.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h fail.h gc.h intext.h io.h memory.h major_gc.h freelist.h minor_gc.h \
+  reverse.h 
+interncp.d.o : interncp.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h fail.h gc.h intext.h io.h memory.h major_gc.h freelist.h minor_gc.h \
+  reverse.h 
+interp.d.o : interp.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h debugger.h fail.h instruct.h memory.h gc.h major_gc.h freelist.h minor_gc.h \
+  prims.h signals.h stacks.h str.h unalignd.h debugcom.h 
+ints.d.o : ints.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h fail.h memory.h gc.h major_gc.h freelist.h minor_gc.h 
+io.d.o : io.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h misc.h \
+  fail.h io.h memory.h gc.h major_gc.h freelist.h minor_gc.h signals.h sys.h 
+lexing.d.o : lexing.c mlvalues.h config.h ../../config/m.h ../../config/s.h misc.h \
+  stacks.h memory.h gc.h major_gc.h freelist.h minor_gc.h str.h 
+main.d.o : main.c ../version.h alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h exec.h fail.h gc.h globals.h intext.h io.h stacks.h memory.h major_gc.h \
+  freelist.h minor_gc.h sys.h debugcom.h 
+major_gc.d.o : major_gc.c config.h ../../config/m.h ../../config/s.h debugger.h \
+  misc.h mlvalues.h fail.h freelist.h gc.h gc_ctrl.h globals.h major_gc.h roots.h 
+memory.d.o : memory.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h fail.h freelist.h gc.h gc_ctrl.h major_gc.h memory.h minor_gc.h 
+meta.d.o : meta.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h globals.h major_gc.h freelist.h memory.h gc.h minor_gc.h prims.h 
+minor_gc.d.o : minor_gc.c config.h ../../config/m.h ../../config/s.h debugger.h \
+  misc.h mlvalues.h fail.h gc.h gc_ctrl.h major_gc.h freelist.h memory.h minor_gc.h \
+  roots.h 
+misc.d.o : misc.c config.h ../../config/m.h ../../config/s.h debugger.h misc.h \
+  mlvalues.h 
+parsing.d.o : parsing.c config.h ../../config/m.h ../../config/s.h mlvalues.h \
+  misc.h memory.h gc.h major_gc.h freelist.h minor_gc.h 
+prims.d.o : prims.c mlvalues.h config.h ../../config/m.h ../../config/s.h misc.h \
+  prims.h 
+roots.d.o : roots.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
+  mlvalues.h memory.h gc.h major_gc.h freelist.h minor_gc.h stacks.h 
+signals.d.o : signals.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h signals.h stacks.h memory.h gc.h major_gc.h freelist.h minor_gc.h 
+stacks.d.o : stacks.c config.h ../../config/m.h ../../config/s.h debugger.h misc.h \
+  mlvalues.h debugcom.h fail.h stacks.h memory.h gc.h major_gc.h freelist.h minor_gc.h 
+str.d.o : str.c alloc.h mlvalues.h config.h ../../config/m.h ../../config/s.h \
+  misc.h debugger.h 
+sys.d.o : sys.c config.h ../../config/m.h ../../config/s.h alloc.h mlvalues.h \
+  misc.h debugcom.h fail.h globals.h instruct.h signals.h stacks.h memory.h gc.h \
+  major_gc.h freelist.h minor_gc.h 
