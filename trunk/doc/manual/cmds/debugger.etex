@@ -422,8 +422,12 @@ Give \var{arguments} as command-line arguments for the program.
 \end{options}
 
 A shell is used to pass the arguments to the debugged program. You can
-therefore use wildcards and shell variables inside the arguments.
-The "SHELL" environment variable controls which shell is used.
+therefore use wildcards, shell variables, and file redirections inside
+the arguments. To debug programs that read from standard input, it is
+recommended to redirect their input from a file (using
+"set arguments < input-file"), otherwise input to the program and
+input to the debugger are not properly separated.
+
 
 \subsection{How programs are loaded}
 

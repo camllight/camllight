@@ -373,6 +373,10 @@ The following command-line options are recognized by "camlmktop".
 Link in ``custom runtime'' mode. See the corresponding option for
 "camlc", in chapter~\ref{c:camlc}.
 
+\item["-g"]
+Add debugging information to the toplevel file produced, which can
+then be debugged with "camldebug" (chapter~\ref{c:debugger}).
+
 \item["-I" \var{directory}]
 Add the given directory to the list of directories searched for
 compiled object code files (".zo").
