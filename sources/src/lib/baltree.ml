@@ -1,6 +1,6 @@
-(* Weight-balanced binary trees.
-   These are binary trees such that the difference between the heights of
-   the childs differ by at most 2. *)
+(* Height-balanced binary trees.
+   These are binary trees such that the heights of the children
+   differ by at most 2. *)
 
 #open "int";;
 #open "eq";;
@@ -13,7 +13,7 @@ let height = function
   | Node(_, _, _, h) -> h;;
 
 (* Creates a new node with left son l, value x and right son r.
-   l and r must be balanced and height l / height r must be between 1/N and N.
+   l and r must be balanced and | height l - height r | <= 2.
    Inline expansion of height for better speed. *)
 
 let new l x r =
@@ -21,8 +21,8 @@ let new l x r =
   let sr = match r with Empty -> 0 | Node(_,_,_,s) -> s in
   Node(l, x, r, (if sl >= sr then succ sl else succ sr));;
 
-(* Same as new, but performs rebalancing if necessary.
-   Assumes l and r balanced, and | height l - height r | <= 2.
+(* Same as new, but performs one step of rebalancing if necessary.
+   Assumes l and r balanced.
    Inline expansion of new for better speed in the most frequent case
    where no rebalancing is required. *)
 
@@ -56,8 +56,7 @@ let bal l x r =
   end else
     Node(l, x, r, (if sl >= sr then succ sl else succ sr));;
 
-(* Same as bal, but rebalance regardless of the original difference
-   height l - height r *)
+(* Same as bal, but repeat rebalancing until the final result is balanced. *)
 
 let rec join l x r =
   match bal l x r with
@@ -69,7 +68,7 @@ let rec join l x r =
 
 (* Merge two trees l and r into one.
    All elements of l must precede the elements of r.
-   Assumes height l / height r between 1/N and N. *)
+   Assumes | height l - height r | <= 2. *)
 
 let rec merge = fun
     Empty t -> t
