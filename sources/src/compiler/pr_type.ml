@@ -7,18 +7,6 @@
 #open "types";;
 #open "modules";;
 
-let can_omit_qualifier sel_fct gl =
-  try
-    let gl' =
-      try
-        hashtbl__find (sel_fct !defined_module) gl.qualid.id
-      with Not_found ->
-        hashtbl__find (sel_fct !opened_modules) gl.qualid.id in
-    gl.qualid = gl'.qualid
-  with Not_found ->
-    false
-;;
-
 let output_global sel_fct oc gl =
   if not (can_omit_qualifier sel_fct gl) then begin
     output_string oc gl.qualid.qual;
