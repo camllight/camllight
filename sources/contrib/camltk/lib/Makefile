@@ -1,9 +1,9 @@
 SUPPORTDIR=../libsupport
-
+UNIXDIR=../../libunix
 CAMLC=camlc
 CAMLCOMP=$(CAMLC) -c
 CPP=/lib/cpp -P -Dunix
-COMPFLAGS=-O fast -g -I $(SUPPORTDIR)
+COMPFLAGS=-O fast -g -I $(UNIXDIR) -I $(SUPPORTDIR)
 LINKFLAGS=-g
 CAMLYACC=camlyacc -v
 CAMLLEX=camllex
@@ -41,7 +41,8 @@ camltktop1 : $(WIDGETOBJS) $(SUPPORT1)
 camltktop2 : $(WIDGETOBJS) $(SUPPORT2)
 	cp -p $(SUPPORTDIR)/protocol2.zo $(SUPPORTDIR)/protocol.zo
 	camlmktop -o camltktop2 -I $(SUPPORTDIR) \
-	            -custom unix.zo $(SUPPORT) tk.zo $(WIDGETOBJS) -lunix
+	            -custom $(UNIXDIR)/unix.zo $(SUPPORT) tk.zo $(WIDGETOBJS) \
+                    $(UNIXDIR)/libunix.a
 
 
 clean : 
