@@ -10,14 +10,14 @@
 (**) #open "fchar";;
 
 let lowercase s =
-  let t = create_string (string_length s) in
+  let lc = create_string (string_length s) in
   for i = 0 to string_length s - 1 do
     let c = s.[i] in
 	if c >= `A` & c <= `Z`
-	then t.[i] <- char_of_int(int_of_char c + 32)
-	else t.[i] <- c
+	then lc.[i] <- char_of_int(int_of_char c + 32)
+	else lc.[i] <- c
   done;
-  t
+  lc
 ;;
 let check_suffix name suff =
   string_length name >= string_length suff &
