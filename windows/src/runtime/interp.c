@@ -291,15 +291,12 @@ value interprete(prog)
       /* fall through CHECK_SIGNALS */
 
     Instruct(CHECK_SIGNALS):
-#ifdef macintosh
-      { static int spin_count = 1;
-        if (--spin_count == 0) { spin_count = 24; SpinCursor ((short) 1); }
-      }
-#endif
-#if defined(MSDOS) && defined(__GNUC__)
-      { static int poll_count = 1;
-        if (--poll_count == 0) { poll_count = 500; poll_break(); }
-      }
+#ifdef PERIODIC_ACTION_FREQ
+      { static int periodic_action_count = 1;
+        if (--periodic_action_count == 0) {
+          periodic_action_count = PERIODIC_ACTION_FREQ;
+          ui_periodic_action();
+        }
 #endif
       if (something_to_do) goto process_signal;
       Next;

@@ -479,7 +479,8 @@ static value intern_fast_val(chan, magic)
     value32 * block;
     whsize32 = whsize;
     block = (value32 *) stat_alloc(whsize32 * sizeof(value32));
-    if (really_getblock(chan, block, whsize32 * sizeof(value32)) == 0) {
+    if (really_getblock(chan, (char *) block,
+                        whsize32 * sizeof(value32)) == 0) {
       stat_free((char *) block);
       failwith ("intern : truncated object");
     }

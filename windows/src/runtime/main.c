@@ -86,9 +86,11 @@ int attempt_open(name, trail)
   return fd;
 }
 
-char usage[] = "usage: camlrun [-V] <file> <args>\n";
-
+#ifdef HAS_UI
+int caml_main(argc, argv)
+#else
 int main(argc, argv)
+#endif
      int argc;
      char * argv[];
 {
@@ -118,40 +120,36 @@ int main(argc, argv)
     for(i = 1; i < argc && argv[i][0] == '-'; i++) {
       switch(argv[i][1]) {
 #ifdef DEBUG
-      case 't':
-        { extern int trace_flag;
-          trace_flag = 1;
-	}
+      case 't': {
+        extern int trace_flag;
+        trace_flag = 1;
         break;
+      }
 #endif
       case 'V':
         fprintf(stderr, "The Caml Light runtime system, version %s\n",
                 VERSION);
         exit(0);
       default:
-        fprintf(stderr, "Unknown option %s.\n", argv[i]);
-        exit(2);
-        
+        fatal_error_arg("Unknown option %s.\n", argv[i]);
       }
     }
 
-    if (argv[i] == 0) {
-      fprintf(stderr, "No bytecode file specified.\n");
-      exit(2);
-    }
+    if (argv[i] == 0)
+      fatal_error("No bytecode file specified.\n");
 
     fd = attempt_open(&argv[i], &trail);
 
     switch(fd) {
     case FILE_NOT_FOUND:
-      fprintf(stderr, "Fatal error: cannot find file %s\n", argv[i]);
-      exit(2);
+      fatal_error_arg("Fatal error: cannot find file %s\n", argv[i]);
+      break;
     case TRUNCATED_FILE:
     case BAD_MAGIC_NUM:
-      fprintf(stderr,
-              "Fatal error: the file %s is not a bytecode executable file\n",
-              argv[i]);
-      exit(2);
+      fatal_error_arg(
+        "Fatal error: the file %s is not a bytecode executable file\n",
+        argv[i]);
+      break;
     }
   }
 
@@ -205,7 +203,7 @@ int main(argc, argv)
     sys_init(argv + i);
     if (debugger_address != NULL) debugger_init(debugger_address);
     interprete(start_code);
-    sys_exit(0);
+    sys_exit(Val_int(0));
 
   } else {
 

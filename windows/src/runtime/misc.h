@@ -34,15 +34,24 @@ typedef char huge * addr;
 typedef char * addr;
 #endif
 
-extern int verb_gc;
-#ifdef ANSI
-extern int volatile something_to_do;
+#ifdef __STDC__
+#define Volatile volatile
 #else
-extern int something_to_do;
+#define Volatile
 #endif
 
+#ifdef __GNUC__
+#define Noreturn void volatile
+#else
+#define Noreturn void
+#endif
+
+extern int verb_gc;
+extern int Volatile something_to_do;
+
 void gc_message P((char *, unsigned long));
-void fatal_error P((char *));
+Noreturn fatal_error P((char *));
+Noreturn fatal_error_arg P((char *, char *));
 void memmov P((char *, char *, unsigned long));
 char * aligned_malloc P((asize_t, int));
 

@@ -1,18 +1,11 @@
 #ifndef _sys_
 #define _sys_
 
+#include "misc.h"
 
-#ifdef ANSI
-extern void sys_error (void);
-extern void raise_pending_signal (void);
-extern void sys_init (char **);
-extern void sys_exit (value);
-#else
-void sys_error ();
-void raise_pending_signal ();
-void sys_init ();
-void sys_exit ();
-#endif
-
+void sys_error P((char *));
+void raise_pending_signal P((void));
+void sys_init P((char **));
+void sys_exit P((value));
 
 #endif /* _sys_ */
