@@ -79,6 +79,8 @@ let filter_iso_to a =
     in function ({qual=q;id=i},typ) ->
       match is_iso_to_a (squeeze_typ typ) with
         None,_,_ -> ()
-      | Some ren_unif, rena_x, renb_y 
-	-> print_string (q^"__"^i^" : "); print_one_type typ; print_newline()
+      | Some ren_unif, rena_x, renb_y  ->
+          print_string (q^"__"^i^" : ");
+          output_one_type std_out typ;
+          print_newline()
 ;;
