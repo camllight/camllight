@@ -1,0 +1,1 @@
+WIDGETOBJS=place.zo wm.zo canvas.zo button.zo text.zo scrollbar.zo menubar.zo entry.zo listbox.zo pack.zo radiobutton.zo grab.zo contrib.zo scale.zo checkbutton.zo resource.zo label.zo message.zo menu.zo focus.zo menubutton.zo wait.zo toplevelw.zo frame.zo colormodel.zo selection.zo winfo.zo 

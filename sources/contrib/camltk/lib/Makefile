@@ -1,9 +1,17 @@
-## Configuration
-include ../Makefile.config
-
 SUPPORTDIR=../libsupport
 
+CAMLC=camlc
+CAMLCOMP=$(CAMLC) -c
+CPP=/lib/cpp -P -Dunix
 COMPFLAGS=-O fast -g -I $(SUPPORTDIR)
+LINKFLAGS=-g
+CAMLYACC=camlyacc -v
+CAMLLEX=camllex
+CAMLDEP=../../../src/tools/camldep
+
+TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) \
+	   $(SUPPORTDIR)/camltk.o -lcaml -ltk -ltcl -lX11
+
 
 SUPPORT1=$(SUPPORTDIR)/support.zo $(SUPPORTDIR)/protocol1.zo \
          $(SUPPORTDIR)/textvariable.zo
@@ -12,9 +20,6 @@ SUPPORT2=$(SUPPORTDIR)/support.zo $(SUPPORTDIR)/protocol2.zo \
          $(SUPPORTDIR)/textvariable.zo
 
 SUPPORT=support.zo protocol.zo textvariable.zo
-
-# Set of generated modules (not portable)
-include modules
 
 all : $(WIDGETOBJS) tklib1.zo tklib2.zo camltktop1 camltktop2
 
@@ -43,12 +48,11 @@ clean :
 	rm -f *.z* *.ml *.mli tklib[12].zo  camltktop[12]
 
 install: tklib1.zo tklib2.zo  camltktop1 camltktop2
-	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
-	cp -p *.zi tklib?.zo camltktop? $(INSTALLDIR)
-	chmod 644 $(INSTALLDIR)/*.zi
-	chmod 644 $(INSTALLDIR)/tklib?.zo
-	chmod 755 $(INSTALLDIR)/camltktop?
-	@echo "CAMLTKDIR is $(INSTALLDIR)"
+	[ -d $(LIBDIR) ] || mkdir $(LIBDIR)
+	cp -p *.zi tklib?.zo camltktop? $(LIBDIR)
+	chmod 644 $(LIBDIR)/*.zi
+	chmod 644 $(LIBDIR)/tklib?.zo
+	chmod 755 $(LIBDIR)/camltktop?
 
 tk.ml : tkgen.ml $(SUPPORTDIR)/report.ml $(SUPPORTDIR)/*.ml
 	(echo '#open "support";;'; \
