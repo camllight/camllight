@@ -107,5 +107,6 @@ let text_tag_bind widget tag eventsequence action =
       let CbId = register_callback (WrapEventInfo f what) in
         Send2Tk buf (" {+camlcb " ^ CbId ^ (WriteEventField what) ^"}")
   end;
-  Send2TkEval buf
+  Send2TkEval buf;
+  ()
 ;;
