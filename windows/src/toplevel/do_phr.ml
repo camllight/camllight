@@ -59,7 +59,7 @@ let do_toplevel_phrase phr =
                          {qual=compiled_module_name(); id=name})
             typ;
           print_newline())
-        env
+        (rev env)
   | Ztypedef decl ->
       let _ = type_typedecl phr.im_loc decl in
       do_list
