@@ -19,3 +19,8 @@ value prefix not : bool -> bool = 1 "not"
 value string_of_bool : bool -> string
         (* Return a string representing the given boolean. *)
 ;;
+value bool_of_string : string -> bool
+        (* Return a boolean representing the given string.
+           Raise [Invalid_argument "bool_of_string"] if the given
+           string is not ["true"] or ["false"]. *)
+;;
