@@ -268,7 +268,7 @@ variable:
 ;
 \end{syntax}
 \ikwd{prefix\@\verb`prefix`}%
-No "#infix" directive (section~\ref{s:exten-directive}) is needed to
+No "#infix" directive (section~\ref{s:exten-directives}) is needed to
 give infix symbols their infix status. The precedences and
 associativities of infix symbols  in expressions are determined by
 their first character(s): symbols beginning with "**" have highest
