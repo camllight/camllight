@@ -245,22 +245,21 @@ is syntactically correct and synonymous with
 
 \section{Infix symbols}
 
-Sequences of ``operator'' characters, such as "<=>" or "!!",
+Sequences of ``operator characters'', such as "<=>" or "!!",
 are read as a single token from the @infix-symbol@ or @prefix-symbol@
 class:
 \begin{syntax}
 infix-symbol:
         ('=' || '<' || '>' || '@' || '^' || '|' || '&' || '~' ||
-         '+' || '-' || '*' || '/' || '%') 
-        {'!' || '$' || '%' || '&' || '*' || '+' || '-' || '.' ||
-         '/' || ':' || ';' || '<' || '=' || '>' || '?' || '@' ||
-         '^' || '|' || '~'}
+         '+' || '-' || '*' || '/' || '%') { operator-char }
 ;
 prefix-symbol:
-        ('!' || '?')
-        {'!' || '$' || '%' || '&' || '*' || '+' || '-' || '.' ||
+        ('!' || '?') { operator-char }
+;
+operator-char:
+        '!' || '$' || '%' || '&' || '*' || '+' || '-' || '.' ||
          '/' || ':' || ';' || '<' || '=' || '>' || '?' || '@' ||
-         '^' || '|' || '~'}
+         '^' || '|' || '~'
 ;
 \end{syntax}
 Tokens from these two classes generalize the built-in infix and prefix
@@ -285,7 +284,8 @@ their first character(s): symbols beginning with "**" have highest
 precedence (exponentiation), followed by symbols beginning with "*",
 "/" or "%" (multiplication), then "+" and "-" (addition), then all
 others symbols (comparisons). The updated precedence table for
-expressions is ("*"\ldots\ means ``any infix symbol starting with "*"''):
+expressions is shown below. We write ``"*"\ldots'' to mean ``any infix
+symbol starting with "*"''.
 \begin{tableau}{|l|l|}{Construction or operator}{Associativity}
 \entree{"!"\ldots"   ?"\ldots}{--}
 \entree{".   .(   .["}{--}
@@ -299,13 +299,13 @@ expressions is ("*"\ldots\ means ``any infix symbol starting with "*"''):
 \entree{{\tt \char64} "^"}{right}
 \entree{comparisons ("=  ==  < " etc.), all other infix symbols}{left}
 \entree{"not"}{--}
-\entree{"&"}{left}
-\entree{"or"}{left}
+\entree{"&   /\\"}{left}
+\entree{"or  \\/"}{left}
 \entree{","}{--}
 \entree{"<-   :="}{right}
 \entree{"if"}{--}
 \entree{";"}{right}
-\entree{"let" "match" "fun" "function" "try"}{--}
+\entree{"let  match  fun  function  try"}{--}
 \end{tableau}
 Some infix and prefix symbols are predefined in the default
 environment (see chapters~\ref{c:refman}~and~\ref{c:stdlib} for a
