@@ -46,13 +46,13 @@ and make_ternop op ({e_loc=Loc(l1,m1)} as e1) ({e_loc=Loc(l2,m2)} as e2) e3 =
                    [e1;e2;e3]))
 ;;
 
-let make_list =
-  makel (make_expr(Zconstruct0(constr_nil)))
-  where rec makel res = function
+let make_list el =
+  let rec makel res = function
     [] ->
       res
   | e::l ->
       makel (make_expr(Zconstruct1(constr_cons, make_expr(Ztuple [e;res])))) l
+  in makel (make_expr(Zconstruct0(constr_nil))) el
 ;;
 
 let make_unary_minus = fun
