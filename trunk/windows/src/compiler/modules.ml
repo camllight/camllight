@@ -133,7 +133,7 @@ let open_module name =
 let close_module name =
   let other_modules_names = except name !opened_modules_names in
   reset_opened_modules();
-  do_list open_module other_modules_names;;
+  do_list open_module (rev other_modules_names);;
 
 (* The current state of the compiler *)
 
