@@ -131,7 +131,7 @@ type EventInfo = {
   mutable Ev_Height : int;
   mutable Ev_KeyCode : int;
   mutable Ev_Mode : string;
-  mutable Ev_State : string;
+  mutable Ev_EventState : string; (* Collision with State option *)
   mutable Ev_ValueMask : int;
   mutable Ev_Width : int;
   mutable Ev_MouseX : int;
@@ -162,7 +162,7 @@ type EventField =
   | Height
   | KeyCode
   | Mode
-  | State
+  | EventState
   | ValueMask
   | Width
   | MouseX
@@ -194,7 +194,7 @@ let FillEventInfo ev args = function
   | Height 	-> ev.Ev_Height 	<- int_of_string (arg_GetTkToken args)
   | KeyCode 	-> ev.Ev_KeyCode 	<- int_of_string (arg_GetTkToken args)
   | Mode 	-> ev.Ev_Mode 		<- arg_GetTkToken args
-  | State 	-> ev.Ev_State 		<- arg_GetTkToken args
+  | EventState 	-> ev.Ev_EventState 		<- arg_GetTkToken args
   | ValueMask	-> ev.Ev_ValueMask 	<- int_of_string (arg_GetTkToken args)
   | Width 	-> ev.Ev_Width 		<- int_of_string (arg_GetTkToken args)
   | MouseX 	-> ev.Ev_MouseX 	<- int_of_string (arg_GetTkToken args)
@@ -227,7 +227,7 @@ let WrapEventInfo f what =
     Ev_Height = 0;
     Ev_KeyCode = 0;
     Ev_Mode = "";
-    Ev_State = "";
+    Ev_EventState = "";
     Ev_ValueMask = 0;
     Ev_Width = 0;
     Ev_MouseX = 0;
@@ -267,7 +267,7 @@ let rec WriteEventField = function
       | Height -> 	" %h"
       | KeyCode -> 	" %k"
       | Mode -> 	" %m"
-      | State -> 	" %s"
+      | EventState -> 	" %s"
       | ValueMask -> 	" %v"
       | Width -> 	" %w"
       | MouseX -> 	" %x"

@@ -1,5 +1,11 @@
-## Configuration
-include ../Makefile.config
+CAMLC=camlc
+CAMLCOMP=$(CAMLC) -c
+CPP=/lib/cpp -P -Dunix
+COMPFLAGS=-O fast -g
+LINKFLAGS=-g
+CAMLYACC=camlyacc -v
+CAMLLEX=camllex
+CAMLDEP=../../../src/tools/camldep
 
 all: support.zo textvariable.zo camltk.zi camltk.o protocol1.zo protocol2.zo
 
@@ -17,18 +23,18 @@ protocol2.zo: protocol2.ml
 
 
 camltk.o : camltk.c
-	$(CC) -g -c -I/usr/local/lib/caml-light \
+	$(CC) -g -c -I../../../src/runtime \
 		 -I$(TCLINCLDIR) \
 		 -I$(TKINCLDIR) \
 		 camltk.c
 
 install: camltk.o support.zi textvariable.zi protocol.zi
-	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
-	cp -p support.zi $(INSTALLDIR)
-	cp -p textvariable.zi $(INSTALLDIR)
-	cp -p protocol.zi $(INSTALLDIR)
-	cp -p camltk.o $(INSTALLDIR)
-	chmod 644 $(INSTALLDIR)/*.zi $(INSTALLDIR)/camltk.o
+	[ -d $(LIBDIR) ] || mkdir $(LIBDIR)
+	cp -p support.zi $(LIBDIR)
+	cp -p textvariable.zi $(LIBDIR)
+	cp -p protocol.zi $(LIBDIR)
+	cp -p camltk.o $(LIBDIR)
+	chmod 644 $(LIBDIR)/*.zi $(LIBDIR)/camltk.o
 
 clean : 
 	rm -f *.z* *.o protocol.ml
@@ -41,6 +47,7 @@ clean :
 
 .ml.zo:
 	$(CAMLCOMP) $(COMPFLAGS) $<
+
 
 depend: 
 	mv Makefile Makefile.bak
