@@ -4,13 +4,16 @@ INCLUDES=-I ../compiler -I ../linker
 COMPFLAGS=-O fast $(INCLUDES)
 LINKFLAGS=-g $(INCLUDES)
 
-all: dumpsymb dumpobj
+all: dumpsymb dumpobj dumpintf
 
 dumpsymb: dumpsymb.zo
 	$(CAMLLINK) $(LINKFLAGS) -o dumpsymb stdlib.zo dumpsymb.zo
 	
 dumpobj: opnames.zo dumpobj.zo
 	$(CAMLLINK) $(LINKFLAGS) -o dumpobj stdlib.zo opcodes.zo opnames.zo dumpobj.zo
+
+dumpintf: dumpintf.zo
+	$(CAMLLINK) $(LINKFLAGS) -o dumpintf stdlib.zo config.zo misc.zo const.zo globals.zo modules.zo builtins.zo types.zo pr_type.zo dumpintf.zo
 
 .SUFFIXES:
 .SUFFIXES: .ml .zo
@@ -27,6 +30,6 @@ opnames.ml: ../runtime/instruct.h
         ../runtime/instruct.h > opnames.ml
 
 clean:
-	rm -f *.zo *.zi dumpobj dumpsymb
+	rm -f *.zo *.zi dumpobj dumpsymb opnames.ml
 
 depend:
