@@ -118,28 +118,6 @@ let chk_sub errname table c =
   else raise (Invalid_argument errname)
 ;;
 
-(***************************************************)
-(* Callbacks *)
-(***************************************************)
-
-let callback_table = 
-   (hashtbl__new 73 : (string, unit -> unit) hashtbl__t) 
-;;
-
-let new_function_id =
-  let counter = ref 0 in
-  function () ->
-    incr counter;
-    "f" ^ (string_of_int !counter)
-;;
-
-
-let register_callback f =
-  let id = new_function_id () in
-    hashtbl__add callback_table id f;
-    id
-;;
-
 (* Other builtin types and utilities *)
 (* The CAMLtoTKstring converter *)
 (* []/$ are still substituted inside "" *) 
@@ -197,4 +175,26 @@ let catenate_sep sep =
   | x::l -> it_list (fun s s' -> s^sep^s') x l
 ;;
 
+
+(* Parsing results of Tcl *)
+(* split a string according to char_sep predicate *)
+let split_str char_sep str =
+  let len = string_length str in
+  let rec skip_sep cur =
+    if cur >= len then cur
+    else if char_sep (nth_char str cur) then skip_sep (succ cur)
+    else cur  in
+  let rec split beg cur =
+    if cur >= len then 
+      if beg = cur then []
+      else [sub_string str beg (len - beg)]
+    else if char_sep (nth_char str cur) 
+         then 
+      	   let nextw = skip_sep cur in
+      	    (sub_string str beg (cur - beg))
+      	      ::(split nextw nextw)
+	 else split beg (succ cur) in
+  let wstart = skip_sep 0 in
+  split wstart wstart
+;;
 

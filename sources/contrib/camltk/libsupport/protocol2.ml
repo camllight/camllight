@@ -13,11 +13,35 @@ and PipeTkCallB = ref stdout		(* callback information *)
 and PipeTkResult = ref stdout		(* function call results *)
 ;;
 
-(* Note: writing is not completely robust *) 
-(* One might just get a SIGPIPE *)
+
+(***************************************************************************)
+(* Evaluating Tcl code                                                     *)
+(***************************************************************************)
+
+(* Catching tcl evaluation errors *)
+let safeeval_code = "
+proc safeeval { chan cmd } {
+  if [catch { uplevel $cmd } errmsg] {
+      puts stderr \"TkError $errmsg\";
+      puts $chan \"TkError $errmsg\";
+      flush $chan;
+     } else {
+  }
+}
+"
+;;
+
+(* Writing is not completely robust: if wish dies between two writes, we *) 
+(* will probably get a SIGPIPE *)
+
+type write_buffer == unit
+;;
 
 (* Start a Tcl phrase *)
-let Send2TkStart chan  =
+(* flag is true if there will be a result *)
+(*  (meaning report error on PipeTkResult instead of PipeTkCallB) *)
+let Send2TkStart res  =
+  let chan = if res then "$PipeTkResult" else "$PipeTkCallB" in
   if !debug then begin
       prerr_string "safeeval ";
       prerr_string chan;
@@ -26,11 +50,12 @@ let Send2TkStart chan  =
       end;
   write !PipeCaml2Tk "safeeval " 0 9;
   write !PipeCaml2Tk chan 0 (string_length chan);
-  write !PipeCaml2Tk " { " 0 3
+  write !PipeCaml2Tk " { " 0 3;
+  ()
 ;; 
 
 (* Pieces of phrase. Space tokenisation here to avoid complex source *)
-let Send2Tk s = 
+let Send2Tk _ s = 
   if !debug then begin
       prerr_string s; prerr_string " "; flush std_err
       end;
@@ -40,7 +65,7 @@ let Send2Tk s =
 ;;
 
 (* End phrase and eval *)
-let Send2TkEval () = 
+let Send2TkEval _ = 
   if !debug then begin
       prerr_string " }\n"; flush std_err
       end;
@@ -58,9 +83,10 @@ let rawSend2Tk s =
   () 
 ;;
 
-exception TkError of string
-;;
 
+(***************************************************************************)
+(* Reading Tcl arguments to callback or result of function call            *)
+(***************************************************************************)
 (* Read on port until end_char predicate is matched *)
 let read_string end_char port = 
   let rec read_rec buf bufsize offs =
@@ -76,6 +102,7 @@ let read_string end_char port =
   read_rec (create_string 32) 32 0
 ;;
 
+(* Predicates *)
 let token_sep = function
    ` ` -> true
  | `\n` -> true
@@ -111,27 +138,6 @@ let read_line port =
   else str
 ;;
 
-(* split a string according to char_sep predicate *)
-let split_str char_sep str =
-  let len = string_length str in
-  let rec skip_sep cur =
-    if cur >= len then cur
-    else if char_sep (nth_char str cur) then skip_sep (succ cur)
-    else cur  in
-  let rec split beg cur =
-    if cur >= len then 
-      if beg = cur then []
-      else [sub_string str beg (len - beg)]
-    else if char_sep (nth_char str cur) 
-         then 
-      	   let nextw = skip_sep cur in
-      	    (sub_string str beg (cur - beg))
-      	      ::(split nextw nextw)
-	 else split beg (succ cur) in
-  let wstart = skip_sep 0 in
-  split wstart wstart
-;;
-
 (* Tokens may be received on the same line or on different lines *)
 
 (* Mode 1: read token up to whitespace or \n *)
@@ -157,18 +163,46 @@ let GetTkString port =
       res
 ;;
 
-(* Catching tcl evaluation errors *)
-let safeeval_code = "
-proc safeeval { chan cmd } {
-  if [catch { uplevel $cmd } errmsg] {
-      puts stderr \"TkError $errmsg\";
-      puts $chan \"TkError $errmsg\";
-      flush $chan;
-     } else {
+type callback_buffer == unit
+;;
+
+(* Extracting callback arguments from the pipe *)
+let arg_GetTkToken () = GetTkToken !PipeTkCallB
+and arg_GetTkTokenList ()  = GetTkTokenList !PipeTkCallB
+and arg_GetTkString () = GetTkString !PipeTkCallB
+;;
+
+type result_buffer == unit
+;;
+
+(* Extracting results of function call *)
+let res_GetTkToken () = GetTkToken !PipeTkResult
+and res_GetTkTokenList ()  = GetTkTokenList !PipeTkResult
+and res_GetTkString () = GetTkString !PipeTkResult
+;;
+
+
+(* Callback encoding *)
+(* this is bogus if arg of callback is a string *)
+let caml_callback = "
+proc camlcb {cbid args} {
+  global PipeTkCallB;
+  puts $PipeTkCallB $cbid;
+  foreach i $args {
+   puts $PipeTkCallB $i
+   };
+  flush $PipeTkCallB;
   }
-}
 "
 ;;
+
+(* Other wrapping stuff *)
+let result_string_header = "nputs $PipeTkResult ["
+and result_header = "puts $PipeTkResult ["
+and result_footer = "]; flush $PipeTkResult;"
+;;
+
+
 
 (* Process stuff *)
 let child_pid = ref 0
@@ -197,16 +231,12 @@ let OpenTkInternal = function argv ->
       	rawSend2Tk("set PipeTkResult [open /tmp/PipeTkResult"^(dollardollar)^" w]\n");
         rawSend2Tk("proc nputs { pip str } { puts $pip [string length $str]; puts $pip $str}\n");
 	rawSend2Tk safeeval_code;
+	rawSend2Tk caml_callback;
       	(* open the other pipes *)
         PipeTkCallB := open ("/tmp/PipeTkCallB"^dollardollar) [O_RDONLY] 0;
       	PipeTkResult := open ("/tmp/PipeTkResult"^dollardollar) [O_RDONLY] 0;
 	(* return the toplevel widget *)
         default_toplevel_widget
-;;
-
-let OpenTk () = OpenTkInternal [| "wish" |]
-;;
-let OpenTkClass s = OpenTkInternal [| "wish"; "-name"; s |]
 ;;
 
 (* This does not work 
@@ -222,7 +252,7 @@ let OpenTkClass s = OpenTkInternal [| "wish"; "-name"; s |]
   end;
 *)
 
-let CloseTk = function () ->
+let CloseTkInternal = function () ->
   begin try
     kill !child_pid SIGINT
   with _ -> ()
@@ -235,4 +265,76 @@ let CloseTk = function () ->
   unlink ("/tmp/PipeCaml2Tk"^dollardollar);
   unlink ("/tmp/PipeTkCallB"^dollardollar);
   unlink ("/tmp/PipeTkResult"^dollardollar)
+;;
+
+(***************************************************************************)
+(* Callbacks                                                               *)
+(***************************************************************************)
+
+let callback_table = 
+   (hashtbl__new 73 : (string, callback_buffer -> unit) hashtbl__t) 
+;;
+
+let new_function_id =
+  let counter = ref 0 in
+  function () ->
+    incr counter;
+    "f" ^ (string_of_int !counter)
+;;
+
+
+let register_callback f =
+  let id = new_function_id () in
+    hashtbl__add callback_table id f;
+    id
+;;
+
+let NextCallback () =
+  let str = GetTkToken !PipeTkCallB in
+    try (hashtbl__find callback_table str) () 
+    with exc -> CloseTkInternal(); raise exc
+;;
+
+(***************************************************************************)
+(* File descriptor callbacks                                               *)
+(***************************************************************************)
+let channel_callbacks = 
+  (hashtbl__new 11 : (file_descr, (unit -> unit)) hashtbl__t);;
+let channels  = ref ([] : file_descr list)
+;;
+
+let add_fileinput fd cb =
+  channels := fd :: !channels;
+  hashtbl__add channel_callbacks fd cb
+;;
+
+let remove_fileinput fd = 
+  channels := except fd !channels;
+  hashtbl__remove channel_callbacks fd
+;;
+
+
+let OpenTk () = 
+  let top = OpenTkInternal [| "wish" |] in
+    add_fileinput !PipeTkCallB NextCallback;
+    (top : Widget)
+;;
+let OpenTkClass s = 
+  let top = OpenTkInternal  [| "wish"; "-name"; s |] in
+    add_fileinput !PipeTkCallB NextCallback;
+    (top : Widget)
+;;
+
+let CloseTk () = 
+  remove_fileinput !PipeTkCallB; CloseTkInternal()
+;;
+
+let NextEvent () =
+    let (ins,_,_) = select !channels [] [] (-1.0) in
+       do_list (fun fd -> (hashtbl__find channel_callbacks fd) ())
+               ins
+;;
+
+let MainLoop () =
+  while true do NextEvent() done
 ;;
