@@ -17,7 +17,6 @@ let module_panel parent selected_paths =
   let lb = listbox__create fls [] in
   let sb = scrollbar__create fls [] in
     frx_listbox__scroll_link sb lb;
-    frx_focus__auto lb;
     tk__bind lb [[Double], ButtonPressDetail 1] 
            (BindSet ([], fun _ ->
                           do_list (fun s ->
@@ -80,7 +79,6 @@ let path_panel parent =
   let lb = listbox__create fls [] in
   let sb = scrollbar__create fls [] in
     frx_listbox__scroll_link sb lb;
-    frx_focus__auto lb;
 
   let add_path n =
     begin try
@@ -163,7 +161,7 @@ let browsing_panel parent =
 ;;
 
 let bye () = 
-  CloseTk();
+  closeTk();
   exit 0
 ;;
 
@@ -188,7 +186,7 @@ let main () =
     ]
     (fun s -> initial_modules := s :: !initial_modules);
     
-  let top = OpenTkDisplayClass !display "CamlBrowser" in
+  let top = openTkDisplayClass !display "CamlBrowser" in
      frx_text__init();
      signal SIGINT (Signal_handle bye);
      signal SIGTERM (Signal_handle bye);
@@ -231,16 +229,16 @@ let main () =
    try
      do_list (function m -> if add_module m then visual_module false m) 
       	     !initial_modules;
-     tk__MainLoop()
+     tk__mainLoop()
    with
      TkError s as ex -> begin 
       	 prerr_string s;
       	 prerr_string "\n";
       	 flush std_err;
-      	 CloseTk(); 
+      	 closeTk(); 
       	 raise ex 
 	 end
-   | ex -> begin CloseTk(); raise ex end
+   | ex -> begin closeTk(); raise ex end
 ;;
 
 

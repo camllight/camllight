@@ -1,9 +1,11 @@
-type PaletteType =
-  | GrayShades of int
+(* type *)
+type paletteType =
+    GrayShades of int
   | RGBShades of int * int * int
 ;;
+(* /type *)
 
-let CAMLtoTKPaletteType = function
+let cCAMLtoTKpaletteType = function
     GrayShades (foo) -> TkToken (string_of_int foo)
   | RGBShades (r,v,b) -> TkToken (string_of_int r^"/"^
 				  string_of_int v^"/"^

@@ -1,20 +1,15 @@
 #open "support";;
 #open "camltk";;
 
+(* Retype widgets returned from Tk *)
+let cTKtoCAMLwidget = function
+   "" -> raise (TkError "unexpected result: empty widget path")
+ | s -> get_widget_atom s
+;;
+
 let debug = 
  ref (try sys__getenv "CAMLTKDEBUG"; true
       with Not_found -> false)
-;;
-
-(***************************************************************************)
-(* Evaluating Tcl code                                                     *)
-(***************************************************************************)
-
-let iterate_converter f = conv []
-  where rec conv accu = function
-    [] -> rev accu
-  | args -> let v,args = f args in
-      	     conv (v::accu) args
 ;;
 
 (* This is approximative, since we don't quote what needs to be quoted *)
@@ -29,7 +24,12 @@ let dump_args args =
   flush std_err
 ;;
 
-let TkEval args = 
+(*
+ * Evaluating Tcl code
+ *   debugging support should not affect performances...
+ *)
+
+let tkEval args = 
   if !debug then dump_args args;
   let res = tcl_direct_eval args in
   if !debug then begin
@@ -41,24 +41,29 @@ let TkEval args =
   res
 ;;
 
-(***************************************************************************)
-(* Callbacks                                                               *)
-(***************************************************************************)
+(*
+ * Callbacks
+ *)
 
-(* Large initial size to avoid leaks due to growing hashtbl algorithm *)
+type cbid == int
+;;
+
+(* Hashtblc is a variation on Hashbtl, avoiding space leaks *)
+
 let callback_naming_table = 
-   (hashtblc__new 401 : (string, callback_buffer -> unit) hashtblc__t) 
+   (hashtblc__new 401 : (cbid, callback_buffer -> unit) hashtblc__t) 
 ;;
 
 let callback_memo_table =
-   (hashtblc__new 401 : (Widget, string) hashtblc__t)
+   (hashtblc__new 401 : (widget, cbid) hashtblc__t)
 ;;
 
 let new_function_id =
   let counter = ref 0 in
-  function () ->
-    incr counter;
-    "f" ^ (string_of_int !counter)
+  function () -> incr counter; !counter
+;;
+
+let string_of_cbid = string_of_int
 ;;
 
 (* Add a new callback, associated to widget w *)
@@ -66,8 +71,8 @@ let new_function_id =
 let register_callback w f =
   let id = new_function_id () in
     hashtblc__add callback_naming_table id f;
-    hashtblc__add callback_memo_table w id;
-    id
+    if w <> dummy_widget then hashtblc__add callback_memo_table w id;
+    (string_of_cbid id)
 ;;
 
 let clear_callback id =
@@ -83,83 +88,143 @@ let remove_callbacks w =
     done
 ;;
 
-(* Hand-coded callback for destroyed widgets *)
-(* We could perhaps do it with our own event handler ? *)
-let install_cleanup () =
-  let wrapped_remove = function
-      [wname] -> 
-      	  let w = TKtoCAMLWidget wname in
-      	   remove_callbacks w;
-	   remove_widget w
-    | _ -> raise (TkError "bad cleanup callback") in
-  hashtblc__add callback_naming_table "0" wrapped_remove;
-  (* setup general destroy callback *)
-  tcl_eval "bind all <Destroy> {camlcb 0 %W}"
+(* Hand-coded callback for destroyed widgets
+ * This may be extended by the application, or by other layers of Camltk.
+ * Could use bind + of Tk, but I'd rather give an alternate mechanism so
+ * that hooks can be set up at load time (i.e. before openTk)
+ *)
+
+let destroy_hooks = ref []
 ;;
+let add_destroy_hook f = 
+  destroy_hooks := f :: !destroy_hooks
+;;
+
+add_destroy_hook (fun w -> remove_callbacks w; remove_widget w)
+;;
+
+let install_cleanup () =
+  let call_destroy_hooks = function
+      [wname] -> 
+      	let w = cTKtoCAMLwidget wname in
+	 do_list (fun f -> f w) !destroy_hooks
+    | _ -> raise (TkError "bad cleanup callback") in
+  let fid = new_function_id () in
+   hashtblc__add callback_naming_table fid call_destroy_hooks;
+  (* setup general destroy callback *)
+  tcl_eval ("bind all <Destroy> {camlcb " ^ (string_of_cbid fid) ^" %W}")
+;;
+
 
 (* The callback dispatch function *)
-let dispatch_callback = function
-    [] -> raise (TkError "invalid callback")
- |  [x] -> raise (TkError "invalid callback")
- | _::id::args as l -> 
-    if !debug then begin
-      do_list (fun x -> prerr_string x; prerr_string " ") l;
-      prerr_string "\n";
-      flush std_err
-      end;
-    (hashtblc__find callback_naming_table id) args;
-    if !debug then begin
-      prerr_string "<<-\n";
-      flush std_err
-    end
+let dispatch_callback (id, args) =
+  if !debug then begin
+    prerr_string "camlcb "; prerr_int id;
+    do_list (fun x -> prerr_string x; prerr_string " ") args;
+    prerr_string "\n";
+    flush std_err
+    end;
+  (hashtblc__find callback_naming_table id) args;
+  if !debug then begin
+    prerr_string "<<-\n";
+    flush std_err
+  end
 ;;
 
+let protected_dispatch args =
+  try catchexc__f dispatch_callback args
+  with
+     Out_of_memory -> raise Out_of_memory
+   | sys__Break -> raise sys__Break
+   | e -> flush std_err
+;;
+
+install_callback_handler protected_dispatch;;
+
 (* Different version of initialisation functions *)
-let OpenTk () =
-  install_callback_handler dispatch_callback;
+let openTk () =
   opentk "" "CamlTk";
   install_cleanup();
   default_toplevel_widget
 ;;
 
-let OpenTkClass s =
-  install_callback_handler dispatch_callback;
+let openTkClass s =
   opentk "" s;
   install_cleanup();
   default_toplevel_widget
 ;;
 
-let OpenTkDisplayClass disp cl =
-  install_callback_handler dispatch_callback;
+let openTkDisplayClass disp cl =
   opentk disp cl;
   install_cleanup();
   default_toplevel_widget
 ;;
 
 (* Destroy all widgets, thus cleaning up table and exiting the loop *)
-let CloseTk () =
+let closeTk () =
   tcl_eval "destroy ."; ()
 ;;
 
-let MainLoop =
+let mainLoop =
   tk_mainloop 
 ;;
 
-(* Extensions *)
+(*
+ * Extensions
+ *)
+(* File input handlers *)
+
+let fd_table = hashtbl__new 37 (* Avoid space leak in callback table *)
+;;
+
 let add_fileinput fd f =
-  let id = register_callback dummy_widget (function _ -> f ()) in
+  let id = new_function_id () in
+    hashtblc__add callback_naming_table id (fun _ -> f());
     if !debug then begin
-      prerr_string "fileinput:"; prerr_string id; prerr_string "\n";
-      flush stderr
+      prerr_string "fileinput:"; prerr_int id; prerr_string "\n";
+      flush std_err
     end;
+    hashtbl__add fd_table (fd, `r`) id;
     add_file_input fd id
 ;;
 
-let remove_fileinput =
-    rem_file_input
+let remove_fileinput fd =
+  begin try
+    let id = hashtbl__find fd_table (fd, `r`) in
+      clear_callback id
+  with
+    Not_found -> ()
+  end;
+  hashtbl__remove fd_table (fd, `r`);
+  rem_file_input fd
 ;;
 
-type Timer == (TkTimer * string)
+let add_fileoutput fd f =
+  let id = new_function_id () in
+    hashtblc__add callback_naming_table id (fun _ -> f());
+    if !debug then begin
+      prerr_string "fileoutput:"; prerr_int id; prerr_string "\n";
+      flush std_err
+    end;
+    hashtbl__add fd_table (fd, `w`) id;
+    add_file_output fd id
+;;
+
+let remove_fileoutput fd =
+  begin try
+    let id = hashtbl__find fd_table (fd, `w`) in
+      clear_callback id
+  with
+    Not_found -> ()
+  end;
+  hashtbl__remove fd_table (fd, `w`);
+  rem_file_output fd
+;;
+
+
+(* Timers *)
+
+type timer == (TkTimer * cbid)
 ;;
 (* A timer is used only once, so we must clean the callback table *)
 let add_timer milli f =
@@ -167,8 +232,8 @@ let add_timer milli f =
   let wrapped _ =
     clear_callback id; (* do it first in case f raises exception *)
     f() in
-  let t = internal_add_timer milli id in
   hashtblc__add callback_naming_table id wrapped;
+  let t = internal_add_timer milli id in
   t,id
 ;;
 
@@ -177,4 +242,14 @@ let add_timer milli f =
 let remove_timer (tkTimer, id) =
   internal_rem_timer tkTimer;
   clear_callback id
+;;
+
+(* Variable trace *)
+let var_handle vname f =
+  let id = new_function_id() in
+  let wrapped _ =
+    clear_callback id;
+    f() in
+  hashtblc__add callback_naming_table id wrapped;
+  internal_tracevar vname id
 ;;

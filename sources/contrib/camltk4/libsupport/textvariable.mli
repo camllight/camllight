@@ -1,20 +1,23 @@
 (* Support for Tk -textvariable option *)
 #open "protocol";;
+#open "support";;
 
-type TextVariable
+type textVariable
       (* TextVariable is an abstract type *)
 ;;
 
-value new : unit -> TextVariable
+value new : unit -> textVariable
       (* Allocation of a TextVariable *)
-and   set : TextVariable -> string -> unit
+and   new_temporary : widget -> textVariable
+      (* Allocation of a textVariable with lifetime associated to widget *)
+and   set : textVariable -> string -> unit
       (* Setting the value of a TextVariable *)
-and   get : TextVariable -> string
+and   get : textVariable -> string
       (* Reading the value of a TextVariable *)
-and   name : TextVariable -> string
+and   name : textVariable -> string
       (* Its tcl name *)
 ;;
 
-value CAMLtoTKTextVariable : TextVariable -> TkArgs
+value cCAMLtoTKtextVariable : textVariable -> tkArgs
       (* Internal conversion function *)
 ;;

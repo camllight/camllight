@@ -24,6 +24,7 @@ type token =
   | FUNCTION
   | MODULE
   | EXTERNAL
+  | UNSAFE
 ;;
-value Entry :
+value entry :
   (lexing__lexbuf  -> token) -> lexing__lexbuf -> unit;;

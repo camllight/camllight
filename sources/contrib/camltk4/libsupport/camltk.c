@@ -10,6 +10,9 @@
 #include <memory.h>
 #include <fail.h>
 
+/* The Tcl interpretor */
+Tcl_Interp *cltclinterp = NULL;
+
 /* Code part of the callback dispatcher */
 static code_t handler_code = NULL;
 
@@ -22,14 +25,28 @@ value camltk_install_callback_handler(handler) /* ML */
 }
 
 /* Hack for calling Caml global function from C */
-value camltk_dispatch_callback(arg)
+/* arg has been allocated by us, and it might move
+   when we allocate the pair and the closure
+   */
+value camltk_dispatch_callback(id,arg)
+     int id;
      value arg;
 {
   value clos;
+  value res = Atom(0);
+  Push_roots(r,2);
+#define garg r[0]
+#define pair r[1]
+  garg = arg;			/* save it */
+  pair = alloc_tuple(2);	/* alloc a pair */
+  Field(pair, 0) = Val_int(id);
+  Field(pair, 1) = garg;
   clos = alloc(2,Closure_tag);
   Code_val(clos) = handler_code;
   Env_val(clos) = Atom(0);
-  callback(clos, arg);
+  res = callback(clos, pair);
+  Pop_roots();
+  return res;
 }
 
 /* Copy a list of strings from C to Caml */
@@ -80,11 +97,31 @@ int CamlCBCmd(clientdata, interp, argc, argv)
      int argc;
      char *argv[];
 {
-  camltk_dispatch_callback(copy_string_list(argc,argv));
-  /* Assume no result */
-  /* Never fails (Caml would have raised an exception) */
-  interp->result = "";
-  return TCL_OK;
+  /* Assumes no result */
+  Tcl_SetResult(interp, NULL, NULL);
+  if (argc >= 2) {
+    int id;
+    if (Tcl_GetInt(interp, argv[1], &id) != TCL_OK)
+      return TCL_ERROR;
+    camltk_dispatch_callback(id, copy_string_list(argc-2,&argv[2]));
+    /* Never fails (Caml would have raised an exception) */
+    /* but result may have been set by callback */
+    return TCL_OK;
+  }
+  else
+    return TCL_ERROR;
+}
+
+/* Callbacks are always of type _ -> unit, to simplify storage
+ * But a callback can nevertheless return something (to Tcl) by
+ * using the following. TCL_VOLATILE ensures that Tcl will make
+ * a copy of the string
+ */
+value camltk_return (v) /* ML */
+     value v;
+{
+  Tcl_SetResult(cltclinterp, String_val(v), TCL_VOLATILE);
+  return Val_unit;
 }
 
 /* Note: raise_with_string WILL copy the error message */
@@ -95,28 +132,36 @@ void tk_error(errmsg)
 }
 
 /* 
-   Dealing with signals: when a signal handler is defined in Caml,
-   the actual execution of the signal handler upon reception of the
-   signal is delayed until we are sure we are out of the GC.
-   If a signal occurs during the MainLoop, we would have to wait
-   the next event for the handler to be invoked.
+ * Dealing with signals: when a signal handler is defined in Caml,
+ * the actual execution of the signal handler upon reception of the
+ * signal is delayed until we are sure we are out of the GC.
+ * If a signal occurs during the MainLoop, we would have to wait
+ *  the next event for the handler to be invoked.
+ * The following function will invoke a pending signal handler if any,
+ * and we put in on a regular timer.
 */
+
+#define SIGNAL_INTERVAL 300
+
+int signal_events = 0; /* do we have a pending timer */
 
 /* The following function will invoke a pending signal handler if any */
 void invoke_pending_caml_signals (clientdata) 
      ClientData clientdata;
 {
+  signal_events = 0;
   enter_blocking_section();
   /* Rearm timer */
   Tk_CreateTimerHandler(300, invoke_pending_caml_signals, NULL);
+  signal_events = 1;
   leave_blocking_section();
 }
 
 
-Tcl_Interp *cltclinterp = NULL;
 static Tk_Window mainWindow;
 
 #define RCNAME ".camltkrc"
+#define CAMLCB "camlcb"
 
 /* Initialisation */
 value camltk_opentk(display, name) /* ML */
@@ -145,6 +190,7 @@ value camltk_opentk(display, name) /* ML */
 
   /* This is required by "unknown" and thus autoload */
   Tcl_SetVar(cltclinterp, "tcl_interactive", "0", TCL_GLOBAL_ONLY);
+  /* Our hack for implementing break in callbacks */
   Tcl_SetVar(cltclinterp, "BreakBindingsSequence", "0", TCL_GLOBAL_ONLY);
 
   /* Load the traditional rc file */
@@ -165,9 +211,6 @@ value camltk_opentk(display, name) /* ML */
     }
   }
 
-  /* Initialise signal handling */
-  Tk_CreateTimerHandler(100, invoke_pending_caml_signals, NULL);
-  
   return Atom(0);
 }
 
@@ -229,13 +272,20 @@ value v;
 
 /* 
  * Memory of allocated Tcl lists.
+ * We should not need more than MAX_LIST
  */
-static char *tcllists[64];
+#define MAX_LIST 256
+static char *tcllists[MAX_LIST];
+
 static int startfree = 0;
 /* If size is lower, do not allocate */
 static char *quotedargv[16];
 
-/* Fill a preallocated vector arguments, doing expansion and all */
+/* Fill a preallocated vector arguments, doing expansion and all
+ * Assumes Tcl will 
+ *  not tamper with our strings
+ *  make copies if strings are "persistent"
+ */
 int fill_args (argv, where, v) 
 char ** argv;
 int where;
@@ -286,8 +336,10 @@ value v;
   for(i=0,size=0;i<Wosize_val(v);i++)
     size += argv_size(Field(v,i));
 
-  /* one slot for NULL, one slot for "unknown" if command not found */
-  argv = (char **)stat_alloc((size + 2) * sizeof(char *));
+  /* +4: one slot for NULL
+         one slot for "unknown" if command not found
+	 two slots for chaining local roots */
+  argv = (char **)stat_alloc((size + 4) * sizeof(char *));
 
   wherewasi = startfree;
 
@@ -297,7 +349,13 @@ value v;
     for(i=0, where=0;i<Wosize_val(v);i++)
       where = fill_args(argv,where,Field(v,i));
     argv[size] = NULL;
+    argv[size + 1] = NULL;
   }
+
+  /* Register argv as local roots for the GC (cf. Push_roots in memory.h) */
+  argv[size + 2] = (char *)(size + 2);
+  argv[size + 3] = (char *) c_roots_head;
+  c_roots_head = (value *)&(argv[size + 2]);
 
   whereami = startfree;
 
@@ -315,6 +373,10 @@ value v;
       result = TCL_ERROR;
       Tcl_AppendResult(cltclinterp, "Unknown command \"", argv[0], "\"", NULL);
     };
+
+  /* Remove argv from the local roots */
+  Pop_roots();
+
   /* Free the various things we allocated */
   stat_free((char *)argv);
   for (i=wherewasi; i<whereami; i++)
@@ -356,32 +418,21 @@ value camltk_splitlist (v) /* ML */
 
 /*
  * File descriptor callbacks
- * It's not possible to call non-global ML code, so use general 
- *  callback stuff for fd. 
  */
 
 void FileProc(clientdata, mask)
      ClientData clientdata;
      int mask;
 {
-  char *arg[2] = {"camlcb", (char *)clientdata};
-
-  camltk_dispatch_callback(copy_string_list(2,arg));
+  camltk_dispatch_callback(Val_int(clientdata),Atom(0));
 }
-
-/* Avoid space leak */
-static char *file_cbids[NOFILE];
 
 value camltk_add_file_input(fd, cbid)    /* ML */
      value fd;
      value cbid;
 {
-  /* Make a copy of the cbid and put it in the CliendData */
-  char *cbid_save = string_to_c(cbid);
-
   Tk_CreateFileHandler(Int_val(fd), TK_READABLE, 
-		       FileProc, (ClientData) cbid_save);
-  file_cbids[Int_val(fd)] = cbid_save;
+		       FileProc, (ClientData) (Int_val(cbid)));
   return Atom(0);
 }
 
@@ -389,47 +440,206 @@ value camltk_rem_file_input(fd) /* ML */
      value fd;
 {
   Tk_DeleteFileHandler(Int_val(fd));
-  if (file_cbids[Int_val(fd)]) {
-    stat_free(file_cbids[Int_val(fd)]);
-    file_cbids[Int_val(fd)] = NULL;
-  };
   return Atom(0);
+}
+
+value camltk_add_file_output(fd, cbid)    /* ML */
+     value fd;
+     value cbid;
+{
+  Tk_CreateFileHandler(Int_val(fd), TK_WRITABLE, 
+		       FileProc, (ClientData) (Int_val(cbid)));
+  return Val_unit;
+}
+
+value camltk_rem_file_output(fd) /* ML */
+     value fd;
+{
+  Tk_DeleteFileHandler(Int_val(fd));
+  return Val_unit;
 }
 
 value camltk_tk_mainloop() /* ML */
 {
+  if (!signal_events) {
+    /* Initialise signal handling */
+    signal_events = 1;
+    Tk_CreateTimerHandler(100, invoke_pending_caml_signals, NULL);
+  };
   Tk_MainLoop();
   return Atom(0);
 }
 
 
-/* Basically the same thing as FileProc */
-/* Since a timer handler is called only once, we can free */
-/* the clientdata. Space leak will occur when timer is */
-/* cancelled. */
+/* Note: this HAS to be reported "as-is" in ML source */
+static int event_flag_table[] = {
+  TK_DONT_WAIT, TK_X_EVENTS, TK_FILE_EVENTS, TK_TIMER_EVENTS, TK_IDLE_EVENTS,
+  TK_ALL_EVENTS
+};
 
+value camltk_dooneevent(flags) /* ML */
+     value flags;
+{
+  int ret;
+  ret = Tk_DoOneEvent(convert_flag_list(flags, event_flag_table));
+  return Val_int(ret);
+}
+
+/* Basically the same thing as FileProc */
 void TimerProc (ClientData clientdata)
 {
-  char *arg[] = {"camlcb", (char *)clientdata};
-  value callback_list = copy_string_list(2,arg);
-
-  stat_free((char *)clientdata);
-  camltk_dispatch_callback(callback_list);
+  camltk_dispatch_callback(Val_int(clientdata),Atom(0));
 }
 
 value camltk_add_timer(milli, cbid) /* ML */
      value milli;
      value cbid;
 {
-  /* Make a copy of the cbid and put it in the CliendData */
-  char *cbid_save = string_to_c(cbid);
-  return ((value)Tk_CreateTimerHandler(Int_val(milli), TimerProc, 
-				       (ClientData) cbid_save));
+  /* look at tkEvent.c , Tk_Token is an int */ 
+  return (Val_int(Tk_CreateTimerHandler(Int_val(milli), TimerProc, 
+				       (ClientData) (Int_val(cbid)))));
 }
 
 value camltk_rem_timer(token) /* ML */
      value token;
 {
-  Tk_DeleteTimerHandler((Tk_TimerToken) token);
+  Tk_DeleteTimerHandler((Tk_TimerToken) Int_val(token));
+  return Atom(0);
+}
+
+/* The following are replacements for 
+    tkwait variable
+    tkwait visibility
+    tkwait window
+   in the case where we use threads (staying in Tk_MainLoop() prevents
+   thread scheduling from taking place).
+   We could get away we using a regular timer than invokes some nop function.
+*/
+
+/* Forward declaration to keep the compiler happy */
+static char *		WaitVariableProc _ANSI_ARGS_((ClientData clientData,
+			    Tcl_Interp *interp, char *name1, char *name2,
+			    int flags));
+static void		WaitVisibilityProc _ANSI_ARGS_((ClientData clientData,
+			    XEvent *eventPtr));
+static void		WaitWindowProc _ANSI_ARGS_((ClientData clientData,
+			    XEvent *eventPtr));
+
+static char * WaitVariableProc(clientdata, interp, name1, name2, flags)
+     ClientData clientdata;
+     Tcl_Interp *interp;	/* Interpreter containing variable. */
+     char *name1;		/* Name of variable. */
+     char *name2;		/* Second part of variable name. */
+     int flags;			/* Information about what happened. */
+{
+  char *fullvar;
+
+  /* Rebuild the full variable name */
+  if (NULL == name2) {
+    fullvar = stat_alloc (strlen(name1) + 1);
+    strcpy(fullvar,name1);
+  } else { 
+    fullvar= stat_alloc (strlen(name1) + strlen(name2) + 3);
+    strcpy(fullvar,name1);
+    strcat(fullvar,"(");
+    strcat(fullvar,name2);
+    strcat(fullvar,")");
+  }
+  Tcl_UntraceVar(interp, fullvar,
+		TCL_GLOBAL_ONLY|TCL_TRACE_WRITES|TCL_TRACE_UNSETS,
+		WaitVariableProc, clientdata);
+  stat_free(fullvar);
+  camltk_dispatch_callback(Val_int(clientdata),Atom(0));
+  return (char *)NULL;
+}
+
+/* Sets up a callback upon modification of a variable */
+value camltk_trace_var(var,cbid) /* ML */
+     value var;
+     value cbid;
+{
+  /* Make a copy of var, since Tcl will modify it in place, and we
+   * don't trust that much what it will do here
+   */
+  char *cvar = string_to_c(var);
+
+  if (Tcl_TraceVar(cltclinterp, cvar,
+		   TCL_GLOBAL_ONLY|TCL_TRACE_WRITES|TCL_TRACE_UNSETS,
+		   WaitVariableProc,
+		   (ClientData) (Int_val(cbid)))
+		   != TCL_OK) {
+    stat_free(cvar);
+    tk_error(cltclinterp->result);
+  };
+  stat_free(cvar);
+  return Atom(0);
+}
+
+/* For the other handlers, we need a bit more data */
+struct WinCBData {
+  int cbid;
+  Tk_Window win;
+};
+
+static void WaitVisibilityProc(clientData, eventPtr)
+    ClientData clientData;	
+    XEvent *eventPtr;		/* Information about event (not used). */
+{
+  struct WinCBData *vis = clientData;
+  value cbid = Val_int(vis->cbid);
+
+  Tk_DeleteEventHandler(vis->win, VisibilityChangeMask,
+	    WaitVisibilityProc, clientData);
+
+  stat_free((char *)vis);
+  camltk_dispatch_callback(cbid,Val_int(0));
+}
+
+/* Sets up a callback upon Visibility of a window */
+value camltk_wait_vis(win,cbid) /* ML */
+     value win;
+     value cbid;
+{
+  struct WinCBData *vis =
+    (struct WinCBData *)stat_alloc(sizeof(struct WinCBData));
+  vis->win = Tk_NameToWindow(cltclinterp, String_val(win), mainWindow);
+  if (vis -> win == NULL) {
+    stat_free((char *)vis);
+    tk_error(cltclinterp->result);
+  };
+  vis->cbid = Int_val(cbid);
+  Tk_CreateEventHandler(vis->win, VisibilityChangeMask,
+			WaitVisibilityProc, (ClientData) vis);
+  return Atom(0);
+}
+
+static void WaitWindowProc(clientData, eventPtr)
+    ClientData clientData;	
+    XEvent *eventPtr;		
+{
+  if (eventPtr->type == DestroyNotify) {
+    struct WinCBData *vis = clientData;
+    value cbid = Val_int(vis->cbid);
+    stat_free((char *)clientData);
+    /* The handler is destroyed by Tk itself */
+    camltk_dispatch_callback(cbid,Atom(0));
+  }
+}
+
+/* Sets up a callback upon window destruction */
+value camltk_wait_des(win,cbid) /* ML */
+     value win;
+     value cbid;
+{
+  struct WinCBData *vis =
+    (struct WinCBData *)stat_alloc(sizeof(struct WinCBData));
+  vis->win = Tk_NameToWindow(cltclinterp, String_val(win), mainWindow);
+  if (vis -> win == NULL) {
+    stat_free((char *)vis);
+    tk_error(cltclinterp->result);
+  };
+  vis->cbid = Int_val(cbid);
+  Tk_CreateEventHandler(vis->win, StructureNotifyMask,
+			WaitWindowProc, (ClientData) vis);
   return Atom(0);
 }

@@ -7,7 +7,6 @@
 
 let version = "$Id$"
 ;;
-
 (*
  * Simple requester 
  *  an entry field, unrestricted, with emacs-like bindings
@@ -18,7 +17,7 @@ let version = "$Id$"
 *)
 
 let open_simple title action notaction memory =
-  let t = toplevelw__create support__default_toplevel_widget [] in
+  let t = toplevelw__create support__default_toplevel_widget [Class "Dialog"] in
   focus__set t;
   wm__title_set t title;
   let tit = label__create t [Text title] in
@@ -42,7 +41,8 @@ let open_simple title action notaction memory =
 
     bind e [[], KeyPressDetail "Escape"]
       	 (BindSet ([], (fun _ -> button__invoke bcancel)));
-    pack [bok; bcancel] [Side Side_Left; Fill Fill_X; Expand true];
+    pack [bok] [Side Side_Left; Expand true];
+    pack [bcancel] [Side Side_Right; Expand true];
     pack [tit;e] [Fill Fill_X];
     pack [f] [Side Side_Bottom; Fill Fill_X];
     frx_widget__resizeable t;
@@ -51,13 +51,56 @@ let open_simple title action notaction memory =
     grab__set t
 ;;
 
+(* A synchronous version *)
+let open_simple_synchronous title memory =
+  let t = toplevelw__create support__default_toplevel_widget [Class "Dialog"] in
+  focus__set t;
+  wm__title_set t title;
+  let tit = label__create t [Text title] in
+  let len = max 40 (string_length (textvariable__get memory)) in
+  let e =
+    entry__create t [Relief Sunken; TextVariable memory; TextWidth len] in
+
+  let waiting = textvariable__new_temporary t in
+  
+  let activate _ =
+     grab__release t;			(* because of wm *)
+     destroy t;				(* so action can call open_simple *)
+     textvariable__set waiting "1" in
+
+  bind e [[], KeyPressDetail "Return"] (BindSet ([], activate));
+
+  let f = frame__create t [] in
+  let bok = button__create f [Text "Ok"; Command activate] in
+  let bcancel = 
+     button__create f
+	[Text "Cancel"; 
+	 Command (fun () -> 
+		   grab__release t; destroy t; textvariable__set waiting "0")] in
+
+    bind e [[], KeyPressDetail "Escape"]
+      	 (BindSet ([], (fun _ -> button__invoke bcancel)));
+    pack [bok] [Side Side_Left; Expand true];
+    pack [bcancel] [Side Side_Right; Expand true];
+    pack [tit;e] [Fill Fill_X];
+    pack [f] [Side Side_Bottom; Fill Fill_X];
+    frx_widget__resizeable t;
+    focus__set e;
+    tkwait__visibility t;
+    grab__set t;
+    tkwait__variable waiting;
+    begin match textvariable__get waiting with
+      "1" -> true
+    | _ -> false
+    end
+;;
 (*
  * Simple list requester
  * Same remarks as in open_simple.
  * focus seems to be in the listbox automatically
  *)
 let open_list title elements action notaction =
-  let t = toplevelw__create support__default_toplevel_widget [] in
+  let t = toplevelw__create support__default_toplevel_widget [Class "Dialog"] in
   wm__title_set t title;
 
   let tit = label__create t [Text title] in
@@ -97,13 +140,12 @@ let open_list title elements action notaction =
     grab__set t
 ;;
 
-
 (* Synchronous *)
 let open_passwd title =
   let username = ref ""
   and password = ref ""
   and cancelled = ref false in
-  let t = toplevelw__create support__default_toplevel_widget [] in
+  let t = toplevelw__create support__default_toplevel_widget [Class "Dialog"] in
   focus__set t;
   wm__title_set t title;
   let tit = label__create t [Text title]
@@ -124,11 +166,18 @@ let open_passwd title =
                                     destroy t)] (* will return from tkwait *)
   in
     entry__configure ep [Show `*`];
-    pack [bok; bcancel] [Side Side_Left; Fill Fill_X];
+    bind eu [[], KeyPressDetail "Return"]
+      (BindSetBreakable ([], (fun _ -> focus__set ep; break())));
+    bind ep [[], KeyPressDetail "Return"]
+      (BindSetBreakable ([], (fun _ -> button__flash bok; 
+                                       button__invoke bok; 
+      	       	       	       	       break())));
+
+    pack [bok] [Side Side_Left; Expand true];
+    pack [bcancel] [Side Side_Right; Expand true];
     pack [tit;fu;fp;fb] [Fill Fill_X];
-    frx_widget__resizeable t;
-    focus__set eu;
     tkwait__visibility t;
+    focus__set eu;
     grab__set t;
     tkwait__window t;
     if !cancelled then failwith "cancelled"

@@ -11,7 +11,7 @@
 #open "tags";;
 
 let error m =
-  dialog (widget_atom default_toplevel_widget "error")
+  dialog__create default_toplevel_widget
 	 "Caml Browser Error"
 	 m
 	 (Predefined "error")
