@@ -323,8 +323,8 @@ let std_options = [
   "-g", arg__Unit (function () ->
       	fprintf stderr "Warning: -p option incompatible with debugger\n";
 	flush stderr);
-  "-i", arg__Unit (function () -> ()) (* ignored *)
-  "-lang", arg__String (function () -> ()) (* ignored *)
+  "-i", arg__Unit (function () -> ()); (* ignored *)
+  "-lang", arg__String (function lang -> ()) (* ignored *)
  ]
 ;;
 
