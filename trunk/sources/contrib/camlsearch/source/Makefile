@@ -3,16 +3,16 @@ CAMLLEX		=camllex
 CAMLYACC	=camlyacc
 CAMLTEX		=../tools/caml-tex-format
 CAMLDETEX	=../tools/caml-tex-extract
-COMPFLAGS	=-I $(COMPLIBDIR) $(DEBUG)
-LINKFLAGS	=-I $(COMPLIBDIR) -g
+COMPFLAGS	=-I $(UNIXLIBDIR) -I $(COMPLIBDIR) $(DEBUG)
+LINKFLAGS	=-I $(COMPLIBDIR) -I $(COMPLIBDIR) -g
 YACCFLAGS	=# -v
 
 
 DEBUG=	-g
 NAME=	camlsearch
 
-COMPOBJS= config.zo misc.zo const.zo prim.zo globals.zo location.zo \
-	errors.zo modules.zo builtins.zo types.zo
+COMPOBJS= config.zo misc.zo interntl.zo const.zo prim.zo globals.zo \
+        location.zo error.zo modules.zo builtins.zo types.zo
 OBJS=	general.zo comparisons.zo directory_and_file.zo type_parser.zo \
 	type_lexer.zo primitives.zo type_for_matching.zo \
 	compiler_dependant_stuff.zo operations_on_types.zo output.zo \
@@ -25,7 +25,7 @@ all:	$(NAME)
 
 #					Crée l'executable
 $(NAME):	$(OBJS)
-	camlc -custom -g $(LINKFLAGS) -o $(NAME) $(COMPOBJS) $(OBJS) -lunix
+	camlc -custom -g $(LINKFLAGS) -o $(NAME) $(COMPOBJS) $(OBJS) $(UNIXLIBDIR)/libunix.a
 
 #					Formate pour TeX
 report: $(TEXOBJ)
@@ -36,10 +36,10 @@ install: $(NAME)
 	install -c -m 755 $(NAME) $(INSTALLDIR)
 #					Efface les fichiers inutiles
 clean:
-	-rm $(NAME)
-	-rm *.zi *.zix *.zo *.f.tex *~
-	-rm `ls *.mli.tex | sed 's/.tex$///'`
-	-rm `ls *.ml.tex | sed 's/.tex$///'`
+	rm -f $(NAME)
+	rm -f *.zi *.zix *.zo *.f.tex *~
+	rm -f `echo *.mli.tex | sed 's/.tex$///'`
+	rm -f `echo *.ml.tex | sed 's/.tex$///'`
 
 #					Tags pour Emacs
 tags:
@@ -49,7 +49,7 @@ tags:
 depend:
 	mv Makefile Makefile.bak
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
-         camldep *.mli *.ml) > Makefile
+         ../../../src/tools/camldep *.mli *.ml) > Makefile
 
 #					Comment compiler
 .SUFFIXES :

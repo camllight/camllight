@@ -1,27 +1,33 @@
 ### System dependent configuration section
 
 COMPLIBDIR=../../../src/compiler
-INSTALLDIR=/usr/local/bin
-MANDIR=/usr/local/man/manl
-ELISPDIR=/usr/local/lib/emacs/site-lisp
+UNIXLIBDIR=../../libunix
+
+# Overriden when called from ../Makefile
+BINDIR=/usr/local/bin
+MANEXT=l
+MANDIR=/usr/local/man/man$(MANEXT)
+EMACSLISPDIR=/usr/local/lib/emacs/site-lisp
 
 ### End of system dependent configuration section
 
 PACKAGE=camlsearch.tar.Z
 
 all:
-	(cd source; make "COMPLIBDIR=$(COMPLIBDIR)")
+	(cd source; \
+         $(MAKE) "COMPLIBDIR=$(COMPLIBDIR)" "UNIXLIBDIR=$(UNIXLIBDIR)")
 
 install:
-	(cd source; make install "INSTALLDIR=$(INSTALLDIR)" "COMPLIBDIR=$(COMPLIBDIR)")
-	(cd doc; make install "MANDIR=$(MANDIR)")
-	(cd emacs-lisp; make install "ELISPDIR=$(ELISPDIR)")
+	(cd source; $(MAKE) install "INSTALLDIR=$(BINDIR)" \
+                "COMPLIBDIR=$(COMPLIBDIR)" "UNIXLIBDIR=$(UNIXLIBDIR)")
+	(cd doc; $(MAKE) install "MANEXT=$(MANEXT)" "MANDIR=$(MANDIR)")
+	(cd emacs-lisp; $(MAKE) install "ELISPDIR=$(EMACSLISPDIR)")
 
 distrib: clean
 	(cd ..; rm -f $(PACKAGE); \
 	 tar -cvf - camlsearch | compress -c > $(PACKAGE))
 
 clean:
-	(cd source; make clean)
-	-rm *~
+	(cd source; $(MAKE) clean)
+	rm -f *~
 
