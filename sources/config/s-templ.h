@@ -1,5 +1,11 @@
 /* Operating system and standard library dependencies. */
 
+/* 0. This is a Unix machine. */
+
+#ifndef unix
+#define unix
+#endif
+
 /* 1. For the runtime system. */
 
 #define HAS_MEMMOVE
@@ -74,6 +80,12 @@ typedef int sighandler_return_type;
 
 /* Define HAS_MKFIFO if the library provides the mkfifo() function. */
 
+#define HAS_GETCWD
+#define HAS_GETWD
+
+/* Define HAS_GETCWD if the library provides the getcwd() function. */
+/* Define HAS_GETWD if the library provides the getwd() function. */
+
 #define HAS_GETPRIORITY
 
 /* Define HAS_GETPRIORITY if the library provides getpriority() and
@@ -118,5 +130,23 @@ typedef int sighandler_return_type;
 
 #define HAS_TERMIOS
 
-/* Define HAS_TERMIOS if you have /usr/include/termios.h and it's 
+/* Define HAS_TERMIOS if you have /usr/include/termios.h and it is
    Posix-compliant. */
+
+#define HAS_ASYNC_IO
+
+/* Define HAS_ASYNC_IO if BSD-style asynchronous I/O are supported
+   (the process can request to be sent a SIGIO signal when a descriptor
+   is ready for reading). */
+
+#define HAS_SETITIMER
+
+/* Define HAS_SETITIMER if you have setitimer(). */
+
+#define HAS_GETHOSTNAME
+
+/* Define HAS_GETHOSTNAME if you have gethostname(). */
+
+#define HAS_UNAME
+
+/* Define HAS_UNAME if you have uname(). */
