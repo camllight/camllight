@@ -215,10 +215,13 @@ let untrace name =
 let install_printer name =
   begin try
     let val_desc = find_value_desc (parse_global name) in
-    let ty_arg = new_type_var() in
-    let ty_printer = type_arrow(ty_arg, type_unit) in
     begin try
+      push_type_level();
+      let ty_arg = new_type_var() in
+      let ty_printer = type_arrow(ty_arg, type_unit) in
       unify (type_instance val_desc.info.val_typ, ty_printer);
+      pop_type_level();
+      generalize_type ty_arg;
       let pos = get_slot_for_variable val_desc.qualid in
       printers := (name, ty_arg, (magic_obj global_data.(pos) : obj -> unit))
                :: !printers

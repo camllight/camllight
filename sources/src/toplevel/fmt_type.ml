@@ -90,7 +90,7 @@ let rec print_typ priority ty =
 
 and print_typ_list priority sep = function
     [] ->
-      fatal_error "print_typ_list"
+      ()
   | [ty] ->
       print_typ priority ty
   | ty::rest ->
