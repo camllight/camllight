@@ -21,7 +21,7 @@ PERVASIVES=baltree bool char eq exc fchar filename float format fstring fvect \
     gc genlex hashtbl int io iparsing lexing list map obj pair parsing \
     printexc printf queue random ref set sort stack stream string \
     toplevel vect graphics \
-	big_int nat num ratio arstatus
+    big_int fnat nat num ratio arstatus
 
 SPECIALS=sys
 
