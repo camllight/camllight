@@ -65,7 +65,10 @@ let write_constructor w
      (* if argument is unit, constructor has no argument *)
        	 Unit -> ()
        | ty -> w " of "; w (ppMLtype ty)
-     end
+     end;
+     w "\t\t(* tk keyword: ";
+     w tkstring;
+     w " *)"
 ;;
 
 (* Write a rhs type decl *)
