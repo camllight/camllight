@@ -115,6 +115,9 @@ become superuser and do "make install".
 
 IF SOMETHING GOES WRONG:
 
+Read the "common problems" and "machine-specific hints" section at the
+end of this file.
+
 Check the files m.h and s.h in config/. Wrong endianness or alignment
 constraints in m.h will immediately crash the bytecode interpreter.
 
@@ -166,6 +169,12 @@ unable to compile correctly the runtime system (wrong code is
 generated for (x - y) where x is a pointer and y an integer). This
 causes "make world" to crash when compiling in src/lib.  Fix: use
 another C compiler (gcc works fine).
+
+* On DECstations 3000 under OSF1 3.0: "make configure" hangs while
+testing asynchronous I/O. This may even hang your login shell as well.
+Apparently, asynchronous I/O are severely buggy in the 3.0 kernel.
+Fix: comment out lines 286-289 in config/autoconf and run "make configure"
+again.
 
 * On MIPS machines from MIPS Co.  Add "-systype bsd43" to OPTS.
 Also, some versions of the cc compiler are reportedly unable to
