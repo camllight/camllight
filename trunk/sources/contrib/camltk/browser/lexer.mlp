@@ -55,6 +55,7 @@ do_list add_keyword [
   "try";
   "type";
   "value";
+  "when";
   "where";
   "while";
   "with"
@@ -133,9 +134,13 @@ let saved_string_start = ref 0;;
 #define ACCENTED `\128`-`\154` `\160`-`\165`
 #endif
 
-rule Main = parse
-    [` ` `\010` `\013` `\009` `\026` `\012`] +
-      { Main lexbuf }
+#define SYMBOLS \
+    `!` `$` `%` `&` `*` `+` `-` `.` `/` `:` `;` \
+    `<` `=` `>` `?` `@` `^` `|` `~`
+
+rule main = parse
+    [` ` `\010` `\013` `\009` `\012`] +
+      { main lexbuf }
   | [`A`-`Z` `a`-`z` ACCENTED ]
     ( `_` ? [`A`-`Z` `a`-`z` ACCENTED `'` (*'*) `0`-`9` ] ) *
       { let s = get_lexeme lexbuf in
@@ -151,95 +156,80 @@ rule Main = parse
   | [`0`-`9`]+ (`.` [`0`-`9`]*)? ([`e` `E`] [`+` `-`]? [`0`-`9`]+)?
       { Dontcare }
   | "\""
-      { String lexbuf }
+      { string lexbuf }
   | "`"
-      { Char lexbuf }
+      { char lexbuf }
   | "(*"
       { comment_depth := 1; 
       	let thestart = get_lexeme_start lexbuf in
-      	let theend = Comment lexbuf in
+      	let theend = comment lexbuf in
       	  Commentaire (thestart,theend)} 
   | "#" { Dontcare }
-  | "!" { Dontcare }
-  | "!=" { Dontcare }
   | "&" { Dontcare }
   | "'" { Dontcare }
   | "(" { Dontcare }
   | ")" { Dontcare }
   | "*" { Dontcare }
-  | "*." { Dontcare }
-  | "+" { Dontcare }
-  | "+." { Dontcare }
   | "," { Dontcare }
-  | "-" { Dontcare }
-  | "-." { Dontcare }
   | "->" { Dontcare }
   | "." { Dontcare }
   | ".." { Dontcare }
   | ".(" { Dontcare }
-  | "/" { Dontcare }
-  | "/." { Dontcare }
+  | ".[" { Dontcare }
   | ":" { Dontcare }
   | "::" { Dontcare }
   | ":=" { Dontcare }
   | ";" { Dontcare }
   | ";;" { Dontcare }
-  | "<" { Dontcare }
-  | "<." { Dontcare }
   | "<-" { Dontcare }
-  | "<=" { Dontcare }
-  | "<=." { Dontcare }
-  | "<>" { Dontcare }
-  | "<>." { Dontcare }
   | "=" { Dontcare }
-  | "=." { Dontcare }
   | "==" { Dontcare }
-  | ">" { Dontcare }
-  | ">." { Dontcare }
-  | ">=" { Dontcare }
-  | ">=." { Dontcare }
   | ">]" { Dontcare }
-  | "@" { Dontcare }
   | "[" { Dontcare }
   | "[|" { Dontcare }
   | "[<" { Dontcare }
   | "]" { Dontcare }
-  | "^" { Dontcare }
   | "_" { Dontcare }
   | "__" { Dontcare }
   | "{" { Dontcare }
   | "|" { Dontcare }
   | "|]" { Dontcare }
   | "}" { Dontcare }
+  | "/\\" { Dontcare }
+  | "\\/" { Dontcare }
+
+  | "!="    { Dontcare }
+  | "-"     { Dontcare }
+  | "-."    { Dontcare }
+
+  | [ `!` `?` ] [ SYMBOLS ] *
+            { Dontcare }
+  | [ `=` `<` `>` `@` `^` `|` `&` `~` ] [ SYMBOLS ] *
+            { Dontcare }
+  | [ `+` `-` ] [ SYMBOLS ] *
+            { Dontcare }
+  | "**" [ SYMBOLS ] *
+            { Dontcare }
+  | [ `*` `/` `%` ] [ SYMBOLS ] *
+            { Dontcare }
   | eof { EOF }
   | _
       { raise (Lexical_error("illegal character",
                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
 
-and Comment = parse
+and comment = parse
     "(*"
-      { comment_depth := succ !comment_depth; Comment lexbuf }
+      { comment_depth := succ !comment_depth; comment lexbuf }
   | "*)"
       { comment_depth := pred !comment_depth;
-        if !comment_depth > 0 then Comment lexbuf
+        if !comment_depth > 0 then comment lexbuf
       	else get_lexeme_end lexbuf }
-  | "\""
-      { reset_string_buffer();
-        String lexbuf;
-        reset_string_buffer();
-        Comment lexbuf }
-  | "`" [^ `\\` `\``] "`"
-      { Comment lexbuf }
-  | "`" `\\` [`\\` `\`` `n` `t` `b` `r`] "`"
-      { Comment lexbuf }
-  | "`" `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`] "`"
-      { Comment lexbuf }
   | eof
       { raise (Lexical_error("comment not terminated", -1, -1)) }
   | _
-      { Comment lexbuf }
+      { comment lexbuf }
 
-and Char = parse
+and char = parse
     [^ `\\` `\``] "`"
       { Dontcare }
   | `\\` [`\\` `\`` `n` `t` `b` `r`] "`"
@@ -250,17 +240,17 @@ and Char = parse
       { raise (Lexical_error("bad character constant",
                             get_lexeme_start lexbuf, get_lexeme_end lexbuf)) }
 
-and String = parse
+and string = parse
     `"`
       { Dontcare }
   | `\\` [` ` `\010` `\013` `\009` `\026` `\012`] +
-      { String lexbuf }
+      { string lexbuf }
   | `\\` [`\\` `"` `n` `t` `b` `r`]
-      { String lexbuf }
+      { string lexbuf }
   | `\\` [`0`-`9`] [`0`-`9`] [`0`-`9`]
-      { String lexbuf }
+      { string lexbuf }
   | eof
       { raise (Lexical_error("string not terminated", -1, -1)) }
   | _
-      { String lexbuf }
+      { string lexbuf }
 ;;
