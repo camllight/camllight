@@ -23,6 +23,20 @@ grep: expr.zo auto.zo ensent.zo determ.zo grep.zo
 clean::
 	$(RM) grep
 
+all::fastgrep
+
+fastgrep: expr.zo auto.zo ensent.zo determ.zo fastgrep.zo fastrec.o
+	$(CAMLC) $(LINKFLAGS) -custom  expr.zo auto.zo ensent.zo determ.zo fastgrep.zo fastrec.o  -o fastgrep
+
+clean::
+	$(RM) fastgrep
+
+fastrec.o: fastrec.c
+	$(CAMLC) -c fastrec.c
+
+clean::
+	rm -f fastrec.o
+
 # (end Imakefile)
 
 clean::
@@ -48,9 +62,11 @@ makefiles:: makefile
 
 auto.zi: expr.zi 
 determ.zi: auto.zi 
+fastrec.zi: determ.zi 
 auto.zo: auto.zi expr.zi 
 determ.zo: determ.zi auto.zi ensent.zi 
 ensent.zo: ensent.zi 
 expr.zo: expr.zi 
+fastgrep.zo: determ.zi auto.zi fastrec.zi expr.zi 
 grep.zo: determ.zi auto.zi expr.zi 
 loadall.zo: grep.zo 
