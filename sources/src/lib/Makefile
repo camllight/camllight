@@ -3,7 +3,7 @@
 CAMLCOMP=../camlrun ../camlcomp
 CAMLLIBR=../camlrun ../camllibr
 CPP=/lib/cpp -P
-COMPFLAGS=-stdlib . -O none -g
+COMPFLAGS=-stdlib . -O none -g -W
 
 # The list of all interfaces. Order irrelevant.
 

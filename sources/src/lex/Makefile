@@ -5,7 +5,7 @@ CAMLLINK=../camlrun ../camllink
 CAMLLEX=../camlrun ../camllex
 CAMLYACC=../camlyacc -s
 
-COMPFLAGS=-O fast -stdlib ../lib
+COMPFLAGS=-W -O fast -stdlib ../lib
 LINKFLAGS=-g -stdlib ../lib
 
 OBJS=syntax.zo scan_aux.zo scanner.zo gram_aux.zo grammar.zo \

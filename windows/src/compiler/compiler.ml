@@ -83,11 +83,12 @@ let do_directive loc = function
 (* Warn for unused #open *)
 
 let check_unused_opens () =
-  hashtbl__do_table
-    (fun name used ->
-      if not !used & not (mem name !default_used_modules)
-      then unused_open_warning name)
-    used_opened_modules
+  if !typing__warnings then
+   hashtbl__do_table
+     (fun name used ->
+       if not !used & not (mem name !default_used_modules)
+       then unused_open_warning name)
+     used_opened_modules
 ;;
 
 (* Compiling an interface *)

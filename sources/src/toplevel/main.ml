@@ -25,6 +25,8 @@ and debug_option () =
   toplevel__debug_mode true
 and set_language lang =
   interntl__language := lang
+and warnings_option () =
+  typing__warnings := true
 ;;
 
 let main() =
@@ -38,8 +40,9 @@ try
               "-O", arg__String open_set;
               "-open", arg__String open_set;
               "-g", arg__Unit debug_option;
+              "-debug", arg__Unit debug_option;
               "-lang", arg__String set_language;
-              "-debug", arg__Unit debug_option]
+              "-W", arg__Unit warnings_option]
              anonymous;
   default_used_modules := "toplevel" :: !default_used_modules;
   version__print_banner();

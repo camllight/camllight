@@ -6,7 +6,7 @@ CAMLLEX=../camlrun ../camllex
 CAMLYACC=../camlyacc -s
 CPP=/lib/cpp -P
 
-COMPFLAGS=-O fast
+COMPFLAGS=-W -O fast
 LINKFLAGS=-g
 
 OBJS=config.zo misc.zo interntl.zo const.zo prim.zo lambda.zo globals.zo \

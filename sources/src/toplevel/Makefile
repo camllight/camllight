@@ -5,7 +5,7 @@ CAMLLINK=../camlrun ../camllink
 CAMLLIBR=../camlrun ../camllibr
 CAMLRUN=../camlrun
 INCLUDES=-stdlib ../lib -I ../compiler -I ../linker
-COMPFLAGS=-O fast $(INCLUDES)
+COMPFLAGS=-W -O fast $(INCLUDES)
 LINKFLAGS=-g $(INCLUDES)
 CPP=/lib/cpp -P
 
