@@ -20,9 +20,7 @@ static sighandler_return_type unix_signal_handler(sig)
 #ifndef BSD_SIGNALS
   signal(sig, unix_signal_handler);
 #endif
-  signal_handler = sighandler_code;
-  signal_number = sig;
-  execute_signal();
+  handle_signal(sighandler_code, sig);
 }
 
 value unix_set_signal(sig, behavior) /* ML */
@@ -38,7 +36,9 @@ value unix_set_signal(sig, behavior) /* ML */
     signal(s, SIG_IGN);
     break;
   case 2:                       /* Signal_handle */
+    enter_blocking_section ();
     signal(s, unix_signal_handler);
+    leave_blocking_section ();
     break;
   }
   return Val_int(s);

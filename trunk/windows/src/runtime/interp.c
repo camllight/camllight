@@ -309,8 +309,10 @@ value interprete(prog)
 	minor_collection ();
 	Restore_after_gc;
       }
-      if (signal_is_pending){
-	signal_is_pending = 0;
+      tmp = (value) pending_signal;
+      /* If a signal arrives here, it will be lost. */
+      pending_signal = 0;
+      if ((int) tmp){
 	push_ret_frame();
 	retsp->pc = pc;
 	retsp->env = env;
@@ -323,9 +325,9 @@ value interprete(prog)
 	retsp->pc = return_from_interrupt;
 	retsp->env = env;
 	retsp->cache_size = 0;
-	*--rsp = Val_int(signal_number);
+	*--rsp = Val_int((int) tmp);
 	cache_size = 1;
-	pc = signal_handler;
+	pc = pending_signal_handler;
       }
       Next;
 

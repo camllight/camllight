@@ -127,7 +127,6 @@ value alloc_shr (wosize, tag)
     if (new_block == NULL) raise_out_of_memory ();
     fl_add_block (new_block);
     hp = fl_allocate (wosize);
-    if (hp == NULL) fatal_error ("alloc_shr: expand heap failed\n");
   }
 
   Assert (Is_in_heap (Val_hp (hp)));
