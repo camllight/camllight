@@ -41,9 +41,12 @@ Caml Light 0.7:
 * Syntactic sugar:
   - Alternate syntax for string access and update (s.[i], s.[i] <- c).
   - := can be used instead of <- in array,  record and string assignment,
-    e.g. rec.lbl := val or array.(index) := val).
+    e.g. record.lbl := val or array.(index) := val).
   - Final semicolons permitted in sequences, lists, arrays and records
     (e.g. begin ...; ...; end or [1;2;]).
+  - Initial | permitted in pattern matchings and type definitions
+    (e.g. function | pat -> expr | ...
+     or type t = | Cstr1 | ...)
   - "\/" and "/\" synonymous for "&" and "or".
 
 * Optimized access to unqualified identifiers in symbol tables.
