@@ -156,7 +156,7 @@ minor_gc.o : minor_gc.c config.h ../../config/m.h ../../config/s.h debugger.h \
 misc.o : misc.c config.h ../../config/m.h ../../config/s.h debugger.h misc.h \
   mlvalues.h 
 parsing.o : parsing.c config.h ../../config/m.h ../../config/s.h mlvalues.h \
-  misc.h memory.h gc.h major_gc.h freelist.h minor_gc.h 
+  misc.h memory.h gc.h major_gc.h freelist.h minor_gc.h alloc.h 
 prims.o : prims.c mlvalues.h config.h ../../config/m.h ../../config/s.h misc.h \
   prims.h 
 roots.o : roots.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
@@ -227,7 +227,7 @@ minor_gc.d.o : minor_gc.c config.h ../../config/m.h ../../config/s.h debugger.h 
 misc.d.o : misc.c config.h ../../config/m.h ../../config/s.h debugger.h misc.h \
   mlvalues.h 
 parsing.d.o : parsing.c config.h ../../config/m.h ../../config/s.h mlvalues.h \
-  misc.h memory.h gc.h major_gc.h freelist.h minor_gc.h 
+  misc.h memory.h gc.h major_gc.h freelist.h minor_gc.h alloc.h 
 prims.d.o : prims.c mlvalues.h config.h ../../config/m.h ../../config/s.h misc.h \
   prims.h 
 roots.d.o : roots.c debugger.h misc.h config.h ../../config/m.h ../../config/s.h \
