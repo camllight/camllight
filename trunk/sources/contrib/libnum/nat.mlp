@@ -1,6 +1,6 @@
 (* nat: fonctions auxiliaires et d impression pour le type nat.
    Derive de nats.ml de Caml V3.1, Valerie Menissier.
-   Adapte a Caml Light par Xavier Leroy. *)
+   Adapte a Caml Light par Xavier Leroy & Pierre Weis. *)
 
 (*
 #include "../../config/m.h"
@@ -15,15 +15,27 @@
 (**) #open "fvect";;
 (**) #open "fchar";;
 (**) #open "int_misc";;
+(**) #open "string_misc";;
+
+(* Sizes of words and strings. *)
 
 #ifdef CAML_SIXTYFOUR
-let length_of_digit = 64;;
+let word_size = 64;;
 #else
-let length_of_digit = 32;;
+let word_size = 32;;
 #endif
 
+let length_of_digit = word_size;;
+
+(* Taille maximum d une chai^ne de caractères en octets *)
+let biggest_string_length =
+ (word_size asr 3)          (* Number of characters in a word *)
+ * (1 lsl (word_size - 10) - 1) (* Available number of bits to count the *)
+                            (* length of a string in words *)
+ - 1                        (* The trailing zero - 1 *);;
+
 let make_nat len =
-  if len < 0 then invalid_arg "make_nat" else
+  if len <= 0 then invalid_arg "make_nat" else
     let res = create_nat len in set_to_zero_nat res 0 len; res
 ;;
 
@@ -44,7 +56,7 @@ let is_nat_int nat off len =
 let sys_int_of_nat nat off len =
   if is_nat_int nat off len
   then nth_digit_nat nat off
-  else failwith "int_of_nat"
+  else failwith "sys_int_of_nat"
 ;;
 
 let int_of_nat nat =
@@ -75,34 +87,7 @@ and gt_nat nat1 off1 len1 nat2 off2 len2 =
 ;;
 
 let square_nat nat1 off1 len1 nat2 off2 len2 =
-  let c = ref 0 
-  and trash = make_nat 1 in
-    (* Double product *)
-    for i = 0 to len2 - 2 do
-        c := !c + mult_digit_nat 
-                         nat1
-                         (succ (off1 + 2 * i))
-                         (2 * (pred (len2 - i)))
-                         nat2 
-                         (succ (off2 + i))
-                         (pred (len2 - i))
-                         nat2
-                         (off2 + i)
-    done;
-    shift_left_nat nat1 0 len1 trash 0 1;
-    (* Square of digit *)
-    for i = 0 to len2 - 1 do
-        c := !c + mult_digit_nat 
-                         nat1 
-                         (off1 + 2 * i)
-                         (len1 - 2 * i)
-                         nat2
-                         (off2 + i)
-                         1
-                         nat2
-                         (off2 + i)
-    done;
-  !c
+  mult_nat nat1 off1 len1 nat2 off2 len2 nat2 off2 len2
 ;;
 
 let set_square_nat nat1 off1 len1 nat2 off2 len2 =
@@ -160,10 +145,10 @@ let gcd_nat nat1 off1 len1 nat2 off2 len2 =
 (* Does subnat1 = subnat2 or subnat2+1? *)
 let almost_eq_nat nat1 off1 len1 nat2 off2 len2 =
   match compare_nat nat1 off1 len1 nat2 off2 len2 with
-       0 -> true
+    |  0 -> true
     |  1 -> let over = incr_nat nat2 off2 len2 1 in
             let res = eq_nat nat1 off1 len1 nat2 off2 (len2 + over) in
-            let _ = decr_nat nat2 off2 (len2 + over) 0 in
+            set_decr_nat nat2 off2 (len2 + over) 0;
             res
     | _ -> false
 ;;
@@ -192,7 +177,7 @@ let sqrt_nat nat off len =
      div_nat copy 0 size_copy candidate 0 (pred size_sqrt);
      blit_nat aux 0 copy (pred size_sqrt) size_aux;
      (* This addition is safe because good sizes at the beginning *)
-     let _ = add_nat aux 0 size_aux candidate 0 (pred size_sqrt) 0 in
+     set_add_nat aux 0 size_aux candidate 0 (pred size_sqrt) 0;
      shift_right_nat aux 0 size_aux trash 0 1;
      let real_size_aux = ref (num_digits_nat aux 0 size_aux)
      and real_size_candidate = ref (num_digits_nat candidate 0 size_sqrt) in
@@ -220,49 +205,6 @@ let sqrt_nat nat off len =
   copy_nat candidate 0 (num_digits_nat candidate 0 size_sqrt)
 ;;
 
-let power_base_max = make_nat 2;;
-
-#ifdef CAML_SIXTYFOUR
-set_digit_nat power_base_max 0 1000000000000000000;
-mult_digit_nat power_base_max 0 2 
-               power_base_max 0 1 (nat_of_int 9) 0;;
-let pmax = 19;;
-#else
-set_digit_nat power_base_max 0 1000000000;;
-let pmax = 9;;
-#endif
-
-(* XL: ai specialise le code ci-dessous aux cas length_of_digit = 32
-   et length_of_digit = 64 *)
-
-(****
-let pmax =
-  if eq_int length_of_digit 16 then begin
-          set_digit_nat power_base_max 0 10000; 4
-  end else if lt_int length_of_digit 20 then begin
-          set_digit_nat power_base_max 0 3125;           
-          shift_left_nat power_base_max 0 1 (nat_of_int 0) 0 5; 5
-  end else if lt_int length_of_digit 24 then begin 
-          set_digit_nat power_base_max 0 15625;           
-          shift_left_nat power_base_max 0 1 (nat_of_int 0) 0 6; 6
-  end else if lt_int length_of_digit 27 then begin 
-          set_digit_nat power_base_max 0 10000; 
-          mult_digit_nat power_base_max 0 2 
-                         power_base_max 0 1 (nat_of_int 999) 0; 7
-  end else if lt_int length_of_digit 30 then begin 
-          set_digit_nat power_base_max 0 10000; 
-          mult_digit_nat power_base_max 0 2 
-                          power_base_max 0 1 (nat_of_int 9999) 0; 8
-  end else begin
-          set_digit_nat power_base_max 0 10000; 
-          mult_digit_nat power_base_max 0 2 
-                          power_base_max 0 1 (nat_of_int 9999) 0;
-          mult_digit_nat power_base_max 0 2 
-                          power_base_max 0 1 (nat_of_int 9) 0; 9
-  end
-;;
-*****)         
-
 (* Nat temporaries *)
 let A_2 = make_nat 2
 and A_1 = make_nat 1 
@@ -278,36 +220,31 @@ let max_power_10_power_in_int = nat_of_int 1000000000;;
 #endif
 
 let raw_string_of_digit nat off =
-  if is_nat_int nat off 1 
-     then begin string_of_int (nth_digit_nat nat off) end 
-  else begin
-       blit_nat B_2 0 nat off 1;
-       div_digit_nat A_2 0 A_1 0 B_2 0 2 max_power_10_power_in_int 0;
-       let leading_digits = nth_digit_nat A_2 0
-       and s1 = string_of_int (nth_digit_nat A_1 0) in
-       let len = string_length s1 in
-       if lt_int leading_digits 10 then begin
-            let result = make_string (max_superscript_10_power_in_int+1) `0` in
-            set_nth_char result 0 
-                         (char_of_int (add_int 48 leading_digits));
-            blit_string s1 0 
-                 result (sub_int (string_length result) len) len;
-            result
-       end else begin
-            let result = make_string (max_superscript_10_power_in_int+2) `0` in
-            blit_string (string_of_int leading_digits) 0 result 0 2;
-            blit_string s1 0 
-                 result (sub_int (string_length result) len) len;
-            result
-       end
-  end
+  if is_nat_int nat off 1 then string_of_int (nth_digit_nat nat off) else
+   begin
+    blit_nat B_2 0 nat off 1;
+    div_digit_nat A_2 0 A_1 0 B_2 0 2 max_power_10_power_in_int 0;
+    let leading_digits = nth_digit_nat A_2 0
+    and s1 = string_of_int (nth_digit_nat A_1 0) in
+    let len = string_length s1 in
+    if leading_digits < 10 then begin
+         let result = make_string (max_superscript_10_power_in_int + 1) `0` in
+         result.[0] <- char_of_int (48 + leading_digits);
+         blit_string s1 0 result (string_length result - len) len;
+         result
+    end else begin
+         let result = make_string (max_superscript_10_power_in_int + 2) `0` in
+         blit_string (string_of_int leading_digits) 0 result 0 2;
+         blit_string s1 0 result (string_length result - len) len;
+         result
+    end
+   end
 ;;
 
 (* XL: suppression de string_of_digit et de sys_string_of_digit.
    La copie est de toute facon faite dans string_of_nat, qui est le
    seul point d entree public dans ce code. *)
 
-(******
 let sys_string_of_digit nat off =
     let s = raw_string_of_digit nat off in
     let result = create_string (string_length s) in
@@ -319,10 +256,6 @@ let string_of_digit nat =
     sys_string_of_digit nat 0
 ;;
 
-*******)
-
-let digits = "0123456789ABCDEF";;
-
 (*
    make_power_base affecte power_base des puissances successives de base a 
    partir de la puissance 1-ieme.
@@ -331,36 +264,44 @@ let digits = "0123456789ABCDEF";;
    sur un int.
 *)
 let make_power_base base power_base = 
-  let i = ref 0 
+  let i = ref 1
   and j = ref 0 in
-   set_digit_nat power_base 0 base;
-   while incr i; is_digit_zero power_base !i do
-   set_mult_digit_nat power_base !i 2 
-                  power_base (pred !i) 1 
-                  power_base 0
-   done;
-   while !j <= !i && is_digit_int power_base !j do incr j done;
-  (!i - 2, !j);;
-
-(* 
-   int_to_string place la representation de l entier int en base base 
-   dans la chaine s en le rangeant de la fin indiquee par pos vers le 
-   debut, sur times places et affecte a pos sa nouvelle valeur. 
-*)
-let int_to_string int s pos_ref base times = 
-  let i = ref int 
-  and j = ref times in
-     while ((!i != 0) || (!j != 0)) && (!pos_ref != -1) do
-        set_nth_char s !pos_ref (nth_char digits (!i mod base));
-        decr pos_ref;
-        decr j;
-        i := !i / base
-     done
-;;
+  set_digit_nat power_base 0 base;
+  while is_digit_zero power_base !i do
+   set_mult_digit_nat power_base !i 2 power_base (pred !i) 1 power_base 0;
+   incr i
+  done;
+  decr i;
+  while !j <= !i && is_digit_int power_base !j do incr j done;
+  (!i - 1, min !i !j);;
 
 (* XL: suppression de adjust_string *)
+(* PW: ajout de adjust_string *)
+(* /*
+   on compte les zéros placés au début de la chaine, 
+   on en déduit la longueur réelle de la chaine 
+   et on construit la chaine adhoc en y ajoutant before et after.
+*/ *)
+let adjust_string s before after =
+  let len_s = string_length s
+  and k = ref 0 in
+    while !k < len_s - 1 && s.[!k] == `0`
+       do incr k 
+    done;
+  let len_before = string_length before
+  and len_after = string_length after 
+  and l1 = max (len_s - !k) 1 in
+  let l2 = len_before + l1 in
+  if l2 <= 0 then failwith "adjust_string" else
+  let ok_len = l2 + len_after in
+  let ok_s = create_string ok_len in
+  blit_string before 0 ok_s 0 len_before;
+  blit_string s !k ok_s len_before l1;
+  blit_string after 0 ok_s l2 len_after;
+  ok_s
+;;
 
-let power_base_int base i = 
+let power_base_int base i =
   if i == 0 then
     nat_of_int 1 
   else if i < 0 then
@@ -403,131 +344,294 @@ let power_base_int base i =
   end
 ;;
 
-(* the ith element (i >= 2) of num_digits_max_vector is :
-    |                                 |
-    | biggest_string_length * log (i) |
-    | ------------------------------- | + 1
-    |      length_of_digit * log (2)  |
-    --                               --
-*)
-
 (* XL: ai specialise le code d origine a length_of_digit = 32. *)
 (* Puis suppression (inutile?) *)
+(* /* PW: rajoute avec 32 et 64 bits */ *)
 
-(******
-let num_digits_max_vector = 
-  [|0; 0; 1024; 1623; 2048; 2378; 2647; 2875; 3072; 3246; 3402; 
-              3543; 3671; 3789; 3899; 4001; 4096|];;
+(* the base-th element (base >= 2) of num_digits_max_vector is :
+    |                                    |
+    | biggest_string_length * log (base) |
+    | ---------------------------------- | + 1
+    |      length_of_digit * log (2)     |
+    --                                  --
+La base la plus grande possible pour l impression est 16. *)
 
+#ifdef CAML_SIXTYFOUR
 let num_digits_max_vector = 
-   match length_of_digit with
-     16 -> [|0; 0; 2048; 3246; 4096; 4755; 5294; 5749; 6144; 6492; 6803; 
-              7085; 7342; 7578; 7797; 8001; 8192|]
-(* If really exotic machines !!!!
-   | 17 -> [|0; 0; 1928; 3055; 3855; 4476; 4983; 5411; 5783; 6110; 6403; 
-              6668; 6910; 7133; 7339; 7530; 7710|]
-   | 18 -> [|0; 0; 1821; 2886; 3641; 4227; 4706; 5111; 5461; 5771; 6047; 
-              6298; 6526; 6736; 6931; 7112; 7282|]
-   | 19 -> [|0; 0; 1725; 2734; 3449; 4005; 4458; 4842; 5174; 5467; 5729; 
-              5966; 6183; 6382; 6566; 6738; 6898|]
-   | 20 -> [|0; 0; 1639; 2597; 3277; 3804; 4235; 4600; 4915; 5194; 5443; 
-              5668; 5874; 6063; 6238; 6401; 6553|] 
-   | 21 -> [|0; 0; 1561; 2473; 3121; 3623; 4034; 4381; 4681; 4946; 5183; 
-              5398; 5594; 5774; 5941; 6096; 6241|]
-   | 22 -> [|0; 0; 1490; 2361; 2979; 3459; 3850; 4182; 4468; 4722; 4948; 
-              5153; 5340; 5512; 5671; 5819; 5958|]
-   | 23 -> [|0; 0; 1425; 2258; 2850; 3308; 3683; 4000; 4274; 4516; 4733; 
-              4929; 5108; 5272; 5424; 5566; 5699|]
-   | 24 -> [|0; 0; 1366; 2164; 2731; 3170; 3530; 3833; 4096; 4328; 4536; 
-              4723; 4895; 5052; 5198; 5334; 5461|]
-   | 25 -> [|0; 0; 1311; 2078; 2622; 3044; 3388; 3680; 3932; 4155; 4354; 
-              4534; 4699; 4850; 4990; 5121; 5243|]
-   | 26 -> [|0; 0; 1261; 1998; 2521; 2927; 3258; 3538; 3781; 3995; 4187; 
-              4360; 4518; 4664; 4798; 4924; 5041|]
-   | 27 -> [|0; 0; 1214; 1924; 2428; 2818; 3137; 3407; 3641; 3847; 4032; 
-              4199; 4351; 4491; 4621; 4742; 4855|]
-   | 28 -> [|0; 0; 1171; 1855; 2341; 2718; 3025; 3286; 3511; 3710; 3888; 
-              4049; 4196; 4331; 4456; 4572; 4681|]
-   | 29 -> [|0; 0; 1130; 1791; 2260; 2624; 2921; 3172; 3390; 3582; 3754; 
-              3909; 4051; 4181; 4302; 4415; 4520|]
-   | 30 -> [|0; 0; 1093; 1732; 2185; 2536; 2824; 3067; 3277; 3463; 3629; 
-              3779; 3916; 4042; 4159; 4267; 4369|]
-   | 31 -> [|0; 0; 1057; 1676; 2114; 2455; 2733; 2968; 3171; 3351; 3512; 
-              3657; 3790; 3912; 4025; 4130; 4228|]
+ [|0; 0; 262143; 415488; 524287; 608679; 677632; 735930; 786431; 830976; 
+   870823; 906868; 939776; 970047; 998074; 1024167; 1048575; |];; 
+#else
+let num_digits_max_vector = 
+  [|0; 0; 524287; 830976; 1048575; 1217358; 1355264; 1471861; 1572863; 
+    1661953; 1741646; 1813737; 1879552; 1940095; 1996149; 2048335; 2097151; 
+ |];;
+#endif
+
+(* num_digits_max_vector.(base) gives the maximum number of words that
+   may have the biggest big number that can be printed into a single
+   character string of maximum length (the number being printed in
+   base [base]). (This computation takes into account the size of the
+   machine word (length_of_digit or size_word).)
 *)
-   | 32 -> [|0; 0; 1024; 1623; 2048; 2378; 2647; 2875; 3072; 3246; 3402; 
-              3543; 3671; 3789; 3899; 4001; 4096|]
-   | n -> failwith "num_digits_max_vector"
-;;
-******)
 
 (* XL: suppression de string_list_of_nat *)
+(* PW: ajout de string_list_of_nat *)
+let zero_nat = make_nat 1;;
+
+let power_max_map = make_vect 17 zero_nat;;
+
+let power_max base =
+ let v = power_max_map.(base) in
+ if v != zero_nat then v else begin
+   let v = power_base_int base biggest_string_length in
+   power_max_map.(base) <- v; v
+  end
+;;
+
+let sys_string_list_of_nat base nat off len =
+  if is_nat_int nat off len 
+  then [sys_string_of_int base "" (nth_digit_nat nat off) ""] else 
+  (* /* 
+     pmax : L indice de la plus grande puissance de base qui soit un digit 
+     pint : La plus grande puissance de base qui soit un int 
+     power_base : nat de (length_of_digit + 1) digits dont le i-eme digit 
+     contient base^(i+1)
+  */ *)
+  let power_base = make_nat (succ length_of_digit) in
+  let (pmax, pint) = make_power_base base power_base in
+  (* /* 
+     La representation de 2^length_of_digit en base base a real_pmax chiffres
+  */ *)
+  let real_pmax = pmax + 2
+  and num_int_in_digit = pmax / pint
+  (* /* 
+     new_nat est une copie de nat qui a un chiffre de plus à cause de 
+     la division
+   */ *)
+  and new_nat = make_nat (succ len)
+  and len_copy = ref (succ (num_digits_nat nat off len)) in
+  let len_new_nat = ref !len_copy in 
+  (* /* 
+     copy1 et copy2 sont en fait 2 noms pour un me^me contenu, 
+     copy1 est l argument sur lequel se fait la division, 
+     copy2 est le quotient de la division 
+     et on remet copy1 à la bonne valeur à la fin de la boucle
+  */ *)
+  let copy1 = create_nat !len_copy
+  and copy2 = make_nat !len_copy
+  and rest_digit = make_nat 2
+  and rest_int = create_nat 1
+  and places = ref 0 in
+  (* /*
+     On divise nat par power_max jusqu' 'à épuisement, on écrit les restes 
+     successifs, la représentation de ces nombres en base base tient sur 
+     biggest_int chiffres donc sur une chaine de caractères
+  */ *)
+  let length_block = num_digits_max_vector.(base) in
+  let l = ref ([] : string list) in
+    len_copy := pred !len_copy; 
+    blit_nat new_nat 0 nat 0 len;
+    while not (is_zero_nat new_nat 0 !len_new_nat) do
+       let len_s = 
+         if !len_new_nat <= length_block
+            then let cand = real_pmax * !len_new_nat in
+                   (if cand <= 0 then biggest_string_length else cand)
+            else biggest_string_length in
+       (if !len_new_nat > length_block
+          then (let power_max_base = power_max base in
+                div_nat new_nat 0 !len_new_nat power_max_base 0 length_block; 
+                blit_nat copy1 0 new_nat 0 length_block;
+                len_copy := num_digits_nat copy1 0 length_block;
+                len_new_nat := max 1 (!len_new_nat - length_block);
+                blit_nat new_nat 0 new_nat length_block !len_new_nat;
+                set_to_zero_nat new_nat !len_new_nat length_block;
+                (* /* 
+                   new_nat a un premier digit nul pour les divisions 
+                   ultérieures éventuelles
+                */ *)
+                len_new_nat := 
+                  (if is_zero_nat new_nat 0 !len_new_nat 
+                     then 1 
+                     else succ (
+                            num_digits_nat new_nat 0 !len_new_nat)))
+          else (blit_nat copy1 0 new_nat 0 !len_new_nat;
+                len_copy := num_digits_nat copy1 0 !len_new_nat;
+                set_to_zero_nat new_nat 0 !len_new_nat;
+                len_new_nat := 1));
+      let s = make_string len_s `0`
+      and pos_ref = ref (pred len_s) in
+        while not (is_zero_nat copy1 0 !len_copy) do 
+           (* /* On récupère un digit dans rest_digit */ *)
+           set_digit_nat copy1 !len_copy 0; 
+           div_digit_nat copy2 0
+                         rest_digit 0 copy1 0 (succ !len_copy) power_base pmax;
+           places := succ pmax;
+           for j = 0 to num_int_in_digit do
+             (* /* 
+                On récupère un int dans rest_int
+                La valeur significative de copy se trouve dans copy2 
+                on peut donc utiliser copy1 pour stocker la valeur du 
+                quotient avant de la remettre dans rest_digit.
+             */ *)
+             if compare_digits_nat rest_digit 0 power_base (pred pint) == 0
+                then (set_digit_nat rest_digit 0 1;
+                      set_digit_nat rest_int 0 0)
+                else (div_digit_nat copy1 0 rest_int 0 rest_digit 0 2
+                                     power_base (pred pint);
+                      blit_nat rest_digit 0 copy1 0 1);
+             (* /* 
+                On l''écrit dans la chaine s en lui réservant la place 
+                nécessaire 
+             */ *)
+             int_to_string 
+               (nth_digit_nat rest_int 0) s pos_ref base 
+                 (if is_zero_nat copy2 0 !len_copy then min !pos_ref pint else
+                  if !places > pint then (places := !places - pint; pint)
+                  else !places)
+           done;
+         len_copy := num_digits_nat copy2 0 !len_copy; 
+         blit_nat copy1 0 copy2 0 !len_copy
+      done;
+      if is_zero_nat new_nat 0 !len_new_nat
+          then l := adjust_string s "" "" :: !l
+          else l := s :: !l
+    done; !l
+;;
+
+(* Power_base_max is used *)
+let power_base_max = make_nat 2;;
+
+#ifdef CAML_SIXTYFOUR
+set_digit_nat power_base_max 0 1000000000000000000;
+mult_digit_nat power_base_max 0 2 
+               power_base_max 0 1 (nat_of_int 9) 0;;
+let pmax = 19;;
+#else
+set_digit_nat power_base_max 0 1000000000;;
+let pmax = 9;;
+#endif
 
 let unadjusted_string_of_nat nat off len_nat =
   let len = num_digits_nat nat off len_nat in
-  if len == 1 then
-       raw_string_of_digit nat off
-  else
-       let len_copy = ref (succ len) in
-       let copy1 = create_nat !len_copy
-       and copy2 = make_nat !len_copy
-       and rest_digit = make_nat 2 in
-         if len > biggest_int / (succ pmax)
-            then failwith "number too long" 
-            else let len_s = (succ pmax) * len in
-                 let s = make_string len_s `0`
-                 and pos_ref = ref len_s in
-                   len_copy := pred !len_copy; 
-                   blit_nat copy1 0 nat off len;
-                   set_digit_nat copy1 len 0;
-                   while not (is_zero_nat copy1 0 !len_copy) do  
-                      div_digit_nat copy2 0 
-                                     rest_digit 0 
-                                     copy1 0 (succ !len_copy) 
-                                     power_base_max 0;
-                      let str = raw_string_of_digit rest_digit 0 in
-                      blit_string str 0 
-                                  s (!pos_ref - string_length str)
-                                  (string_length str);
-                      (* XL: il y avait pmax a la place de string_length str
-                         mais ca ne marche pas avec le blit de Caml Light,
-                         qui ne verifie pas les debordements *)
-                      pos_ref := !pos_ref - pmax;
-                      len_copy := num_digits_nat copy2 0 !len_copy; 
-                      blit_nat copy1 0 copy2 0 !len_copy;
-                      set_digit_nat copy1 !len_copy 0 
-                   done;
-                   s
+  if len == 1 then raw_string_of_digit nat off else
+  let len_copy = ref (succ len) in
+  let copy1 = create_nat !len_copy
+  and copy2 = make_nat !len_copy
+  and rest_digit = make_nat 2 in
+    if len > biggest_int / (succ pmax)
+       then failwith "number too long" 
+       else let len_s = (succ pmax) * len in
+            let s = make_string len_s `0`
+            and pos_ref = ref len_s in
+              len_copy := pred !len_copy; 
+              blit_nat copy1 0 nat off len;
+              set_digit_nat copy1 len 0;
+              while not (is_zero_nat copy1 0 !len_copy) do  
+                 div_digit_nat copy2 0 
+                                rest_digit 0 
+                                copy1 0 (succ !len_copy) 
+                                power_base_max 0;
+                 let str = raw_string_of_digit rest_digit 0 in
+                 blit_string str 0 
+                             s (!pos_ref - string_length str)
+                             (string_length str);
+                 (* XL: il y avait pmax a la place de string_length str
+                    mais ca ne marche pas avec le blit de Caml Light,
+                    qui ne verifie pas les debordements *)
+                 pos_ref := !pos_ref - pmax;
+                 len_copy := num_digits_nat copy2 0 !len_copy; 
+                 blit_nat copy1 0 copy2 0 !len_copy;
+                 set_digit_nat copy1 !len_copy 0 
+              done;
+              s
 ;;
 
 let string_of_nat nat = 
-  let s = unadjusted_string_of_nat nat 0 (length_nat nat) 
-  and index = ref 0 in
-    begin try
-      for i = 0 to sub_int (string_length s) 2 do
-       if nth_char s i != `0` then (index:= i; raise Exit)
-      done
-    with Exit -> ()
-    end;
-    sub_string s !index (sub_int (string_length s) !index)
+ let s = unadjusted_string_of_nat nat 0 (length_nat nat) 
+ and index = ref 0 in
+ begin try
+  for i = 0 to string_length s - 2 do
+   if s.[i] != `0` then (index:= i; raise Exit)
+  done
+ with Exit -> () end;
+ sub_string s !index (string_length s - !index)
 ;;
 
 (* XL: suppression de sys_string_of_nat *)
+(* PW: ajout de sys_string_of_nat *)
+let sys_string_of_nat base before nat off len after =
+  if base == 10 then 
+    if num_digits_nat nat off len == 1 &&
+       string_length before == 0 && 
+       string_length after == 0
+    then sys_string_of_digit nat off
+    else adjust_string
+          (unadjusted_string_of_nat nat off len) before after else
+  if is_nat_int nat off len
+  then sys_string_of_int base before (nth_digit_nat nat off) after
+  else let sl = sys_string_list_of_nat base nat off len in
+       match sl with
+       | [s] -> adjust_string s before after
+       | _ -> invalid_arg "sys_string_of_nat"
+;;
+
 
 (* XL: suppression de debug_string_nat *)
+(* PW: ajout de debug_string_nat *)
+let power_debug = nat_of_int 256;;
 
-let base_digit_of_char c base =
-  let n = int_of_char c in
-    if n >= 48 && n <= 47 + min base 10 then n - 48
-    else if n >= 65 && n <= 65 + base - 11 then n - 55
-    else failwith "invalid digit"
+(*
+   On écrit le nombre en base = 16, avec length_of_digit = 32 
+   avec des barres pour séparer les digits
+*)
+let debug_string_vect_nat nat =
+  let len = length_nat nat in
+  let max_digits = biggest_string_length / max_superscript_10_power_in_int in
+  let blocks = len / max_digits
+  and rest = len mod max_digits in
+  let length = max_superscript_10_power_in_int * max_digits
+  and vs = make_vect (succ blocks) "" in
+    for i = 0 to blocks do
+      let len_s =
+       if i == blocks
+        then 1 + max_superscript_10_power_in_int * rest else length in
+      let s = make_string len_s `0` 
+      and pos = ref (len_s - 1) in
+      let treat_int int end_digit =
+        decr pos;
+        s.[!pos] <- digits.[int mod 16];
+        let rest_int = int asr 4 in
+        decr pos;
+        s.[!pos] <- digits.[rest_int mod 16];
+        if end_digit then (decr pos; s.[!pos] <- `|`)
+      in s.[!pos] <- `|`;
+         for j = i * max_digits to pred (min len (succ i * max_digits)) do
+             let digit = make_nat 1
+             and digit1 = make_nat 2
+             and digit2 = make_nat 2 in
+               blit_nat digit1 0 nat j 1;
+               for k = 0 to 2 do
+                   div_digit_nat digit2 0 digit 0 digit1 0 2 power_debug 0;
+                   blit_nat digit1 0 digit2 0 1;
+                   treat_int (nth_digit_nat digit 0) false
+               done;
+               treat_int (nth_digit_nat digit1 0) true
+         done;
+     vs.(i) <- s
+     done;
+     vs
+;;
+
+let debug_string_nat nat =
+  let vs = debug_string_vect_nat nat in
+  if vect_length vs == 1 then vs.(0) else invalid_arg "debug_string_nat"
 ;;
 
 (* 
-   La sous-chaine (s, off, len) represente un nat en base base que 
-   on determine ici 
+   La sous-chaine (s, off, len) représente un nat en base base que 
+   on détermine ici 
 *)
-let sys_nat_of_string base s off len = 
+let simple_sys_nat_of_string base s off len = 
   let power_base = make_nat (succ length_of_digit) in
   let (pmax, pint) = make_power_base base power_base in
   let new_len = ref (1 + len / (pmax + 1))
@@ -542,17 +646,18 @@ let sys_nat_of_string base s off len =
   and int = ref 0 in
 
   for i = off to bound do
-    (* 
+    (* /*
        on lit pint (au maximum) chiffres, on en fait un int 
-       et on l integre au nombre
-     *)
-      let c = nth_char s i  in
+       et on l''intègre au nombre
+     */ *)
+      let c = s.[i]  in
         begin match c with 
-          ` ` | `\t` | `\n` | `\r` | `\\` -> ()
-        | _ -> int := !int * base + base_digit_of_char c base;
+        | ` ` | `\t` | `\n` | `\r` | `\\` -> ()
+        | _ -> int := !int * base + base_digit_of_char base c;
                incr digits_read
         end;
-        if (!digits_read == pint || i == bound) && not (!digits_read == 0) then 
+        if (!digits_read == pint || i == bound) && not (!digits_read == 0)
+        then 
           begin
            set_digit_nat nat1 0 !int;
            let erase_len = if !new_len = !current_len then !current_len - 1
@@ -578,6 +683,139 @@ let sys_nat_of_string base s off len =
     nat
 ;;
 
+(********************
+added: PW
+*)
+(* base_power_nat base n nat compute nat*base^n *)
+let base_power_nat base n nat =
+  match sign_int n with
+  | 0 -> nat
+  | -1 -> let base_nat = power_base_int base (- n) in
+          let len_base_nat = num_digits_nat base_nat 0 (length_nat base_nat) 
+          and len_nat = num_digits_nat nat 0 (length_nat nat) in
+          if len_nat < len_base_nat then invalid_arg "base_power_nat" else
+          if len_nat == len_base_nat &&
+             compare_digits_nat nat len_nat base_nat len_base_nat == -1
+          then invalid_arg "base_power_nat"
+          else
+           let copy = create_nat (succ len_nat) in
+           blit_nat copy 0 nat 0 len_nat;
+           set_digit_nat copy len_nat 0;
+           div_nat copy 0 (succ len_nat) base_nat 0 len_base_nat;
+           if not (is_zero_nat copy 0 len_base_nat)
+           then invalid_arg "base_power_nat"
+           else copy_nat copy len_base_nat 1
+  | _ -> let base_nat = power_base_int base n in
+         let len_base_nat = num_digits_nat base_nat 0 (length_nat base_nat) 
+         and len_nat = num_digits_nat nat 0 (length_nat nat) in
+         let new_len = len_nat + len_base_nat in
+         let res = make_nat new_len in
+          if len_nat > len_base_nat
+             then set_mult_nat res 0 new_len 
+                           nat 0 len_nat 
+                           base_nat 0 len_base_nat
+             else set_mult_nat res 0 new_len 
+                           base_nat 0 len_base_nat 
+                           nat 0 len_nat;
+         if is_zero_nat res 0 new_len then zero_nat
+         else res
+;;
+
+let decimal_of_string base s off len =
+ (* Skipping leading + sign if any *)
+ let skip_first = s.[off] == `+` in
+ let offset = if skip_first then off + 1 else off
+ and length = if skip_first then len - 1 else len in
+
+ let offset_limit = pred (offset + length) in
+ let n = (index_char s `.` offset) in
+   (* s ends with a `.` *)
+   if n == offset_limit then failwith "decimal_of_string" else
+   if n == -1 || n > offset_limit
+    then
+     let n2 = (index_char s `e` offset) in
+      (* s ends with a `e` *)
+      if n2 == offset_limit then failwith "decimal_of_string" else
+      (* No `.` no `e` : regular integer *)
+      if n2 == -1 || n2 > offset_limit
+       then (sub_string s offset length, 0)
+       else (* integer e int *)
+            let new_len = n2 - offset in
+                     (sub_string s offset new_len,
+                      sys_int_of_string base s (succ n2)
+                         (pred (length - new_len)))
+         (* '.' is well formed into the string *)
+    else let len = pred (length + offset - n) in
+         let n2 = (index_char s `e` n) in
+           (* s ends with a `e` *)
+           if n2 == offset_limit then failwith "decimal_of_string" else
+           if n2 == (-1) || n2 > offset_limit
+              then (* integer . integer *)
+                   (let s_res = make_string (pred length) ` `
+                    and new_len = n - offset in
+                         (blit_string s offset s_res 0 new_len);
+                         (blit_string s (succ n) s_res new_len len);
+                         s_res, 
+                    -len)
+              else (* integer . integer e int *)
+                   (let s_res = make_string 
+                               (pred (n2 - offset)) ` `
+                    and new_len = sub_int n offset in
+                      (blit_string s offset s_res 0 new_len);
+                      (blit_string s (succ n) s_res new_len 
+                                     (pred (n2 - n)));
+                         s_res,
+                    (sys_int_of_string
+                      base s (succ n2) (offset_limit - n2)) -
+                    (pred (n2 - n)))
+;;
+
+(* La chaîne s contient un entier en notation scientifique, de off sur
+   une longueur de len *)
+let sys_nat_of_string base s off len = 
+  let (snat, k) = decimal_of_string base s off len in
+  let len_snat = string_length snat in
+  if k < 0 then begin
+    for i = len_snat + k to pred len_snat do
+     if snat.[i] != `0` then failwith "sys_nat_of_string"
+    done;
+    simple_sys_nat_of_string base snat 0 (len_snat + k)
+   end
+  else base_power_nat base k (simple_sys_nat_of_string base snat 0 len_snat)
+;;
+
 let nat_of_string s = sys_nat_of_string 10 s 0 (string_length s);;
 
-let float_of_nat nat = float__float_of_string(string_of_nat nat);;
+let sys_float_of_nat nat off len = 
+ float_of_string (sys_string_of_nat 10 "" nat off len ".0");;
+
+let float_of_nat nat = sys_float_of_nat nat 0 (length_nat nat);;
+
+let nat_of_float f = nat_of_string (string_of_float f);;
+
+(* Nat printing *)
+
+let string_for_read_of_nat n =
+    sys_string_of_nat 10 "#<" n 0 (length_nat n) ">";;
+
+let sys_print_nat base before nat off len after =
+  print_string before;
+  do_list print_string (sys_string_list_of_nat base nat off len);
+  print_string after
+;;
+
+let print_nat nat =
+  sys_print_nat 10 "" nat 0 (num_digits_nat nat 0 (length_nat nat)) ""
+;;
+
+let print_nat_for_read nat = 
+  sys_print_nat 10 "#<" nat 0 (num_digits_nat nat 0 (length_nat nat)) ">"
+;;
+
+let debug_print_nat nat =
+  let vs = debug_string_vect_nat nat in
+    for i = pred (vect_length vs) downto 0 do
+      print_string vs.(i) 
+    done
+;;
+

@@ -14,9 +14,9 @@ RANLIB=ranlib
 
 # Compilation options
 CFLAGS=-O -I../../src/runtime -I./bignum/h
-CAMLC=camlc
+CAMLC=camlc -g
 CAMLCOMP=$(CAMLC) -c
-COMPFLAGS=-W -O fast
+COMPFLAGS=-W #-O fast
 CAMLLIBR=camllibr
 CAMLMKTOP=camlmktop
 
@@ -80,14 +80,14 @@ depend: nat.ml int_misc.ml
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
 big_int.zi: nat.zi 
-num.zi: ratio.zi nat.zi big_int.zi 
+num.zi: nat.zi big_int.zi ratio.zi 
 ratio.zi: nat.zi big_int.zi 
 arith_flags.zo: arith_flags.zi 
 arith_status.zo: arith_status.zi arith_flags.zi 
-big_int.zo: big_int.zi int_misc.zi nat.zi 
+big_int.zo: big_int.zi string_misc.zi nat.zi int_misc.zi 
 int_misc.zo: int_misc.zi 
 nat.zo: nat.zi int_misc.zi 
-num.zo: num.zi int_misc.zi nat.zi big_int.zi ratio.zi arith_flags.zi 
-ratio.zo: ratio.zi string_misc.zi int_misc.zi nat.zi big_int.zi \
-    arith_flags.zi 
+num.zo: num.zi nat.zi arith_flags.zi int_misc.zi big_int.zi ratio.zi 
+ratio.zo: ratio.zi string_misc.zi nat.zi arith_flags.zi int_misc.zi \
+    big_int.zi 
 string_misc.zo: string_misc.zi 
