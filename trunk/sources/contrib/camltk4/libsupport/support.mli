@@ -7,14 +7,7 @@ value default_toplevel_widget : Widget
       	(* The default toplevel widget is ".", of type "toplevel" *)
 ;;
 
-value new_toplevel_widget : string -> Widget
-       (* the argument must be a valid window name: no 8bit char, start
-          with a lowercase, ... *)
-;;
-
-value toplevel_widget_atom : string -> Widget
-       (* creates the atom, but does not add the widget in internal tables.
-          Allows detection of already existing toplevel widgets. *)
+value widget_atom : Widget -> string -> Widget
 ;;
 
 (* The following functions are used internally.
@@ -74,8 +67,7 @@ and   get_buffer : extensible_buffer -> string
 ;;
 
 
-value quote_string : string -> string
-and catenate_sep : string -> string list -> string
+value catenate_sep : string -> string list -> string
 and split_str : (char -> bool) -> string -> string list
       (* Various string manipulations *)
 ;;

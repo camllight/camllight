@@ -38,22 +38,9 @@ let dummy_widget =
   default_toplevel_widget
 ;;
 
-let toplevel_widget_atom s = 
-  Typed("."^s, "toplevel")
-;;
-
-let new_toplevel_widget s =
-  let wname = "."^s in
-  let w = Typed(wname, "toplevel") in
-    hashtbl__add widget_table wname w;
-    w
-;;
-
 let remove_widget w =
   hashtbl__remove widget_table (widget_name w)
 ;;
-
-
 
 (* Retype widgets returned from Tk *)
 let TKtoCAMLWidget s =
@@ -78,7 +65,7 @@ let widget_naming_scheme = [
 	"scale", "sc";
 	"scrollbar", "sb";
 	"text", "t";
-      	"toplevel", "T" ]
+      	"toplevel", "top" ]
 ;;
 
 
@@ -113,9 +100,7 @@ let new_suffix class n =
 (* The function called by generic creation *)
 let new_widget_atom =
   let counter = ref 0 in
-  fun 
-    "toplevel" w -> w  (* toplevel widgets are given in argument *)
-  | class parent ->
+  fun class parent ->
       let parentpath = widget_name parent in
       let path = 
       	 incr counter;
@@ -140,6 +125,17 @@ let new_named_widget class parent name =
 	w
 ;;
   
+(* Just create a path. Only to check existence of widgets *)
+(* Use with care *)
+let widget_atom parent name =
+  let parentpath = widget_name parent in
+  let path =
+    if parentpath = "."
+    then "." ^ name
+    else parentpath ^ "." ^ name in
+      Untyped path
+;;
+
 
 
 (* Redundant with subtyping of Widget, backward compatibility *)
@@ -156,68 +152,6 @@ let chk_sub errname table c =
   if mem c table then ()
   else raise (Invalid_argument errname)
 ;;
-
-(* 
- * Other builtin types and utilities
- *   The CAMLtoTKstring converter : []/$ are still substituted inside "" 
- *   Dead code since we now bypass Tcl_Eval
- *) 
-
-let tcl_string_for_read s =
-  let n = ref 0 in
-    for i = 0 to string_length s - 1 do
-      n := !n +
-        (match nth_char s i with
-           `"` | `\\` | `\n` | `\t` | `[` | `]` | `$` | `{` | `}` -> 2
-          | c -> if is_printable c then 1 else 4)
-    done;
-    if !n == string_length s then s else begin
-      let s' = create_string !n in
-        n := 0;
-        for i = 0 to string_length s - 1 do
-          begin
-            match nth_char s i with
-              `"` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `"`
-            | `\\` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `\\`
-            | `\n` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `n`
-            | `\t` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `t`
-            | `[` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `[`
-            | `]` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `]`
-            | `$` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `$`
-            | `{` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `{`
-            | `}` -> s'.[!n] <- `\\`; incr n; s'.[!n] <- `}`
-            | c ->
-                if is_printable c then
-                  s'.[!n] <- c
-                else begin
-                  let a = int_of_char c in
-                  s'.[!n] <- `\\`;
-                  incr n;
-                  s'.[!n] <- (char_of_int (48 + a / 100));
-                  incr n;
-                  s'.[!n] <- (char_of_int (48 + (a / 10) mod 10));
-                  incr n;
-                  s'.[!n] <- (char_of_int (48 + a mod 10))
-                end
-          end;
-          incr n
-        done;
-        s'
-      end
-;;
-
-let quote_string x =
-  let n = string_length x + 2 in
-  let s = create_string n in
-    s.[0] <- ` `;
-    s.[n-1] <- ` `;
-    blit_string x 0 s 1 (n-2);
-  let s' = tcl_string_for_read s in
-    s'.[0] <- `"`;
-    s'.[string_length s'-1] <- `"`;
-   s'
-;;
-
 
 (* strings assumed to be atomic (no space, no special char) *)
 let CAMLtoTKsymbol x = x
