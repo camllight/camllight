@@ -15,11 +15,6 @@ camldep         perl    Find inter-module dependencies between .zi and
 camlsize        perl    Print the code, data and symbol size of a
                         executable bytecode file
 
-cmpcode         perl    Compare the code parts of two executable
-                        bytecode files.
-
-cmpzo           perl    Compare the code parts of two .zo files.
-
 dumpobj         caml    Disassemble a .zo file.
 
 dumpsymb        caml    Dump the debugging information contained in a
@@ -32,5 +27,5 @@ linkarch        sh      Builds a directory hierarchy that parallels
                         the source files. Useful when compiling Caml Light
                         on several platforms at once.
 
-make-opcodes    awk     Used to generate ../compiler/opcodes.ml from
-                        ../runtime/instruct.h.
+make-jumptable  awk     Used to generate ../runtime/jumptbl.h and
+make-opcodes            ../compiler/opcodes.ml from ../runtime/instruct.h.
