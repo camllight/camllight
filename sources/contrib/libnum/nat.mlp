@@ -239,13 +239,9 @@ and B_2 = make_nat 2
 #ifdef SIXTYFOUR
 let max_superscript_10_power_in_int = 18;;
 let max_power_10_power_in_int = nat_of_int 1000000000000000000;;
-let raw_string_of_digit_vect =
-    [| "0000000000000000000"; "00000000000000000000" |];;
 #else
 let max_superscript_10_power_in_int = 9;;
 let max_power_10_power_in_int = nat_of_int 1000000000;;
-let raw_string_of_digit_vect =
-    [| "0000000000" |];;
 #endif
 
 let raw_string_of_digit nat off =
@@ -257,36 +253,34 @@ let raw_string_of_digit nat off =
        let leading_digits = nth_digit_nat A_2 0
        and s1 = string_of_int (nth_digit_nat A_1 0) in
        let len = string_length s1 in
-       if lt_int leading_digits 10 
-          then begin
-               let result = raw_string_of_digit_vect.(0) in
-               set_nth_char result 0 
-                            (char_of_int (add_int 48 leading_digits));
-               blit_string s1 0 
-                    result (sub_int max_superscript_10_power_in_int len) len;
-               result
-               end 
-       else begin
-            let result = raw_string_of_digit_vect.(1) in
-            blit_string (string_of_int leading_digits) 0 result 0 2;
-            blit_string s1 0 result 
-                 (sub_int max_superscript_10_power_in_int len) len;
+       if lt_int leading_digits 10 then begin
+            let result = make_string (max_superscript_10_power_in_int+1) `0` in
+            set_nth_char result 0 
+                         (char_of_int (add_int 48 leading_digits));
+            blit_string s1 0 
+                 result (sub_int (string_length result) len) len;
             result
-           end
+       end else begin
+            let result = make_string (max_superscript_10_power_in_int+2) `0` in
+            blit_string (string_of_int leading_digits) 0 result 0 2;
+            blit_string s1 0 
+                 result (sub_int (string_length result) len) len;
+            result
        end
+  end
 ;;
 
-(* XL: suppression de string_of_digit *)
+(* XL: suppression de string_of_digit et de sys_string_of_digit.
+   La copie est de toute facon faite dans string_of_nat, qui est le
+   seul point d'entree public dans ce code. *)
 
-
+(******
 let sys_string_of_digit nat off =
     let s = raw_string_of_digit nat off in
     let result = create_string (string_length s) in
     blit_string s 0 result 0 (string_length s);
     s
 ;;
-
-(******
 
 let string_of_digit nat =
     sys_string_of_digit nat 0
@@ -440,7 +434,7 @@ let num_digits_max_vector =
 let unadjusted_string_of_nat nat off len_nat =
   let len = num_digits_nat nat off len_nat in
   if len == 1 then
-       sys_string_of_digit nat off
+       raw_string_of_digit nat off
   else
        let len_copy = ref (succ len) in
        let copy1 = create_nat !len_copy
