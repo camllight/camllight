@@ -203,6 +203,14 @@ value mult_digit_nat(argv, argn)	/* ML */
                              Bignum_val(nat3), Long_val(ofs3)));
 }
 
+value set_mult_digit_nat(argv, argn)	/* ML */
+     value * argv;
+     int argn;
+{
+  mult_digit_nat(argv, argn);
+  return Val_unit;
+}
+
 value mult_nat(argv, argn)	/* ML */
      value * argv;
      int argn;
@@ -225,6 +233,14 @@ value mult_nat(argv, argn)	/* ML */
     Val_long(BnMultiply(Bignum_val(nat1), Long_val(ofs1), Long_val(len1),
                         Bignum_val(nat2), Long_val(ofs2), Long_val(len2),
                         Bignum_val(nat3), Long_val(ofs3), Long_val(len3)));
+}
+
+value set_mult_nat(argv, argn)	/* ML */
+     value * argv;
+     int argn;
+{
+  mult_nat(argv, argn);
+  return Val_unit;
 }
 
 value shift_left_nat(argv, argn)	/* ML */

@@ -29,9 +29,9 @@ value create_nat: int -> nat = 1 "create_nat"
   and decr_nat: nat -> int -> int -> int -> int = 4 "decr_nat"
   and sub_nat: nat -> int -> int -> nat -> int -> int -> int -> int = 7 "sub_nat"
   and mult_digit_nat: nat -> int -> int -> nat -> int -> int -> nat -> int -> int = 8 "mult_digit_nat"
-(*  and set_mult_digit_nat: nat -> int -> int -> nat -> int -> int -> nat -> int -> unit*)
+  and set_mult_digit_nat: nat -> int -> int -> nat -> int -> int -> nat -> int -> unit = 8 "set_mult_digit_nat"
   and mult_nat: nat -> int -> int -> nat -> int -> int -> nat -> int -> int -> int = 9 "mult_nat"
-(*  and set_mult_nat: nat -> int -> int -> nat -> int -> int -> nat -> int -> int -> unit*)
+  and set_mult_nat: nat -> int -> int -> nat -> int -> int -> nat -> int -> int -> unit = 9 "set_mult_nat"
   and shift_left_nat: nat -> int -> int -> nat -> int -> int -> unit = 6 "shift_left_nat"
   and div_digit_nat: nat -> int -> nat -> int -> nat -> int -> int -> nat -> int -> unit = 9 "div_digit_nat"
   and div_nat: nat -> int -> int -> nat -> int -> int -> unit = 6 "div_nat"
@@ -47,7 +47,7 @@ value create_nat: int -> nat = 1 "create_nat"
   and lor_digit_nat: nat -> int -> nat -> int -> unit = 4 "lor_digit_nat"
   and lxor_digit_nat: nat -> int -> nat -> int -> unit = 4 "lxor_digit_nat"
   and square_nat : nat -> int -> int -> nat -> int -> int -> int
-(*  and set_square_nat : nat -> int -> int -> nat -> int -> int -> unit*)
+  and set_square_nat : nat -> int -> int -> nat -> int -> int -> unit
   and gcd_nat : nat -> int -> int -> nat -> int -> int -> int
   and sqrt_nat : nat -> int -> int -> nat
   and string_of_nat : nat -> string
