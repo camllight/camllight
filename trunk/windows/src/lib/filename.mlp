@@ -13,20 +13,20 @@ let lowercase s =
   let lc = create_string (string_length s) in
   for i = 0 to string_length s - 1 do
     let c = s.[i] in
-	if c >= `A` & c <= `Z`
+	if c >= `A` && c <= `Z`
 	then lc.[i] <- char_of_int(int_of_char c + 32)
 	else lc.[i] <- c
   done;
   lc
 ;;
 let check_suffix name suff =
-  string_length name >= string_length suff &
+  string_length name >= string_length suff &&
   lowercase (sub_string name (string_length name - string_length suff) 
                              (string_length suff)) = lowercase suff
 ;;
 #else
 let check_suffix name suff =
-  string_length name >= string_length suff &
+  string_length name >= string_length suff &&
   sub_string name (string_length name - string_length suff) (string_length suff)
     = suff
 ;;
@@ -42,15 +42,15 @@ let current_dir_name = ".";;
 
 let concat dirname filename =
   let l = string_length dirname - 1 in
-  if l < 0 or nth_char dirname l == `/`
+  if l < 0 || nth_char dirname l == `/`
   then dirname ^ filename
   else dirname ^ "/" ^ filename
 ;;
 
 let is_absolute n =
-     (string_length n >= 1 & sub_string n 0 1 = "/")
-  or (string_length n >= 2 & sub_string n 0 2 = "./")
-  or (string_length n >= 3 & sub_string n 0 3 = "../")
+     (string_length n >= 1 && sub_string n 0 1 = "/")
+  || (string_length n >= 2 && sub_string n 0 2 = "./")
+  || (string_length n >= 3 && sub_string n 0 3 = "../")
 ;;
 
 let slash_pos s =
@@ -100,11 +100,11 @@ let concat dirname filename =
   let l =
     string_length dirname1 - 1 in
   let dirname2 =
-    if l < 0 or nth_char dirname1 l == `:`
+    if l < 0 || nth_char dirname1 l == `:`
     then dirname1
     else dirname1 ^ ":" in
   let filename2 =
-    if string_length filename > 0 & nth_char filename 0 == `:`
+    if string_length filename > 0 && nth_char filename 0 == `:`
     then sub_string filename 1 (string_length filename - 1)
     else filename in
   dirname2 ^ filename2
@@ -139,16 +139,16 @@ let current_dir_name = ".";;
 
 let concat dirname filename =
   let l = string_length dirname - 1 in
-  if l < 0 or nth_char dirname l == `\\` or nth_char dirname l == `:`
+  if l < 0 || nth_char dirname l == `\\` || nth_char dirname l == `:`
   then dirname ^ filename
   else dirname ^ "\\" ^ filename
 ;;
 
 let is_absolute n =
-     (string_length n >= 2 & nth_char n 1 == `:`)
-  or (string_length n >= 1 & sub_string n 0 1 = "\\")
-  or (string_length n >= 2 & sub_string n 0 2 = ".\\")
-  or (string_length n >= 3 & sub_string n 0 3 = "..\\")
+     (string_length n >= 2 && nth_char n 1 == `:`)
+  || (string_length n >= 1 && sub_string n 0 1 = "\\")
+  || (string_length n >= 2 && sub_string n 0 2 = ".\\")
+  || (string_length n >= 3 && sub_string n 0 3 = "..\\")
 ;;
 
 let sep_pos s =
@@ -169,9 +169,9 @@ let basename name =
 ;;
 
 let rec dirname name =
-  if string_length name >= 2 & nth_char name 1 == `:` then
+  if string_length name >= 2 && nth_char name 1 == `:` then
     sub_string name 0 2 ^ dirname (sub_string name 2 (string_length name - 2))
-  else if name = "/" or name = "\\" then
+  else if name = "/" || name = "\\" then
     name
   else
     try

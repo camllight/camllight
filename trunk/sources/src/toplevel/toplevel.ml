@@ -31,7 +31,7 @@ let parse_global s =
   let rec parse n =
     if n + 2 >= string_length s then
       GRname s
-    else if nth_char s n == `_` & nth_char s (n+1) == `_` then
+    else if nth_char s n == `_` && nth_char s (n+1) == `_` then
       GRmodname { qual = sub_string s 0 n;
                   id = sub_string s (n + 2) (string_length s - n - 2) }
     else

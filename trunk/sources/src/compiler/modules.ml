@@ -71,7 +71,7 @@ let load_module name =
     let fullname = find_in_path (name ^ ".zi") in
     let extname = fullname ^ "x" in
     read_module name
-      (if !use_extended_interfaces & file_exists extname
+      (if !use_extended_interfaces && file_exists extname
        then extname else fullname)
   with Cannot_find_file _ ->
     interntl__eprintf "Cannot find the compiled interface file %s.zi.\n" name;

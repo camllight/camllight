@@ -41,7 +41,7 @@ let load_information file =
 	  (prerr_endline ("The file " ^ file ^ " is not a bytecode executable file.");
 	   close_in inchan;
 	   raise Toplevel)
-        else if (symbol_size = 0) or (debug_size = 0) then
+        else if (symbol_size = 0) || (debug_size = 0) then
 	  (prerr_endline
       	     ("The file " ^ file ^ " does not contain enough debugging information.");
            prerr_endline "Please recompile it with the '-g' option.";

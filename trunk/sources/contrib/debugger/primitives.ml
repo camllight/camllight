@@ -92,7 +92,7 @@ let find p =
 (* ### c s -> pos *)
 let string_pos s c =
   let i = ref 0 and l = string_length s in
-    while (!i < l) & (nth_char s !i != c) do i := !i + 1 done;
+    while (!i < l) && (nth_char s !i != c) do i := !i + 1 done;
     if !i = l then raise Not_found;
     !i;;
 
@@ -100,13 +100,13 @@ let string_pos s c =
 let string_trim s =
   let l = string_length s and i = ref 0 in
     while
-      (!i < l) & (match nth_char s !i with ` ` | `\t` -> true | _ -> false)
+      (!i < l) && (match nth_char s !i with ` ` | `\t` -> true | _ -> false)
     do
       incr i
     done;
     let j = ref (l - 1) in
       while
-        (!j >= !i) & (match nth_char s !j with ` ` | `\t` -> true | _ -> false)
+        (!j >= !i) && (match nth_char s !j with ` ` | `\t` -> true | _ -> false)
       do
         decr j
       done;

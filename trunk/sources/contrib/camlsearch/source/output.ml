@@ -10,7 +10,7 @@ let rec int_to_alpha i =
     (int_to_alpha (i / 26) ^ int_to_alpha (i mod 26));;
 
 let string_of_global_name {Module_name = module; Local_name = name} =
-  if (module = "") or (module = "builtin") or (not !write_module_name) then
+  if (module = "") || (module = "builtin") || (not !write_module_name) then
     name
   else
     (module ^ "__" ^ name);;

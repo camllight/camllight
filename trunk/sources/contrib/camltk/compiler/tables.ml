@@ -108,7 +108,7 @@ let new_type typname =
 (* Assume that types not yet defined are not subtyped *)
 (* Widget is builtin and implicitly subtyped *)
 let is_subtyped s =
-  s = "Widget" or
+  s = "Widget" ||
   try  
     let typdef = hashtbl__find types_table s in
       typdef.subtypes <> []
@@ -238,7 +238,7 @@ let enter_type typname constructors =
 		end;
 		(* Callbacks require widget context *)
 		typdef.requires_widget_context <- 
-      	       	  typdef.requires_widget_context or
+      	       	  typdef.requires_widget_context ||
                   has_callback c.Template)
             constructors
 ;;
@@ -262,7 +262,7 @@ let enter_subtype typ subtyp constructors =
 		       typdef.constructors <- c :: typdef.constructors
 		    end;
 		    typdef.requires_widget_context <-
-      	       	       typdef.requires_widget_context or
+      	       	       typdef.requires_widget_context ||
       	       	       has_callback c.Template;
                     c
                | Abbrev name -> find_constructor name typdef.constructors

@@ -205,7 +205,7 @@ and rewrite_expr e =
 	    end
 	 else
       	    rewrite_expr e2;
-         if !instr_if & e.e_loc <> locelse then begin
+         if !instr_if && e.e_loc <> locelse then begin
 	    insert_open e3;
 	    insert_profile e3;
       	    rewrite_expr e3;

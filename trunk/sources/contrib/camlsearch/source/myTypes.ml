@@ -32,7 +32,7 @@ let isos_same_type_constr
   {Module_name = q1; Local_name = id1}
   {Module_name = q2; Local_name = id2}
 =
-  if ((q1 = "") or (q2 = "") or (q1 = q2))
+  if ((q1 = "") || (q2 = "") || (q1 = q2))
   then (id1 = id2)
   else false;;
 

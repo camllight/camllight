@@ -114,7 +114,7 @@ let compile_nbranch int_of_key casel =
   let rec partition start =
     if start >= n then [] else
     let stop = ref (n-1) in
-    while keyv.(!stop) - keyv.(start) >= 255 or
+    while keyv.(!stop) - keyv.(start) >= 255 ||
           keyv.(!stop) - keyv.(start) > 4 * (!stop - start) do
       decr stop
     done;

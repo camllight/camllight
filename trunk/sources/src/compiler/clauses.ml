@@ -195,7 +195,7 @@ let rec satisfiable pss qs = match pss with
 | _ -> match qs with
     [] -> false
   | {p_desc = Zorpat(q1,q2)}::qs ->
-      satisfiable pss (q1::qs) or satisfiable pss (q2::qs)
+      satisfiable pss (q1::qs) || satisfiable pss (q2::qs)
   | {p_desc = Zaliaspat(q,_)}::qs -> satisfiable pss (q::qs)
   | {p_desc = Zconstraintpat(q,_)}::qs -> satisfiable pss (q::qs)
   | {p_desc = (Zwildpat | Zvarpat(_))}::qs ->
@@ -210,7 +210,7 @@ let rec satisfiable pss qs = match pss with
             exists try_non_omega constrs
           else
             satisfiable (filter_extra pss) qs
-          or
+          ||
             exists try_non_omega constrs)
   | q::qs ->
       let q0 = simple_pat q pss in
@@ -237,14 +237,14 @@ let rec le_pat p q =
   | Zconstraintpat(p,_),_ -> le_pat p q
   | _,Zconstraintpat(q,_) -> le_pat p q
   | Zorpat(p1,p2),_ ->
-      le_pat p1 q or le_pat p2 q
+      le_pat p1 q || le_pat p2 q
   | _,Zorpat(q1,q2) ->
-       le_pat p q1 & le_pat p q2
+       le_pat p q1 && le_pat p q2
   | Zconstantpat(c1), Zconstantpat(c2) -> c1 = c2
   | Zconstruct0pat(c1), Zconstruct0pat(c2) ->
       c1.info.cs_tag == c2.info.cs_tag
   | Zconstruct1pat(c1,p), Zconstruct1pat(c2,q) ->
-      c1.info.cs_tag == c2.info.cs_tag & le_pat p q
+      c1.info.cs_tag == c2.info.cs_tag && le_pat p q
   | Ztuplepat(ps), Ztuplepat(qs) -> le_pats ps qs
   | Zrecordpat(l1), Zrecordpat(l2) ->
      let size = record_nargs p in
@@ -252,7 +252,7 @@ let rec le_pat p q =
   | _,_ -> false  
 
 and le_pats ps qs = match ps,qs with
-  p::ps,q::qs -> le_pat p q & le_pats ps qs
+  p::ps,q::qs -> le_pat p q && le_pats ps qs
 | _           -> true
 ;;
 

@@ -19,7 +19,7 @@ let expanse_file file =
       [file]
   else
     let file2 = file ^ ".zi" in
-      if (file_exist file2) & not (is_directory file2) then
+      if (file_exist file2) && not (is_directory file2) then
 	[file2]
       else
         (prerr_endline ("File not found : " ^ file);
@@ -94,7 +94,7 @@ let main () =
 	        function
                   [] -> ()
 	        | l ->
-		    if (not limited_depth) or (depth <= max_depth) then
+		    if (not limited_depth) || (depth <= max_depth) then
                       (if !output__verbose then
       	       	       	 (print_string "Depth ";
                           print_int depth;
@@ -118,7 +118,7 @@ let main () =
 	        function
                   [] -> ()
 	        | l ->
-		    if (not limited_depth) or (depth <= max_depth) then
+		    if (not limited_depth) || (depth <= max_depth) then
                       (if !output__verbose then
       	       	       	 (print_string "Depth ";
                           print_int depth;

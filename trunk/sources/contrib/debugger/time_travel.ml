@@ -441,7 +441,7 @@ let rec find_last_breakpoint max_time =
     let rec find break =
       let time = current_time () in
         step_forward (max_time - time);
-	if ((on_breakpoint ()) & (current_time () < max_time)) then
+	if ((on_breakpoint ()) && (current_time () < max_time)) then
 	  find true
 	else
 	  (time, break)
@@ -456,7 +456,7 @@ let rec back_to time time_max =
   in
     go_to (max time t);
     let (new_time, break) = find_last_breakpoint time_max in
-      if break or (new_time <= time) then
+      if break || (new_time <= time) then
         go_to new_time
       else
       	back_to time new_time;;
@@ -512,7 +512,7 @@ let finish () =
                        Rep_stack_pointer = sp;
                        Rep_program_pointer = pc2}
                   ->
-     	            (pc = pc2) & (frame <> sp)
+     	            (pc = pc2) && (frame <> sp)
                   | _ ->
      	            false
                 do

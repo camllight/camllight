@@ -33,12 +33,12 @@ let regexp e = compile_regexp e false;;
 let regexp_case_fold e = compile_regexp e true;;
 
 let group_beginning n =
-  if n < 0 or n >= 10 then invalid_arg "str__group_beginning" else
+  if n < 0 || n >= 10 then invalid_arg "str__group_beginning" else
   let pos = beginning_group n in
   if pos == -1 then raise Not_found else pos;;
 
 let group_end n =
-  if n < 0 or n >= 10 then invalid_arg "str__group_end" else
+  if n < 0 || n >= 10 then invalid_arg "str__group_end" else
   let pos = end_group n in
   if pos == -1 then raise Not_found else pos;;
 

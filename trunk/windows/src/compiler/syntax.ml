@@ -158,8 +158,8 @@ let rec pat_irrefutable pat =
   | Zconstantpat _ -> false
   | Ztuplepat patl -> for_all pat_irrefutable patl
   | Zconstruct0pat cstr -> single_constructor cstr
-  | Zconstruct1pat(cstr, pat) -> single_constructor cstr & pat_irrefutable pat
-  | Zorpat(pat1, pat2) -> pat_irrefutable pat1 or pat_irrefutable pat2
+  | Zconstruct1pat(cstr, pat) -> single_constructor cstr && pat_irrefutable pat
+  | Zorpat(pat1, pat2) -> pat_irrefutable pat1 || pat_irrefutable pat2
   | Zconstraintpat(pat, _) -> pat_irrefutable pat
   | Zrecordpat lbl_pat_list ->
       for_all (fun (lbl, pat) -> pat_irrefutable pat) lbl_pat_list

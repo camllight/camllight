@@ -232,7 +232,7 @@ let rec conquer_matching =
   | (key, matchref) :: rest ->
       let (lambda1, total1) = conquer_matching !matchref
       and (list2,   total2) = conquer_divided_matching rest in
-        ((key, lambda1) :: list2, total1 & total2)
+        ((key, lambda1) :: list2, total1 && total2)
   in function
     Matching([], _) ->
       (Lstaticfail 0, false)
@@ -259,7 +259,7 @@ let rec conquer_matching =
           and (lambda,    total2) = conquer_matching vars in
           let span = get_span_of_matching matching
           and num_cstr = list_length constrs in
-            if num_cstr = span & total1 then
+            if num_cstr = span && total1 then
               (Lswitch(span, path, switchlst), true)
             else
               (Lstatichandle(Lswitch(span, path, switchlst), lambda),

@@ -103,7 +103,7 @@ let rec tpat new_env (pat, ty, mut_flag) =
       if mem_assoc v new_env then
         non_linear_pattern_err pat v
       else begin
-        if !warnings & (not !typing_let) & v.[0] >= `A` & v.[0] <= `Z` then
+        if !warnings && (not !typing_let) && v.[0] >= `A` && v.[0] <= `Z` then
           upper_case_variable_warning pat v;
         (v, (ty, mut_flag)) :: new_env
       end
@@ -183,22 +183,22 @@ let rec is_nonexpansive expr =
   | Zconstant sc -> true
   | Ztuple el -> for_all is_nonexpansive el
   | Zconstruct0 cstr -> true
-  | Zconstruct1(cstr, e) -> cstr.info.cs_mut == Notmutable & is_nonexpansive e
+  | Zconstruct1(cstr, e) -> cstr.info.cs_mut == Notmutable && is_nonexpansive e
   | Zlet(rec_flag, bindings, body) ->
-      for_all (fun (pat, expr) -> is_nonexpansive expr) bindings &
+      for_all (fun (pat, expr) -> is_nonexpansive expr) bindings &&
       is_nonexpansive body
   | Zfunction pat_expr_list -> true
   | Ztrywith(body, pat_expr_list) ->
-      is_nonexpansive body &
+      is_nonexpansive body &&
       for_all (fun (pat, expr) -> is_nonexpansive expr) pat_expr_list
   | Zsequence(e1, e2) -> is_nonexpansive e2
   | Zcondition(cond, ifso, ifnot) ->
-      is_nonexpansive ifso & is_nonexpansive ifnot
+      is_nonexpansive ifso && is_nonexpansive ifnot
   | Zconstraint(e, ty) -> is_nonexpansive e
   | Zvector [] -> true
   | Zrecord lbl_expr_list ->
       for_all (fun (lbl, expr) ->
-                  lbl.info.lbl_mut == Notmutable & is_nonexpansive expr)
+                  lbl.info.lbl_mut == Notmutable && is_nonexpansive expr)
               lbl_expr_list
   | Zrecord_access(e, lbl) -> is_nonexpansive e
   | Zparser pat_expr_list -> true

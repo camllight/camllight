@@ -69,7 +69,7 @@ let next_linefeed (buffer, _) pos =
       raise Out_of_range
     else
       let rec search p =
-        if (p = length) or (nth_char buffer p = `\n`) then
+        if (p = length) || (nth_char buffer p = `\n`) then
           p
         else
       	  search (p + 1)

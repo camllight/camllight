@@ -8,7 +8,7 @@
 (* Type constructor equality *)
 
 let same_type_constr cstr1 cstr2 =
-  cstr1.info.ty_stamp == cstr2.info.ty_stamp &
+  cstr1.info.ty_stamp == cstr2.info.ty_stamp &&
   cstr1.qualid.qual = cstr2.qualid.qual
 ;;
 
@@ -221,7 +221,7 @@ let occur_check level0 v =
         if level > level0 then level <- level0;
         ty' == v
     | {typ_desc = Tarrow(t1,t2)} ->
-        occurs_rec t1 or occurs_rec t2
+        occurs_rec t1 || occurs_rec t2
     | {typ_desc = Tproduct(ty_list)} ->
         exists occurs_rec ty_list
     | {typ_desc = Tconstr(_, ty_list)} ->
@@ -254,7 +254,7 @@ let rec unify (ty1, ty2) =
             unify_list (tyl1, tyl2)
         | Tconstr(cstr1, []), Tconstr(cstr2, [])
           when cstr1.info.ty_stamp == cstr2.info.ty_stamp (* inline exp. of *)
-             & cstr1.qualid.qual = cstr2.qualid.qual -> (* same_type_constr *)
+             && cstr1.qualid.qual = cstr2.qualid.qual -> (* same_type_constr *)
             ()
         | Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args), _ ->
             unify (expand_abbrev params body args, ty2)
@@ -262,7 +262,7 @@ let rec unify (ty1, ty2) =
             unify (ty1, expand_abbrev params body args)
         | Tconstr(cstr1, tyl1), Tconstr(cstr2, tyl2)
           when cstr1.info.ty_stamp == cstr2.info.ty_stamp (* inline exp. of *)
-             & cstr1.qualid.qual = cstr2.qualid.qual -> (* same_type_constr *)
+             && cstr1.qualid.qual = cstr2.qualid.qual -> (* same_type_constr *)
             unify_list (tyl1, tyl2)
         | _, _ ->
             raise Unify
@@ -319,7 +319,7 @@ let rec filter (ty1, ty2) =
           Tvar link1, Tvar link2 when ty1.typ_level != generic ->
             link1 <- Tlinkto ty2
         | Tvar link1, _ when ty1.typ_level != generic
-                           & not(occur_check ty1.typ_level ty1 ty2) ->
+                           && not(occur_check ty1.typ_level ty1 ty2) ->
             link1 <- Tlinkto ty2
         | Tarrow(t1arg, t1res), Tarrow(t2arg, t2res) ->
             filter (t1arg, t2arg);

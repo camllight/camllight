@@ -29,7 +29,7 @@ let parse_phrase parsing_fun lexing_fun lexbuf =
       skip() in
   let skip_maybe () =
     if parsing__is_current_lookahead EOF
-    or parsing__is_current_lookahead SEMISEMI
+    || parsing__is_current_lookahead SEMISEMI
     then () else skip() in
   try
     parsing_fun lexing_fun lexbuf
@@ -90,7 +90,7 @@ let check_unused_opens () =
   if !typing__warnings then
    hashtbl__do_table
      (fun name used ->
-       if not !used & not (mem name !default_used_modules)
+       if not !used && not (mem name !default_used_modules)
        then unused_open_warning name)
      !used_opened_modules
 ;;

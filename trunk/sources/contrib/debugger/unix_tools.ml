@@ -51,7 +51,7 @@ let search_in_path name =
       let path = sys__getenv "PATH" in
         let length = string_length path in
           let rec traverse pointer =
-            if (pointer >= length) or (nth_char path pointer = `:`) then
+            if (pointer >= length) || (nth_char path pointer = `:`) then
               pointer
             else
               traverse (pointer + 1)
@@ -80,7 +80,7 @@ let rec expand_path ch =
   let rec subst_variable ch =
     try
       let pos = string_pos ch `$` in
-        if (pos + 1 < string_length ch) & (nth_char ch (pos + 1) = `$`) then
+        if (pos + 1 < string_length ch) && (nth_char ch (pos + 1) = `$`) then
       	  (sub_string ch 0 (pos + 1))
 	    ^ (subst_variable
       	         (sub_string ch (pos + 2) (string_length ch - pos - 2)))

@@ -33,11 +33,11 @@ let fprintf outchan format =
                       int_of_string (sub_string format (i+1) (j-i-1))
                     with _ ->
                       invalid_arg "fprintf: bad %s format" in
-                  if p > 0 & string_length s < p then begin
+                  if p > 0 && string_length s < p then begin
                     output_string outchan
                                   (make_string (p - string_length s) ` `);
                     output_string outchan s
-                  end else if p < 0 & string_length s < -p then begin
+                  end else if p < 0 && string_length s < -p then begin
                     output_string outchan s;
                     output_string outchan
                                   (make_string (-p - string_length s) ` `)
@@ -163,10 +163,10 @@ let sprintf format =
           int_of_string (sub_string format (i+1) (j-i-1))
         with _ ->
           invalid_arg "sprintf: bad %s format" in
-      if p > 0 & string_length s < p then begin
+      if p > 0 && string_length s < p then begin
         res := make_string (p - string_length s) ` ` :: !res;
         res := s :: !res
-      end else if p < 0 & string_length s < -p then begin
+      end else if p < 0 && string_length s < -p then begin
         res := s :: !res;
         res := make_string (-p - string_length s) ` ` :: !res
       end else

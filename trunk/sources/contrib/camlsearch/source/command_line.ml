@@ -6,7 +6,7 @@
 let prerr_location string pos_min pos_max =
   prerr_endline string;
   for i = 0 to pos_min - 1 do
-    if (string_length string > i) & (nth_char string i = `\t`) then
+    if (string_length string > i) && (nth_char string i = `\t`) then
       prerr_char `\t`
     else
       prerr_char ` `

@@ -47,7 +47,7 @@ let rec copy source dest =
       mkdir dest 0o700;
       do_dir
         (fun file ->
-          if file = "." or file = ".." then () else
+          if file = "." || file = ".." then () else
             copy (source ^ "/" ^ file) (dest ^ "/" ^ file))
         source;
       set_infos dest infos

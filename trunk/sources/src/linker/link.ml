@@ -34,7 +34,7 @@ let add_required = function
   | _ -> ();;
 
 let scan_phrase tolink phr =
-  if not phr.cph_pure or exists is_required phr.cph_reloc then begin
+  if not phr.cph_pure || exists is_required phr.cph_reloc then begin
     do_list remove_required phr.cph_reloc;
     do_list add_required phr.cph_reloc;
     phr :: tolink

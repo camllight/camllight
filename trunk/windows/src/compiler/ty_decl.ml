@@ -144,7 +144,7 @@ let define_new_type loc (ty_desc, params, def) =
   ty_desc.info.ty_desc <- type_comp;
   begin try
     let extdef = assoc ty_desc.qualid.id !external_types in
-    if extdef.et_manifest or extdef.et_defined then
+    if extdef.et_manifest || extdef.et_defined then
       illegal_type_redefinition loc extdef.et_descr;
     if extdef.et_descr.info.ty_arity <> ty_desc.info.ty_arity then
       type_decl_arity_err loc extdef.et_descr ty_desc;

@@ -41,7 +41,7 @@ let name_of_type_var sch var =
   with Not_found ->
     let name = int_to_alpha !type_vars_counter in
     let var_name =
-      if (not sch) or var.typ_level == generic then name else "_" ^ name in
+      if (not sch) || var.typ_level == generic then name else "_" ^ name in
     incr type_vars_counter;
     type_vars_names := (var, var_name) :: !type_vars_names;
     var_name

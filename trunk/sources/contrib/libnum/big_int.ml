@@ -18,8 +18,8 @@ type big_int =
 ;;
 
 let create_big_int sign nat =  
- if sign == 1 or sign == -1 or
-    (sign == 0 &
+ if sign == 1 || sign == -1 ||
+    (sign == 0 &&
      is_zero_nat nat 0 (num_digits_nat nat 0 (length_nat nat)))
  then { Sign = sign; 
          Abs_Value = nat }
@@ -64,7 +64,7 @@ let abs_big_int bi =
         -1 if bi < bi2
 *)
 let compare_big_int bi1 bi2 =
-  if bi1.Sign == 0 & bi2.Sign == 0 then 0
+  if bi1.Sign == 0 && bi2.Sign == 0 then 0
   else if bi1.Sign < bi2.Sign then -1
   else if bi1.Sign > bi2.Sign then 1
   else if bi1.Sign == 1 then
@@ -254,7 +254,7 @@ let quomod_big_int bi1 bi2 =
             let not_null_mod = not (is_zero_nat r 0 size_bi2) in
 
             (* correct the signs, adjusting the quotient and remainder *)
-            if bi1_negatif & not_null_mod
+            if bi1_negatif && not_null_mod
              then 
               (* bi1<0, r>0, noting r for (r, size_bi2) the remainder,      *)
               (* we have |bi1|=q * |bi2| + r with 0 < r < |bi2|,            *)
@@ -327,7 +327,7 @@ let int_of_big_int bi =
 
 let is_int_big_int bi = 
    is_nat_int (bi.Abs_Value) 0 (num_digits_big_int bi)
-or (bi.Sign == -1 & num_digits_big_int bi == 1 &
+or (bi.Sign == -1 && num_digits_big_int bi == 1 &&
     num_leading_zero_bits_in_digit (bi.Abs_Value) 0 >= 1);;
 
 (* XL: le "1" provient de "pred (length_of_digit - length_of_int))" *)
@@ -520,7 +520,7 @@ let base_power_big_int base n bi =
            and len_bi = num_digits_big_int bi in
              if len_bi < len_nat then
                invalid_arg "base_power_big_int"
-             else if len_bi == len_nat &
+             else if len_bi == len_nat &&
                      compare_digits_nat (bi.Abs_Value) len_bi nat len_nat == -1
                then invalid_arg "base_power_big_int"
              else
@@ -557,13 +557,13 @@ let decimal_of_string s off_set length =
  let n = (index_char s `.` off_set) in
    (* s ends with a `.` *)
    if n == offset_limit then failwith "decimal_of_string" else
-   if n == -1 or n > offset_limit
+   if n == -1 || n > offset_limit
       then
        let n2 = (index_char s `e` off_set) in
         (* s ends with a `e` *)
         if n2 == offset_limit then failwith "decimal_of_string" else
         (* No `.` no `e` : regular integer *)
-        if n2 == -1 or n2 > offset_limit
+        if n2 == -1 || n2 > offset_limit
          then (sub_string s off_set length, 0)
          else (* integer e int *)
               let new_len = n2 - off_set in
