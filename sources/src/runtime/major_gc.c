@@ -14,7 +14,7 @@
 #include <Memory.h>
 #endif
 
-#ifdef ANSI
+#ifdef __STDC__
 #include <limits.h>
 #else
 #ifdef SIXTYFOUR
