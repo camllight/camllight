@@ -1,35 +1,23 @@
 # Makefile for the parser generator.
 
-CC=cc
+OUTPUT=camlyacc.exe
 
-CFLAGS=-O -DNDEBUG $(OPTS)
+CFLAGS=-O -DNDEBUG
 
 OBJS= closure.o error.o lalr.o lr0.o main.o mkpar.o output.o reader.o \
   skeleton.o symtab.o verbose.o warshall.o
 
-all: camlyacc
+all: camlyacc.exe
 
-camlyacc: $(OBJS)
-	$(CC) $(CFLAGS) -o camlyacc $(OBJS)
-
-clean:
-	rm -f *.o camlyacc
+camlyacc.out: $(OBJS)
+	$(CC) $(CFLAGS) -o camlyacc.out @&&!
+$(OBJS)
+!
 
 install:
-	cp camlyacc $(BINDIR)/camlyacc
-	strip $(BINDIR)/camlyacc
+	copy camlyacc.exe $(BINDIR)\camlyacc.exe
 
-depend:
+!include "../tools/make-c.inc"
 
-closure.o: defs.h
-error.o: defs.h
-lalr.o: defs.h
-lr0.o: defs.h
-main.o: defs.h
-mkpar.o: defs.h
-output.o: defs.h
-reader.o: defs.h
-skeleton.o: defs.h
-symtab.o: defs.h
-verbose.o: defs.h
-warshall.o: defs.h
+### EVERYTHING THAT GOES BEYOND THIS COMMENT WILL BE ERASED WITHOUT WARNING
+### DO NOT DELETE THIS LINE
