@@ -46,4 +46,4 @@ let main() =
         exit 100
 ;;
 
-printexc__f main ();;
+printexc__f main (); exit 0;;

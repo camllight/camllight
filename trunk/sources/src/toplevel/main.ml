@@ -82,4 +82,4 @@ with Toplevel -> exit 2
       exit 100
 ;;
 
-printexc__f main ();;
+printexc__f main (); exit 0;;

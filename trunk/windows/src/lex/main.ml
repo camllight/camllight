@@ -50,4 +50,4 @@ let main () =
   close_out !oc
 ;;
 
-printexc__f main ();;
+printexc__f main (); exit 0;;
