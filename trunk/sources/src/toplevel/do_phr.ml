@@ -10,8 +10,9 @@
 #open "ty_decl";;
 #open "front";;
 #open "back";;
-#open "pr_type";;
+#open "fmt_type";;
 #open "pr_value";;
+#open "format";;
 #open "symtable";;
 #open "load_phr";;
 #open "compiler";;
@@ -26,11 +27,12 @@ let do_toplevel_phrase phr =
         type_expression phr.im_loc expr in
       let res =
         load_phrase(compile_lambda false (translate_expression expr)) in
+      open_hovbox 0;
       print_string "- : ";
-      output_one_type std_out ty;
-      print_string " = ";
+      print_one_type ty;
+      print_string " ="; print_space();
       print_value res ty;
-      print_endline ""
+      print_newline()
   | Zletdef(rec_flag, pat_expr_list) ->
       let env = type_letdef phr.im_loc rec_flag pat_expr_list in
       let res =
@@ -45,13 +47,14 @@ let do_toplevel_phrase phr =
       reset_rollback ();
       do_list
         (fun (name, (typ, mut_flag)) ->
+          open_hovbox 0;
           print_string name; print_string " : ";
-          output_one_type std_out typ; print_string " = ";
+          print_one_type typ; print_string " ="; print_space();
           print_value
             global_data.(get_slot_for_variable
                          {qual=compiled_module_name(); id=name})
             typ;
-          print_endline "")
+          print_newline())
         env
   | Ztypedef decl ->
       let _ = type_typedecl phr.im_loc decl in

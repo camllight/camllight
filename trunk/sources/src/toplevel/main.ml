@@ -8,6 +8,7 @@
 #open "location";;
 #open "do_phr";;
 #open "compiler";;
+#open "format";;
 
 let anonymous s =
   raise (arg__Bad ("don't know what to do with " ^ s))
@@ -59,7 +60,7 @@ try
     while true do
       try
         print_string toplevel_input_prompt;
-        flush std_out;
+        print_flush ();
         reset_rollback();
         do_toplevel_phrase(parse_impl_phrase lexbuf)
       with End_of_file ->
@@ -68,8 +69,8 @@ try
              flush std_err;
              rollback ()
          | Break ->
-             printf__printf "Interrupted.\n";
-             flush std_err;
+             print_string "Interrupted.\n";
+             print_newline();
              rollback ()
     done
 
