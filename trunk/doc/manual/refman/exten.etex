@@ -298,7 +298,7 @@ The updated precedence table for expressions is shown below. We write
 \begin{tableau}{|l|l|}{Construction or operator}{Associativity}
 \entree{"!"\ldots"   ?"\ldots}{--}
 \entree{".   .(   .["}{--}
-\entree{function application}{right}
+\entree{function application}{left}
 \entree{constructor application}{--}
 \entree{"-   -." (prefix)}{--}
 \entree{"**"\ldots}{right}
