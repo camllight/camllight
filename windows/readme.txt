@@ -1,4 +1,4 @@
-  This archive contains the binaries for Caml Light 0.71, 
+  This archive contains the binaries for Caml Light 0.72,
   Windows (3.1, 95 and NT) version.
 
 CONTENTS
@@ -15,13 +15,15 @@ CONTENTS
 
 COPYRIGHT
 
-  All files in this archive except CAML\BIN\CWSDPMI.EXE are copyright INRIA,
+  All files in this archive except CAML\BIN\CWSDPMI.EXE and
+  CAML\BIN\EMU387.DXE are copyright INRIA,
   and covered by the copyright notice in file COPYRGHT.TXT.
 
-  The file CAML\BIN\CWSDPMI.EXE is copyright 1995 Charles W Sandmann
+  The files CAML\BIN\CWSDPMI.EXE and CAML\BIN\EMU387.DXE
+  are copyright 1995 Charles W Sandmann
   (sandmann@clio.rice.edu), 102 Hurst Ct, Destrehan, LA 70047.
   Sources and binary updates are available at
-  ftp://ftp.coast.net//pub/systems/pc/simtel/vendors/djgpp/v2misc/
+  ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/
 
 
 OVERVIEW
@@ -62,19 +64,21 @@ REQUIREMENTS
 
   Linking with C functions (the "-custom" option to camlc and camlmktop)
   requires the DJGPP compiler version 2, freely available at
-  ftp://ftp.coast.net//pub/systems/pc/simtel/vendors/djgpp/
+  ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/
 
 
 INSTALLATION
 
-  See the file INSTALL.TXT for installation instructions.
+  Installation is normally fully automatic from the self-extracting
+  archive. In case of problems after installation, see the file
+  INSTALL.TXT for more information.
 
 
 DOCUMENTATION
 
   The Caml Light reference manual is included in this distribution,
-  in Windows Help format and in plain text. Other formats as well as a
-  tutorial ("Functional programming in Caml Light", by Michel Mauny)
+  in Windows Help format. Other formats as well as a tutorial
+  ("Functional programming in Caml Light", by Michel Mauny)
   are available from archive site from which you obtained Caml Light.
   They can also be obtained by anonymous FTP from
   ftp.inria.fr as described below, or from the Web site.
@@ -106,12 +110,12 @@ KEEPING IN TOUCH WITH THE CAML COMMUNITY:
 
   Messages to the list should be sent to:
 
-                caml-list@pauillac.inria.fr
+                caml-list@inria.fr
 
   If you wish to subscribe to this list, please send a message
   (including your email address) to:
 
-                caml-list-request@pauillac.inria.fr
+                caml-list-request@inria.fr
 
 
 BUG REPORTS AND USER FEEDBACK:
