@@ -87,7 +87,7 @@ value is_digit_int(nat, ofs)	/* ML */
 {
   Check1 (nat, ofs, "is_digit_int");
 
-  return Val_bool(BnDoesDigitFitInWord(Bignum_val(nat), Long_val(ofs)));
+  return Val_bool(Bignum_val(nat)[Long_val(ofs)] >> BN_WORD_SIZE == 0);
 }
 
 value is_digit_zero(nat, ofs)	/* ML */
