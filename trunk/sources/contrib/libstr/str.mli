@@ -8,7 +8,7 @@ type regexp;;
 value regexp: string -> regexp
         (* Compile a regular expression. The syntax for regular expressions
            is the same as in Gnu Emacs. The special characters are
-           [$^.*+?[]\]. The following constructs are recognized:
+           [\$^.*+?[]]. The following constructs are recognized:
 -          [.     ] matches any character except newline
 -          [*     ] (postfix) matches the previous expression zero, one or
                     several times
