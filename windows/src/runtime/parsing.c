@@ -159,6 +159,9 @@ value parse_engine(tables, env, cmd, arg) /* ML */
     modify(&Field(env->v_stack, sp), env->lval);
     Field(env->symb_start_stack, sp) = env->symb_start;
     Field(env->symb_end_stack, sp) = env->symb_end;
+    Trace(printf("Symb_start = %d, symb_end = %d\n",
+                 Int_val(Field(env->symb_start_stack, sp)),
+                 Int_val(Field(env->symb_end_stack, sp))));
     env->curr_char = Val_int(-1);
     goto loop;
 
@@ -203,6 +206,9 @@ value parse_engine(tables, env, cmd, arg) /* ML */
       /* This is an epsilon production. Take symb_start equal to symb_end. */
       Field(env->symb_start_stack, sp) = Field(env->symb_end_stack, asp);
     }
+    Trace(printf("Symb_start = %d, symb_end = %d\n",
+                 Int_val(Field(env->symb_start_stack, sp)),
+                 Int_val(Field(env->symb_end_stack, sp))));
     goto loop;
   }
 }
