@@ -95,6 +95,9 @@ value gr_wait_event(eventlist)
         key = gr_queue[gr_head];
         gr_head++;
         if (gr_head >= SIZE_QUEUE) gr_head = 0;
+        mouse_x = event.xkey.x;
+        mouse_y = event.xkey.y;
+        button = event.xkey.state & Button1Mask;
         break;
       default:
         gr_handle_simple_event(&event);
