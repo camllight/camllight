@@ -14,7 +14,7 @@ CAMLTKDIR=../lib
 SUPPORTDIR=../libsupport
 UNIXDIR=../../libunix
 
-TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) \
+TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
 	   $(SUPPORTDIR)/camltk.o -lcaml -ltk -ltcl -lX11
 
 CAMLDEP=../../../src/tools/camldep
