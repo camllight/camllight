@@ -32,11 +32,12 @@ let do_code may_free code entrypoint len =
           ()
       end;
       open_hovbox 0;
-      print_string "Uncaught exception: ";
+      print_string (interntl__translate "Uncaught exception: ");
       begin try
         print_value (obj__repr x) builtins__type_exn
       with _ ->
-        print_string "<Internal error while printing the exception>"
+        print_string
+          (interntl__translate "<Internal error while printing the exception>")
       end;
       print_newline();
       raise Toplevel
