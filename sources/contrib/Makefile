@@ -9,7 +9,7 @@ PACKAGES=libunix libgraph debugger libnum libstr mletags \
 
 # Which C compiler to use.
 # Should be the same compiler used to compile the main system (../src).
-CC=cc
+CC=gcc
 
 # Any additional options to $(CC).
 OPTS=
