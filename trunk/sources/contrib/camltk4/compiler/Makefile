@@ -19,10 +19,10 @@ parser.ml parser.mli: parser.mly
 	$(CAMLYACC) -v parser.mly
 
 clean : 
-	rm -f *.z*  parser.ml lexer.ml tkcompiler
+	rm -f *.z*  parser.mli parser.ml lexer.ml tkcompiler
 
 scratch :
-	rm -f *.z*  parser.ml lexer.ml tkcompiler
+	rm -f *.z*  parser.mli parser.ml lexer.ml tkcompiler
 
 install: 
 	cp tkcompiler $(BINDIR)
