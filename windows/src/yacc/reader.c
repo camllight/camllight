@@ -1620,7 +1620,7 @@ make_goal()
       pitem[nitems++] = bc;
       pitem[nitems++] = bp;
       fprintf(entry_file,
-              "let %s = yyparse yytables %d;;\n",
+              "let %s lexfun lexbuf = yyparse yytables %d lexfun lexbuf;;\n",
               bp->name, bp->entry);
       fprintf(interface_file,
               "value %s :\n  (lexing__lexbuf  -> token) -> lexing__lexbuf -> %s;;\n",
