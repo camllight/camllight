@@ -42,6 +42,8 @@ static void emit_compact(chan, v)
 #endif
     } else
       output_number(chan, CODE_INT32, n, 32);
+  } else if (!Is_atom(v) && !Is_young(v) && !Is_in_heap(v)) {
+    invalid_argument("output_compact_value: abstract value");
   } else {
     header_t hd = Hd_val(v);
     tag_t tag = Tag_hd(hd);

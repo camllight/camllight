@@ -64,6 +64,9 @@ static byteoffset_t emit(v)
   asize_t end_pos;
 
   if (Is_long(v)) return (byteoffset_t) v;
+  if (!Is_atom(v) && !Is_young(v) && !Is_in_heap(v)) {
+    invalid_argument("output_value: abstract value");
+  }
   size = Wosize_val(v);
   if (size == 0) return (Tag_val(v) << 2) + 2;
   if (2 * extern_table_used >= extern_table_size) resize_extern_table();
