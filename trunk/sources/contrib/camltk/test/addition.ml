@@ -2,7 +2,7 @@
 
 let main () =
   let top = OpenTk ()  in
-  (* The widgets *)
+  (* The widgets. They all have "top" as parent widget. *)
   let en1 = entry__create top [TextWidth 6; Relief Sunken] in
   let lab1 = label__create top [Text "plus"] in
   let en2 = entry__create top [TextWidth 6 ; Relief Sunken] in
@@ -24,10 +24,14 @@ let main () =
       	Failure "int_of_string" ->
           label__configure result_display [Text "error"]
   in
+  (* Set the callbacks *)
   entry__configure en1 [ScrollCommand (get_and_refresh (en1,n1)) ];
   entry__configure en2 [ScrollCommand (get_and_refresh (en2,n2)) ];
+  (* Map the widgets *)
   pack [en1;lab1;en2;lab2;result_display] [];
+  (* Make the window resizable *)
   wm__minsize_set top 1 1;
+  (* Start interaction (event-driven program) *)
   MainLoop ()
 ;;
 

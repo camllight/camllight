@@ -1,14 +1,16 @@
-#open "tk";;
-(* Initialisation of the interface *)
-let top = OpenTk ();;
+#open "tk";;            (* Make interface functions available *)
+let top = OpenTk ();;   (* Initialisation of the interface *)
 (* top is now the toplevel widget *)
+
 (* Widget initialisation *)
 let b = button__create top 
           [Text "foobar"; 
-	   Command (function () -> print_string "foobar\n"; flush stdout)]
+           Command (function () -> 
+                      print_string "foobar"; 
+                      print_newline(); 
+                      flush stdout)]
 ;;
-pack [b][]
-;;
-(* Mainloop for events *)
-MainLoop()
-;;
+(* b exists but is not yet visible *)
+pack [b][] ;;           (* Make b visible *)
+MainLoop() ;;           (* User interaction*)
+(* You can quit this program by deleting its main window *)
