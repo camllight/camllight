@@ -78,7 +78,7 @@ executable, provided it is given extension ".EXE". Hence, if the
 output file is named "caml_out.exe", you can execute it with the
 command
 \begin{alltt}
-        caml.out \nth{arg}{1} \nth{arg}{2} \ldots \nth{arg}{n}
+        caml_out \nth{arg}{1} \nth{arg}{2} \ldots \nth{arg}{n}
 \end{alltt}
 Actually, the produced file "caml_out.exe" is a tiny executable
 file prepended to the bytecode file. The executable simply runs the
@@ -210,6 +210,15 @@ profiler "camlpro" in chapter~\ref{c:profiler}.
 
 \item["-v"]
 Print the version number of the compiler.
+
+\item["-W"]
+Print extra warning messages for the following events:
+\begin{itemize}
+\item A "#open" directive is useless (no identifier in the opened
+module is ever referenced).
+\item A variable name in a pattern matching is capitalized (often
+corresponds to a misspelled constant constructor).
+\end{itemize}
 
 \end{options}
 
@@ -344,7 +353,7 @@ changes. To check that the "Makefile" contains the right dependencies,
 remove all ".zi" files and rebuild the whole program; if no ``Cannot
 find file'' error appears, you're all set.
 
-\item[The type inferred for the value \var{name},
+\item[The type inferred for \var{name},
 	that is, \var{t},
 	contains type variables that cannot be generalized]
 Type variables ("'a", "'b", \ldots) in a type \var{t} can be in either
