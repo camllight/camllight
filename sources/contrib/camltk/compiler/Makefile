@@ -1,11 +1,16 @@
-## Configuration
-include ../Makefile.config
+CAMLC=camlc
+CAMLCOMP=$(CAMLC) -c
+CPP=/lib/cpp -P -Dunix
+COMPFLAGS=-O fast -g
+LINKFLAGS=-g
+CAMLYACC=camlyacc -v
+CAMLLEX=camllex
+CAMLDEP=../../../src/tools/camldep
 
 OBJS=tsort.zo tables.zo lexer.zo parser.zo  compile.zo intf.zo maincompile.zo
 
 tkcompiler : $(OBJS)
-	camlc -g -o tkcompiler $(OBJS)
-#	camldbgc -g -o tkcompiler $(OBJS)
+	$(CAMLC) $(LINKFLAGS) -o tkcompiler $(OBJS)
 
 lexer.ml: lexer.mll
 	$(CAMLLEX) lexer.mll
@@ -20,7 +25,7 @@ scratch :
 	rm -f *.z*  parser.ml lexer.ml tkcompiler
 
 install: 
-	cp -p tkcompiler $(INSTALLDIR)
+	cp -p tkcompiler $(BINDIR)
 
 .SUFFIXES :
 .SUFFIXES : .mli .ml .zi .zo .mlp
