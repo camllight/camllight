@@ -24,6 +24,7 @@ protocol2.zo: protocol2.ml
 
 camltk.o : camltk.c
 	$(CC) -g -c -I../../../src/runtime \
+		 -I$(X11_INCLUDES) \
 		 -I$(TCLINCLDIR) \
 		 -I$(TKINCLDIR) \
 		 camltk.c
