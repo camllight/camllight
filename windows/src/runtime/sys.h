@@ -3,7 +3,9 @@
 
 #include "misc.h"
 
-void sys_error P((char *));
+#define SYS_ERROR_NO_ARG Val_int(0)
+
+void sys_error P((value));
 void raise_pending_signal P((void));
 void sys_init P((char **));
 value sys_exit P((value));
