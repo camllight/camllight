@@ -841,7 +841,8 @@ widget toplevel {
 
 ################### Various functions
 function ()    destroy "destroy" (widget)
-function (int) dialog  "tk_dialog" (widget, string, string, string, int, string list)
+# use Predefined "" for empty bitmap
+function (int) dialog  "tk_dialog" (widget, string, string, Bitmap, int, string list)
 	
 ##### focus variations
 module focus {
