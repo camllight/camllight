@@ -1,4 +1,0 @@
-while (<>) {
-  last if /^};/;
-  print $_ if s/^  /  &&lbl_/;
-}
