@@ -256,6 +256,8 @@ let rec translate_expr env =
   | Zparser case_list ->
       let (stream_type, _) = types__filter_arrow expr.e_typ in
       translate_parser translate_expr expr.e_loc env case_list stream_type
+  | Zwhen(e1,e2) ->
+      guard_expression (transl e1) (transl e2)
   in transl
 
 and translate_match loc env failure_code casel =

@@ -5,6 +5,7 @@
 #open "globals";;
 #open "location";;
 #open "syntax";;
+#open "lambda";;
 
 let make_pat desc = {p_desc = desc; p_loc = no_location; p_typ = no_type};;
 
@@ -248,7 +249,11 @@ let rec satisfiable pss qs = match pss with
 
 
 let rec make_matrix pses = match pses with
-  (ps,_)::pses -> ps::make_matrix pses
+  ((ps,_) as clause)::pses ->
+     if has_guard clause then
+       make_matrix pses
+     else
+       ps::make_matrix pses
 | []           -> []
 ;;
 
@@ -305,7 +310,9 @@ let check_unused casel =
   let prefs =   
     list_it
       (fun ((ps,_) as clause) r ->
-         ([],clause)::map (fun (pss,clause) -> ps::pss,clause) r)
+         if has_guard clause then ([],clause)::r
+         else
+           ([],clause)::map (fun (pss,clause) -> ps::pss,clause) r)
       casel [] in
   let rec check_rec l   = match l with
     (pss,((qs,_) as clause)) :: l ->       
