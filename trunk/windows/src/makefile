@@ -1,14 +1,15 @@
-TOPDIR=C:\CAML7
+TOPDIR=C:\caml
 BINDIR=$(TOPDIR)\bin
 LIBDIR=$(TOPDIR)\lib
 EXDIR =$(TOPDIR)\examples
-SRCDIR=$(TOPDIR)\src
-DOCDIR =$(TOPDIR)\doc
+EXDIR_SLASH=$(EXDIR:\=/)
+INFODIR =$(TOPDIR)\info
+DOCDIR=$(TOPDIR)\doc
 
-GUIDIR	 = $(TOPDIR)\src\windows\gui
-APPLI_DIR= $(GUIDIR)\WinRelease
 TXTFILES = copyrght.txt readme.txt install.txt
 
+DJGPP=C:/djgpp/bin
+DJGPPFILES=$(DJGPP)/cwsdpmi.exe $(DJGPP)/emu387.dxe
 	
 all: world gui
 
@@ -77,8 +78,6 @@ compare:
 
 # Install the Caml Light system
 install:
-	mkdir $(LIBDIR)
-	mkdir $(BINDIR)
 	cd runtime
 	nmake BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
 	cd ..\launch
@@ -99,6 +98,14 @@ install:
 	nmake BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
 	cd ..
 	cp camlmsgs.txt $(LIBDIR)
+	cp windows\gui\WinRelease\Camlwin.exe $(TOPDIR)\Camlwin.exe
+	cd ..
+	cp camlwin.ini $(TXTFILES) $(TOPDIR)
+	xcopy /e /s /i examples $(EXDIR)
+	rm -rf $(EXDIR_SLASH)/CVS $(EXDIR_SLASH)/*/CVS
+	xcopy /e /s /i info $(INFODIR)
+	rm -rf $(INFODIR)/CVS
+	cp $(DJGPPFILES) $(BINDIR)
 
 # Remove the Caml Light system after installation
 uninstall:
@@ -156,17 +163,6 @@ gui:
 
 # Make the distribution:
 distrib:
-	cd $(TOPDIR)
-	rm -rf CAML
-	md CAML
-	copy $(APPLI_DIR)\CAMLWIN.EXE CAML
-	cp camlwin.ini CAML 
-	cp $(TXTFILES) CAML
-	xcopy /e /s /i $(BINDIR) CAML\BIN
-	xcopy /e /s /i $(LIBDIR) CAML\LIB
-	xcopy /e /s /i $(EXDIR) CAML\EXAMPLES
-	xcopy /e /s /i $(DOCDIR) CAML\DOC
+	cd \
 	rm -f cl71win.zip
-	pkzip -r -P -ex cl71win.zip CAML\*.*
-	rm -rf CAML
-
+	pkzip -r -P -ex cl71win.zip caml\*.*
