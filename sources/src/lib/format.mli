@@ -2,8 +2,19 @@
 
 (* This module implements a pretty-printing facility to format text
    within ``pretty-printing boxes''. The pretty-printer breaks lines
-   at specified break hints, and indents lines according to the box structure.
-*)
+   at specified break hints, and indents lines according to the box
+   structure. *)
+
+(* Rule of thumb for casual users:
+   use simple boxes (as obtained by [open_box 0]);
+   use simple break hints (as obtained by [print_cut ()] or by
+   [print_space ()] that ouputs a space);
+   once a box is opened, display material with basic printing
+   functions (e. g. [print_int] and [print_string]);
+   when the material for a box has been printed, call [close_box ()] to
+   close the box;
+   at the end of your routine, evaluate [print_newline ()] to close
+   all remaining boxes and flush the pretty-printer. *) 
 
 (* The behaviour of pretty-printing commands is unspecified
    if there is no opened pretty-printing box. Each box opened via
@@ -19,6 +30,10 @@
 #open "io";;
 
 (*** Boxes *)
+value open_hbox : unit -> unit;;
+        (* [open_hbox ()] opens a new pretty-printing box.
+           This box is ``horizontal'': the line is not split in this box
+           (new lines may still occur inside boxes nested deeper). *)
 value open_vbox : int -> unit;;
         (* [open_vbox d] opens a new pretty-printing box
            with offset [d]. 
@@ -26,10 +41,6 @@ value open_vbox : int -> unit;;
            box leads to a new line.
            When a new line is printed in the box, [d] is added to the
            current indentation. *)
-value open_hbox : unit -> unit;;
-        (* [open_hbox ()] opens a new pretty-printing box.
-           This box is ``horizontal'': the line is not split in this box
-           (new lines may still occur inside boxes nested deeper). *)
 value open_hvbox : int -> unit;;
         (* [open_hovbox d] opens a new pretty-printing box
            with offset [d]. 
@@ -44,6 +55,17 @@ value open_hovbox : int -> unit;;
            This box is ``horizontal or vertical'': break hints
            inside this box may lead to a new line, if there is no more room
            on the line to print the remainder of the box.
+           When a new line is printed in the box, [d] is added to the
+           current indentation. *)
+value open_box : int -> unit;;
+        (* [open_box d] opens a new pretty-printing box
+           with offset [d]. 
+           This box is the general purpose pretty-printing box.
+           Material in this box is displayed ``horizontal or vertical'':
+           break hints inside the box may lead to a new line, if there
+           is no more room on the line to print the remainder of the box,
+           or if a new line may lead to a new indentation
+           (demonstrating the indentation of the box).
            When a new line is printed in the box, [d] is added to the
            current indentation. *)
 value close_box : unit -> unit;;
@@ -91,8 +113,9 @@ value print_newline : unit -> unit;;
         (* Equivalent to [print_flush] followed by a new line. *)
 
 value print_if_newline : unit -> unit;;
-        (* If the preceding line has not been split, the next
-           formatting command is ignored. *)
+        (* Execute the next formatting command if the preceding line
+           has just been split. Otherwise, ignore the next formatting
+           command. *)
 
 (*** Tabulations *)
 value open_tbox : unit -> unit;;
@@ -120,7 +143,8 @@ value set_margin : int -> unit;;
         (* [set_margin d] sets the value of the right margin
            to [d] (in characters): this value is used to detect line
            overflows that leads to split lines.
-           Nothing happens if [d] is smaller than 2 or bigger than 999999999. *)
+           Nothing happens if [d] is smaller than 2 or
+           bigger than 999999999. *)
 value get_margin : unit -> int;;
         (* Return the position of the right margin. *)
 
@@ -130,7 +154,8 @@ value set_max_indent : int -> unit;;
            indentation limit to [d] (in characters):
            once this limit is reached, boxes are rejected to the left,
            if they do not fit on the current line.
-           Nothing happens if [d] is smaller than 2 or bigger than 999999999. *)
+           Nothing happens if [d] is smaller than 2 or
+           bigger than 999999999. *)
 value get_max_indent : unit -> int;;
         (* Return the value of the maximum indentation limit (in
            characters). *)
@@ -141,7 +166,7 @@ value set_max_boxes : int -> unit;;
            of boxes simultaneously opened.
            Material inside boxes nested deeper is printed as an
            ellipsis (more precisely as the text returned by
-           [get_ellipsis_text]).
+           [get_ellipsis_text ()]).
            Nothing happens if [max] is not greater than 1. *)
 value get_max_boxes : unit -> int;;
         (* Return the maximum number of boxes allowed before ellipsis. *)
@@ -170,3 +195,60 @@ value get_formatter_output_functions :
         unit -> (string -> int -> int -> unit) * (unit -> unit);;
         (* Return the current output functions of the pretty-printer. *)
 
+type formatter;;
+        (* Abstract data type corresponding to a pretty-printer and
+           all its machinery.
+           Defining new pretty-printers permits the output of
+           material in parallel on several channels.
+           Parameters of the pretty-printer are local to the prety-printer:
+           margin, maximum indentation limit, maximum number of boxes
+           simultaneously opened, ellipsis, and so on, are specific to
+           each pretty-printer and may be fixed independantly. *)
+
+value std_formatter : formatter;;
+        (* The standard formatter used by the formatting functions
+           above. *)
+
+value make_formatter :
+        (string -> int -> int -> unit) -> (unit -> unit) -> formatter;;
+        (* Return a new formatter that writes according to the
+           output functions given as argument. *)
+
+value pp_open_hbox : formatter -> unit -> unit;;
+value pp_open_vbox : formatter -> int -> unit;;
+value pp_open_hvbox : formatter -> int -> unit;;
+value pp_open_hovbox : formatter -> int -> unit;;
+value pp_open_box : formatter -> int -> unit;;
+value pp_close_box : formatter -> unit -> unit;;
+value pp_print_string : formatter -> string -> unit;;
+value pp_print_as : formatter -> int -> string -> unit;;
+value pp_print_int : formatter -> int -> unit;;
+value pp_print_float : formatter -> float -> unit;;
+value pp_print_char : formatter -> char -> unit;;
+value pp_print_bool : formatter -> bool -> unit;;
+value pp_print_break : formatter -> int * int -> unit;;
+value pp_print_cut : formatter -> unit -> unit;;
+value pp_print_space : formatter -> unit -> unit;;
+value pp_force_newline : formatter -> unit -> unit;;
+value pp_print_flush : formatter -> unit -> unit;;
+value pp_print_newline : formatter -> unit -> unit;;
+value pp_print_if_newline : formatter -> unit -> unit;;
+value pp_open_tbox : formatter -> unit -> unit;;
+value pp_close_tbox : formatter -> unit -> unit;;
+value pp_print_tbreak : formatter -> int * int -> unit;;
+value pp_set_tab : formatter -> unit -> unit;;
+value pp_print_tab : formatter -> unit -> unit;;
+value pp_set_margin : formatter -> int -> unit;;
+value pp_get_margin : formatter -> unit -> int;;
+value pp_set_max_indent : formatter -> int -> unit;;
+value pp_get_max_indent : formatter -> unit -> int;;
+value pp_set_max_boxes : formatter -> int -> unit;;
+value pp_get_max_boxes : formatter -> unit -> int;;
+value pp_set_ellipsis_text : formatter -> string -> unit;;
+value pp_get_ellipsis_text : formatter -> unit -> string;;
+value pp_set_formatter_output_channel : formatter -> out_channel -> unit;;
+value pp_set_formatter_output_functions : formatter ->
+        (string -> int -> int -> unit) -> (unit -> unit) -> unit;;
+value pp_get_formatter_output_functions :
+        formatter -> unit -> (string -> int -> int -> unit) * (unit -> unit);;
+        (* The basic functions to use with formatters. *)
