@@ -16,14 +16,16 @@ typedef struct {
   char *next_bp;   /* Pointer to the first byte of the next block. */
 } block;
 
+/* The sentinel can be located anywhere in memory, but it must not be
+   adjacent to any heap object. */
 static struct {
   value filler1; /* Make sure the sentinel is never adjacent to any block. */
   header_t h;
-  value first_hp;
+  value first_bp;
   value filler2; /* Make sure the sentinel is never adjacent to any block. */
 } sentinel = {0, Make_header (0, 0, Blue), NULL, 0};
 
-#define Fl_head ((char *) (&(sentinel.first_hp)))
+#define Fl_head ((char *) (&(sentinel.first_bp)))
 static char *fl_prev = Fl_head;  /* Current allocation pointer. */
 static char *fl_last = NULL;     /* Last block in the list.  Only valid
                                     just after fl_allocate returned NULL. */
@@ -58,8 +60,8 @@ void fl_verify ()
    0. The free block has the desired size.  Detach the block from the
       free-list and return it.
    1. The free block is 1 word longer than the desired size.  Detach
-      the block from the free list (the remaining word cannot be linked),
-      make an empty block (header only), and return the rest.
+      the block from the free list.  The remaining word cannot be linked:
+      turn it into an empty block (header only), and return the rest.
    2. The free block is big enough.  Split it in two and return the right
       block.
    In all cases, the allocated block is right-justified in the free block:
@@ -131,8 +133,8 @@ void fl_init_merge ()
   fl_merge = Fl_head;
 }
 
-/* [fl_merge_block] returns the hp of the next block after bp, because
-   merging blocks may change that. */
+/* [fl_merge_block] returns the head pointer of the next block after [bp],
+   because merging blocks may change the size of [bp]. */
 char *fl_merge_block (bp)
     char *bp;
 {
@@ -225,5 +227,9 @@ void fl_add_block (bp)
                                             Assert (cur > bp || cur == NULL);
     Next (bp) = cur;
     Next (prev) = bp;
+    /* When inserting a block between fl_merge and gc_sweep_hp, we must
+       advance fl_merge to the new block, so that fl_merge is always the
+       last free-list block before gc_sweep_hp. */
+    if (prev == fl_merge && bp <= gc_sweep_hp) fl_merge = bp;
   }
 }

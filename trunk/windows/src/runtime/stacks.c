@@ -44,7 +44,7 @@ static void realloc_arg_stack()
   if (size >= Max_arg_stack_size)
     raise_out_of_memory();
   size *= 2;
-  gc_message ("Growing argument stack to %ldk.\n",
+  gc_message ("Growing argument stack to %ldk\n",
 	      (long) size * sizeof(value) / 1024);
   new_low = (value *) stat_alloc(size * sizeof(value));
   new_high = new_low + size;
@@ -78,7 +78,7 @@ static void realloc_ret_stack()
   if (size >= Max_ret_stack_size)
     raise_out_of_memory();
   size *= 2;
-  gc_message ("Growing return stack to %ldk.\n",
+  gc_message ("Growing return stack to %ldk\n",
 	      (long) size * sizeof(value) / 1024);
   new_low = (value *) stat_alloc(size * sizeof(value));
   new_high = new_low + size;

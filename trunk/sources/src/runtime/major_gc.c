@@ -48,12 +48,12 @@ static void realloc_gray_vals ()
 
   Assert (gray_vals_cur == gray_vals_end);
   if (gray_vals_size < stat_heap_size / 128){
-    gc_message ("Growing gray_vals to %ldk.\n",
+    gc_message ("Growing gray_vals to %ldk\n",
 		(long) gray_vals_size * sizeof (value) / 512);
     new = (value *) realloc ((char *) gray_vals,
                              2 * gray_vals_size * sizeof (value));
     if (new == NULL){
-      gc_message ("No room.\n", 0);
+      gc_message ("No room for growing gray_vals\n", 0);
       gray_vals_cur = gray_vals;
       heap_is_pure = 0;
     }else{
@@ -157,7 +157,6 @@ static void sweep_slice (work)
   while (work > 0){
     if (gc_sweep_hp < limit){
       hp = gc_sweep_hp;
-      /* [fl_merge_block] might erase the header, so we must read it now. */
       hd = Hd_hp (hp);
       work -= Whsize_hd (hd);
       gc_sweep_hp += Bhsize_hd (hd);
@@ -169,7 +168,7 @@ static void sweep_slice (work)
 	gc_sweep_hp = fl_merge_block (Bp_hp (hp));
 	break;
       case Gray:
-	Assert (0);
+	Assert (0);     /* Fall through to Black when not in debug mode. */
       case Black:
 	Hd_hp (hp) = Whitehd_hd (hd);
 	break;

@@ -199,15 +199,15 @@ void init_gc (minor_size, major_incr, percent_fr, verb)
      int verb;
 {
 #ifdef DEBUG
-  gc_message ("Debug mode.\n", 0);
+  gc_message ("*** camlrun: debug mode ***\n", 0);
 #endif
   verb_gc = verb;
-  set_minor_heap_size (norm_minsize (Bsize_wsize (minor_size)));
-  major_heap_increment = norm_heapincr (Bsize_wsize (major_incr));
+  set_minor_heap_size (Bsize_wsize (norm_minsize (minor_size)));
+  major_heap_increment = Bsize_wsize (norm_heapincr (major_incr));
   percent_free = norm_pfree (percent_fr);
   init_major_heap (major_heap_increment);
   init_c_roots ();
-  gc_message ("Initial space overhead: %d\n", percent_free);
+  gc_message ("Initial space overhead: %d%%\n", percent_free);
   gc_message ("Initial heap increment: %ldk\n", major_heap_increment / 1024);
   gc_message ("Initial minor heap size: %ldk\n", minor_heap_size / 1024);
 }
