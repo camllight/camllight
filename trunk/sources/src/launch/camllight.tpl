@@ -2,7 +2,7 @@
 
 stdlib=LIBDIR
 includes=""
-options="-W"
+options=""
 
 case "$LANG" in
   "") ;;
@@ -27,8 +27,6 @@ while : ; do
     -lang)
       options="$options -lang $2"
       shift;;
-    -W)
-      options="$options -W";;
     -*)
       echo "Unknown option \"$1\", ignored" >&2;;
     *)
