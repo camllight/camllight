@@ -24,7 +24,7 @@ all:
 	cd lib; $(MAKE) $(LIBMKF) depend; $(MAKE) $(LIBMKF) 
 	cd browser; $(MAKE) $(MKF)
 
-EXDIRS=test tktop browser
+EXDIRS=test browser
 
 examples:
 	for d in $(EXDIRS); do \
