@@ -76,14 +76,44 @@ bytecode files.) Hence, if you have installed camlrun in a
 non-standard directory, be careful to add it to the PATH variable
 before running camlc or camllight.
 
-7- The contrib/ directory contains libraries (Unix system calls,
-X-windows interface, portable graphics, arbitrary-precision rational
-arithmetic) and tools (TeX interface, "tags" utility) that may be of
-interest to you.  Look into the subdirectories of contrib/, and follow
-the installation instructions there.
+7- Now that the Caml Light compiler is installed, you can compile the
+tools and libraries contained in the contrib/ directory: source-level
+replay debugger, X-windows user interface toolkit, "tags" program for
+Emacs, arbitrary-precision rational arithmetic, Unix system calls
+interface, etc. The file contrib/INDEX gives a short description of
+the packages contained in contrib/ (what they do, what they require).
+The subdirectories of contrib/ also contain more information in README
+and INSTALL files.  Read the descriptions and choose which packages
+you need.
+
+8- Edit the files contrib/Makefile and contrib/Makefile.conf to
+indicate which packages to install, which C compiler to use, where to
+find external libraries on your system, and where to install files.
+It is recommended to use the same C compiler used to compile the core
+system (the one specified in src/Makefile).
+
+9- Make sure you have not erased any of the files in src/ that have
+been generated during the compilation of the core system.  If you
+have, recompile the core system (step 3- above).
+
+10- From the contrib/ subdirectory, do:
+
+        make all
+
+or, better,
+
+        make all > log.all 2>&1     # in sh
+        make all >& log.all         # in csh
+
+11- You can now install the packages.  From the contrib/ directory,
+become superuser and do "make install".
+
+12- Installation is complete. Time to clean up.
+
+        (cd src; make clean); (cd contrib; make clean)
 
 
-IF SOMETHING GOES WRONG.
+IF SOMETHING GOES WRONG:
 
 Check the files m.h and s.h in config/. Wrong endianness or alignment
 constraints in m.h will immediately crash the bytecode interpreter.
@@ -99,19 +129,25 @@ can uncover bugs in optimizing compilers. Alternatively, try another C
 compiler (e.g. gcc instead of the vendor-supplied cc).
 
 You can also build a debug version of the runtime system. Go to the
-src/runtime/ directory and do "make debug". Then, copy camlrund to
+src/runtime/ directory and do "make camlrund". Then, copy camlrund to
 ../camlrun, and try again. This version of the runtime system contains
 lots of assertions and sanity checks that could help you pinpoint the
 problem.
 
+If something goes wrong during the compilation of one of the packages
+in contrib/, check the README and INSTALL files in the corresponding
+directory for hints. If you really can't get one of the packages to
+compile, remove it from the PACKAGES variable in contrib/Makefile and
+go ahead with the others.
 
-COMMON PROBLEMS
 
-* camlc or camllight complain that camlrun cannot be found. See point
-6- in the installation instructions.
+COMMON PROBLEMS:
+
+* camlc or camllight complain that camlrun cannot be found. Make sure
+that the directory containing camlrun is in your PATH (see point 6- above).
 
 * The Makefiles assume that make execute commands by calling /bin/sh. They
-won't work if /bin/csh is called instead. You might have to unset the SHELL
+won't work if /bin/csh is called instead. You may have to unset the SHELL
 environment variable, or set it to /bin/sh.
 
 * You can safely ignore the following warnings:
@@ -123,20 +159,31 @@ environment variable, or set it to /bin/sh.
   correct ANSI C.
 
 
-MACHINE-SPECIFIC HINTS 
+MACHINE-SPECIFIC HINTS:
 
-* On MIPS machines from MIPS Co. Add "-systype bsd43" to OPTS.
+* On HP 9000/700 machines under HP/UX 9.  Some versions of cc are
+unable to compile correctly the runtime system (wrong code is
+generated for (x - y) where x is a pointer and y an integer). This
+causes "make world" to crash when compiling in src/lib.  Fix: use
+another C compiler (gcc works fine).  Another option is to apply the
+patch in file HPUX9.patch, which attempts to work around the bug
+in cc.  Seems to work sometimes, but use at your own risks.
+
+* On MIPS machines from MIPS Co.  Add "-systype bsd43" to OPTS.
 Also, some versions of the cc compiler are reportedly unable to
 compile src/runtime/interp.c ("as1: internal: unexpected opcode bcond06").
-Either compile without optimizations (remove -O from CFLAGS in
-src/runtime/Makefile) or use gcc.
+Either compile without optimizations (remove -O from OPTS in
+src/Makefile) or use gcc.
 
-* On some Next machines: cc pretends to be gcc but is not quite gcc.
+* On some Next machines. cc pretends to be gcc but is not quite gcc.
 If the compilation of src/runtime/interp.c causes syntax errors, insert
-#undef __GNUC__ at the very beginning of src/runtime/interp.c.
+#undef __GNUC__ at the very beginning of src/runtime/misc.h.
 
 * On SGI Indigo under IRIX 4.0. "ar" emits some warnings about multiple
 definitions of global variables. Ignore them; that's just ANSI pedantism.
 
-* On Macintoshes under A/UX with gcc. You might have to add -D_SYSV_SOURCE
-to OPTS.
+* On Macintoshes under A/UX with gcc. It may be necessary to add
+-D_SYSV_SOURCE to OPTS.
+
+
+
