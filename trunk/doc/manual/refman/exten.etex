@@ -238,11 +238,6 @@ The syntax of some constructs has been slightly relaxed:
 
 \begin{itemize}
 
-\item The symbol ":=" can be used instead of "<-" in assignments to
-record fields, vector elements, or string characters. For instance,
-@expr_1 '.(' expr_2 ')' ':=' expr_3@ is parsed as
-@'vect_assign' expr_1 expr_2 expr_3@. 
-
 \item An optional ";" may terminate a sequence, list expression, or
 record expression. For instance, @'begin' e_1 ';' e_2 ';' 'end'@ is
 syntactically correct and synonymous with @'begin' e_1 ';' e_2 'end'@.
@@ -265,7 +260,7 @@ class:
 \begin{syntax}
 infix-symbol:
         ('=' || '<' || '>' || '@' || '^' || '|' || '&' || '~' ||
-         '+' || '-' || '*' || '/' || '%') { operator-char }
+         '+' || '-' || '*' || '/' || '$' || '%') { operator-char }
 ;
 prefix-symbol:
         ('!' || '?') { operator-char }
