@@ -1,10 +1,11 @@
 # Configuration
 CPP=/lib/cpp -P
-CAMLCOMP=camlc -c
+CAMLC=camlc
+CAMLCOMP=$(CAMLC) -c
 CAMLLEX=camllex
 CAMLYACC=camlyacc
 
-COMPFLAGS=-O fast
+COMPFLAGS=-W -O fast
 LINKFLAGS=-g
 
 OBJS=lexer.zo parser.zo main.zo

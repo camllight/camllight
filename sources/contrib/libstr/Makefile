@@ -13,6 +13,8 @@ RANLIB=ranlib
 # Compilation options
 CFLAGS=-O -I$(REGEXLIB) -I../../src/runtime
 CAMLC=camlc
+CAMLCOMP=$(CAMLC) -c
+COMPFLAGS=-W
 REGEXLIB=regex-0.12
 COBJS=strstubs.o $(REGEXLIB)/regex.o
 
@@ -43,10 +45,10 @@ install:
 .SUFFIXES: .ml .mli .zo .zi .tex
 
 .mli.zi:
-	$(CAMLC) -c $<
+	$(CAMLCOMP) $(COMPFLAGS) $<
 
 .ml.zo:
-	$(CAMLC) -c $<
+	$(CAMLCOMP) $(COMPFLAGS) $<
 
 depend:
 	mv Makefile Makefile.bak; \
