@@ -4,21 +4,10 @@
 #include "signals.h"
 #include "stacks.h"
 
-#ifdef __STDC__
-
-volatile int signal_is_pending = 0;
+Volatile int signal_is_pending = 0;
 int in_blocking_section = 0;
-volatile code_t signal_handler;
-volatile int signal_number;
-
-#else
-
-int signal_is_pending = 0;
-int in_blocking_section = 0;
-code_t signal_handler;
-int signal_number;
-
-#endif
+Volatile code_t signal_handler;
+Volatile int signal_number;
 
 void execute_signal()
 {

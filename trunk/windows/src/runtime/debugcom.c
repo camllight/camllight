@@ -132,10 +132,8 @@ void debugger_init(address)
     sock_addr.s_inet.sin_addr.s_addr = inet_addr(address);
     if (sock_addr.s_inet.sin_addr.s_addr == -1) {
       host = gethostbyname(address);
-      if (host == NULL) {
-        fprintf(stderr, "Unknown debugging host %s\n", address);
-        exit(2);
-      }
+      if (host == NULL)
+        fatal_error_arg("Unknown debugging host %s\n", address);
       bcopy(host->h_addr, &sock_addr.s_inet.sin_addr, host->h_length);
     }
     sock_addr.s_inet.sin_port = htons(atoi(port));

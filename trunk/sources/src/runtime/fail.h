@@ -26,11 +26,11 @@ struct longjmp_buffer {
 extern struct longjmp_buffer * external_raise;
 extern value exn_bucket;
 
-void mlraise P((value));
-void raise_with_arg P((tag_t tag, value arg));
-void raise_with_string P((tag_t tag, char * msg));
-void failwith P((char *));
-void invalid_argument P((char *));
-void raise_out_of_memory P((void));
+Noreturn mlraise P((value));
+Noreturn raise_with_arg P((tag_t tag, value arg));
+Noreturn raise_with_string P((tag_t tag, char * msg));
+Noreturn failwith P((char *));
+Noreturn invalid_argument P((char *));
+Noreturn raise_out_of_memory P((void));
 
 #endif /* _fail_ */

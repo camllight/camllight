@@ -2,29 +2,42 @@
 #include "config.h"
 #include "debugger.h"
 #include "misc.h"
+#ifdef HAS_UI
+#include "ui.h"
+#endif
 
 int verb_gc;
-#ifdef ANSI
-int volatile something_to_do = 0;
-#else
-int something_to_do = 0;
-#endif
+Volatile int something_to_do = 0;
 
 void gc_message (msg, arg)
      char *msg;
      unsigned long arg;
 {
   if (verb_gc){
+#ifdef HAS_UI
+    ui_gc_message(msg, arg);
+#else
     fprintf (stderr, msg, arg);
     fflush (stderr);
+#endif
   }
 }
 
-void fatal_error (s)
-     char *s;
+void fatal_error_arg (msg, arg)
+     char * msg, * arg;
 {
-  fprintf (stderr, "%s", s);
+#ifdef HAS_UI
+  ui_fatal_error(msg, arg);
+#else
+  fprintf (stderr, "%s", msg, arg);
   exit(2);
+#endif
+}
+
+void fatal_error (msg)
+     char * msg;
+{
+  fatal_error_arg(msg, NULL);
 }
 
 #ifdef USING_MEMMOV

@@ -43,9 +43,25 @@ char * error_message()
 
 #endif /* HAS_STRERROR */
 
-void sys_error()
+void sys_error(arg)
+     char * arg;
 {
-  raise_with_string(SYS_ERROR_EXN, error_message());
+  char * err = error_message();
+  int err_len = strlen(err);
+  int arg_len;
+  value str;
+
+  if (arg == NULL) {
+    str = alloc_string(err_len);
+    bcopy(err, &Byte(str, 0), err_len);
+  } else {
+    arg_len = strlen(arg);
+    str = alloc_string(arg_len + 2 + err_len);
+    bcopy(arg, &Byte(str, 0), arg_len);
+    bcopy(": ", &Byte(str, arg_len), 2);
+    bcopy(err, &Byte(str, arg_len + 2), err_len);
+  }
+  raise_with_arg(SYS_ERROR_EXN, str);
 }
 
 void sys_exit(retcode)          /* ML */
@@ -83,14 +99,14 @@ value sys_open(path, flags, perm) /* ML */
   ret = open(String_val(path), convert_flag_list(flags, sys_open_flags),
              Int_val(perm));
 #endif
-  if (ret == -1) sys_error();
+  if (ret == -1) sys_error(String_val(path));
   return Val_long(ret);
 }
 
 value sys_close(fd)             /* ML */
      value fd;
 {
-  if (close(Int_val(fd)) != 0) sys_error();
+  if (close(Int_val(fd)) != 0) sys_error(NULL);
   return Atom(0);
 }
 
@@ -99,7 +115,7 @@ value sys_remove(name)          /* ML */
 {
   int ret;
   ret = unlink(String_val(name));
-  if (ret != 0) sys_error();
+  if (ret != 0) sys_error(String_val(name));
   return Atom(0);
 }
 
@@ -107,7 +123,8 @@ value sys_rename(oldname, newname) /* ML */
      value oldname, newname;
 {
 #ifdef HAS_RENAME
-  if (rename(String_val(oldname), String_val(newname)) != 0) sys_error();
+  if (rename(String_val(oldname), String_val(newname)) != 0) 
+    sys_error(String_val(oldname));
 #else
   invalid_argument("rename: not implemented");
 #endif
@@ -117,7 +134,7 @@ value sys_rename(oldname, newname) /* ML */
 value sys_chdir(dirname)        /* ML */
      value dirname;
 {
-  if (chdir(String_val(dirname)) != 0) sys_error();
+  if (chdir(String_val(dirname)) != 0) sys_error(String_val(dirname));
   return Atom(0);
 }
 
@@ -142,7 +159,7 @@ value sys_system_command(command)   /* ML */
   invalid_arg("system_command unavailable");
 #else
   int retcode = system(String_val(command));
-  if (retcode == -1) sys_error();
+  if (retcode == -1) sys_error(String_val(command));
   return Val_int(retcode);
 #endif
 }

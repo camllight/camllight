@@ -12,6 +12,9 @@
 #include "mlvalues.h"
 #include "signals.h"
 #include "sys.h"
+#ifdef HAS_UI
+#include "ui.h"
+#endif
 
 /* Common functions. */
 
@@ -40,8 +43,9 @@ value channel_size(channel)      /* ML */
   long end;
 
   end = lseek(channel->fd, 0, 2);
-  if (end == -1) sys_error();
-  if (lseek(channel->fd, channel->offset, 0) != channel->offset) sys_error();
+  if (end == -1) sys_error(NULL);
+  if (lseek(channel->fd, channel->offset, 0) != channel->offset) 
+    sys_error(NULL);
   return Val_long(end);
 }
 
@@ -54,8 +58,12 @@ static void really_write(fd, p, n)
 {
   int retcode;
   while (n > 0) {
+#ifdef HAS_UI
+    retcode = ui_write(fd, p, n);
+#else
     retcode = write(fd, p, n);
-    if (retcode == -1) sys_error();
+#endif
+    if (retcode == -1) sys_error(NULL);
     p += retcode;
     n -= retcode;
   }
@@ -155,7 +163,7 @@ value seek_out(channel, pos)    /* ML */
     channel->curr = channel->buff + dest - channel->offset;
   } else {
     flush(channel);
-    if (lseek(channel->fd, dest, 0) != dest) sys_error();
+    if (lseek(channel->fd, dest, 0) != dest) sys_error(NULL);
     channel->offset = dest;
   }
   return Atom(0);
@@ -186,13 +194,13 @@ static int really_read(fd, p, n)
   int retcode;
 
   enter_blocking_section();
-#ifdef MSDOS
-  retcode = msdos_read(fd, p, n);
+#ifdef HAS_UI
+  retcode = ui_read(fd, p, n);
 #else
   retcode = read(fd, p, n);
 #endif
   leave_blocking_section();
-  if (retcode == -1) sys_error();
+  if (retcode == -1) sys_error(NULL);
   return retcode;
 }
 
@@ -306,7 +314,7 @@ value seek_in(channel, pos)     /* ML */
       dest <= channel->offset) {
     channel->curr = channel->max - (channel->offset - dest);
   } else {
-    if (lseek(channel->fd, dest, 0) != dest) sys_error();
+    if (lseek(channel->fd, dest, 0) != dest) sys_error(NULL);
     channel->offset = dest;
     channel->curr = channel->max = channel->buff;
   }
