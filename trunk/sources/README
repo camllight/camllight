@@ -1,4 +1,4 @@
-  This is the release 0.71 of the Caml Light system, for Unix machines.
+  This is the release 0.72 of the Caml Light system, for Unix machines.
 
 OVERVIEW:
 
@@ -9,8 +9,7 @@ OVERVIEW:
   Caml Light implements the Caml language, a functional language from
   the ML family. Caml is quite close to Standard ML, though not strictly
   conformant. There are some slight differences in syntax and semantics,
-  and major differences in the module system (these changes were
-  required to support separate compilation).
+  and major differences in the module system.
 
   Caml Light is implemented as a bytecode compiler, and fully
   bootstrapped.  The runtime system and bytecode interpreter is written
@@ -29,13 +28,6 @@ OVERVIEW:
   smoothly with the Unix programming environment: make, compilations under
   Emacs, ... The generated programs are quite small, and can be used like
   any other Unix command.
-
-  This distribution has been tested on the following platforms:
-
-        DecStation 3000/300, OSF/1 2.0, cc and gcc 2.5.8
-        SparcStation 10, SunOS 4.1.3, cc, gcc 2.5.8, and acc 3.0
-        DecStation 5000/200, Ultrix 4.1, cc and gcc 2.4.5
-        PC 486 DX2/66, Linux 1.2.6, gcc 2.5.8
 
 CONTENTS:
 
@@ -78,7 +70,7 @@ DOCUMENTATION:
 
   The Caml Light system is described in:
 
-  "The Caml Light system, release 0.7", by Xavier Leroy (reference manual)
+  "The Caml Light system, release 0.72", by Xavier Leroy (reference manual)
   "Functional programming using Caml Light", by Michel Mauny (tutorial)
 
   These documents are distributed in Postscript, DVI, and plain text.
@@ -113,12 +105,12 @@ KEEPING IN TOUCH WITH THE CAML COMMUNITY:
 
   Messages to the list should be sent to:
 
-                caml-list@pauillac.inria.fr
+                caml-list@inria.fr
 
   If you wish to subscribe to this list, please send a message
   (including your email address) to:
 
-                caml-list-request@pauillac.inria.fr
+                caml-list-request@inria.fr
 
   The Usenet news group comp.lang.ml also contains discussions about
   the ML family of programming languages, including Caml. The newsgroup
@@ -130,7 +122,7 @@ BUG REPORTS AND USER FEEDBACK:
 
   Send your bug reports by E-mail to
 
-          caml-light@pauillac.inria.fr
+          caml-light@inria.fr
 
   or by paper mail to
 
@@ -144,9 +136,9 @@ BUG REPORTS AND USER FEEDBACK:
   small) that exhibits the unexpected behavior, and the configuration
   you are using (machine type, etc).
 
-  The mailing list caml-light@pauillac.inria.fr is forwarded to a small
+  The mailing list caml-light@inria.fr is forwarded to a small
   group of implementors at INRIA. For general questions and discussions,
-  caml-list@pauillac.inria.fr is better; for bug reports and very specific
-  technical questions, caml-light@pauillac.inria.fr is preferred. We often
+  caml-list@inria.fr is better; for bug reports and very specific
+  technical questions, caml-light@inria.fr is preferred. We often
   cross-post from one list to the other, anyway.
 

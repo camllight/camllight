@@ -78,7 +78,7 @@ before running camlc or camllight.
 
 7- Now that the Caml Light compiler is installed, you can compile the
 tools and libraries contained in the contrib/ directory: source-level
-replay debugger, X-windows user interface toolkit, "tags" program for
+replay debugger, X Windows user interface toolkit, "tags" program for
 Emacs, arbitrary-precision rational arithmetic, Unix system calls
 interface, etc. The file contrib/INDEX gives a short description of
 the packages contained in contrib/ (what they do, what they require).
@@ -110,7 +110,8 @@ become superuser and do "make install".
 
 12- Installation is complete. Time to clean up.
 
-        (cd src; make clean); (cd contrib; make clean)
+        (cd src; make clean)
+        (cd contrib; make clean)
 
 
 IF SOMETHING GOES WRONG:
@@ -162,7 +163,7 @@ environment variable, or set it to /bin/sh.
   correct ANSI C.
 
 * gcc 2.6.0 has been reported to generate incorrect code for the
-runtime system in -O mode. Upgrade to 2.6.3 or turn -O off.
+runtime system in -O mode. Upgrade to 2.7.2 or turn -O off.
 
 MACHINE-SPECIFIC HINTS:
 
@@ -182,9 +183,9 @@ again.
 non-standard syntax for scripts that causes some of the sed-scripts in
 src/runtime/Makefile and src/linker/Makefile to fail during "make world".
 (We did not experience this problem with the versions of Linux we
-use: 1.0.9 and 1.2.6.) You'll have to adapt the sed scripts, then do
-"make clean", then do "make world" again. It is crucial to do "make
-clean", otherwise incorrectly generated files will remain.
+use.) You'll have to adapt the sed scripts, then do "make clean", then
+do "make world" again. It is crucial to do "make clean", otherwise
+incorrectly generated files will remain.
 
 * On MIPS machines from MIPS Co.  Add "-systype bsd43" to OPTS.
 Also, some versions of the cc compiler are reportedly unable to
