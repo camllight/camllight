@@ -7,7 +7,7 @@
 #open "syntax";;
 #open "types";;
 #open "pr_type";;
-#open "printf";;
+#open "interntl";;
 
 let output_globalref oc = function
     GRname s ->
@@ -240,5 +240,11 @@ let not_exhaustive_warning loc =
 let bad_format_letter loc letter =
   eprintf "%aBad format letter `%c'.\n"
     output_location loc letter;
+  raise Toplevel
+;;
+
+let displacement_overflow () =
+  eprintf "%tPhrase too large, a relative displacement has overflowed.\n"
+    output_input_name;
   raise Toplevel
 ;;

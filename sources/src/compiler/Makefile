@@ -9,7 +9,7 @@ CPP=/lib/cpp -P
 COMPFLAGS=-O fast
 LINKFLAGS=-g
 
-OBJS=config.zo misc.zo const.zo prim.zo lambda.zo globals.zo \
+OBJS=config.zo misc.zo interntl.zo const.zo prim.zo lambda.zo globals.zo \
  location.zo syntax.zo \
  modules.zo builtins.zo types.zo \
  pr_type.zo error.zo typing.zo ty_decl.zo pr_decl.zo ty_intf.zo \
