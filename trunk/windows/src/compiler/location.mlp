@@ -44,7 +44,6 @@ let output_loc oc input seek line_flag (Loc(pos1, pos2)) =
       while input() != `\n` do () done
     with End_of_file -> () in
   let copy_line () =
-    output_string oc error_prompt;
     let c = ref ` ` in
       begin try
         while c := input(); !c != `\n` do output_char oc !c done
@@ -53,7 +52,6 @@ let output_loc oc input seek line_flag (Loc(pos1, pos2)) =
       end;
       output_char oc `\n` in
   let pr_line first len ch =
-    output_string oc error_prompt;
     let c = ref ` `
     and f = ref first
     and l = ref len in
@@ -97,30 +95,43 @@ let output_loc oc input seek line_flag (Loc(pos1, pos2)) =
   if line_flag then output_lines oc pos1 pos2 !line1_pos !line1 !line2;
   if !line1 == !line2 then begin
     seek !line1_pos;
+    output_string oc error_prompt;
     copy_line ();
     seek !line1_pos;
+    output_string oc error_prompt;
     pr_line (pos1 - !line1_pos) (pos2 - pos1) `^`;
     output_char oc `\n`
   end else begin
     seek !line1_pos;
+    output_string oc error_prompt;
     pr_line 0 (pos1 - !line1_pos) `.`;
     seek pos1;
     copy_line();
     if !line2 - !line1 <= 8 then
-      for i = !line1 + 1 to !line2 - 1 do copy_line() done
+      for i = !line1 + 1 to !line2 - 1 do
+        output_string oc error_prompt;
+        copy_line()
+      done
     else
       begin
-        for i = !line1 + 1 to !line1 + 3 do copy_line() done;
+        for i = !line1 + 1 to !line1 + 3 do
+          output_string oc error_prompt;
+          copy_line()
+        done;
         output_string oc error_prompt; output_string oc "..........\n";
         for i = !line1 + 4 to !line2 - 4 do skip_line() done;
-        for i = !line2 - 3 to !line2 - 1 do copy_line() done
+        for i = !line2 - 3 to !line2 - 1 do
+          output_string oc error_prompt;
+          copy_line()
+        done
       end;
     begin try
+      output_string oc error_prompt;
       for i = !line2_pos to pos2 - 1 do
         output_char oc (input())
       done;
       pr_line 0 100 `.`
-    with End_of_file -> prerr_string "<EOF>"
+    with End_of_file -> output_string oc "<EOF>"
     end;
     output_char oc `\n`
   end
