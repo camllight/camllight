@@ -327,9 +327,7 @@ value fcntl_int : file_descr -> int -> int -> int = 3 "unix_fcntl_int"
   and fcntl_ptr : file_descr -> int -> string -> int = 3 "unix_fcntl_ptr"
         (* Interface to [fcntl] in the case where the argument is a pointer.
            The integer argument is the command code. A pointer to the string
-           argument is passed as argument to the command. The string argument
-           is usually set up with the functions from modules [peek] and
-           [poke]. *)
+           argument is passed as argument to the command. *)
 ;;
 
 (*** Directories *)
@@ -415,9 +413,7 @@ value ioctl_int : file_descr -> int -> int -> int = 3 "unix_ioctl_int"
   and ioctl_ptr : file_descr -> int -> string -> int = 3 "unix_ioctl_ptr"
         (* Interface to [ioctl] in the case where the argument is a pointer.
            The integer argument is the command code. A pointer to the string
-           argument is passed as argument to the command. The string argument
-           is usually set up with the functions from modules [peek] and
-           [poke]. *)
+           argument is passed as argument to the command. *)
 ;;
 
 (*** Polling *)
