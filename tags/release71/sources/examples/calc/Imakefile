@@ -1,0 +1,3 @@
+CamlProg(calc,lexer.zo parser.zo calc.zo,)
+CamlYaccFile(parser)
+CamlLexFile(lexer)

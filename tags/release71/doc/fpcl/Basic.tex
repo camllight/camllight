@@ -1,0 +1,530 @@
+\chapter{Basic types}
+\label{c:basic}
+
+We examine in this chapter the Caml basic types.
+
+\section{Numbers}
+
+Caml Light provides two numeric types: integers (type \verb"int") and
+floating-point numbers (type \verb"float"). Integers are limited to
+the range $-2^{30} \ldots 2^{30}-1$. Integer arithmetic is taken modulo
+$2^{31}$; that is, an integer operation that overflows does not raise an
+error, but the result simply wraps around. Predefined operations
+(functions) on integers include:
+\begin{center}
+\begin{tabular}{rl}
+{\tt +} &addition\\
+{\tt -} &subtraction and unary minus\\
+{\tt *} &multiplication\\
+{\tt /} &division\\
+{\tt mod} &modulo
+\end{tabular}
+\end{center}
+
+Some examples of expressions:
+\begin{caml_example}
+3 * 4 + 2;;
+3 * (4 + 2);;
+3 - 7 - 2;;
+\end{caml_example}
+There are precedence rules that make \verb"*" bind tighter than \verb"+", and so on. In doubt, write extra parentheses.
+\par
+So far, we have not seen the type of these arithmetic operations.
+They all expect  two integer arguments; so, they are functions taking
+one integer and returning a function from integers to integers.
+The (functional) value of such infix identifiers may be obtained by taking
+their {\em prefix} version.\ikwd{prefix@\verb`prefix`}
+\begin{caml_example}
+prefix + ;;
+prefix * ;;
+prefix mod ;;
+\end{caml_example}
+
+As shown by their types, the infix operators \verb"+", \verb"*",
+\ldots, do not work on floating-point values. A separate set of
+floating-point arithmetic operations is provided:
+
+\begin{center}
+\begin{tabular}{rl}
+{\tt +.} &addition\\
+{\tt -.} &subtraction and unary minus\\
+{\tt *.} &multiplication\\
+{\tt /.} &division\\
+\verb"sqrt" & square root \\
+\verb"exp", \verb"log" & exponentiation and logarithm \\
+\verb"sin", \verb"cos",\ldots & usual trigonometric operations
+\end{tabular}
+\end{center}
+
+We have two conversion functions to go back and forth between integers
+and floating-point numbers: \verb"int_of_float" and
+\verb"float_of_int".
+
+\begin{caml_example}
+1 + 2.3;;
+float_of_int 1 +. 2.3;;
+\end{caml_example}
+
+Let us now give some examples of numerical functions. We start by
+defining some very simple functions on numbers: 
+\begin{caml_example}
+let square x = x *. x;;
+square 2.0;;
+square (2.0 /. 3.0);;
+let sum_of_squares (x,y) = square(x) +. square(y);;
+let half_pi = 3.14159 /. 2.0
+in sum_of_squares(cos(half_pi), sin(half_pi));;
+\end{caml_example}
+
+We now develop a classical example: the computation of the root of a
+function by Newton's method.
+Newton's method can be stated as follows: if $y$ is an approximation to a
+root of a function $f$, then:
+\[
+y - \frac{f(y)}{f'(y)}
+\]
+is a better approximation, where $f'(y)$ is the derivative of $f$
+evaluated at $y$.
+For example, with $f(x)=x^2 -a$, we have $f'(x)=2x$, and therefore:
+\[
+y-\frac{f(y)}{f'(y)} = y - \frac{y^2 -a}{2y} = \frac{y+\frac{a}{y}}{2}
+\]
+
+We can define a function {\tt deriv} for approximating the derivative of a
+function at a given point by:
+\begin{caml_example}
+let deriv f x dx = (f(x+.dx) -. f(x)) /. dx;;
+\end{caml_example}
+Provided \verb|dx| is sufficiently small, this gives a reasonable estimate
+of the derivative of $f$ at $x$.
+
+The following function returns the absolute value of its floating
+point number argument.  It uses the ``{\tt if} \ldots {\tt then}
+\ldots {\tt else}''\ikwd{if@\verb`if`} conditional construct.
+\begin{caml_example}
+let abs x = if x >. 0.0 then x else -. x;;
+\end{caml_example}
+The main function, given below, uses three local functions. The first
+one, {\tt until}, is an example of a {\em recursive} function: it
+calls itself in its body, and is defined using a {\tt let rec}
+construct ({\tt rec} shows that the definition is recursive). It takes
+three arguments: a predicate {\tt p} on floats, a function {\tt
+change} from floats to floats, and a float {\tt x}. If \verb|p(x)| is
+false, then \verb"until" is called with last argument
+\verb|change(x)|, otherwise, {\tt x} is the result of the whole call.
+We will study recursive functions more closely later. The two other
+auxiliary functions, {\tt satisfied} and {\tt improve}, take a float
+as argument and deliver respectively a boolean value and a float. The
+function {\tt satisfied} asks wether the image of its argument by {\tt
+f} is smaller than {\tt epsilon} or not, thus testing wether {\tt y}
+is close enough to a root of {\tt f}. The function {\tt improve}
+computes the next approximation using the formula given below. The
+three local functions are defined using a cascade of {\tt let}
+constructs. The whole function is:
+\begin{caml_example}
+let newton f epsilon =
+  let rec until p change x =
+            if p(x) then x
+            else until p change (change(x)) in
+  let satisfied y = abs(f y) <. epsilon in
+  let improve y = y -. (f(y) /. (deriv f y epsilon))
+in until satisfied improve;;
+\end{caml_example}
+Some examples of equation solving:
+\begin{caml_example}
+let square_root x epsilon =
+           newton (function y -> y*.y -. x) epsilon x
+and cubic_root x epsilon =
+           newton (function y -> y*.y*.y -. x) epsilon x;;
+square_root 2.0 1e-5;;
+cubic_root 8.0 1e-5;;
+2.0 *. (newton cos 1e-5 1.5);;
+\end{caml_example}
+
+\section{Boolean values}
+
+The presence of the conditional construct implies the presence of
+boolean values.  The type \verb"bool" is composed of two values
+\verb"true" and \verb"false".
+\begin{caml_example}
+true;;
+false;;
+\end{caml_example}
+The functions with results of type \verb"bool" are often called {\em
+predicates}.
+Many predicates are predefined in Caml. Here are some of them:
+\begin{caml_example}
+prefix <;;
+1 < 2;;
+prefix <.;;
+3.14159 <. 2.718;;
+\end{caml_example}
+There exist also \verb"<=", \verb">", \verb">=", and similarly
+\verb"<=.", \verb">.", \verb">=.".
+
+\subsection{Equality}
+
+Equality has a special status in functional languages because of
+functional values. It is easy to test equality of values of base types
+(integers, floating-point numbers, booleans, \ldots):
+\begin{caml_example}
+1 = 2;;
+false = (1>2);;
+\end{caml_example}
+But it is impossible, in the general case, to decide the equality of
+functional values. Hence, equality stops on a run-time error when
+it encounters functional values.
+\begin{caml_example}
+(fun x -> x) = (fun x -> x);;
+\end{caml_example}
+Since equality may be used on values of any type, what is its type?
+Equality takes two arguments of the same type (whatever type it
+is) and returns a boolean value.  The type of equality is a {\em
+polymorphic type}, i.e. may take several possible forms.  Indeed, when
+testing equality of two numbers, then its type is
+\verb|int -> int -> bool|, and when testing equality of strings, its type is
+\verb|string -> string -> bool|.
+\begin{caml_example}
+prefix =;;
+\end{caml_example}
+The type of equality uses {\em type variables}, written \verb|'a|,
+\verb|`b|, etc. Any type can be substituted to type variables in order
+to produces specific {\em instances} of types. For example,
+substituting \verb|int| for \verb|'a| above produces
+\verb|int -> int -> bool|, which is the type of the equality function
+used on integer values.
+\begin{caml_example}
+1=2;;
+(1,2) = (2,1);;
+1 = (1,2);;
+\end{caml_example}
+
+\subsection{Conditional}
+\ikwd{if@\verb`if`}
+
+Conditional expressions are of the form ``${\tt
+if}~e_{\rm{test}}~{\tt then}~e_1~{\tt else}~e_2$'', where
+$e_{\rm{test}}$ is an expression of type {\tt bool} and $e_1$, $e_2$
+are expressions possessing the same type. As an example, the logical
+negation could be written:
+\begin{caml_example}
+let negate a = if a then false else true;;
+negate (1=2);;
+\end{caml_example}
+
+
+\subsection{Logical operators}
+\ikwd{or@\verb`or`}
+
+The classical logical operators are available in Caml. Disjunction and
+conjunction are respectively written {\tt or} and \verb|&|:
+\begin{caml_example}
+true or false;;
+(1<2) & (2>1);;
+\end{caml_example}
+The operators \verb"&" and \verb"or" are not functions. They should
+not be seen as regular functions, since they evaluate their second
+argument only if it is needed. For example, the \verb"or" operator
+evaluates its second operand only if the first one evaluates to
+\verb"false".
+The behavior of these operators may be described as follows:
+\begin{center}
+\begin{tabular}{lcl}
+$e_1$ {\tt or} $e_2$ & \mbox{is equivalent to} &
+                {\tt if} $e_1$ {\tt then true  else} $e_2$\\
+$e_1$ \verb"&" $e_2$ & \mbox{is equivalent to} &
+                {\tt if} $e_1$ {\tt then} $e_2$ {\tt else false}
+\end{tabular}
+\end{center}
+Negation is predefined:\ikwd{not@\verb`not`}
+\begin{caml_example}
+not true;;
+\end{caml_example}
+The \verb|not| identifier receives a special treatment from the
+parser: the application ``{\tt not f x}'' is recognized as ``{\tt not
+(f x)}'' while ``{\tt f g x}'' is identical to ``{\tt (f g) x}''. This
+special treatment explains why the functional value associated to {\tt not}
+can be obtained only using the {\tt prefix} keyword:
+\begin{caml_example}
+prefix not;;
+\end{caml_example}
+
+\section{Strings and characters}
+
+String constants (type \verb"string") are written between \verb|"|
+characters (double-quotes). Single-character constants (type
+\verb"char") are written between \verb|`| characters (backquotes).
+The most used string operation is string concatenation, denoted by the
+\verb"^" character.
+\begin{caml_example}
+"Hello" ^ " World!";;
+prefix ^;;
+\end{caml_example}
+Characters are ASCII characters:
+\begin{caml_example}
+`a`;;
+`\065`;;
+\end{caml_example}
+and can be built from their ASCII code as in:
+\begin{caml_example}
+char_of_int 65;;
+\end{caml_example}
+Other operations are available (\verb"sub_string", \verb|int_of_char|,
+etc). See the Caml Light reference manual \cite{CamlLightDoc} for
+complete information.
+
+
+\section{Tuples}
+
+\subsection{Constructing tuples}
+
+It is possible to combine values into tuples (pairs, triples, \ldots).
+The {\em value constructor} for
+tuples is the ``{\tt,}'' character (the comma). We will often use parentheses
+around tuples in order to improve readability, but they are not strictly
+necessary.
+\begin{caml_example}
+1,2;;
+1,2,3,4;;
+let p = (1+2, 1<2);;
+\end{caml_example}
+The infix ``{\tt *}'' identifier is the {\em type constructor} for tuples.
+For instance, $t_1 {\tt *} t_2$ corresponds to the mathematical cartesian product of types $t_1$ and $t_2$.
+
+We can build tuples from any values: the tuple value constructor is {\em
+generic}.
+
+\subsection{Extracting pair components}
+
+{\em Projection} functions are used to extract components of tuples. For pairs, we have:
+\begin{caml_example}
+fst;;
+snd;;
+\end{caml_example}
+They have polymorphic types, of course, since they may be applied to
+any kind of pair.  They are predefined in the Caml system, but could
+be defined by the user (in fact, the cartesian product itself could be
+defined --- see section \ref{s:udefprodtypes}, dedicated to user-defined
+product types):
+\begin{caml_example}
+let first (x,y) = x
+and second (x,y) = y;;
+first p;;
+second p;;
+\end{caml_example}
+We say that \verb|first| is a {\em generic} value because it works
+uniformly on several kinds of arguments (provided they are pairs). We
+often confuse between ``generic'' and ``polymorphic'', saying that
+such value is polymorphic instead of generic.
+
+
+\section{Patterns and pattern-matching}
+
+Patterns and pattern-matching play an important role in ML languages.
+They appear in all real programs and are strongly related to types
+(predefined or user-defined).
+
+A {\em pattern} indicates the {\em shape} of a value.
+Patterns are ``values with holes''.
+A single variable (formal parameter) is a pattern (with no shape specified:
+it matches any value).
+When a value is {\em matched against} a pattern (this is called
+{\em pattern-matching}), the pattern acts as a filter.
+We already used patterns and pattern-matching in all the functions we wrote:
+the function body {\tt (function x -> ...)} does (trivial) pattern-matching.
+When applied to a value, the formal parameter {\tt x} gets bound to
+that value.
+The function body {\tt (function (x,y) -> x+y)} does also pattern-matching:
+when applied to a value (a pair, because of well-typing hypotheses), the
+{\tt x} and {\tt y} get bound respectively to the first and the second
+component of that pair.
+\par
+All these pattern-matching examples were trivial ones, they did not involve any test:
+\begin{itemize}
+\item formal parameters such as {\tt x} do not impose any particular shape to the
+value they are supposed to match;
+\item pair patterns such as {\tt(x,y)} always match for typing reasons
+(cartesian product is a {\em product type}).
+\end{itemize}
+However, some types do not guarantee such a uniform shape to their
+values. Consider the {\tt bool} type: an element of type {\tt bool} is
+either {\tt true} or {\tt false}.
+%
+%
+If we impose to a value of type {\tt bool} to have the shape of {\tt true},
+then pattern-matching may fail. Consider the following function:
+\begin{caml_example}
+let f = function true -> false;;
+\end{caml_example}
+The compiler warns us that the pattern-matching may fail (we did not
+consider the {\tt false} case).
+
+Thus, if we apply {\tt f} to a value that evaluates to {\tt true},
+pattern-matching will succeed (an equality test is performed during
+execution).
+\begin{caml_example}
+f (1<2);;
+\end{caml_example}
+But, if {\tt f}'s argument evaluates to {\tt false}, a run-time
+error is reported:
+\begin{caml_example}
+f (1>2);;
+\end{caml_example}
+Here is a correct definition using pattern-matching:
+\begin{caml_example}
+let negate = function true -> false
+                    | false -> true;;
+\end{caml_example}
+The pattern-matching has now two cases, separated by the ``{\verb"|"}''
+character.
+Cases are examined in turn, from top to bottom. An equivalent definition of
+{\tt negate} would be:
+\begin{caml_example}
+let negate = function true -> false
+                    | x -> true;;
+\end{caml_example}
+The second case now matches any boolean value (in fact, only {\tt false} since
+{\tt true} has been caught by the first match case). When the second case is
+chosen, the identifier {\tt x} gets bound to the argument of {\tt
+negate}, and could be used in the right-hand part of the match case.
+Since in our example we do not use the value of the argument in the
+right-hand part of the second match case, another equivalent
+definition of {\tt negate} would be:
+\begin{caml_example}
+let negate = function true -> false
+                    | _ -> true;;
+\end{caml_example}
+Where ``\verb"_"'' acts as a formal paramenter (matches any value), but does
+not introduce any binding: it should be read as ``anything else''.
+
+As an example of pattern-matching, consider the following function
+definition (truth value table of implication):
+\begin{caml_example}
+let imply = function (true,true) -> true
+                   | (true,false) -> false
+                   | (false,true) -> true
+                   | (false,false) -> true;;
+\end{caml_example}
+Here is another way of defining {\tt imply}, by using variables:
+\begin{caml_example}
+let imply = function (true,x) -> x
+                   | (false,x) -> true;;
+\end{caml_example}
+Simpler, and simpler again:
+\begin{caml_example}
+let imply = function (true,x) -> x
+                   | (false,_) -> true;;
+let imply = function (true,false) -> false
+                   | _ -> true;;
+\end{caml_example}
+Pattern-matching is allowed on any type of value (non-trivial
+pattern-matching is only possible on types with {\em data constructors}).
+
+For example:
+\begin{caml_example}
+let is_zero = function 0 -> true | _ -> false;;
+let is_yes = function "oui" -> true
+                    | "si" -> true
+                    | "ya" -> true
+                    | "yes" -> true
+                    | _ -> false;;
+\end{caml_example}
+
+\section{Functions}
+\ikwd{function@\verb`function`}
+
+The type constructor ``\verb"->"'' is predefined and cannot be defined
+in ML's type system.
+We shall explore in this section some further aspects of functions
+and functional types.
+
+\subsection{Functional composition}
+
+Functional composition is easily definable in Caml. It is of course a
+polymorphic function:
+\begin{caml_example}
+let compose f g = function x -> f (g (x));;
+\end{caml_example}
+The type of {\tt compose} contains no more constraints than the ones
+appearing in the definition: in a sense, it is the {\em most general} type
+compatible with these constraints.
+
+These constraints are:
+\begin{itemize}
+\item the codomain of {\tt g} and the domain of {\tt f} must be the same;
+\item {\tt x} must belong to the domain of {\tt g};
+\item {\tt compose f g x} will belong to the codomain of {\tt f}.
+\end{itemize}
+
+
+Let's see \verb"compose" at work:
+\begin{caml_example}
+let succ x = x+1;;
+compose succ list_length;;
+(compose succ list_length) [1;2;3];;
+\end{caml_example}
+
+\subsection{Currying}
+We can define two versions of the addition function:
+\begin{caml_example}
+let plus = function (x,y) -> x+y;;
+let add = function x -> (function y -> x+y);;
+\end{caml_example}
+These two functions differ only in their way of taking their arguments.
+The first one will take an argument belonging to a cartesian product,
+the second one will take a number and return a function.
+The {\tt add} function is said to be {\em the curried version} of {\tt
+plus} (in honor of the logician Haskell Curry).
+
+
+The currying transformation may be written in Caml under the form of a
+higher-order function:
+\begin{caml_example}
+let curry f = function x -> (function y -> f(x,y));;
+\end{caml_example}
+Its inverse function may be defined by:
+\begin{caml_example}
+let uncurry f = function (x,y) -> f x y;;
+\end{caml_example}
+We may check the types of {\tt curry} and {\tt uncurry} on particular
+examples:
+\begin{caml_example}
+uncurry (prefix +);;
+uncurry (prefix ^);;
+curry plus;;
+\end{caml_example}
+
+\section*{Exercises}
+%
+\begin{exo}\label{Basic:1}
+Define functions that compute the surface area and the volume of
+well-known geometric objects (rectangles, circles, spheres, \ldots).
+\end{exo}
+%
+\begin{exo}\label{Basic:2}
+What would happen in a language submitted to call-by-value with
+recursion if there was no conditional construct ({\tt if ... then ... else ...})?
+\end{exo}
+\begin{exo}\label{Basic:3}
+Define the {\tt factorial} function such that:
+\[{\tt factorial}~n = n * (n-1) * \ldots * 2 * 1\]
+Give two versions of {\tt factorial}: recursive and tail recursive.
+\end{exo}
+\begin{exo}\label{Basic:5}
+Define the {\tt fibonacci} function that, when given a number $n$,
+returns the $n$th Fibonacci number, i.e. the $n$th term $u_n$ of the
+sequence defined by:
+\[\begin{array}{l}
+u_1 = 1\\
+u_2 = 1\\
+u_{n+2} = u_{n+1} + u_n
+\end{array}\]
+\end{exo}
+\begin{exo}\label{Basic:6}
+What are the types of the following expressions?
+\begin{itemize}
+\item {\tt uncurry compose}
+\item {\tt compose curry uncurry}
+\item {\tt compose uncurry curry}
+\end{itemize}
+\end{exo}

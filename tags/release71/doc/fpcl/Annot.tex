@@ -1,0 +1,282 @@
+\chapter{Mutable data structures}
+\label{c:mutable}
+
+The definition of a sum or product type may be annotated to allow physical 
+(destructive) update on data structures of that type. This is the main 
+feature of the {\em imperative programming} style. Writing values into memory locations is the fundamental mechanism of imperative languages 
+such as Pascal. The Lisp language, while mostly functional, also provides
+the dangerous functions {\tt rplaca} and {\tt rplacd} to
+physically modify lists. Mutable structures are required to implement
+many efficient algorithms. They are also very convenient to represent
+the current state of a state machine.
+
+\section{User-defined mutable data structures}
+
+Assume we want to define a type {\tt person} as in the previous chapter.
+Then, it seems natural to allow a person to change his/her age, job and the
+city that person lives in, but {\em not} his/her name.
+We can do this by annotating some labels in the type definition of
+{\tt person} by the {\tt mutable}\ikwd{mutable@\verb`mutable`} keyword:
+\begin{caml_example}
+type person =
+    {Name: string; mutable Age: int;
+     mutable Job: string; mutable City: string};;
+\end{caml_example}
+We can build values of type {\tt person} in the very same way as before:
+\begin{caml_example}
+let jean =
+    {Name="Jean"; Age=23; Job="Student"; City="Paris"};;
+\end{caml_example}
+But now, the value {\tt jean} may be physically modified in the fields
+specified to be {\tt mutable} in the definition (and {\em only} in these
+fields).
+
+We can modify the field {\tt Field} of an expression \verb"<expr1>" in order
+to assign it the value of \verb"<expr2>" by using the following construct:
+\begin{verbatim}
+<expr1>.Field <- <expr2>
+\end{verbatim}
+For example; if we want {\tt jean} to become one year older, we would write:
+\begin{caml_example}
+jean.Age <- jean.Age + 1;;
+\end{caml_example}
+Now, the value {\tt jean} has been modified into:
+\begin{caml_example}
+jean;;
+\end{caml_example}
+We may try to change the {\tt Name} of {\tt jean}, but we won't succeed: the
+typecheker will not allow us to do that.
+\begin{caml_example}
+jean.Name <- "Paul";;
+\end{caml_example}
+It is of course possible to use such constructs in functions as in:
+\begin{caml_example}
+let get_older ({Age=n; _} as p) = p.Age <- n + 1;;
+\end{caml_example}
+\ikwd{as@\verb`as`}
+In that example, we named {\tt n} the current {\tt Age} of the argument, but
+we also named {\tt p} the argument. This is an {\em alias} pattern: it
+saves us the bother of writing:
+\begin{caml_example}
+let get_older p =
+    match p with {Age=n} -> p.Age <- n + 1;;
+\end{caml_example}
+Notice that in the two previous expressions, we did not specify all
+fields of the record {\tt p}.
+Other examples would be:
+\begin{caml_example}
+let move p new_city = p.City <- new_city
+and change_job p j = p.Job <- j;;
+change_job jean "Teacher"; move jean "Cannes";
+get_older jean; jean;;
+\end{caml_example}
+We used the ``{\tt ;}'' character between the different changes we
+imposed to {\tt jean}. This is the {\em sequencing} of evaluations: it
+permits to evaluate successively several expressions, discarding the
+result of each (except the last one). This construct becomes useful in
+the presence of {\em side-effects} such as physical modifications and
+input/output, since we want to explicitly specify the order in which
+they are performed.
+
+\section{The {\tt ref} type}
+
+The {\tt ref} type is the predefined type of mutable indirection
+cells.  It is present in the Caml system for reasons of compatibility
+with earlier versions of Caml. The {\tt ref} type could be defined as
+follows (we don't use the {\tt ref} name in the following definition
+because we want to preserve the original {\tt ref} type):
+\begin{caml_example}
+type 'a reference = {mutable Ref: 'a};;
+\end{caml_example}
+Example of building a value of type {\tt ref}:
+\begin{caml_example}
+let r = ref (1+2);;
+\end{caml_example}
+The {\tt ref} identifier is syntactically presented as a sum data
+constructor.  The definition of {\tt r} should be read as ``let {\tt
+r} be a reference to the value of {\tt 1+2}''.  The value of {\tt r}
+is nothing but a memory location whose contents can be overwritten.
+
+We consult a reference (i.e. read its memory location) with the ``{\tt
+!}'' symbol:
+\begin{caml_example}
+!r + 1;;
+\end{caml_example}
+
+We modify values of type {\tt ref} with the {\tt :=} infix function:
+\begin{caml_example}
+r:=!r+1;;
+r;;
+\end{caml_example}
+Some primitives are attached to the {\tt ref} type, for example:
+\begin{caml_example}
+incr;;
+decr;;
+\end{caml_example}
+which increments (resp. decrements) references on integers.
+
+\section{Arrays}
+
+Arrays are modifiable data structures. They belong to the
+parameterized type \verb|'a vect|. Array expressions are bracketed by
+\verb'[|' and \verb'|]', and elements are separated by semicolons:
+\begin{caml_example}
+let a = [| 10; 20; 30 |];;
+\end{caml_example}
+The length of an array is returned by with the function \verb|vect_length|:
+\begin{caml_example}
+vect_length a;;
+\end{caml_example}
+
+
+\subsection{Accessing array elements}
+
+Accesses to array elements can be done using the following syntax:
+\begin{caml_example}
+a.(0);;
+\end{caml_example}
+or, more generally: $e_1${\tt .(}$e_2${\tt )},
+where $e_1$ evaluates to an array and $e_2$ to an integer.
+Alternatively, the function \verb|vect_item| is provided:
+\begin{caml_example}
+vect_item;;
+\end{caml_example}
+The first element of an array is at index 0. Arrays are useful because
+accessing an element is done in constant time: an array is a
+contiguous fragment of memory, while accessing list elements takes
+linear time.
+
+\subsection{Modifying array elements}
+
+Modification of an array element is done with the construct:
+\begin{center}
+$e_1${\tt .(}$e_2${\tt )} \verb|<-| $e_3$
+\end{center}
+where $e_3$ has the same type as the elements of the array $e_1$. The
+expression $e_2$ computes the index at which the modification will occur.
+
+As for accessing, a function for modifying array elements is also
+provided:
+\begin{caml_example}
+vect_assign;;
+\end{caml_example}
+For example:
+\begin{caml_example}
+a.(0) <- (a.(0)-1);;
+a;;
+vect_assign a 0 ((vect_item a 0) - 1);;
+a;;
+\end{caml_example}
+
+\section{Loops: {\tt while} and {\tt for}}
+\ikwd{while@\verb`while`}
+\ikwd{for@\verb`for`}
+
+Imperative programming (i.e. using side-effects such as physical
+modification of data structures) traditionally makes use of sequences
+and explicit loops. Sequencing evaluation in Caml Light is done by
+using the semicolon ``\verb";"''. Evaluating expression $e_1$,
+discarding the value returned, and then evaluating $e_2$ is written:
+\begin{center}
+$e_1$ {\tt ;} $e_2$
+\end{center}
+If $e_1$ and $e_2$ perform side-effects, this construct ensures
+that they will be performed in the specified order (from left to
+right). In order to emphasize sequential side-effects, instead of
+using parentheses around sequences, one can use {\tt begin} and {\tt
+end}, as in:\ikwd{begin@\verb`begin`}\ikwd{end@\verb`end`}
+\begin{caml_example}
+let x = ref 1 in
+  begin
+     x := !x + 1;
+     x := !x * !x
+  end;;
+\end{caml_example}
+The keywords {\tt begin} and {\tt end} are equivalent to opening and
+closing parentheses. The program above could be written as:
+\begin{caml_example}
+let x = ref 1 in
+  (x := !x + 1; x := !x * !x);;
+\end{caml_example}
+
+Explicit loops are not strictly necessary {\em per se}: a recursive
+function could perform the same work. However, the usage of an
+explicit loop locally emphasizes a more imperative style. Two loops
+are provided:
+\begin{itemize}
+\item {\it while}: {\tt while} $e_1$ {\tt do} $e_2$ {\tt done}
+evaluates $e_1$ which must return a boolean expression, if $e_1$
+return {\tt true}, then $e_2$ (which is usually a sequence) is
+evaluated, then $e_1$ is evaluated again and so on until $e_1$
+returns {\tt false}.
+
+\item{\it for}: two variants, increasing and decreasing
+\begin{itemize}
+\item {\tt for} $v$\verb|=|$e_1$ {\tt to} $e_2$ {\tt do} $e_3$ {\tt done}
+\item {\tt for} $v$\verb|=|$e_1$ {\tt downto} $e_2$ {\tt do} $e_3$ {\tt done}
+\end{itemize}
+where $v$ is an identifier. Expressions $e_1$ and $e_2$ are the bounds
+of the loop: they must evaluate to integers. In the case of the
+increasing loop, the expressions $e_1$ and $e_2$ are evaluated
+producing values $n_1$ and $n_2$ : if $n_1$ is strictly greater than
+$n_2$, then nothing is done.  Otherwise, $e_3$ is evaluated $(n_2 -
+n_1)+1$ times, with the variable $v$ bound successively to $n_1$, $n_1
++1$, \ldots, $n_2$.
+
+The behavior of the decreasing loop is similar: if $n_1$ is strictly
+smaller than $n_2$, then nothing is done. Otherwise, $e_3$ is
+evaluated $(n_1 - n_2)+1$ times with $v$ bound to successive values
+decreasing from $n_1$ to $n_2$.
+\end{itemize}
+Both loops return the value \verb|()| of type {\tt unit}.
+\begin{caml_example}
+for i=0 to (vect_length a) - 1 do a.(i) <- i done;;
+a;;
+\end{caml_example}
+
+\section{Polymorphism and mutable data structures}
+
+There are some restrictions concerning polymorphism and mutable data
+structures.
+One cannot enclose polymorphic objects inside mutable data structures.
+\begin{caml_example}
+let r = ref [];;
+\end{caml_example}
+The reason is that once the type of {\tt r}, {\tt ('a list) ref}, has
+been computed, it cannot be changed. But the value of {\tt r} can be
+changed: we could write:
+\begin{verbatim}
+r:=[1;2];;
+\end{verbatim}
+and now, {\tt r} would be a reference on a list of numbers while its type
+would still be {\tt ('a list) ref}, allowing us to write:
+\begin{verbatim}
+r:= true::!r;;
+\end{verbatim}
+making {\tt r} a reference on {\tt [true; 1; 2]}, which is an illegal
+Caml object.
+
+Thus the Caml typechecker imposes that modifiable data structures appearing
+at toplevel must possess monomorphic types (i.e. not polymorphic).
+
+
+
+\section*{Exercises}
+
+\begin{exo}\label{Annot:4}
+Give a mutable data type defining the Lisp type of lists and define
+the four functions {\tt car}, {\tt cdr}, {\tt rplaca} and {\tt rplacd}.
+\end{exo}
+
+\begin{exo}\label{Annot:5}
+Define a \verb"stamp" function, of type \verb"unit -> int", that
+returns a fresh integer each time it is called. That is, the first
+call returns 1; the second call returns 2; and so on.
+\end{exo}
+
+\begin{exo}\label{Annot:6}
+Define a \verb|quick_sort| function on arrays of floating point
+numbers following the {\em quicksort} algorithm \cite{Quicksort}.
+Information about the {\em quicksort} algorithm can be found
+in~\cite{SedgewickPascal}, for example.
+\end{exo}

@@ -1,0 +1,146 @@
+\title{Functional programming \\ using Caml Light}
+\author{Michel Mauny}
+\date{January 1995}
+
+\emergencystretch=50pt  % pour que TeX resolve les overfull hbox lui-meme
+\setcounter{tocdepth}{1}        % Pour ne pas mettre les \subsection
+                                % dans la table des matieres
+\def\CAMLVERSION{0.7}
+\newtheorem{exoth}{Exercise}[chapter]
+\def\exo{\begin{exoth}\ifx\exofont\undefined\else\exofont\fi}
+\def\endexo{\end{exoth}}
+\def\Example{\paragraph{Example}}
+\def\End{\par\noindent$\Box$\par}
+\def\ikwd#1{}
+
+\begin{document}
+
+\maketitle
+
+\cleardoublepage
+
+\tableofcontents
+
+\chapter{Introduction}
+
+This document is a tutorial introduction to functional programming, and,
+more precisely, to the usage of Caml Light.  It has been used to teach
+Caml Light\footnote{The ``Caml Strong'' version of these notes is available
+as an INRIA technical report~\cite{BDC}.} in different universities
+and is intended for beginners. It contains numerous examples and
+exercises, and absolute beginners should read it while sitting in
+front of a Caml Light toplevel loop, testing examples and variations
+by themselves.
+
+After generalities about functional programming, some features
+specific to Caml Light are described. ML type synthesis and a simple
+execution model are presented in a complete example of prototyping a
+subset of ML.
+
+Part~I (chapters \ref{c:gen}--\ref{c:udeftypes}) may be skipped by
+users familiar with ML. Users with experience in functional programming,
+but unfamiliar with the ML dialects may skip the very first chapters and
+start at chapter~\ref{c:udeftypes}, learning the Caml Light syntax
+from the examples.  Part~I starts with some intuition about functions
+and types and gives an overview of ML and other functional languages
+(chapter~\ref{c:gen}). Chapter~\ref{c:basicconcepts} outlines the
+interaction with the Caml Light toplevel loop and its basic objects.
+Basic types and some of their associated primitives are presented in
+chapter~\ref{c:basic}. Lists (chapter \ref{c:lists}) and user-defined
+types (chapter \ref{c:udeftypes}) are structured data allowing for the
+representation of complex objects and their easy creation and
+destructuration.
+
+While concepts presented in part~I are common (under one form or
+another) to many functional languages, part~B (chapters
+\ref{c:mutable}--\ref{c:standalone}) is dedicated to features
+specific to Caml Light: mutable data structures (chapter
+\ref{c:mutable}), exception handling (chapter \ref{c:exceptions}),
+input/output (chapter \ref{c:basicio}) and streams and parsers (chapter
+\ref{c:streams}) show a more imperative side of the language.
+Standalone programs and separate compilation (chapter
+\ref{c:standalone}) allow for modular programming and the creation of
+standalone applications. Concise examples of Caml Light features are
+to be found in this part.
+
+Part~C (chapters \ref{c:ASL}--\ref{c:ASLcompiling}) is meant for
+already experienced Caml Light users willing to know more about how
+the Caml Light compiler synthesizes the types of expression and how
+compilation and evaluation proceeds.  Some knowledge about first-order
+unification is assumed. The presentation is rather informal, and is
+sometimes terse (specially in the chapter about type synthesis). We
+prototype a small and simple functional language (called ASL): we give
+the complete prototype implementation, from the ASL parser to the
+symbolic execution of code.  Lexing and parsing of ASL programs are
+presented in chapter
+\ref{c:ASL}, providing realistic usages of streams and parsers.
+Chapter \ref{c:ASLsemantics} presents an untyped call-by-value
+semantics of ASL programs through the definition of an ASL
+interpreter. The encoding of recursion in untyped ASL is presented in
+chapter \ref{c:ASLuntypedrecursion}, showing the expressive power of
+the language. The type synthesis of functional programs is
+demonstrated in chapter \ref{c:ASLtyping}, using destructive
+unification (on first-order terms representing types) as a central
+tool.  Chapter \ref{c:ASLcompiling} introduces the Categorical
+Abstract Machine: a simple execution model for call-by-value
+functional programs. Although the Caml Light execution model is
+different from the one presented here, an intuition about the simple
+compilation of functional languages can be found in this chapter.
+
+\medskip
+
+{\bf Warning:} The programs and remarks (especially contained in parts
+B and C) might not be valid in Caml Light versions different from
+\CAMLVERSION.
+
+\part{Functional programming}
+\input{Gen.mltex}
+\input{Fund.mltex}
+\input{Basic.mltex}
+\input{Lists.mltex}
+\input{Types.mltex}
+\part{Caml Light specifics}
+\input{Annot.mltex}
+\input{Exc.mltex}
+\input{IO.mltex}
+\input{Streams.mltex}
+\input{Modules.tex}
+\part{A complete example}
+\input{ASL.mltex}
+\input{Ans.mltex}
+
+\chapter{Conclusions and further reading}
+
+We have not been exhaustive in the description of the Caml Light features.
+We only introduced general concepts in functional programming, and we
+have insisted on the features used in the prototyping of ASL:
+a tiny model of Caml Light typing and semantics.
+
+The reference manual \cite{CamlLightDoc} provides an exhaustive
+description of the Caml Light language, its libraries, commands and
+extensions.
+
+Those who read French are referred to \cite{Weis-Leroy}, a
+progressive, but thorough introduction to programming in Caml Light,
+with many interesting examples, and to \cite{Leroy-Weis}, the French
+edition of the Caml Light reference manual.
+
+Description about ``Caml Strong'' and useful information about
+programming in Caml can be found in \cite{CAMLPrimer} and
+\cite{CAMLRefMan}.
+
+An introduction to lambda-calculus and type systems can be found in
+\cite{Krivine}, \cite{Hindley} and \cite{Barendregt}.
+
+The description of the implementation of call-by-value functional
+programming languages can be found in \cite{ZINC}.
+
+The implementation of lazy functional languages is described in
+\cite{Peyton} (translated in French as \cite{FPeyton}).
+An introduction to programming in lazy functional languages can be
+found in \cite{Bird}.
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}

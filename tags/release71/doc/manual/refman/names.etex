@@ -1,0 +1,82 @@
+\section{Global names} \label{s:names}
+
+Global names are used to denote value variables, value constructors
+(constant or non-constant), type constructors, and record labels.
+Internally, a global name consists of two parts: the name of the
+defining module (the module name), and the name of the global inside
+that module (the local name). The two parts of the name must be valid
+identifiers. Externally, global names have the following syntax:
+\begin{syntax}
+global-name:
+        ident
+      | ident '__' ident
+\end{syntax}
+The form @ident '__' ident@ is called a qualified name. The first
+identifier is the module name, the second identifier is the local
+name.  The form @ident@ is called an unqualified name. The identifier
+is the local name; the module name is omitted. The compiler infers
+this module name following the completion rules given below, therefore
+transforming the unqualified name into a full global name.
+
+To complete an unqualified identifier, the compiler checks a list of
+modules, the opened modules, to see if they define a global with the
+same local name as the unqualified identifier. When one is found, the
+identifier is completed into the full name of that global. That is,
+the compiler takes as module name the name of an opened module that
+defines a global with the same local name as the unqualified
+identifier. If several modules satisfy this condition, the one that
+comes first in the list of opened modules is selected.
+
+The list of opened modules always includes the module currently being
+compiled (checked first). (In the case of a toplevel-based
+implementation, this is the module where all toplevel definitions are
+entered.) It also includes a number of standard library modules that
+provide the initial environment (checked last).  In addition, the
+"#open" and "#close" directives can be used to add or remove
+modules from that list. The modules added with "#open" are
+checked after the module currently being compiled, but before the
+initial standard library modules. 
+
+\begin{syntax}
+variable:
+        global-name
+      | 'prefix' operator-name
+;
+operator-name:
+    '+' || '-' || '*' || '/' || 'mod' || '+.' || '-.' || '*.' || '/.'
+  | '@' || '^' || '!' || ':=' || '=' || '<>' || '==' || '!=' || '!' 
+  | '<' || '<=' || '>' || '<=' || '<.' || '<=.' || '>.' || '<=.'
+;
+cconstr:
+        global-name
+      | '[]'
+      | '()'
+;
+ncconstr:
+        global-name
+      | 'prefix' '::'
+;
+typeconstr:
+        global-name
+;
+label:
+        global-name
+\end{syntax}
+Depending on the context, global names can stand for global variables
+(@variable@\/), constant value constructors (@cconstr@\/), non-constant
+value constructors (@ncconst@\/), type constructors (@typeconstr@\/),
+or record labels (@label@\/). For variables and value constructors,
+special names built with @'prefix'@ and an operator name are
+recognized. The tokens @'[]'@ and @'()'@ are also recognized as
+built-in constant constructors (the empty list and the unit value).
+
+The syntax of the language restricts labels and type constructors to
+appear in certain positions, where no other kind of global names are
+accepted. Hence labels and type constructors have their own name spaces.
+Value constructors and value variables live in the same name space: a
+global name in value position is interpreted as a value constructor
+if it appears in the scope of a type declaration defining that
+constructor; otherwise, the global name is taken to be a value
+variable. For value constructors, the type declaration determines
+whether a constructor is constant or not.
+

@@ -1,0 +1,615 @@
+\chapter{Streams and parsers}\label{c:streams}
+
+In the next part of these course notes, we will implement a small
+functional language. Parsing valid programs of this language requires
+writing a lexical analyzer and a parser for the language. For the
+purpose of writing easily such programs, Caml Light provides a special
+data structure: {\em streams}. Their main usage is to be interfaced to
+input channels or strings and to be matched against {\em stream
+patterns}.
+
+\section{Streams}
+
+Streams belong to an abstract data type: their actual representation
+remains hidden from the user. However, it is still possible to build
+streams either ``by hand'' or by using some predefined functions.
+
+\subsection{The {\tt stream} type}
+
+The type {\tt stream} is a parameterized type. One can build streams
+of integers, of characters or of any other type. Streams receive a
+special syntax, looking like the one for lists. The empty stream is
+written:
+\begin{caml_example}
+[< >];;
+\end{caml_example}
+A non empty stream possesses elements that are written preceded by the
+``\verb|'|'' (quote) character.
+\begin{caml_example}
+[< '0; '1; '2 >];;
+\end{caml_example}
+Elements that are not preceded by ``\verb|'|'' are {\em substreams}
+that are expanded in the enclosing stream:
+\begin{caml_example}
+[< '0; [<'1;'2>]; '3 >];;
+let s = [< '"abc" >] in [< s; '"def" >];;
+\end{caml_example}
+Thus, stream concatenation can be defined as:
+\begin{caml_example}
+let stream_concat s t = [< s; t >];;
+\end{caml_example}
+Building streams in this way can be useful while testing a parsing
+function or defining a lexical analyzer (taking as argument a stream
+of characters and returning a stream of tokens). Stream concatenation
+{\em does not copy} substreams: they are simply put in the same
+stream. Since (as we will see later) stream matching has a
+destructive effect on streams (streams are physically ``eaten'' by
+stream matching), parsing \verb|[< t; t >]| will in fact parse {\tt t}
+only once: the first occurrence of {\tt t} will be consumed, and the
+second occurrence will be empty before its parsing will be performed.
+
+Interfacing streams with an input channel can be done with the
+function:
+\begin{caml_example}
+stream_of_channel;;
+\end{caml_example}
+returning a stream of characters which are read from the channel
+argument. The end of stream will coincide with the end of the file
+associated to the channel.
+
+In the same way, one can build the character stream associated to a
+character string using:
+\begin{caml_example}
+stream_of_string;;
+let s = stream_of_string "abc";;
+\end{caml_example}
+
+\subsection{Streams are lazily evaluated}
+
+Stream expressions are submitted to {\em lazy evaluation}, i.e. they
+are effectively build only when required. This is useful in that it
+allows for the easy manipulation of ``interactive'' streams like the
+stream built from the standard input. If this was not the case, i.e.
+if streams were immediately completely computed, a program evaluating
+``\verb|stream_of_channel std_in|'' would read everything up to an
+end-of-file on standard input before giving control to the rest of the
+program. Furthermore, lazy evaluation of streams allows for the
+manipulation of infinite streams.  As an example, we can build the
+infinite stream of integers, using side effects to show precisely when
+computations occur:
+\begin{caml_example}
+let rec ints_from n =
+   [< '(print_int n; print_char ` `; flush std_out; n);
+      ints_from (n+1) >];;
+let ints = ints_from 0;;
+\end{caml_example}
+We notice that no printing occurred and that the program terminates:
+this shows that none of the elements have been evaluated and that the
+infinite stream has not been built. We will see in the next section
+that these side-effects will occur on demand, i.e. when tests will be
+needed by a matching function on streams.
+
+\section{Stream matching and parsers}
+
+The syntax for building streams can be used for pattern-matching over
+them. However, stream matching is more complex than the usual pattern
+matching.
+
+\subsection{Stream matching is destructive}
+
+Let us start with a simple example:
+\begin{caml_example}
+let next = function [< 'x >] -> x;;
+\end{caml_example}
+The {\tt next} function returns the first element of its stream
+argument, and fails if the stream is empty:
+\begin{caml_example}
+let s = [< '0; '1; '2 >];;
+next s;;
+next s;;
+next s;;
+next s;;
+\end{caml_example}
+We can see from the previous examples that the stream pattern
+\verb|[< 'x >]| matches {\em an initial segment} of the stream. Such a
+pattern must be read as ``the stream whose first element matches
+{\tt x}''. Furthermore, once stream matching has succeeded, the
+stream argument has been {\em physically modified} and does not contain
+any longer the part that has been recognized by the {\tt next}
+function.
+
+If we come back to the infinite stream of integers, we can see that
+the calls to {\tt next} provoke the evaluation of the necessary part
+of the stream:
+\begin{caml_example}
+next ints; next ints; next ints;;
+\end{caml_example}
+Thus, successive calls to {\tt next} remove the first
+elements of the stream until it becomes empty. Then, {\tt next} fails
+when applied to the empty stream, since, in the definition of {\tt
+next}, there is no stream pattern that matches an initial segment of the
+empty stream.
+
+It is of course possible to specify several stream patterns as in:
+\begin{caml_example}
+let next = function
+  [< 'x >] -> x
+| [< >] -> raise (Failure "empty");;
+\end{caml_example}
+Cases are tried in turn, from top to bottom.
+
+Stream pattern components are not restricted to quoted patterns
+(intended to match stream elements), but can be also function calls
+(corresponding to non-terminals, in the grammar terminology).
+Functions appearing as stream pattern components are intended to match
+substreams of the stream argument: they are called on the actual
+stream argument, and they are followed by a pattern which should match
+the result of this call. For example, if we define a parser
+recognizing a non  empty sequence of characters \verb|`a`|:
+\begin{caml_example}
+let seq_a =
+    let rec seq = function
+        [< '`a`; seq l >] -> `a`::l
+      | [< >] -> []
+    in function [< '`a`; seq l >] -> `a`::l;;
+\end{caml_example}
+we used the recursively defined function \verb|seq| inside the
+stream pattern of the first rule. This definition should be read as:
+\begin{itemize}
+\item if the stream is not empty and if its first element matches
+\verb|`a`|, apply \verb|seq| to the rest of the stream, let {\tt l}
+be the result of this call and return \verb|`a`::l|,
+\item otherwise, fail (raise \verb|Parse_failure|);
+\end{itemize}
+and \verb|seq| should be read in the same way (except that, since it
+recognizes possibly empty sequences of \verb|`a`|, it never fails).
+
+Less operationally, we can read it as: ``a non-empty sequence of
+\verb|`a`| starts with an \verb|`a`|, and is followed by a possibly
+empty sequence of \verb|`a`|.
+
+Another example is the recognition of a non-empty sequence of \verb|`a`|
+followed by a \verb|`b`|, or a \verb|`b`| alone:
+\begin{caml_example}
+let seq_a_b = function
+  [< seq_a l; '`b` >] -> l@[`b`]
+| [< '`b` >] -> [`b`];;
+\end{caml_example}
+Here, operationally, once an \verb|`a`| has been recognized, the first
+matching rule is chosen. Any further mismatch (either from
+\verb|seq_a| or from the last \verb|`b`|) will raise a
+\verb|Parse_error| exception, and the whole parsing will fail. On the
+other hand, if the first character is not an \verb|`a`|, \verb|seq_a|
+will raise \verb|Parse_failure|, and the second rule
+(\verb|[< '`b` >] -> ...|) will be tried.
+
+This behavior is typical of predictive parsers.  Predictive parsing
+is recursive-descent parsing with one look-ahead token. In other
+words, a predictive parser is a set of (possibly mutually recursive)
+procedures, which are selected according to the shape of (at most) the
+first token.
+
+\subsection{Sequential binding in stream patterns}
+
+Bindings in stream patterns occur sequentially, in contrast with
+bindings in regular patterns, which can be thought as occurring in
+parallel. Stream matching is guaranteed to be performed from left to right.
+For example, computing the sum of the elements of an integer stream
+could be defined as:
+\begin{caml_example}
+let rec stream_sum n = function
+  [< '0; (stream_sum n) p >] -> p
+| [< 'x; (stream_sum (n+x)) p >] -> p
+| [< >] -> n;;
+stream_sum 0 [< '0; '1; '2; '3; '4 >];;
+\end{caml_example}
+The \verb|stream_sum| function uses its first argument as an
+accumulator holding the sum computed so far. The call
+\verb|(stream_sum (n+x))| uses {\tt x} which was bound in the stream
+pattern component occurring at the left of the call.
+
+{\bf Warning:} streams patterns are legal only in the {\tt function}
+and {\tt match} constructs. The {\tt let} and other forms are
+restricted to usual patterns. Furthermore, a stream pattern cannot
+appear inside another pattern.
+
+\section{Parameterized parsers}
+
+Since a parser is a function like any other function, it can be
+parameterized or be used as a parameter. Parameters used only in the
+right-hand side of stream-matching rules simulate {\em inherited
+attributes} of attribute grammars. Parameters used as parsers in
+stream patterns allow for the implementation of {\em higher-order}
+parsers. We will use the next example to motivate the introduction of
+parameterized parsers.
+
+\subsection{Example: a parser for arithmetic expressions}
+
+Before building a parser for arithmetic expressions, we need a lexical
+analyzer able to recognize arithmetic operations and integer
+constants. Let us first define a type for tokens:
+\begin{caml_example}
+type token =
+  PLUS | MINUS | TIMES | DIV | LPAR | RPAR
+| INT of int;;
+\end{caml_example}
+Skipping blank spaces is performed by the {\tt spaces} function
+defined as:
+\begin{caml_example}
+let rec spaces = function
+  [< '` `|`\t`|`\n`; spaces _ >] -> ()
+| [< >] -> ();;
+\end{caml_example}
+The conversion of a digit (character) into its integer value is done
+by:
+\begin{caml_example}
+let int_of_digit = function
+  `0`..`9` as c -> (int_of_char c) - (int_of_char `0`)
+| _ -> raise (Failure "not a digit");;
+\end{caml_example}
+The ``{\tt as}'' keyword allows for naming a pattern: in this case,
+the variable {\tt c} will be bound to the actual digit matched by
+\verb|`0`..`9`|. Pattern built with {\tt as} are called {\em alias
+patterns}.
+
+For the recognition of integers, we already feel the need for a
+parameterized parser. Integer recognition is done by the {\tt integer}
+analyzer defined below. It is parameterized by a numeric value
+representing the value of the first digits of the number:
+\begin{caml_example}
+let rec integer n = function
+  [< ' `0`..`9` as c; (integer (10*n + int_of_digit c)) r >] -> r
+| [< >] -> n;;
+integer 0 (stream_of_string "12345");;
+\end{caml_example}
+We are now ready to write the lexical analyzer, taking a stream of
+characters, and returning a stream of tokens. Returning a token stream
+which will be explored by the parser is a simple, reasonably efficient
+and intuitive way of composing a lexical analyzer and a parser.
+\begin{caml_example}
+let rec lexer s = match s with
+  [< '`(`; spaces _ >] -> [< 'LPAR; lexer s >]
+| [< '`)`; spaces _ >] -> [< 'RPAR; lexer s >]
+| [< '`+`; spaces _ >] -> [< 'PLUS; lexer s >]
+| [< '`-`; spaces _ >] -> [< 'MINUS; lexer s >]
+| [< '`*`; spaces _ >] -> [< 'TIMES; lexer s >]
+| [< '`/`; spaces _ >] -> [< 'DIV; lexer s >]
+| [< '`0`..`9` as c; (integer (int_of_digit c)) n; spaces _ >]
+                       -> [< 'INT n; lexer s >];;
+\end{caml_example}
+We assume there is no leading space in the input.
+
+Now, let us examine the language that we want to recognize. We shall
+have integers, infix arithmetic operations and parenthesized
+expressions.
+The BNF form of the grammar is:
+\begin{verbatim}
+Expr ::= Expr + Expr
+       | Expr - Expr
+       | Expr * Expr
+       | Expr / Expr
+       | ( Expr )
+       | INT
+\end{verbatim}
+The values computed by the parser will be {\em abstract syntax trees}
+(by contrast with {\em concrete syntax}, which is the input string or
+stream). Such trees belong to the following type:
+\begin{caml_example}
+type atree =
+  Int of int
+| Plus of atree * atree
+| Minus of atree * atree
+| Mult of atree * atree
+| Div of atree * atree;;
+\end{caml_example}
+The {\tt Expr} grammar is ambiguous. To make it unambiguous, we will
+adopt the usual precedences for arithmetic operators and assume that
+all operators associate to the left. Now, to use stream matching for
+parsing, we must take into account the fact that matching rules are
+chosen according to the behavior of the first component of each
+matching rule. This is predictive parsing, and, using well-known
+techniques, it is easy to rewrite the grammar above in such a way that
+writing the corresponding predictive parser becomes trivial. These
+techniques are described in~\cite{DragonBook}, and consist in adding
+a non-terminal for each precedence level, and removing left-recursion.
+We obtain:
+\begin{verbatim}
+Expr ::= Mult
+       | Mult + Expr
+       | Mult - Expr
+
+Mult ::= Atom
+       | Atom * Mult
+       | Atom / Mult
+
+Atom ::= INT
+       | ( Expr )
+\end{verbatim}
+While removing left-recursion, we forgot about left associativity of
+operators. This is not a problem, as long as we build correct abstract
+trees.
+
+Since stream matching bases its choices on the first component of
+stream patterns, we cannot see the grammar above as a parser. We need
+a further transformation, factoring common prefixes of grammar rules
+(left-factor). We obtain:
+\begin{verbatim}
+Expr ::= Mult RestExpr
+
+        RestExpr ::= + Mult RestExpr
+                   | - Mult RestExpr
+                   | (* nothing *)
+
+Mult ::= Atom RestMult
+
+        RestMult ::= * Atom RestMult
+                   | / Atom RestMult
+                   | (* nothing *)
+
+Atom ::= INT
+       | ( Expr )
+\end{verbatim}
+Now, we can see this grammar as a parser (note that the order of rules
+becomes important, and empty productions must appear last). The shape
+of the parser is:
+\begin{verbatim}
+let rec expr =
+    let rec restexpr ? = function
+        [< 'PLUS; mult ?; restexpr ? >] -> ?
+      | [< 'MINUS; mult ?; restexpr ? >] -> ?
+      | [< >] -> ?
+in function [< mult e1; restexpr ? >] -> ?
+
+and mult =
+    let rec restmult ? = function
+        [< 'TIMES; atom ?; restmult ? >] -> ?
+      | [< 'DIV; atom ?; restmult ? >] -> ?
+      | [< >] -> ?
+in function [< atom e1; restmult ? >] -> ?
+
+and atom = function
+  [< 'INT n >] -> Int n
+| [< 'LPAR; expr e; 'RPAR >] -> e
+\end{verbatim}
+We used question marks where parameters, bindings and results still
+have to appear.  Let us consider the {\tt expr} function: clearly, as
+soon as {\tt e1} is recognized, we must be ready to build the leftmost
+subtree of the result. This leftmost subtree is either restricted to
+{\tt e1} itself, in case {\tt restexpr} does not encounter any
+operator, or it is the tree representing the addition (or subtraction)
+of {\tt e1} and the expression immediately following the additive
+operator. Therefore, {\tt restexpr} must be called with {\tt e1} as an
+intermediate result, and accumulate subtrees built from its
+intermediate result, the tree constructor corresponding to the
+operator and the last expression encountered. The body of {\tt expr}
+becomes:
+\begin{verbatim}
+let rec expr =
+    let rec restexpr e1 = function
+        [< 'PLUS; mult e2; restexpr (Plus (e1,e2)) e >] -> e
+      | [< 'MINUS; mult e2; restexpr (Minus (e1,e2)) e >] -> e
+      | [< >] -> e1
+in function [< mult e1; (restexpr e1) e2 >] -> e2
+\end{verbatim}
+Now, {\tt expr} recognizes a product {\tt e1} (by {\tt mult}), and
+applies \verb|(restexpr e1)| to the rest of the stream. According to
+the additive operator encountered (if any), this function will apply
+{\tt mult} which will return some {\tt e2}. Then the process continues
+with \verb|Plus(e1,e2)| as intermediate result. In the end, a
+correctly balanced tree will be produced (using the last rule of {\tt
+restexpr}).
+
+With the same considerations on {\tt mult} and {\tt restmult}, we can
+complete the parser, obtaining:
+\begin{caml_example}
+let rec expr =
+    let rec restexpr e1 = function
+        [< 'PLUS; mult e2; (restexpr (Plus (e1,e2))) e >] -> e
+      | [< 'MINUS; mult e2; (restexpr (Minus (e1,e2))) e >] -> e
+      | [< >] -> e1
+in function [< mult e1; (restexpr e1) e2 >] -> e2
+
+and mult =
+    let rec restmult e1 = function
+        [< 'TIMES; atom e2; (restmult (Mult (e1,e2))) e >] -> e
+      | [< 'DIV; atom e2; (restmult (Div (e1,e2))) e >] -> e
+      | [< >] -> e1
+in function [< atom e1; (restmult e1) e2 >] -> e2
+
+and atom = function
+  [< 'INT n >] -> Int n
+| [< 'LPAR; expr e; 'RPAR >] -> e;;
+\end{caml_example}
+And we can now try our parser:
+\begin{caml_example}
+expr (lexer (stream_of_string "(1+2+3*4)-567"));;
+\end{caml_example}
+
+\subsection{Parameters simulating inherited attributes}
+
+In the previous example, the parsers {\tt restexpr} and {\tt restmult}
+take an abstract syntax tree {\tt e1} as argument and pass it down to the
+result through recursive calls such as \verb|(restexpr
+(Plus(e1,e2)))|. If we see such parsers as non-terminals ({\tt
+RestExpr} from the grammar above) this parameter acts as an inherited
+attribute of the non-terminal. Synthesized attributes are simulated by
+the right hand sides of stream matching rules.
+
+\subsection{Higher-order parsers}
+
+In the definition of {\tt expr}, we may notice that the parsers {\tt
+expr} and {\tt mult} on the one hand and {\tt restexpr} and {\tt
+restmult} on the other hand have exactly the same structure. To
+emphasize this similarity, if we define parsers for additive (resp.
+multiplicative) operators by:
+\begin{caml_example}
+let addop = function
+  [< 'PLUS >] -> (function (x,y) -> Plus(x,y))
+| [< 'MINUS >] -> (function (x,y) -> Minus(x,y))
+and multop = function
+  [< 'TIMES >] -> (function (x,y) -> Mult(x,y))
+| [< 'DIV >] -> (function (x,y) -> Div(x,y));;
+\end{caml_example}
+we can rewrite the {\tt expr} parser as:
+\begin{caml_example}
+let rec expr =
+    let rec restexpr e1 = function
+        [< addop f; mult e2; (restexpr (f (e1,e2))) e >] -> e
+      | [< >] -> e1
+in function [< mult e1; (restexpr e1) e2 >] -> e2
+
+and mult =
+    let rec restmult e1 = function
+        [< multop f; atom e2; (restmult (f (e1,e2))) e >] -> e
+      | [< >] -> e1
+in function [< atom e1; (restmult e1) e2 >] -> e2
+
+and atom = function
+  [< 'INT n >] -> Int n
+| [< 'LPAR; expr e; 'RPAR >] -> e;;
+\end{caml_example}
+Now, we take advantage of these similarities in order to define a
+general parser for left-associative operators. Its name is
+\verb|left_assoc| and is parameterized by a parser for operators and a
+parser for expressions:
+\begin{caml_example}
+let rec left_assoc op term =
+    let rec rest e1 = function
+        [< op f; term e2; (rest (f (e1,e2))) e >] -> e
+      | [< >] -> e1
+    in function [< term e1; (rest e1) e2 >] -> e2;;
+\end{caml_example}
+Now, we can redefine {\tt expr} as:
+\begin{caml_example}
+let rec expr str = left_assoc addop mult str
+and mult str = left_assoc multop atom str
+and atom = function
+  [< 'INT n >] -> Int n
+| [< 'LPAR; expr e; 'RPAR >] -> e;;
+\end{caml_example}
+And we can now try our definitive parser:
+\begin{caml_example}
+expr (lexer (stream_of_string "(1+2+3*4)-567"));;
+\end{caml_example}
+Parameterized parsers are useful for defining general parsers such as
+\verb|left_assoc| that can
+be used with different instances. Another example of a useful general
+parser is the {\tt star} parser defined as:
+\begin{caml_example}
+let rec star p = function
+  [< p x; (star p) l >] -> x::l
+| [< >] -> [];;
+\end{caml_example}
+The {\tt star} parser iterates zero or more times its argument {\tt p}
+and returns the list of results. We still have to be careful in using
+these general parsers because of the predictive nature of parsing. For
+example, {\tt star p} will never successfully terminate if {\tt p}
+has a rule for the empty stream pattern: this rule will make
+the second rule of {\tt star} useless!
+
+\subsection{Example: parsing a non context-free language}
+
+As an example of parsing with parameterized parsers, we shall build
+a parser for the language $\{wCw~ |~ w \in (A|B)^{*} \}$, which is
+known to be non context-free.
+
+First, let us define a type for this alphabet:
+\begin{caml_example}
+type token = A | B | C;;
+\end{caml_example}
+Given an input of the form $w {\tt C} w$, the idea for a parser
+recognizing it is:
+\begin{itemize}
+\item first, to recognize the sequence $w$ with a parser {\tt wd} (for
+{\em word definition}) returning information in order to build a
+parser recognizing only $w$;
+\item then to recognize {\tt C};
+\item and to use the parser built at the first step to recognize the
+sequence $w$.
+\end{itemize}
+The definition of {\tt wd} is as follows:
+\begin{caml_example}
+let rec wd = function
+  [< 'A; wd l >] -> (function [< 'A >] -> "a")::l
+| [< 'B; wd l >] -> (function [< 'B >] -> "b")::l
+| [< >] -> [];;
+\end{caml_example}
+The {\tt wu} function (for {\em word usage}) builds a parser
+sequencing a list of parsers:
+\begin{caml_example}
+let rec wu = function
+  p::pl -> (function [< p x; (wu pl) l >] -> x^l)
+| [] -> (function [< >] -> "");;
+\end{caml_example}
+The {\tt wu} function builds, from a list of parsers $p_i$, for
+$i=1..n$, a single parser
+\begin{center}
+\verb|function [<|$p_1~x_1${\tt;}\ldots{\tt;}$p_n~x_n$\verb|>] -> [|$x_1${\tt;}\ldots{\tt;}$x_n$\verb|]|
+\end{center}
+which is the sequencing of parsers $p_i$.
+The main parser {\tt w} is:
+\begin{caml_example}
+let w = function [< wd l; 'C; (wu l) r >] -> r;;
+w [< 'A; 'B; 'B; 'C; 'A; 'B; 'B >];;
+w [< 'C >];;
+\end{caml_example}
+
+In the previous parser, we used an intermediate list of parsers in
+order to build the second parser. We can redefine {\tt wd} without
+using such a list:
+\begin{caml_example}
+let w =
+    let rec wd wr = function
+        [< 'A; (wd (function [< wr r; 'A >] -> r^"a")) p >] -> p
+      | [< 'B; (wd (function [< wr r; 'B >] -> r^"b")) p >] -> p
+      | [< >] -> wr
+    in function [< (wd (function [< >] -> "")) p; 'C; p str >] -> str;;
+w [< 'A; 'B; 'B; 'C; 'A; 'B; 'B >];;
+w [< 'C >];;
+\end{caml_example}
+Here, {\tt wd} is made local to {\tt w}, and takes as parameter {\tt
+wr} (for {\em word recognizer}) whose initial value is the parser with
+an empty stream pattern.  This parameter accumulates intermediate
+results, and is delivered at the end of parsing the initial sequence
+$w$. After checking for the presence of {\tt C}, it is used to parse
+the second sequence $w$.
+
+\section{Further reading}
+
+A summary of the constructs over streams and of primitives over
+streams is given in \cite{CamlLightDoc}.
+
+An alternative to parsing with streams and stream matching are the
+{\tt camllex} and {\tt camlyacc} programs.
+
+A detailed presentation of streams and stream matching following
+``predictive parsing'' semantics can be found
+in~\cite{MaunydeRauglaudre92a}, where alternative semantics are given
+with some possible implementations.
+
+\section*{Exercises}
+
+\begin{exo}\label{Streams:1}
+Define a parser for the language of prefix arithmetic expressions
+generated by the grammar:
+\begin{verbatim}
+Expr ::= INT
+       | + Expr Expr
+       | - Expr Expr
+       | * Expr Expr
+       | / Expr Expr
+\end{verbatim}
+Use the lexical analyzer for arithmetic expressions given above. The
+result of the parser must be the integer resulting from the evaluation
+of the arithmetic expression, i.e. its type must be:
+\begin{center}
+\verb`token -> int`
+\end{center}
+\end{exo}
+
+\begin{exo}\label{Streams:2}
+Enrich the type {\tt token} above with a constructor {\tt IDENT
+of string} for identifiers, and enrich the lexical analyzer for it to
+recognize identifiers built from alphabetic letters (upper or
+lowercase). Length of identifiers may be limited.
+\end{exo}

@@ -1,0 +1,483 @@
+\chapter{User-defined types}
+\label{c:udeftypes}
+
+The user is allowed to define his/her own data types.
+With this facility, there is no need to encode
+the data structures that must be manipulated by a program into lists
+(as in Lisp) or into arrays (as in Fortran). Furthermore, early
+detection of type errors is enforced, since user-defined data types reflect
+precisely the needs of the algorithms. %
+
+Types are either:
+\begin{itemize}
+\item {\em product} types,
+\item or {\em sum} types.
+\end{itemize}
+
+We have already seen examples of both kinds of types: the {\tt bool} and
+{\tt list} types are sum types (they contain values with different shapes
+and are defined and matched using several alternatives). The
+cartesian product is an example of a product type: we know statically
+the shape of values belonging to cartesian products.
+
+In this chapter, we will see how to define and use new types in Caml.
+
+%
+\section{Product types}
+\label{s:udefprodtypes}
+
+Product types are {\em finite} {\em labeled} products of types.
+They are a generalization of cartesian product.
+Elements of product types are called {\em records}.
+
+\subsection{Defining product types}
+
+An example: suppose we want to define a data structure containing
+information about individuals. We could define:
+\begin{caml_example}
+let jean=("Jean",23,"Student","Paris");;
+\end{caml_example}
+and use pattern-matching to extract any particular
+information about the person {\tt jean}.
+The problem with such usage of cartesian product is that a function
+\verb"name_of" returning the name field of a value representing an individual
+would have the same type as the general first projection for 4-tuples
+(and indeed would be the same function). This type is not precise enough
+since it allows for the application of the function to any 4-uple, and
+not only to values such as {\tt jean}.
+
+Instead of using cartesian product, we define a {\tt person} data
+type:\ikwd{type@\verb`type`}
+\begin{caml_example}
+type person =
+  {Name:string; Age:int; Job:string; City:string};;
+\end{caml_example}
+The type {\tt person} is the {\em product} of {\tt string}, {\tt int}, {\tt
+string} and {\tt string}.
+The field names provide type information and also documentation: it
+is much easier to understand data structures such as {\tt jean} above than
+arbitrary tuples.
+%
+
+We have {\em labels} (i.e. {\tt Name}, \ldots) to refer to components of
+the products. The order of appearance of the products components is not
+relevant: labels are sufficient to uniquely identify the components.
+The Caml system finds a canonical order on labels
+to represent and print record values. The order is always the order which
+appeared in the definition of the type.
+%
+
+We may now define the individual {\tt jean} as:
+\begin{caml_example}
+let jean = {Job="Student"; City="Paris";
+            Name="Jean"; Age=23};;
+\end{caml_example}
+This example illustrates the fact that order of labels is not
+relevant.
+
+\subsection{Extracting products components}
+
+The canonical way of extracting product components is {\em pattern-matching}.
+Pattern-matching provides a way to mention the shape of values and to give
+(local) names to components of values.
+In the following example, we name {\tt n} the numerical value contained in
+the field {\tt Age} of the argument, and we choose to forget values
+contained in other fields (using the \verb"_" character).%
+\begin{caml_example}
+let age_of = function
+     {Age=n; Name=_; Job=_; City=_} -> n;;
+age_of jean;;
+\end{caml_example}
+It is also possible to access the value of a single field, with the
+{\tt .} (dot) operator:
+\begin{caml_example}
+jean.Age;;
+jean.Job;;
+\end{caml_example}
+Labels always refer to the most recent type definition: when two
+record types possess some common labels, then these labels always
+refer to the most recently defined type. When using modules (see
+section~\ref{s:modules}) this problem arises for types defined in
+the same module. For types defined in different modules, the full name
+of labels (i.e. with the name of the modules prepended) disambiguates
+such situations.
+
+\subsection{Parameterized product types}
+
+It is important to be able to define parameterized types in order to
+define {\em generic} data structures. The {\tt list} type is parameterized,
+and this is the reason why we may build lists of any kind of values.
+If we want to define the cartesian product as a Caml type, we need type
+parameters because we want to be able to build cartesian product of {\em
+any} pair of types.
+\begin{caml_example}
+type ('a,'b) pair = {Fst:'a; Snd:'b};;
+let first x = x.Fst and second x = x.Snd;;
+let p={Snd=true; Fst=1+2};;
+first(p);;
+\end{caml_example}
+Warning: the {\tt pair} type is similar to the Caml cartesian product {\tt
+*}, but it is a different type.
+\begin{caml_example}
+fst p;;
+\end{caml_example}
+Actually, any two type definitions produce different types. If we
+enter again the previous definition:
+\begin{caml_example}
+type ('a,'b) pair = {Fst:'a; Snd:'b};;
+\end{caml_example}
+we cannot any longer extract the {\tt Fst} component of {\tt x}:
+\begin{caml_example}
+p.Fst;;
+\end{caml_example}
+since the label {\tt Fst} refers to the {\em latter} type {\tt pair} that we
+defined, while {\tt p}'s type is the {\em former} {\tt pair}.
+
+\section{Sum types}
+
+A {\em sum} type is the {\em finite} {\em labeled} disjoint union of
+several types.
+A sum type definition defines a type as being the union of some other types.%
+
+\subsection{Defining sum types}
+
+Example: we want to have a type called {\tt identification} whose
+values can be:
+\begin{itemize}
+\item either strings (name of an individual),
+\item or integers (encoding of social security number as a pair of integers).
+\end{itemize}
+We then need a type containing {\em both} \verb|int * int| and
+character strings.  We also want to preserve static type-checking, we
+thus want to be able to distinguish pairs from character strings
+even if they are injected in order to form a single type.
+
+Here is what we would do:\ikwd{type@\verb`type`}
+\begin{caml_example}
+type identification = Name of string
+                    | SS of int * int;;
+\end{caml_example}
+The type {\tt identification} is the labeled disjoint union of {\tt string}
+and \verb|int * int|.
+The labels {\tt Name} and {\tt SS} are {\em injections}.
+They respectively inject \verb|int * int| and {\tt string} into a single type
+{\tt identification}.
+
+Let us use these injections in order to build new values:
+\begin{caml_example}
+let id1 = Name "Jean";;
+let id2 = SS (1670728,280305);;
+\end{caml_example}
+Values {\tt id1} and {\tt id2} belong to the same type. They may for
+example be put into lists as in:
+\begin{caml_example}
+[id1;id2];;
+\end{caml_example}
+
+Injections may possess one argument (as in the example above), or
+none. The latter case corresponds\footnote{In Caml Light, there is no
+implicit order on values of sum types.} to {\em enumerated types}, as
+in Pascal. An example of enumerated type is:
+\begin{caml_example}
+type suit = Heart
+          | Diamond
+          | Club
+          | Spade;;
+Club;;
+\end{caml_example}
+The type {\tt suit} contains only 4 distinct elements.
+Let us continue this example by defining a type for cards.
+\begin{caml_example}
+type card = Ace of suit
+          | King of suit
+          | Queen of suit
+          | Jack of suit
+          | Plain of suit * int;;
+\end{caml_example}
+The type {\tt card} is the disjoint union of:
+\begin{itemize}
+\item {\tt suit} under the injection {\tt Ace},
+\item {\tt suit} under the injection {\tt King},
+\item {\tt suit} under the injection {\tt Queen},
+\item {\tt suit} under the injection {\tt Jack},
+\item the product of {\tt int} and  {\tt suit} under the injection {\tt Plain}.
+\end{itemize}
+Let us build a list of cards:
+\begin{caml_example}
+let figures_of c = [Ace c; King c; Queen c; Jack c]
+and small_cards_of c =
+    map (function n -> Plain(c,n)) [7;8;9;10];;
+figures_of Heart;;
+small_cards_of Spade;;
+\end{caml_example}
+
+\subsection{Extracting sum components}
+
+Of course, pattern-matching is used to extract sum components.
+In case of sum types, pattern-matching uses dynamic tests for this
+extraction.
+The next example defines a function {\tt color} returning the name of
+the color of the suit argument:%
+\begin{caml_example}
+let color = function Diamond -> "red"
+                   | Heart -> "red"
+                   | _ -> "black";;
+\end{caml_example}
+Let us count the values of cards (assume we are playing ``belote''):
+\begin{caml_example}
+let count trump = function
+    Ace _        -> 11
+  | King _       -> 4
+  | Queen _      -> 3
+  | Jack c       -> if c = trump then 20 else 2
+  | Plain (c,10) -> 10
+  | Plain (c,9)  -> if c = trump then 14 else 0
+  | _             -> 0;;
+\end{caml_example}
+
+\subsection{Recursive types}
+
+Some types possess a naturally recursive structure, lists, for
+example. It is also the case for tree-like structures, since trees
+have subtrees that are trees themselves.
+
+Let us define a type for abstract syntax trees of a simple arithmetic
+language\footnote{Syntax trees are said to be {\em abstract} because
+they are pieces of {\em abstract syntax} contrasting with {\em
+concrete syntax} which is the ``string'' form of programs: analyzing
+(parsing) concrete syntax usually produces abstract syntax.}. An
+arithmetic expression will be either a numeric constant, or a
+variable, or the addition, multiplication, difference, or division of
+two expressions.\ikwd{type@\verb`type`}
+\begin{caml_example}
+type arith_expr = Const of int
+                | Var of string
+                | Plus of args
+                | Mult of args
+                | Minus of args
+                | Div of args
+and args = {Arg1:arith_expr; Arg2:arith_expr};;
+\end{caml_example}
+The two types \verb|arith_expr| and \verb|args| are simultaneously
+defined, and \verb|arith_expr| is recursive since its definition
+refers to \verb|args| which itself refers to \verb|arith_expr|. As an
+example, one could represent the abstract syntax tree of the
+arithmetic expression ``\verb|x+(3*y)|'' as the Caml value:
+\begin{caml_example}
+Plus {Arg1=Var "x";
+       Arg2=Mult{Arg1=Const 3; Arg2=Var "y"}};;
+\end{caml_example}
+
+The recursive definition of types may lead to types such that it is
+hard or impossible to build values of these types.
+For example:
+%% \begin{caml_example}
+%% type stupid = {Head:stupid; Tail:stupid};;
+%% \end{caml_example}
+\begin{caml_example}
+type stupid = {Next:stupid};;
+\end{caml_example}
+Elements of this type are {\em infinite} data structures. Essentially,
+the only way to construct one is:
+%% \begin{caml_example}
+%% let rec stupid_value =
+%%     {Head=stupid_value; Tail=stupid_value};;
+%% \end{caml_example}
+\begin{caml_example}
+let rec stupid_value = {Next=stupid_value};;
+\end{caml_example}
+
+Recursive type definitions should be {\em well-founded} (i.e. possess
+a non-recursive case, or {\em base case}) in order to work well with
+call-by-value.
+
+\subsection{Parameterized sum types}
+
+Sum types may also be parameterized.
+Here is the definition of a type isomorphic to the {\tt list} type:
+\begin{caml_example}
+type 'a sequence = Empty
+                 | Sequence of 'a * 'a sequence;;
+\end{caml_example}
+
+A more sophisticated example is the type of generic binary trees:
+\begin{caml_example}
+type ('a,'b) btree = Leaf of 'b
+                   | Btree of ('a,'b) node
+and ('a,'b) node = {Op:'a;
+                    Son1: ('a,'b) btree;
+                    Son2: ('a,'b) btree};;
+\end{caml_example}
+A binary tree is either a leaf (holding values of type {\tt 'b}) or a
+node composed of an operator (of type {\tt 'a}) and two sons, both of them
+being binary trees.
+
+Binary trees can also be used to represent abstract trees for
+arithmetic expressions (with only binary operators and only one kind
+of leaves). The abstract
+syntax tree \verb|t| of ``\verb|1+2|'' could be defined as:
+\begin{caml_example}
+let t = Btree {Op="+"; Son1=Leaf 1; Son2=Leaf 2};;
+\end{caml_example}
+
+Finally, it is time to notice that pattern-matching is not restricted to
+function bodies, i.e. constructs such as:
+\begin{center}
+\begin{tabular}{rll}
+\tt function & $P_1$ & \verb|->| $E_1$\\
+    \verb'|' & \ldots\\
+    \verb'|' & $P_n$ & \verb|->| $E_n$
+\end{tabular}
+\end{center}
+but there is also a construct dedicated to pattern-matching of actual
+values:
+\ikwd{match@\verb`match`}
+\begin{center}
+\begin{tabular}{rll}
+\tt match $E$ with & $P_1$ & \verb|->| $E_1$\\
+          \verb'|' & \ldots\\
+          \verb'|' & $P_n$ & \verb|->| $E_n$
+\end{tabular}
+\end{center}
+which matches the value of the expression $E$ against each of the
+patterns $P_i$, selecting the first one that matches, and giving
+control to the corresponding expression. For example, we can match the
+tree {\tt t} previously defined by:
+\begin{caml_example}
+match t with Btree{Op=x; Son1=_; Son2=_} -> x
+           | Leaf l -> "No operator";;
+\end{caml_example}
+
+\subsection{Data constructors and functions}
+
+One may ask: ``What is the difference between a sum data constructor and a
+function?''.
+At first sight, they look very similar. We assimilate constant data
+constructors (such as {\tt Heart}) to constants. Similarly, in Caml
+Light, sum data constructors with arguments also possess a functional type:
+\begin{caml_example}
+Ace;;
+\end{caml_example}
+However, a data constructor possesses particular properties
+that a general function does not possess, and it is interesting to
+understand these differences.  From the mathematical point of view, a
+sum data constructor is known to be an {\em injection} while a Caml
+function is a general function without further information.
+A mathematical injection $f: A \rightarrow B$ admits an inverse function
+$f^{-1}$ from its image $f(A) \subset B$ to $A$.
+
+From the examples above, if we consider the {\tt King} constructor, then:
+\begin{caml_example}
+let king c = King c;;
+\end{caml_example}
+{\tt king} is the general function associated to the {\tt King}
+constructor, and:
+\begin{caml_example}
+function King c -> c;;
+\end{caml_example}
+is the inverse function for {\tt king}.
+It is a partial function, since pattern-matching may fail.
+
+\subsection{Degenerate cases: when sums meet products}
+
+What is the status of a sum type with a single case such as:
+\begin{caml_example}
+type counter1 = Counter of int;;
+\end{caml_example}
+Of course, the type {\tt counter1} is isomorphic to {\tt int}.
+The injection \verb"function x -> Counter x" is a {\em total} function from {\tt int} to
+{\tt counter1}. It is thus a {\em bijection}.
+
+Another way to define a type isomorphic to {\tt int} would be:
+\begin{caml_example}
+type counter2 = {Counter: int};;
+\end{caml_example}
+The types {\tt counter1} and {\tt counter2} are isomorphic to {\tt int}.
+They are at the same time sum and product types.
+Their pattern-matching does not perform any run-time test.
+
+The possibility of defining arbitrary complex data types permits the easy
+manipulation of abstract syntax trees in Caml (such as the \verb"arith_expr"
+type above). These abstract syntax trees are supposed to represent programs of
+a language (e.g. a language of arithmetic expressions). These kind of
+languages which are defined in Caml are called {\em object-languages} and
+Caml is said to be their {\em metalanguage}.
+
+\section{Summary}
+
+\begin{itemize}
+\item New types can be introduced in Caml.
+\item Types may be {\em parameterized} by type variables. The syntax of type
+parameters is:
+\begin{verbatim}
+<params> ::
+          | <tvar>
+          | ( <tvar> [, <tvar>]* )
+\end{verbatim}
+\item Types can be {\em recursive}.
+
+\item Product types:
+  \begin{itemize}
+  \item Mathematical product of several types.
+  \item The construct is:
+     \begin{verbatim}
+     type <params> <tname> =
+                      {<Field>: <type>; ...}
+     \end{verbatim}
+     where the \verb"<type>"s may contain type variables appearing in
+     \verb"<params>".
+  \end{itemize}
+\item Sum types:
+  \begin{itemize}
+  \item Mathematical disjoint union of several types.
+  \item The construct is:
+     \begin{verbatim}
+     type <params> <tname> =
+              <Injection> [of <type>] | ...
+     \end{verbatim}
+     where the \verb"<type>"s may contain type variables appearing in
+     \verb"<params>".
+  \end{itemize}
+\end{itemize}
+
+\section*{Exercises}
+
+\begin{exo}\label{Types:1}
+Define a function taking as argument a binary tree and returning a pair of
+lists: the first one contains all operators of the tree, the second
+one contains all its leaves.
+\end{exo}
+\begin{exo}\label{Types:2}
+Define a function \verb"map_btree" analogous to the {\tt map} function
+on lists.
+The function \verb"map_btree" should take as arguments two functions {\tt f}
+and {\tt g}, and a binary tree. It should return a new binary tree whose
+leaves are the result of applying {\tt f} to the leaves of the tree
+argument, and whose operators are the results of applying the {\tt g}
+function to the operators of the argument.
+\end{exo}
+\begin{exo}\label{Types:3}
+We can associate to the {\tt list} type definition an canonical
+iterator in the following way. We give a functional interpretation
+to the data constructors of the {\tt list} type.
+
+We change the list constructors {\tt []} and {\tt ::} respectively
+into a constant {\tt a} and an operator $\oplus$ (used as a prefix
+identifier), and abstract with respect to these two operators, obtaining
+the list iterator satisfying:
+\begin{quote}
+\tt list\_it $\oplus$ a [] = a\\
+\tt list\_it $\oplus$ a ($x_1$::\ldots::$x_n$::[]) = $x_1$ $\oplus$ (\ldots $\oplus$ ($x_n$ $\oplus$ a)\ldots)
+\end{quote}
+Its Caml definition would be:
+\begin{caml_example}
+let rec list_it f a = 
+        function [] -> a
+               | x::l -> f x (list_it f a l);;
+\end{caml_example}
+As an example, the application of \verb|it_list| to the functional
+composition and to its neutral element (the identity function),
+computes the composition of lists of functions (try it!).
+
+Define, using the same method, a canonical iterator over binary trees.
+\end{exo}

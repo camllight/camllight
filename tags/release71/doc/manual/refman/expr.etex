@@ -1,0 +1,587 @@
+\section{Expressions}
+\ikwd{in\@\verb`in`|see{\verb`let`}}
+\ikwd{and\@\verb`and`|see{\verb`let`, \verb`type`, \verb`exception`,
+\verb`value`, \verb'where'}}
+\ikwd{rec\@\verb`rec`|see{\verb`let`, \verb'where'}}
+\ikwd{let\@\verb`let`}
+\ikwd{try\@\verb`try`}
+\ikwd{function\@\verb`function`}
+\ikwd{fun\@\verb`fun`}
+\ikwd{with\@\verb`with`|see{\verb`match`, \verb`try`}}
+\ikwd{done\@\verb`done`|see{\verb`while`, \verb`for`}}
+\ikwd{do\@\verb`do`|see{\verb`while`, \verb`for`}}
+\ikwd{downto\@\verb`downto`|see{\verb`for`}}
+\ikwd{to\@\verb`to`|see{\verb`for`}}
+\ikwd{for\@\verb`for`}
+\ikwd{else\@\verb`else`|see{\verb`if`}}
+\ikwd{then\@\verb`then`|see{\verb`if`}}
+\ikwd{if\@\verb`if`}
+\ikwd{of\@\verb`of`|see{\verb`type`, \verb`exception`}}
+\ikwd{or\@\verb`or`}
+\ikwd{match\@\verb`match`}
+\ikwd{begin\@\verb`begin`}
+\ikwd{end\@\verb`end`}
+
+\begin{syntax}
+expr:
+    ident
+  | variable
+  | constant
+  | '(' expr ')'
+  | 'begin' expr 'end'
+  | '(' expr ':' typexpr ')'
+  | expr ',' expr { ',' expr }
+  | ncconstr expr
+  | expr '::' expr
+  | '[' expr { ';' expr } ']'
+  | '[|' expr { ';' expr } '|]'
+  | '{' label '=' expr { ';' label '=' expr } '}'
+  | expr expr
+  | prefix-op expr
+  | expr infix-op expr
+  | expr '.' label
+  | expr '.' label '<-' expr
+  | expr '.(' expr ')'
+  | expr '.(' expr ')' '<-' expr
+  | expr '&' expr
+  | expr 'or' expr
+  | 'if' expr 'then' expr [ 'else' expr ]
+  | 'while' expr 'do' expr 'done'
+  | 'for' ident '=' expr ( 'to' || 'downto' ) expr 'do' expr 'done'
+  | expr ';' expr
+  | 'match' expr 'with' simple-matching
+  | 'fun' multiple-matching
+  | 'function' simple-matching
+  | 'try' expr 'with' simple-matching
+  | 'let' ['rec'] let-binding  { 'and' let-binding } 'in' expr
+;
+simple-matching:
+    pattern '->' expr { '|' pattern '->' expr }
+;
+multiple-matching:
+    pattern-list '->' expr { '|' pattern-list '->' expr }
+;
+pattern-list:
+    pattern { pattern }
+;
+let-binding:
+    pattern '=' expr
+  | variable pattern-list '=' expr
+;
+prefix-op:
+    '-' || '-.' || '!'
+;
+infix-op:
+    '+' || '-' || '*' || '/' || 'mod' || '+.' || '-.' || '*.' || '/.'
+                                         || '@' || '^' || '!' || ':=' 
+  | '=' || '<>' || '==' || '!=' || '<' || '<=' || '>' || '<=' 
+                                     || '<.' || '<=.' || '>.' || '<=.'
+\end{syntax}
+
+The table below shows the relative precedences and associativity of
+operators and non-closed constructions. The constructions with higher
+precedence come first.
+\ikwd{not\@\verb`not`}%
+\ikwd{or\@\verb`or`}%
+\ikwd{if\@\verb`if`}%
+\ikwd{fun\@\verb`fun`}%
+\ikwd{function\@\verb`function`}%
+\ikwd{match\@\verb`match`}%
+\ikwd{try\@\verb`try`}%
+\ikwd{let\@\verb`let`}%
+\ikwd{prefix\@\verb`prefix`}%
+\begin{tableau}{|l|l|}{Construction or operator}{Associativity}
+\entree{"!"}{--}
+\entree{".   .("}{--}
+\entree{function application}{right}
+\entree{constructor application}{--}
+\entree{"-   -." (prefix)}{--}
+\entree{"mod"}{left}
+\entree{"*   *.   /   /."}{left}
+\entree{"+   +.   -   -."}{left}
+\entree{"::"}{right}
+\entree{{\tt \char64} "^"}{right}
+\entree{comparisons ("=  ==  < " etc.)}{left}
+\entree{"not"}{--}
+\entree{"&"}{left}
+\entree{"or"}{left}
+\entree{","}{--}
+\entree{"<-   :="}{right}
+\entree{"if"}{--}
+\entree{";"}{right}
+\entree{"let" "match" "fun" "function" "try"}{--}
+\end{tableau}
+
+\subsection{Simple expressions}
+
+\subsubsection*{Constants}
+
+Expressions consisting in a constant evaluate to this constant.
+
+\subsubsection*{Variables} \label{expr:var}
+
+Expressions consisting in a variable evaluate to the value bound to
+this variable in the current evaluation environment. The variable can
+be either a qualified identifier or a simple identifier. Qualified
+identifiers always denote global variables. Simple identifiers denote
+either a local variable, if the identifier is locally bound, or a
+global variable, whose full name is obtained by qualifying the simple
+identifier, as described in section~\ref{s:names}.
+
+\subsubsection*{Parenthesized expressions}
+\ikwd{begin\@\verb`begin`}
+\ikwd{end\@\verb`end`}
+
+The expressions @'(' expr ')'@ and @'begin' expr 'end'@ have the same
+value as @expr@. Both constructs are semantically equivalent, but it
+is good style to use @'begin' \ldots 'end'@ inside control structures:
+\begin{alltt}
+        if \ldots then begin \ldots ; \ldots end else begin \ldots ; \ldots end
+\end{alltt}
+and @'(' \ldots ')'@ for the other grouping situations.
+
+Parenthesized expressions can contain a type constraint, as in @'('
+expr ':' type ')'@. This constraint forces the type of @expr@ to be
+compatible with @type@.
+
+\subsubsection*{Function abstraction}
+
+The most general form of function abstraction is:
+\begin{latexonly}
+$$\begin{array}{rlll}
+\token{fun} & {\sl pattern}_1^1 ~ \ldots ~ {\sl pattern}_1^m & \token{->} &
+                                                               {\sl expr}_1 \\
+\token{|}   & \ldots \\
+\token{|}   & {\sl pattern}_n^1 ~ \ldots ~ {\sl pattern}_n^m & \token{->} &
+                                                               {\sl expr}_n
+\end{array}$$
+\end{latexonly}
+\begin{rawhtml}
+<pre>
+fun <i>pattern</i>11 ... <i>pattern</i>1M -&gt; <i>expr</i>1
+  | ...
+  | <i>pattern</i>N1 ... <i>pattern</i>NM -&gt; <i>expr</i>N
+</pre>
+\end{rawhtml}
+This expression evaluates to a functional value with \var{m} curried arguments.
+When this function is applied to \var{m} values \nth{v}{1}~\ldots~\nth{v}{m},
+the values are matched against each pattern row
+@pattern_i^1 \ldots pattern_i^m@
+for \var{i} from 1 to \var{n}.
+If one of these matchings succeeds, that is if the value \nth{v}{j}
+matches the pattern @pattern_i^j@ for all \fromoneto{j}{m},
+then the expression @expr_i@ associated to the selected pattern row
+is evaluated, and its value becomes the value of the function
+application. The evaluation of @expr_i@ takes place in an
+environment enriched by the bindings performed during the matching.
+
+If several pattern rows match the arguments, the one that occurs first
+in the function definition is selected. If none of the pattern rows
+matches the argument, the exception "Match_failure" is raised.
+%
+\index{Match_failure (exception)\@\verb`Match_failure` (exception)}
+
+If the function above is applied to less than \var{m} arguments, a
+functional value is returned, that represents the partial application
+of the function to the arguments provided. This partial application is
+a function that, when applied to the remaining arguments,
+matches all arguments against the pattern rows as described above.
+Matching does not start until all \var{m} arguments have been provided
+to the function; hence, partial applications of the function to less
+than \var{m} arguments never raise "Match_failure".
+
+All pattern rows in the function body must contain the same
+number of patterns. A variable must not be bound more than once in
+one pattern row.
+
+Functions with only one argument can be defined with the
+{\tt function} keyword instead of {\tt fun}:
+\begin{latexonly}
+$$\begin{array}{rlll}
+\token{function} & {\sl pattern}_1 & \token{->} & {\sl expr}_1 \\
+\token{|}   & \ldots \\
+\token{|}   & {\sl pattern}_n & \token{->} & {\sl expr}_n
+\end{array}$$
+\end{latexonly}
+\begin{rawhtml}
+<pre>
+function <i>pattern</i>1 -&gt; <i>expr</i>1
+       | ...
+       | <i>pattern</i>N -&gt; <i>expr</i>N
+</pre>
+\end{rawhtml}
+The function thus defined behaves exactly as described above. The only
+difference between the two forms of function definition is how a
+parsing ambiguity is resolved. The two forms @cconstr~pattern@ (two
+patterns in a row) and @ncconstr~pattern@ (one pattern) cannot be
+distinguished syntactically. Function definitions introduced by
+{\tt fun} resolve the ambiguity to the former form; function
+definitions introduced by {\tt function} resolve it to the latter
+form (the former form makes no sense in this case).
+
+\subsubsection*{Function application}
+
+Function application is denoted by juxtaposition of expressions. The
+expression @expr_1 expr_2 \ldots expr_n@ evaluates the expressions
+@expr_1@ to @expr_n@. The expression @expr_1@ must evaluate to a
+functional value, which is then applied to the values of 
+@expr_2, \ldots, expr_n@. The order in which the expressions @expr_1, \ldots,
+expr_n@ are evaluated is not specified.
+
+\subsubsection*{Local definitions} \label{s:localdef}
+\ikwd{let\@\verb`let`}
+
+The {\tt let} and {\tt let rec} constructs bind variables locally.
+The construct
+\begin{center}
+@"let" pattern_1 "=" expr_1 "and" \ldots "and" pattern_n "=" expr_n "in" expr@
+\end{center}
+evaluates @expr_1 \ldots expr_n@ in some unspecified order, then matches
+their values against the patterns @pattern_1 \ldots pattern_n@. If the
+matchings succeed, @expr@ is evaluated in the environment enriched by
+the bindings performed during matching, and the value of @expr@ is
+returned as the value of the whole {\tt let} expression. If one of the
+matchings fails, the exception "Match_failure" is raised.
+%
+\index{Match_failure (exception)\@\verb`Match_failure` (exception)}
+
+An alternate syntax is provided to bind variables to functional
+values: instead of writing
+\begin{center}
+@ident "=" "fun" pattern_1 \ldots pattern_m "->" expr@
+\end{center}
+in a {\tt let} expression, one may instead write
+\begin{center}
+@ident pattern_1 \ldots pattern_m "=" expr@
+\end{center}
+Both forms bind @ident@ to the curried function with \var{m} arguments and
+only one case,
+\begin{center}
+@pattern_1 \ldots pattern_m "->" expr@.
+\end{center}
+
+\medskip
+\noindent
+Recursive definitions of variables are introduced by {\tt let rec}:
+\begin{center}
+@"let" "rec" pattern_1 "=" expr_1 "and" \ldots "and" pattern_n "=" expr_n
+       "in" expr@
+\end{center}
+The only difference with the {\tt let} construct described above is
+that the bindings of variables to values performed by the
+pattern-matching are considered already performed when the expressions
+@expr_1@ to @expr_n@ are evaluated. That is, the expressions @expr_1@
+to @expr_n@ can reference identifiers that are bound by one of the
+patterns @pattern_1, \ldots, pattern_n@, and expect them to have the
+same value as in @expr@, the body of the {\tt let rec} construct.
+
+The recursive definition is guaranteed to behave as described above if
+the expressions @expr_1@ to @expr_n@ are function definitions
+(@"fun" \ldots@ or @"function" \ldots@), and the patterns @pattern_1
+\ldots pattern_n@ consist in a single variable, as in:
+\begin{center}
+@"let" "rec" ident_1 "=" "fun" \ldots
+"and" \ldots
+"and" ident_n "=" "fun" \ldots
+"in" expr@
+\end{center}
+This defines @ident_1 \ldots ident_n@ as mutually recursive functions
+local to @expr@. The behavior of other forms of {\tt let rec}
+definitions is implementation-dependent.
+
+\subsection{Control constructs}
+
+\subsubsection*{Sequence}
+
+The expression @expr_1 ";" expr_2@ evaluates @expr_1@ first, then
+@expr_2@, and returns the value of @expr_2@.
+
+\subsubsection*{Conditional}
+\ikwd{if\@\verb`if`}
+
+The expression @"if" expr_1 "then" expr_2 "else" expr_3@ evaluates to
+the value of @expr_2@ if @expr_1@ evaluates to the boolean @"true"@,
+and to the value of @expr_3@ if @expr_1@ evaluates to the boolean
+@"false"@.
+
+The @"else" expr_3@ part can be omitted, in which case it defaults to
+@"else" "()"@.
+
+\subsubsection*{Case expression}\ikwd{match\@\verb`match`}
+
+The expression
+\begin{latexonly}
+$$\begin{array}{rlll}
+\token{match} & {\sl expr} \\
+\token{with} & {\sl pattern}_1 & \token{->} & {\sl expr}_1 \\
+\token{|}     & \ldots \\
+\token{|}     & {\sl pattern}_n & \token{->} & {\sl expr}_n
+\end{array}$$
+\end{latexonly}
+\begin{rawhtml}
+<pre>
+match <i>expr</i> with
+      <i>pattern</i>1 -&gt; <i>expr</i>1
+    | ...
+    | <i>pattern</i>N -&gt; <i>expr</i>N
+</pre>
+\end{rawhtml}
+matches the value of @expr@ against the patterns @pattern_1@ to
+@pattern_n@. If the matching against @pattern_i@ succeeds, the
+associated expression @expr_i@ is evaluated, and its value becomes the
+value of the whole @'match'@ expression. The evaluation of
+@expr_i@ takes place in an environment enriched by the bindings
+performed during matching. If several patterns match the value of
+@expr@, the one that occurs first in the @'match'@ expression is
+selected. If none of the patterns match the value of @expr@, the
+exception @'Match_failure'@ is raised.
+%
+\index{Match_failure (exception)\@\verb`Match_failure` (exception)}
+
+\subsubsection*{Boolean operators}
+
+The expression @expr_1 '&' expr_2@ evaluates to @'true'@ if both
+@expr_1@ and @expr_2@ evaluate to @'true'@; otherwise, it evaluates to
+@'false'@. The first component, @expr_1@, is evaluated first. The
+second component, @expr_2@, is not evaluated if the first component
+evaluates to @'false'@. Hence, the expression @expr_1 '&' expr_2@ behaves 
+exactly as
+\begin{center}
+@'if' expr_1 'then' expr_2 'else' 'false'@.
+\end{center}
+
+\ikwd{or\@\verb`or`}
+The expression @expr_1 'or' expr_2@ evaluates to @'true'@ if one of
+@expr_1@ and @expr_2@ evaluates to @'true'@; otherwise, it evaluates to
+@'false'@. The first component, @expr_1@, is evaluated first. The
+second component, @expr_2@, is not evaluated if the first component
+evaluates to @'true'@. Hence, the expression @expr_1 'or' expr_2@ behaves 
+exactly as
+\begin{center}
+@'if' expr_1 'then' 'true' 'else' expr_2@.
+\end{center}
+
+\subsubsection*{Loops}
+
+\ikwd{while\@\verb`while`}
+The expression @'while' expr_1 'do' expr_2 'done'@ repeatedly
+evaluates @expr_2@ while @expr_1@ evaluates to @'true'@. The loop
+condition @expr_1@ is evaluated and tested at the beginning of each
+iteration. The whole @'while' \ldots 'done'@ expression evaluates to
+the unit value @'()'@.
+
+\ikwd{for\@\verb`for`}
+The expression @'for' ident '=' expr_1 'to' expr_2 'do' expr_3 'done'@
+first evaluates the expressions @expr_1@ and @expr_2@ (the boundaries)
+into integer values \var{n} and \var{p}. Then, the loop body @expr_3@ is
+repeatedly evaluated in an environment where the local variable named
+@ident@ is successively bound to the values
+\begin{latexonly}
+   $n$, $n+1$, \ldots, $p-1$, $p$.
+   The loop body is never evaluated if $n > p$.
+\end{latexonly}
+\begin{rawhtml}
+   <i>n</i>, <i>n</i>+1, \ldots, <i>p</i>-1, <i>p</i>.
+   The loop body is never evaluated if <i>n</i> &gt; <i>p</i>.
+\end{rawhtml}
+
+The expression @'for' ident '=' expr_1 'downto' expr_2 'do' expr_3 'done'@
+first evaluates the expressions @expr_1@ and @expr_2@ (the boundaries)
+into integer values \var{n} and \var{p}. Then, the loop body @expr_3@ is
+repeatedly evaluated in an environment where the local variable named
+@ident@ is successively bound to the values
+\begin{latexonly}
+   $n$, $n-1$, \ldots, $p+1$, $p$.
+   The loop body is never evaluated if $n < p$.
+\end{latexonly}
+\begin{rawhtml}
+   <i>n</i>, <i>n</i>-1, \ldots, <i>p</i>+1, <i>p</i>.
+   The loop body is never evaluated if <i>n</i> &lt; <i>p</i>.
+\end{rawhtml}
+
+In both cases, the whole @'for'@ expression evaluates to the unit
+value @'()'@.
+
+\subsubsection*{Exception handling}
+\ikwd{try\@\verb`try`}
+
+The expression
+\begin{latexonly}
+$$\begin{array}{rlll}
+\token{try~} & {\sl expr} \\
+\token{with} & {\sl pattern}_1 & \token{->} & {\sl expr}_1 \\
+\token{|}   & \ldots \\
+\token{|}   & {\sl pattern}_n & \token{->} & {\sl expr}_n
+\end{array}$$
+\end{latexonly}
+\begin{rawhtml}
+<pre>
+try  <i>expr</i>
+with <i>pattern</i>1 -&gt; <i>expr</i>1
+    | ...
+    | <i>pattern</i>N -&gt; <i>expr</i>N
+</pre>
+\end{rawhtml}
+evaluates the expression @expr@ and returns its value if the
+evaluation of @expr@ does not raise any exception. If the evaluation
+of @expr@ raises an exception, the exception value is matched against
+the patterns @pattern_1@ to @pattern_n@. If the matching against
+@pattern_i@ succeeds, the associated expression @expr_i@ is evaluated,
+and its value becomes the value of the whole @'try'@ expression. The
+evaluation of @expr_i@ takes place in an environment enriched by the
+bindings performed during matching. If several patterns match the value of
+@expr@, the one that occurs first in the @'try'@ expression is
+selected. If none of the patterns matches the value of @expr@, the
+exception value is raised again, thereby transparently ``passing
+through'' the @'try'@ construct.
+
+\subsection{Operations on data structures}
+
+\subsubsection*{Products}
+
+The expression @expr_1 ',' \ldots ',' expr_n@ evaluates to the
+\var{n}-tuple of the values of expressions @expr_1@ to @expr_n@. The
+evaluation order for the subexpressions is not specified.
+
+\subsubsection*{Variants}
+
+The expression @ncconstr expr@ evaluates to the variant value whose
+constructor is @ncconstr@, and whose argument is the value of @expr@.
+
+For lists, some syntactic sugar is provided. The expression
+@expr_1 '::' expr_2@ stands for the constructor @'prefix' '::'@
+applied to the argument @'(' expr_1 ',' expr_2 ')'@, and therefore
+evaluates to the list whose head is the value of @expr_1@ and whose tail
+is the value of @expr_2@. The expression @'[' expr_1 ';' \ldots ';'
+expr_n ']'@ is equivalent to @expr_1 '::' \ldots '::' expr_n '::'
+'[]'@, and therefore evaluates to the list whose elements are the
+values of @expr_1@ to @expr_n@.
+
+\subsubsection*{Records}
+
+The expression @'{' label_1 '=' expr_1 ';' \ldots ';' label_n '='
+expr_n '}'@ evaluates to the record value
+@'{' label_1 '=' v_1 ';' \ldots ';' label_n '=' v_n '}'@,
+where @v_i@ is the value of @expr_i@ for \fromoneto{i}{n}.
+The labels @label_1@ to @label_n@ must all belong to the same record
+types; all labels belonging to this record type must appear exactly
+once in the record expression, though they can appear in any
+order. The order in which @expr_1@ to @expr_n@ are evaluated is not
+specified.
+
+The expression @expr_1 '.' label@ evaluates @expr_1@ to a record
+value, and returns the value associated to @label@ in this record
+value.
+
+The expression @expr_1 '.' label '<-' expr_2@ evaluates @expr_1@ to a record
+value, which is then modified in-place by replacing the value
+associated to @label@ in this record by the value of
+@expr_2@. This operation is permitted only if @label@ has been
+declared @'mutable'@ in the definition of the record type. The whole
+expression @expr_1 '.' label '<-' expr_2@ evaluates to the unit value
+@'()'@.
+
+\subsubsection*{Arrays}
+
+The expression @'[|' expr_1 ';' \ldots ';' expr_n '|]'@ evaluates to
+a \var{n}-element array, whose elements are initialized with the values of
+@expr_1@ to @expr_n@ respectively. The order in which these
+expressions are evaluated is unspecified.
+
+The expression @expr_1 '.(' expr_2 ')'@ is equivalent to the
+application @'vect_item' expr_1 expr_2@. In the initial environment,
+the identifier @'vect_item'@ resolves to a built-in function that
+returns the value of element number @expr_2@ in the array denoted by
+@expr_1@. The first element has number 0; the last element has number
+$n-1$, where \var{n} is the size of the array. The exception
+"Invalid_argument" is raised if the access is out of bounds.
+
+The expression @expr_1 '.(' expr_2 ')' '<-' expr_3@ is equivalent to
+@'vect_assign' expr_1 expr_2 expr_3@. In the initial environment,
+the identifier @'vect_assign'@ resolves to a built-in function that
+modifies in-place the array denoted by @expr_1@, replacing element
+number @expr_2@ by the value of @expr_3@. The exception
+"Invalid_argument" is raised if the access is out of bounds. The
+built-in function returns @'()'@. Hence, the whole expression @expr_1
+'.(' expr_2 ')' '<-' expr_3@ evaluates to the unit value @'()'@.
+
+This behavior of the two constructs @expr_1 '.(' expr_2 ')'@ and
+@expr_1 '.(' expr_2 ')' '<-' expr_3@ may change if the meaning
+of the identifiers @'vect_item'@ and @'vect_assign'@ is changed,
+either by redefinition or by modification of the list of opened
+modules. See the discussion below on operators.
+
+\subsection{Operators}
+
+The operators written @'infix-op'@ in the grammar above can appear
+in infix position (between two expressions). The operators written
+@'prefix-op'@
+\ikwd{prefix\@\verb`prefix`}
+in the grammar above can appear in prefix position (in
+front of an expression).
+
+The expression @prefix-op expr@ is interpreted as the application
+@ident expr@, where @ident@ is the identifier associated to the
+operator @prefix-op@ in the table below. Similarly, the expression
+@expr_1 infix-op expr_2@ is interpreted as the application
+@ident expr_1 expr_2@, where @ident@ is the identifier associated to the
+operator @infix-op@ in the table below. The identifiers written
+@ident@ above are then evaluated following the rules in
+section~\ref{expr:var}. In the initial environment, they evaluate to
+built-in functions whose behavior is described in the table. The
+behavior of the constructions @prefix-op expr@ and @expr_1 infix-op
+expr_2@ may change if the meaning of the identifiers associated to
+@prefix-op@ or @infix-op@ is changed, either by redefinition of the
+identifiers, or by modification of the list of opened modules, through
+the @'#open'@ and @'#close'@ directives.
+
+\begin{tableauoperateurs}
+\entreeoperateur{"+"}{"prefix +"}{Integer addition.}
+\entreeoperateur{"-" (infix)}{"prefix -"}{Integer subtraction.}
+\entreeoperateur{"-" (prefix)}{"minus"}{Integer negation.}
+\entreeoperateur{"*"}{"prefix *"}{Integer multiplication.}
+\entreeoperateur{"/"}{"prefix /"}{Integer division.
+        Raise "Division_by_zero" if second argument is zero. The result is
+        unspecified if either argument is negative.}
+\entreeoperateur{"mod"}{"prefix mod"}{Integer modulus. Raise
+        "Division_by_zero" if second argument is zero. The result is
+        unspecified if either argument is negative.}
+\entreeoperateur{"+."}{"prefix +."}{Floating-point addition.}
+\entreeoperateur{"-." (infix)}{"prefix -."}{Floating-point subtraction.}
+\entreeoperateur{"-." (prefix)}{"minus_float"}{Floating-point negation.}
+\entreeoperateur{"*."}{"prefix *."}{Floating-point multiplication.}
+\entreeoperateur{"/."}{"prefix /."}{Floating-point division.
+        Raise "Division_by_zero" if second argument is zero.}
+\entreeoperateur{{\tt\char64} }{"prefix "{\tt\char64}}{List concatenation.}
+\entreeoperateur{"^" }{"prefix ^"}{String concatenation.}
+\entreeoperateur{"!" }{"prefix !"}{Dereferencing (return the current
+        contents of a reference).}
+\entreeoperateur{":="}{"prefix :="}{Reference assignment (update the
+        reference given as first argument with the value of the second
+        argument).}
+\entreeoperateur{"=" }{"prefix ="}{Structural equality test.}
+\entreeoperateur{"<>" }{"prefix <>"}{Structural inequality test.}
+\entreeoperateur{"==" }{"prefix =="}{Physical equality test.}
+\entreeoperateur{"!=" }{"prefix !="}{Physical inequality test.}
+\entreeoperateur{"<" }{"prefix <"}{Test ``less than'' on integers.}
+\entreeoperateur{"<=" }{"prefix <="}{Test ``less than or equal '' on integers.}
+\entreeoperateur{">" }{"prefix >"}{Test ``greater than'' on integers.}
+\entreeoperateur{">=" }{"prefix >="}{Test ``greater than or equal''
+        on integers.}
+\entreeoperateur{"<." }{"prefix <."}{Test ``less than''
+        on floating-point numbers.}
+\entreeoperateur{"<=." }{"prefix <=."}{Test ``less than or equal ''
+        on floating-point numbers.}
+\entreeoperateur{">." }{"prefix >."}{Test ``greater than''
+        on floating-point numbers.}
+\entreeoperateur{">=." }{"prefix >=."}{Test ``greater than or equal''
+        on floating-point numbers.}
+\end{tableauoperateurs}
+
+The behavior of the "+", "-", "*", "/", "mod", "+.", "-.", "*." or
+"/." operators is unspecified if the result falls outside of the range
+of representable integers or floating-point numbers, respectively. See
+chapter~\ref{c:stdlib} for a more precise description of the behavior
+of the operators above.
+
+%% \newpage

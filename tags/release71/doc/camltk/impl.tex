@@ -1,0 +1,350 @@
+\chapter{Implementor's Manual}
+\label{chap:impl}
+\tk\ is still evolving, and also offers numerous user-contributed
+extensions. To ensure the compatibility of \camltk\ with this evolution,
+we chose to divide the library in two parts:
+\begin{itemize}
+\item a protocol layer for communication between \caml\ and \tcl,
+\item implementation of \tk\ commands generated from  a high-level
+description of available widgets and functions.
+\end{itemize} 
+
+This chapter defines the syntax and semantics of the \camltk\ description
+language, as well as some technical details of the protocol.
+
+\section{The \camltk\ description language}
+The language allows the specification of
+\begin{description}
+\item[widgets] of the standard \tk\ library, with options and associated
+commands,
+\item[functions] not associated with a specific widget class
+\item[modules] grouping families of functions.
+\end{description} 
+
+A source file is simply a collection of entries, each entry describing an
+element of the interface. The {\tt tkcompiler} provided in this distribution
+takes the source file and produces \caml\ modules forming the interface
+library.
+
+\subsection{Tk tokens}
+{\bf Note: this is new to \thisrelease, and reflects a complete rewrite of
+the low level communication between \caml\ and \tcl\tk.}
+
+In the heart of the interface, \caml\ needs to call \tcl\tk\ procedures with
+arguments. Essentially, arguments are lists of tokens (strings). In some
+cases an argument will itself be a list of strings. It is mandatory that the
+descriptions of types and procedure respects the ``tokenization'' of
+arguments. 
+
+The syntax for describing translations respecting tokens is called a {\em
+template}. A {\em template} is a list of tokens, each token being
+\begin{description}
+\item[a string,] e.g. \verb|"foobar"|, used as is by \tk.
+\item[a type,] e.g. Color. The translation of a value of this type may
+result in several tokens
+\item[a list of tokens]
+\end{description} 
+
+\subsection{Types}
+A type entry contains information to translate data from \caml\ to \tk\ 
+and the converse. Each data type that needs to be exchanged by \caml\ and
+\tk\ must be described by a type entry. For each type, a conversion function
+from \caml\ to \tk\ is generated, as well as a parsing function from \tk\ to
+\caml\ if required (because values of the type are returned by some
+function in the library) and feasible.
+
+A type is given by a set of value constructors, as in \caml. For each
+constructor, one must give the \caml\ name, and its template.
+\paragraph{Example}
+\begin{verbatim}
+type State { 
+   Normal ["normal"]
+   Active ["active"]
+   Disabled ["disabled"]
+}
+\end{verbatim} 
+defines the \caml\ type
+\begin{verbatim}
+type State =
+          Disabled
+        | Active
+        | Normal
+;;
+\end{verbatim} 
+and the conversion function
+\begin{verbatim}
+let CAMLtoTKState = function
+	Disabled -> TkToken"disabled"
+	| Active -> TkToken"active"
+	| Normal -> TkToken"normal"
+;;
+\end{verbatim} 
+
+The parser can be generated only in restricted cases: zeroary constructors,
+and at most one anonymous \verb|int| constructor and one anonymous
+\verb|string| constructor (anonymous means that the template is composed
+only with this token). Otherwise, the compiler will produce a warning
+message, and you have to write the parser yourself. 
+
+\subsection{Subtypes}
+As customary, types will be statically verified in \caml\ programs. However, in
+order to reduce the number of value constructors required by the interface
+(and associated naming problems),
+we introduced a notion of {\em subtypes}. A subtype is a named subset of the
+set of constructors of a type. In this case, type-checking (i.e. verifiying
+that a constructor belongs to a subtype) will occur at run-time.
+
+If a type requires subtyping, then one should not declare the type itself,
+but instead define each of its subtypes. The compiler will consider the
+whole set of constructors for the definition of the type. Note also that the
+definition of a constructor may be omitted if it has  already been declared.
+
+\paragraph{Example}
+\begin{verbatim}
+subtype option(standard) {
+   ActiveBackground		["-activebackground"; Color]
+   ActiveBorderWidth		["-activeborderwidth"; Units]
+   ActiveForeground		["-activeforeground"; Color]
+   Anchor			["-anchor"; Anchor]
+   ...
+   }
+subtype option (bitmap) {
+   Anchor
+   Background
+   ...
+   }
+\end{verbatim}
+defines two subtypes (\verb|standard| and \verb|bitmap|) of the type
+\verb|option|.
+
+Subtypes may be referred to (in argument types of functions) with the same
+syntax: \verb|type(subtype)|.
+\paragraph{Example}
+\begin{verbatim}
+   function () delete [widget(listbox); "delete"; Index(listbox); Index(listbox)]
+\end{verbatim} 
+
+\subsection{Widgets}
+A widget class description is composed of its name, the set of valid options
+for the creation of widgets of this class, and the set of functions and
+commands associated to the class.
+
+Options descriptions follow the same syntax as value constructors in type or
+subtype declarations, except for the presence of the \verb|option| keyword.
+Actually, the options declared inside a widget description form a subtype
+(with the name of the class) of the \verb|option| type. 
+\verb|option| is not really hardwired in the compiler, in that it obeys the
+same rules for subtyping as user-defined types. However the \verb|option|
+type is implicitly used when producing the widget creation functions.
+
+Function declarations are formed of
+\begin{itemize}
+\item the \verb|function| keyword
+\item the result type of the function (inside parenthesis)
+\item the \caml\ name of the function
+\item the template of arguments
+\end{itemize} 
+
+The \caml\ function will have as many arguments as types appearing in the
+template, in the same order.
+
+\paragraph{Example}
+\begin{verbatim}
+widget message {
+   option Anchor
+   option Background
+   option Borderwidth
+   option Cursor
+   option Font
+   option Foreground
+   option PadX
+   option PadY
+   option Relief
+   option Text
+   option TextVariable
+   option Width
+
+   option Aspect ["-aspect"; int]
+   option Justify ["-justify"; Justification]
+
+   function () configure [widget(message); "configure"; option(message) list]
+   function (string) configure_get [widget(message); "configure"]
+   }
+\end{verbatim}
+Note that the first options are given implicitly, since they belong to
+``standard'' options, defined elsewhere. The two others are given in their
+full form. 
+
+Each widget class is compiled into a separate module (bearing the name of the
+widget class). Besides the functions described in the entry, the compiler
+produces two creation functions
+\begin{verbatim}
+value create : Widget -> option list -> Widget ;;
+value create_named : Widget -> string -> option list -> Widget ;;
+\end{verbatim} 
+with, in fact, run-time verification of options, who must belong to the
+subtype \verb|option(widgetname)|. The first argument of \verb|create| is
+the parent of the created widget. The second argument of \verb|create_named|
+is the new path component of the widget.
+
+
+\subsection{Modules}
+A module is simply a set of functions to be grouped in a separate module.
+\paragraph{Example}
+\begin{verbatim}
+module selection {
+   function () clear ["selection"; "clear"; widget]
+   function (string) get ["selection"; "get"]
+   }
+\end{verbatim} 
+
+\subsection{Builtins}
+Some datatypes cannot be described in the syntax of the interface
+description language, because they require custom converters. Thus it is
+possible to write them directly in \caml\ and place 
+them in a \verb|builtin_*.ml| file.
+To avoid a warning message from the compiler, one may also declare the type
+as external
+\paragraph{Example}
+\begin{verbatim}
+type Units external     # builtin_GetPixel
+\end{verbatim} 
+For each builtin type \verb|foo|, one should provide a \verb|CAMLtoTKfoo|
+function, of type \verb|foo -> protocol__TkArgs|, respecting the
+tokenization. If data of this type is to be returned by a function, one
+should also write a parser \verb|TKtoCAMLfoo|.
+For example, the file \verb|builtin_GetPixel.ml| contains the \verb|Units|
+type, used extensively in \tk\ for specifying distances or coordinates.
+It requires both a pretty-printer and a parser (which emulates the
+\verb|tkGetPixel| function in the \tk\ library).
+
+
+\section{Compiling}
+The interface description source is compiled with
+\begin{verbatim}
+$ tkcompiler filename
+\end{verbatim}
+(the file compiled defaults to \verb|Widgets.src| if \verb|filename| is
+omitted).
+The compiler requires the existence of a \verb|lib| subdirectory, where it
+will produce \verb|tkgen.ml|, \verb|modules|, and various \caml\ files
+corresponding to entries in the interface description source.
+
+The compiler will report the following errors
+\begin{description}
+\item[lexical errors]
+\item[syntax errors] see the grammar of the language below
+\item[duplicate definitions]
+\item[illegal implicit use of constructors]
+\item[cyclic dependancy on types]
+\end{description} 
+
+Producing the library requires the presence of several files in the
+\verb|lib| directory. For more details, check the \verb|Makefile| in
+\verb|lib|. 
+
+\section{Run-time support}
+Apart from the modules produced by compiling the widget description file,
+the \camltk\ interface uses low-level support for some basic data types and
+communication protocol between \caml\ and \tcl.
+
+\subsection{Widget support}
+\begin{description}
+\item[Widget naming] :
+in the contrary of the {\sf Tcl/Tk} approach, \camltk\ keeps the naming of
+widgets internal to the library. Moreover, there is no particular data
+associated to widgets in the \caml\ half of the world. A widget is
+essentially its \tk\ path. The public functions are: 
+
+\begin{verbatim}
+value default_toplevel_widget : Widget
+      	(* The default toplevel widget is ".", of type "toplevel" *)
+;;
+value new_toplevel_widget : string -> Widget
+       (* the argument must be a valid window name: no 8bit char, start
+          with a lowercase, ... *)
+;;
+\end{verbatim} 
+And some functions used internally are
+\begin{verbatim}
+value widget_name : Widget -> string
+      (* Return the name (tk "path") of a widget *)
+and  widget_class : Widget-> string
+      (* Returns the class of a widget *)
+;;
+value new_widget_atom : string -> Widget -> Widget
+and   new_named_widget : string -> Widget -> string -> Widget
+      (* Abstract creation functions *)
+;;
+\end{verbatim} 
+
+\item[Widget typing] :
+\camltk\ attempts to check widget types before sending code to \tcl.
+We chose to have a unique \caml\ type for widgets, \verb|Widget|, and
+to check dynamically when necessary if a widget is of the required class.
+Thus, internally, 
+\begin{verbatim}
+type Widget =
+  Untyped of string
+| Typed of string * string
+;;
+\end{verbatim} 
+We also maintain a table associating {\em widget paths} to {\em Widgets}.
+The reason for this table is that we may have to dynamically retype a widget
+path returned by a \tcl\ function.
+
+\end{description}
+
+
+\subsection{Transferring control}
+\caml\ has been extended with primitives for evaluating \tcl\ procedures.
+\begin{description}
+\item[tcl\_eval] evaluates a \tcl\ source phrase. The implementation of
+\verb|tcl_eval| is straightforward.
+During this evaluation, \tcl\ will perform all customary substitutions and
+argument parsing. Thus, one needs to be careful with \tcl\ special
+characters. This function is deprecated, and {\tt tcl\_direct\_eval} is
+preferred. 
+
+\item[tcl\_direct\_eval] evaluates a \tcl\ procedure call. It takes as
+argument a value of type {\tt TkArgs vect}, which could be thought of as
+an {\tt argv} parameter. Note however that the vector may still contain
+token lists that have to be expanded.
+\end{description} 
+
+\tcl\ has been extended with a new command \verb|camlcb| to call \caml\ (or
+more precisely a given \caml\ function). 
+\verb|camlcb| relies on the \verb|callback| primitive of the \caml\
+runtime. Currently, the \caml\ runtime does not allow storage of \caml\
+values in C global variables, because global variables cannot be roots for
+the garbage collector. The implementation of \verb|camlcb| uses the same
+trick as signal handling.
+
+\subsection{Other \camltk\ primitives}
+The other primitives, written in C, added to the \caml\ runtime deal with
+\begin{description}
+\item[initialising a \tcl\ interpreter] :  straightforward
+\item[file descriptor callbacks] : the mechanism of file descriptor
+callbacks is available in \tk, although not as \tcl\ commands. We simply
+provide a \caml\ primitive to deal with this form of callbacks.
+\end{description} 
+
+\subsection{Transferring data}
+We provide {\em extensible buffers} to simplify the production of the \tcl\
+source code to be evaluated by \tcl.
+
+\subsection{Callback handling}
+Callbacks are \caml\ functions. They have to be invoked by \tcl, using the
+\verb|camlcb| command. The link between \tcl\ and \caml\ is made through
+a hash-table, associating an identifier (string) to a \caml\ function.
+
+In order to avoid space leaks due to storing callback closures in the table,
+we implement a memo-mechanism associating callbacks to widgets.
+Except for class wide callbacks, each callback is defined for a given
+widget. When this widget is destroyed, the callback cannot be invoked any
+more, and we can remove it from the table. We thus provide a general binding
+for all widgets, on event \verb|Destroy|, that will remove all callbacks
+associated to a widget being destroyed.
+If a user bindings masks the default binding for the \verb|Destroy| event,
+its callback should call the function \verb|protocol__remove_callbacks| with
+argument the widget being destroyed.
