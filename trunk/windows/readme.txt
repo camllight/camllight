@@ -1,4 +1,4 @@
-  This archive contains the binaries for Caml Light 0.72,
+  This archive contains the binaries for Caml Light 0.73,
   Windows (3.1, 95 and NT) version.
 
 CONTENTS
