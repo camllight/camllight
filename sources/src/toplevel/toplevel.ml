@@ -3,7 +3,6 @@
 #open "obj";;
 #open "meta";;
 #open "misc";;
-#open "interntl";;
 #open "const";;
 #open "location";;
 #open "modules";;
@@ -46,7 +45,7 @@ let load_object name =
     try
       find_in_path filename
     with Cannot_find_file name ->
-      eprintf "Cannot find file %s.\n" name;
+      interntl__eprintf "Cannot find file %s.\n" name;
       raise Toplevel in
   let inchan = open_in_bin truename in
   let stop = input_binary_int inchan in
@@ -111,7 +110,7 @@ let loadfile filename =
     try
       find_in_path filename
     with Cannot_find_file name ->
-      eprintf "Cannot find file %s.\n" name;
+      interntl__eprintf "Cannot find file %s.\n" name;
       raise Toplevel in
   let ic = open_in truename in
   let lexbuf = lexing__create_lexer_channel ic in
@@ -179,17 +178,18 @@ let trace name =
       ValueNotPrim ->
         let pos = get_slot_for_variable val_desc.qualid in
         if mem_assoc pos !trace_env then begin
-          eprintf "The function %s is already traced.\n" name        
+          interntl__eprintf "The function %s is already traced.\n" name        
         end else begin
           trace_env := (pos, global_data.(pos)) :: !trace_env;
           global_data.(pos) <-
             trace_instr name global_data.(pos) val_desc.info.val_typ;
-          eprintf "The function %s is now traced.\n" name
+          interntl__eprintf "The function %s is now traced.\n" name
         end
     | ValuePrim(_, _) ->
-        eprintf "The function %s is a primitive, it cannot be traced.\n" name
+        interntl__eprintf
+         "The function %s is a primitive, it cannot be traced.\n" name
   with Desc_not_found ->
-    eprintf "Unknown function %s.\n" name
+    interntl__eprintf "Unknown function %s.\n" name
   end
 ;;
 
@@ -199,18 +199,18 @@ let untrace name =
     let pos = get_slot_for_variable val_desc.qualid in
     let rec except = function
       [] ->
-        eprintf "The function %s was not traced.\n" name;
+        interntl__eprintf "The function %s was not traced.\n" name;
         []
     | (pos',obj as pair)::rest ->
         if pos == pos' then begin
           global_data.(pos) <- obj;
-          eprintf "The function %s is no longer traced.\n" name;
+          interntl__eprintf "The function %s is no longer traced.\n" name;
           rest
         end else
           pair :: except rest in
     trace_env := except !trace_env
   with Desc_not_found ->
-    eprintf "Unknown function %s.\n" name
+    interntl__eprintf "Unknown function %s.\n" name
   end
 ;;
 
@@ -230,16 +230,16 @@ let install_printer name =
       printers := (name, ty_arg, (magic_obj global_data.(pos) : obj -> unit))
                :: !printers
     with Unify ->
-      eprintf "%s has the wrong type for a printing function.\n" name
+      interntl__eprintf "%s has the wrong type for a printing function.\n" name
     end
   with Desc_not_found ->
-    eprintf "Unknown function %s.\n" name
+    interntl__eprintf "Unknown function %s.\n" name
   end
 ;;
 
 let remove_printer name =
   let rec remove = function
-    [] -> eprintf "No printer named %s.\n" name; []
+    [] -> interntl__eprintf "No printer named %s.\n" name; []
   | (pr_name, _, _ as printer) :: rem ->
       if name = pr_name then rem else printer :: remove rem in
   printers := remove !printers
@@ -265,7 +265,7 @@ let compile s =
       let filename = filename__chop_suffix s ".mli" in
       compile_interface (filename__basename filename) filename
     else begin
-      eprintf "Incorrect source file name %s.\n\
+      interntl__eprintf "Incorrect source file name %s.\n\
                A source file name must end in \".ml\" or \".mli\".\n" s
     end))
 ;;
