@@ -86,11 +86,11 @@ The subdirectories of contrib/ also contain more information in README
 and INSTALL files.  Read the descriptions and choose which packages
 you need.
 
-8- Edit the files contrib/Makefile and contrib/Makefile.conf to
-indicate which packages to install, which C compiler to use, where to
-find external libraries on your system, and where to install files.
-It is recommended to use the same C compiler used to compile the core
-system (the one specified in src/Makefile).
+8- Edit the file contrib/Makefile to indicate which packages to
+install, which C compiler to use, where to find external libraries on
+your system, and where to install files.  It is highly recommended to
+use the same C compiler used to compile the core system (the one
+specified in src/Makefile).
 
 9- Make sure you have not erased any of the files in src/ that have
 been generated during the compilation of the core system.  If you
