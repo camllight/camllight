@@ -24,7 +24,7 @@ MKF=-f ../Makefile.conf -f Makefile
 
 # Compile everything
 all:
-	@set +e; set -x; for d in $(PACKAGES); do (cd $$d; $(MAKE) $(MKF) all); done
+	@set -e; set -x; for d in $(PACKAGES); do (cd $$d; $(MAKE) $(MKF) all); done
 
 # Install everything
 install:
