@@ -4,7 +4,7 @@
     listbox
 *)
 
-(* This type is here because of dependencies with Anchorage *)
+(* This type is here because of dependencies with AnchorPoint *)
 type Anchor =
 	SE		(* tk option: se *)
 	| S		(* tk option: s *)
@@ -30,89 +30,116 @@ let CAMLtoTKAnchor = function
 ;;
 
 
+(* A large type for all indices in all widgets *)
+(* a bit overkill though *)
 
 type Index =
-	  Number of int		(* tk keyword:  *)
+	  Number of int		(* no keyword  *)
+        | Active                (* tk keyword: active *)
 	| End		        (* tk keyword: end *)
+        | Last			(* tk keyword: last *)
+        | NoIndex		(* tk keyword: none *)
 	| Insert		(* tk keyword: insert *)
 	| SelFirst		(* tk keyword: sel.first *)
 	| SelLast		(* tk keyword: sel.last *)
         | At of int		(* tk keyword: @n *)
         | AtXY of int * int     (* tk keyword: @x,y *)
-(* New for TK 4.0 *)
-        | Active                (* tk keyword: active *)
-        | Anchorage of Anchor   (* Problem of dependance *)
+        | AnchorPoint   	(* tk keyword: anchor *)
+        | Pattern of string     (* no keyword *)
+        | LineChar of int * int (* tk keyword: l.c *)
+        | Mark of string        (* no keyword *)
+        | TagFirst of string    (* tk keyword: tag.first *)
+        | TagLast of string     (* tk keyword: tag.last *)
+        | Embedded of Widget	(* no keyword *)
 ;;
 
 (* sp to avoid being picked up by doc scripts *)
  type Index_constrs =
 	  CNumber
+        | CActive
 	| CEnd
+	| CLast
+	| CNoIndex
 	| CInsert
 	| CSelFirst
 	| CSelLast
         | CAt
         | CAtXY
-(* New for TK 4.0 *)
-        | CActive
-        | CAnchorage
+        | CAnchorPoint
+	| CPattern
+	| CLineChar
+	| CMark
+	| CTagFirst
+	| CTagLast
+	| CEmbedded
 ;;
 
 let Index_any_table = 
-  [CNumber; CEnd; CInsert; CSelFirst; CSelLast; CAt; CAtXY]
+ [CNumber; CActive; CEnd; CLast; CNoIndex; CInsert; CSelFirst;
+  CSelLast; CAt; CAtXY; CAnchorPoint; CPattern; CLineChar;
+  CMark; CTagFirst; CTagLast; CEmbedded]
 ;;
-let Index_listbox_table = 
-  [CNumber; CEnd; CInsert; CActive]
-;;
-let Index_entry_table = 
-  [CNumber; CEnd; CInsert; CSelFirst; CSelLast; CAt; CAnchorage]
-;;
+
 let Index_canvas_table =
   [CNumber; CEnd; CInsert; CSelFirst; CSelLast; CAtXY]
 ;;
- 
+let Index_entry_table = 
+  [CNumber; CAnchorPoint; CEnd; CInsert; CSelFirst; CSelLast; CAt]
+;;
+let Index_listbox_table = 
+  [CNumber; CActive; CAnchorPoint; CEnd; CAtXY]
+;;
+let Index_menu_table =
+  [CNumber; CActive; CEnd; CLast; CNoIndex; CAt; CPattern]
+;;
+
+let Index_text_table =
+  [CLineChar; CAtXY; CEnd; CMark; CTagFirst; CTagLast; CEmbedded]
+;;
+
+
 let CAMLtoTKIndex table = function
    Number x -> chk_sub "Number" table CNumber; TkToken (string_of_int x)
+ | Active -> chk_sub "Active" table CActive; TkToken "active"
  | End -> chk_sub "End" table CEnd; TkToken "end"
+ | Last -> chk_sub "Last" table CLast; TkToken "last"
+ | NoIndex -> chk_sub "NoIndex" table CNoIndex; TkToken "none"
  | Insert -> chk_sub "Insert" table CInsert; TkToken "insert"
  | SelFirst -> chk_sub "SelFirst" table CSelFirst; TkToken "sel.first"
  | SelLast -> chk_sub "SelLast" table CSelLast; TkToken "sel.last"
  | At n -> chk_sub "At" table CAt; TkToken ("@"^string_of_int n)
  | AtXY (x,y) -> chk_sub "AtXY" table CAtXY; 
       	     TkToken ("@"^string_of_int x^","^string_of_int y)
- | Active -> chk_sub "Active" table CActive;
-       	TkToken "active"
- | Anchorage (a) -> chk_sub "Anchorage" table CAnchorage;
-        CAMLtoTKAnchor a
+ | AnchorPoint -> chk_sub "AnchorPoint" table CAnchorPoint; TkToken "anchor"
+ | Pattern s -> chk_sub "Pattern" table CPattern; TkToken s
+ | LineChar (l,c) -> chk_sub "LineChar" table CLineChar;
+      	  TkToken (string_of_int l^"."^string_of_int c)
+ | Mark s -> chk_sub "Mark" table CMark; TkToken s
+ | TagFirst t -> chk_sub "TagFirst" table CTagFirst; 
+      	   TkToken (t^".first")
+ | TagLast t -> chk_sub "TagLast" table CTagLast;
+      	   TkToken (t^".last")
+ | Embedded w -> chk_sub "Embedded" table CEmbedded;
+       	   CAMLtoTKWidget Widget_any_table w
 ;;
 
-(* In fact, returned values are probably only numerical indexes *)
-let TKtoCAMLIndex = function
-     "" -> raise (Invalid_argument "TKtoCAMLIndex: empty")
-   | "sel.last" -> SelLast
-   | "sel.first" -> SelFirst
-   | "insert" -> Insert
-   | "end" -> End
-   | "active" -> Active
-   (* Anchor part *)
-   | "se" -> Anchorage SE
-   | "s" -> Anchorage S
-   | "sw" -> Anchorage SW
-   | "e" -> Anchorage E
-   | "center" -> Anchorage Center
-   | "w" -> Anchorage W
-   | "ne" -> Anchorage NE
-   | "n" -> Anchorage N
-   | "nw" -> Anchorage NW
-   (* Anchorage end *)
-   | s when s.[0] = `@` -> 
-       begin try
-         At(int_of_string (sub_string s 1 (pred (string_length s))))
-       with
-	 _ -> raise (Invalid_argument ("TKtoCAMLIndex: "^s))
-       end
-   | s -> 
-       begin try Number(int_of_string s)
-       with _ -> raise (Invalid_argument ("TKtoCAMLIndex: "^s))
-       end
+let char_index c s = find 0
+  where rec find i =
+    if i >= string_length s 
+    then raise Not_found
+    else if nth_char s i = c then i 
+    else find (i+1) 
+;;
+
+(* Assume returned values are only numerical and l.c *)
+(* .menu index returns none if arg is none, but blast it *)
+let TKtoCAMLIndex s =
+  try
+   let p = char_index `.` s in
+    LineChar(int_of_string (sub_string s 0 p), 
+      	     int_of_string (sub_string s (p+1) (string_length s - p - 1)))
+  with
+    Not_found ->
+      try Number (int_of_string s)
+      with _ -> raise (Invalid_argument ("TKtoCAMLIndex: "^s))
 ;;
