@@ -32,16 +32,16 @@ and syntax = parse
   | "@" { () }
   | `'` {
       addspace();
-      print_string "<code>";
+      print_string "<font color=\"blue\"><code>";
       inquote lexbuf;
-      print_string "</code>";
+      print_string "</code></font>";
       need_space := true;
       syntax lexbuf }
   | `"` {
       addspace();
-      print_string "<code>";
+      print_string "<font color=\"blue\"><code>";
       indoublequote lexbuf;
-      print_string "</code>";
+      print_string "</code></font>";
       need_space := true;
       syntax lexbuf }
   | [`a`-`z``-`] + {
@@ -57,12 +57,24 @@ and syntax = parse
       | s -> printf__eprintf "Warning: %s ignored.\n" s
       end;
       syntax lexbuf }
+  | `_` _ {
+      print_string "<SUB>";
+      print_char(get_lexeme_char lexbuf 1);
+      print_string "</SUB>";
+      syntax lexbuf }
+  | `^` _ {
+      print_string "<SUP>";
+      print_char(get_lexeme_char lexbuf 1);
+      print_string "</SUP>";
+      syntax lexbuf }
+(***
   | [`_` `^`] _ {
       let subscript = get_lexeme_char lexbuf 1 in
       if subscript >= `a` & subscript <= `z`
       then print_char(char_of_int(int_of_char subscript - 32))
       else print_char subscript;
       syntax lexbuf }
+***)
   | ":" {
       print_string ":\n      ";
       need_space := false;
