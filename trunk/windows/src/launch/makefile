@@ -2,9 +2,9 @@ CC=gcc
 CFLAGS=-O -DUSE_GCC
 SMALLCC=wcl /ms
 
-CAMLC=camlc.o driver.o ../runtime/aexpand.o
-CAML=caml.o driver.o ../runtime/aexpand.o
-CAMLMKTOP=camlmkto.o driver.o ../runtime/aexpand.o
+CAMLC=camlc.o driver.o
+CAML=caml.o driver.o
+CAMLMKTOP=camlmkto.o driver.o
 
 all: header camlc.exe caml.exe camlmkto.exe
 

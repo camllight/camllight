@@ -1,5 +1,5 @@
 CC = cl /nologo
-LIB = libbignum.lib
+LIB = bignum.lib
 OBJECT = o\KerN.obj o\bnInit.obj o\bnMult.obj o\bnDivide.obj o\bnCmp.obj o\bzf.obj o\bz.obj 
 KERNH = h\BigNum.h 
 CFLAGS = -c -I.\h -Ox -DCAML_LIGHT

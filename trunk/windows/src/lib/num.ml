@@ -10,7 +10,7 @@
 #open "int_misc";;
 #open "nat";;
 #open "big_int";;
-#open "arith_flags";;
+#open "arflags";;
 #open "ratio";;
 
 let BIGGEST_INT = big_int_of_int biggest_int

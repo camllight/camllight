@@ -4,8 +4,6 @@
 char * stdlib;
 stringlist opt = NULL;
 
-extern int expand_diversions(int *ref_argc, char ***ref_argv);
-     
 main(argc, argv)
      int argc;
      char ** argv;
@@ -16,8 +14,6 @@ main(argc, argv)
   char * cmd;
   int status;
   char * lang;
-
-  if (expand_diversions(&argc, &argv) == -1) return 2; 
 
   stdlib = getenv("CAMLLIB");
   if (stdlib == NULL) {

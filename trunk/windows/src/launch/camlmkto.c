@@ -31,8 +31,6 @@ char * syst_perv[] = {
    "toplevel","vect","big_int","nat","num","ratio","arstatus",
    NULL };
 
-extern int expand_diversions(int *ref_argc, char ***ref_argv);
-     
 main(argc, argv)
      int argc;
      char ** argv;
@@ -43,8 +41,6 @@ main(argc, argv)
   int status;
   char * lang;
   
-  if (expand_diversions(&argc, &argv) == -1) return 2; 
-
   stdlib = getenv("CAMLLIB");
   if (stdlib == NULL) {
     fprintf(stderr, "Variable CAMLLIB is undefined.\n");
