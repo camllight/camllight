@@ -62,6 +62,7 @@ let matching_elements list name instr =
 let all_matching_instructions =
   matching_elements instruction_list (function (a, _, _, _, _) -> a);;
 
+(* itz 04-21-96 don't do priority completion in emacs mode *)
 let matching_instructions instr =
   let all = all_matching_instructions instr in
     let prio =
@@ -69,7 +70,7 @@ let matching_instructions instr =
       	(function (_, pr, _, _, _) -> pr)
       	all
     in
-      if prio = [] then all else prio;;
+      if prio = [] || !emacs then all else prio;;
 
 let matching_variables =
   matching_elements variable_list (function (a, _, _) -> a);;
@@ -199,7 +200,8 @@ let instr_kill lexbuf =
     (prerr_endline "The program is not being run."; raise Toplevel);
   if (yes_or_no "Kill the program being debugged") then begin
     kill_program ();
-    clear_ellipses()
+    clear_ellipses();
+    show_no_point ()			(* itz 04-19-96 *)
   end;;
 
 let instr_run lexbuf =
@@ -275,6 +277,44 @@ let print_info_list () =
   print_endline "List of info commands :";
   do_list (function (nm, _, _) -> print_string nm; print_space()) !info_list;
   print_newline ();;
+
+let instr_complete lexbuf =
+    let rec print_list l = 
+	(try 
+	    end_of_line lexbuf;
+      	    do_list (function i -> begin print_string i; print_newline () end)
+ 	    l
+	with _ -> remove_file !user_channel)
+    and match_list lexbuf = (match Identifier_or_eol Lexeme lexbuf with
+	  Some x -> (match matching_instructions x with
+	      	( [("set",_,_,_,_)] | [("show",_,_,_,_)] ) as i ->
+		(let [(i_full,_,_,_,_)] = i in
+		    if x = i_full then
+	      	      (match Identifier_or_eol Lexeme lexbuf with
+	     	   	  | Some ident ->
+			    (match matching_variables ident with
+				  [v,_,_] -> if v = ident then [] else [v]
+				| l -> map (function (nm,_,_) ->nm) l)
+		       	  | None ->   map (function (nm, _, _) -> nm)
+			    !variable_list)
+		    else [i_full])
+	      | [("info",_,_,_,_)] ->
+		if x = "info" then
+	       	  (match Identifier_or_eol Lexeme lexbuf with
+ 	      	       	Some ident ->
+			(match matching_variables ident with
+			      [v,_,_] -> if v = ident then [] else [v]
+			    | l -> map (function (nm,_,_) ->nm) l)
+		      | None ->   map (function (nm, _, _) -> nm)
+			!variable_list)
+		else ["info"]
+	      |	["help",_,_,_,_] -> if x <> "help" then ["help"]
+	      else
+		match_list lexbuf
+	      |	[i,_,_,_,_] -> if i = x then [] else [i]
+	      | l -> map (function (nm,_,_,_,_) -> nm) l)
+	| None -> map (function (nm,_,_,_,_) -> nm) !instruction_list)
+    in print_list (match_list lexbuf);;
 
 let instr_help lexbuf =
   match Identifier_or_eol Lexeme lexbuf with
@@ -764,6 +804,8 @@ let initialize_interpreter () =
        help message *)
     ["cd", false, instr_cd, true,
 "set working directory to DIR for debugger and program being debugged.";
+     "complete", false, instr_complete, false,
+"complete word at cursor according to context. Useful for Emacs.";
      "pwd", false, instr_pwd, true,
 "print working directory.";
      "directory", false, instr_dir, false,
