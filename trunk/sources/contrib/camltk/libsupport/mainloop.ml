@@ -27,6 +27,11 @@ let OpenTk () =
     add_fileinput !protocol__PipeTkCallB NextCallback;
     (top : Widget)
 ;;
+let OpenTkClass s = 
+  let top = OpenTkClass s in
+    add_fileinput !protocol__PipeTkCallB NextCallback;
+    (top : Widget)
+;;
 
 (* Redefine CloseTk so it appears in module tk *)
 let CloseTk () = 
