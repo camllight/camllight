@@ -629,6 +629,43 @@ DEP_CPP_GRAPH=\
 # Begin Source File
 
 SOURCE=.\graphdoc.cpp
+
+!IF  "$(CFG)" == "Camlwin - Win32 Debug"
+
+DEP_CPP_GRAPHD=\
+	".\STDAFX.H"\
+	".\camlwin.h"\
+	".\xeditvw.h"\
+	".\txtrmdoc.h"\
+	".\txtrmfr.h"\
+	".\mainfrm.h"\
+	".\graphdoc.h"\
+	".\graphvw.h"\
+	".\..\..\RUNTIME\alloc.h"\
+	".\..\..\RUNTIME\memory.h"\
+	".\..\..\RUNTIME\fail.h"\
+	".\..\..\RUNTIME\signals.h"\
+	".\..\..\RUNTIME\str.h"\
+	".\colors.h"\
+	".\..\..\RUNTIME\MISC.H"\
+	".\..\..\RUNTIME\MLVALUES.H"\
+	".\..\..\RUNTIME\CONFIG.H"\
+	".\..\..\..\config\M.H"\
+	".\..\..\..\config\S.H"\
+	".\..\..\RUNTIME\GC.H"\
+	".\..\..\RUNTIME\MAJOR_GC.H"\
+	".\..\..\RUNTIME\MINOR_GC.H"\
+	".\..\..\RUNTIME\FREELIST.H"\
+	
+NODEP_CPP_GRAPHD=\
+	".\;"\
+	
+
+"$(INTDIR)\graphdoc.obj" : $(SOURCE) $(DEP_CPP_GRAPHD) "$(INTDIR)"
+
+
+!ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
+
 DEP_CPP_GRAPHD=\
 	".\STDAFX.H"\
 	".\camlwin.h"\
@@ -657,6 +694,8 @@ DEP_CPP_GRAPHD=\
 
 "$(INTDIR)\graphdoc.obj" : $(SOURCE) $(DEP_CPP_GRAPHD) "$(INTDIR)"
 
+
+!ENDIF 
 
 # End Source File
 ################################################################################
