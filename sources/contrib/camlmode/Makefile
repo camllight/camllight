@@ -12,7 +12,7 @@ all:
 
 install:
 	cp $(FILES) $(EMACSLISPDIR)
-#	dir=`pwd`; cd $(EMACSLISPDIR); $(EMACS) -batch -l $$dir/compile
+	dir=`pwd`; cd $(EMACSLISPDIR); $(EMACS) -batch -l $$dir/compile
 
 clean:
 	rm -f *~ #*#
