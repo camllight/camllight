@@ -123,6 +123,15 @@ for i = 2 to 16 do
    let _ = test i eq_string (s', s i) in ()
 done;;
 
+let s = "1833520974" in
+test 23
+eq_string (string_of_nat (nat_of_string s), s)
+;;
+
+let s = "18335209741833520974" in
+test 24
+eq_string (string_of_nat (nat_of_string s), s)
+;;
 
 testing_function "string_of_digit";;
 

@@ -273,3 +273,5 @@ test 6 eq (f1 (let n = num_of_string "2000000000000000000000000" in n+1) ,
 test 7 eq (f1 (1/2), false);;
 
 **************)
+(* From Jean-Christophe Filliatre *)
+(Int 2) **/ ((Int 2) **/ ((Int 2) **/ (Int 16)));;
