@@ -13,7 +13,7 @@ let init_semantics caml_fun =
                         | _ -> raise Illtyped)
               | _ -> raise Illtyped);;
 let caml_function = function
-    "+" -> prefix +
+  | "+" -> prefix +
   | "-" -> prefix -
   | "*" -> prefix *
   | "/" -> prefix /
@@ -23,28 +23,29 @@ let init_sem =  map (fun x -> init_semantics(caml_function x))
                     init_env;;
 let global_sem = ref init_sem;;
 let rec nth n = function
-     []  -> raise (Failure "nth")
+  | []  -> raise (Failure "nth")
   | x::l -> if n=1 then x else nth (n-1) l;;
-let rec semant rho = sem
-    where rec sem = function
-      Const n -> Numval n
+let rec semant rho =
+  let rec sem = function
+    | Const n -> Numval n
     | Var(n) -> nth n rho
     | Cond(e1,e2,e3) ->
-        (match sem e1 with Numval 0 -> sem e3
-                         | Numval n -> sem e2
-                         | _ -> raise Illtyped)
+        (match sem e1 with
+         | Numval 0 -> sem e3
+         | Numval n -> sem e2
+         | _ -> raise Illtyped)
     | Abs(_,e') -> Funval(fun x -> semant (x::rho) e')
-    | App(e1,e2) -> (match sem e1
-                      with Funval(f) -> f (sem e2)
-                         | _ -> raise Illtyped)
-;;
+    | App(e1,e2) -> (match sem e1 with
+                     | Funval f -> f (sem e2)
+                     | _ -> raise Illtyped) in
+  sem;;
 
 let semant_asl = function Decl(s,e) ->
   semant !global_sem e
 ;;
 
 let print_semval = function
-  Numval n -> print_string "Numval "; print_int n
+| Numval n -> print_string "Numval "; print_int n
 | Funval f -> print_string "Funval <fun>"
 ;;
 

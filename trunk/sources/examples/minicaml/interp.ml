@@ -4,12 +4,12 @@
 let code_nombre n =
     Val_nombre n
 and décode_nombre = function
-    Val_nombre n -> n
+  | Val_nombre n -> n
   | _ -> raise(Erreur "entier attendu")
 and code_booléen b =
     Val_booléenne b
 and décode_booléen = function
-    Val_booléenne b -> b
+  | Val_booléenne b -> b
   | _ -> raise(Erreur "booléen attendu");;
 
 (* Pour transformer une fonction Caml en valeur fonctionnelle *)
@@ -18,7 +18,7 @@ let prim1 codeur calcul décodeur =
   Val_primitive(function val -> codeur(calcul(décodeur val)))
 and prim2 codeur calcul décodeur1 décodeur2 =
   Val_primitive(function
-    Val_paire(v1, v2) ->
+  | Val_paire(v1, v2) ->
       codeur(calcul (décodeur1 v1) (décodeur2 v2))
   | _ -> raise(Erreur "paire attendue"));;
 
@@ -47,16 +47,17 @@ let boucle () =
     print_string "# "; flush std_out;
     try
       match lire_phrase flux_d'entrée with
-        Expression expr ->
+      | Expression expr ->
           let rés = évalue !env_global expr in
           print_string "- = "; imprime_valeur rés;
           print_newline()
       | Définition déf ->
           let nouvel_env = évalue_définition !env_global déf in
           begin match nouvel_env with
-            (nom, val) :: _ ->
+          | (nom, val) :: _ ->
               print_string nom; print_string " = ";
               imprime_valeur val; print_newline()
+          | _ -> failwith "mauvaise gestion des définitions"
           end;
           env_global := nouvel_env
     with

@@ -44,7 +44,7 @@ let geom_rules = [
 ];;
 
 let geom_rank = function
-    "U" -> 0
+  | "U" -> 0
   | "*" -> 1
   | "I" -> 2
   | "B" -> 3

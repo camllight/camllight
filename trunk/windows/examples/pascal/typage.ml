@@ -6,15 +6,15 @@ let vérifie_type message type_attendu type_réel =
     raise(Erreur_typage(Conflit(message, type_attendu, type_réel)));;
 
 let vérifie_tableau = function
-    Array(inf, sup, éléments) -> éléments
+  | Array(inf, sup, éléments) -> éléments
   | _ -> raise(Erreur_typage(Tableau_attendu));;
 
 let vérifie_non_tableau message = function
-    Array(inf, sup, éléments) ->
+  | Array(inf, sup, éléments) ->
       raise(Erreur_typage(Tableau_interdit message))
   | _ -> ();;
 let rec type_expr env = function
-    Constante(Entière n) -> Integer
+  | Constante(Entière n) -> Integer
   | Constante(Booléenne b) -> Boolean
   | Variable nom_var ->
       cherche_variable nom_var env
@@ -51,15 +51,17 @@ and type_application env nom paramètres arguments =
   do_list2 type_paramètre paramètres arguments
 
 and type_op_unaire = function
-    "-" -> (Integer, Integer)
+  | "-" -> (Integer, Integer)
   | "not" -> (Boolean, Boolean)
+  | _ -> failwith "opérateur unaire inconnu"
 
 and type_op_binaire = function
-    "*" | "/" | "+" | "-" -> (Integer,Integer,Integer)
+  | "*" | "/" | "+" | "-" -> (Integer,Integer,Integer)
   | "=" | "<>" | "<" | ">" | "<=" | ">=" -> (Integer,Integer,Boolean)
-  | "and" | "or" -> (Boolean,Boolean,Boolean);;
+  | "and" | "or" -> (Boolean,Boolean,Boolean)
+  | _ -> failwith "opérateur binaire inconnu";;
 let rec type_instr env = function
-    Affectation_var(nom_var, expr) ->
+  | Affectation_var(nom_var, expr) ->
       let type_var = cherche_variable nom_var env in
       vérifie_non_tableau ("affectation de " ^ nom_var) type_var;
       vérifie_type ("la variable " ^ nom_var)
@@ -122,14 +124,14 @@ let type_programme prog =
   with Pas_trouvé nom ->
     raise(Erreur_typage(Indéfini nom));;
 let rec affiche_type = function
-    Integer -> prerr_string "integer"
+  | Integer -> prerr_string "integer"
   | Boolean -> prerr_string "boolean"
   | Array(inf, sup, ty) ->
       prerr_string "array ["; prerr_int inf; prerr_string ".."; 
       prerr_int sup; prerr_string "] of "; affiche_type ty;;
 
 let affiche_erreur = function
-    Indéfini nom ->
+  | Indéfini nom ->
       prerr_string "Nom inconnu: "; prerr_string nom;
       prerr_endline "."
   | Conflit(message, type_attendu, type_réel) ->

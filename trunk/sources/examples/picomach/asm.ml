@@ -12,7 +12,7 @@ let assemble_fichier nom_entrée nom_sortie =
         close_out sortie;
         sys__remove nom_sortie;
         match exc with
-          Parse_error | Parse_failure ->
+        | Parse_error | Parse_failure ->
             prerr_string
               "Erreur de syntaxe aux alentours du caractère numéro ";
             prerr_int (pos_in entrée);

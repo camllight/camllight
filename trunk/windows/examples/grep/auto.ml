@@ -18,7 +18,7 @@ type automate_de_thompson =
     final   : état };;
 
 let rec thompson = function
-    Epsilon ->
+  | Epsilon ->
       let e1 = nouvel_état() and e2 = nouvel_état() in
       ajoute_eps_trans e1 e2;
       {initial = e1; final = e2}

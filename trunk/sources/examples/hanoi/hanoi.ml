@@ -10,7 +10,7 @@ let base_de_tige taille_grand_disque =
     let moitié = make_string taille_grand_disque `_` in
     " " ^ moitié ^ "|" ^ moitié ^ " ";;
 let rec tige taille_grand_disque = function
-    (0, []) -> []
+  | (0, []) -> []
   | (0, tête::reste) ->
       disque_numéro tête taille_grand_disque ::
       tige taille_grand_disque (0, reste)
@@ -19,7 +19,7 @@ let rec tige taille_grand_disque = function
       tige taille_grand_disque (décalage-1, liste);;
 let rec recolle l1 l2 l3 =
   match (l1, l2, l3) with
-    ([], [], []) -> []
+  | ([], [], []) -> []
   | (t1::r1, t2::r2, t3::r3) -> (t1 ^ t2 ^ t3) :: recolle r1 r2 r3
   | _ -> failwith "recolle";;
 let imprime ligne = print_string ligne; print_newline();;
@@ -33,10 +33,10 @@ let imprime_jeu nombre_de_disques départ milieu arrivée =
 let ajoute_disque disque (décalage, disques as tige) =
     (décalage - 1, disque::disques);;
 let sommet = function
-    (décalage, sommet :: reste) -> sommet
+  | (décalage, sommet :: reste) -> sommet
   | (décalage, []) -> failwith "sommet: tige vide";;
 let enlève_sommet = function
-    (décalage, sommet :: reste) -> (décalage + 1, reste)
+  | (décalage, sommet :: reste) -> (décalage + 1, reste)
   | (décalage, []) -> failwith "enlève_sommet: tige vide";;
 let déplace (nom_départ, tige_départ) (nom_arrivée, tige_arrivée) =
     imprime("Je déplace un disque de " ^

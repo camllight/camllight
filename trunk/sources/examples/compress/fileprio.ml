@@ -1,7 +1,7 @@
 type 'a t = Vide | File of int * 'a * 'a t * 'a t;;
 let vide = Vide;;
 let rec enlève_sommet = function
-    Vide -> raise File_vide
+  | Vide -> raise File_vide
   | File(prio, elt, Vide, Vide) -> Vide
   | File(prio, elt, gauche, Vide) -> gauche
   | File(prio, elt, Vide, droite) -> droite
@@ -12,11 +12,11 @@ let rec enlève_sommet = function
       else File(prio_d, elt_d, gauche, enlève_sommet droite);;
 
 let extraire = function
-    Vide -> raise File_vide
+  | Vide -> raise File_vide
   | File(prio, elt, _, _) as file -> (prio, elt, enlève_sommet file);;
 let rec ajoute file prio elt =
   match file with
-    Vide ->
+  | Vide ->
       File(prio, elt, Vide, Vide)
   | File(prio1, elt1, gauche, droite) ->
       if prio <= prio1

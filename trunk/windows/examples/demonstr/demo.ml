@@ -7,7 +7,7 @@ let examine chaîne =
     try
       vérifie_tautologie proposition variables;
       begin match variables with
-        [] ->
+      | [] ->
           print_string "Théorème: "
       | [var] ->
           print_string ("Théorème: pour toute proposition "^var^", ")

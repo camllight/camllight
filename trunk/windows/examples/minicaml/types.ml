@@ -20,7 +20,7 @@ and type_flèche t1 t2 = Terme("->", [|t1; t2|])
 and type_produit t1 t2 = Terme("*", [|t1; t2|])
 and type_liste t = Terme("list", [|t|]);;
 let rec valeur_de = function
-    Variable({Valeur = Connue ty1} as var) ->
+  | Variable({Valeur = Connue ty1} as var) ->
       let valeur_de_ty1 = valeur_de ty1 in
       var.Valeur <- Connue valeur_de_ty1;
       valeur_de_ty1
@@ -28,14 +28,14 @@ let rec valeur_de = function
 let test_d'occurrence var ty =
   let rec test t =
     match valeur_de t with
-      Variable var' ->
+    | Variable var' ->
         if var == var' then raise(Circularité(Variable var, ty))
     | Terme(constructeur, arguments) ->
         do_vect test arguments
   in test ty;;
 let rec rectifie_niveaux niveau_max ty =
   match valeur_de ty with
-    Variable var ->
+  | Variable var ->
       if var.Niveau > niveau_max then var.Niveau <- niveau_max
   | Terme(constructeur, arguments) ->
       do_vect (rectifie_niveaux niveau_max) arguments;;
@@ -44,7 +44,7 @@ let rec unifie ty1 ty2 =
   and valeur2 = valeur_de ty2 in
   if valeur1 == valeur2 then () else
     match (valeur1, valeur2) with
-      Variable var, ty ->
+    | Variable var, ty ->
         test_d'occurrence var ty;
         rectifie_niveaux var.Niveau ty;        
         var.Valeur <- Connue ty
@@ -70,7 +70,7 @@ let généralisation ty =
   let paramètres = ref [] in
   let rec trouve_paramètres ty =
     match valeur_de ty with
-      Variable var ->
+    | Variable var ->
         if var.Niveau > !niveau_de_liaison & not memq var !paramètres
         then paramètres := var :: !paramètres
     | Terme(constr, arguments) ->
@@ -81,13 +81,13 @@ let généralisation ty =
 let schéma_trivial ty = {Paramètres = []; Corps = ty};;
 let spécialisation schéma =
   match schéma.Paramètres with
-    [] -> schéma.Corps
+  | [] -> schéma.Corps
   | paramètres ->
       let nouvelles_inconnues =
         map (fun var -> (var, nouvelle_inconnue())) paramètres in
       let rec copie ty =
         match valeur_de ty with
-          Variable var as ty ->
+        | Variable var as ty ->
             begin try
               assq var nouvelles_inconnues
             with Not_found ->
@@ -113,17 +113,18 @@ let imprime_var var =
 
 let rec imprime ty =
   match valeur_de ty with
-    Variable var ->
+  | Variable var ->
       imprime_var var
   | Terme(constructeur, arguments) ->
       match vect_length arguments with
-        0 -> print_string constructeur
+      | 0 -> print_string constructeur
       | 1 -> imprime arguments.(0);
              print_string " "; print_string constructeur
       | 2 -> print_string "("; imprime arguments.(0);
              print_string " "; print_string constructeur;
              print_string " "; imprime arguments.(1);
-             print_string ")";;
+             print_string ")"
+      | _ -> failwith "constructeur de type ayant trop d'arguments";;
 
 let imprime_type ty =
   noms_des_variables := [];

@@ -5,16 +5,16 @@
 let taille_du_mot = 4;;            (* un mot = quatre octets *)
 
 let rec taille_du_type = function
-    Integer | Boolean -> taille_du_mot
+  | Integer | Boolean -> taille_du_mot
   | Array(inf, sup, ty) -> (sup - inf + 1) * taille_du_type ty;;
 let val_const = function
-    Entière n -> n
+  | Entière n -> n
   | Booléenne b -> if b then 1 else 0;;
 type info_variable =
   { typ: expr_type;
     emplacement: emplacement_variable }
 and emplacement_variable =
-    Global_indirect of int
+  | Global_indirect of int
   | Global_direct of int
   | Local_indirect of int
   | Local_direct of int;;
@@ -28,7 +28,7 @@ and libère_pile n =
   printf "add sp, %d, sp\n" (n*taille_du_mot);
   profondeur_pile := !profondeur_pile - n*taille_du_mot;;
 let rec type_de env = function
-    Constante(Entière n) -> Integer
+  | Constante(Entière n) -> Integer
   | Constante(Booléenne b) -> Boolean
   | Variable nom -> (cherche_variable nom env).typ
   | Application(fonc, args) ->
@@ -43,13 +43,14 @@ let rec type_de env = function
       in type_res
   | Accès_tableau(arg1, arg2) ->
       match type_de env arg1 with
-        Array(inf, sup, ty) -> ty;;
+      | Array(inf, sup, ty) -> ty
+      | _ -> failwith "type de tableau erroné";;
 let rec sans_interférences env = function
-    Constante c -> true
+  | Constante c -> true
   | Variable nom ->
       let var = cherche_variable nom env in
       begin match var.emplacement with
-        Global_indirect _ | Global_direct _ -> false
+      | Global_indirect _ | Global_direct _ -> false
       | Local_indirect _  | Local_direct _  -> true
       end
   | Application(fonc, args) -> false
@@ -62,7 +63,7 @@ let rec sans_interférences env = function
 let dernier_registre = 24;;
 
 let rec besoins env = function
-    Constante c -> 0
+  | Constante c -> 0
   | Variable nom -> 0
   | Application(fonc, args) -> dernier_registre
   | Op_unaire(op, arg) -> besoins env arg
@@ -76,21 +77,22 @@ and besoins_op_binaire env arg1 arg2 =
   then max b2 (b1 + 1)
   else max b1 (b2 + 1);;
 let instr_pour_op = function
-    "+"   -> "add"     | "-"   -> "sub"
+  | "+"   -> "add"     | "-"   -> "sub"
   | "*"   -> "mult"    | "/"   -> "div"
   | "="   -> "seq"     | "<>"  -> "sne"
   | "<"   -> "slt"     | ">"   -> "sgt"
   | "<="  -> "sle"     | ">="  -> "sge"
-  | "and" -> "and"     | "or"  -> "or";;
+  | "and" -> "and"     | "or"  -> "or"
+  | _ -> failwith "opérateur inconnu";;
 
 let rec compile_expr env expr reg =
   match expr with
-    Constante cst ->
+  | Constante cst ->
       printf "add r 0, %d, r %d\n" (val_const cst) reg
   | Variable nom ->
       let var = cherche_variable nom env in
       begin match var.emplacement with
-        Global_indirect n ->
+      | Global_indirect n ->
           printf "load r 0, %d, r %d  # %s \n" n reg nom
       | Global_direct n ->
           printf "add r 0, %d, r %d  # %s \n" n reg nom
@@ -116,8 +118,9 @@ let rec compile_expr env expr reg =
   | Op_unaire(op, arg) ->
       compile_expr env arg reg;
       begin match op with
-        "-"   -> printf "sub r 0, r %d, r %d\n" reg reg
+      | "-"   -> printf "sub r 0, r %d, r %d\n" reg reg
       | "not" -> printf "seq r 0, r %d, r %d\n"  reg reg
+      | _ -> failwith "opérateur uniaire inconnu"
       end
   | Op_binaire(op, arg1, Constante cst2) ->
       compile_expr env arg1 reg;
@@ -135,7 +138,7 @@ let rec compile_expr env expr reg =
       let (Array(inf, sup, type_éléments)) = type_de env arg1 in
       compile_expr env arg1 reg;
       begin match type_éléments with
-        Integer | Boolean ->
+      | Integer | Boolean ->
           printf "load r %d, %d, r %d\n" reg
                  ((val_const cst - inf) * taille_du_mot) reg
       | Array(_, _, _) ->
@@ -148,7 +151,7 @@ let rec compile_expr env expr reg =
       let (reg1, reg2) = compile_arguments env arg1 arg2 reg in
       if inf <> 0 then printf "sub r %d, %d, r %d\n" reg2 inf reg2;
       begin match type_éléments with
-        Integer | Boolean ->
+      | Integer | Boolean ->
           printf "mult r %d, %d, r %d\n" reg2 taille_du_mot reg2;
           printf "load r %d, r %d, r %d\n" reg1 reg2 reg
       | Array(_, _, typ) ->
@@ -184,7 +187,7 @@ let nouvelle_étiq () =
   incr compteur_d'étiquettes; !compteur_d'étiquettes;;
 
 let rec compile_instr env = function
-    Affectation_var(nom_var,
+  | Affectation_var(nom_var,
                     Constante(Entière 0 | Booléenne false)) ->
       affecte_var env nom_var 0
   | Affectation_var(nom_var, expr) ->
@@ -257,16 +260,17 @@ let rec compile_instr env = function
 and affecte_var env nom reg =
   let var = cherche_variable nom env in
   match var.emplacement with
-    Global_indirect n ->
+  | Global_indirect n ->
       printf "store r 0, %d, r %d  # %s \n" n reg nom
   | Local_indirect n ->
       printf "store sp, %d, r %d  # %s \n"
-             (!profondeur_pile - n) reg nom;;
+             (!profondeur_pile - n) reg nom
+  | _ -> failwith "mauvaise gestion des emplacements de varaibles";;
 let alloue_variable_locale (nom, typ) env =
   profondeur_pile := !profondeur_pile + taille_du_type typ;
   let emplacement =
     match typ with
-      Integer | Boolean ->
+    | Integer | Boolean ->
         Local_indirect(!profondeur_pile)
     | Array(_, _, _) ->
         Local_direct(!profondeur_pile) in
@@ -320,7 +324,7 @@ let adresse_donnée = ref 0;;
 let alloue_variable_globale (nom, typ) env =
   let emplacement =
     match typ with
-      Integer | Boolean -> Global_indirect(!adresse_donnée)
+    | Integer | Boolean -> Global_indirect(!adresse_donnée)
     | Array(_, _, _)    -> Global_direct(!adresse_donnée) in
   adresse_donnée := !adresse_donnée + taille_du_type typ;
   ajoute_variable nom {typ=typ; emplacement=emplacement} env;;

@@ -8,7 +8,7 @@
    with principal unifier sig *)
 (* super : term -> term -> (num list & subst) list *)
 let super m = suprec where rec suprec = function
-    Term(_,sons) as n ->
+  | Term(_,sons) as n ->
       let collate (pairs,n) son =
        (pairs @ map (fun (u,sig) -> (n::u,sig)) (suprec son), n+1) in
       let insides = fst (it_list collate ([],1) sons) in
@@ -30,7 +30,7 @@ and (n,_) = <<H(F(A,x),F(x,y))>> in super m n;;
 (* All (u,sig), u&[], such that n/u unifies with m *)
 (* super_strict : term -> term -> (num list & subst) list *)
 let super_strict m = function
-      Term(_,sons) ->
+    | Term(_,sons) ->
         let collate (pairs,n) son =
           (pairs @ map (fun (u,sig) -> (n::u,sig)) (super m son), n+1) in
         fst (it_list collate ([],1) sons)
@@ -60,7 +60,7 @@ let mutual_critical_pairs eq1 eq2 =
 
 let rename n (t1,t2) =
   let rec ren_rec = function
-    Var k -> Var(k+n)
+  | Var k -> Var(k+n)
   | Term(op,sons) -> Term(op, map ren_rec sons) in
   (ren_rec t1, ren_rec t2)
 ;;
@@ -85,11 +85,11 @@ let kb_completion greater = kbrec where rec kbrec rnum rules =
   where rec processf (k,l) =
    (processkl where rec processkl eqs =
      match eqs with
-     [] ->
+   | [] ->
       if k<l then next_criticals (k+1,l) else
       if l<rnum then next_criticals (1,l+1) else
        (match failures with
-          [] -> rules (* successful completion *)
+        | [] -> rules (* successful completion *)
         | _  -> message "Non-orientable equations :";
                 do_list non_orientable failures;
                 failwith "kb_completion")

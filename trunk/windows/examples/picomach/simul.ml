@@ -46,7 +46,7 @@ let écrire_mémoire adresse valeur =
     pico.mémoire.(adr) <- valeur;;
 
 let valeur_opérande = function
-    Reg r -> lire_registre r
+  | Reg r -> lire_registre r
   | Imm n -> n;;
 let tableau_des_appels_système =
   make_vect 10 ((function x -> x) : int -> int);;
@@ -61,12 +61,12 @@ let cycle_d'horloge () =
   let instruction = lire_instruction pico.pc in
   pico.pc <- pico.pc + taille_du_mot;
   match instruction with
-    Op(opération, reg1, opérande, reg2) ->
+  | Op(opération, reg1, opérande, reg2) ->
       let arg1 = lire_registre reg1
       and old2 = lire_registre reg2
       and arg2 = valeur_opérande opérande in
       begin match opération with
-        Load  -> écrire_registre reg2 (lire_mémoire (arg1 + arg2))
+      | Load  -> écrire_registre reg2 (lire_mémoire (arg1 + arg2))
       | Store -> écrire_mémoire (arg1 + arg2) (lire_registre reg2)
       | Add   -> écrire_registre reg2 (arg1 + arg2)
       | Mult  -> écrire_registre reg2 (arg1 * arg2)

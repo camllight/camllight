@@ -4,41 +4,41 @@
 let rec lire_proposition f = proposition5 f
 
 and proposition0 = function
-    [< 'Ident s >] -> Variable s
+  | [< 'Ident s >] -> Variable s
   | [< 'MC "vrai" >] -> Vrai
   | [< 'MC "faux" >] -> Faux
   | [< 'MC "("; lire_proposition p; 'MC ")" >] -> p
 
 and proposition1 = function
-    [< 'MC "non"; proposition0 p >] -> Non p
+  | [< 'MC "non"; proposition0 p >] -> Non p
   | [< proposition0 p >] -> p
 
 and proposition2 = function
-    [< proposition1 p; (reste2 p) q >] -> q
+  | [< proposition1 p; (reste2 p) q >] -> q
 and reste2 p = function
-    [< 'MC "et"; proposition1 q; (reste2 (Et (p, q))) r >] -> r
+  | [< 'MC "et"; proposition1 q; (reste2 (Et (p, q))) r >] -> r
   | [<>] -> p
 
 and proposition3 = function
-    [< proposition2 p; (reste3 p) q >] -> q
+  | [< proposition2 p; (reste3 p) q >] -> q
 and reste3 p = function
-    [< 'MC "ou"; proposition2 q; (reste3 (Ou (p, q))) r >] -> r
+  | [< 'MC "ou"; proposition2 q; (reste3 (Ou (p, q))) r >] -> r
   | [<>] -> p
 
 and proposition4 = function
-    [< proposition3 p; (reste4 p) q >] -> q
+  | [< proposition3 p; (reste4 p) q >] -> q
 and reste4 p = function
-    [< 'MC "=>"; proposition3 q; (reste4 (Implique (p, q))) r >] -> r
+  | [< 'MC "=>"; proposition3 q; (reste4 (Implique (p, q))) r >] -> r
   | [<>] -> p
 
 and proposition5 = function
-    [< proposition4 p; (reste5 p) q >] -> q
+  | [< proposition4 p; (reste5 p) q >] -> q
 and reste5 p = function
-    [< 'MC "<=>"; proposition4 q; (reste5 (Équivalent(p,q))) r >] -> r
+  | [< 'MC "<=>"; proposition4 q; (reste5 (Équivalent(p,q))) r >] -> r
   | [<>] -> p;;
 let lire_opération lire_opérateur lire_base constructeur =
   let rec lire_reste e1 = function
-    [< lire_opérateur _;
+  | [< lire_opérateur _;
        lire_base e2;
        (lire_reste (constructeur (e1, e2))) e >] -> e
   | [< >] -> e1 in
@@ -46,13 +46,13 @@ let lire_opération lire_opérateur lire_base constructeur =
 let rec lire_proposition f = proposition5 f
 
 and proposition0 = function
-    [< 'Ident s >] -> Variable s
+  | [< 'Ident s >] -> Variable s
   | [< 'MC "vrai" >] -> Vrai
   | [< 'MC "faux" >] -> Faux
   | [< 'MC "("; lire_proposition p; 'MC ")" >] -> p
 
 and proposition1 = function
-    [< 'MC "non"; proposition0 p >] -> Non p
+  | [< 'MC "non"; proposition0 p >] -> Non p
   | [< proposition0 p >] -> p
 
 and proposition2 flux =

@@ -29,7 +29,7 @@ let assemble instruction =
 
 let définir_étiquette nom_étiq val_étiq =
     try
-      hashtbl__find asm.table_étiq nom_étiq;
+      let déjà_définie = hashtbl__find asm.table_étiq nom_étiq in
       raise (Erreur ("étiquette " ^ nom_étiq ^ " redéfinie"))
     with Not_found ->
       hashtbl__add asm.table_étiq nom_étiq val_étiq;;
@@ -51,7 +51,7 @@ let résoudre_étiquette (adresse, nom_étiq) =
           raise (Erreur ("étiquette " ^ nom_étiq ^ " indéfinie")) in
     let nouvelle_instruction =
         match asm.code.(décode_adresse adresse) with
-          Op(opération, reg1, _, reg2) ->
+        | Op(opération, reg1, _, reg2) ->
             Op(opération, reg1, Imm valeur, reg2)
         | Jmp(_, reg) ->
             Jmp(Imm valeur, reg)

@@ -3,7 +3,7 @@
 #open "envir";;
 
 let rec valeur_initiale = function
-    Integer | Boolean -> Inconnue
+  | Integer | Boolean -> Inconnue
   | Array(inf, sup, ty) ->
       let v = make_vect (sup - inf + 1) Inconnue in
       for i = inf to sup do
@@ -17,7 +17,7 @@ let alloue_variables décl_var env =
   list_it alloue_variable décl_var env;;
 let rec ajoute_arguments paramètres arguments env =
   match (paramètres, arguments) with
-    [], [] -> env
+  | [], [] -> env
   | ((nom, typ) :: reste_p, val :: reste_a) ->
       ajoute_arguments reste_p reste_a
                        (ajoute_variable nom (ref val) env)
@@ -27,7 +27,7 @@ let environnement_global =
   ref (environnement_initial [] [] : valeur ref env);;
 
 let rec évalue_expr env = function
-    Constante(Entière n) -> Ent n
+  | Constante(Entière n) -> Ent n
   | Constante(Booléenne b) -> Bool b
   | Variable nom ->
       let emplacement = cherche_variable nom env in
@@ -38,14 +38,15 @@ let rec évalue_expr env = function
   | Op_unaire(op, argument) ->
       let v = évalue_expr env argument in
       begin match op with
-        "-"   -> Ent(- (ent_val v))
+      | "-"   -> Ent(- (ent_val v))
       | "not" -> Bool(not (bool_val v))
+      | _ -> failwith "Opérateur unaire inconnu"
       end
   | Op_binaire(op, argument1, argument2) ->
       let v1 = évalue_expr env argument1 in
       let v2 = évalue_expr env argument2 in
       begin match op with
-        "*"   -> Ent(ent_val v1 * ent_val v2)
+      | "*"   -> Ent(ent_val v1 * ent_val v2)
       | "/"   -> let n2 = ent_val v2 in
                  if n2 = 0
                  then raise(Erreur_exécution "division par zéro")
@@ -60,6 +61,7 @@ let rec évalue_expr env = function
       | ">="  -> Bool(ent_val v1 >= ent_val v2)
       | "and" -> Bool(bool_val v1 & bool_val v2)
       | "or"  -> Bool(bool_val v1 or bool_val v2)
+      | _ -> failwith "Opérateur binaire inconnu"
       end
   | Accès_tableau(argument1, argument2) ->
       let (inf, tbl) = tableau_val(évalue_expr env argument1) in
@@ -69,7 +71,7 @@ let rec évalue_expr env = function
       else raise(Erreur_exécution "accès hors bornes")
 
 and exécute_instr env = function
-    Affectation_var(nom, expr) ->
+  | Affectation_var(nom, expr) ->
       let emplacement = cherche_variable nom env in
       emplacement := évalue_expr env expr
   | Affectation_tableau(expr1, expr2, expr3) ->

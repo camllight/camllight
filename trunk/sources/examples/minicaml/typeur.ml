@@ -24,16 +24,17 @@ let boucle () =
     print_string "# "; flush std_out;
     try
       match lire_phrase flux_d'entrée with
-        Expression expr ->
+      | Expression expr ->
           let ty = type_exp !env_global expr in
           print_string "- : "; imprime_type ty;
           print_newline()
       | Définition déf ->
           let nouvel_env = type_déf !env_global déf in
           begin match nouvel_env with
-            (nom, schéma) :: _ ->
+          | (nom, schéma) :: _ ->
               print_string nom; print_string " : ";
               imprime_schéma schéma; print_newline()
+          | _ -> failwith "mauvaise gestion des défintions"
           end;
           env_global := nouvel_env
     with

@@ -10,19 +10,19 @@ let répète n liste_d'ordres =
     for i = 1 to n do liste_d'ordres() done;;
 répète 4 (function () -> print_int 1; print_char `*`);;
 type nombre =
-     Entier of int
+   | Entier of int
    | Flottant of float;;
 let flottant = function
-    Entier i -> float_of_int i
+  | Entier i -> float_of_int i
   | Flottant f -> f;;
 type ordre =
-     Av of nombre | Re of nombre
+   | Av of nombre | Re of nombre
    | Td of nombre | Tg of nombre
    | Lc | Bc
    | Ve
    | Rep of int * ordre list;;
 let rec exécute_ordre = function
-    Av n -> avance (flottant n)
+  | Av n -> avance (flottant n)
   | Re n -> avance (-. (flottant n))
   | Tg a -> tourne (flottant a)
   | Td a -> tourne (-. (flottant a))
@@ -38,7 +38,7 @@ exécute_programme
   carré (Flottant 12.5); carré (Flottant 6.25);
   carré (Flottant 3.125)];;
 type lexème =
-     Mot of string
+   | Mot of string
    | Symbole of char
    | Constante_entière of int
    | Constante_flottante of float;;
@@ -48,17 +48,17 @@ stream_next flux_car;;
 stream_next flux_car;;
 let rec saute_blancs flux =
   match flux with
-    [< ' ` ` >] -> saute_blancs flux  (* ` ` est l'espace *)
+  | [< ' ` ` >] -> saute_blancs flux  (* ` ` est l'espace *)
   | [< ' `\t` >] -> saute_blancs flux (* `\t` est la tabulation *)
   | [< ' `\n` >] -> saute_blancs flux (* `\n` est la fin de ligne *)
   | [< >] -> ();;
 let rec saute_blancs flux =
   match flux with
-    [< ' (` ` | `\t` | `\n`) >] -> saute_blancs flux
+  | [< ' (` ` | `\t` | `\n`) >] -> saute_blancs flux
   | [< >] -> ();;
 let rec lire_entier accumulateur flux =
   match flux with
-    [< '(`0`..`9` as c) >] ->
+  | [< '(`0`..`9` as c) >] ->
       lire_entier (10 * accumulateur + int_of_char c - 48) flux
   | [< >] -> accumulateur;;
 let flux_car = stream_of_string "123/456";;
@@ -67,7 +67,7 @@ stream_next flux_car;;
 lire_entier 900 flux_car;;
 let rec lire_décimales accumulateur échelle flux =
   match flux with
-    [< '(`0`..`9` as c) >] ->
+  | [< '(`0`..`9` as c) >] ->
       lire_décimales
         (accumulateur +.
            float_of_int(int_of_char c - 48) *. échelle)
@@ -77,7 +77,7 @@ lire_décimales 123.4 0.01 (stream_of_string "56789");;
 let tampon = "----------------";;
 let rec lire_mot position flux =
   match flux with
-    [< '(`A`..`Z` | `a`..`z` | `é` | `è` | `_` as c) >] ->
+  | [< '(`A`..`Z` | `a`..`z` | `é` | `è` | `_` as c) >] ->
       if position < string_length tampon then
         set_nth_char tampon position c;
       lire_mot (position+1) flux
@@ -86,13 +86,13 @@ let rec lire_mot position flux =
 let rec lire_lexème flux =
   saute_blancs flux;
   match flux with
-    [< '(`A`..`Z` | `a`..`z` | `é` | `è` as c) >] ->
+  | [< '(`A`..`Z` | `a`..`z` | `é` | `è` as c) >] ->
       set_nth_char tampon 0 c;
       Mot(lire_mot 1 flux)
   | [< '(`0`..`9` as c) >] ->
       let n = lire_entier (int_of_char c - 48) flux in
       begin match flux with
-        [< '`.` >] ->
+      | [< '`.` >] ->
           Constante_flottante
             (lire_décimales (float_of_int n) 0.1 flux)
       | [< >] -> Constante_entière(n)
@@ -105,7 +105,7 @@ lire_lexème flux_car;;
 lire_lexème flux_car;;
 let rec analyseur_lexical flux =
  match flux with
-   [< lire_lexème l >] -> [< 'l; analyseur_lexical flux >]
+ | [< lire_lexème l >] -> [< 'l; analyseur_lexical flux >]
  | [< >] -> [< >];;
 let flux_lexèmes =
     analyseur_lexical(stream_of_string "123bonjour   ! 45.67");;
@@ -114,7 +114,7 @@ stream_next flux_lexèmes;;
 stream_next flux_lexèmes;;
 stream_next flux_lexèmes;;
 let nombre = function
-    [< 'Constante_entière i >] -> Entier i
+  | [< 'Constante_entière i >] -> Entier i
   | [< 'Constante_flottante f >] -> Flottant f;;
 let flux_lexèmes =
     analyseur_lexical(stream_of_string "123 1.05 fini");;
@@ -122,7 +122,7 @@ nombre flux_lexèmes;;
 nombre flux_lexèmes;;
 nombre flux_lexèmes;;
 let rec ordre = function
-    [< 'Mot "baisse_crayon" >] -> Bc
+  | [< 'Mot "baisse_crayon" >] -> Bc
   | [< 'Mot "bc" >] -> Bc
   | [< 'Mot "lève_crayon" >] -> Lc
   | [< 'Mot "lc" >] -> Lc
@@ -141,12 +141,12 @@ let rec ordre = function
   | [< 'Mot "rep"; 'Constante_entière n;
        liste_d'ordres l >] -> Rep (n,l)
 and liste_d'ordres = function
-    [< 'Symbole `[`; suite_d'ordres l; 'Symbole `]` >] -> l
+  | [< 'Symbole `[`; suite_d'ordres l; 'Symbole `]` >] -> l
 and suite_d'ordres = function
-    [< ordre ord; suite_d'ordres l_ord >] -> ord::l_ord
+  | [< ordre ord; suite_d'ordres l_ord >] -> ord::l_ord
   | [<>] -> [];;
 let analyse_programme = function
-    [< suite_d'ordres l; 'Symbole `.` >] -> l;;
+  | [< suite_d'ordres l; 'Symbole `.` >] -> l;;
 let lire_code chaîne =
     analyse_programme
       (analyseur_lexical (stream_of_string chaîne));;
@@ -156,29 +156,29 @@ let logo chaîne =
 logo "ve répète 6
            [td 60 répète 6 [av 15 tg 60] av 15].";;
 type expression =
-     Constante of nombre
+   | Constante of nombre
    | Somme of expression * expression
    | Produit of expression * expression
    | Différence of expression * expression
    | Quotient of expression * expression
    | Variable of string;;
 let ajoute_nombres = function
-    (Entier i, Entier j) -> Entier (i + j)
+  | (Entier i, Entier j) -> Entier (i + j)
   | (n1, n2) -> Flottant (flottant n1 +. flottant n2)
 and soustrais_nombres = function
-    (Entier i, Entier j) -> Entier (i - j)
+  | (Entier i, Entier j) -> Entier (i - j)
   | (n1, n2) -> Flottant (flottant n1 -. flottant n2)
 and multiplie_nombres = function
-    (Entier i, Entier j) -> Entier (i * j)
+  | (Entier i, Entier j) -> Entier (i * j)
   | (n1, n2) -> Flottant (flottant n1 *. flottant n2)
 and divise_nombres = function
-    (Entier i, Entier j) -> Entier (i / j)
+  | (Entier i, Entier j) -> Entier (i / j)
   | (n1, n2) -> Flottant (flottant n1 /. flottant n2)
 and compare_nombres = function
-    (Entier i, Entier j) -> i >= j
+  | (Entier i, Entier j) -> i >= j
   | (n1, n2) -> (flottant n1 >=. flottant n2);;
 let rec valeur_expr env = function
-    Constante n -> n
+  | Constante n -> n
   | Somme (e1, e2) ->
      ajoute_nombres (valeur_expr env e1, valeur_expr env e2)
   | Produit (e1, e2) ->
@@ -189,7 +189,7 @@ let rec valeur_expr env = function
      divise_nombres (valeur_expr env e1, valeur_expr env e2)
   | Variable s -> assoc s env;;
 type ordre =
-     Av of expression | Re of expression
+   | Av of expression | Re of expression
    | Td of expression | Tg of expression
    | Lc | Bc
    | Ve
@@ -204,11 +204,11 @@ let définit_procédure (nom, proc as liaison) =
 and définition_de nom_de_procédure =
     assoc nom_de_procédure !procédures_définies;;
 let valeur_entière = function
-    Entier i -> i
+  | Entier i -> i
   | Flottant f -> failwith "entier attendu";;
 exception Fin_de_procédure;;
 let rec exécute_ordre env = function
-    Av e -> avance (flottant (valeur_expr env e))
+  | Av e -> avance (flottant (valeur_expr env e))
   | Re e -> avance (-. (flottant (valeur_expr env e)))
   | Tg a -> tourne (flottant (valeur_expr env a))
   | Td a -> tourne (-. (flottant (valeur_expr env a)))
@@ -228,8 +228,8 @@ let rec exécute_ordre env = function
      let variables = définition.Paramètres
      and corps = définition.Corps in
      let rec augmente_env = function
-         [],[] -> env
-       | variable::vars, expr::exprs ->
+       | [],[] -> env
+       | variable :: vars, expr :: exprs ->
           (variable, valeur_expr env expr) ::
           augmente_env (vars, exprs)
        | _ ->
@@ -239,14 +239,14 @@ let rec exécute_ordre env = function
      try  do_list (exécute_ordre env_pour_corps) corps
      with Fin_de_procédure -> ();;
 type phrase_logo =
-     Pour of string * procédure
+   | Pour of string * procédure
    | Ordre of ordre;;
 type programme_logo = Programme of phrase_logo list;;
 let rec exécute_phrase = function
-    Ordre ord -> exécute_ordre [] ord
+  | Ordre ord -> exécute_ordre [] ord
   | Pour (nom, proc as liaison) -> définit_procédure liaison
 and exécute_programme = function
-    Programme phs -> do_list exécute_phrase phs;;
+  | Programme phs -> do_list exécute_phrase phs;;
 let logo chaîne =
     do_list exécute_phrase
      (analyse_programme
