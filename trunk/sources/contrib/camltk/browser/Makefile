@@ -20,7 +20,8 @@ CAMLDEP=../../../src/tools/camldep
 
 COMPFLAGS=-g -O fast -I $(CAMLTKDIR) -I $(SUPPORTDIR) -I ../../../src/compiler
 
-COMPILEROBJS = config.zo misc.zo globals.zo modules.zo location.zo types.zo \
+COMPILEROBJS = config.zo misc.zo interntl.zo globals.zo modules.zo \
+               location.zo types.zo \
                error.zo const.zo builtins.zo
 OBJS= lexer.zo util.zo hyper_printers.zo visual.zo source.zo main.zo
 
