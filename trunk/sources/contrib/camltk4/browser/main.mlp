@@ -13,12 +13,12 @@ let module_panel parent selected_paths =
   let f = frame__create parent [] in (* vgroup *)
   let title = label__create f [Text "Opened Modules"] in
 
-  let fls = frame__create f [Relief Sunken; Borderwidth (Pixels 2)] in 
+  let fls = frame__create f [Relief Sunken; BorderWidth (Pixels 2)] in 
   let lb = listbox__create fls [] in
   let sb = scrollbar__create fls [] in
     frx_listbox__scroll_link sb lb;
     frx_focus__auto lb;
-    tk__bind lb [[Double], WhatButton 1] 
+    tk__bind lb [[Double], ButtonPressDetail 1] 
            (BindSet ([], fun _ ->
                           do_list (fun s ->
 			             visual_module false (listbox__get lb s))
@@ -27,7 +27,7 @@ let module_panel parent selected_paths =
     try 
       modules__open_module n;
       listbox__insert lb End [n];
-      listbox__yview lb (Number (max 0 (listbox__size lb - 4)));
+      listbox__yview_index lb (Number (max 0 (listbox__size lb - 4)));
       true
     with
       Toplevel -> begin
@@ -54,14 +54,16 @@ let module_panel parent selected_paths =
        Command (fun () -> 
                  frx_req__open_list "Open a module" 
       	       	       	   (modlist__modules_of_path (selected_paths ()))
-      	       	       	   add_module)]
+      	       	       	   add_module 
+      	       	       	   (fun _ -> ()))]
   and o1 = button__create f
       [Text "Open and View Module"; Relief Raised; 
        Command (fun () -> 
                  frx_req__open_list "Open and View a module" 
       	       	       	   (modlist__modules_of_path (selected_paths ()))
       	       	       	   (function n -> if add_module n then
-      	       	       	       	       	  visual_module false n))] in
+      	       	       	       	       	  visual_module false n)
+                           (fun _ -> ()))] in
 
    pack [title] [Fill Fill_X];
     pack [lb] [Side Side_Left; Fill Fill_Both; Expand true];
@@ -79,7 +81,7 @@ let path_panel parent =
   let f = frame__create parent [] in (* vgroup *)
   let title = label__create f [Text "Load Path"] in
 
-  let fls = frame__create f [Relief Sunken; Borderwidth (Pixels 2)] in 
+  let fls = frame__create f [Relief Sunken; BorderWidth (Pixels 2)] in 
   let lb = listbox__create fls [] in
   let sb = scrollbar__create fls [] in
     frx_listbox__scroll_link sb lb;
@@ -107,19 +109,21 @@ let path_panel parent =
       	[] -> !load_path
      |  l -> map (listbox__get lb) l  in
 
-  tk__bind lb [[Double], WhatButton 1] 
+  tk__bind lb [[Double], ButtonPressDetail 1] 
      (BindSet ([], 
        fun _ -> do_list (fun s ->
 	  frx_req__open_list "Select a source file"
             (set__elements (modlist__sources_of_directory (listbox__get lb s)))
-            display_file)
+            display_file
+      	    (fun _ -> ()))
         (listbox__curselection lb)));
 
   let memory = textvariable__new () in
   let o = button__create f
       [Text "Add Directory"; Relief Raised; 
        Command (fun () -> 
-      	       	 frx_req__open_simple "Add a directory to the load path" add_path memory)
+      	       	 frx_req__open_simple "Add a directory to the load path" 
+      	       	      add_path (fun _ -> ()) memory)
       ] in
 
    pack [title] [Fill Fill_X];
@@ -137,7 +141,7 @@ let browsing_panel parent =
    let enterf = frame__create f [] in
    let m = label__create enterf [Text "Enter a global symbol:"] in
    let e = entry__create enterf [Relief Sunken] in
-      tk__bind e [[], XKey "Return"]
+      tk__bind e [[], KeyPressDetail "Return"]
                  (BindSet ([], (fun _ -> visual_search_any 
       	       	       	       	       	  (entry__get e))));
       (* Make e the default focus for the toplevel *)
@@ -162,7 +166,8 @@ let browsing_panel parent =
        Command 
         (fun () -> frx_req__open_list "Open a source file" 
       	       	     (modlist__sources_of_path !load_path)
-      	       	     display_file)] in
+      	       	     display_file
+      	       	     (fun _ -> ()))] in
 
    pack [cb; o2; enterf] [Side Side_Bottom; Fill Fill_X];
    f
