@@ -65,8 +65,16 @@ caml-tex
   A preprocessor to insert Caml code in TeX/LaTeX sources.
 
   Requirements:
-        - TeX/LaTeX
-        - Perl 4.0
+        - TeX/LaTeX 2.09
+        - Perl
+
+caml-latex2e
+--------
+  Enhanced version of caml-tex, for use with Latex2e.
+
+  Requirements:
+        - LaTeX2e
+        - Perl
 
 camlsearch
 ----------
