@@ -75,8 +75,6 @@ version.ml: version.mlp ../version.h
 ### DO NOT DELETE THIS LINE
 lexer.zi: parser.zi 
 parser.zi: syntax.zo 
-all.zo: lambda.zo modules.zo config.zi compiler.zo misc.zo syntax.zo \
-    globals.zo 
 back.zo: prim.zo lambda.zo const.zo misc.zo instruct.zo 
 buffcode.zo: error.zo 
 builtins.zo: modules.zo globals.zo const.zo 
