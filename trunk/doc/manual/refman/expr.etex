@@ -89,7 +89,7 @@ precedence come first.
 \ikwd{try\@\verb`try`}%
 \ikwd{let\@\verb`let`}%
 \ikwd{prefix\@\verb`prefix`}%
-\begin{tableau}{Construction or operator}{Associativity}
+\begin{tableau}{|l|l|}{Construction or operator}{Associativity}
 \entree{"!"}{--}
 \entree{".   .("}{--}
 \entree{function application}{right}
@@ -146,6 +146,7 @@ compatible with @type@.
 \subsubsection*{Function abstraction}
 
 The most general form of function abstraction is:
+\begin{latexonly}
 $$\begin{array}{rlll}
 \token{fun} & {\sl pattern}_1^1 ~ \ldots ~ {\sl pattern}_1^m & \token{->} &
                                                                {\sl expr}_1 \\
@@ -153,15 +154,24 @@ $$\begin{array}{rlll}
 \token{|}   & {\sl pattern}_n^1 ~ \ldots ~ {\sl pattern}_n^m & \token{->} &
                                                                {\sl expr}_n
 \end{array}$$
-This expression evaluates to a functional value with $m$ curried arguments.
-When this function is applied to $m$ values $v_1 \ldots v_m$, the
-values are matched against each pattern row
-${\sl pattern}_i^1 ~ \ldots ~ {\sl pattern}_i^m$, for $i$ from 1 to
-$n$. If one of these matchings succeeds, that is if the value $v_j$
-matches the pattern ${\sl pattern}_i^j$ for all $j = 1 \ldots m$, then
-the expression ${\sl expr}_i$ associated to the selected pattern row
+\end{latexonly}
+\begin{rawhtml}
+<pre>
+fun <i>pattern</i>11 ... <i>pattern</i>1M -&gt; <i>expr</i>1
+  | ...
+  | <i>pattern</i>N1 ... <i>pattern</i>NM -&gt; <i>expr</i>N
+</pre>
+\end{rawhtml}
+This expression evaluates to a functional value with \var{m} curried arguments.
+When this function is applied to \var{m} values \nth{v}{1}~\ldots~\nth{v}{m},
+the values are matched against each pattern row
+@pattern_i^1 \ldots pattern_i^m@
+for \var{i} from 1 to \var{n}.
+If one of these matchings succeeds, that is if the value \nth{v}{j}
+matches the pattern @pattern_i^j@ for all \fromoneto{j}{m},
+then the expression @expr_i@ associated to the selected pattern row
 is evaluated, and its value becomes the value of the function
-application. The evaluation of ${\sl expr}_i$ takes place in an
+application. The evaluation of @expr_i@ takes place in an
 environment enriched by the bindings performed during the matching.
 
 If several pattern rows match the arguments, the one that occurs first
@@ -170,26 +180,35 @@ matches the argument, the exception "Match_failure" is raised.
 %
 \index{Match_failure (exception)\@\verb`Match_failure` (exception)}
 
-If the function above is applied to less than $m$ arguments, a
+If the function above is applied to less than \var{m} arguments, a
 functional value is returned, that represents the partial application
 of the function to the arguments provided. This partial application is
 a function that, when applied to the remaining arguments,
 matches all arguments against the pattern rows as described above.
-Matching does not start until all $m$ arguments have been provided
+Matching does not start until all \var{m} arguments have been provided
 to the function; hence, partial applications of the function to less
-than $m$ arguments never raise "Match_failure".
+than \var{m} arguments never raise "Match_failure".
 
 All pattern rows in the function body must contain the same
 number of patterns. A variable must not be bound more than once in
 one pattern row.
 
-Functions with only one argument can be defined with the {\tt
-function} keyword instead of {\tt fun}:
+Functions with only one argument can be defined with the
+{\tt function} keyword instead of {\tt fun}:
+\begin{latexonly}
 $$\begin{array}{rlll}
 \token{function} & {\sl pattern}_1 & \token{->} & {\sl expr}_1 \\
 \token{|}   & \ldots \\
 \token{|}   & {\sl pattern}_n & \token{->} & {\sl expr}_n
 \end{array}$$
+\end{latexonly}
+\begin{rawhtml}
+<pre>
+function <i>pattern</i>1 -&gt; <i>expr</i>1
+       | ...
+       | <i>pattern</i>N -&gt; <i>expr</i>N
+</pre>
+\end{rawhtml}
 The function thus defined behaves exactly as described above. The only
 difference between the two forms of function definition is how a
 parsing ambiguity is resolved. The two forms @cconstr~pattern@ (two
@@ -213,10 +232,9 @@ expr_n@ are evaluated is not specified.
 
 The {\tt let} and {\tt let rec} constructs bind variables locally.
 The construct
-$$
-\hbox{@"let" pattern_1 "=" expr_1 "and" \ldots "and" pattern_n "=" expr_n
-       "in" expr@}
-$$
+\begin{center}
+@"let" pattern_1 "=" expr_1 "and" \ldots "and" pattern_n "=" expr_n "in" expr@
+\end{center}
 evaluates @expr_1 \ldots expr_n@ in some unspecified order, then matches
 their values against the patterns @pattern_1 \ldots pattern_n@. If the
 matchings succeed, @expr@ is evaluated in the environment enriched by
@@ -228,25 +246,26 @@ matchings fails, the exception "Match_failure" is raised.
 
 An alternate syntax is provided to bind variables to functional
 values: instead of writing
-$$
-\hbox{@ident "=" "fun" pattern_1 \ldots pattern_m "->" expr@}
-$$
+\begin{center}
+@ident "=" "fun" pattern_1 \ldots pattern_m "->" expr@
+\end{center}
 in a {\tt let} expression, one may instead write
-$$
-\hbox{@ident pattern_1 \ldots pattern_m "=" expr@}
-$$
-Both forms bind @ident@ to the curried function with $m$ arguments and
+\begin{center}
+@ident pattern_1 \ldots pattern_m "=" expr@
+\end{center}
+Both forms bind @ident@ to the curried function with \var{m} arguments and
 only one case,
-$$
-\hbox{@pattern_1 \ldots pattern_m "->" expr@.}
-$$
+\begin{center}
+@pattern_1 \ldots pattern_m "->" expr@.
+\end{center}
+
 \medskip
 \noindent
 Recursive definitions of variables are introduced by {\tt let rec}:
-$$
-\hbox{@"let" "rec" pattern_1 "=" expr_1 "and" \ldots "and" pattern_n "=" expr_n
-       "in" expr@}
-$$
+\begin{center}
+@"let" "rec" pattern_1 "=" expr_1 "and" \ldots "and" pattern_n "=" expr_n
+       "in" expr@
+\end{center}
 The only difference with the {\tt let} construct described above is
 that the bindings of variables to values performed by the
 pattern-matching are considered already performed when the expressions
@@ -259,12 +278,12 @@ The recursive definition is guaranteed to behave as described above if
 the expressions @expr_1@ to @expr_n@ are function definitions
 (@"fun" \ldots@ or @"function" \ldots@), and the patterns @pattern_1
 \ldots pattern_n@ consist in a single variable, as in:
-$$\hbox{
+\begin{center}
 @"let" "rec" ident_1 "=" "fun" \ldots
 "and" \ldots
 "and" ident_n "=" "fun" \ldots
-"in" expr@}
-$$
+"in" expr@
+\end{center}
 This defines @ident_1 \ldots ident_n@ as mutually recursive functions
 local to @expr@. The behavior of other forms of {\tt let rec}
 definitions is implementation-dependent.
@@ -290,12 +309,22 @@ The @"else" expr_3@ part can be omitted, in which case it defaults to
 \subsubsection*{Case expression}\ikwd{match\@\verb`match`}
 
 The expression
+\begin{latexonly}
 $$\begin{array}{rlll}
 \token{match} & {\sl expr} \\
 \token{with} & {\sl pattern}_1 & \token{->} & {\sl expr}_1 \\
 \token{|}     & \ldots \\
 \token{|}     & {\sl pattern}_n & \token{->} & {\sl expr}_n
 \end{array}$$
+\end{latexonly}
+\begin{rawhtml}
+<pre>
+match <i>expr</i> with
+      <i>pattern</i>1 -&gt; <i>expr</i>1
+    | ...
+    | <i>pattern</i>N -&gt; <i>expr</i>N
+</pre>
+\end{rawhtml}
 matches the value of @expr@ against the patterns @pattern_1@ to
 @pattern_n@. If the matching against @pattern_i@ succeeds, the
 associated expression @expr_i@ is evaluated, and its value becomes the
@@ -316,7 +345,9 @@ The expression @expr_1 '&' expr_2@ evaluates to @'true'@ if both
 second component, @expr_2@, is not evaluated if the first component
 evaluates to @'false'@. Hence, the expression @expr_1 '&' expr_2@ behaves 
 exactly as
-$$ {\tt if}~{\sl expr_1}~{\tt then}~{\sl expr_2}~{\tt else~false}. $$
+\begin{center}
+@'if' expr_1 'then' expr_2 'else' 'false'@.
+\end{center}
 
 \ikwd{or\@\verb`or`}
 The expression @expr_1 'or' expr_2@ evaluates to @'true'@ if one of
@@ -325,7 +356,9 @@ The expression @expr_1 'or' expr_2@ evaluates to @'true'@ if one of
 second component, @expr_2@, is not evaluated if the first component
 evaluates to @'true'@. Hence, the expression @expr_1 'or' expr_2@ behaves 
 exactly as
-$$ {\tt if}~{\sl expr_1}~{\tt then~true~else}~{\sl expr_2}. $$
+\begin{center}
+@'if' expr_1 'then' 'true' 'else' expr_2@.
+\end{center}
 
 \subsubsection*{Loops}
 
@@ -339,17 +372,31 @@ the unit value @'()'@.
 \ikwd{for\@\verb`for`}
 The expression @'for' ident '=' expr_1 'to' expr_2 'do' expr_3 'done'@
 first evaluates the expressions @expr_1@ and @expr_2@ (the boundaries)
-into integer values $n$ and $p$. Then, the loop body @expr_3@ is
+into integer values \var{n} and \var{p}. Then, the loop body @expr_3@ is
 repeatedly evaluated in an environment where the local variable named
-@ident@ is successively bound to the values $n$, $n+1$, \ldots, $p-1$,
-$p$. The loop body is never evaluated if $n > p$.
+@ident@ is successively bound to the values
+\begin{latexonly}
+   $n$, $n+1$, \ldots, $p-1$, $p$.
+   The loop body is never evaluated if $n > p$.
+\end{latexonly}
+\begin{rawhtml}
+   <i>n</i>, <i>n</i>+1, \ldots, <i>p</i>-1, <i>p</i>.
+   The loop body is never evaluated if <i>n</i> &gt; <i>p</i>.
+\end{rawhtml}
 
 The expression @'for' ident '=' expr_1 'downto' expr_2 'do' expr_3 'done'@
 first evaluates the expressions @expr_1@ and @expr_2@ (the boundaries)
-into integer values $n$ and $p$. Then, the loop body @expr_3@ is
+into integer values \var{n} and \var{p}. Then, the loop body @expr_3@ is
 repeatedly evaluated in an environment where the local variable named
-@ident@ is successively bound to the values $n$, $n-1$, \ldots, $p+1$,
-$p$. The loop body is never evaluated if $n < p$.
+@ident@ is successively bound to the values
+\begin{latexonly}
+   $n$, $n-1$, \ldots, $p+1$, $p$.
+   The loop body is never evaluated if $n < p$.
+\end{latexonly}
+\begin{rawhtml}
+   <i>n</i>, <i>n</i>-1, \ldots, <i>p</i>+1, <i>p</i>.
+   The loop body is never evaluated if <i>n</i> &lt; <i>p</i>.
+\end{rawhtml}
 
 In both cases, the whole @'for'@ expression evaluates to the unit
 value @'()'@.
@@ -358,12 +405,22 @@ value @'()'@.
 \ikwd{try\@\verb`try`}
 
 The expression
+\begin{latexonly}
 $$\begin{array}{rlll}
 \token{try~} & {\sl expr} \\
 \token{with} & {\sl pattern}_1 & \token{->} & {\sl expr}_1 \\
 \token{|}   & \ldots \\
 \token{|}   & {\sl pattern}_n & \token{->} & {\sl expr}_n
 \end{array}$$
+\end{latexonly}
+\begin{rawhtml}
+<pre>
+try  <i>expr</i>
+with <i>pattern</i>1 -&gt; <i>expr</i>1
+    | ...
+    | <i>pattern</i>N -&gt; <i>expr</i>N
+</pre>
+\end{rawhtml}
 evaluates the expression @expr@ and returns its value if the
 evaluation of @expr@ does not raise any exception. If the evaluation
 of @expr@ raises an exception, the exception value is matched against
@@ -382,7 +439,7 @@ through'' the @'try'@ construct.
 \subsubsection*{Products}
 
 The expression @expr_1 ',' \ldots ',' expr_n@ evaluates to the
-$n$-tuple of the values of expressions @expr_1@ to @expr_n@. The
+\var{n}-tuple of the values of expressions @expr_1@ to @expr_n@. The
 evaluation order for the subexpressions is not specified.
 
 \subsubsection*{Variants}
@@ -403,12 +460,13 @@ values of @expr_1@ to @expr_n@.
 
 The expression @'{' label_1 '=' expr_1 ';' \ldots ';' label_n '='
 expr_n '}'@ evaluates to the record value
-$\{ label_1 = v_1; \ldots; label_n = v_n \}$, where $v_i$ is the value
-of @expr_i@ for $i = 1, \ldots, n$. The labels @label_1@ to @label_n@
-must all belong to the same record types; all labels belonging to this
-record type must appear exactly once in the record expression, though
-they can appear in any order. The order in which @expr_1@ to
-@expr_n@ are evaluated is not specified.
+@'{' label_1 '=' v_1 ';' \ldots ';' label_n '=' v_n '}'@,
+where @v_i@ is the value of @expr_i@ for \fromoneto{i}{n}.
+The labels @label_1@ to @label_n@ must all belong to the same record
+types; all labels belonging to this record type must appear exactly
+once in the record expression, though they can appear in any
+order. The order in which @expr_1@ to @expr_n@ are evaluated is not
+specified.
 
 The expression @expr_1 '.' label@ evaluates @expr_1@ to a record
 value, and returns the value associated to @label@ in this record
@@ -425,7 +483,7 @@ expression @expr_1 '.' label '<-' expr_2@ evaluates to the unit value
 \subsubsection*{Arrays}
 
 The expression @'[|' expr_1 ';' \ldots ';' expr_n '|]'@ evaluates to
-a $n$-element array, whose elements are initialized with the values of
+a \var{n}-element array, whose elements are initialized with the values of
 @expr_1@ to @expr_n@ respectively. The order in which these
 expressions are evaluated is unspecified.
 
@@ -434,7 +492,7 @@ application @'vect_item' expr_1 expr_2@. In the initial environment,
 the identifier @'vect_item'@ resolves to a built-in function that
 returns the value of element number @expr_2@ in the array denoted by
 @expr_1@. The first element has number 0; the last element has number
-$n-1$, where $n$ is the size of the array. The exception
+$n-1$, where \var{n} is the size of the array. The exception
 "Invalid_argument" is raised if the access is out of bounds.
 
 The expression @expr_1 '.(' expr_2 ')' '<-' expr_3@ is equivalent to
@@ -476,57 +534,53 @@ expr_2@ may change if the meaning of the identifiers associated to
 identifiers, or by modification of the list of opened modules, through
 the @'#open'@ and @'#close'@ directives.
 
-\begin{center}
-\begin{tabular}{|l|l|p{10cm}|}
-\hline
-Operator & Associated & Behavior in the default environment \\
-         & identifier &                                     \\
-\hline
-\verb'+' & \verb'prefix +' & Integer addition. \\
-\verb'-' (infix) & \verb'prefix -' & Integer subtraction. \\
-\verb'-' (prefix) & \verb'minus' & Integer negation. \\
-\verb'*' & \verb'prefix *' & Integer multiplication. \\
-\verb'/' & \verb'prefix /' & Integer division. Raise \verb'Division_by_zero' if
-        second argument is zero. The result is
-        unspecified if either argument is negative. \\
-\verb'mod' & \verb'prefix mod' & Integer modulus. Raise
-        \verb'Division_by_zero' if second argument is zero. The result is
-        unspecified if either argument is negative. \\
-\verb'+.' & \verb'prefix +.' & Floating-point addition. \\
-\verb'-.' (infix) & \verb'prefix -.' & Floating-point subtraction. \\
-\verb'-.' (prefix) & \verb'minus_float' & Floating-point negation. \\
-\verb'*.' & \verb'prefix *.' & Floating-point multiplication. \\
-\verb'/.' & \verb'prefix /.' & Floating-point division.
-        Raise \verb'Division_by_zero' if second argument is zero. \\
-{\tt\char64}  & \verb'prefix '{\tt\char64} & List concatenation. \\
-\verb'^'  & \verb'prefix ^' & String concatenation. \\
-\verb'!'  & \verb'prefix !' & Dereferencing (return the current
-contents of a reference). \\
-\verb':=' & \verb'prefix :=' & Reference assignment (update the
-reference given as first argument with the value of the second
-argument). \\
-\verb'='  & \verb'prefix =' & Structural equality test. \\
-\verb'<>'  & \verb'prefix <>' & Structural inequality test. \\
-\verb'=='  & \verb'prefix ==' & Physical equality test. \\
-\verb'!='  & \verb'prefix !=' & Physical inequality test. \\
-\verb'<'  & \verb'prefix <' & Test ``less than'' on integers. \\
-\verb'<='  & \verb'prefix <=' & Test ``less than or equal '' on integers. \\
-\verb'>'  & \verb'prefix >' & Test ``greater than'' on integers. \\
-\verb'>='  & \verb'prefix >=' & Test ``greater than or equal'' on integers. \\
-\verb'<.'  & \verb'prefix <.' & Test ``less than'' on floating-point numbers. \\
-\verb'<=.'  & \verb'prefix <=.' & Test ``less than or equal '' on floating-point numbers. \\
-\verb'>.'  & \verb'prefix >.' & Test ``greater than'' on floating-point numbers. \\
-\verb'>=.'  & \verb'prefix >=.' & Test ``greater than or equal'' on
-floating-point numbers. \\
-\hline
-\end{tabular}
-\end{center}
+\begin{tableauoperateurs}
+\entreeoperateur{"+"}{"prefix +"}{Integer addition.}
+\entreeoperateur{"-" (infix)}{"prefix -"}{Integer subtraction.}
+\entreeoperateur{"-" (prefix)}{"minus"}{Integer negation.}
+\entreeoperateur{"*"}{"prefix *"}{Integer multiplication.}
+\entreeoperateur{"/"}{"prefix /"}{Integer division.
+        Raise "Division_by_zero" if second argument is zero. The result is
+        unspecified if either argument is negative.}
+\entreeoperateur{"mod"}{"prefix mod"}{Integer modulus. Raise
+        "Division_by_zero" if second argument is zero. The result is
+        unspecified if either argument is negative.}
+\entreeoperateur{"+."}{"prefix +."}{Floating-point addition.}
+\entreeoperateur{"-." (infix)}{"prefix -."}{Floating-point subtraction.}
+\entreeoperateur{"-." (prefix)}{"minus_float"}{Floating-point negation.}
+\entreeoperateur{"*."}{"prefix *."}{Floating-point multiplication.}
+\entreeoperateur{"/."}{"prefix /."}{Floating-point division.
+        Raise "Division_by_zero" if second argument is zero.}
+\entreeoperateur{{\tt\char64} }{"prefix "{\tt\char64}}{List concatenation.}
+\entreeoperateur{"^" }{"prefix ^"}{String concatenation.}
+\entreeoperateur{"!" }{"prefix !"}{Dereferencing (return the current
+        contents of a reference).}
+\entreeoperateur{":="}{"prefix :="}{Reference assignment (update the
+        reference given as first argument with the value of the second
+        argument).}
+\entreeoperateur{"=" }{"prefix ="}{Structural equality test.}
+\entreeoperateur{"<>" }{"prefix <>"}{Structural inequality test.}
+\entreeoperateur{"==" }{"prefix =="}{Physical equality test.}
+\entreeoperateur{"!=" }{"prefix !="}{Physical inequality test.}
+\entreeoperateur{"<" }{"prefix <"}{Test ``less than'' on integers.}
+\entreeoperateur{"<=" }{"prefix <="}{Test ``less than or equal '' on integers.}
+\entreeoperateur{">" }{"prefix >"}{Test ``greater than'' on integers.}
+\entreeoperateur{">=" }{"prefix >="}{Test ``greater than or equal''
+        on integers.}
+\entreeoperateur{"<." }{"prefix <."}{Test ``less than''
+        on floating-point numbers.}
+\entreeoperateur{"<=." }{"prefix <=."}{Test ``less than or equal ''
+        on floating-point numbers.}
+\entreeoperateur{">." }{"prefix >."}{Test ``greater than''
+        on floating-point numbers.}
+\entreeoperateur{">=." }{"prefix >=."}{Test ``greater than or equal''
+        on floating-point numbers.}
+\end{tableauoperateurs}
 
-The behavior of the \verb'+', \verb'-', \verb'*', \verb'/',
-\verb'mod', \verb'+.', \verb'-.', \verb'*.' or \verb'/.' operators is
-unspecified if the result falls outside of the range of representable
-integers or floating-point numbers, respectively. See
+The behavior of the "+", "-", "*", "/", "mod", "+.", "-.", "*." or
+"/." operators is unspecified if the result falls outside of the range
+of representable integers or floating-point numbers, respectively. See
 chapter~\ref{c:stdlib} for a more precise description of the behavior
 of the operators above.
 
-\newpage
+%% \newpage

@@ -45,7 +45,7 @@ integer-literal:
 An integer literal is a sequence of one or more digits, optionally
 preceded by a minus sign. By default, integer literals are in decimal
 (radix 10). The following prefixes select a different radix:
-\begin{tableau}{Prefix}{Radix}
+\begin{tableau}{|l|l|}{Prefix}{Radix}
 \entree{"0x", "0X"}{hexadecimal (radix 16)}
 \entree{"0o", "0O"}{octal (radix 8)}
 \entree{"0b", "0B"}{binary (radix 2)}
@@ -82,7 +82,7 @@ char-literal:
 Character literals are delimited by "`" (backquote) characters.
 The two backquotes enclose either one character different from
 "`" and "\\", or one of the escape sequences below:
-\begin{tableau}{Sequence}{Character denoted}
+\begin{tableau}{|l|l|}{Sequence}{Character denoted}
 \entree{"\\\\"}{backslash ("\\")}
 \entree{"\\`"}{backquote ("`")}
 \entree{"\\n"}{newline (LF)}
@@ -109,7 +109,7 @@ String literals are delimited by "\"" (double quote) characters.
 The two double quotes enclose a sequence of either characters
 different from "\"" and "\\", or escape sequences from the
 table below:
-\begin{tableau}{Sequence}{Character denoted}
+\begin{tableau}{|l|l|}{Sequence}{Character denoted}
 \entree{"\\\\"}{backslash ("\\")}
 \entree{"\\\""}{double quote ("\"")}
 \entree{"\\n"}{newline (LF)}

@@ -104,12 +104,22 @@ Cases of a pattern matching can include guard expressions, which are
 arbitrary boolean expressions that must evaluate to "true" for the
 match case to be selected. Guards occur just before the "->" token and
 are introduced by the "when" keyword:
+\begin{latexonly}
 $$\begin{array}{rlll}
 \token{match} & {\sl expr} \\
 \token{with} & {\sl pattern}_1 [\token{when} {\sl cond}_1] & \token{->} & {\sl expr}_1 \\
 \token{|}     & \ldots \\
 \token{|}     & {\sl pattern}_n  [\token{when} {\sl cond}_n] & \token{->} & {\sl expr}_n
 \end{array}$$
+\end{latexonly}
+\begin{rawhtml}
+<pre>
+match <i>expr</i> with
+      <i>pattern</i>1 [when <i>cond</i>1] -&gt; <i>expr</i>1
+    | ...
+    | <i>pattern</i>N [when <i>cond</i>N] -&gt; <i>expr</i>N
+</pre>
+\end{rawhtml}
 (Same syntax for the "fun", "function", and "try" \ldots "with" constructs.)
 During matching, if the value of @expr@ matches some pattern
 @pattern_i@ which has a guard @cond_i@, then the expression @cond_i@
@@ -276,7 +286,7 @@ precedence (exponentiation), followed by symbols beginning with "*",
 "/" or "%" (multiplication), then "+" and "-" (addition), then all
 others symbols (comparisons). The updated precedence table for
 expressions is ("*"\ldots\ means ``any infix symbol starting with "*"''):
-\begin{tableau}{Construction or operator}{Associativity}
+\begin{tableau}{|l|l|}{Construction or operator}{Associativity}
 \entree{"!"\ldots"   ?"\ldots}{--}
 \entree{".   .(   .["}{--}
 \entree{function application}{right}

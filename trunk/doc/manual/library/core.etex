@@ -18,21 +18,15 @@ unqualified identifiers to refer to the functions provided by these
 modules, without adding \verb|#open| directives. Actually, the list of
 automatically opened modules depend on the "-O" option given to the
 compiler or to the toplevel system:
-\begin{center}
-\begin{tabular}{|l|p{8cm}|}
-\hline
-"-O" option & Opened modules (reverse opening order) \\
-\hline
-"-O cautious" (default) & "io", "eq", "int", "float", "ref", "pair", "list",
-                          "vect", "char", "string", "bool", "exc", "stream",
-                          "builtin" \\
-"-O fast"               & "io", "eq", "int", "float", "ref", "pair", "list",
-                          "fvect", "fchar", "fstring", "bool",
-                          "exc", "stream", "builtin" \\
-"-O none"               & "builtin" \\
-\hline
-\end{tabular}
-\end{center}
+\begin{tableau}{|l|p{8cm}|}{"-O" option}{Opened modules (reverse opening order)}
+\entree{"-O cautious" (default)}{
+        "io", "eq", "int", "float", "ref", "pair", "list",
+        "vect", "char", "string", "bool", "exc", "stream", "builtin"}
+\entree{"-O fast"}{
+        "io", "eq", "int", "float", "ref", "pair", "list",
+        "fvect", "fchar", "fstring", "bool", "exc", "stream", "builtin"}
+\entree{"-O none"}{"builtin"}
+\end{tableau}
 
 \end{itemize}
 

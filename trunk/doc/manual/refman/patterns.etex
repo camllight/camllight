@@ -22,7 +22,7 @@ The table below shows the relative precedences and associativity of
 operators and non-closed pattern constructions. The constructions with
 higher precedences come first.
 \ikwd{as\@\verb`as`}
-\begin{tableau}{Operator}{Associativity}
+\begin{tableau}{|l|l|}{Operator}{Associativity}
 \entree{Constructor application}{--}
 \entree{"::"}{right}
 \entree{","}{--}
@@ -92,15 +92,15 @@ respectively. This pattern behaves like
 
 The pattern @pattern_1 "," \ldots "," pattern_n@ matches $n$-tuples
 whose components match the patterns @pattern_1@ through @pattern_n@. That
-is, the pattern matches the tuple values $(v_1, \ldots, v_n)$ such that
-@pattern_i@ matches $v_i$ for $i = 1, \ldots, n$.
+is, the pattern matches the tuple values @(v_1, \ldots, v_n)@ such that
+@pattern_i@ matches @v_i@ for \fromoneto{i}{n}.
 
 \subsubsection*{Record patterns}
 
 The pattern @"{" label_1 "=" pattern_1 ";" \ldots ";" label_n "="
 pattern_n "}"@ matches records that define at least the labels
 @label_1@ through @label_n@, and such that the value associated to
-@label_i@ match the pattern @pattern_i@, for $i = 1, \ldots, n$. The
-record value can define more labels than @label_1@ \ldots @label_n@;
-the values associated to these extra labels are not taken into account
-for matching.
+@label_i@ match the pattern @pattern_i@, for \fromoneto{i}{n}.
+The record value can define more labels than @label_1@ \ldots
+@label_n@; the values associated to these extra labels are not taken
+into account for matching.
