@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <sys/stat.h>
 #include "config.h"
 #include "alloc.h"
 #include "debugcom.h"
@@ -211,8 +212,7 @@ value sys_catch_break(onoff)    /* ML */
 
 /* Search path function */
 
-#ifndef MSDOS
-#ifndef macintosh
+#ifdef unix
 
 char * searchpath(name)
      char * name;
@@ -221,6 +221,7 @@ char * searchpath(name)
   char * path;
   char * p;
   char * q;
+  struct stat st;
 
   for (p = name; *p != 0; p++) {
     if (*p == '/') return name;
@@ -238,12 +239,13 @@ char * searchpath(name)
       *p++ = *q++;
     }
     *p = 0;
-    if (access(fullname, 1) == 0) return fullname;
+    if (access(fullname, 1) == 0 &&
+        stat(fullname, &st) == 0 &&
+        (st.st_mode & S_IFMT) == S_IFREG)
+      return fullname;
     if (*path == 0) return 0;
     path++;
   }
 }
 
 #endif
-#endif
-
