@@ -1,4 +1,3 @@
-#open "gc";;
 #open "printf";;
 
 let print_stat c =
