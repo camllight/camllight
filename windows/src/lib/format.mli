@@ -6,16 +6,21 @@
    structure. *)
 
 (* Rule of thumb for casual users:
-   use simple boxes (as obtained by [open_box 0]);
-   use simple break hints (as obtained by [print_cut ()] that outputs a
+-   use simple boxes (as obtained by [open_box 0]);
+-   use simple break hints (as obtained by [print_cut ()] that outputs a
    simple break hint, or by [print_space ()] that ouputs a space
    indicating a break hint);
-   once a box is opened, display its material with basic printing
+-   once a box is opened, display its material with basic printing
    functions (e. g. [print_int] and [print_string]);
-   when the material for a box has been printed, call [close_box ()] to
+-   when the material for a box has been printed, call [close_box ()] to
    close the box;
-   at the end of your routine, evaluate [print_newline ()] to close
-   all remaining boxes and flush the pretty-printer. *) 
+-   at the end of your routine, evaluate [print_newline ()] to close
+   all remaining boxes and flush the pretty-printer. *)
+
+(* You may alternatively consider this module as providing an extension to the
+   [printf] facility: you can simply add pretty-printing annotations to your
+   regular printf formats, as explained below in the documentation of
+   the function [fprintf]. *)
 
 (* The behaviour of pretty-printing commands is unspecified
    if there is no opened pretty-printing box. Each box opened via
