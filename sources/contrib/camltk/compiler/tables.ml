@@ -233,11 +233,11 @@ let enter_type typname constructors =
     do_list (function c ->
 		if not (check_duplicate_constr false c typdef.constructors)
 		then begin 
-		   typdef.constructors := c :: typdef.constructors;
+		   typdef.constructors <- c :: typdef.constructors;
 		   add_template_dependancies typname c.Template
 		end;
 		(* Callbacks require widget context *)
-		typdef.requires_widget_context := 
+		typdef.requires_widget_context <- 
       	       	  typdef.requires_widget_context or
                   has_callback c.Template)
             constructors
@@ -261,7 +261,7 @@ let enter_subtype typ subtyp constructors =
 		       add_template_dependancies typ c.Template;
 		       typdef.constructors <- c :: typdef.constructors
 		    end;
-		    typdef.requires_widget_context :=
+		    typdef.requires_widget_context <-
       	       	       typdef.requires_widget_context or
       	       	       has_callback c.Template;
                     c

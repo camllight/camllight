@@ -222,15 +222,9 @@ Expr :
           { () }
       | Simple_expr DOT Ext_ident LESSMINUS Expr
           { () }
-      | Simple_expr DOT Ext_ident COLONEQUAL Expr
-          { () }
       | Simple_expr DOTLPAREN Expr RPAREN LESSMINUS Expr
           { () }
-      | Simple_expr DOTLPAREN Expr RPAREN COLONEQUAL Expr
-          { () }
       | Simple_expr DOTLBRACKET Expr RBRACKET LESSMINUS Expr
-          { () }
-      | Simple_expr DOTLBRACKET Expr RBRACKET COLONEQUAL Expr
           { () }
       | Expr COLONEQUAL Expr
           { () }
@@ -299,11 +293,11 @@ Simple_expr :
           { () }
       | PREFIX Simple_expr
           { () }
-      | Simple_expr DOT Ext_ident %prec COLONEQUAL
+      | Simple_expr DOT Ext_ident
           { () }
-      | Simple_expr DOTLPAREN Expr RPAREN  %prec COLONEQUAL
+      | Simple_expr DOTLPAREN Expr RPAREN
           { () }
-      | Simple_expr DOTLBRACKET Expr RBRACKET  %prec COLONEQUAL
+      | Simple_expr DOTLBRACKET Expr RBRACKET
           { () }
 ;
 
