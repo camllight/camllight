@@ -49,7 +49,7 @@ let do_toplevel_phrase phr =
         (fun (name, (typ, mut_flag)) ->
           open_hovbox 0;
           print_string name; print_string " : ";
-          print_one_type typ; print_string " ="; print_space();
+          print_one_schema typ; print_string " ="; print_space();
           print_value
             global_data.(get_slot_for_variable
                          {qual=compiled_module_name(); id=name})

@@ -33,16 +33,24 @@ let int_to_alpha i =
 ;;
 
 let type_vars_counter = ref 0
-and type_vars_names = ref ([] : (typ * string) list);;
+and type_vars_names = ref ([] : (typ * string) list)
+and print_nongen_vars = ref false;;
 
-let reset_type_var_name () =
-  type_vars_counter := 0; type_vars_names := [];;
+let reset_type_var_name nongen_flag =
+  type_vars_counter := 0;
+  type_vars_names := [];
+  print_nongen_vars := nongen_flag
+;;
 
 let name_of_type_var var =
   try
     assq var !type_vars_names
   with Not_found ->
-    let var_name = int_to_alpha !type_vars_counter in
+    let name = int_to_alpha !type_vars_counter in
+    let var_name =
+      if !print_nongen_vars & var.typ_level != generic
+      then "_" ^ name
+      else name in
     incr type_vars_counter;
     type_vars_names := (var, var_name) :: !type_vars_names;
     var_name
@@ -96,6 +104,5 @@ and print_typ_list priority sep = function
       print_typ_list priority sep rest
 ;;
 
-let print_type ty = print_typ 0 ty;;
-
-let print_one_type ty = reset_type_var_name(); print_typ 0 ty;;
+let print_one_type ty = reset_type_var_name false; print_typ 0 ty;;
+let print_one_schema ty = reset_type_var_name true; print_typ 0 ty;;
