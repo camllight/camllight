@@ -7,6 +7,7 @@
 #include <mlvalues.h>
 #include <alloc.h>
 #include <memory.h>
+#include <fail.h>
 
 /* Code part of the callback dispatcher */
 static code_t handler_code = NULL;
@@ -89,29 +90,11 @@ int CamlCBCmd(clientdata, interp, argc, argv)
   return TCL_OK;
 }
 
-
-
-#ifdef TCL_ERROR_EXN
 void tk_error(errmsg)
      char *errmsg;
 {
-  value res;
-  Push_roots(r,2);
-#define arg r[0]
-#define msg r[1]
-  msg= copy_string(errmsg);
-  res = alloc(1,TCL_ERROR_EXN);
-  Field(res,0) = errmsg;
-  Pop_roots();
-  mlraise(res);
+  raise_with_string(TCL_ERROR_EXN, errmsg);
 }
-#else
-void tk_error(errmsg)
-     char *errmsg;
-{
-  failwith(errmsg);
-}
-#endif
 
 static Tcl_Interp *tclinterp;
 static Tk_Window mainWindow;
