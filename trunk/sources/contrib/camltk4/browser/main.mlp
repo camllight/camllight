@@ -31,12 +31,7 @@ let module_panel parent selected_paths =
       true
     with
       Toplevel -> begin
-	 dialog (support__new_toplevel_widget "error")
-	     "Caml Browser Error"
-	     ( "Cannot open module: " ^ n)
-	     (Predefined "error")
-	     0
-	     ["Ok"];
+	 error ( "Cannot open module: " ^ n);
          false
 	end
 
@@ -95,13 +90,7 @@ let path_panel parent =
 	 listbox__insert lb (Number 0) [n];
 	 read_tags n
     with
-      _ -> dialog (support__new_toplevel_widget "error")
-	     "Caml Browser Error"
-	     ( "Cannot open directory: " ^ n)
-	     (Predefined "error")
-	     0
-	     ["Ok"];
-	     ()
+      _ -> error ("Cannot open directory: " ^ n)
     end in
 
   let selected () =

@@ -10,11 +10,14 @@
 #open "source";;
 #open "tags";;
 
-(* Namer for toplevel widgets *)
-let new_visual_top =
-  let cnter = ref 0 in
-  function () ->
-   incr cnter; "global" ^ string_of_int !cnter
+let error m =
+  dialog (widget_atom default_toplevel_widget "error")
+	 "Caml Browser Error"
+	 m
+	 (Predefined "error")
+	 0
+	 ["Ok"];
+  ()
 ;;
 
 (* Abstraction for displaying an object of type 'a associated to a symbol  *)
@@ -34,8 +37,7 @@ let rec visual_meta visual silent sym =
     (* Find the object *)
     let object = visual.finder sym in
 
-    let t = toplevelw__create 
-      	       (new_toplevel_widget (new_visual_top ())) [] in
+    let t = toplevelw__create support__default_toplevel_widget [] in
 
     let titlestr = visual.titler object in
     wm__title_set t titlestr;
@@ -76,33 +78,11 @@ let rec visual_meta visual silent sym =
     focus__set tx;
     frx_widget__resizeable t
    with   
-    Toplevel -> begin
-	 dialog (new_toplevel_widget "error")
-	     "Caml Browser Error"
-	     ( "Cannot open module :" ^ sym)
-	     (Predefined "error")
-	     0
-	     ["Ok"];
-	 ()
-	end
+     Toplevel -> error ("Cannot open module :" ^ sym)
    | Desc_not_found -> 
-      	if not silent then begin
-	  dialog (new_toplevel_widget "error")
-	      "Caml Browser Error"
-	      ( sym ^ " is undefined")
-	      (Predefined "error")
-	      0
-	      ["Ok"]; 
-         ()
-         end
+      	if not silent then error ( sym ^ " is undefined")
    | Cannot_find_file filename ->
-      begin 
-       dialog (support__new_toplevel_widget "error")
-      	      "Caml Browser Error"
-	      ("Cannot open " ^ filename )
-	      (Predefined "error") 0 ["Ok"]; 
-       ()
-      end
+      error ("Cannot open " ^ filename )
 ;;
 
 (* Parsing a qualified ident by hand ... *)
