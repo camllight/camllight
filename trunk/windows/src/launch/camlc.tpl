@@ -25,7 +25,7 @@ while : ; do
       if $profile
       then 
 	$stdlib/camlinstr -m $proflags -stdlib $stdlib $includes $compopt $1 ${1}t || exit $?
-        camlrun $stdlib/camlcomp -stdlib $stdlib $includes $compopt ${1}t || exit $?
+        camlrun $stdlib/camlcomp -stdlib $stdlib $includes $compopt ${1}t || { rm -f ${1}t; exit $?; }
 	rm -f ${1}t
       else
         camlrun $stdlib/camlcomp -stdlib $stdlib $includes $compopt $1 || exit $?
