@@ -94,3 +94,4 @@ let bounded_split expr text num =
 
 let split expr text = bounded_split expr text 0;;
 
+let format = printf__sprintf;;
