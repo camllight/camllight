@@ -87,8 +87,8 @@ let cautious f arg cont =
 
 let rec print_val prio depth obj ty =
   decr printer_steps;
-  if !printer_steps < 0 then raise Ellipsis else
-  if depth < 0 then raise Ellipsis else
+  if !printer_steps <= 0 then raise Ellipsis else
+  if depth <= 0 then raise Ellipsis else
   try
     find_printer ty obj; ()
   with Not_found ->
