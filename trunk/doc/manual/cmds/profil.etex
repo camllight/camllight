@@ -20,36 +20,76 @@ several letters after the "-p" option, indicating which parts of the
 program should be profiled:
 
 %% description des options
+\begin{options}
+\item[a] all options
+\item[f] function calls : a count point is set at the beginning of
+function bodies
+\item[i] {\bf if \ldots then \ldots else \ldots} : count points are set in
+both {\bf then} branch and {\bf else} branch
+\item[l] {\bf while, for} loops: a count point is set at the beginning of
+the loop body
+\item[m] {\bf match} branches: a count point is set at the beginning of the
+body of each branch
+\item[t] {\bf try \ldots with \ldots} branches: a count point is set at the
+beginning of the body of each branch
+\end{options}
 
-For instance, compiling with "-pzorglub" profiles this, this, and
-that.
 
-The "-p" option without additional letters defaults to "-ptoto",
-meaning that the following are profiled: this, this, and that.
+For instance, compiling with "-pfilm" profiles function calls, if\ldots then
+\ldots else\ldots, loops and pattern matching.
+
+The "-p" option without additional letters defaults to "-pfm",
+meaning that only function calls and pattern matching are profiled.
 
 \section{Profiling an execution}
 
-Running a bytecode executable file that has been compiled with "-p"
-records the execution counts for the specified parts of the program
-and saves them in a file called "gabu.zomeu" in the current directory.
+Running a bytecode executable file that has been compiled and linked with
+"-p" records the execution counts for the specified parts of the program
+and saves them in a file called "camlpro.dump" in the current directory.
 
-The program must terminate via the function "io__exit", otherwise
-execution counts are not written.
+More precisely, the dump file "camlpro.dump" is written when the
+\verb|io__exit| function is called. 
+The linker, called with {\tt -p} option, adds \verb|io__exit 0| as the last
+phrase of the bytecode executable, in case the original program never calls
+\verb|io__exit|. 
+However, if the program terminates with an ``uncaught exception'', the dump
+file will not be produced.
+
+If a compatible dump file already exists in the current directory, then the
+profiling information is accumulated. This allows, for instance, the
+profiling of the compiler compiling a set of modules.
 
 \section{Printing profiling information}
 
 The "camlpro" command produces a source listing of the program modules
 where execution counts have been inserted as comments. For instance,
 \begin{verbatim}
-        camlpro list
+        camlpro foo.ml
 \end{verbatim}
-prints the source code for the "list" module, with comments indicating
-how many times the functions in this module have been called.
+prints the source code for the "foo" module, with comments indicating
+how many times the functions in this module have been called. Naturally,
+this information is accurate only if the source file has not been modified
+since the profiling execution took place.
 
-The following options are recognized by "camlpro":
+The following option is recognized by "camlpro":
 
 \begin{options}
-\item["-glop" \var{arg}] ...
+\item["-f" \var{dumpfile}] specifies an alternate dump file of profiling
+information
 \end{options}
 
+An additional argument specifies the output file. For instance
+\begin{verbatim}
+	camlpro -f ../test/camlpro.dump foo.ml foo_profiled.ml
+\end{verbatim} 
+will save the annotated program in file {\tt foo_profiled.ml}. Otherwise,
+the annotated program is written on the standard output.
 
+
+\section{Known bugs}
+The following situation (file \verb|x.ml|)
+\begin{verbatim}
+let a = 1;;
+x__a ;;
+\end{verbatim} 
+will break the profiler.
