@@ -1,3 +1,2 @@
-SOURCES=camlsearch.l
-install: $(SOURCES)
-	install -c $(SOURCES) $(MANDIR)
+install:
+	cp camlsearch.l $(MANDIR)/camlsearch.$(MANEXT)
