@@ -46,12 +46,12 @@ MANDIR=/usr/local/man/man$(MANEXT)
 # The path to the include directory containing the X11/*.h includes
 # (usually /usr/include; for SunOS with OpenLook, /usr/openwin/include)
 # Needed for the "libgraph" and "camltk" packages.
-X11_INCLUDES=/usr/X11R6/include
+X11_INCLUDES=/usr/include/
 
 # The path to the directory containing the X11 libraries.
 # (usually /usr/lib; for SunOS with OpenLook, /usr/openwin/lib)
 # Needed for the "libgraph" and "camltk" packages.
-X11_LIB=/usr/X11R6/lib
+X11_LIB=/usr/lib
 
 # Name of the target architecture.
 # Used only for the libnum library (arbitrary-precision arithmetic), to
@@ -74,13 +74,13 @@ EMACSLISPDIR=/usr/lib/emacs/site-lisp
 
 # Name of the directories where the tcl.h and tk.h includes can be found.
 # Needed only for the "camltk" package.
-TCLINCLDIR=/usr/include/tcl
-TKINCLDIR=/usr/include/tk
+TCLINCLDIR=/usr/local/lib/tcl7.4/include
+TKINCLDIR=/usr/local/lib/tk4.0/include
 
 # Name of the directories where the libtcl.a and libtk.a libraries can be found
 # Needed only for the "camltk" package.
-TKLIBDIR=/usr/lib
-TCLLIBDIR=/usr/lib
+TKLIBDIR=/usr/local/lib/tk4.0/lib
+TCLLIBDIR=/usr/local/lib/tcl7.4/lib
 
 # List of libraries required to link Tcl/Tk. This may help if you have
 # a custom Tcl/Tk with various extensions (such as Xpm)
@@ -94,7 +94,7 @@ SHELL=/bin/sh
 ### End of configuration section
 
 SUBDIRS=libunix libgraph debugger libnum libstr mletags \
-  caml-tex camlmode lorder profiler camltk camlsearch
+  caml-tex camlmode lorder profiler camltk camltk4 camlsearch
 
 DEFINES=\
   CC='$(CC)' \
