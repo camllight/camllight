@@ -96,6 +96,7 @@ src:	%aThis expression has type %a,\n\
 	but is used with type %a.\n
 fr:	%aCette expression est de type %a,\n\
 	mais est utilisée avec le type %a.\n
+es:     %aEsta expresión es de tipo %a; no de tipo %a.\n
 
 src:	%aThis function is applied to too many arguments.\n
 fr:	%aCette fonction reçoit trop d'arguments.\n
@@ -128,7 +129,7 @@ es:     %tEl tipo %a se declara en la interfaz, pero no está implementado.\n
 src:	%tThe value %a is declared in the interface, but not implemented.\n
 fr:	%tLa valeur %a est déclarée dans l'interface,\n\
         mais n'est pas définie dans l'implémentation.\n
-es:     %El valor %a se declara en la interfaz, pero no está implementado.\n
+es:     %tEl valor %a se declara en la interfaz, pero no está implementado.\n
 
 src:	%tThe value %a is declared with type %a,\n\
 	but defined with type %a.\n
@@ -136,7 +137,6 @@ fr:	%tLa valeur %a est déclarée du type %a,\n\
 	mais est définie avec le type %a.\n
 es:     %tEl valor %a se ha declarado con tipo %a,\n\
         pero se ha definido con tipo %a.\n
-
 
 src:	%tThe type inferred for the value %a,\n\
 	that is, %a,\n\
@@ -181,7 +181,7 @@ src:	%aThis kind of expression is not allowed in \
 	right-hand sides of "let rec".\n
 fr:	%aCe genre d'expressions n'est pas autorisé comme \
 	membre droit d'un "let rec".\n
-es:     %aEste tipo de expresión no está permitido \ 
+es:     %aEste tipo de expresión no está permitido \
         en la parte derecha de un "let rec".\n
 
 src:	%aThe type %a is exported as an abstract type by this module\n\
