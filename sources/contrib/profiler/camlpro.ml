@@ -17,7 +17,7 @@ exception Profiler
 ;;
 
 let profiler_failwith s =
-  eprintf "Profiler error: %s" s;
+  eprintf "Profiler error: %s\n" s;
   flush stderr;
   raise Profiler
 ;;
