@@ -143,7 +143,7 @@ value sys_system_command(command)   /* ML */
 #else
   int retcode = system(String_val(command));
   if (retcode == -1) sys_error();
-  return Val_int(retcode & 0xFF);
+  return Val_int(retcode);
 #endif
 }
 

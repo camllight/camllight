@@ -52,15 +52,11 @@ install:
 	strip $(BINDIR)/camlrun
 	cp libcaml.a $(LIBDIR)
 	if $(RANLIBTEST); then cd $(LIBDIR); $(RANLIB) libcaml.a; else true; fi
-	for i in mlvalues.h alloc.h misc.h; do \
-	sed -e 's|#include "\([^"]*\)"|#include "'$(LIBDIR)'/\1"|' \
-		$$i > $(LIBDIR)/$$i; \
- done
+	cp mlvalues.h alloc.h misc.h $(LIBDIR)
 	sed -e '/#include ".*\/m.h/r ../../config/m.h' \
             -e '/#include ".*\/s.h/r ../../config/s.h' \
             -e '/#include "/d' config.h > $(LIBDIR)/config.h
 	sed -e '/#include ".*gc\.h"/d' \
-            -e 's|#include "\([^"]*\)"|#include "'$(LIBDIR)'/\1"|' \
 	    -e '/#define Alloc_small/,/^}/d' \
 	    -e '/Modify/,/^}/d' memory.h > $(LIBDIR)/memory.h
 

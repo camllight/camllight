@@ -38,7 +38,7 @@ struct channel {
 
 struct channel * open_descriptor P((value));
 value flush P((struct channel *));
-void putword P((struct channel *, int32));
+void putword P((struct channel *, uint32));
 void putblock P((struct channel *, char *, unsigned));
 unsigned char refill P((struct channel *));
 uint32 getword P((struct channel *));
