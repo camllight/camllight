@@ -57,6 +57,7 @@ clean:
 
 install:
 	cp camltop $(LIBDIR)/camltop
+	cp toplevel.mli toplevel.zi $(LIBDIR)
 	cp provide $(LIBDIR)/provide
 	cp expunge $(LIBDIR)/expunge
 	cp toplib.zo $(LIBDIR)/toplib.zo
