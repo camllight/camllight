@@ -162,7 +162,7 @@ char *fl_merge_block (bp)
     /* If [bp] and [cur] are adjacent, remove [cur] from the free-list
        and merge them. */
   adj = bp + Bosize_hd (hd);
-  if (adj == Hp_bp (cur)){
+  if (adj == (char *) Hp_bp (cur)){
     char *next_cur = Next (cur);
     long cur_whsz = Whsize_bp (cur);
 
@@ -180,7 +180,7 @@ char *fl_merge_block (bp)
   }
     /* If [prev] and [bp] are adjacent merge them, else insert [bp] into
        the free-list if it is big enough. */
-  if (prev + Bosize_bp (prev) == Hp_bp (bp)){
+  if (prev + Bosize_bp (prev) == (char *) Hp_bp (bp)){
     Hd_bp (prev) = Make_header (Wosize_bp (prev) + Whsize_hd (hd), 0, Blue);
 #ifdef DEBUG
     Hd_bp (bp) = not_random ();

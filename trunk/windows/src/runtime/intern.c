@@ -500,7 +500,7 @@ static value intern_fast_val(chan, magic)
     hd = Hd_val (res);
     color = Color_hd (hd);
     Assert (color == White || color == Black);
-    if (really_getblock(chan, Hp_val(res), bhsize) == 0) {
+    if (really_getblock(chan, (char *) Hp_val(res), bhsize) == 0) {
       Hd_val (res) = hd;                      /* Avoid confusing the GC. */
       failwith ("intern : truncated object");
     }
@@ -553,7 +553,7 @@ static value intern_fast_val(chan, magic)
     hd = Hd_val (res);
     color = Color_hd (hd);
     Assert (color == White || color == Black);
-    if (really_getblock(chan, Hp_val(res), bhsize) == 0) {
+    if (really_getblock(chan, (char *) Hp_val(res), bhsize) == 0) {
       Hd_val (res) = hd;                      /* Avoid confusing the GC. */
       failwith ("intern : truncated object");
     }
