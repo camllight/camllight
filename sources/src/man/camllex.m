@@ -1,4 +1,4 @@
-.TH CAMLLEX 1  "7 September 1992"
+.TH CAMLLEX 1
 
 .SH NAME
 camllex \- a lexical analyzer generator for Caml Light

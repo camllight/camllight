@@ -1,4 +1,4 @@
-.TH CAMLYACC 1  "7 September 1992"
+.TH CAMLYACC 1
 
 .SH NAME
 camlyacc \- a parser generator for Caml Light
