@@ -9,7 +9,7 @@ COMPFLAGS=-O fast $(INCLUDES)
 LINKFLAGS=-g $(INCLUDES)
 CPP=/lib/cpp -P
 
-EXTERNOBJS=config.zo misc.zo \
+EXTERNOBJS=config.zo misc.zo interntl.zo \
     const.zo prim.zo instruct.zo lambda.zo \
     globals.zo location.zo syntax.zo modules.zo builtins.zo \
     types.zo pr_type.zo error.zo typing.zo ty_decl.zo pr_decl.zo \
@@ -49,7 +49,7 @@ expunge: expunge.zo
 
 provide: provide.zo
 	$(CAMLLINK) $(LINKFLAGS) -o provide stdlib.zo \
-                config.zo misc.zo modules.zo provide.zo
+                config.zo misc.zo interntl.zo modules.zo provide.zo
 
 clean:
 	rm -f *.zi *.zo camltop expunge provide

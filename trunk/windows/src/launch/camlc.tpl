@@ -17,6 +17,11 @@ p=""
 prodump=""
 proflags="fm"
 
+case "$LANG" in
+  "") ;;
+   *) compopt="-lang $LANG"; linkopt="-lang $LANG";;
+esac
+
 while : ; do
   case $1 in
     "")
@@ -86,6 +91,10 @@ while : ; do
       p=p
       prodump=$stdlib/prodump.zo
       proflags=`echo $1 | sed -e 's/^-p//'`;;
+    -lang)
+      compflags="$compflags -lang $2"
+      linkflags="$compflags -lang $2"
+      shift;;
     -*)
       echo "Unknown option \"$1\", ignored" >&2;;
     *)

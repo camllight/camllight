@@ -120,6 +120,7 @@ install:
 	cd lex; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
 	cd yacc; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
 	cd man; make MANDIR=$(MANDIR) MANEXT=$(MANEXT) install
+	cp camlmsgs.txt $(LIBDIR)
 
 # Remove the Caml Light system after installation
 uninstall:

@@ -1,14 +1,15 @@
 (* System functions for interactive use. *)
 
 #open "obj";;
-#open "printf";;
 #open "meta";;
 #open "misc";;
+#open "interntl";;
 #open "const";;
 #open "location";;
 #open "lexer";;
 #open "modules";;
 #open "globals";;
+#open "builtins";;
 #open "types";;
 #open "instruct";;
 #open "patch";;
@@ -44,7 +45,12 @@ let parse_global s =
 
 let load_object name =
   let (_, filename) = add_suffix name ".zo" in
-  let truename = find_in_path filename in
+  let truename = 
+    try
+      find_in_path filename
+    with Cannot_find_file name ->
+      eprintf "Cannot find file %s.\n" name;
+      raise Toplevel in
   let inchan = open_in_bin truename in
   let stop = input_binary_int inchan in
   let start = pos_in inchan in
@@ -105,7 +111,7 @@ let loadfile filename =
     try
       find_in_path filename
     with Cannot_find_file name ->
-      printf__eprintf "Cannot find file %s\n" name;
+      eprintf "Cannot find file %s.\n" name;
       raise Toplevel in
   let ic = open_in truename in
   let lexbuf = lexing__create_lexer_channel ic in
@@ -117,7 +123,7 @@ let loadfile filename =
       while true do
         do_toplevel_phrase(parse_impl_phrase lexbuf)
       done)
-  with End_of_file | Toplevel -> flush stderr; close_in ic
+  with End_of_file | Toplevel -> close_in ic
      | x -> close_in ic; raise x
 ;;
 
@@ -180,8 +186,7 @@ let trace name =
     end
   with Desc_not_found ->
     eprintf "Unknown function %s.\n" name
-  end;
-  flush std_err
+  end
 ;;
 
 let untrace name =
@@ -202,8 +207,7 @@ let untrace name =
     trace_env := except !trace_env
   with Desc_not_found ->
     eprintf "Unknown function %s.\n" name
-  end;
-  flush std_err
+  end
 ;;
 
 (* To define specific printing functions. *)
@@ -211,15 +215,19 @@ let untrace name =
 let install_printer name =
   begin try
     let val_desc = find_value_desc (parse_global name) in
-    let (ty_arg, ty_res) = filter_arrow val_desc.info.val_typ in
-    let pos = get_slot_for_variable val_desc.qualid in
-    printers := (name, ty_arg, (magic_obj global_data.(pos) : obj -> unit))
-             :: !printers
-  with
-    Desc_not_found -> eprintf "Unknown function %s.\n" name
-  | Unify -> eprintf "%s is not a function.\n" name
-  end;
-  flush std_err
+    let ty_arg = new_type_var() in
+    let ty_printer = type_arrow(ty_arg, type_unit) in
+    begin try
+      unify (type_instance val_desc.info.val_typ, ty_printer);
+      let pos = get_slot_for_variable val_desc.qualid in
+      printers := (name, ty_arg, (magic_obj global_data.(pos) : obj -> unit))
+               :: !printers
+    with Unify ->
+      eprintf "%s has the wrong type for a printing function.\n" name
+    end
+  with Desc_not_found ->
+    eprintf "Unknown function %s.\n" name
+  end
 ;;
 
 let remove_printer name =
@@ -227,13 +235,17 @@ let remove_printer name =
     [] -> eprintf "No printer named %s.\n" name; []
   | (pr_name, _, _ as printer) :: rem ->
       if name = pr_name then rem else printer :: remove rem in
-  printers := remove !printers;
-  flush std_err
+  printers := remove !printers
 ;;
 
 (* Change the current working directory *)
 
 let cd s = sys__chdir s;;
+
+(* Add a directory to the search path *)
+
+let directory dirname =
+  load_path := dirname :: !load_path;;
 
 (* Compile a file *)
 
@@ -247,8 +259,7 @@ let compile s =
       compile_interface (filename__basename filename) filename
     else begin
       eprintf "Incorrect source file name %s.\n\
-               A source file name must end in \".ml\" or \".mli\".\n" s;
-      flush std_err
+               A source file name must end in \".ml\" or \".mli\".\n" s
     end))
 ;;
 
@@ -272,3 +283,4 @@ let verbose_mode status =
 
 let set_print_depth n =
   if n > 0 then pr_value__printer_depth := n;;
+

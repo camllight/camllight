@@ -7,7 +7,7 @@ COMPFLAGS=-O fast $(INCLUDES)
 LINKFLAGS=-g $(INCLUDES)
 CPP=/lib/cpp -P
 
-EXTERNOBJS=config.zo misc.zo readword.zo
+EXTERNOBJS=config.zo misc.zo interntl.zo readword.zo
 
 OBJS=librar.zo version.zo main.zo
 
