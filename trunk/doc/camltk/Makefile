@@ -1,10 +1,11 @@
 LATEX=latex
-FORMAT=../tools/format-intf
+FORMAT=./format-intf
 
 DIR=../../cl/contrib/camltk
 CAMLTKDIR= $(DIR)/lib
 TKSUPDIR=$(DIR)/libsupport
 
+TEXINPUTS=.:../manual:/usr/local/lib/tex/inputs
 
 # THIS MAKEFILE IS BOGUS, DON'T RELY ON DEPENDANCIES
 
@@ -14,12 +15,12 @@ TEXFILES=camltk.tex user.tex impl.tex reference.tex bnf.tex
 # Generated files
 GENFILES=inclmod.tex \
 	bindtypes.tex tkbuiltin.tex tktypes.tex helloworld.tex \
-	addition.tex tkgen.tex textvariable.tex
+	addition.tex tkgen.tex textvariable.tex bnf.tex
 
 all: camltk.dvi
 
 camltk.dvi: $(TEXFILES) $(GENFILES) $(MODULES) camltk.bbl
-	$(LATEX) camltk.tex
+	TEXINPUTS=$(TEXINPUTS) $(LATEX) camltk.tex
 
 camltk.bbl: tk.bib
 	bibtex camltk
@@ -28,7 +29,6 @@ camltk.aux: camltk.tex
 	$(LATEX) camltk.tex
 
 ###### Generated files
-
 
 # Inclusion of all modules
 inclmod.tex: $(CAMLTKDIR)/modules makemodinc
@@ -59,6 +59,11 @@ tkgen.tex:
 textvariable.tex:
 	$(FORMAT) textvariable < $(TKSUPDIR)/textvariable.mli > textvariable.tex
 
+bnf.tex: $(DIR)/compiler/parser.output
+	(echo '\begin{verbatim}'; \
+	sed -n -e '1,/C-L/s/^[ ]*[0-9]*[ ][ ]//p' \
+            $(DIR)/compiler/parser.output; \
+	echo '\end{verbatim}') > bnf.tex
 
 # Other files included in the doc
 helloworld.tex:
@@ -74,11 +79,16 @@ addition.tex:
 	echo '\end{verbatim}') | expand > addition.tex
 
 clean: 
-	rm -f camltk.dvi camltk.log camltk.blg $(GENFILES)
+	rm -f camltk.dvi camltk.log camltk.blg $(GENFILES) library/*.tex
 
 scratch: clean
 	rm -f camltk.blg camltk.bbl camltk.toc  *.aux
 
+
+DISTFILES=camltk.dvi addition-dump.ps browser.ps helloworld-dump.ps
+distrib: $(DISTFILES)
+	tar cf camltk.dvi.tar $(DISTFILES)
+	gzip camltk.dvi.tar
 
 .SUFFIXES:
 .SUFFIXES: .tex .mli .bib .bbl

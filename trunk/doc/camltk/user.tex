@@ -3,7 +3,7 @@
 programs, you should consult the reference manual
 (chapter~\ref{chap:ref}), as well as the \tk\ man pages.  Whenever the
 reference manual is unsufficient, you can check the \verb|Widgets.src| file
-(which syntax is given in chapter~\ref{chap:impl}) since this file the
+(which syntax is found in chapter~\ref{chap:impl}) since this file gives the
 mappings between \tk\ and \caml\ for functions and data. 
 
 \section{Modules}
@@ -31,8 +31,7 @@ of the interface. For example, the abstract type of widgets is defined in
 \end{itemize} 
 
 All modules required by the \camltk\ interface are in the \verb|tklib.zo|
-or \verb|tklib2.zo| library archives (only one of them is required,
-depending on the architecture you choose, cf. section~\ref{sec:compiling}).
+library archive.
 
 The organization of the interface is designed so that, in general, you
 should \verb|#open| only the \verb|tk| module, and for the 
@@ -45,6 +44,19 @@ less error-prone.
 
 
 \section{Basics}
+\begin{latexonly}
+\begin{figure}
+\caption{The {\tt helloworld} example}
+\label{fig:helloworld}
+\begin{center}
+\leavevmode
+\epsfbox{helloworld-dump.ps}
+\end{center}
+\end{figure}
+\end{latexonly}
+
+\htmladdimg{helloworld.gif}
+
 As usual with toolkits, the simplest way to learn how to write programs is
 by copy-paste-ing from available source code. In general, a \caml\ program
 using the \tk\ toolkit will have the following structure :
@@ -52,16 +64,29 @@ using the \tk\ toolkit will have the following structure :
 \input helloworld.tex
 
 The first step is to initialize the interface with \verb|OpenTk|, and this
-returns the {\em toplevel} widget\footnote{Note that attempting to call a
-\camltk\ function without previously having initialised the interface will
-probably cause your program to core dump.}.
+returns the {\em toplevel} widget.
 Then, the program creates some widgets, as children of the {\em toplevel}
 widget. These widgets form the user interface of your application. In this
 simple case, we have only one button, whose behaviour is to print a simple
 message on the standard output. Finally, the program enters the
-\verb|MainLoop|, and user-interaction takes place.
+\verb|MainLoop|, and user-interaction takes
+place. Figure~\ref{fig:helloworld} shows the interface of this program.
+
 
 \section{Example}
+\begin{latexonly}
+\begin{figure}
+\caption{The {\tt addition} example}
+\label{fig:addition}
+\begin{center}
+\leavevmode
+\epsfbox{addition-dump.ps}
+\end{center}
+\end{figure}
+\end{latexonly}
+
+\htmladdimg{addition.gif}
+
 Here is a complete working example with a few widgets and callbacks.
 This program may be found in the \verb|test| directory of the distribution,
 under the name \verb|addition.ml|.
@@ -72,7 +97,24 @@ The \verb|ScrollCommand| callback has the property of being called each time
 the insertion cursor blinks in an \verb|entry| widget. This property is
 responsible for the ``electric'' behavior of this program. Another approach
 would have been to associate an action to the event ``key return has been 
-pressed''.
+pressed''. Figure~\ref{fig:addition} shows the interface of this program.
+
+\section{Initialisation}
+A program using the \camltk\ interface must call one of the three following
+functions :
+\begin{verbatim}
+value OpenTk : unit -> Widget
+and OpenTkClass : string -> Widget
+and OpenTkDisplayClass : string -> string -> Widget
+\end{verbatim}
+Each of these functions returns the initial toplevel widget ("." in \tcl\tk).
+\verb|OpenTkClass| lets you specify the resource class of the toplevel
+widget, and \verb|OpenTkDisplayClass| lets you specify the display and the
+resource class.
+
+During the initialisation, the file \verb|$HOME/.camltkrc|, if it exists,
+will be loaded by \tcl\tk. This might be the place where to write some
+special customisations in \tcl, such as changing auto-load path, \ldots 
 
 \section{Widgets}
 The description of widget commands and options is given in the reference
@@ -115,18 +157,15 @@ given event.
 
 \paragraph{Example}
 \begin{verbatim}
-bind myCanvas [[],Motion] 
-   (BindSet([Ev_MouseX; Ev_MouseY;Ev_Place;Ev_SendEvent;Ev_KeySymString], 
-            mouse_moved)) ;;
+bind myCanvas [[],Motion] (BindSet([Ev_MouseX; Ev_MouseY], mouse_moved)) ;;
 \end{verbatim} 
 will trigger the callback \verb|mouse_moved| when the event \verb|Motion|
 occurs in the \verb|myCanvas| widget. The function \verb|mouse_moved| may
-assume that the  information in the fields {\tt Ev\_MouseX, Ev\_MouseY,
-Ev\_Place, Ev\_SendEvent, Ev\_KeySymString} of its argument contain accurate
-information.
+assume that the  information in the fields {\tt Ev\_MouseX, Ev\_MouseY} of
+its argument contain accurate information.
 
 \paragraph{Text and Canvas bindings}
-\mbox{}\newline
+\mbox{}\\
 
 Bindings on objets in \verb|text| and \verb|canvas| widgets obey the same
 rules, and the functions are 
@@ -140,7 +179,7 @@ Additional arguments are respectively the {\em tag} and the {\em tag or id}
 for which the binding is defined.
 
 \paragraph{Class bindings}
-\mbox{}\newline
+\mbox{}\\
 
 Binding for classes of widgets are managed with
 \begin{verbatim}
@@ -149,6 +188,20 @@ tk__class_bind : string ->
 \end{verbatim} 
 The first argument should be a widget class name (e.g. \verb|"Button"|).
 Widget class names in \camltk\ are the exact same names as in \tk.
+With \tk\ 3.6, a class binding is {\bf masked} by a widget specific binding.
+
+\section{Text variables}
+Text variables are available in \camltk. However, they are not physically
+shared between \caml\ and \tk, that is, \tk\ cannot directly modify
+a \caml\ variable.
+Instead, setting or consulting a \verb|textvariable| requires a transaction
+between \caml\ and \tk. However, the "sharing" properties of 
+text variables in \tk\ are preserved. For example, if a
+text variable is used to physically share the content of an {\tt entry} with
+the text of a {\tt label}, then this sharing will effectively occur in the
+\tk\ world, whether your \caml\ program is concerned with the actual
+contents of the text variable or not. 
+
 
 \section{Exiting}
 The function
@@ -204,6 +257,18 @@ several examples from \cite{ouster94}.
 working applications. They are provided for documentation purposes only}.
 
 \section{The Caml Browser}
+\begin{latexonly}
+\begin{figure}
+\caption{The Caml Browser}
+\begin{center}
+\leavevmode
+\epsfbox{browser.ps}
+\end{center}
+\end{figure}
+\end{latexonly}
+
+\htmladdimg{browser.gif"}
+
 In the directory {\tt browser} you will find a yet more complete example,
 featuring many different kinds of widgets. The browser mimicks the 
 \caml\ toplevel behaviour: you can open and close modules ({\tt \#open} and
@@ -216,39 +281,25 @@ of compiled interfaces ({\tt .zi} files), so you will not see the comments
 that were in the source file.
 
 The browser can also display source files. Hypertext navigation is also
-available for source files, but does not reflect the compiler's semantics,
+available, but does not reflect the compiler's semantics,
 as the \verb|#open| directives in the source file are not taken into
 account.
 
+When available, the browser also attemps to load {\tt TAGS} file, created by
+the {\tt mletags} program in the \caml\ contributions. It is therefore
+possible to navigate in program sources. However, note that the browser
+implements only a simplified version of Emacs's {\tt tag} mechanism.
 
 \section{Compilation}
-\label{sec:compiling}
-\subsection{Architecture}
-In this release, there are two possible architectures for the \camltk\
-interface. As in previous versions, there is a {\em two-process}
-architecture, where \caml\ communicates to a slave \wish\ interpreter.
-There is now a {\em single-process} architecture, where both \caml\ and \tk\
-coexist in a single process.
-
-{\bf Note: } because the {\em two-process} architecture is less portable and
-less robust than the {\em single-process} architecture, the former may not
-be supported in future versions.
-
-
-%% Avec la 0.7, Camltk est installe avec le reste du bouzin
-% In the following, we refer to \verb|CAMLTKDIR| as an environment variable
-% pointing to the directory where the interface library has been
-% installed, that is normally \verb|/usr/local/lib/caml-light/tk|.
 In the following, we refer to \verb|TCLLIBDIR| (resp. \verb|TKLIBDIR|) as
 an environment variable containing the directory where \verb|libtcl.a|
 (resp. \verb|libtk.a|) is located. Consult your system administrator if you
-don't have this information. Moreover, we assume a ``standard installation''
-of \caml\ and \camltk\ from the distribution. This means, starting from
-release \thisrelease, that all \camltk\ library files are installed in the
-same directory as standard \caml\ library files.
+don't have this information. 
 
-\subsection{Compilation for Single-process architecture}
-The library is named \verb|tklib.zo|.
+Moreover, we assume a ``standard installation'' of \caml\ and \camltk\ from
+the distribution. This means that all \camltk\ library files are installed
+in the same directory as standard \caml\ library files.
+
 The usual commands for compiling and linking are:
 \begin{verbatim}
 $ camlc -c addition.ml
@@ -257,32 +308,40 @@ $ camlc -custom -o addition tklib.zo addition.zo \
         -lcamltk -lcaml -ltk -ltcl -lX11
 \end{verbatim}
 Linking is a bit complex, because we need to tell the C compiler/linker
-where to find the libtk.a and libtcl.a libraries, and to link with all
-required pieces. Your linker might complain about \verb|main| being defined
-twice. It this produces an error, you cannot use this architecture.
-We will try to provide a bug-fix if this turns out to be a problem.
+where to find the \verb|libtk.a| and \verb|libtcl.a| libraries, and to link
+with all required pieces. Your linker might complain during this step.
+Most problems have been encountered on {\bf Solaris} systems, but we also
+know of successful installations on {\bf Solaris}.
+\begin{itemize}
+\item \verb|main| being defined twice. The problem here is that we are
+dealing with three librairies (caml, tcl, tk) containing a \verb|main|
+function. However, the linker should choose the first one, that is, the
+\verb|main| of the caml library. At this time, the only solution we can
+propose is to built alternate versions of the tcl and tk librairies, where
+the \verb|main| function has been removed.
 
-\subsection{Compilation for Two-process architecture}
-The library is named \verb|tklib2.zo|.
-The usual commands for compiling and linking are:
+\item undefined symbol \verb|_Tcl_AppInit|. This function is referenced only
+in the \verb|main| function of the tcl library. Thus, since this \verb|main|
+is actually dead code, \verb|Tcl_AppInit| should not be required. A
+workaround is to add the following lines
 \begin{verbatim}
-$ camlc -c addition.ml
-$ camlc -custom -o addition unix.zo tklib2.zo addition.zo -lunix
+int Tcl_AppInit(Tcl_Interp *interp)
+{
+  return 0;
+}
 \end{verbatim} 
- \verb|unix.zo| comes from the \verb|libunix| contrib, and is normally
-installed in the same directory as standard \caml\ libraries. 
-The commands are simpler because we rely on the external \verb|wish|
-interpreter.
+to the file \verb|libsupport/camltk.c|.
+\end{itemize} 
+
 
 \subsection{Toplevels}
-The distribution also contains two toplevels featuring the \camltk\
-interface: \verb|camltktop1| and \verb|camltktop2|.
-These toplevels may be run with: 
+The distribution also installs a toplevel featuring the \camltk\
+interface: \verb|camltktop|.
+This toplevel may be run with: 
 \begin{verbatim}
-$ camllight camltktop1
-$ camllight camltktop2
+$ camllight camltktop
 \end{verbatim} 
-Note however that the usage of the toplevels is awkward (for the time
+Note however that the usage of the toplevel is awkward (for the time
 being), because callbacks cannot be executed until you enter MainLoop, and
 you cannot easily leave MainLoop.
 
@@ -361,18 +420,6 @@ Partially applied widget commands (such as redisplay commands) translate
 quite well to \caml, with possibly some wrapping required due to 
 value constructors.
 
-\subsection{Text variables}
-\verb|TextVariables| are now available in \camltk. However,
-\verb|textvariables| are not physically shared between \caml\ and \tk.
-Instead, setting or consulting a \verb|textvariable| requires a transaction
-between \caml\ and \tk. However, the "sharing" properties of 
-\verb|textvariables| in \tk\ are preserved. For example, if the
-\verb|textvariable| is  
-used to physically share the content of an {\tt entry} with the text
-of a {\tt label}, then this sharing will effectively occur in the \tk\
-world, whether your \caml\ program is concerned with the actual
-contents of the \verb|textvariable| or not. 
-
 \subsection{How to find out the \caml\ name of \tk\ keywords and functions}
 Normally, a \caml\ command for a widget class will have the same name as the
 corresponding \tk\ command. However, in some cases, for example when a same
@@ -391,9 +438,9 @@ widget class.
 \end{itemize} 
 
 \section{Debugging}
-Since this is a beta release, some \tk\ functions may have been improperly
+Some \tk\ functions may have been improperly
 implemented in the \camltk\ library. This may cause undue \tk\ errors
-(exception \verb|TkError|, or sometimess \verb|Invalid_Argument| ). To
+(exception \verb|TkError|, or sometimes \verb|Invalid_Argument|). To
 facilitate the debugging, you can set the 
 Unix environment variable \verb|CAMLTKDEBUG| to any value before launching
 your program. This will allow you to see all

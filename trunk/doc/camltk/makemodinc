@@ -12,6 +12,6 @@ do
 # echo "\\begin{alltt}"
 # echo "\\input $CAMLTKDIR/$m.mli"
 # echo "\\end{alltt}"
-../tools/format-intf $m < $CAMLTKDIR/$m.mli > library/$m.tex
+./format-intf $m < $CAMLTKDIR/$m.mli > library/$m.tex
 echo "\\input library/$m.tex"
 done
