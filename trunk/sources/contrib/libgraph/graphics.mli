@@ -35,7 +35,7 @@ type color == int
            blue component. *)
 ;;
 
-value rgb: int -> int -> int -> int
+value rgb: int -> int -> int -> color
         (* [rgb r g b] returns the integer encoding the color with red
            component [r], green component [g], and blue component [b].
            [r], [g] and [b] are in the range [0..255]. *)
