@@ -77,7 +77,7 @@ let module_panel parent =
 	 dialog (support__new_toplevel_widget "error")
 	     "Caml Browser Error"
 	     ( "Cannot open module :" ^ n)
-	     ""
+	     (Predefined "error")
 	     0
 	     ["Ok"];
 	 ()
