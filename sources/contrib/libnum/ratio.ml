@@ -407,6 +407,14 @@ let div_ratio_big_int r bi =
 (* Functions on type string                                 *)
 (* giving floating point approximations of rational numbers *)
 
+let only_zeros s i l =
+ let res = ref true in
+ for j = i to i + l - 1 do
+  if s.[j] <> `0` then res := false
+ done;
+ !res
+;;
+
 (* Position of the leading digit of the decimal expansion          *)
 (* of a strictly positive rational number                          *)
 (* if the decimal expansion of a non null rational r is equal to   *)
@@ -422,7 +430,9 @@ let msd_ratio r =
          let size_num = string_length str_num
          and size_den = string_length str_den in
          let rec msd_rec str_num nnum str_den nden i m = 
-           if i > nnum then if i > nden then 0 else pred m
+           if i > nnum then
+            if i > nden or only_zeros str_den i (nden - i)
+            then m else pred m
            else if i > nden then m
            else match compare_int (int_of_char (nth_char str_num i)) 
                                   (int_of_char (nth_char str_den i)) with
