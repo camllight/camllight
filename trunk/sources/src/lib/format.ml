@@ -37,7 +37,7 @@ and tblock = Pp_tbox of int list ref  (* Tabulation box *)
 ;;
 
 (* The Queue: contains all formatting elements.
-   elements are tuples (size,token,length), where
+   elements are tuples (size, token, length), where
    size is set when the size of the block is known
    len is the declared length of the token *)
 type pp_queue_elem =
@@ -69,27 +69,35 @@ type formatter =
  (* Global variables: default initialization is
     set_margin 78
     set_min_space_left 0 *)
- (* value of right margin *)
+ (* Value of right margin *)
  mutable pp_margin : int;
  (* Minimal space left before margin, when opening a block *)
  mutable pp_min_space_left : int;
- (* maximum value of indentation:
+ (* Maximum value of indentation:
     no blocks can be opened further *)
  mutable pp_max_indent : int;
- mutable pp_space_left : int;    (* space remaining on the current line *)
- mutable pp_current_indent : int;(* current value of indentation *)
- mutable pp_left_total : int; 	 (* total width of tokens already printed *)
- mutable pp_right_total : int;	 (* total width of tokens ever put in queue *)
- mutable pp_curr_depth : int;	 (* current number of opened blocks *)
- mutable pp_max_boxes : int;	 (* maximum number of blocks which can be
-                                    opened at the same time *)
- mutable pp_ellipsis : string;   (* ellipsis string *)
+ (* Space remaining on the current line *)
+ mutable pp_space_left : int;
+ (* Current value of indentation *)
+ mutable pp_current_indent : int;
+ (* True when the line has been broken by the pretty-printer *)
+ mutable pp_is_new_line : bool;
+ (* Total width of tokens already printed *)
+ mutable pp_left_total : int;
+ (* Total width of tokens ever put in queue *)
+ mutable pp_right_total : int;
+ (* Current number of opened blocks *)
+ mutable pp_curr_depth : int;
+ (* Maximum number of blocks which can be simultaneously opened *)
+ mutable pp_max_boxes : int;
+ (* Ellipsis string *)
+ mutable pp_ellipsis : string;
+ (* Output function *)
  mutable pp_output_function : string -> int -> int -> unit;
-                                 (* output function *)
+ (* Flushing function *)
  mutable pp_flush_function : unit -> unit;
-                                 (* flushing function *)
- mutable pp_queue : pp_queue_elem queue;
-                                 (* The pretty-printer queue *)
+ (* The pretty-printer queue *)
+ mutable pp_queue : pp_queue_elem queue
 };;
 
 (* Qeues *)
@@ -145,6 +153,7 @@ let display_blanks state n =
 (* To format a break, indenting a new line *)
 let break_new_line state offset width =
     pp_output_newline state;
+    state.pp_is_new_line <- true;
     let indent = state.pp_margin - width + offset in
     (* Don't indent more than pp_max_indent *)
     let real_indent = min state.pp_max_indent indent in
@@ -184,9 +193,10 @@ let format_pp_token state size = function
 
   | Pp_text s ->
       state.pp_space_left <- state.pp_space_left - size;
-      pp_output_string state s
+      pp_output_string state s;
+      state.pp_is_new_line <- false
 
-  | Pp_begin (off,ty) ->
+  | Pp_begin (off, ty) ->
       let insertion_point = state.pp_margin - state.pp_space_left in
       if insertion_point > state.pp_max_indent then
          (* can't open a block right there *)
@@ -245,28 +255,30 @@ let format_pp_token state size = function
 
   | Pp_newline ->
      begin match state.pp_format_stack with
-     | Format_elem (_,width) :: _ -> break_line state width
+     | Format_elem (_, width) :: _ -> break_line state width
      | _ -> pp_output_newline state
      end
 
   | Pp_if_newline ->
      if state.pp_current_indent != state.pp_margin - state.pp_space_left
-      then pp_skip_token state
+     then pp_skip_token state
 
   | Pp_break (n, off) ->
      begin match state.pp_format_stack with
-     | Format_elem (ty,width) :: _ ->
+     | Format_elem (ty, width) :: _ ->
         begin match ty with
         | Pp_hovbox ->
            if size > state.pp_space_left 
            then break_new_line state off width
            else break_same_line state n
         | Pp_box ->
+           (* Have the line just been broken here ? *)
+           if state.pp_is_new_line then break_same_line state n else
            if size > state.pp_space_left
             then break_new_line state off width else
            (* break the line here leads to new indentation ? *)
            if state.pp_current_indent > state.pp_margin - width + off
-            then break_new_line state off width else break_same_line state n
+           then break_new_line state off width else break_same_line state n
         | Pp_hvbox -> break_new_line state off width
         | Pp_fits -> break_same_line state n
         | Pp_vbox  -> break_new_line state off width
@@ -346,7 +358,7 @@ let scan_push state b tok =
     pp_enqueue state tok;
     if b then set_size state true;
     state.pp_scan_stack <-
-     Scan_elem (state.pp_right_total,tok) :: state.pp_scan_stack;;
+     Scan_elem (state.pp_right_total, tok) :: state.pp_scan_stack;;
 
 (*
   To open a new block :
@@ -455,17 +467,14 @@ let pp_print_if_newline state () =
    If line is broken then offset is added to the indentation of the current
    block else (the value of) width blanks are printed.
    To do (?) : add a maximum width and offset value *)
-let pp_print_break_curry state width offset =
+let pp_print_break state width offset =
   if state.pp_curr_depth < state.pp_max_boxes then 
     scan_push state true
      {elem_size = (- state.pp_right_total); token = Pp_break (width, offset);
       length = width};;
 
-let pp_print_space state () = pp_print_break_curry state 1 0
-and pp_print_cut state () = pp_print_break_curry state 0 0;;
-
-let pp_print_break state (width, offset) =
-    pp_print_break_curry state width offset;;
+let pp_print_space state () = pp_print_break state 1 0
+and pp_print_cut state () = pp_print_break state 0 0;;
 
 (* Tabulation boxes *)
 let pp_open_tbox state () =
@@ -483,15 +492,13 @@ let pp_close_tbox state () =
    state.pp_curr_depth <- state.pp_curr_depth - 1 end;;
 
 (* Print a tabulation break *)
-let pp_print_tbreak_curry state width offset =
+let pp_print_tbreak state width offset =
   if state.pp_curr_depth < state.pp_max_boxes then
     scan_push state true
      {elem_size = (- state.pp_right_total); token = Pp_tbreak (width, offset); 
       length = width};;
 
-let pp_print_tab state () = pp_print_tbreak_curry state 0 0;;
-let pp_print_tbreak state (width, offset) =
-    pp_print_tbreak_curry state width offset;;
+let pp_print_tab state () = pp_print_tbreak state 0 0;;
 
 let pp_set_tab state () =
   if state.pp_curr_depth < state.pp_max_boxes
@@ -508,6 +515,8 @@ let pp_set_max_boxes state n = if n > 1 then state.pp_max_boxes <- n;;
 
 (* To know the current maximum number of boxes allowed *)
 let pp_get_max_boxes state () = state.pp_max_boxes;;
+
+let pp_over_max_boxes state () = state.pp_curr_depth = state.pp_max_boxes;;
 
 (* Ellipsis *)
 let pp_set_ellipsis_text state s = state.pp_ellipsis <- s
@@ -571,6 +580,7 @@ let make_formatter f g =
   pp_max_indent = 78 - 10;
   pp_space_left = 78;
   pp_current_indent = 0;
+  pp_is_new_line = true;
   pp_left_total = 1;
   pp_right_total = 1;
   pp_curr_depth = 1;
@@ -582,10 +592,10 @@ let make_formatter f g =
  };;
 
 let std_formatter =
-    make_formatter (output std_out) (fun () -> flush std_out);;
+    make_formatter (output stdout) (fun () -> flush stdout);;
 
 let err_formatter =
-    make_formatter (output std_err) (fun () -> flush std_err);;
+    make_formatter (output stderr) (fun () -> flush stderr);;
 
 let open_hbox = pp_open_hbox std_formatter
 and open_vbox = pp_open_vbox std_formatter
@@ -617,6 +627,7 @@ and set_max_indent = pp_set_max_indent std_formatter
 and get_max_indent = pp_get_max_indent std_formatter
 and set_max_boxes = pp_set_max_boxes std_formatter
 and get_max_boxes = pp_get_max_boxes std_formatter
+and over_max_boxes = pp_over_max_boxes std_formatter
 and set_ellipsis_text = pp_set_ellipsis_text std_formatter
 and get_ellipsis_text = pp_get_ellipsis_text std_formatter
 and set_formatter_out_channel =
@@ -629,6 +640,7 @@ and get_formatter_output_functions =
 #open "obj";;
 #open "float";;
 #open "int";;
+
 let fprintf ppf format =
   let format = (magic format : string) in
   let limit = string_length format in
@@ -660,9 +672,12 @@ let fprintf ppf format =
           | `.` ->
               pp_print_newline ppf ();
               doprn (succ j)
-          | `;` ->
+          | `\n` ->
               pp_force_newline ppf ();
               doprn (succ j)
+          | `;` ->
+              let j = do_pp_break ppf (i + 2) in
+              doprn j
           | _ -> invalid_arg ("fprintf: unknown format") end
       | `%` ->
           let j = skip_args (succ i) in
@@ -719,40 +734,37 @@ let fprintf ppf format =
 
   and skip_args j =
     match format.[j] with
-    | `0` | `1` | `2` | `3` | `4` | `5` | `6` | `7` | `8` | `9` |
-      ` ` | `.` | `-` ->
-        skip_args (succ j)
-    | c ->
-        j
+    | `0` .. `9` | ` ` | `.` | `-` -> skip_args (succ j)
+    | c -> j
+
+  and get_int s i =
+   if i >= limit then invalid_arg s else
+   match format.[i] with
+   | ` ` -> get_int s (i + 1)
+   | c ->
+      let rec get j =
+       if j >= limit then invalid_arg s else
+       match format.[j] with
+       | `0` .. `9` | `-` -> get (succ j)
+       | `>` | ` ` ->
+         if j = i then 0, succ j else
+          begin try int_of_string (sub_string format i (j-i)), succ j
+          with Failure _ -> invalid_arg s end
+       | c -> invalid_arg s in
+       get i
 
   and doint i j n =
-    let len = j-i in
-    let fmt = create_string (len+2) in
+    let len = j - i in
+    let fmt = create_string (len + 2) in
     blit_string format i fmt 0 len;
     fmt.[len] <- `l`;
-    fmt.[len+1] <- format.[j];
+    fmt.[len + 1] <- format.[j];
     pp_print_string ppf (format_int fmt n);
     doprn (succ j)
 
   and dofloat i j f =
     pp_print_string ppf (format_float (sub_string format i (j-i+1)) f);
     doprn (succ j)
-
-  and get_box_size i =
-   match format.[i] with
-   | ` ` -> get_box_size (i + 1)
-   | c ->
-      let rec get_size j =
-       match format.[j] with
-       | `0` | `1` | `2` | `3` | `4` | `5` | `6` | `7` | `8` | `9` |
-         `-` ->
-         get_size (succ j)
-       | `>` ->
-         if j = i then 0, succ j else
-          begin try int_of_string (sub_string format i (j-i)), succ j
-          with Failure _ -> invalid_arg "fprintf: bad box format" end
-       | c -> invalid_arg "fprintf: bad box format" in
-       get_size i
 
   and get_box_kind j =
    if j >= limit then Pp_box, j else
@@ -775,13 +787,25 @@ let fprintf ppf format =
    | `v` -> Pp_vbox, succ j
    | _ -> Pp_box, j
 
+  and do_pp_break ppf i =
+   if i >= limit
+   then begin pp_print_space ppf (); i end else
+   match format.[i] with
+   | `<` ->
+     let nspaces, j = get_int "fprintf: bad break format" (succ i) in
+     let offset, j = get_int "fprintf: bad break format" j in
+     if format.[pred j] != `>` then invalid_arg "fprintf: bad break format"
+     else pp_print_break ppf nspaces offset;
+     j
+   | c ->  pp_print_space ppf (); i
+
   and do_pp_open ppf i =
    if i >= limit
    then begin pp_open_box_gen ppf 0 Pp_box; i end else
    match format.[i] with
    | `<` ->
-     let k,j = get_box_kind (succ i) in
-     let size,j = get_box_size j in
+     let k, j = get_box_kind (succ i) in
+     let size, j = get_int "fprintf: bad box format" j in
      pp_open_box_gen ppf size k;
      j
    | c ->  pp_open_box_gen ppf 0 Pp_box; i

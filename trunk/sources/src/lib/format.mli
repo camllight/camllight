@@ -72,17 +72,17 @@ value print_space : unit -> unit;;
            a space between two words). 
            It indicates that the line may be split at this
            point. It either prints one space or splits the line.
-           It is equivalent to [print_break (1, 0)]. *)
+           It is equivalent to [print_break 1 0]. *)
 value print_cut : unit -> unit;;
         (* [print_cut ()] is used to mark a good break position.
            It indicates that the line may be split at this 
            point. It either prints nothing or splits the line.
            This allows line splitting at the current
            point, without printing spaces or adding indentation.
-           It is equivalent to [print_break (0, 0)]. *)
-value print_break : int * int -> unit;;
+           It is equivalent to [print_break 0 0]. *)
+value print_break : int -> int -> unit;;
         (* Insert a break hint in a pretty-printing box.
-           [print_break (nspaces, offset)] indicates that the line may
+           [print_break nspaces offset] indicates that the line may
            be split (a newline character is printed) at this point,
            if the contents of the current box does not fit on one line.
            If the line is split at that point, [offset] is added to
@@ -135,6 +135,9 @@ value set_max_boxes : int -> unit;;
            Nothing happens if [max] is not greater than 1. *)
 value get_max_boxes : unit -> int;;
         (* Return the maximum number of boxes allowed before ellipsis. *)
+value over_max_boxes : unit -> bool;;
+        (* Test the maximum number of boxes allowed have
+           already been opened. *)
 
 (*** Advanced formatting *)
 value open_hbox : unit -> unit;;
@@ -149,7 +152,7 @@ value open_vbox : int -> unit;;
            When a new line is printed in the box, [d] is added to the
            current indentation. *)
 value open_hvbox : int -> unit;;
-        (* [open_hovbox d] opens a new pretty-printing box
+        (* [open_hvbox d] opens a new pretty-printing box
            with offset [d]. 
            This box is ``horizontal-vertical'': it behaves as an
            ``horizontal'' box if it fits on a single line,
@@ -170,9 +173,9 @@ value open_tbox : unit -> unit;;
         (* Open a tabulation box. *)
 value close_tbox : unit -> unit;;
         (* Close the most recently opened tabulation box. *)
-value print_tbreak : int * int -> unit;;
+value print_tbreak : int -> int -> unit;;
         (* Break hint in a tabulation box.
-           [print_tbreak (spaces, offset)] moves the insertion point to
+           [print_tbreak spaces offset] moves the insertion point to
            the next tabulation ([spaces] being added to this position).
            Nothing occurs if insertion point is already on a
            tabulation mark.
@@ -220,21 +223,21 @@ type formatter;;
            Parameters of the pretty-printer are local to the pretty-printer:
            margin, maximum indentation limit, maximum number of boxes
            simultaneously opened, ellipsis, and so on, are specific to
-           each pretty-printer and may be fixed independantly.
+           each pretty-printer and may be fixed independently.
            A new formatter is obtained by calling the [make_formatter]
-           function. *) 
+           function. *)
 
 value std_formatter : formatter;;
         (* The standard formatter used by the formatting functions
            above. It is defined using [make_formatter] with
-           output function [output std_out] and flushing function
-           [fun () -> flush std_out]. *)
+           output function [output stdout] and flushing function
+           [fun () -> flush stdout]. *)
 
 value err_formatter : formatter;;
         (* A formatter to use with formatting functions below for
            output to standard error. It is defined using [make_formatter] with
-           output function [output std_err] and flushing function
-           [fun () -> flush std_err]. *)
+           output function [output stderr] and flushing function
+           [fun () -> flush stderr]. *)
 
 value make_formatter :
         (string -> int -> int -> unit) -> (unit -> unit) -> formatter;;
@@ -255,7 +258,7 @@ value pp_print_int : formatter -> int -> unit;;
 value pp_print_float : formatter -> float -> unit;;
 value pp_print_char : formatter -> char -> unit;;
 value pp_print_bool : formatter -> bool -> unit;;
-value pp_print_break : formatter -> int * int -> unit;;
+value pp_print_break : formatter -> int -> int -> unit;;
 value pp_print_cut : formatter -> unit -> unit;;
 value pp_print_space : formatter -> unit -> unit;;
 value pp_force_newline : formatter -> unit -> unit;;
@@ -264,7 +267,7 @@ value pp_print_newline : formatter -> unit -> unit;;
 value pp_print_if_newline : formatter -> unit -> unit;;
 value pp_open_tbox : formatter -> unit -> unit;;
 value pp_close_tbox : formatter -> unit -> unit;;
-value pp_print_tbreak : formatter -> int * int -> unit;;
+value pp_print_tbreak : formatter -> int -> int -> unit;;
 value pp_set_tab : formatter -> unit -> unit;;
 value pp_print_tab : formatter -> unit -> unit;;
 value pp_set_margin : formatter -> int -> unit;;
@@ -273,6 +276,7 @@ value pp_set_max_indent : formatter -> int -> unit;;
 value pp_get_max_indent : formatter -> unit -> int;;
 value pp_set_max_boxes : formatter -> int -> unit;;
 value pp_get_max_boxes : formatter -> unit -> int;;
+value pp_over_max_boxes : formatter -> unit -> bool;;
 value pp_set_ellipsis_text : formatter -> string -> unit;;
 value pp_get_ellipsis_text : formatter -> unit -> string;;
 value pp_set_formatter_out_channel : formatter -> out_channel -> unit;;
@@ -284,7 +288,7 @@ value pp_get_formatter_output_functions :
            These functions are the basic ones: usual functions
            operating on the standard formatter are defined via partial
            evaluation of these primitives. For instance,
-           [print_string] is equivalent to [pp_print_string std_formatter]. *)
+           [print_string] is equal to [pp_print_string std_formatter]. *)
 
 #open "printf";;
 value fprintf : formatter -> ('a, formatter, unit) format -> 'a;;
@@ -307,11 +311,17 @@ value fprintf : formatter -> ('a, formatter, unit) format -> 'a;;
 -          [\]]: close the most recently opened pretty-printing box.
 -          [,]: output a good break as with [print_cut ()].
 -          [ ]: output a space, as with [print_space ()].
--          [;]: force a newline, as with [force_newline ()].
+-          [\n]: force a newline, as with [force_newline ()].
+-          [;]: output a good break as with [print_break]. The
+           [nspaces] and [offset] parameters of the break may be
+           optionally specified with the following syntax: 
+           the [<] character, followed by an integer [nspaces] value,
+           then an integer offset, and a closing [>] character. 
 -          [.]: flush the pretty printer as with [print_newline ()].
 -          [@]: a plain [@] character. *)
-value printf : ('a, formatter, unit) format -> 'a
+
+value printf : ('a, formatter, unit) format -> 'a;;
         (* Same as [fprintf], but output on [std_formatter]. *)
-  and eprintf: ('a, formatter, unit) format -> 'a;;
+value eprintf: ('a, formatter, unit) format -> 'a;;
         (* Same as [fprintf], but output on [err_formatter]. *)
 

@@ -58,52 +58,52 @@ genlex.ml: genlex.mlp
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
 filename.zi: sys.zi 
-format.zi: io.zi 
+format.zi: io.zi printf.zi 
 gc.zi: io.zi 
 genlex.zi: stream.zi 
 io.zi: sys.zi 
-iparsing.zi: parsing.zi obj.zi 
+iparsing.zi: obj.zi parsing.zi 
 lexing.zi: io.zi obj.zi 
 map.zi: eq.zi 
-parsing.zi: lexing.zi obj.zi 
+parsing.zi: obj.zi lexing.zi 
 printf.zi: io.zi 
 set.zi: eq.zi 
 stream.zi: io.zi 
-arg.zo: arg.zi eq.zi exc.zi sys.zi bool.zi fstring.zi list.zi io.zi \
-    float.zi fvect.zi int.zi 
-baltree.zo: baltree.zi exc.zi eq.zi bool.zi int.zi 
+arg.zo: arg.zi exc.zi float.zi eq.zi fvect.zi io.zi int.zi bool.zi list.zi \
+    fstring.zi sys.zi 
+baltree.zo: baltree.zi exc.zi int.zi bool.zi eq.zi 
 bool.zo: bool.zi 
-char.zo: char.zi exc.zi eq.zi bool.zi fchar.zi 
+char.zo: char.zi exc.zi fchar.zi bool.zi fstring.zi eq.zi 
 eq.zo: eq.zi 
 exc.zo: exc.zi 
-fchar.zo: fchar.zi fstring.zi int.zi 
-filename.zo: filename.zi exc.zi eq.zi bool.zi fstring.zi int.zi 
-float.zo: float.zi exc.zi fstring.zi int.zi 
-format.zo: format.zi eq.zi exc.zi bool.zi fstring.zi io.zi ref.zi float.zi \
-    int.zi 
-fstring.zo: fstring.zi eq.zi fchar.zi ref.zi int.zi 
-fvect.zo: fvect.zi eq.zi list.zi int.zi 
+fchar.zo: fchar.zi int.zi fstring.zi 
+filename.zo: filename.zi exc.zi int.zi bool.zi fstring.zi eq.zi 
+float.zo: float.zi exc.zi int.zi fstring.zi 
+format.zo: format.zi io.zi exc.zi obj.zi int.zi bool.zi fstring.zi ref.zi \
+    float.zi eq.zi 
+fstring.zo: fstring.zi int.zi fchar.zi ref.zi eq.zi 
+fvect.zo: fvect.zi int.zi list.zi eq.zi 
 gc.zo: gc.zi printf.zi 
-genlex.zo: genlex.zi hashtbl.zi stream.zi exc.zi eq.zi fchar.zi float.zi \
-    fstring.zi list.zi ref.zi int.zi 
-hashtbl.zo: hashtbl.zi eq.zi exc.zi fvect.zi int.zi 
+genlex.zo: genlex.zi exc.zi int.zi stream.zi fchar.zi list.zi fstring.zi \
+    ref.zi hashtbl.zi float.zi eq.zi 
+hashtbl.zo: hashtbl.zi fvect.zi exc.zi int.zi eq.zi 
 int.zo: int.zi eq.zi 
-io.zo: io.zi exc.zi eq.zi sys.zi bool.zi fstring.zi float.zi int.zi 
-lexing.zo: lexing.zi exc.zi eq.zi fstring.zi io.zi obj.zi int.zi 
-list.zo: list.zi eq.zi exc.zi bool.zi int.zi 
+io.zo: io.zi exc.zi int.zi bool.zi fstring.zi float.zi eq.zi sys.zi 
+lexing.zo: lexing.zi io.zi exc.zi obj.zi int.zi fstring.zi eq.zi 
+list.zo: list.zi exc.zi int.zi bool.zi eq.zi 
 map.zo: map.zi baltree.zi 
 pair.zo: pair.zi exc.zi 
-parsing.zo: parsing.zi exc.zi eq.zi iparsing.zi fvect.zi ref.zi lexing.zi \
-    obj.zi int.zi 
-printexc.zo: printexc.zi eq.zi exc.zi sys.zi bool.zi io.zi fvect.zi obj.zi \
-    int.zi 
-printf.zo: printf.zi eq.zi exc.zi bool.zi fstring.zi list.zi io.zi ref.zi \
-    obj.zi float.zi int.zi 
-queue.zo: queue.zi exc.zi ref.zi int.zi 
-random.zo: random.zi eq.zi float.zi fvect.zi ref.zi int.zi 
+parsing.zo: parsing.zi fvect.zi exc.zi obj.zi int.zi ref.zi iparsing.zi \
+    eq.zi lexing.zi 
+printexc.zo: printexc.zi exc.zi eq.zi fvect.zi io.zi int.zi obj.zi bool.zi \
+    sys.zi 
+printf.zo: printf.zi io.zi exc.zi obj.zi int.zi list.zi bool.zi ref.zi \
+    fstring.zi float.zi eq.zi 
+queue.zo: queue.zi exc.zi int.zi ref.zi 
+random.zo: random.zi fvect.zi int.zi ref.zi eq.zi float.zi 
 set.zo: set.zi exc.zi eq.zi baltree.zi 
 sort.zo: sort.zi 
 stack.zo: stack.zi exc.zi list.zi 
-stream.zo: stream.zi exc.zi eq.zi fstring.zi io.zi ref.zi obj.zi 
-string.zo: string.zi exc.zi eq.zi sys.zi bool.zi fstring.zi int.zi 
-vect.zo: vect.zi exc.zi eq.zi sys.zi bool.zi fvect.zi int.zi 
+stream.zo: stream.zi exc.zi io.zi obj.zi ref.zi fstring.zi eq.zi 
+string.zo: string.zi exc.zi int.zi bool.zi fstring.zi eq.zi sys.zi 
+vect.zo: vect.zi fvect.zi exc.zi int.zi bool.zi eq.zi sys.zi 
