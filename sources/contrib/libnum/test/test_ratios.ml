@@ -65,14 +65,12 @@ test 1
 test 2 eq
  (null_denominator (create_ratio (big_int_of_int 1) zero_big_int),true);;
 
-(*****
 testing_function "verify_null_denominator";;
 
 test 1
  eq (verify_null_denominator (ratio_of_string "0/1"), false);;
 test 2
  eq (verify_null_denominator (ratio_of_string "0/0"), true);;
-*****)
 
 testing_function "sign_ratio";;
 
@@ -88,12 +86,12 @@ eq_int (sign_ratio (create_ratio zero_big_int (big_int_of_int (-3))), 0);;
 testing_function "normalize_ratio";;
 
 let r = create_ratio (big_int_of_int 12) (big_int_of_int (-16)) in
-normalize_ratio r;
+let r = normalize_ratio r in
 test 1 eq_big_int (numerator_ratio r, big_int_of_int (-3)) && 
 test 2 eq_big_int (denominator_ratio r, big_int_of_int 4);;
 
 let r = create_ratio (big_int_of_int (-1)) zero_big_int in
-normalize_ratio r;
+let r = normalize_ratio r in
 test 3 eq_big_int (numerator_ratio r, big_int_of_int (-1)) && 
 test 4 eq_big_int (denominator_ratio r, zero_big_int);;
 
@@ -167,14 +165,13 @@ in
 test 1
 eq_big_int (bi1,
             big_int_of_string "1040259735709286400")
-& 
-test 2
+&& test 2
 eq_big_int (bi2,
             big_int_of_string "-26542080")
-& test 3
+&& test 3
 eq_big_int (mult_big_int (denominator_ratio r1) (denominator_ratio r2),
             big_int_of_string "2169804593037312000")
-& test 4
+&& test 4
 eq_big_int (add_big_int bi1 bi2,
             big_int_of_string "1040259735682744320")
 ;;
@@ -592,16 +589,16 @@ eq_int (int_of_ratio
 
 failwith_test 3
 int_of_ratio (create_ratio (big_int_of_int 4) (big_int_of_int 0))
-(Failure "integer argument required");;
+(Failure "int_of_ratio: integer argument required");;
 
 failwith_test 4
 int_of_ratio (create_ratio (succ_big_int (big_int_of_int biggest_int)) 
                              (big_int_of_int 1))
-(Failure "integer argument required");;
+(Failure "int_of_ratio: integer argument required");;
 
 failwith_test 5
 int_of_ratio (create_ratio (big_int_of_int 4) (big_int_of_int 3))
-(Failure "integer argument required");;
+(Failure "int_of_ratio: integer argument required");;
 
 testing_function "ratio_of_int";;
 
@@ -660,6 +657,7 @@ test 1
 eq_string (string_of_ratio 
               (create_ratio (big_int_of_int 43) (big_int_of_int 35)), 
            "43/35");;
+
 test 2
 eq_string (string_of_ratio 
               (create_ratio (big_int_of_int 42) (big_int_of_int 0)), 
@@ -685,7 +683,6 @@ test 1
 eq_ratio (ratio_of_string ("123/3456"), 
           create_ratio (big_int_of_int 123) (big_int_of_int 3456));;
 
-(***********
 test 2
 eq_ratio (ratio_of_string ("12.3/34.56"), 
           create_ratio (big_int_of_int 1230) (big_int_of_int 3456));;
@@ -698,7 +695,6 @@ eq_ratio (ratio_of_string ("12.3/345.6"),
 test 5
 eq_ratio (ratio_of_string ("12.3/0.0"), 
           create_ratio (big_int_of_int 123) (big_int_of_int 0));;
-***********)
 test 6
 eq_ratio (ratio_of_string ("0/0"), 
           create_ratio (big_int_of_int 0) (big_int_of_int 0));;
@@ -709,8 +705,11 @@ eq_ratio (ratio_of_string "1234567890",
 failwith_test 8
 ratio_of_string "frlshjkurty" (Failure "invalid digit");;
 
-(***********
 testing_function "msd_ratio";;
+
+test 0
+eq_int (msd_ratio (create_ratio (big_int_of_int 1) (big_int_of_int 10)),
+        (-1));;
 
 test 1
 eq_int (msd_ratio (create_ratio (big_int_of_int 0) (big_int_of_int 1)),
@@ -761,14 +760,13 @@ eq_int (msd_ratio (create_ratio (big_int_of_int 23467)
         1);;
 failwith_test 15
 msd_ratio (create_ratio (big_int_of_int 1) (big_int_of_int 0))
-("msd_ratio "^infinite_failure);;
+(Failure ("msd_ratio "^infinite_failure));;
 failwith_test 16
 msd_ratio (create_ratio (big_int_of_int (-1)) (big_int_of_int 0))
-("msd_ratio "^infinite_failure);;
+(Failure("msd_ratio "^infinite_failure));;
 failwith_test 17
 msd_ratio (create_ratio (big_int_of_int 0) (big_int_of_int 0))
-("msd_ratio "^infinite_failure);;
-*************************)
+(Failure("msd_ratio "^infinite_failure));;
 
 testing_function "round_futur_last_digit";;
 

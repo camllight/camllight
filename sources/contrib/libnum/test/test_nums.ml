@@ -49,9 +49,12 @@ eq_num (sub_num (Big_int (big_int_of_int 1)) (Ratio (ratio_of_string "3/4")),
 test 5
 eq_num (sub_num (Big_int (big_int_of_int 1)) (Big_int (big_int_of_int 3)),
         Int (-2));;
-test 7
-eq_num (sub_num (Big_int (big_int_of_int 1)) (Ratio (ratio_of_string "3/4")),
+test 6
+eq_num (sub_num (num_of_int 1) (Ratio (ratio_of_string "3/4")), 
         Ratio (ratio_of_string "1/4"));;
+test 7
+eq_num (sub_num (Big_int (big_int_of_int 10)) (Ratio (ratio_of_string "30/4")),
+        Ratio (ratio_of_string "5/2"));;
 test 8
 eq_num (sub_num (Ratio (ratio_of_string "2/3")) (Ratio (ratio_of_string "3/4")),
         Ratio (ratio_of_string "-1/12"));;
@@ -148,7 +151,6 @@ testing_function "num_of_string";;
 
 test 1
 eq_num (num_of_string "123/3456", Ratio (ratio_of_string "123/3456"));;
-(*********
 test 2
 eq_num (num_of_string "12.3/34.56", Ratio (ratio_of_string "1230/3456"));;
 test 3
@@ -161,33 +163,20 @@ eq_num (num_of_string "12.3/0.0", Ratio (ratio_of_string "123/0"));;
 test 6
 eq_num (num_of_string "0/0", Ratio (ratio_of_string "0/0"));;
 set_error_when_null_denominator true;;
-*********)
 test 7
 eq_num (num_of_string "1234567890",
         Big_int (big_int_of_string "1234567890"));;
 test 8
 eq_num (num_of_string "12345", Int (int_of_string "12345"));;
-(*********
 test 9
 eq_num (num_of_string "0.23", Ratio (ratio_of_string "23/100"));;
 test 10
 eq_num (num_of_string "0.23", Ratio (ratio_of_string "0.23/1"));;
-********)
 
 failwith_test 11
 num_of_string ("frlshjkurty") (Failure "num_of_string");;
 
-(*******
-
-testing_function "immediate numbers";;
-
-standard arith false;;
-
-let x = (1/2) in
-test 0 eq_string (string_of_num x, "1/2");;
-
-let y = 12345678901 in
-test 1 eq_string (string_of_num y, "12345678901");;
+(**************
 testing_function "immediate numbers";;
 
 let x = (1/2) in
