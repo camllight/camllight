@@ -157,8 +157,12 @@ module, are listed below.
 Return the matched string.
 
 \item["lexing__get_lexeme_char lexbuf "$n$]
-Return the $n^{\mbox{\scriptsize th}}$ character in the matched string. The
-first character corresponds to $n = 0$.
+Return the
+\begin{latexonly}$n^{\mbox{\scriptsize th}}$\end{latexonly}
+\begin{rawhtml}
+<I>n</I>-th
+\end{rawhtml}
+character in the matched string. The first character corresponds to $n = 0$.
 
 \item["lexing__get_lexeme_start lexbuf"]
 Return the absolute position in the input text of the beginning of the
@@ -288,14 +292,13 @@ directive inside the rules.
 \subsection{Rules}
 
 The syntax for rules is as usual:
-%
-\begin{flushleft} \it
-nonterminal \verb":"                                                       \\
-\verb"   " symbol \ldots symbol \verb"{" semantic-action \verb"}"          \\
-\verb"  |" \ldots                                                          \\
-\verb"  |" symbol \ldots symbol \verb"{" semantic-action \verb"}"          \\
-\verb";"
-\end{flushleft}
+\begin{alltt}
+\var{nonterminal} :
+    \var{symbol} \ldots \var{symbol} \{ \var{semantic-action} \}
+  | \ldots
+  | \var{symbol} \ldots \var{symbol} \{ \var{semantic-action} \}
+;
+\end{alltt}
 %
 Rules can also contain the \verb"%prec "{\it symbol} directive in the
 right-hand side part, to override the default precedence and
