@@ -6,24 +6,24 @@ STDLIB_INTF=sort.tex hashtbl.tex printf.tex arg.tex \
   filename.tex lexing.tex parsing.tex stack.tex queue.tex random.tex \
   printexc.tex sys.tex genlex.tex set.tex map.tex baltree.tex format.tex gc.tex
 
-GRAPHICS_INTF=graphics.tex
+OTHER_INTF=graphics.tex unix.tex str.tex num.tex arithstatus.tex
 
 FILES=core.tex core-all.tex $(CORE_INTF) \
       stdlib.tex stdlib-all.tex $(STDLIB_INTF) \
-      graph.tex $(GRAPHICS_INTF)
+      graph.tex $(OTHER_INTF) libunix.tex libstr.tex libnum.tex
 
 FORMAT=../../tools/format-intf
 
 CLDIR=../../../cl
 
-VPATH=$(CLDIR)/src/lib:$(CLDIR)/contrib/libgraph
+VPATH=$(CLDIR)/src/lib:$(CLDIR)/contrib/libgraph:$(CLDIR)/contrib/libunix:$(CLDIR)/contrib/libstr:$(CLDIR)/contrib/libnum
 
 all: $(FILES)
 
 clean:
 	rm -f $(FILES)
 
-$(CORE_INTF) $(STDLIB_INTF) $(GRAPHICS_INTF): $(FORMAT)
+$(CORE_INTF) $(STDLIB_INTF) $(OTHER_INTF): $(FORMAT)
 
 core-all.tex: $(CORE_INTF)
 	@ (for i in $(CORE_INTF); do echo "\\input $$i"; done) | sort > core-all.tex
@@ -39,3 +39,6 @@ stdlib-all.tex: $(STDLIB_INTF)
 
 .mli.tex:
 	$(FORMAT) $* $< > $*.tex
+
+arithstatus.tex: $(CLDIR)/contrib/libnum/arith_status.mli
+	$(FORMAT) arith_status $(CLDIR)/contrib/libnum/arith_status.mli > arithstatus.tex

@@ -83,26 +83,7 @@ geometry.
 \begin{mac} The argument to "open_graph" is ignored.
 \end{mac}
 
-\begin{pcbase}
-The 86 PC version supports the CGA, EGA and VGA graphics cards.
-The argument to "open_graph" is interpreted as follows:
-
-\begin{tabular}{|r|l|}
-\hline
-Argument to "open_graph" & Graphic mode \\
-\hline
-\verb|"cga"| & 320x200, 4 colors \\
-\verb|"ega_low"| & 640x200, 16 colors \\
-\verb|"ega_high"| & 640x350, 16 colors \\
-\verb|"vga_low"| & 640x200, 16 colors \\
-\verb|"vga_med"| & 640x350, 16 colors \\
-\verb|"vga_high"| & 640x480, 16 colors \\
-anything else & highest possible resolution \\
-\hline
-\end{tabular}
-\end{pcbase}
-
-\begin{pcthree}
+\begin{pc}
 The 386 PC version supports VGA graphics cards, and a number of
 SuperVGA cards, provided the correct driver has been installed. (See
 the installation instructions.) Only 256 color modes are supported.
@@ -127,7 +108,7 @@ anything else & default resolution, as set in the "GO32" variable
 \hline
 \end{tabular}
 
-\end{pcthree}
+\end{pc}
 
 \begin{library}
 \input graphics
