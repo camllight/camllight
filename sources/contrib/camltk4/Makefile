@@ -17,10 +17,12 @@ TKINCLDIR=/usr/local/lib/tk4.0/include
 TCLLIBDIR=/usr/local/lib/tcl7.4/lib
 TKLIBDIR=/usr/local/lib/tk4.0/lib
 #Does not work on SunOS
-#TKLIBS=-ltk4.0 -ltcl7.4 -lX11
+#Work on PWS under Digital Unix.
+TKLIBS=-ltk4.0 -ltcl7.4 -lX11
 #Does not work on Linux with old tcl/tk installed in /usr/lib
 #unless we use -static
-TKLIBS=-ltk -ltcl -lX11
+#Does not work on PWS under Digital Unix.
+#TKLIBS=-ltk -ltcl -lX11
 
 MKF=\
   CC='$(CC)' \
