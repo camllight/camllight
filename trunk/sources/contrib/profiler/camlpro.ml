@@ -181,6 +181,7 @@ and rewrite_expr e =
                  rewrite_expr body;
                  rewrite_patexpr_list pelist
                end
+            | _ -> () 
             end
      | Zfunction plelist -> 
       	  if !instr_fun then
