@@ -8,11 +8,11 @@ type Units =
 ;;
 
 let CAMLtoTKUnits = function
-    Pixels (foo) -> (string_of_int foo)
-  | Millimeters (foo)  -> (string_of_float foo)^"m"
-  | Inches (foo)  -> (string_of_float foo)^"i"
-  | PrinterPoint (foo) -> (string_of_float foo)^"p"
-  | Centimeters (foo) -> (string_of_float foo)^"c"
+    Pixels (foo) -> TkToken (string_of_int foo)
+  | Millimeters (foo)  -> TkToken(string_of_float foo^"m")
+  | Inches (foo)  -> TkToken(string_of_float foo^"i")
+  | PrinterPoint (foo) -> TkToken(string_of_float foo^"p")
+  | Centimeters (foo) -> TkToken(string_of_float foo^"c")
   ;;
 
 let TKtoCAMLUnits str = 

@@ -88,7 +88,7 @@ type Modifier =
 ;;
 
 let CAMLtoTKModifier = function
-   Control ->"Control-"
+   Control -> "Control-"
  | Shift -> "Shift-"
  | Lock -> "Lock-"
  | Button1 -> "Button1-"
@@ -117,7 +117,7 @@ let CAMLtoTKEvent (ml, xe) =
   
 (* type EventSequence == (Modifier list * XEvent) list *)
 let CAMLtoTKEventSequence l =
-  it_list (prefix ^) "" (map CAMLtoTKEvent l)
+  TkToken(it_list (prefix ^) "" (map CAMLtoTKEvent l))
 ;;
 
 (* Event structure, passed to bounded functions *)
@@ -332,37 +332,39 @@ type BindAction =
 (* bind: Widget -> (Modifier list * XEvent) list -> BindAction -> unit *)
 
 let bind widget eventsequence action =
-  let buf = Send2TkStart false in
-  Send2Tk buf ("bind "^ widget_name widget^" "
-                      ^ (CAMLtoTKEventSequence eventsequence));
+  TkEval [| TkToken "bind";
+      	    TkToken (widget_name widget);
+	    CAMLtoTKEventSequence eventsequence;
   begin match action with
-     BindRemove -> Send2Tk buf "{}"
+     BindRemove -> TkToken ""
   |  BindSet (what, f) ->
       let CbId = register_callback widget (WrapEventInfo f what) in
-        Send2Tk buf (" {camlcb " ^ CbId ^ (WriteEventField what) ^"}")
+        TkToken ("camlcb " ^ CbId ^ (WriteEventField what))
   |  BindExtend (what, f) ->
       let CbId = register_callback widget (WrapEventInfo f what) in
-        Send2Tk buf (" {+camlcb " ^ CbId ^ (WriteEventField what) ^"}")
-  end;
-  Send2TkEval buf;
+        TkToken ("+camlcb " ^ CbId ^ (WriteEventField what))
+      
+  end
+  |];
   ()
 ;;
 
 (* class_bind : string -> (Modifier list * XEvent) list -> BindAction -> unit 
       class arg is not constrained *)
 let class_bind class eventsequence action =
-  let buf = Send2TkStart false in
-  Send2Tk buf ("bind "^ class ^" "
-                      ^ (CAMLtoTKEventSequence eventsequence));
+  TkEval [| TkToken "bind";
+      	    TkToken class;
+	    CAMLtoTKEventSequence eventsequence;
   begin match action with
-     BindRemove -> Send2Tk buf "{}"
+     BindRemove -> TkToken ""
   |  BindSet (what, f) ->
       let CbId = register_callback dummy_widget (WrapEventInfo f what) in
-        Send2Tk buf (" {camlcb " ^ CbId ^ (WriteEventField what) ^"}")
+        TkToken ("camlcb " ^ CbId ^ (WriteEventField what))
   |  BindExtend (what, f) ->
       let CbId = register_callback dummy_widget (WrapEventInfo f what) in
-        Send2Tk buf (" {+camlcb " ^ CbId ^ (WriteEventField what) ^"}")
-  end;
-  Send2TkEval buf;
+        TkToken ("+camlcb " ^ CbId ^ (WriteEventField what))
+      
+  end
+ |];
   ()
 ;;
