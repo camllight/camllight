@@ -9,18 +9,9 @@
 (* Parsing functions *)
 
 let parse_phrase parsing_fun lexing_fun lexbuf =
-  let rec skip () =
-    try
-      match lexing_fun lexbuf with
-        EOF -> ()
-      | SEMISEMI -> ()
-      | _ -> skip()
-    with lexer__Lexical_error(_,_,_) ->
-      skip() in
   try
     parsing_fun lexing_fun lexbuf
   with parsing__Parse_error f ->
-         if f (obj__repr EOF) or f (obj__repr SEMISEMI) then () else skip();
          failwith "parser"
      | lexer__Lexical_error(msg, pos1, pos2) ->
          failwith "lexer"
