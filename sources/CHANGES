@@ -29,6 +29,8 @@ Caml Light 0.74:
   implementation) (set the variable BIGNUM_ARCH to pentium in the
   Makefile of the contrib directory).
 
+* camllex: fixed bug causing undetected type errors in lexer definitions.
+
 Caml Light 0.73:
 ---------------
 
