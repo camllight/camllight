@@ -55,7 +55,7 @@ semantics (parse_top "i = \\x. x;");;
 semantics (parse_top "x = i (f 2);");;
 semantics (parse_top "y = (C x (\\x.x) 2) 0;");;
 semantics (parse_top "z = \\f.((\\x.f(\\y.(x x) y))(\\x.f(\\y.(x x) y)));");;
-semantics (parse_top "f = z(\\f.(\\n. C (= n 0) 1 (* n (f (- n 1)))));");;
+semantics (parse_top "f = z(\\f.(\\n. C (= n 0) 1 ( * n (f (- n 1)))));");;
 semantics (parse_top "x = f 8;");;
 semantics (parse_top
   "b = z(\\b.(\\n. C (= n 1) 1 (C (= n 2) 1 (+ (b(- n 1)) (b(- n 2))))));");;
