@@ -57,3 +57,6 @@ value sign_big_int : big_int -> int
   and leading_digit_big_int : big_int -> int
   and nth_digit_big_int : big_int -> int -> int
 ;;
+
+value sys_print_big_int : int -> string -> big_int -> string -> unit;;
+value print_big_int : big_int -> unit;;
