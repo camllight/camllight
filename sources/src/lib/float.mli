@@ -74,18 +74,17 @@ value ceil : float -> float = 1 "ceil_float"
              equal to [f].
              [ceil f] returns the least integer value greater than or
              equal to [f]. *)
-  and fabs : float -> float = 1 "fabs_float"
   and abs_float : float -> float = 1 "fabs_float"
           (* Return the absolute value of the argument. *)
-  and fmod : float -> float -> float = 2 "fmod_float"
+  and mod_float : float -> float -> float = 2 "fmod_float"
           (* [fmod a b] returns the remainder of [a] with respect to
              [b]. *)
   and frexp : float -> float * int = 1 "frexp_float"
           (* [frexp f] returns the pair of the significant
-             and the exponent of [f] (when $f$ is zero, the
-             significant $x$ and the exponent $n$ of $f$ are equal to
-             zero; when $f$ is non-zero, they are defined by
-             $f = x * 2^{n}$). *)
+             and the exponent of [f] (when [f] is zero, the
+             significant [x] and the exponent [n] of [f] are equal to
+             zero; when [f] is non-zero, they are defined by
+             [f = x *. 2 ** n]). *)
   and ldexp : float -> int -> float = 2 "ldexp_float"
            (* [ldexp x n] returns [x *. 2 ** n]. *)
   and modf : float -> float * float = 1 "modf_float"
