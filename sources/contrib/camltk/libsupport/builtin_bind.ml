@@ -276,6 +276,7 @@ let rec WriteEventField = function
       | Time -> 	" %t"
       | OverrideRedirect -> " %o"
       | Place -> 	" %p"
+      (* Quoting is done by Tk *)
       | Char -> 	" %A"
       | BorderWidth -> 	" %B"
       | Display -> 	" %D"
@@ -294,6 +295,7 @@ let rec WriteEventField = function
 type BindAction =
    BindSet of EventField list *  (EventInfo -> unit)
  | BindRemove
+ | BindExtend of EventField list *  (EventInfo -> unit)
 ;;
 
 
@@ -304,10 +306,31 @@ let bind widget eventsequence action =
   Send2Tk buf ("bind "^ widget_name widget^" "
       	              ^ (CAMLtoTKEventSequence eventsequence));
   begin match action with
-     BindRemove -> Send2Tk buf " "
+     BindRemove -> Send2Tk buf "{}"
   |  BindSet (what, f) ->
       let CbId = register_callback (WrapEventInfo f what) in
         Send2Tk buf (" {camlcb " ^ CbId ^ (WriteEventField what) ^"}")
+  |  BindExtend (what, f) ->
+      let CbId = register_callback (WrapEventInfo f what) in
+        Send2Tk buf (" {+camlcb " ^ CbId ^ (WriteEventField what) ^"}")
+  end;
+  Send2TkEval buf
+;;
+
+(* class_bind : string -> (Modifier list * XEvent) list -> BindAction -> unit 
+      class arg is not constrained *)
+let class_bind class eventsequence action =
+  let buf = Send2TkStart false in
+  Send2Tk buf ("bind "^ class ^" "
+      	              ^ (CAMLtoTKEventSequence eventsequence));
+  begin match action with
+     BindRemove -> Send2Tk buf "{}"
+  |  BindSet (what, f) ->
+      let CbId = register_callback (WrapEventInfo f what) in
+        Send2Tk buf (" {camlcb " ^ CbId ^ (WriteEventField what) ^"}")
+  |  BindExtend (what, f) ->
+      let CbId = register_callback (WrapEventInfo f what) in
+        Send2Tk buf (" {+camlcb " ^ CbId ^ (WriteEventField what) ^"}")
   end;
   Send2TkEval buf
 ;;
