@@ -22,11 +22,10 @@ let copy_chunk (Location(start,stop)) =
     copy (stop - start)
 ;;
 
-let output_action (i,act) =
-  output_string !oc ("action_" ^ string_of_int i ^ " lexbuf = (\n");
+let output_action (i, name, act) =
+  output_string !oc ("action_" ^ string_of_int i ^ " lexbuf = ((\n");
   copy_chunk act;
-  output_string !oc ")\nand ";
-  ()
+  output_string !oc (") : '" ^ name ^ ")\nand ")
 ;;
 
 (* 2- Generating the states *)
@@ -133,7 +132,8 @@ let rec output_entries = function
   | (name,state_num) :: rest ->
       output_string !oc (name ^ " lexbuf =\n");
       output_string !oc "  start_lexing lexbuf;\n";
-      output_string !oc ("  state_" ^ string_of_int state_num ^ " lexbuf\n");
+      output_string !oc
+        ("  (state_" ^ string_of_int state_num ^ " lexbuf : '" ^ name ^ ")\n");
       match rest with
         [] -> output_string !oc ";;\n"; ()
       | _  -> output_string !oc "\nand "; output_entries rest
