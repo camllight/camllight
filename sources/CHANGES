@@ -19,7 +19,7 @@ Caml Light 0.7:
 * Partial matches and unused match cases are correctly detected now.
 
 * Internationalized error messages (controlled by the LANG environment
-  variable; known languages so far: american english, french).
+  variable; known languages so far: american english, french, spanish).
   More detailed error messages.
 
 * Various fixes in the garbage collector to fight fragmentation of the
@@ -67,6 +67,8 @@ Caml Light 0.7:
 
 * Static type-checking of printf. User-defined printers supported in printf
   formats (%a and %t).
+
+* "camlc -W" prints extra warnings (useless #open, capitalized variable, ...).
 
 * Parsing engine now reentrant; a camlyacc-generated parser can call
   another one in one of its actions.
