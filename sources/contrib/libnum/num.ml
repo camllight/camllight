@@ -294,8 +294,8 @@ let compare_num n1 n2 =
     | Ratio r2 -> compare_big_int_ratio bi1 r2 end
  | Ratio r1 ->
     begin match n2 with
-    | Int i2 -> compare_big_int_ratio (big_int_of_int i2) r1
-    | Big_int bi2 -> compare_big_int_ratio bi2 r1
+    | Int i2 -> - (compare_big_int_ratio (big_int_of_int i2) r1)
+    | Big_int bi2 -> - (compare_big_int_ratio bi2 r1)
     | Ratio r2 -> compare_ratio r1 r2 end
 ;;
 
