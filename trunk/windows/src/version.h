@@ -1,2 +1,1 @@
-#define MAJOR 0
-#define MINOR 7
+#define VERSION "0.7d"
