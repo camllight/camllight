@@ -2,9 +2,9 @@
 #
 #		KerN for the VAX.
 #		[Bepaul, Shand]
-#		Last modified on Mon Apr  2 21:03:05 GMT+2:00 1990 by shand 
-#		     modified on Mon Nov 20 13:51:10 GMT+1:00 1989 by herve 
-#		     modified on 17-OCT-1989 20:37:48 by Jim Lawton 
+#		Last modified_on Mon Apr  2 21:03:05 GMT+2:00 1990 by shand 
+#		     modified_on Mon Nov 20 13:51:10 GMT+1:00 1989 by herve 
+#		     modified_on 17-OCT-1989 20:37:48 by Jim Lawton 
 #
 # >>> IMPORTANT <<<     DO NOT MODIFY THIS LINE
 #

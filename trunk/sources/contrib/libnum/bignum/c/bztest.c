@@ -1,6 +1,6 @@
 /* Copyright     Digital Equipment Corporation & INRIA     1988, 1989 */
-/* Last modified on Mon Apr 15 18:44:14 GMT+2:00 1991 by herve */
-/*      modified on Tue Feb 13 17:55:06 GMT+1:00 1990 by shand */
+/* Last modified_on Tue Feb 25  1:27:57 GMT+1:00 1992 by shand */
+/*      modified_on Mon Apr 15 18:44:14 GMT+2:00 1991 by herve */
 
 #include <stdio.h>
 #include "BigZ.h"
@@ -41,7 +41,7 @@ char *B, *C;
 #define two             FromI(2)
 #define minusone        FromI(-1)
 
-#ifdef DIGITon16BITS
+#ifdef DIGITonUSHORT
 #define two31m1         Sub(Mul(From("65536"),From("32768")),one)
 #else
 #define two31m1         FromI(0x7FFFFFFF)

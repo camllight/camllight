@@ -1,10 +1,10 @@
 #  Copyright     Digital Equipment Corporation & INRIA     1988, 1989
 #  BigNum For VMS - Version 1.0
 
-#  Last modified on Tue Oct  9 10:51:13 GMT+1:00 1990 by herve
-#       modified on Tue Mar 27 14:23:22 GMT+2:00 1990 by shand
-#       modified on Tue Sep  5 18:00:00 GMT      1989 by esase::lawton
-#       modified on Wed Jul  5 10:23:54 GMT+2:00 1989 by bertin 
+#  Last modified_on Thu Feb 20 18:46:39 GMT+1:00 1992 by shand
+#       modified_on Tue Oct  9 10:51:13 GMT+1:00 1990 by herve
+#       modified_on Tue Sep  5 18:00:00 GMT      1989 by esase::lawton
+#       modified_on Wed Jul  5 10:23:54 GMT+2:00 1989 by bertin 
 
 PATH_SOURCE=[.c]
 PATH_INCLUDE=[.h]
@@ -49,7 +49,7 @@ $(LIB) : $(OBJECT)
 	@ write sys$output "The Default is KerN written in VAX-MACRO with digits on 32 bits"
  	macro [.s]vaxKerN.mar /object=[.o]KerN.obj
 
-C32 : scratch [.c]KerN.c Makefile
+Cint : scratch [.c]KerN.c Makefile
 	$(CC) [.c]KerN $(CFLAGS) /define ="VMS" /object=[.o]KerN.obj
 	mms /MACRO="OBJECT=$(OBJECT),[.o]bnMult.obj"
 

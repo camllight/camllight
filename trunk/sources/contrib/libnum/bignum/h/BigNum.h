@@ -1,12 +1,14 @@
 /* Copyright     Digital Equipment Corporation & INRIA     1988, 1989 */
-/* Adapted by Xavier Leroy on Fri Apr 30 1993 */
-/* Last modified on Mon Oct  8 15:12:37 GMT+1:00 1990 by herve */
-/*      modified on Fri Aug 17 17:19:01 GMT+2:00 1990 by shand */
-/*      modified on Wed Jul  5 10:19:33 GMT+2:00 1989 by bertin */
-
+/* Last modified_on Thu Feb 20 18:41:41 GMT+1:00 1992 by shand */
+/*      modified_on Thu Oct 31 16:41:47 1991 by herve */
+/*      modified_on Wed Jul  5 10:19:33 GMT+2:00 1989 by bertin */
+/* Adapted to Caml Light by Xavier Leroy, Mon May 9. */
 
 /* BigN.h - Types and structures for clients of BigNum */
 
+#if !defined(_stdc_)
+#define _NO_PROTO
+#endif
 
 
 		/******** representation of a bignum ******/
@@ -52,21 +54,20 @@
 #define TRUE				1
 #define FALSE				0
 
+typedef unsigned long			BigNumDigit;
 
-		/* if DIGITon16BITS is defined, a single digit is on 16 bits */
-		/* otherwise (by default) a single digit is on 32 bits *****/
-		/* Note: on 32 bit machine it makes little sense to mix */
-		/* longs and short, so we define Boolean & BigNumCmp to be */
-		/* int usually */
-
-#ifdef DIGITon16BITS
-typedef unsigned short			BigNumDigit;
-typedef short				Boolean;
-#else
-typedef unsigned int 			BigNumDigit;
+#ifndef BigZBoolean
 typedef int				Boolean;
+#define BigZBoolean
 #endif
 
+#ifndef __
+#if defined(_NO_PROTO)
+#define __(args) ()
+#else
+#define __(args) args
+#endif
+#endif
 
 		/* bignum types: digits, big numbers, carries ... */
 
@@ -74,53 +75,46 @@ typedef BigNumDigit * 	BigNum;		/* A big number is a digit pointer */
 typedef BigNumDigit	BigNumCarry;	/* Either 0 or 1 */
 typedef unsigned long 	BigNumProduct;	/* The product of two digits */
 /* BigNumLength must be int as nl is in the code, remember int is 16 bits on MSDOS - jch */
-typedef unsigned int	BigNumLength;	/* The length of a bignum */
-#ifdef DIGITon16BITS
-typedef short		BigNumCmp;	/* result of comparison */
-#else
+typedef unsigned long	BigNumLength;	/* The length of a bignum */
 typedef int		BigNumCmp;	/* result of comparison */
-#endif
-
 
 /**/
 
 
 		/************ functions of bn.c ***********/
 
-extern void             BnnInit 			();
-extern void             BnnClose 			();
+extern void             BnnInit 	__((void));
+extern void             BnnClose 	__((void));
 
-extern Boolean		BnnIsZero 			();
-extern BigNumCarry 	BnnMultiply			();
-extern void		BnnDivide			();
-extern BigNumCmp	BnnCompare			();
-
+extern Boolean		BnnIsZero 	__((BigNum nn, BigNumLength nl));
+extern BigNumCarry 	BnnMultiply	__((BigNum pp,BigNumLength pl, BigNum nn, BigNumLength nl, BigNum mm, BigNumLength ml));
+extern void		BnnDivide	__((BigNum nn, BigNumLength nl, BigNum dd, BigNumLength dl));
+extern BigNumCmp	BnnCompare	__((BigNum mm, BigNumLength ml, BigNum nn, BigNumLength nl));
 
 		/*********** functions of KerN.c **********/
-
-extern void 		BnnSetToZero			();
-extern void 		BnnAssign			();
-extern void 		BnnSetDigit			();
-extern BigNumDigit 	BnnGetDigit			();
-extern BigNumLength	BnnNumDigits			();
-extern BigNumDigit	BnnNumLeadingZeroBitsInDigit	();
-extern Boolean 		BnnDoesDigitFitInWord 		();
-extern Boolean		BnnIsDigitZero 			();
-extern Boolean		BnnIsDigitNormalized 		();
-extern Boolean 		BnnIsDigitOdd			();
-extern BigNumCmp		BnnCompareDigits		();
-extern void 		BnnComplement			();
-extern void 		BnnAndDigits			();
-extern void		BnnOrDigits			();
-extern void		BnnXorDigits			();
-extern BigNumDigit	BnnShiftLeft			();
-extern BigNumDigit	BnnShiftRight			();
-extern BigNumCarry 	BnnAddCarry			();
-extern BigNumCarry 	BnnAdd				();
-extern BigNumCarry 	BnnSubtractBorrow		();
-extern BigNumCarry 	BnnSubtract			();
-extern BigNumCarry 	BnnMultiplyDigit		();
-extern BigNumDigit	BnnDivideDigit			();
+extern void 		BnnSetToZero	__((BigNum nn, BigNumLength nl));
+extern void 		BnnAssign	__((BigNum mm, BigNum nn, BigNumLength nl));
+extern void 		BnnSetDigit	__((BigNum nn, BigNumDigit d));
+extern BigNumDigit 	BnnGetDigit	__((BigNum nn));
+extern BigNumLength	BnnNumDigits	__((BigNum nn, BigNumLength nl));
+extern BigNumDigit	BnnNumLeadingZeroBitsInDigit	__((BigNumDigit d));
+extern Boolean 		BnnDoesDigitFitInWord 		__((BigNumDigit d));
+extern Boolean		BnnIsDigitZero 	__((BigNumDigit d));
+extern Boolean		BnnIsDigitNormalized 		__((BigNumDigit d));
+extern Boolean 		BnnIsDigitOdd	__((BigNumDigit d));
+extern BigNumCmp	BnnCompareDigits __((BigNumDigit d1, BigNumDigit d2));
+extern void 		BnnComplement	__((BigNum nn, BigNumLength nl));
+extern void 		BnnAndDigits	__((BigNum n, BigNumDigit d));
+extern void		BnnOrDigits	__((BigNum n, BigNumDigit d));
+extern void		BnnXorDigits	__((BigNum n, BigNumDigit d));
+extern BigNumDigit	BnnShiftLeft	__((BigNum mm, BigNumLength ml, int nbits));
+extern BigNumDigit	BnnShiftRight	__((BigNum mm, BigNumLength ml, int nbits));
+extern BigNumCarry 	BnnAddCarry	__((BigNum nn, BigNumLength nl, BigNumCarry carryin));
+extern BigNumCarry 	BnnAdd		__((BigNum mm, BigNumLength ml, BigNum nn, BigNumLength nl, BigNumCarry carryin));
+extern BigNumCarry 	BnnSubtractBorrow __((BigNum nn, BigNumLength nl, BigNumCarry carryin));
+extern BigNumCarry 	BnnSubtract	__((BigNum mm, BigNumLength ml, BigNum nn, BigNumLength nl, BigNumCarry carryin));
+extern BigNumCarry 	BnnMultiplyDigit __((BigNum mm, BigNumLength ml, BigNum nn, BigNumLength nl, BigNumDigit d));
+extern BigNumDigit	BnnDivideDigit	__((BigNum qq, BigNum nn, BigNumLength nl, BigNumDigit d));
 
 /**/
 
@@ -129,14 +123,15 @@ extern BigNumDigit	BnnDivideDigit			();
 
 #ifndef BNNMACROS_OFF
 /* the functions BnnIsZero and BnnCompareDigits are not macro procedures
-since they use parameters twice, and that can produce some bugs if
-you pass a parameter like x++, the increment will be executed twice ! */
+   since they use parameters twice, and that can produce bugs if
+   you pass a parameter like x++
+ */
 #define BnnSetDigit(nn,d) 		(*(nn) = (d))
-#define BnnGetDigit(nn)			((unsigned)(*(nn)))
-#define BnnDoesDigitFitInWord(d)	(BN_DIGIT_SIZE > BN_WORD_SIZE ? ((d) >= 1 << BN_WORD_SIZE ? FALSE : TRUE) : TRUE)
+#define BnnGetDigit(nn)			(*(nn))
+#define BnnDoesDigitFitInWord(d)	(BN_DIGIT_SIZE > BN_WORD_SIZE ? ((d) >= (BigNumDigit)1 << BN_WORD_SIZE ? FALSE : TRUE) : TRUE)
 #define BnnIsDigitZero(d)		((d) == 0)
-#define BnnIsDigitNormalized(d)		((d) & (1 << (BN_DIGIT_SIZE - 1)) ? TRUE : FALSE)
-#define BnnIsDigitOdd(d) 		((d) & 1 ? TRUE : FALSE)
+#define BnnIsDigitNormalized(d)		((d) & (((BigNumDigit) 1) << (BN_DIGIT_SIZE - 1)) ? TRUE : FALSE)
+#define BnnIsDigitOdd(d) 		((d) & ((BigNumDigit) 1) ? TRUE : FALSE)
 #define BnnAndDigits(nn, d)		(*(nn) &= (d))
 #define BnnOrDigits(nn, d)		(*(nn) |= (d))
 #define BnnXorDigits(nn, d)		(*(nn) ^= (d))
