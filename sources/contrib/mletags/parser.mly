@@ -402,15 +402,6 @@ Binding_list :
           { [$1] }
 ;
 
-/* Extraction of location in file */
-Pattern_loc:
-        Pattern {loc()}
-;
-
-Ide_loc:
-        Ide {loc()}
-;
-
 Binding :
         Pattern_loc EQUAL Expr  %prec prec_define
           { $1 }
@@ -453,6 +444,10 @@ Simple_pattern_list :
           { () }
       | Simple_pattern
           { () }
+;
+
+Pattern_loc:
+        Pattern {loc()}
 ;
 
 Pattern :
@@ -546,6 +541,10 @@ Parser_match :
 ;
 
 /* Identifiers */
+
+Ide_loc:
+        Ide {loc()}
+;
 
 Ide :
         IDENT
@@ -680,7 +679,7 @@ Type1_def :
         /* epsilon */
           { [] }
       | EQUAL Opt_bar Constr_decl
-          { $2 }
+          { $3 }
       | EQUAL LBRACE Label_decl Opt_semi RBRACE
           { $3 }
       | EQUALEQUAL Type
