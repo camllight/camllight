@@ -1,4 +1,4 @@
-(* Utils *)
+(* Miscellaneous utilities *)
 #open "tk";;
 
 (* Make a window (toplevel widget) resizeable *)
@@ -12,7 +12,6 @@ let scroll_text_link sb tx =
   text__configure tx [YScrollCommand (scrollbar__set sb)];
   scrollbar__configure sb [Slidecommand (text__yview_line tx)]
 ;;
-
 
 (* Link a scrollbar and a listbox *)
 let scroll_listbox_link sb lb =
@@ -100,7 +99,7 @@ let line_down_keys tx sb =
 
 let navigation_keys tx sb =
    (* if text widget is disabled, clicking in it will not set the focus *)
-   (* and the bindings will not br activated *)
+   (* and the bindings will not be activated *)
    (* therefore, do it manually *)
    bind tx [[Any],Enter] (BindSet ([],fun _ -> focus__set tx));
    bind tx [[Any],Leave] (BindSet ([],fun _ -> focus__none ()));
@@ -187,7 +186,7 @@ let open_req title action =
   let tit = label__create t [Text title] in
   let e = entry__create t [Relief Sunken] in
     util__entry_bindings e;
-    tk__bind e [[], XKey "Return"]
+    bind e [[], XKey "Return"]
       	(BindSet ([], fun _ -> action (entry__get e); destroy t));
 
   let f = frame__create t [] in
@@ -198,11 +197,11 @@ let open_req title action =
       	    [Text "Cancel"; 
       	     Command (fun () -> destroy t)] in
 
-    tk__bind t [[], XKey "Return"]
+    bind t [[], XKey "Return"]
       	 (BindSet ([], (fun _ -> button__invoke bok)));
-    tk__bind t [[], XKey "Escape"]
+    bind t [[], XKey "Escape"]
       	 (BindSet ([], (fun _ -> button__invoke bcancel)));
-    tk__bind e [[], XKey "Escape"]
+    bind e [[], XKey "Escape"]
       	 (BindSet ([], (fun _ -> button__invoke bcancel)));
     pack [bok; bcancel] [Side Side_Left; Fill Fill_X; Expand true];
     pack [tit;e] [Fill Fill_X];
@@ -214,7 +213,6 @@ let open_req title action =
 (******************** Simple list requester ********************)
 let open_list_req title elements action =
   let t = toplevelw__create (support__new_toplevel_widget "openlist") [] in
-  focus__set t;
   grab__set_local t;
   let tit = label__create t [Text title] in
 
@@ -226,9 +224,14 @@ let open_list_req title elements action =
   let activate _ =
     do_list (fun s -> action (listbox__get lb s))
       	    (listbox__curselection lb);
-    destroy t in
-  tk__bind lb [[Double], WhatButton 1] (BindSet ([], activate));
+    destroy t 
+  and cfeedback p = label__configure tit [Text (title ^ " [" ^ p ^ "]")] in
 
+  bind lb [[Double], WhatButton 1] (BindSet ([], activate));
+
+  let cupdate = complete__add_completion lb activate cfeedback in
+     (* It's delicate to extend "internal" <1> *)
+     bind lb [[Any], ButtonRelease] (BindSet ([],cupdate));
   let f = frame__create t [] in
   let bok = button__create f [Text "Ok"; Command activate] in
   let bcancel = button__create f 

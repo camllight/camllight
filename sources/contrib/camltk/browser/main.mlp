@@ -31,7 +31,8 @@ let module_panel parent =
   let add_module n =
     try 
       modules__open_module n;
-      listbox__insert lb End [n]
+      listbox__insert lb End [n];
+      listbox__yview lb (Number (max 0 (listbox__size lb - 4)))
     with
       Toplevel -> begin
 	 dialog (support__new_toplevel_widget "error")
