@@ -70,7 +70,6 @@ try
              rollback ()
          | Break ->
              print_string "Interrupted.\n";
-             print_newline();
              rollback ()
     done
 
