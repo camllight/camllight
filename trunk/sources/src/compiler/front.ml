@@ -9,7 +9,7 @@
 #open "modules";;
 #open "lambda";;
 #open "prim";;
-#open "match";;
+#open "matching";;
 #open "tr_env";;
 #open "trstream";;
 #open "error";;

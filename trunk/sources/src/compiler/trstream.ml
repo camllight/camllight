@@ -5,7 +5,7 @@
 #open "syntax";;
 #open "prim";;
 #open "lambda";;
-#open "match";;
+#open "matching";;
 #open "tr_env";;
 
 (* The following constants must be kept in sync with the definition
