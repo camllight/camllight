@@ -29,9 +29,7 @@ void set_minor_heap_size (size)
   if (young_ptr != young_start) minor_collection ();
                                            Assert (young_ptr == young_start);
   new_heap = (char *) stat_alloc (size);
-  if (young_start == NULL){
-    gc_message ("Initial minor heap size: %ldk.\n", size / 1024);
-  }else{
+  if (young_start != NULL){
     stat_free ((char *) young_start);
   }
   young_start = new_heap;
@@ -64,7 +62,7 @@ static void oldify (p, v)
     if (Is_blue_val (v)){    /* Already forwarded ? */
       *p = Field (v, 0);     /* Then the forward pointer is the first field. */
     }else if (Tag_val (v) >= No_scan_tag){
-      result = raw_alloc_shr (Wosize_val (v), Tag_val (v));
+      result = alloc_shr (Wosize_val (v), Tag_val (v));
       bcopy (Bp_val (v), Bp_val (result), Bosize_val (v));
       Hd_val (v) = Bluehd_hd (Hd_val (v));    /* Put the forward flag. */
       Field (v, 0) = result;                  /* And the forward pointer. */
@@ -75,7 +73,7 @@ static void oldify (p, v)
       value field0 = Field (v, 0);
       mlsize_t sz = Wosize_val (v);
 
-      result = raw_alloc_shr (sz, Tag_val (v));
+      result = alloc_shr (sz, Tag_val (v));
       *p = result;
       Hd_val (v) = Bluehd_hd (Hd_val (v));    /* Put the forward flag. */
       Field (v, 0) = result;                  /* And the forward pointer. */

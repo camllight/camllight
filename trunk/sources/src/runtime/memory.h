@@ -14,7 +14,6 @@
 extern value *c_roots_head;
 
 void init_c_roots P((void));
-value raw_alloc_shr P((mlsize_t, tag_t));
 value alloc_shr P((mlsize_t, tag_t));
 void adjust_gc_speed P((mlsize_t, mlsize_t));
 void modify P((value *, value));

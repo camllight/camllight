@@ -270,7 +270,6 @@ void init_major_heap (heap_size)
 
   stat_heap_size = round_heap_chunk_size (heap_size);
   Assert (stat_heap_size % Page_size == 0);
-  gc_message ("Initial major heap size: %ldk.\n", stat_heap_size / 1024);
   heap_start = aligned_malloc (stat_heap_size + sizeof (heap_chunk_head),
 			       sizeof (heap_chunk_head));
   if (heap_start == NULL)
@@ -309,5 +308,4 @@ void init_major_heap (heap_size)
   heap_is_pure = 1;
   allocated_words = 0;
   extra_heap_memory = 0;
-  gc_message ("Initial space overhead: %ld%%.\n", percent_free);
 }

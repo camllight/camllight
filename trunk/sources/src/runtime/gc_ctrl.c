@@ -143,15 +143,26 @@ static long norm_minsize (s)
 value gc_set (v) /* ML */
     value v;
 {
+  int newpf;
+
   verb_gc = Bool_val (Field (v, 3));
-  percent_free = norm_pfree (Long_val (Field (v, 2)));
+
+  newpf = norm_pfree (Long_val (Field (v, 2)));
+  if (newpf != percent_free){
+    percent_free = newpf;
+    gc_message ("New space overhead: %d%%\n", percent_free);
+  }
+
   if (Bsize_wsize (Long_val (Field (v, 1))) != major_heap_increment){
     major_heap_increment = norm_heapincr (Bsize_wsize (Long_val (Field(v,1))));
+    gc_message ("New heap increment size: %ldk\n", major_heap_increment/1024);
   }
+
     /* Minor heap size comes last because it will trigger a minor collection
        (thus invalidating [v]) and it can raise [Out_of_memory]. */
   if (Bsize_wsize (Long_val (Field (v, 0))) != minor_heap_size){
     long new_size = norm_minsize (Bsize_wsize (Long_val (Field (v, 0))));
+    gc_message ("New minor heap size: %ldk\n", new_size/1024);
     set_minor_heap_size (new_size);
   }
   return Atom (0);
@@ -196,4 +207,7 @@ void init_gc (minor_size, major_incr, percent_fr, verb)
   percent_free = norm_pfree (percent_fr);
   init_major_heap (major_heap_increment);
   init_c_roots ();
+  gc_message ("Initial space overhead: %d\n", percent_free);
+  gc_message ("Initial heap increment: %ldk\n", major_heap_increment / 1024);
+  gc_message ("Initial minor heap size: %ldk\n", minor_heap_size / 1024);
 }
