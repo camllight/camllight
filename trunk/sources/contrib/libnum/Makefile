@@ -19,11 +19,11 @@ CAMLLIBR=camllibr
 CAMLMKTOP=camlmktop
 
 ZOFILES=int_misc.zo string_misc.zo nat.zo big_int.zo arith_flags.zo ratio.zo \
-        num.zo num_equal.zo arith_status.zo
+        num.zo arith_status.zo
 
-ZIFILES=big_int.zi nat.zi num.zi ratio.zi arith_status.zi num_equal.zi
+ZIFILES=big_int.zi nat.zi num.zi ratio.zi arith_status.zi
 
-OBJFILES=nat_stubs.o num_equal.o
+OBJFILES=nat_stubs.o
 
 all: libnums.a nums.zo $(ZIFILES) camlnum
 
@@ -68,25 +68,25 @@ nums.zo: $(ZOFILES)
 
 int_misc.ml: int_misc.mlp
 nat.ml: nat.mlp
+nat.o: nat.h
 
 depend: nat.ml int_misc.ml
 	mv Makefile Makefile.BAK; \
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.BAK; \
-	 gcc -MM *.c; \
 	 ../../src/tools/camldep *.mli *.ml) > Makefile
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
-big_int.zi: nat.zi
-num.zi: ratio.zi nat.zi big_int.zi
-ratio.zi: nat.zi big_int.zi
-arith_flags.zo: arith_flags.zi
-arith_status.zo: arith_status.zi arith_flags.zi
-big_int.zo: big_int.zi int_misc.zi nat.zi
-int_misc.zo: int_misc.zi
-nat.zo: nat.zi int_misc.zi
-num.zo: num.zi int_misc.zi nat.zi big_int.zi ratio.zi arith_flags.zi
-num_equal.zo: num_equal.zi num.zi inum_equal.zi
+big_int.zi: nat.zi 
+num.zi: ratio.zi nat.zi big_int.zi 
+ratio.zi: nat.zi big_int.zi 
+arith_flags.zo: arith_flags.zi 
+arith_status.zo: arith_status.zi arith_flags.zi 
+big_int.zo: big_int.zi int_misc.zi nat.zi 
+int_misc.zo: int_misc.zi 
+nat.zo: nat.zi int_misc.zi 
+num.zo: num.zi int_misc.zi nat.zi big_int.zi ratio.zi arith_flags.zi 
+num_equal.zo: num_equal.zi num.zi inum_equal.zi 
 ratio.zo: ratio.zi string_misc.zi int_misc.zi nat.zi big_int.zi \
-    arith_flags.zi
-string_misc.zo: string_misc.zi
+    arith_flags.zi 
+string_misc.zo: string_misc.zi 
