@@ -45,14 +45,14 @@ MANDIR=/usr/local/man/man$(MANEXT)
 # The path to the include directory containing the X11/*.h includes
 # (usually /usr/include; for SunOS with OpenLook, /usr/openwin/include)
 # Needed for the "libgraph" and "camltk" packages.
-#X11_INCLUDES=/usr/X11R6/include
-X11_INCLUDES=/usr/include/X11
+X11_INCLUDES=/usr/X11R6/include
+#X11_INCLUDES=/usr/include/X11
 
 # The path to the directory containing the X11 libraries.
 # (usually /usr/lib; for SunOS with OpenLook, /usr/openwin/lib)
 # Needed for the "libgraph" and "camltk" packages.
-#X11_LIB=/usr/X11R6/lib
-X11_LIB=/usr/lib/X11
+X11_LIB=/usr/X11R6/lib
+#X11_LIB=/usr/lib/X11
 
 # Name of the target architecture.
 # Used only for the libnum library (arbitrary-precision arithmetic), to
@@ -64,7 +64,7 @@ X11_LIB=/usr/lib/X11
 # See the file libnum/README for more explanations.
 # If you don't know, leave BIGNUM_ARCH=C, which selects a portable
 # C implementation of these routines.
-BIGNUM_ARCH=alpha
+BIGNUM_ARCH=C
 
 # Name of the directory where LaTeX style files should be installed.
 # Needed only for the "caml-tex" and "caml-latex2e" packages.
@@ -76,17 +76,22 @@ EMACSLISPDIR=/usr/lib/emacs/site-lisp
 
 # Name of the directories where the tcl.h and tk.h includes can be found.
 # Needed only for the "camltk" package.
-TCLINCLDIR=/usr/local/lib/tcl7.4/include
-TKINCLDIR=/usr/local/lib/tk4.0/include
+#TCLINCLDIR=/usr/local/lib/tcl7.4/include
+#TKINCLDIR=/usr/local/lib/tk4.0/include
+TCLINCLDIR=/usr/include
+TKINCLDIR=/usr/include
 
 # Name of the directories where the libtcl.a and libtk.a libraries can be found
 # Needed only for the "camltk" package.
-TKLIBDIR=/usr/local/lib/tk4.0/lib
-TCLLIBDIR=/usr/local/lib/tcl7.4/lib
+#TKLIBDIR=/usr/local/lib/tk4.0/lib
+#TCLLIBDIR=/usr/local/lib/tcl7.4/lib
+TKLIBDIR=/usr/lib
+TCLLIBDIR=/usr/lib
 
 # List of libraries required to link Tcl/Tk. This may help if you have
 # a custom Tcl/Tk with various extensions (such as Xpm)
-TKLIBS=-ltk -ltcl -lX11
+#TKLIBS=-ltk -ltcl -lX11
+TKLIBS=-ltk8.0 -ltcl8.0 -lX11 -ldl -lm
 
 # Some "make"s need this to ensure that they call /bin/sh, not /bin/csh
 # Seems harmless on most other "make"s. Try removing this line if you

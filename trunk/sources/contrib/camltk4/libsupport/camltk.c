@@ -16,7 +16,9 @@ Tcl_Interp *cltclinterp = NULL;
 /* Code part of the callback dispatcher */
 static code_t handler_code = NULL;
 
-/* Initialization: has to be called with the GLOBAL callback dispatcher */
+/* Initialization: has to be called (once) with the global Caml function
+ * implementing the callback dispatcher 
+ */
 value camltk_install_callback_handler(handler) /* ML */
   value handler;
 {
@@ -139,54 +141,73 @@ void tk_error(errmsg)
  *  the next event for the handler to be invoked.
  * The following function will invoke a pending signal handler if any,
  * and we put in on a regular timer.
-*/
+ */
 
 #define SIGNAL_INTERVAL 300
 
 int signal_events = 0; /* do we have a pending timer */
 
-/* The following function will invoke a pending signal handler if any */
 void invoke_pending_caml_signals (clientdata) 
      ClientData clientdata;
 {
   signal_events = 0;
-  enter_blocking_section();
+  enter_blocking_section(); /* triggers signal handling */
   /* Rearm timer */
-  Tk_CreateTimerHandler(300, invoke_pending_caml_signals, NULL);
+  Tk_CreateTimerHandler(SIGNAL_INTERVAL, invoke_pending_caml_signals, NULL);
   signal_events = 1;
   leave_blocking_section();
 }
 
+/* Now the real Tk stuff */
 
-static Tk_Window mainWindow;
+static Tk_Window cltk_mainWindow;
 
 #define RCNAME ".camltkrc"
 #define CAMLCB "camlcb"
 
-/* Initialisation */
+/* In slave mode, the interpreter *already* exists */
+int cltk_slave_mode = 0;
+
+/* Initialisation, based on tkMain.c */
 value camltk_opentk(display, name) /* ML */
      value display,name;
 {
-  /* Create an interpreter, dies if error */
-  cltclinterp = Tcl_CreateInterp();
+
+  if (!cltk_slave_mode) {
+    /* Create an interpreter, dies if error */
+    cltclinterp = Tcl_CreateInterp();
+
+    if (Tcl_Init(cltclinterp) != TCL_OK)
+      tk_error(cltclinterp->result);
+    Tcl_SetVar(cltclinterp, "argv0", String_val (name), TCL_GLOBAL_ONLY);
+    { /* Sets display if needed */
+      char *args;
+      char *tkargv[2];
+      if (string_length(display) > 0) {
+	Tcl_SetVar(cltclinterp, "argc", "2", TCL_GLOBAL_ONLY);
+	tkargv[0] = "-display";
+	tkargv[1] = String_val(display);
+	args = Tcl_Merge(2, tkargv);
+	Tcl_SetVar(cltclinterp, "argv", args, TCL_GLOBAL_ONLY);
+	free(args);
+      }
+    }
+    if (Tk_Init(cltclinterp) != TCL_OK)
+      tk_error(cltclinterp->result);
+
+    /* Retrieve the main window */
+    cltk_mainWindow = Tk_MainWindow(cltclinterp);
+
+    if (NULL == cltk_mainWindow)
+      tk_error(cltclinterp->result);
+  
+    Tk_GeometryRequest(cltk_mainWindow,200,200);
+  }
+
   /* Create the camlcallback command */
   Tcl_CreateCommand(cltclinterp,
-		    "camlcb", CamlCBCmd, 
+		    CAMLCB, CamlCBCmd, 
 		    (ClientData)NULL,(Tcl_CmdDeleteProc *)NULL);
-  /* Open main window */
-  mainWindow = Tk_CreateMainWindow(cltclinterp,
-				   String_val (display), /* screenname */
-				   String_val(name), /* basename */
-				   "Tk"  /* classname */
-				   );
-  if (NULL == mainWindow)
-    tk_error(cltclinterp->result);
-  
-  Tk_GeometryRequest(mainWindow,200,200);
-  if (Tcl_Init(cltclinterp) != TCL_OK)
-    tk_error(cltclinterp->result);
-  if (Tk_Init(cltclinterp) != TCL_OK)
-    tk_error(cltclinterp->result);
 
   /* This is required by "unknown" and thus autoload */
   Tcl_SetVar(cltclinterp, "tcl_interactive", "0", TCL_GLOBAL_ONLY);
@@ -228,7 +249,7 @@ value str;
   code = Tcl_Eval(cltclinterp,String_val(str));
   switch (code) {
   case TCL_OK:
-    return copy_string (cltclinterp->result);
+    return copy_string(cltclinterp->result);
   case TCL_ERROR:
     tk_error(cltclinterp->result);
   default:  /* TCL_BREAK, TCL_CONTINUE, TCL_RETURN */
@@ -261,7 +282,7 @@ value v;
   case 1:			/* TkTokenList */
     { int n;
       value l;
-      for (l=Field(v,0),n=0;Tag_val(l)==1;l=Field(l,1))
+      for (l=Field(v,0), n=0; Tag_val(l)==1; l=Field(l,1))
 	n+=argv_size(Field(l,0));
       return n;
     }
@@ -281,7 +302,7 @@ static int startfree = 0;
 /* If size is lower, do not allocate */
 static char *quotedargv[16];
 
-/* Fill a preallocated vector arguments, doing expansion and all
+/* Fill a preallocated vector arguments, doing expansion and all.
  * Assumes Tcl will 
  *  not tamper with our strings
  *  make copies if strings are "persistent"
@@ -297,7 +318,7 @@ value v;
     return (where + 1);
   case 1:
     { value l;
-      for (l=Field(v,0);Tag_val(l)==1;l=Field(l,1))
+      for (l=Field(v,0); Tag_val(l)==1; l=Field(l,1))
 	where = fill_args(argv,where,Field(l,0));
       return where;
     }
@@ -345,7 +366,7 @@ value v;
 
   /* Copy */
   {
-    int where;			/*  */
+    int where;
     for(i=0, where=0;i<Wosize_val(v);i++)
       where = fill_args(argv,where,Field(v,i));
     argv[size] = NULL;
@@ -402,7 +423,7 @@ value camltk_splitlist (v) /* ML */
   int result;
 
   if (!cltclinterp) tk_error("Tcl/Tk not initialised");
-  
+  /* argv is allocated by Tcl, to be freed by us */
   result = Tcl_SplitList(cltclinterp,String_val(v),&argc,&argv);
   switch(result) {
   case TCL_OK:
@@ -432,7 +453,7 @@ value camltk_add_file_input(fd, cbid)    /* ML */
      value cbid;
 {
   Tk_CreateFileHandler(Int_val(fd), TK_READABLE, 
-		       FileProc, (ClientData) (Int_val(cbid)));
+		       FileProc, (ClientData)(Int_val(cbid)));
   return Atom(0);
 }
 
@@ -470,7 +491,6 @@ value camltk_tk_mainloop() /* ML */
   return Atom(0);
 }
 
-
 /* Note: this HAS to be reported "as-is" in ML source */
 static int event_flag_table[] = {
   TK_DONT_WAIT, TK_X_EVENTS, TK_FILE_EVENTS, TK_TIMER_EVENTS, TK_IDLE_EVENTS,
@@ -486,7 +506,8 @@ value camltk_dooneevent(flags) /* ML */
 }
 
 /* Basically the same thing as FileProc */
-void TimerProc (ClientData clientdata)
+void TimerProc (clientdata)
+     ClientData clientdata;
 {
   camltk_dispatch_callback((int)clientdata,Atom(0));
 }
@@ -602,7 +623,7 @@ value camltk_wait_vis(win,cbid) /* ML */
 {
   struct WinCBData *vis =
     (struct WinCBData *)stat_alloc(sizeof(struct WinCBData));
-  vis->win = Tk_NameToWindow(cltclinterp, String_val(win), mainWindow);
+  vis->win = Tk_NameToWindow(cltclinterp, String_val(win), cltk_mainWindow);
   if (vis -> win == NULL) {
     stat_free((char *)vis);
     tk_error(cltclinterp->result);
@@ -633,7 +654,7 @@ value camltk_wait_des(win,cbid) /* ML */
 {
   struct WinCBData *vis =
     (struct WinCBData *)stat_alloc(sizeof(struct WinCBData));
-  vis->win = Tk_NameToWindow(cltclinterp, String_val(win), mainWindow);
+  vis->win = Tk_NameToWindow(cltclinterp, String_val(win), cltk_mainWindow);
   if (vis -> win == NULL) {
     stat_free((char *)vis);
     tk_error(cltclinterp->result);
