@@ -93,7 +93,7 @@ let final_rewrite () =
   copy (in_channel_length !infile);
   if !instr_mode then begin
   let len = string_of_int !profile_counter
-  in if string_length len > 6 then raise (Failure "too many functions");
+  in if string_length len > 6 then failwith "too many functions";
      seek_out !outfile (30 - string_length len);
      fprint !outfile len
    end;
@@ -351,18 +351,17 @@ let main () =
 		   modname := basename !filename
 		   end
 		else
-      	       	   raise (Failure "first argument must end in .ml")
+      	       	   failwith "first argument must end in .ml"
 	| 2 -> outfile := open_out s
 	| _ -> 
-         raise (Failure "usage: camlinstr [-m [fmila]+] infile.ml outfile.ml")
+          failwith "usage: camlinstr [-m [afilmt]+] infile.ml outfile.ml"
 
       in
       	arg__parse 
       	  (("-m", arg__String (fun s -> modes := s))::std_options)
 	 anon;
         if !anonargs < 2 then
-      	 raise (Failure "usage: camlinstr [-m [fmila]+] infile.ml outfile.ml");
-
+      	  failwith "usage: camlinstr [-m [afilmt]+] infile.ml outfile.ml";
         insert_action := add_incr_counter !modname;
         set_flags !modes;
 	init_rewrite !modes !modname;
@@ -380,7 +379,7 @@ let main () =
 	      modname := basename !filename
 	      end
 	   else
-      	      raise (Failure "first argument must end in .ml")
+      	      failwith "first argument must end in .ml"
            end
         else 
 	   outfile := open_out s 
@@ -389,7 +388,7 @@ let main () =
       	(("-f", arg__String (fun s -> dumpfile := s))::std_options) 
       	anon;
       if !firstarg then
-      	raise (Failure "usage: camlpro [-f dumpfile] infile.ml [outfile]");
+      	failwith "usage: camlpro [-f dumpfile] infile.ml [outfile]";
 
       insert_action := add_val_counter;
 
@@ -397,7 +396,7 @@ let main () =
       let allcounters = input_value ic in
       let modes,cv = 
       	 try assoc !modname allcounters 
-      	 with Not_found -> raise(Failure("Module " ^ !modname ^ " not used."))
+      	 with Not_found -> failwith ("Module " ^ !modname ^ " not used.")
       in
       	counters := cv;
 	set_flags modes;
@@ -407,6 +406,5 @@ let main () =
 	
 ;;
 
-
-
-printexc__f main ();;
+printexc__f main ()
+;;
