@@ -49,11 +49,12 @@ let basename name =
 ;;
 
 let dirname name =
-  if name = "/" then name else
-    try
-      sub_string name 0 (slash_pos name)
-    with Not_found ->
-      "."
+  try
+    match slash_pos name with
+      0 -> "/"
+    | n -> sub_string name 0 (slash_pos name)
+  with Not_found ->
+    "."
 ;;
 #endif
 
