@@ -196,17 +196,21 @@ let instr_kill lexbuf =
   end_of_line lexbuf;
   if not !loaded then
     (prerr_endline "The program is not being run."; raise Toplevel);
-  if (yes_or_no "Kill the program being debugged") then
-    kill_program ();;
+  if (yes_or_no "Kill the program being debugged") then begin
+    kill_program ();
+    clear_ellipses()
+  end;;
 
 let instr_run lexbuf =
   end_of_line lexbuf;
+  clear_ellipses();
   ensure_loaded ();
   run ();
   show_current_event ();;
 
 let instr_reverse lexbuf =
   end_of_line lexbuf;
+  clear_ellipses();
   ensure_loaded ();
   back_run ();
   show_current_event ();;
@@ -217,6 +221,7 @@ let instr_step lexbuf =
       None -> 1
     | Some x -> x
   in
+    clear_ellipses();
     ensure_loaded ();
     step step_count;
     show_current_event ();;
@@ -227,12 +232,14 @@ let instr_back lexbuf =
       None -> 1
     | Some x -> x
   in
+    clear_ellipses();
     ensure_loaded ();
     step (-step_count);
     show_current_event ();;
 
 let instr_finish lexbuf =
   end_of_line lexbuf;
+  clear_ellipses();
   ensure_loaded ();
   finish ();
   show_current_event ();;
@@ -243,12 +250,14 @@ let instr_next lexbuf =
       None -> 1
     | Some x -> x
   in
+    clear_ellipses();
     ensure_loaded ();
     next step_count;
     show_current_event ();;
 
 let instr_goto lexbuf =
   let time = Integer_eol Lexeme lexbuf in
+    clear_ellipses();
     ensure_loaded ();
     go_to time;
     show_current_event ();;
@@ -593,7 +602,7 @@ let raw_vect_variable kill name =
   (function
     lexbuf ->
       let argument_list = Argument_list_eol Argument lexbuf in
-      	if kill & (ask_kill_program ()) then
+      	if not kill or (ask_kill_program ()) then
           name := vect_of_list argument_list),
   function
     () ->
@@ -604,7 +613,7 @@ let raw_variable kill name =
   (function
      lexbuf ->
        let argument = Argument_eol Argument lexbuf in
-      	 if kill & (ask_kill_program ()) then
+      	 if not kill or (ask_kill_program ()) then
            name := argument),
   function
     () ->
@@ -615,7 +624,7 @@ let integer_variable kill name =
   (function
     lexbuf ->
       let argument = Integer_eol Lexeme lexbuf in
-      	if kill & (ask_kill_program ()) then
+      	if not kill or (ask_kill_program ()) then
           name := argument),
   function
     () ->
@@ -631,7 +640,7 @@ let boolean_variable kill name =
         | "of" | "off" -> false
 	| _ -> error "Syntax error."
       in
-      	if kill & (ask_kill_program ()) then
+      	if not kill or (ask_kill_program ()) then
           name := argument),
   function
     () ->
@@ -642,7 +651,7 @@ let path_variable kill name =
   (function
      lexbuf ->
        let argument = Argument_eol Argument lexbuf in
-      	 if kill & (ask_kill_program ()) then
+      	 if not kill or (ask_kill_program ()) then
            name := (expand_path argument)),
   function
     () ->
@@ -744,7 +753,7 @@ let initialize_interpreter () =
     (* function name, priority, function interpreter, can be repeated,
        help message *)
     ["cd", false, instr_cd, true,
-"et working directory to DIR for debugger and program being debugged.";
+"set working directory to DIR for debugger and program being debugged.";
      "pwd", false, instr_pwd, true,
 "print working directory.";
      "directory", false, instr_dir, false,
@@ -845,7 +854,9 @@ It can be either :
      "socket", raw_variable true socket_name,
 "name of the socket used by communications debugger-runtime.";
      "history", integer_variable false history__history_size,
-"history size."];
+"history size.";
+     "print_depth", integer_variable false printer_depth,
+"maximal depth for printing of values."];
   info_list :=
     (* info name, function, help *)
     ["modules", info_modules,
