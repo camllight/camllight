@@ -25,6 +25,7 @@ type Orientation {
 }
 
 # builtins types 
+type TextVariable external # textvariable
 type Units external	# builtin_GetPixel
 type Bitmap external    # builtin_GetBitmap
 type Cursor external    # builtina_GetCursor
@@ -68,6 +69,7 @@ subtype option(standard) {
    SelectForeground "-selectforeground" (Color)
    SetGrid "-setgrid" (bool)
    Text "-text" (string)
+   TextVariable "-textvariable" (TextVariable)
    UnderlinedChar "-underline" (int)
    XScrollCommand "-xscrollcommand" (function (int, int, int, int))
    YScrollCommand "-yscrollcommand" (function (int, int, int, int))
@@ -118,6 +120,7 @@ widget button {
    option PadY
    option Relief
    option Text
+   option TextVariable
 
    option Command "-command" (function ())
    option Height "-height" (Units)
@@ -150,6 +153,7 @@ widget checkbutton {
    option PadY
    option Relief
    option Text
+   option TextVariable
 
    option Command "-command" (function ())
    option Height "-height" (Units)
@@ -183,6 +187,7 @@ widget radiobutton {
    option PadY
    option Relief
    option Text
+   option TextVariable
 
    option Command "-command"(function ())
    option Height "-height" (Units)
@@ -225,6 +230,7 @@ widget entry {
    option SelectBackground
    option SelectBorderWidth
    option SelectForeground
+   option TextVariable
 
    option State "-state" (State)
    option TextWidth "-width" (int)
@@ -451,15 +457,15 @@ widget canvas {
    function (CanvasItem) typeof "type" (TagOrId)
    function () xview "xview" (CanvasIndex)
    function () yview "yview" (CanvasIndex)
-   function (TagOrId) createarc "create arc" (float, float, float, float, option (arc) list)
-   function (TagOrId) createbitmap "create bitmap" (float, float, option (bitmap) list)
-   function (TagOrId) createline "create line" (float list, option (line) list)
-   function (TagOrId) createoval "create oval" (float, float, float, float, option (oval) list)
-   function (TagOrId) createpolygon "create polygon" (float list, option (polygon) list)
-   function (TagOrId) createrectangle "create rectangle" (float, float, option (rectangle) list)
-   function (TagOrId) createtext "create text" (float, float, option (canvastext) list)
-   function (TagOrId) createwindow "create window" (float, float, option (window) list)
-   function () move "move" (TagOrId, float, float)
+   function (TagOrId) createarc "create arc" (Units, Units, Units, Units, option (arc) list)
+   function (TagOrId) createbitmap "create bitmap" (Units, Units, option (bitmap) list)
+   function (TagOrId) createline "create line" (Units list, option (line) list)
+   function (TagOrId) createoval "create oval" (Units, Units, Units, Units, option (oval) list)
+   function (TagOrId) createpolygon "create polygon" (Units list, option (polygon) list)
+   function (TagOrId) createrectangle "create rectangle" (Units, Units, option (rectangle) list)
+   function (TagOrId) createtext "create text" (Units, Units, option (canvastext) list)
+   function (TagOrId) createwindow "create window" (Units, Units, option (window) list)
+   function () move "move" (TagOrId, Units, Units)
    }
 
 widget label {
@@ -474,9 +480,12 @@ widget label {
    option PadY
    option Relief
    option Text
+   option TextVariable
 
    option Height
+   # use the option corresponding to the label contents (echh)
    option Width
+   option TextWidth
 
    function () configure "configure" (option (label) list)
    function (string) configure_get "configure" ()
@@ -539,6 +548,7 @@ widget menubutton {
    option PadY
    option Relief
    option Text
+   option TextVariable
    option UnderlinedChar
 
    option Height
@@ -633,6 +643,7 @@ widget message {
    option PadY
    option Relief
    option Text
+   option TextVariable
    option Width
 
    option Aspect "-aspect" (int)
@@ -838,8 +849,8 @@ type OptionPriority {
 module resource {
    function () add "option add" (string,string,OptionPriority)
    function () clear "option clear" ()
-   function (string) get "get" (widget,string,string)
-   function () readfile "readfile" (string,OptionPriority)
+   function (string) get "option get" (widget,string,string)
+   function () readfile "option readfile" (string,OptionPriority)
    }
 
 
@@ -876,8 +887,8 @@ function ()  pack "pack" (widget list, option(pack) list)
 module pack {
     function () configure "pack configure" (widget list, option(pack) list)  
     function () forget "pack forget" (widget list)
-    function (bool) propapage_get "pack propagate" (widget)
-    function () propapage_set "pack propagate" (widget,bool)
+    function (bool) propagate_get "pack propagate" (widget)
+    function () propagate_set "pack propagate" (widget,bool)
     function (widget list) slaves "pack slaves" (widget)
     }
 
