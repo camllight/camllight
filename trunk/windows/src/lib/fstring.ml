@@ -19,6 +19,20 @@ let prefix ^ s1 s2 =
     s
 ;;
 
+let concat sl =
+  let rec concat_len l = function
+    [] -> l
+  | s :: r -> concat_len (l + string_length s) r in
+  let res = create_string (concat_len 0 sl) in
+  let rec fill_res pos = function
+    [] -> ()
+  | s :: r ->
+      let l = string_length s in
+      blit_string s 0 res pos l;
+      fill_res (pos+l) r in
+  fill_res 0 sl;
+  res;;
+
 let sub_string s start len =
   let res = create_string len in
     blit_string s start res 0 len; res

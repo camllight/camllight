@@ -20,6 +20,9 @@ value nth_char : string -> int -> char
 value prefix ^ : string -> string -> string
         (* [s1 ^ s2] returns a fresh string containing the concatenation of
            the strings [s1] and [s2]. *)
+  and concat : string list -> string
+        (* Return a fresh string containing the concatenation of
+           all the strings in the argument list. *)
   and sub_string : string -> int -> int -> string
         (* [sub_string s start len] returns a fresh string of length [len],
            containing the characters number [start] to [start + len - 1]

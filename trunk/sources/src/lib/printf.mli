@@ -54,6 +54,10 @@ value fprintf: out_channel -> ('a, out_channel, unit) format -> 'a
   and eprintf: ('a, out_channel, unit) format -> 'a
         (* Same as [fprintf], but output on [std_err]. *)
 
+  and sprintf: ('a, unit, string) format -> 'a
+        (* Same as [fprintf], except that the result of the formatting
+           is returned as a string instead of being written on a channel. *)
+
   and fprint: out_channel -> string -> unit
         (* Print the given string on the given output channel, without
            any formatting. This is the same function as [output_string]
@@ -66,4 +70,5 @@ value fprintf: out_channel -> ('a, out_channel, unit) format -> 'a
   and eprint: string -> unit
         (* Print the given string on [std_err], without any formatting.
 	   This is the same function as [prerr_string] of module [io]. *)
+
 ;;

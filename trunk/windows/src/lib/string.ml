@@ -41,6 +41,9 @@ let blit_string src start_src dst start_dst len =
 ;;
 let prefix ^ = fstring__prefix ^
 ;;
+let concat = fstring__concat
+;;
+
 let sub_string s start len =
   if start < 0 or len < 0 or start+len > string_length s
   then invalid_arg "sub_string"
