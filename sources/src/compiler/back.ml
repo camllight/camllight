@@ -54,6 +54,7 @@ let make_branch = function
 let rec discard_dead_code = function
     [] -> []
   | Klabel _ :: _ as code -> code
+  | Kset_global _ :: _ as code -> code
   | _ :: rest -> discard_dead_code rest
 ;;
 
