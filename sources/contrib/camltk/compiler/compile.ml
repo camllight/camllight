@@ -376,22 +376,28 @@ let write_CAMLtoTK w name typdef =
   w "\n;;\n\n"
 ;;
 
+(* Tcl does not really return "lists". It returns sp separated tokens *)
 let write_result_parsing w = function
     List ty ->
-      w ("\tmap "^ converterTKtoCAML "(res_GetTkTokenList res)" ty)
+      w ("\tmap "^ converterTKtoCAML "(splitlist res)" ty)
   | Product tyl ->
       let rnames = varnames "r" (list_length tyl) in
+       w "\tlet l = splitlist res in\n";
+       w ("\t  if list_length l <> " ^ string_of_int (list_length tyl) ^ "\n");
+       w ("\t  then raise (TkError (\"unexpected result: \" ^ res))");
+       w ("\t  else ");
        do_list2 (fun r ty ->
-                  w ("\tlet " ^ r ^ " = ");
-                  w (converterTKtoCAML "(res_GetTkToken res)" ty);
+                  w ("\tlet " ^ r ^ ", l = ");
+                  w (converterTKtoCAML "(hd l)" ty);
+		  w (", tl l");
        	       	  w (" in\n"))
                 rnames
                 tyl;
        w (catenate_sep "," rnames)
   | String ->
-      w (converterTKtoCAML "(res_GetTkString res)" String)
+      w (converterTKtoCAML "res" String)
   | ty ->
-      w (converterTKtoCAML "(res_GetTkToken res)" ty)
+      w (converterTKtoCAML "res" ty)
 ;;
 
 let write_function w def =
