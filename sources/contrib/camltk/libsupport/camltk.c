@@ -1,7 +1,9 @@
 /* There is a clash on "Atom" macro (X11/mlvalues) */
 /* tk.h must be included first */
-#include <tk.h>
+#include <stdlib.h>
+#include <unistd.h>
 
+#include <tk.h>
 #include <mlvalues.h>
 #include <alloc.h>
 #include <memory.h>
@@ -114,6 +116,8 @@ void tk_error(errmsg)
 static Tcl_Interp *tclinterp;
 static Tk_Window mainWindow;
 
+#define RCNAME ".camltkrc"
+
 /* Initialisation */
 value camltk_opentk(name) /* ML */
      value name;
@@ -139,9 +143,25 @@ value camltk_opentk(name) /* ML */
   if (Tk_Init(tclinterp) != TCL_OK)
     tk_error(tclinterp->result);
 
+  {
+    char *home = getenv("HOME");
+    if (home != NULL) {
+      char *f = (char *)malloc(strlen(home)+strlen(RCNAME)+2);
+      if (f == NULL) goto finish;
+      f[0]='\0';
+      strcat(f, home);
+      strcat(f, "/");
+      strcat(f, RCNAME);
+      if (0 == access(f,R_OK)) 
+	if (TCL_OK != Tcl_EvalFile(tclinterp,f))
+	  tk_error(tclinterp->result);
+    }
+  }
+  
+ finish:
   return Atom(0);
 }
-     
+
 /* calling tcl from Caml */
 /* type: string -> string */
 value camltk_tcl_eval(str) /* ML */
