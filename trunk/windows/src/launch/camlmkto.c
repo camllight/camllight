@@ -128,8 +128,9 @@ main(argc, argv)
 					 LST, linkopt,
 					 LST, includes,
 					 STR, "stdlib.zo",
-					 LST, linkfiles,
 					 STR, "toplib.zo",
+					 LST, linkfiles,
+					 STR, "topmain.zo",
 					 END);
     unlink(require);
     if (status != 0) exit(status);

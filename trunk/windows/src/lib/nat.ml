@@ -1,3 +1,15 @@
+#open "exc";;
+#open "bool";;
+#open "fstring";;
+#open "fchar";;
+#open "fvect";;
+#open "list";;
+#open "pair";;
+#open "ref";;
+#open "float";;
+#open "int";;
+#open "eq";;
+#open "io";;
 #open "printf";;
 
 let badcarry name carry = 

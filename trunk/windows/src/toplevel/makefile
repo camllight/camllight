@@ -15,7 +15,7 @@ EXTERNOBJS=config.zo misc.zo interntl.zo \
     predef.zo prim_c.zo symtable.zo patch.zo tr_const.zo
 
 OBJS=fmt_type.zo pr_value.zo load_phr.zo do_phr.zo toplevel.zo \
-     version.zo main.zo
+     version.zo topinit.zo
 
 PERVASIVES=baltree bool char eq exc fchar filename float format fstring fvect \
     gc genlex hashtbl int io iparsing lexing list map obj pair parsing \
@@ -39,11 +39,11 @@ GENSOURCES=pr_value.ml
 
 all: camltop
 
-camltop: toplib.zo provide expunge
+camltop: toplib.zo topmain.zo provide expunge
 	$(CAMLRUN) provide -stdlib ../lib @<< > required
 $(PERVASIVES)
 <<
-	$(CAMLLINK) $(LINKFLAGS) -o camltop1 -require required stdlib.zo toplib.zo
+	$(CAMLLINK) $(LINKFLAGS) -o camltop1 -require required stdlib.zo toplib.zo topmain.zo
 	$(CAMLRUN) expunge camltop1 camltop @<<
 $(PERVASIVES) $(SPECIALS)
 <<
@@ -72,6 +72,7 @@ install:
 	copy provide $(LIBDIR)
 	copy expunge $(LIBDIR)
 	copy toplib.zo $(LIBDIR)
+	copy topmain.zo $(LIBDIR)
 
 !include "../tools/make-ml.inc"
 

@@ -1,4 +1,4 @@
-# Microsoft Developer Studio Generated NMAKE File, Format Version 4.00
+# Microsoft Developer Studio Generated NMAKE File, Format Version 4.20
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Application" 0x0101
@@ -34,9 +34,9 @@ NULL=nul
 ################################################################################
 # Begin Project
 # PROP Target_Last_Scanned "Camlwin - Win32 Release"
-CPP=cl.exe
 MTL=mktyplib.exe
 RSC=rc.exe
+CPP=cl.exe
 
 !IF  "$(CFG)" == "Camlwin - Win32 Debug"
 
@@ -54,38 +54,38 @@ INTDIR=.\WinDebug
 ALL : "$(OUTDIR)\camlwin.exe" "$(OUTDIR)\camlwin.bsc"
 
 CLEAN : 
-	-@erase ".\WinDebug\vc40.pdb"
-	-@erase ".\WinDebug\camlwin.pch"
-	-@erase ".\WinDebug\vc40.idb"
-	-@erase ".\WinDebug\camlwin.bsc"
-	-@erase ".\WinDebug\graphfrm.sbr"
-	-@erase ".\WinDebug\graphdoc.sbr"
-	-@erase ".\WinDebug\mainfrm.sbr"
-	-@erase ".\WinDebug\txtrmfr.sbr"
-	-@erase ".\WinDebug\graphvw.sbr"
-	-@erase ".\WinDebug\prefsdlg.sbr"
-	-@erase ".\WinDebug\STDAFX.SBR"
-	-@erase ".\WinDebug\ui.sbr"
-	-@erase ".\WinDebug\xeditvw.sbr"
-	-@erase ".\WinDebug\txtrmdoc.sbr"
-	-@erase ".\WinDebug\histdoc.sbr"
-	-@erase ".\WinDebug\camlwin.sbr"
-	-@erase ".\WinDebug\camlwin.exe"
-	-@erase ".\WinDebug\histdoc.obj"
-	-@erase ".\WinDebug\camlwin.obj"
-	-@erase ".\WinDebug\graphfrm.obj"
-	-@erase ".\WinDebug\graphdoc.obj"
-	-@erase ".\WinDebug\mainfrm.obj"
-	-@erase ".\WinDebug\txtrmfr.obj"
-	-@erase ".\WinDebug\graphvw.obj"
-	-@erase ".\WinDebug\prefsdlg.obj"
-	-@erase ".\WinDebug\STDAFX.OBJ"
-	-@erase ".\WinDebug\ui.obj"
-	-@erase ".\WinDebug\xeditvw.obj"
-	-@erase ".\WinDebug\txtrmdoc.obj"
-	-@erase ".\WinDebug\CAMLWIN.res"
-	-@erase ".\WinDebug\camlwin.ilk"
-	-@erase ".\WinDebug\camlwin.pdb"
+	-@erase "$(INTDIR)\camlwin.obj"
+	-@erase "$(INTDIR)\camlwin.pch"
+	-@erase "$(INTDIR)\CAMLWIN.res"
+	-@erase "$(INTDIR)\camlwin.sbr"
+	-@erase "$(INTDIR)\graphdoc.obj"
+	-@erase "$(INTDIR)\graphdoc.sbr"
+	-@erase "$(INTDIR)\graphfrm.obj"
+	-@erase "$(INTDIR)\graphfrm.sbr"
+	-@erase "$(INTDIR)\graphvw.obj"
+	-@erase "$(INTDIR)\graphvw.sbr"
+	-@erase "$(INTDIR)\histdoc.obj"
+	-@erase "$(INTDIR)\histdoc.sbr"
+	-@erase "$(INTDIR)\mainfrm.obj"
+	-@erase "$(INTDIR)\mainfrm.sbr"
+	-@erase "$(INTDIR)\prefsdlg.obj"
+	-@erase "$(INTDIR)\prefsdlg.sbr"
+	-@erase "$(INTDIR)\STDAFX.OBJ"
+	-@erase "$(INTDIR)\STDAFX.SBR"
+	-@erase "$(INTDIR)\txtrmdoc.obj"
+	-@erase "$(INTDIR)\txtrmdoc.sbr"
+	-@erase "$(INTDIR)\txtrmfr.obj"
+	-@erase "$(INTDIR)\txtrmfr.sbr"
+	-@erase "$(INTDIR)\ui.obj"
+	-@erase "$(INTDIR)\ui.sbr"
+	-@erase "$(INTDIR)\vc40.idb"
+	-@erase "$(INTDIR)\vc40.pdb"
+	-@erase "$(INTDIR)\xeditvw.obj"
+	-@erase "$(INTDIR)\xeditvw.sbr"
+	-@erase "$(OUTDIR)\camlwin.bsc"
+	-@erase "$(OUTDIR)\camlwin.exe"
+	-@erase "$(OUTDIR)\camlwin.ilk"
+	-@erase "$(OUTDIR)\camlwin.pdb"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
@@ -123,18 +123,18 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 BSC32_FLAGS=/nologo /o"$(OUTDIR)/camlwin.bsc" 
 BSC32_SBRS= \
-	".\WinDebug\graphfrm.sbr" \
-	".\WinDebug\graphdoc.sbr" \
-	".\WinDebug\mainfrm.sbr" \
-	".\WinDebug\txtrmfr.sbr" \
-	".\WinDebug\graphvw.sbr" \
-	".\WinDebug\prefsdlg.sbr" \
-	".\WinDebug\STDAFX.SBR" \
-	".\WinDebug\ui.sbr" \
-	".\WinDebug\xeditvw.sbr" \
-	".\WinDebug\txtrmdoc.sbr" \
-	".\WinDebug\histdoc.sbr" \
-	".\WinDebug\camlwin.sbr"
+	"$(INTDIR)\camlwin.sbr" \
+	"$(INTDIR)\graphdoc.sbr" \
+	"$(INTDIR)\graphfrm.sbr" \
+	"$(INTDIR)\graphvw.sbr" \
+	"$(INTDIR)\histdoc.sbr" \
+	"$(INTDIR)\mainfrm.sbr" \
+	"$(INTDIR)\prefsdlg.sbr" \
+	"$(INTDIR)\STDAFX.SBR" \
+	"$(INTDIR)\txtrmdoc.sbr" \
+	"$(INTDIR)\txtrmfr.sbr" \
+	"$(INTDIR)\ui.sbr" \
+	"$(INTDIR)\xeditvw.sbr"
 
 "$(OUTDIR)\camlwin.bsc" : "$(OUTDIR)" $(BSC32_SBRS)
     $(BSC32) @<<
@@ -150,19 +150,19 @@ LINK32_FLAGS=..\runtime\libcaml.lib /nologo /stack:0x11240 /subsystem:windows\
 DEF_FILE= \
 	".\CAMLWIN.DEF"
 LINK32_OBJS= \
-	".\WinDebug\histdoc.obj" \
-	".\WinDebug\camlwin.obj" \
-	".\WinDebug\graphfrm.obj" \
-	".\WinDebug\graphdoc.obj" \
-	".\WinDebug\mainfrm.obj" \
-	".\WinDebug\txtrmfr.obj" \
-	".\WinDebug\graphvw.obj" \
-	".\WinDebug\prefsdlg.obj" \
-	".\WinDebug\STDAFX.OBJ" \
-	".\WinDebug\ui.obj" \
-	".\WinDebug\xeditvw.obj" \
-	".\WinDebug\txtrmdoc.obj" \
-	".\WinDebug\CAMLWIN.res"
+	"$(INTDIR)\camlwin.obj" \
+	"$(INTDIR)\CAMLWIN.res" \
+	"$(INTDIR)\graphdoc.obj" \
+	"$(INTDIR)\graphfrm.obj" \
+	"$(INTDIR)\graphvw.obj" \
+	"$(INTDIR)\histdoc.obj" \
+	"$(INTDIR)\mainfrm.obj" \
+	"$(INTDIR)\prefsdlg.obj" \
+	"$(INTDIR)\STDAFX.OBJ" \
+	"$(INTDIR)\txtrmdoc.obj" \
+	"$(INTDIR)\txtrmfr.obj" \
+	"$(INTDIR)\ui.obj" \
+	"$(INTDIR)\xeditvw.obj"
 
 "$(OUTDIR)\camlwin.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -185,35 +185,35 @@ INTDIR=.\WinRelease
 ALL : "$(OUTDIR)\camlwin.exe" "$(OUTDIR)\camlwin.bsc"
 
 CLEAN : 
-	-@erase ".\WinRelease\camlwin.exe"
-	-@erase ".\WinRelease\camlwin.obj"
-	-@erase ".\WinRelease\camlwin.pch"
-	-@erase ".\WinRelease\prefsdlg.obj"
-	-@erase ".\WinRelease\graphfrm.obj"
-	-@erase ".\WinRelease\mainfrm.obj"
-	-@erase ".\WinRelease\txtrmfr.obj"
-	-@erase ".\WinRelease\graphvw.obj"
-	-@erase ".\WinRelease\STDAFX.OBJ"
-	-@erase ".\WinRelease\txtrmdoc.obj"
-	-@erase ".\WinRelease\graphdoc.obj"
-	-@erase ".\WinRelease\xeditvw.obj"
-	-@erase ".\WinRelease\ui.obj"
-	-@erase ".\WinRelease\histdoc.obj"
-	-@erase ".\WinRelease\CAMLWIN.res"
-	-@erase ".\WinRelease\camlwin.pdb"
-	-@erase ".\WinRelease\camlwin.bsc"
-	-@erase ".\WinRelease\STDAFX.SBR"
-	-@erase ".\WinRelease\camlwin.sbr"
-	-@erase ".\WinRelease\mainfrm.sbr"
-	-@erase ".\WinRelease\txtrmdoc.sbr"
-	-@erase ".\WinRelease\txtrmfr.sbr"
-	-@erase ".\WinRelease\xeditvw.sbr"
-	-@erase ".\WinRelease\histdoc.sbr"
-	-@erase ".\WinRelease\prefsdlg.sbr"
-	-@erase ".\WinRelease\ui.sbr"
-	-@erase ".\WinRelease\graphvw.sbr"
-	-@erase ".\WinRelease\graphdoc.sbr"
-	-@erase ".\WinRelease\graphfrm.sbr"
+	-@erase "$(INTDIR)\camlwin.obj"
+	-@erase "$(INTDIR)\camlwin.pch"
+	-@erase "$(INTDIR)\CAMLWIN.res"
+	-@erase "$(INTDIR)\camlwin.sbr"
+	-@erase "$(INTDIR)\graphdoc.obj"
+	-@erase "$(INTDIR)\graphdoc.sbr"
+	-@erase "$(INTDIR)\graphfrm.obj"
+	-@erase "$(INTDIR)\graphfrm.sbr"
+	-@erase "$(INTDIR)\graphvw.obj"
+	-@erase "$(INTDIR)\graphvw.sbr"
+	-@erase "$(INTDIR)\histdoc.obj"
+	-@erase "$(INTDIR)\histdoc.sbr"
+	-@erase "$(INTDIR)\mainfrm.obj"
+	-@erase "$(INTDIR)\mainfrm.sbr"
+	-@erase "$(INTDIR)\prefsdlg.obj"
+	-@erase "$(INTDIR)\prefsdlg.sbr"
+	-@erase "$(INTDIR)\STDAFX.OBJ"
+	-@erase "$(INTDIR)\STDAFX.SBR"
+	-@erase "$(INTDIR)\txtrmdoc.obj"
+	-@erase "$(INTDIR)\txtrmdoc.sbr"
+	-@erase "$(INTDIR)\txtrmfr.obj"
+	-@erase "$(INTDIR)\txtrmfr.sbr"
+	-@erase "$(INTDIR)\ui.obj"
+	-@erase "$(INTDIR)\ui.sbr"
+	-@erase "$(INTDIR)\xeditvw.obj"
+	-@erase "$(INTDIR)\xeditvw.sbr"
+	-@erase "$(OUTDIR)\camlwin.bsc"
+	-@erase "$(OUTDIR)\camlwin.exe"
+	-@erase "$(OUTDIR)\camlwin.pdb"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
@@ -251,18 +251,18 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 BSC32_FLAGS=/nologo /o"$(OUTDIR)/camlwin.bsc" 
 BSC32_SBRS= \
-	".\WinRelease\STDAFX.SBR" \
-	".\WinRelease\camlwin.sbr" \
-	".\WinRelease\mainfrm.sbr" \
-	".\WinRelease\txtrmdoc.sbr" \
-	".\WinRelease\txtrmfr.sbr" \
-	".\WinRelease\xeditvw.sbr" \
-	".\WinRelease\histdoc.sbr" \
-	".\WinRelease\prefsdlg.sbr" \
-	".\WinRelease\ui.sbr" \
-	".\WinRelease\graphvw.sbr" \
-	".\WinRelease\graphdoc.sbr" \
-	".\WinRelease\graphfrm.sbr"
+	"$(INTDIR)\camlwin.sbr" \
+	"$(INTDIR)\graphdoc.sbr" \
+	"$(INTDIR)\graphfrm.sbr" \
+	"$(INTDIR)\graphvw.sbr" \
+	"$(INTDIR)\histdoc.sbr" \
+	"$(INTDIR)\mainfrm.sbr" \
+	"$(INTDIR)\prefsdlg.sbr" \
+	"$(INTDIR)\STDAFX.SBR" \
+	"$(INTDIR)\txtrmdoc.sbr" \
+	"$(INTDIR)\txtrmfr.sbr" \
+	"$(INTDIR)\ui.sbr" \
+	"$(INTDIR)\xeditvw.sbr"
 
 "$(OUTDIR)\camlwin.bsc" : "$(OUTDIR)" $(BSC32_SBRS)
     $(BSC32) @<<
@@ -279,19 +279,19 @@ LINK32_FLAGS=..\runtime\libcaml.lib /nologo /stack:0x40000 /subsystem:windows\
 DEF_FILE= \
 	".\CAMLWIN.DEF"
 LINK32_OBJS= \
-	".\WinRelease\camlwin.obj" \
-	".\WinRelease\prefsdlg.obj" \
-	".\WinRelease\graphfrm.obj" \
-	".\WinRelease\mainfrm.obj" \
-	".\WinRelease\txtrmfr.obj" \
-	".\WinRelease\graphvw.obj" \
-	".\WinRelease\STDAFX.OBJ" \
-	".\WinRelease\txtrmdoc.obj" \
-	".\WinRelease\graphdoc.obj" \
-	".\WinRelease\xeditvw.obj" \
-	".\WinRelease\ui.obj" \
-	".\WinRelease\histdoc.obj" \
-	".\WinRelease\CAMLWIN.res"
+	"$(INTDIR)\camlwin.obj" \
+	"$(INTDIR)\CAMLWIN.res" \
+	"$(INTDIR)\graphdoc.obj" \
+	"$(INTDIR)\graphfrm.obj" \
+	"$(INTDIR)\graphvw.obj" \
+	"$(INTDIR)\histdoc.obj" \
+	"$(INTDIR)\mainfrm.obj" \
+	"$(INTDIR)\prefsdlg.obj" \
+	"$(INTDIR)\STDAFX.OBJ" \
+	"$(INTDIR)\txtrmdoc.obj" \
+	"$(INTDIR)\txtrmfr.obj" \
+	"$(INTDIR)\ui.obj" \
+	"$(INTDIR)\xeditvw.obj"
 
 "$(OUTDIR)\camlwin.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -316,38 +316,38 @@ INTDIR=.\Camlwin_
 ALL : "$(OUTDIR)\camlwin.exe" "$(OUTDIR)\camlwin.bsc"
 
 CLEAN : 
-	-@erase ".\Camlwin_\vc40.pdb"
-	-@erase ".\Camlwin_\camlwin.pch"
-	-@erase ".\Camlwin_\vc40.idb"
-	-@erase ".\Camlwin_\camlwin.bsc"
-	-@erase ".\Camlwin_\graphdoc.sbr"
-	-@erase ".\Camlwin_\graphvw.sbr"
-	-@erase ".\Camlwin_\camlwin.sbr"
-	-@erase ".\Camlwin_\xeditvw.sbr"
-	-@erase ".\Camlwin_\prefsdlg.sbr"
-	-@erase ".\Camlwin_\histdoc.sbr"
-	-@erase ".\Camlwin_\ui.sbr"
-	-@erase ".\Camlwin_\txtrmfr.sbr"
-	-@erase ".\Camlwin_\mainfrm.sbr"
-	-@erase ".\Camlwin_\STDAFX.SBR"
-	-@erase ".\Camlwin_\txtrmdoc.sbr"
-	-@erase ".\Camlwin_\graphfrm.sbr"
-	-@erase ".\Camlwin_\camlwin.exe"
-	-@erase ".\Camlwin_\mainfrm.obj"
-	-@erase ".\Camlwin_\STDAFX.OBJ"
-	-@erase ".\Camlwin_\txtrmdoc.obj"
-	-@erase ".\Camlwin_\graphfrm.obj"
-	-@erase ".\Camlwin_\graphdoc.obj"
-	-@erase ".\Camlwin_\graphvw.obj"
-	-@erase ".\Camlwin_\camlwin.obj"
-	-@erase ".\Camlwin_\xeditvw.obj"
-	-@erase ".\Camlwin_\prefsdlg.obj"
-	-@erase ".\Camlwin_\histdoc.obj"
-	-@erase ".\Camlwin_\ui.obj"
-	-@erase ".\Camlwin_\txtrmfr.obj"
-	-@erase ".\Camlwin_\CAMLWIN.res"
-	-@erase ".\Camlwin_\camlwin.ilk"
-	-@erase ".\Camlwin_\camlwin.pdb"
+	-@erase "$(INTDIR)\camlwin.obj"
+	-@erase "$(INTDIR)\camlwin.pch"
+	-@erase "$(INTDIR)\CAMLWIN.res"
+	-@erase "$(INTDIR)\camlwin.sbr"
+	-@erase "$(INTDIR)\graphdoc.obj"
+	-@erase "$(INTDIR)\graphdoc.sbr"
+	-@erase "$(INTDIR)\graphfrm.obj"
+	-@erase "$(INTDIR)\graphfrm.sbr"
+	-@erase "$(INTDIR)\graphvw.obj"
+	-@erase "$(INTDIR)\graphvw.sbr"
+	-@erase "$(INTDIR)\histdoc.obj"
+	-@erase "$(INTDIR)\histdoc.sbr"
+	-@erase "$(INTDIR)\mainfrm.obj"
+	-@erase "$(INTDIR)\mainfrm.sbr"
+	-@erase "$(INTDIR)\prefsdlg.obj"
+	-@erase "$(INTDIR)\prefsdlg.sbr"
+	-@erase "$(INTDIR)\STDAFX.OBJ"
+	-@erase "$(INTDIR)\STDAFX.SBR"
+	-@erase "$(INTDIR)\txtrmdoc.obj"
+	-@erase "$(INTDIR)\txtrmdoc.sbr"
+	-@erase "$(INTDIR)\txtrmfr.obj"
+	-@erase "$(INTDIR)\txtrmfr.sbr"
+	-@erase "$(INTDIR)\ui.obj"
+	-@erase "$(INTDIR)\ui.sbr"
+	-@erase "$(INTDIR)\vc40.idb"
+	-@erase "$(INTDIR)\vc40.pdb"
+	-@erase "$(INTDIR)\xeditvw.obj"
+	-@erase "$(INTDIR)\xeditvw.sbr"
+	-@erase "$(OUTDIR)\camlwin.bsc"
+	-@erase "$(OUTDIR)\camlwin.exe"
+	-@erase "$(OUTDIR)\camlwin.ilk"
+	-@erase "$(OUTDIR)\camlwin.pdb"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
@@ -369,18 +369,18 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 BSC32_FLAGS=/nologo /o"$(OUTDIR)/camlwin.bsc" 
 BSC32_SBRS= \
-	".\Camlwin_\graphdoc.sbr" \
-	".\Camlwin_\graphvw.sbr" \
-	".\Camlwin_\camlwin.sbr" \
-	".\Camlwin_\xeditvw.sbr" \
-	".\Camlwin_\prefsdlg.sbr" \
-	".\Camlwin_\histdoc.sbr" \
-	".\Camlwin_\ui.sbr" \
-	".\Camlwin_\txtrmfr.sbr" \
-	".\Camlwin_\mainfrm.sbr" \
-	".\Camlwin_\STDAFX.SBR" \
-	".\Camlwin_\txtrmdoc.sbr" \
-	".\Camlwin_\graphfrm.sbr"
+	"$(INTDIR)\camlwin.sbr" \
+	"$(INTDIR)\graphdoc.sbr" \
+	"$(INTDIR)\graphfrm.sbr" \
+	"$(INTDIR)\graphvw.sbr" \
+	"$(INTDIR)\histdoc.sbr" \
+	"$(INTDIR)\mainfrm.sbr" \
+	"$(INTDIR)\prefsdlg.sbr" \
+	"$(INTDIR)\STDAFX.SBR" \
+	"$(INTDIR)\txtrmdoc.sbr" \
+	"$(INTDIR)\txtrmfr.sbr" \
+	"$(INTDIR)\ui.sbr" \
+	"$(INTDIR)\xeditvw.sbr"
 
 "$(OUTDIR)\camlwin.bsc" : "$(OUTDIR)" $(BSC32_SBRS)
     $(BSC32) @<<
@@ -396,19 +396,19 @@ LINK32_FLAGS=..\runtime\libcaml.lib /nologo /stack:0x11240 /subsystem:windows\
 DEF_FILE= \
 	".\CAMLWIN.DEF"
 LINK32_OBJS= \
-	".\Camlwin_\mainfrm.obj" \
-	".\Camlwin_\STDAFX.OBJ" \
-	".\Camlwin_\txtrmdoc.obj" \
-	".\Camlwin_\graphfrm.obj" \
-	".\Camlwin_\graphdoc.obj" \
-	".\Camlwin_\graphvw.obj" \
-	".\Camlwin_\camlwin.obj" \
-	".\Camlwin_\xeditvw.obj" \
-	".\Camlwin_\prefsdlg.obj" \
-	".\Camlwin_\histdoc.obj" \
-	".\Camlwin_\ui.obj" \
-	".\Camlwin_\txtrmfr.obj" \
-	".\Camlwin_\CAMLWIN.res"
+	"$(INTDIR)\camlwin.obj" \
+	"$(INTDIR)\CAMLWIN.res" \
+	"$(INTDIR)\graphdoc.obj" \
+	"$(INTDIR)\graphfrm.obj" \
+	"$(INTDIR)\graphvw.obj" \
+	"$(INTDIR)\histdoc.obj" \
+	"$(INTDIR)\mainfrm.obj" \
+	"$(INTDIR)\prefsdlg.obj" \
+	"$(INTDIR)\STDAFX.OBJ" \
+	"$(INTDIR)\txtrmdoc.obj" \
+	"$(INTDIR)\txtrmfr.obj" \
+	"$(INTDIR)\ui.obj" \
+	"$(INTDIR)\xeditvw.obj"
 
 "$(OUTDIR)\camlwin.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -456,10 +456,10 @@ LINK32_OBJS= \
 SOURCE=.\CAMLWIN.RC
 DEP_RSC_CAMLW=\
 	".\RES\CAMLWIN.ICO"\
-	".\RES\TERM.ICO"\
-	".\RES\HIST.ICO"\
-	".\RES\TOOLBAR.BMP"\
 	".\res\camlwin.rc2"\
+	".\RES\HIST.ICO"\
+	".\RES\TERM.ICO"\
+	".\RES\TOOLBAR.BMP"\
 	
 
 !IF  "$(CFG)" == "Camlwin - Win32 Debug"
@@ -561,25 +561,22 @@ BuildCmds= \
 # Begin Source File
 
 SOURCE=.\camlwin.cpp
-
-!IF  "$(CFG)" == "Camlwin - Win32 Debug"
-
 DEP_CPP_CAMLWI=\
-	".\stdafx.h"\
 	".\camlwin.h"\
-	".\mainfrm.h"\
-	".\txtrmdoc.h"\
-	".\txtrmfr.h"\
-	".\xeditvw.h"\
-	".\histdoc.h"\
 	".\graphdoc.h"\
 	".\graphfrm.h"\
 	".\graphvw.h"\
+	".\histdoc.h"\
+	".\mainfrm.h"\
 	".\prefsdlg.h"\
+	".\stdafx.h"\
+	".\txtrmdoc.h"\
+	".\txtrmfr.h"\
+	".\xeditvw.h"\
 	
-NODEP_CPP_CAMLWI=\
-	".\SaveSettings"\
-	
+
+!IF  "$(CFG)" == "Camlwin - Win32 Debug"
+
 # ADD BASE CPP /Yu"STDAFX.H"
 # ADD CPP /Yu"STDAFX.H"
 
@@ -599,19 +596,6 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
 
-DEP_CPP_CAMLWI=\
-	".\stdafx.h"\
-	".\camlwin.h"\
-	".\mainfrm.h"\
-	".\txtrmdoc.h"\
-	".\txtrmfr.h"\
-	".\xeditvw.h"\
-	".\histdoc.h"\
-	".\graphdoc.h"\
-	".\graphfrm.h"\
-	".\graphvw.h"\
-	".\prefsdlg.h"\
-	
 # ADD BASE CPP /Yu"STDAFX.H"
 # ADD CPP /Yu"STDAFX.H"
 
@@ -631,19 +615,6 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 BoundsCheck"
 
-DEP_CPP_CAMLWI=\
-	".\stdafx.h"\
-	".\camlwin.h"\
-	".\mainfrm.h"\
-	".\txtrmdoc.h"\
-	".\txtrmfr.h"\
-	".\xeditvw.h"\
-	".\histdoc.h"\
-	".\graphdoc.h"\
-	".\graphfrm.h"\
-	".\graphvw.h"\
-	".\prefsdlg.h"\
-	
 # ADD BASE CPP /Yu"STDAFX.H"
 # ADD CPP /Yu"STDAFX.H"
 
@@ -669,11 +640,11 @@ BuildCmds= \
 
 SOURCE=.\mainfrm.cpp
 DEP_CPP_MAINF=\
-	".\stdafx.h"\
 	".\camlwin.h"\
-	".\mainfrm.h"\
 	".\graphdoc.h"\
 	".\graphvw.h"\
+	".\mainfrm.h"\
+	".\stdafx.h"\
 	".\xeditvw.h"\
 	
 
@@ -742,10 +713,10 @@ BuildCmds= \
 
 SOURCE=.\txtrmdoc.cpp
 DEP_CPP_TXTRM=\
-	".\stdafx.h"\
-	".\xeditvw.h"\
 	".\camlwin.h"\
+	".\stdafx.h"\
 	".\txtrmdoc.h"\
+	".\xeditvw.h"\
 	
 
 !IF  "$(CFG)" == "Camlwin - Win32 Debug"
@@ -813,8 +784,8 @@ BuildCmds= \
 
 SOURCE=.\txtrmfr.cpp
 DEP_CPP_TXTRMF=\
-	".\stdafx.h"\
 	".\camlwin.h"\
+	".\stdafx.h"\
 	".\txtrmfr.h"\
 	".\xeditvw.h"\
 	
@@ -884,8 +855,8 @@ BuildCmds= \
 
 SOURCE=.\xeditvw.cpp
 DEP_CPP_XEDIT=\
-	".\stdafx.h"\
 	".\camlwin.h"\
+	".\stdafx.h"\
 	".\xeditvw.h"\
 	
 
@@ -954,10 +925,10 @@ BuildCmds= \
 
 SOURCE=.\histdoc.cpp
 DEP_CPP_HISTD=\
-	".\stdafx.h"\
-	".\xeditvw.h"\
 	".\camlwin.h"\
 	".\histdoc.h"\
+	".\stdafx.h"\
+	".\xeditvw.h"\
 	
 
 !IF  "$(CFG)" == "Camlwin - Win32 Debug"
@@ -1025,9 +996,9 @@ BuildCmds= \
 
 SOURCE=.\prefsdlg.cpp
 DEP_CPP_PREFS=\
-	".\stdafx.h"\
 	".\camlwin.h"\
 	".\prefsdlg.h"\
+	".\stdafx.h"\
 	
 
 !IF  "$(CFG)" == "Camlwin - Win32 Debug"
@@ -1095,8 +1066,8 @@ BuildCmds= \
 
 SOURCE=.\ui.cpp
 DEP_CPP_UI_CP=\
-	".\stdafx.h"\
 	".\camlwin.h"\
+	".\stdafx.h"\
 	
 
 !IF  "$(CFG)" == "Camlwin - Win32 Debug"
@@ -1177,18 +1148,15 @@ SOURCE=.\CAMLWIN.DEF
 # Begin Source File
 
 SOURCE=.\graphvw.cpp
+DEP_CPP_GRAPH=\
+	".\camlwin.h"\
+	".\graphdoc.h"\
+	".\graphvw.h"\
+	".\stdafx.h"\
+	
 
 !IF  "$(CFG)" == "Camlwin - Win32 Debug"
 
-DEP_CPP_GRAPH=\
-	".\stdafx.h"\
-	".\camlwin.h"\
-	".\graphvw.h"\
-	".\graphdoc.h"\
-	
-NODEP_CPP_GRAPH=\
-	".\;"\
-	
 
 "$(INTDIR)\graphvw.obj" : $(SOURCE) $(DEP_CPP_GRAPH) "$(INTDIR)"
 
@@ -1197,12 +1165,6 @@ NODEP_CPP_GRAPH=\
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
 
-DEP_CPP_GRAPH=\
-	".\stdafx.h"\
-	".\camlwin.h"\
-	".\graphvw.h"\
-	".\graphdoc.h"\
-	
 
 "$(INTDIR)\graphvw.obj" : $(SOURCE) $(DEP_CPP_GRAPH) "$(INTDIR)"
 
@@ -1211,12 +1173,6 @@ DEP_CPP_GRAPH=\
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 BoundsCheck"
 
-DEP_CPP_GRAPH=\
-	".\stdafx.h"\
-	".\camlwin.h"\
-	".\graphvw.h"\
-	".\graphdoc.h"\
-	
 
 "$(INTDIR)\graphvw.obj" : $(SOURCE) $(DEP_CPP_GRAPH) "$(INTDIR)"
 
@@ -1230,37 +1186,34 @@ DEP_CPP_GRAPH=\
 # Begin Source File
 
 SOURCE=.\graphdoc.cpp
-
-!IF  "$(CFG)" == "Camlwin - Win32 Debug"
-
 DEP_CPP_GRAPHD=\
-	".\stdafx.h"\
-	".\camlwin.h"\
-	".\xeditvw.h"\
-	".\txtrmdoc.h"\
-	".\txtrmfr.h"\
-	".\mainfrm.h"\
-	".\graphdoc.h"\
-	".\graphvw.h"\
-	".\..\..\RUNTIME\alloc.h"\
-	".\..\..\RUNTIME\memory.h"\
-	".\..\..\RUNTIME\fail.h"\
-	".\..\..\RUNTIME\signals.h"\
-	".\..\..\RUNTIME\str.h"\
-	".\colors.h"\
-	".\..\..\RUNTIME\misc.h"\
-	".\..\..\RUNTIME\mlvalues.h"\
-	".\..\..\RUNTIME\config.h"\
+	"..\..\RUNTIME\alloc.h"\
+	"..\..\RUNTIME\fail.h"\
+	"..\..\RUNTIME\memory.h"\
+	"..\..\RUNTIME\signals.h"\
+	"..\..\RUNTIME\str.h"\
 	".\..\..\..\config\m.h"\
 	".\..\..\..\config\s.h"\
+	".\..\..\RUNTIME\config.h"\
+	".\..\..\RUNTIME\freelist.h"\
 	".\..\..\RUNTIME\gc.h"\
 	".\..\..\RUNTIME\major_gc.h"\
 	".\..\..\RUNTIME\minor_gc.h"\
-	".\..\..\RUNTIME\freelist.h"\
+	".\..\..\RUNTIME\misc.h"\
+	".\..\..\RUNTIME\mlvalues.h"\
+	".\camlwin.h"\
+	".\colors.h"\
+	".\graphdoc.h"\
+	".\graphvw.h"\
+	".\mainfrm.h"\
+	".\stdafx.h"\
+	".\txtrmdoc.h"\
+	".\txtrmfr.h"\
+	".\xeditvw.h"\
 	
-NODEP_CPP_GRAPHD=\
-	".\CAMLGraph"\
-	
+
+!IF  "$(CFG)" == "Camlwin - Win32 Debug"
+
 
 "$(INTDIR)\graphdoc.obj" : $(SOURCE) $(DEP_CPP_GRAPHD) "$(INTDIR)"
 
@@ -1269,31 +1222,6 @@ NODEP_CPP_GRAPHD=\
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 Release"
 
-DEP_CPP_GRAPHD=\
-	".\stdafx.h"\
-	".\camlwin.h"\
-	".\xeditvw.h"\
-	".\txtrmdoc.h"\
-	".\txtrmfr.h"\
-	".\mainfrm.h"\
-	".\graphdoc.h"\
-	".\graphvw.h"\
-	".\..\..\RUNTIME\alloc.h"\
-	".\..\..\RUNTIME\memory.h"\
-	".\..\..\RUNTIME\fail.h"\
-	".\..\..\RUNTIME\signals.h"\
-	".\..\..\RUNTIME\str.h"\
-	".\colors.h"\
-	".\..\..\RUNTIME\misc.h"\
-	".\..\..\RUNTIME\mlvalues.h"\
-	".\..\..\RUNTIME\config.h"\
-	".\..\..\..\config\m.h"\
-	".\..\..\..\config\s.h"\
-	".\..\..\RUNTIME\gc.h"\
-	".\..\..\RUNTIME\major_gc.h"\
-	".\..\..\RUNTIME\minor_gc.h"\
-	".\..\..\RUNTIME\freelist.h"\
-	
 
 "$(INTDIR)\graphdoc.obj" : $(SOURCE) $(DEP_CPP_GRAPHD) "$(INTDIR)"
 
@@ -1302,31 +1230,6 @@ DEP_CPP_GRAPHD=\
 
 !ELSEIF  "$(CFG)" == "Camlwin - Win32 BoundsCheck"
 
-DEP_CPP_GRAPHD=\
-	".\stdafx.h"\
-	".\camlwin.h"\
-	".\xeditvw.h"\
-	".\txtrmdoc.h"\
-	".\txtrmfr.h"\
-	".\mainfrm.h"\
-	".\graphdoc.h"\
-	".\graphvw.h"\
-	".\..\..\RUNTIME\alloc.h"\
-	".\..\..\RUNTIME\memory.h"\
-	".\..\..\RUNTIME\fail.h"\
-	".\..\..\RUNTIME\signals.h"\
-	".\..\..\RUNTIME\str.h"\
-	".\colors.h"\
-	".\..\..\RUNTIME\misc.h"\
-	".\..\..\RUNTIME\mlvalues.h"\
-	".\..\..\RUNTIME\config.h"\
-	".\..\..\..\config\m.h"\
-	".\..\..\..\config\s.h"\
-	".\..\..\RUNTIME\gc.h"\
-	".\..\..\RUNTIME\major_gc.h"\
-	".\..\..\RUNTIME\minor_gc.h"\
-	".\..\..\RUNTIME\freelist.h"\
-	
 
 "$(INTDIR)\graphdoc.obj" : $(SOURCE) $(DEP_CPP_GRAPHD) "$(INTDIR)"
 
@@ -1341,9 +1244,9 @@ DEP_CPP_GRAPHD=\
 
 SOURCE=.\graphfrm.cpp
 DEP_CPP_GRAPHF=\
-	".\stdafx.h"\
 	".\camlwin.h"\
 	".\graphfrm.h"\
+	".\stdafx.h"\
 	
 
 !IF  "$(CFG)" == "Camlwin - Win32 Debug"

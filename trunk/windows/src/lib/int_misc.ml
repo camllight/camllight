@@ -1,7 +1,12 @@
 (* Some extra operations on integers *)
 
-(**) #open "eq";;
-(**) #open "int";;
+#open "eq";;
+#open "int";;
+#open "bool";;
+#open "exc";;
+#open "string";;
+#open "ref";;
+#open "char";;
 
 let length_of_int = sys__word_size - 2;;
 

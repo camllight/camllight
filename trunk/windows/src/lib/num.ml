@@ -1,12 +1,18 @@
 (* num: arithmetique exacte mixte sur rationnels et entiers (grands et petits).
    Adapte de nums.ml de Caml V3.1, Valerie Menissier. *)
 
-#open "bool";;
-#open "eq";;
 #open "exc";;
+#open "bool";;
+#open "fstring";;
+#open "fchar";;
+#open "fvect";;
+#open "list";;
+#open "pair";;
+#open "ref";;
 #open "float";;
 #open "int";;
-#open "ref";;
+#open "eq";;
+#open "io";;
 #open "int_misc";;
 #open "fnat";;
 #open "big_int";;
