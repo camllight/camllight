@@ -3,10 +3,6 @@
    Adapte a Caml Light par Xavier Leroy & Pierre Weis.
    Portage 64 bits: Pierre Weis. *)
 
-(*
-#include "../../config/m.h"
-*)
-
 (**) #open "eq";;
 (**) #open "exc";;
 (**) #open "int";;
@@ -20,13 +16,7 @@
 
 (* Sizes of words and strings. *)
 
-#ifdef CAML_SIXTYFOUR
-let word_size = 64;;
-#else
-let word_size = 32;;
-#endif
-
-let length_of_digit = word_size;;
+let length_of_digit = sys__word_size;;
 
 let make_nat len =
   if len <= 0 then invalid_arg "make_nat" else
@@ -201,26 +191,30 @@ let sqrt_nat nat off len =
 ;;
 
 (* Nat temporaries *)
-let A_2 = make_nat 2
-and A_1 = make_nat 1 
-and B_2 = make_nat 2 
+let tmp_A_2 = make_nat 2
+and tmp_A_1 = make_nat 1 
+and tmp_B_2 = make_nat 2 
 ;;
 
-#ifdef CAML_SIXTYFOUR
-let max_superscript_10_power_in_int = 18;;
-let max_power_10_power_in_int = nat_of_int 1000000000000000000;;
-#else
-let max_superscript_10_power_in_int = 9;;
-let max_power_10_power_in_int = nat_of_int 1000000000;;
-#endif
+let max_superscript_10_power_in_int =
+ match sys__word_size with
+ | 64 -> 18
+ | 32 -> 9
+ | _ -> invalid_arg "Bad word size";;
+
+let max_power_10_power_in_int =
+ match sys__word_size with
+ | 64 -> nat_of_int 1000000000000000000
+ | 32 -> nat_of_int 1000000000
+ | _ -> invalid_arg "Bad word size";;
 
 let sys_string_of_digit nat off =
   if is_nat_int nat off 1 then string_of_int (nth_digit_nat nat off) else
    begin
-    blit_nat B_2 0 nat off 1;
-    div_digit_nat A_2 0 A_1 0 B_2 0 2 max_power_10_power_in_int 0;
-    let leading_digits = nth_digit_nat A_2 0
-    and s1 = string_of_int (nth_digit_nat A_1 0) in
+    blit_nat tmp_B_2 0 nat off 1;
+    div_digit_nat tmp_A_2 0 tmp_A_1 0 tmp_B_2 0 2 max_power_10_power_in_int 0;
+    let leading_digits = nth_digit_nat tmp_A_2 0
+    and s1 = string_of_int (nth_digit_nat tmp_A_1 0) in
     let len = string_length s1 in
     if leading_digits < 10 then begin
          let result = make_string (max_superscript_10_power_in_int + 1) `0` in
@@ -339,16 +333,16 @@ let power_base_int base i =
     --                                   --
 La base la plus grande possible pour l impression est 16. *)
 
-#ifdef CAML_SIXTYFOUR
-let num_digits_max_vector = 
- [|0; 0; 262143; 415488; 524287; 608679; 677632; 735930; 786431; 830976; 
-   870823; 906868; 939776; 970047; 998074; 1024167; 1048575; |];; 
-#else
-let num_digits_max_vector = 
-  [|0; 0; 524287; 830976; 1048575; 1217358; 1355264; 1471861; 1572863; 
-    1661953; 1741646; 1813737; 1879552; 1940095; 1996149; 2048335; 2097151; 
- |];;
-#endif
+let num_digits_max_vector =
+ match sys__word_size with
+ | 64 ->
+    [| 0; 0; 262143; 415488; 524287; 608679; 677632; 735930; 786431; 830976; 
+       870823; 906868; 939776; 970047; 998074; 1024167; 1048575; |]
+ | 32 ->
+    [| 0; 0; 524287; 830976; 1048575; 1217358; 1355264; 1471861; 1572863; 
+       1661953; 1741646; 1813737; 1879552; 1940095; 1996149; 2048335;
+       2097151 |]
+ | _ -> invalid_arg "Bad word size";;
 
 (* num_digits_max_vector.(base) gives the maximum number of words that
    may have the biggest big number that can be printed into a single
@@ -484,15 +478,17 @@ let sys_string_list_of_nat base nat off len =
 (* Power_base_max is used *)
 let power_base_max = make_nat 2;;
 
-#ifdef CAML_SIXTYFOUR
-set_digit_nat power_base_max 0 1000000000000000000;
-mult_digit_nat power_base_max 0 2 
-               power_base_max 0 1 (nat_of_int 9) 0;;
-let pmax = 19;;
-#else
-set_digit_nat power_base_max 0 1000000000;;
-let pmax = 9;;
-#endif
+let pmax =
+ match sys__word_size with
+ | 64 ->
+    set_digit_nat power_base_max 0 1000000000000000000;
+    set_mult_digit_nat power_base_max 0 2 
+                   power_base_max 0 1 (nat_of_int 9) 0;
+    19
+ | 32 ->
+    set_digit_nat power_base_max 0 1000000000;
+    9
+ | _ -> invalid_arg "Bad word size";;
 
 let unadjusted_string_of_nat nat off len_nat =
   let len = num_digits_nat nat off len_nat in

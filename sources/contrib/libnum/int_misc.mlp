@@ -1,17 +1,9 @@
 (* Some extra operations on integers *)
 
-(*
-#include "../../config/m.h"
-*)
-
 (**) #open "eq";;
 (**) #open "int";;
 
-#ifdef CAML_SIXTYFOUR
-let length_of_int = 62;;
-#else
-let length_of_int = 30;;
-#endif
+let length_of_int = sys__word_size - 2;;
 
 let monster_int = 1 lsl length_of_int;;
 let biggest_int = monster_int - 1;;
