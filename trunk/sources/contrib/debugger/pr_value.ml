@@ -250,10 +250,12 @@ let more m =
     try
      let c = hashtbl__find evct m in
      print_string ("<"^string_of_int m^">:"); force_newline();
-     open_hovbox 0; c !printer_depth; close_box();
-     hashtbl__remove evct m
+     open_hovbox 0; c !printer_depth; close_box(); print_newline()
     with Not_found ->
           open_hovbox 0;
-          print_string "Active printing continuations are: ";
+          print_string "No such printing continuation."; force_newline();
+          print_string "Available printing continuations: ";
           hashtbl__do_table (fun m _ -> print_int m; print_space()) evct;
           print_newline();;
+
+let clear_ellipses () = hashtbl__clear evct;;
