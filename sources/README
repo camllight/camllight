@@ -84,6 +84,13 @@ DOCUMENTATION:
   These documents are distributed in Postscript, DVI, and plain text.
   They can be obtained by anonymous FTP from ftp.inria.fr as described below.
 
+  The following Web site offers lots of information on Caml:
+
+        http://pauillac.inria.fr/caml/
+
+  including a comprehensive "Frequently Asked Questions" list, short
+  tutorials, and material for programming courses.
+
 
 AVAILABILITY:
 
@@ -92,6 +99,8 @@ AVAILABILITY:
 
         host:       ftp.inria.fr (192.93.2.54)
         directory:  lang/caml-light
+
+  or through the Web at URL http://pauillac.inria.fr/caml/
 
 
 KEEPING IN TOUCH WITH THE CAML COMMUNITY:
