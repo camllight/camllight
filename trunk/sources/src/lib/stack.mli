@@ -15,10 +15,6 @@ value new: unit -> 'a t
   and pop: 'a t -> 'a
         (* [pop s] removes and returns the topmost element in stack [s],
            or raises [Empty] if the stack is empty. *)
-  and peek: 'a t -> int -> 'a
-        (* [peek s my_number] returns the element at depth [my_number] in
-           stack [s], without removing it from the stack, or raises [Empty]
-           if the stack has less than [my_number] elements. *)
   and clear : 'a t -> unit
         (* Discard all elements from a stack. *)
   and length: 'a t -> int
