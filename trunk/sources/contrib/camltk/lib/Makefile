@@ -22,9 +22,10 @@ SUPPORT2=$(SUPPORTDIR)/support.zo $(SUPPORTDIR)/protocol2.zo \
 
 SUPPORT=support.zo protocol.zo textvariable.zo
 
-all : tklib.zo tklib2.zo toplevels
+# two-process protocol not supported anymore
+all : tklib.zo toplevels
 
-toplevels: camltktop1 camltktop2
+toplevels: camltktop1
 
 tkgen.ml: ../Widgets.src
 	cd ..; compiler/tkcompiler
