@@ -220,3 +220,9 @@ fr:	>       Caml Light version %s\n
 
 src:	Interrupted.\n
 fr:	Interruption.\n
+
+src:	Uncaught exception: 
+fr:	Exception non rattrapée: 
+
+src:	<Internal error while printing the exception>
+fr:	<Erreur interne dans l'impression de l'exception>
