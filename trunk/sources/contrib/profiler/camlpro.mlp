@@ -366,6 +366,7 @@ and open_set set =
 (* camlinstr will get exactly the same options as camlcomp, for
    compatibility. Some of them are not used during translation.
    Profiler + debugger will break locations and thus breakpoints.
+   camlpro *must* also get the same options
  *)
 let std_options = [
   "-stdlib", arg__String set_stdlib;
@@ -380,7 +381,8 @@ let std_options = [
         eprintf "Warning: -p option incompatible with debugger\n";
 	flush stderr);
   "-i", arg__Unit (function () -> ()); (* ignored *)
-  "-lang", arg__String (function lang -> ()) (* ignored *)
+  "-lang", arg__String (function lang -> ()); (* ignored *)
+  "-W", arg__Unit (function () -> ()) (* ignored *)
  ]
 ;;
 
