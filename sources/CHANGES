@@ -7,7 +7,7 @@ Caml Light 0.74:
   - module vect: added init_vect.
   - module format: added a printf facility to control the pretty-printer.
 
-* MS Windows port: fixed image routines bugs.
+* MS Windows port: fixed bugs in functions over graphics__image.
 
 * libnum: square root rewritten. Many bug fixes to support 64
   architectures. Lot of functions rewritten or added. More tests added.
