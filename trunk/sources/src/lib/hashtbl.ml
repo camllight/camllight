@@ -107,9 +107,7 @@ let do_table f h =
         Empty ->
           ()
       | Cons(k, d, rest) ->
-          if (hash_param 10 100 k) mod len == i
-          then begin f k d; do_bucket rest end
-          else do_bucket rest in
+          f k d; do_bucket rest in
     do_bucket h.data.(i)
   done
 ;;
@@ -119,7 +117,7 @@ let do_table_rev f h =
       Empty ->
         ()
     | Cons(k, d, rest) ->
-        f k d; do_bucket rest in
+        do_bucket rest; f k d; () in
   for i = 0 to vect_length h.data - 1 do
     do_bucket h.data.(i)
   done
