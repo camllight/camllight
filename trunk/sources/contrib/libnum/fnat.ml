@@ -34,8 +34,10 @@ let copy_nat nat off_set length =
   res
 ;;
 
+let zero_nat = make_nat 1;;
+
 let is_zero_nat n off len =
-  compare_nat (make_nat 1) 0 1 n off (num_digits_nat n off len) == 0 
+  compare_nat zero_nat 0 1 n off (num_digits_nat n off len) == 0 
 ;;
 
 let is_nat_int nat off len =
@@ -206,6 +208,7 @@ let sys_string_of_digit nat off =
   if is_nat_int nat off 1 then string_of_int (nth_digit_nat nat off) else
    begin
     blit_nat tmp_B_2 0 nat off 1;
+    set_to_zero_nat tmp_B_2 1 1;
     div_digit_nat tmp_A_2 0 tmp_A_1 0 tmp_B_2 0 2 max_power_10_power_in_int 0;
     let leading_digits = nth_digit_nat tmp_A_2 0
     and s1 = string_of_int (nth_digit_nat tmp_A_1 0) in

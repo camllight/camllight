@@ -321,20 +321,24 @@ let gcd_big_int bi1 bi2 =
 
 (* Coercion operators *)
 
-let int_of_big_int bi = 
-  try bi.Sign * int_of_nat bi.Abs_Value
+let monster_big_int = big_int_of_int monster_int;;
+
+let monster_nat = monster_big_int.Abs_Value;;
+
+let is_int_big_int bi =
+  num_digits_big_int bi == 1 &&
+  match compare_nat bi.Abs_Value 0 1 monster_nat 0 1 with
+  | 0 -> bi.Sign == -1
+  | -1 -> true
+  | _ -> false;;
+
+let int_of_big_int bi =
+  try let n = int_of_nat bi.Abs_Value in
+      if bi.Sign = -1 then minus_int n else n
   with Failure _ ->
-    if eq_big_int bi (big_int_of_int monster_int) 
-    then monster_int 
+    if eq_big_int bi monster_big_int then monster_int
     else failwith "int_of_big_int"
 ;;
-
-let is_int_big_int =
- let pdmi = pred (length_of_digit - length_of_int) in
- function bi ->
-    is_nat_int (bi.Abs_Value) 0 (num_digits_big_int bi)
- || (bi.Sign == -1 && num_digits_big_int bi == 1 &&
-     num_leading_zero_bits_in_digit (bi.Abs_Value) 0 >= pdmi);;
 
 (* Coercion with nat type *)
 let nat_of_big_int bi = 
