@@ -18,7 +18,7 @@ reader interested in truly formal descriptions of languages from the
 ML family is referred to {\em The definition of Standard ML} and {\em
 Commentary on Standard ML}, by Milner, Tofte and Harper, MIT Press.
 
-\section*{Warning}
+\subsection*{Warning}
 
 Several implementations of the Caml Light language are available,
 and they evolve at each release. Consequently, this document carefully
@@ -28,7 +28,7 @@ unspecified in this reference manual can be interpreted differently by
 the implementations. The purpose of this reference manual is to
 specify those features that all implementations must provide.
 
-\section*{Notations}
+\subsection*{Notations}
 
 The syntax of the language is given in BNF-like notation. Terminal
 symbols are set in typewriter font (@'like' 'this'@).
