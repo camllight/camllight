@@ -315,7 +315,7 @@ let compare_ratio r1 r2 =
              else 0
          else sign_num_r1
   else if verify_null_denominator r2 then
-         minus_int (sign_big_int r2.Numerator)
+         - (sign_big_int r2.Numerator)
   else match compare_int (sign_big_int r1.Numerator) 
                          (sign_big_int r2.Numerator) with
                1 -> 1
@@ -342,7 +342,7 @@ let eq_big_int_ratio bi r = is_integer_ratio r && eq_big_int bi r.Numerator;;
 let compare_big_int_ratio bi r =
  set_ratio_normalized r;
  if verify_null_denominator r
- then minus_int (sign_big_int r.Numerator)
+ then - (sign_big_int r.Numerator)
  else compare_big_int (mult_big_int bi r.Denominator) r.Numerator
 ;;
 
@@ -508,7 +508,7 @@ let approx_ratio_fix n r =
                    (div_big_int
                       (abs_big_int r.Numerator) 
                       (base_power_big_int
-                        10 (minus_int n) r.Denominator)) in
+                        10 (- n) r.Denominator)) in
          let len = succ (string_length s) in
          let s' = make_string len `0` in
           s'.[0] <- (if sign_r == -1 then `-` else `+`);
@@ -583,29 +583,6 @@ let float_of_rational_string r =
 ;;
 
 (* Coercions with type string *)
-(** A virer
-let string_of_ratio r = 
- let r = cautious_normalize_ratio_when_printing r in
- if !approx_printing_flag
-    then float_of_rational_string r
-    else string_of_big_int r.Numerator ^ "/" ^ string_of_big_int r.Denominator
-;;
-
-(* XL: j'ai puissamment simplifie "ratio_of_string" en virant la notation
-   scientifique. *)
-
-let ratio_of_string s =
-  let n = index_char s `/` 0 in
-  if n == -1 then
-    { Numerator = big_int_of_string s;
-      Denominator = unit_big_int;
-      Normalized = true }
-  else
-    create_ratio (sys_big_int_of_string s 0 n)
-                 (sys_big_int_of_string s (n+1) (string_length s - n - 1))
-;;
-
-***)
 let sys_string_of_ratio base before r after = 
  cautious_set_ratio_normalized_when_printing r;
  if !approx_printing_flag 
@@ -683,8 +660,6 @@ let float_of_ratio r =
   float__float_of_string (float_of_rational_string r)
 ;;
 
-(* XL: suppression de ratio_of_float *)
-(* PW: ajout de ratio_of_float *)
 let ratio_of_float f =
   ratio_of_string (string_of_float f)
 ;;
