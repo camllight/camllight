@@ -199,7 +199,7 @@ and print_list depth obj ty_arg =
  in
    open_hovbox 1;
    print_string "[";
-   cautious (print_conses (depth - 1)) obj;
+   cautious (print_conses depth) obj;
    print_string "]";
    close_box()
 
@@ -216,7 +216,7 @@ and print_vect depth obj ty_arg =
   in
     open_hovbox 2;
     print_string "[|";
-    cautious (print_items (depth - 1)) obj;
+    cautious (print_items depth) obj;
     print_string "|]";
     close_box()
 ;;
