@@ -41,7 +41,7 @@ MANDIR=/usr/local/man/man$(MANEXT)
 
 # The path to the include directory containing the X11/*.h includes
 # (usually /usr/include; for SunOS with OpenLook, /usr/openwin/include)
-# Needed only for the "libgraph" package.
+# Needed for the "libgraph" and "camltk" packages.
 X11_INCLUDES=/usr/include
 
 # The path to the directory containing the X11 libraries.
