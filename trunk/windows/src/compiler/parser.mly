@@ -97,14 +97,15 @@
 
 %right prec_let
 %right prec_define
-%right WHERE prec_where
+%right WHERE
+%right AND
 %right SEMI
 %right prec_list
 %right prec_if
 %right COLONEQUAL LESSMINUS
 %left  AS
 %left  BAR
-%right COMMA
+%left  COMMA
 %right OR BACKSLASHSLASH
 %left  AMPERSAND SLASHBACKSLASH
 %left  NOT
@@ -162,47 +163,6 @@ Interface :
           { raise End_of_file }
 ;
 
-/* Auxiliaries for expressions. Must appear before Expr, for correct
-   resolution of reduce/reduce conflicts. */
-
-Simple_expr_list :
-        Simple_expr Simple_expr_list
-          { $1 :: $2 }
-      | Simple_expr
-          { [$1] }
-;
-
-Expr_comma_list :
-        Expr COMMA Expr_comma_list
-          { $1 :: $3 }
-      | Expr  %prec COMMA
-          { [$1] }
-;
-
-Expr_sm_list :
-        Expr_sm_list SEMI Expr  %prec prec_list
-          { $3 :: $1 }
-      | Expr  %prec prec_list
-          { [$1] }
-;
-
-Opt_semi :
-        SEMI            { () }
-      | /*epsilon*/     { () }
-;
-
-Expr_label :
-        Ext_ident EQUAL Expr
-          { (find_label $1, $3)  }
-;
-
-Expr_label_list :
-        Expr_label_list SEMI Expr_label  %prec prec_list
-          { $3 :: $1 }
-      | Expr_label  %prec prec_list
-          { [$1] }
-;
-
 /* Expressions */
 
 Expr :
@@ -210,8 +170,8 @@ Expr :
           { $1 }
       | Simple_expr Simple_expr_list   %prec prec_app
           { make_apply ($1, $2) }
-      | Expr COMMA Expr_comma_list
-          { make_expr(Ztuple($1::$3)) }
+      | Expr_comma_list
+          { make_expr(Ztuple(rev $1)) }
       | SUBTRACTIVE Expr  %prec prec_uminus
           { make_unary_minus $1 $2 }
       | NOT Expr
@@ -282,9 +242,9 @@ Expr :
           { make_expr(Zparser $3) }
       | TRY Expr WITH Opt_bar Try_match
 	  { make_expr(Ztrywith($2, $5)) }
-      | Expr WHERE Binding_list  %prec prec_where
+      | Expr WHERE Binding_list
           { make_expr(Zlet(false, $3, $1)) }
-      | Expr WHERE REC Binding_list  %prec prec_where
+      | Expr WHERE REC Binding_list  %prec WHERE
           { make_expr(Zlet(true, $4, $1)) }
 ;
 
@@ -323,6 +283,44 @@ Simple_expr :
           { make_binop "vect_item" $1 $3 }
       | Simple_expr DOTLBRACKET Expr RBRACKET  %prec DOT
           { make_binop "nth_char" $1 $3 }
+;
+
+Simple_expr_list :
+        Simple_expr Simple_expr_list
+          { $1 :: $2 }
+      | Simple_expr
+          { [$1] }
+;
+
+Expr_comma_list :
+        Expr_comma_list COMMA Expr
+          { $3 :: $1 }
+      | Expr COMMA Expr
+          { [$3; $1] }
+;
+
+Expr_sm_list :
+        Expr_sm_list SEMI Expr  %prec prec_list
+          { $3 :: $1 }
+      | Expr  %prec prec_list
+          { [$1] }
+;
+
+Opt_semi :
+        SEMI            { () }
+      | /*epsilon*/     { () }
+;
+
+Expr_label :
+        Ext_ident EQUAL Expr
+          { (find_label $1, $3)  }
+;
+
+Expr_label_list :
+        Expr_label_list SEMI Expr_label  %prec prec_list
+          { $3 :: $1 }
+      | Expr_label  %prec prec_list
+          { [$1] }
 ;
 
 /* Constants */
@@ -419,10 +417,10 @@ Pattern_label :
 ;
 
 Pattern_comma_list :
-        Pattern COMMA Pattern_comma_list
-          { $1 :: $3 }
-      | Pattern  %prec COMMA
-          { [$1] }
+        Pattern_comma_list COMMA Pattern
+          { $3 :: $1 }
+      | Pattern COMMA Pattern
+          { [$3; $1] }
 ;
   
 Simple_pattern_list :
@@ -440,8 +438,8 @@ Pattern :
       | Pattern COLONCOLON Pattern
           { make_pat(Zconstruct1pat(constr_cons,
               make_pat(Ztuplepat [$1; $3]))) }
-      | Pattern COMMA Pattern_comma_list
-          { make_pat(Ztuplepat($1 :: $3)) }
+      | Pattern_comma_list
+          { make_pat(Ztuplepat(rev $1)) }
       | Ext_ident Simple_pattern
           { make_pat(Zconstruct1pat (find_constructor $1, $2)) }
       | Pattern BAR Pattern
@@ -558,8 +556,8 @@ Ext_ident :
 Type :
         Simple_type
           { $1 }
-      | Type STAR Type_star_list
-          { make_typ(Ztypetuple($1 :: $3)) }
+      | Type_star_list
+          { make_typ(Ztypetuple(rev $1)) }
       | Type MINUSGREATER Type  %prec prec_typearrow
           { make_typ(Ztypearrow($1, $3)) }
 ;
@@ -578,10 +576,10 @@ Simple_type :
 ;
 
 Type_star_list :
-        Simple_type
-          { [$1] }
-      | Simple_type STAR Type_star_list
-          { $1 :: $3 }
+        Type_star_list STAR Simple_type
+          { $3 :: $1 }
+      | Simple_type STAR Simple_type
+          { [$3; $1] }
 ;
 
 Type_var :

@@ -55,19 +55,23 @@ let new_type_var_list n =
   type_var_list n !current_level
 ;;
 
-(* To compute the free nongeneric type variables in a type *)
+(* To compute the free type variables in a type *)
 
-let rec free_type_vars ty =
-  let ty = type_repr ty in
-  match ty.typ_desc with
-    Tvar _ ->
-      if ty.typ_level == generic then [] else [ty]
+let free_type_vars level ty =
+  let fv = ref [] in
+  let rec free_vars ty =
+    let ty = type_repr ty in
+    match ty.typ_desc with
+      Tvar _ ->
+        if ty.typ_level >= level then fv := ty :: !fv
   | Tarrow(t1,t2) ->
-      free_type_vars t1 @ free_type_vars t2
+      free_vars t1; free_vars t2
   | Tproduct(ty_list) ->
-      flat_map free_type_vars ty_list
+      do_list free_vars ty_list
   | Tconstr(c, ty_list) ->
-      flat_map free_type_vars ty_list
+      do_list free_vars ty_list in
+  free_vars ty;
+  !fv
 ;;
 
 (* To generalize a type *)
