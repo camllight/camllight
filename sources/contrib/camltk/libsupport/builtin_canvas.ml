@@ -1,3 +1,4 @@
+(* TagOrId is builtin  because of SearchSpec *)
 type TagOrId =
     Tag of string
   | Id of int ;;
@@ -14,16 +15,6 @@ let TKtoCAMLTagOrId n =
   with
     _ -> Tag n
 ;;
-
-let GetTagOrId port =
-  TKtoCAMLTagOrId (GetTkToken port)
-;;
-
-let GetTagOrIdList port =
-  map TKtoCAMLTagOrId (GetTkTokenList port)
-;;
-
-
 
 type SearchSpec =
     Above of TagOrId
@@ -70,6 +61,7 @@ let CAMLtoTKCanvasIndex = function
 ;;
 
 
+(* TODO: restrict event fields *)
 let canvas_bind widget tag eventsequence action =
   check_widget_class widget "canvas";
   Send2TkStart "$PipeTkCallB";
@@ -86,33 +78,20 @@ let canvas_bind widget tag eventsequence action =
   Send2TkEval()
 ;;
 
+(* TODO 
+  {set x [w bbox args]; 
 
-type CanvasCoordinates =
-    Pixels of float
-  | Millimeters of float
-  | Inches of float
-  | PrinterPoint of float
-  | Centimeters of float
-;;
+let bbox w a =
+	Send2TkStart "$PipeTkResult";
+	Send2Tk "puts $PipeTkResult [";
+	Send2Tk(widget_name w);
+	Send2Tk "bbox";
+	do_list (function x -> Send2Tk(CAMLtoTKTagOrId x)) a;
+	Send2Tk "]; flush $PipeTkResult";
+	Send2TkEval();
+        (float_of_string (GetTkToken !PipeTkResult)),
+	(float_of_string (GetTkToken !PipeTkResult)),
+	(float_of_string (GetTkToken !PipeTkResult)),
+	(float_of_string (GetTkToken !PipeTkResult));;
 
-
-let CAMLtoTKCanvasCoordinates = function
-    Pixels (foo) -> (string_of_float foo)
-  | Millimeters (foo)  -> (string_of_float foo)^"m"
-  | Inches (foo)  -> (string_of_float foo)^"i"
-  | PrinterPoint (foo) -> (string_of_float foo)^"p"
-  | Centimeters (foo) -> (string_of_float foo)^"c"
-;;
-
-(* Tk always returns pixels *)
-let TKtoCAMLCanvasCoordinates q = 
-  Pixels (float_of_string q)
-;;
-
-let GetCanvasCoordinates port = 
-  TKtoCAMLCanvasCoordinates (GetTkToken port)
-;;
-
-let GetCanvasCoordinatesList port = 
- map TKtoCAMLCanvasCoordinates (GetTkTokenList port)
-;;
+*)
