@@ -134,6 +134,9 @@ value open_out : string -> out_channel
            are detected and preserved. The object can be read back,
            by the function [input_value]. The format is compatible across
 	   all machines for a given version of Caml Light. *)
+  and output_compact_value : out_channel -> 'a -> unit = 2 "extern_compact_val"
+        (* Same as [output_value], but uses a different format, more compact,
+           but slower to generate and read back. *)
   and seek_out : out_channel -> int -> unit = 2 "seek_out"
         (* [seek_out chan pos] sets the current writing position to [pos]
            for channel [chan]. This works only for regular files. On
@@ -210,7 +213,8 @@ value open_in : string -> in_channel
 	   integer. *)
   and input_value : in_channel -> 'a = 1 "intern_val"
         (* Read the representation of a structured value, as produced
-           by [output_value], and return the corresponding value.
+           by [output_value] or [output_compact_value], and return
+           the corresponding value.
            This is not type-safe. The type of the returned object is
            not ['a] properly speaking: the returned object has one
            unique type, which cannot be determined at compile-time.

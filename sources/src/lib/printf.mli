@@ -30,11 +30,17 @@ value fprintf: out_channel -> string -> 'a
 -          [b]: convert a boolean argument to the string [true] or [false]
 -          Refer to the C library [printf] function for the meaning of
            flags and field width specifiers.
+
            The exception [Invalid_argument] is raised if the types of the
            provided arguments do not match the format. The exception is
            also raised if too many arguments are provided. If too few
            arguments are provided, printing stops just before converting
-           the first missing argument. *)
+           the first missing argument.
+
+           Even though this function performs a number of type checks at
+           run-time, it is not type-safe, since it returns a value with
+           static type ['a]. It is recommended to use always [fprintf]
+           in a sequence, as in: [fprintf chan "%d" n; ()]. *)
 
   and printf: string -> 'a
         (* Same as [fprintf], but output on [std_out]. *)
