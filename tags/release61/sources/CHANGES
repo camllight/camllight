@@ -1,0 +1,24 @@
+        Changes between Caml Light 0.5 and Caml Light 0.6
+        -------------------------------------------------
+
+* Better handling of type abbreviations. Implementing an abstract type
+  as an abbreviation now works correctly.
+
+* Debugging mode (option -g to camlc and camllight) to get access
+  to the internals of module implementations.
+
+* New library modules:
+        genlex    generic lexical analyser
+        set       applicative sets over ordered types
+        map       applicative maps over ordered types
+        baltree   balanced binary trees over ordered types
+
+* "compile" command at toplevel (especially useful in the Macintosh version).
+
+* New contributed libraries and tools:
+        camlmode  Emacs editing mode for Caml Light
+        mletags   Indexing of Caml Light source files for use with Emacs "tags"
+        libnum    Arbitrary-precision arithmetic
+        libstr    String operations, regular expressions
+
+* Many bug fixes.

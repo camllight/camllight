@@ -1,0 +1,32 @@
+To compile, just edit the variable definitions at the beginning of the
+Makefile, and do
+
+        make
+
+If everything goes well, become superuser and do
+
+        make install
+
+Then, to use the bignum library from your programs, just do
+
+        camlc -custom <other options> nums.zo <other .zo and .ml files> -lnums
+
+for the linking phase.
+
+If you'd like to have the bignum functions available at toplevel, just do
+
+        make camlnum
+
+to build a special toplevel named "camlnum" that comprises the bignum
+functions. To run this toplevel, do
+
+        camllight camlnum
+
+As an example, try:
+
+        #open "num";;
+        let rec fact n =
+          if n = 0 then Int 1 else mult_num (num_of_int n) (fact(n-1));;
+        string_of_num(fact 1000);;
+
+
