@@ -62,7 +62,7 @@ world:
          echo "fib 20;;") | ./camlrun toplevel/camltop -stdlib lib
 	@ echo "Is that 10946 on the line above? Good."
 	@ echo "The Caml Light system is up and running."
-	
+
 # Rebuild the system (bootstrap)
 bootstrap: backup promote again compare
 
@@ -97,6 +97,15 @@ compare:
 # Restore the latest backup copy of the compiler
 restore:
 	sh tools/restore camlrun camlcomp camllink camllibr camllex 
+
+# Compile all Caml code
+compile:
+	cd lib; make CPP="$(CPP)" all
+	cd compiler; make CPP="$(CPP)" all
+	cd linker; make CPP="$(CPP)" all
+	cd librar; make CPP="$(CPP)" all
+	cd lex; make CPP="$(CPP)" all
+	cd toplevel; make CPP="$(CPP)" all
 
 # Install the Caml Light system
 install:
