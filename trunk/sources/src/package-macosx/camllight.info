@@ -1,0 +1,10 @@
+Title Caml Light
+Version 0.75
+Description This package installs Caml Light version 0.75
+DefaultLocation /
+Relocatable no
+NeedsAuthorization yes
+Application no
+DeleteWarning Caml Light is a cool language.
+InstallOnly no
+DisableStop no
