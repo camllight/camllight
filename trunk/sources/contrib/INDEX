@@ -12,24 +12,14 @@ profiler
   A profiler for Caml Light programs. Counts the number of times functions
   are called, and conditional branches are selected.
 
-camltk
-------
+camltk4
+-------
   An X Windows toolkit to build graphical user interfaces, built on top of
   Tcl/Tk.
 
   Requirements:
-        - X11R5 or later
-        - Tk 3.3 or later (tested on 3.6)
-        - a full installation of Tcl/Tk (including the libraries libtcl.a
-          and libtk.a, and the wish interpreter)
-        - the "libunix" package
-
-camltk4
--------
-  Same as camltk, but for Tk 4.0
-  Requirements:
-        - X11R5 or later
-        - Tk 4.0
+        - X11R6
+        - Tk 8.0 or later
         - a full installation of Tcl/Tk (including the libraries libtcl.a
           and libtk.a, and the wish interpreter)
         - the "libunix" package
@@ -39,9 +29,9 @@ libgraph
   An X Windows implementation of the portable drawing library "graphics".
 
   Requirements:
-        - X11R4 or later
+        - X11R6
         - the "libunix" package
-  
+
 libunix
 -------
   A library of Unix system calls, to support systems programming in Caml Light.
@@ -60,7 +50,7 @@ mletags
   A tool to index Caml Light sources and generate "tag" files for Gnu Emacs.
 
   Requirements:
-        - Gnu Emacs 18 or 19
+        - Gnu Emacs 18 or later
 
 camlmode
 --------
@@ -68,7 +58,7 @@ camlmode
   run the toplevel under Gnu Emacs.
 
   Requirements:
-        - Gnu Emacs 19
+        - Gnu Emacs 19 or later
 
 caml-tex
 --------
@@ -79,7 +69,7 @@ caml-tex
         - Perl
 
 caml-latex2e
---------
+------------
   Enhanced version of caml-tex, for use with Latex2e.
 
   Requirements:
