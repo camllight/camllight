@@ -64,14 +64,15 @@ try
     input_lexbuf := lexbuf;
     while true do
       try
+        flush std_err;
         print_string toplevel_input_prompt;
         print_flush ();
+        flush std_out;
         reset_rollback();
         do_toplevel_phrase(parse_impl_phrase lexbuf)
       with End_of_file ->
              io__exit 0
          | Toplevel ->
-             flush std_err;
              rollback ()
          | sys__Break ->
              print_string(interntl__translate "Interrupted.\n");

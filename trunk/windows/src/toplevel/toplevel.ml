@@ -155,17 +155,17 @@ let rec trace_instr name val ty =
       let namestar = name ^ "*" in
       repr(fun arg ->
         print_string name; print_string " <-- ";
-        print_value arg t1; print_newline ();
+        print_value arg t1; print_newline (); flush std_out;
         try
           let res = (magic_obj val : obj -> obj) arg in
            print_string name; print_string " --> ";
-           print_value res t2; print_newline ();
+           print_value res t2; print_newline (); flush std_out;
            trace_instr namestar res t2
         with exc ->
            print_string name;
            print_string " raises ";
            print_value (repr exc) builtins__type_exn;
-           print_newline ();
+           print_newline (); flush std_out;
            raise exc)
   | Tconstr({info = {ty_abbr = Tabbrev(params, body)}}, args) ->
       trace_instr name val (expand_abbrev params body args)
