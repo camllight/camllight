@@ -8,23 +8,29 @@ value vect_item : 'a vect -> int -> 'a
            The first element has number 0.
            The last element has number [vect_length v - 1].
            Raise [Invalid_argument "vect_item"]  if [n] is outside the range
-           0 -- [(vect_length v - 1)].
+           0 to [(vect_length v - 1)].
            You can also write [v.(n)] instead of [vect_item v n]. *)
   and vect_assign : 'a vect -> int -> 'a -> unit
         (* [vect_assign v n x] modifies vector [v] in place, replacing
            element number [n] with [x].
            Raise [Invalid_argument "vect_assign"] if [n] is outside the range
-           0 -- [vect_length v - 1].
+           0 to [vect_length v - 1].
            You can also write [v.(n) <- x] instead of [vect_assign v n x]. *)
 ;;
 value make_vect : int -> 'a -> 'a vect
-        (* [make_vect n x] returns a fresh vector of length [n], initialized with [x].
-	   All the elements of this new vector are initially [eq] to [x]. *)
+        (* [make_vect n x] returns a fresh vector of length [n],
+           initialized with [x].
+	   All the elements of this new vector are initially
+           physically equal to [x] (see module [eq]). Consequently, if [x]
+           is mutable, it is shared among all elements of the vector,
+           and modifying [x] through one of the vector entries will modify
+           all other entries at the same time. *)
   and make_matrix : int -> int -> 'a -> 'a vect vect
         (* [make_matrix dimx dimy e] returns a two-dimensional array
            (a vector of vectors) with first dimension [dimx] and
            second dimension [dimy]. All the elements of this new matrix
-	   are initially [eq] to [e]. The element ([x,y]) of a matrix [m] is accessed
+	   are initially physically equal to [e].
+           The element ([x,y]) of a matrix [m] is accessed
            with the notation [m.(x).(y)]. *)  
 ;;
 value concat_vect : 'a vect -> 'a vect -> 'a vect
@@ -42,7 +48,7 @@ value concat_vect : 'a vect -> 'a vect -> 'a vect
            containing the same elements as [v]. *)
 ;;
 value fill_vect : 'a vect -> int -> int -> 'a -> unit
-        (* [fill_vect v ofs len x] modifies vector [v] in place,
+        (* [fill_vect v ofs len x] modifies the vector [v] in place,
            storing [x] in elements number [ofs] to [ofs + len - 1].
            Raise [Invalid_argument "fill_vect"] if [ofs] and [len] do not
            designate a valid subvector of [v]. *)

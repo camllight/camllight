@@ -1,13 +1,16 @@
-(* Pretty print *)
+(* Pretty printing *)
 
 (* This module implements a pretty-printing facility to format text
-   within ``pretty-printing boxes''; the pretty-printer breaks lines
-   using specified break hints. The behaviour of pretty-printing
-   commands is unspecified if there is no opened pretty-printing box. *)
+   within ``pretty-printing boxes''. The pretty-printer breaks lines
+   at specified break hints, and indents lines according to the box structure.
+*)
+
+(* The behaviour of pretty-printing commands is unspecified
+   if there is no opened pretty-printing box. *)
 
 #open "io";;
 
-(* Boxes *)
+(*** Boxes *)
 value open_vbox : int -> unit;;
         (* [open_vbox d] opens a new pretty-printing box
            with offset [d]. 
@@ -24,7 +27,7 @@ value open_hvbox : int -> unit;;
            with offset [d]. 
            This box is ``horizontal-vertical'': it behaves as an
            ``horizontal'' box if it fits on a single line,
-           otherwise it behaves as a ``vertical'' one.
+           otherwise it behaves as a ``vertical'' box.
            When a new line is printed in the box, [d] is added to the
            current indentation. *)
 value open_hovbox : int -> unit;;
@@ -32,13 +35,13 @@ value open_hovbox : int -> unit;;
            with offset [d]. 
            This box is ``horizontal or vertical'': break hints
            inside this box may lead to a new line, if there is no more room
-           on the line to print the rest of the box.
+           on the line to print the remainder of the box.
            When a new line is printed in the box, [d] is added to the
            current indentation. *)
 value close_box : unit -> unit;;
         (* Close the most recently opened pretty-printing box. *)
 
-(* Formatting functions *)
+(*** Formatting functions *)
 value print_string : string -> unit;;
         (* [print_string str] prints [str] in the current box. *)
 value print_as : int -> string -> unit;;
@@ -54,14 +57,15 @@ value print_char : char -> unit;;
 value print_bool : bool -> unit;;
         (* Print an boolean in the current box. *)
 
-(* Breaking hints *)
+(*** Break hints *)
 value print_break : int * int -> unit;;
-        (* Break hint in a pretty-printing box.
+        (* Insert a break hint in a pretty-printing box.
            [print_break (nspaces, offset)] indicates that the line may
            be split (a newline character is printed) at this point,
            if the contents of the current box does not fit on one line.
            If the line is split at that point, [offset] is added to
-           the current indentation, otherwise [nspaces] spaces are printed. *)
+           the current indentation. If the line is not split,
+           [nspaces] spaces are printed. *)
 value print_cut : unit -> unit;;
         (* [print_cut ()] is equivalent to [print_break (0,0)].
            This allows line splitting at the current point, without printing
@@ -82,13 +86,11 @@ value print_if_newline : unit -> unit;;
         (* If the preceding line has not been split, the next formatting command
            is ignored. *)
 
-(* Tabulation boxes *)
+(*** Tabulations *)
 value open_tbox : unit -> unit;;
         (* Open a tabulation box. *)
 value close_tbox : unit -> unit;;
         (* Close the most recently opened tabulation box. *)
-
-(* Tabulation breaks *)
 value print_tbreak : int * int -> unit;;
         (* Break hint in a tabulation box.
            [print_tbreak (spaces, offset)] moves the insertion point to
@@ -105,7 +107,7 @@ value set_tab : unit -> unit;;
 value print_tab : unit -> unit;;
         (* [print_tab ()] is equivalent to [print_tbreak (0,0)]. *)
 
-(* Margin *)
+(*** Margin *)
 value set_margin : int -> unit;;
         (* [set_margin d] sets the value of the right margin
            to [d] (in characters): this value is used to detect line
@@ -114,7 +116,7 @@ value set_margin : int -> unit;;
 value get_margin : unit -> int;;
         (* Return the position of the right margin. *)
 
-(* Maximum indentation limit *)
+(*** Maximum indentation limit *)
 value set_max_indent : int -> unit;;
         (* [set_max_indent d] sets the value of the maximum
            indentation limit to [d] (in characters):
@@ -124,7 +126,7 @@ value get_max_indent : unit -> int;;
         (* Return the value of the maximum indentation limit (in
            characters). *)
 
-(* Formatting depth: maximum number of boxes allowed before ellipsis *)
+(*** Formatting depth: maximum number of boxes allowed before ellipsis *)
 value set_max_print_depth : int -> unit;;
         (* [set_max_print_depth max_depth] sets the maximum number
            of boxes simultaneously opened.
@@ -135,14 +137,14 @@ value set_max_print_depth : int -> unit;;
 value get_max_print_depth : unit -> int;;
         (* Return the maximum number of boxes allowed before ellipsis. *)
 
-(* Ellipsis *)
+(*** Ellipsis *)
 value set_ellipsis_text : string -> unit;;
         (* Set the text of the ellipsis printed when too many boxes
-           are opened (by default: [.]). *)
+           are opened (a single dot, [.], by default). *)
 value get_ellipsis_text : unit -> string;;
         (* Return the the text of the ellipsis. *)
 
-(* Redirecting formatter output *)
+(*** Redirecting formatter output *)
 value set_formatter_output : out_channel -> unit;;
         (* Redirect the pretty-printer output to the given channel. *)
 value get_formatter_output : unit -> out_channel;;

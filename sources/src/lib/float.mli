@@ -25,7 +25,7 @@ value minus : float -> float = 1 "~float"
   and prefix / : float -> float -> float = 2 "/"
   and prefix /. : float -> float -> float = 2 "/"
   and div_float : float -> float -> float = 2 "/"
-        (* Division. The result is unpredictable if the dividend is 0.0. *)
+        (* Division. Raise [Division_by_zero] if the dividend is 0.0. *)
   and prefix ** : float -> float -> float = 2 "power_float"
   and prefix **. : float -> float -> float = 2 "power_float"
   and power : float -> float -> float = 2 "power_float"

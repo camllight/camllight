@@ -1,6 +1,8 @@
 (* Operations on references *)
 
 type 'a ref = ref of mutable 'a;;
+        (* The type of references (mutable indirection cells) containing
+           a value of type ['a]. *)
 
 value prefix ! : 'a ref -> 'a = 1 "field0"
         (* [!r] returns the current contents of reference [r].

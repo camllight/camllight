@@ -3,6 +3,10 @@
 #open "io";;
 
 type ('a, 'b, 'c) format;;
+        (* The type of format strings. ['a] is the type of the parameters
+           of the string, ['c] is the result type for the [printf]-style
+           function, and ['b] is the type of the first argument given to
+           [%a] and [%t] printing functions. *)
 
 value fprintf: out_channel -> ('a, out_channel, unit) format -> 'a
         (* [fprintf outchan format arg1 ... argN] formats the arguments
@@ -30,6 +34,14 @@ value fprintf: out_channel -> ('a, out_channel, unit) format -> 'a
 -          [g] or [G]: convert a floating-point argument to decimal notation,
                 in style [f] or [e], [E] (whichever is more compact)
 -          [b]: convert a boolean argument to the string [true] or [false]
+-          [a]: user-defined printer. Takes two arguments and apply the first
+                one to [outchan] (the current output channel) and to the second
+                argument. The first argument must therefore have type
+                [out_channel -> 'b -> unit] and the second ['b].
+                The output produced by the function is therefore inserted
+                in the output of [fprintf] at the current point.
+-          [t]: same as [%a], but takes only one argument (with type
+                [out_channel -> unit]) and apply it to [outchan].
 -          Refer to the C library [printf] function for the meaning of
            flags and field width specifiers.
 
@@ -37,12 +49,7 @@ value fprintf: out_channel -> ('a, out_channel, unit) format -> 'a
            provided arguments do not match the format. The exception is
            also raised if too many arguments are provided. If too few
            arguments are provided, printing stops just before converting
-           the first missing argument.
-
-           Even though this function performs a number of type checks at
-           run-time, it is not type-safe, since it returns a value with
-           static type ['a]. It is recommended to use always [fprintf]
-           in a sequence, as in: [fprintf chan "%d" n; ()]. *)
+           the first missing argument. *)
 
   and printf: ('a, out_channel, unit) format -> 'a
         (* Same as [fprintf], but output on [std_out]. *)
@@ -52,7 +59,8 @@ value fprintf: out_channel -> ('a, out_channel, unit) format -> 'a
 
   and fprint: out_channel -> string -> unit
         (* Print the given string on the given output channel, without
-           any formatting. *)
+           any formatting. This is the same function as [output_string]
+           of module [io]. *)
 
   and print: string -> unit
         (* Print the given string on [std_out], without any formatting.

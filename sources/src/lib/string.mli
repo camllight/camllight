@@ -8,12 +8,14 @@ value nth_char : string -> int -> char
            The first character is character number 0.
            The last character is character number [string_length s - 1].
            Raise [Invalid_argument "nth_char"] if [n] is ouside the range
-           0 -- [(string_length s - 1)]. *)
+           0 to [(string_length s - 1)].
+           You can also write [s.[n]] instead of [nth_char s n]. *)
   and set_nth_char : string -> int -> char -> unit
         (* [set_nth_char s n c] modifies string [s] in place,
            replacing the character number [n] by [c].
            Raise [Invalid_argument "set_nth_char"] if [n] is ouside the range
-           0 to [(string_length s - 1)]. *)
+           0 to [(string_length s - 1)].
+           You can also write [s.[n] <- c] instead of [set_nth_char s n c]. *)
 ;;
 value prefix ^ : string -> string -> string
         (* [s1 ^ s2] returns a fresh string containing the concatenation of

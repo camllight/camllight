@@ -15,8 +15,8 @@ STD_INTF= arg.zi bool.zi char.zi string.zi vect.zi eq.zi exc.zi \
 
 # The list of all implementations. In dependency order.
 
-STD_IMPL= bool.zo eq.zo exc.zo int.zo float.zo fstring.zo string.zo fchar.zo \
-    char.zo list.zo fvect.zo vect.zo io.zo pair.zo arg.zo \
+STD_IMPL= bool.zo eq.zo exc.zo int.zo fstring.zo string.zo fchar.zo \
+    char.zo float.zo list.zo fvect.zo vect.zo io.zo pair.zo arg.zo \
     filename.zo hashtbl.zo lexing.zo parsing.zo printexc.zo sort.zo \
     printf.zo stream.zo stack.zo queue.zo format.zo random.zo genlex.zo \
     baltree.zo set.zo map.zo
@@ -63,8 +63,10 @@ genlex.zi: stream.zi
 io.zi: sys.zi 
 iparsing.zi: parsing.zi obj.zi 
 lexing.zi: io.zi obj.zi 
+map.zi: eq.zi 
 parsing.zi: lexing.zi obj.zi 
 printf.zi: io.zi 
+set.zi: eq.zi 
 stream.zi: io.zi 
 arg.zo: arg.zi eq.zi exc.zi sys.zi fchar.zi fstring.zi list.zi io.zi \
     float.zi fvect.zi int.zi 
@@ -75,7 +77,7 @@ eq.zo: eq.zi
 exc.zo: exc.zi 
 fchar.zo: fchar.zi fstring.zi int.zi 
 filename.zo: filename.zi exc.zi eq.zi fstring.zi int.zi 
-float.zo: float.zi 
+float.zo: float.zi fchar.zi fstring.zi 
 format.zo: format.zi eq.zi exc.zi bool.zi queue.zi fchar.zi fstring.zi \
     io.zi ref.zi float.zi int.zi 
 fstring.zo: fstring.zi eq.zi fchar.zi ref.zi int.zi 

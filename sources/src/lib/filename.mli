@@ -16,7 +16,7 @@ value current_dir_name : string
   and chop_suffix : string -> string -> string
         (* [chop_suffix name suff] removes the suffix [suff] from 
            the filename [name]. The behavior is undefined if [name] does not
-           end up with the suffix [suff]. *)
+           end with the suffix [suff]. *)
   and basename : string -> string
   and dirname : string -> string
         (* Split a file name into directory name / base file name.

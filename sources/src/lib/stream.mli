@@ -3,6 +3,7 @@
 #open "io";;
 
 type 'a stream;;
+  (* The type of streams containing values of type ['a]. *)
 
 exception Parse_failure;;
   (* Raised by parsers when none of the first component of the stream patterns

@@ -3,8 +3,6 @@
 #open "obj";;
 #open "lexing";;
 
-(* The following functions can be called by user code. *)
-
 value symbol_start : unit -> int
   and symbol_end : unit -> int
         (* [symbol_start] and [symbol_end] are to be called in the action part
