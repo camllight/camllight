@@ -1,5 +1,4 @@
-;;; Run camldebug under Emacs
-;;; Derived from gdb.el.
+;;; Run gdb under Emacs
 ;;; Author: W. Schelter, University of Texas
 ;;;     wfs@rascal.ics.utexas.edu
 ;;; Rewritten by rms.
@@ -23,12 +22,48 @@
 ;; things, the copyright notice and this notice must be preserved on all
 ;; copies.
 
+;; Description of GDB interface:
+
+;; A facility is provided for the simultaneous display of the source code
+;; in one window, while using gdb to step through a function in the
+;; other.  A small arrow in the source window, indicates the current
+;; line.
+
+;; Starting up:
+
+;; In order to use this facility, invoke the command GDB to obtain a
+;; shell window with the appropriate command bindings.  You will be asked
+;; for the name of a file to run.  Gdb will be invoked on this file, in a
+;; window named *gdb-foo* if the file is foo.
+
+;; M-s steps by one line, and redisplays the source file and line.
+
+;; You may easily create additional commands and bindings to interact
+;; with the display.  For example to put the gdb command next on \M-n
+;; (def-gdb next "\M-n")
+
+;; This causes the emacs command gdb-next to be defined, and runs
+;; gdb-display-frame after the command.
+
+;; gdb-display-frame is the basic display function.  It tries to display
+;; in the other window, the file and line corresponding to the current
+;; position in the gdb window.  For example after a gdb-step, it would
+;; display the line corresponding to the position for the last step.  Or
+;; if you have done a backtrace in the gdb buffer, and move the cursor
+;; into one of the frames, it would display the position corresponding to
+;; that frame.
+
+;; gdb-display-frame is invoked automatically when a filename-and-line-number
+;; appears in the output.
+
+
 (require 'comint)
 (require 'shell)
 (require 'caml)
 
 ;;; Variables.
 
+(defvar camldebug-lucid (string-match "Lucid" emacs-version))
 (defvar camldebug-emacs-19 (not (string-lessp emacs-version "19")))
 
 (defvar camldebug-last-frame)
@@ -42,46 +77,31 @@
 (defvar camldebug-mode-map nil
   "Keymap for camldebug-mode.")
 
-(defvar camldebug-overlay-event nil
-  "Overlay for displaying the current event.")
-(defvar camldebug-overlay-under nil
-  "Overlay for displaying the current event.")
-(defvar camldebug-event-marker nil
-  "Marker for displaying the current event.")
-
-(cond ((and camldebug-emacs-19 window-system)
-       (make-face 'camldebug-event)
-       (make-face 'camldebug-underline)
-       (if (not (face-differs-from-default-p 'camldebug-event))
-           (invert-face 'camldebug-event))
-       (if (not (face-differs-from-default-p 'camldebug-underline))
-           (set-face-underline-p 'camldebug-underline t))
-       (setq camldebug-overlay-event (make-overlay 1 1))
-       (overlay-put camldebug-overlay-event 'face 'camldebug-event)
-       (setq camldebug-overlay-under (make-overlay 1 1))
-       (overlay-put camldebug-overlay-under 'face 'camldebug-underline))
-      (t
-       (setq camldebug-event-marker (make-marker))
-       (setq overlay-arrow-string "=>")))
+(if (and camldebug-emacs-19 window-system)
+    (progn
+      (make-face 'camldebug-current-event)
+      (if (not (face-differs-from-default-p 'camldebug-current-event))
+	  (invert-face 'camldebug-current-event))))
 
 ;;; Keymaps.
 
 (if camldebug-mode-map
    nil
-  (setq camldebug-mode-map
-        (if camldebug-emacs-19
-            (cons 'keymap comint-mode-map)
-            (copy-keymap comint-mode-map)))
+  (cond (camldebug-lucid
+	 (setq camldebug-mode-map (make-sparse-keymap))
+	 (set-keymap-name camldebug-mode-map 'camldebug-mode-map)
+	 (set-keymap-parent camldebug-mode-map comint-mode-map))
+	(camldebug-emacs-19
+	 (setq camldebug-mode-map (cons 'keymap comint-mode-map)))
+	(t
+	 (setq camldebug-mode-map (copy-keymap comint-mode-map))))
   (define-key camldebug-mode-map "\C-l" 'camldebug-refresh)
   (define-key camldebug-mode-map "\C-c\C-c" 'camldebug-control-c-subjob)
   (define-key camldebug-mode-map "\t" 'comint-dynamic-complete)
-  (define-key camldebug-mode-map "\M-?" 'comint-dynamic-list-completions)
-  (if camldebug-emacs-19
-      (define-key camldebug-mode-map [double-mouse-1] 'camldebug-more)))
+  (define-key camldebug-mode-map "\M-?" 'comint-dynamic-list-completions))
 
-(if caml-mode-map
-    (progn
-      (define-key caml-mode-map "\C-x " 'camldebug-break)))
+;(define-key ctl-x-map " " 'camldebug-break)
+;(define-key ctl-x-map "&" 'send-camldebug-command)
 
 ;;Of course you may use `def-camldebug' with any other camldebug command.
 
@@ -120,8 +140,8 @@ The following commands are available:
 \\[camldebug-display-frame] displays in the other window
 the last line referred to in the camldebug buffer.
 
-\\[camldebug-step], \\[camldebug-back] and \\[camldebug-next], in the camldebug window,
-call camldebug to step, backstep or next and then update the other window
+\\[camldebug-step],\\[camldebug-next], and \\[camldebug-nexti] in the camldebug window,
+call camldebug to step,next or nexti and then update the other window
 with the current file and position.
 
 If you are in a source file, you may select a point to break
@@ -133,6 +153,7 @@ Additionally we have:
 
 \\[camldebug-display-frame] display frames file in other window
 \\[camldebug-step] advance one line in program
+\\[send-camldebug-command] used for special printing of an arg at the current point.
 C-x SPACE sets break point at current line."
   (interactive)
   (comint-mode)
@@ -210,28 +231,21 @@ the camldebug commands `cd DIR' and `directory'."
       (if (= (aref string 1) ?\032)
 	  (let ((end (string-match "\n" string)))
 	    (if end
-                (let ((cmd (aref string 2)))
-                  (cond
-                   ((eq cmd ?M)         ; Insert mark
-                    (let* ((first-colon (string-match ":" string 3))
-                           (second-colon
-                            (string-match ":" string (1+ first-colon))))
-                      (setq camldebug-last-frame
-                            (cons (substring string 3 first-colon)
-                                  (cons (string-to-int
-                                         (substring string
-                                                    (1+ first-colon)
-                                                    second-colon))
-                                        (equal "before"
-                                               (substring string
-                                                          (1+ second-colon)
-                                                          end))))))
-                    (setq camldebug-last-frame-displayed-p nil))
-                   ((eq cmd ?H)         ; Hide mark
-		    (setq camldebug-last-frame nil)
-		    (setq camldebug-last-frame-displayed-p t)
-		    (camldebug-remove-current-event)))
-                  (camldebug-filter-scan-input proc
+		(progn
+		  (let* ((first-colon (string-match ":" string 2))
+			 (second-colon
+			  (string-match ":" string (1+ first-colon))))
+		    (setq camldebug-last-frame
+			  (cons (substring string 2 first-colon)
+				(cons       (string-to-int
+					     (substring string (1+ first-colon)
+							second-colon))
+					    (equal "before"
+						   (substring string
+							      (1+ second-colon)
+							      end))))))
+		  (setq camldebug-last-frame-displayed-p nil)
+		  (camldebug-filter-scan-input proc
 					       (substring string (1+ end))))
 	      (setq camldebug-filter-accumulator string)))
 	(camldebug-filter-insert proc "\032")
@@ -278,11 +292,11 @@ the camldebug commands `cd DIR' and `directory'."
   (cond ((null (buffer-name (process-buffer proc)))
 	 ;; buffer killed
 	 ;; Stop displaying an arrow in a source file.
-	 (camldebug-remove-current-event)
+	 (camldebug-remove-events)
 	 (set-process-buffer proc nil))
 	((memq (process-status proc) '(signal exit))
 	 ;; Stop displaying an arrow in a source file.
-	 (camldebug-remove-current-event)
+	 (camldebug-remove-events)
 	 ;; Fix the mode line.
 	 (setq mode-line-process
 	       (concat ": "
@@ -350,31 +364,54 @@ Obeying it means displaying in another window the specified file and line."
 
 ;;; Events.
 
-(defun camldebug-remove-current-event ()
-  (if (and camldebug-emacs-19 window-system)
-      (progn
-        (delete-overlay camldebug-overlay-event)
-        (delete-overlay camldebug-overlay-under))
-    (setq overlay-arrow-position nil)))
+(if camldebug-lucid
+    (require 'annotations))
 
-(defun camldebug-set-current-event (pos buffer before)
-  (if (and camldebug-emacs-19 window-system)
+(defvar camldebug-current-event nil)
+
+(defun camldebug-remove-events ()
+  (camldebug-remove-current-event))
+
+(defun camldebug-remove-current-event ()
+  (condition-case nil
+      (if camldebug-current-event
+	  (if (and camldebug-lucid window-system)
+	      (delete-annotation camldebug-current-event)
+	    (save-excursion
+	      (widen)
+	      (set-buffer (car (car camldebug-current-event)))
+	      (goto-char (cdr (car camldebug-current-event)))
+	      (let (buffer-read-only)
+		(delete-char 5))
+	      (setq buffer-read-only (car (car (cdr camldebug-current-event))))
+	      (setq buffer-undo-list (cdr (car (cdr camldebug-current-event))))
+	      (set-buffer-modified-p (cdr (cdr camldebug-current-event)))
+	      )))
+    (error nil))
+  (setq camldebug-current-event nil))
+
+(defun camldebug-set-current-event (pos buffer kind)
+  (camldebug-remove-current-event)
+  (if (and camldebug-lucid window-system)
       (progn
-        (if (save-excursion
-              (set-buffer before)
-              (goto-char (1+ pos))
-              (looking-at "\n"))
-            (setq pos (1- pos)))
-        (move-overlay camldebug-overlay-event pos (1+ pos) buffer)
-        (if before
-            (move-overlay camldebug-overlay-under (+ pos 1) (+ pos 3) buffer)
-          (move-overlay camldebug-overlay-under (- pos 2) pos buffer)))
+	(setq camldebug-current-event
+	      (make-annotation (if kind "<|b|>" "<|a|>") pos 'text buffer))
+	(set-annotation-face camldebug-current-event
+			     'camldebug-current-event))
     (save-excursion
       (set-buffer buffer)
       (goto-char pos)
-      (beginning-of-line)
-      (move-marker camldebug-event-marker (point))
-      (setq overlay-arrow-position camldebug-event-marker))))
+      (let ((buffer-state (cons (cons buffer-read-only buffer-undo-list)
+				(buffer-modified-p))))
+	(setq buffer-read-only t)
+	(let (buffer-read-only)
+	  (insert (if kind "<|b|>" "<|a|>"))
+	  (if (and camldebug-emacs-19 window-system)
+	      (overlay-put (make-overlay pos (point))
+			   'face 'camldebug-current-event)
+	      )
+	  (setq camldebug-current-event (cons (cons buffer pos)
+					      buffer-state)))))))
 
 ;;; Miscellaneous.
 
@@ -426,29 +463,62 @@ Obeying it means displaying in another window the specified file and line."
   "Set CDB breakpoint at this source line."
   (interactive)
   (let ((file-name (file-name-nondirectory buffer-file-name))
-        (pos (point)))
+	(line (save-restriction
+		(widen)
+		(beginning-of-line)
+		(1+ (count-lines 1 (point))))))
     (process-send-string (get-buffer-process current-camldebug-buffer)
-			 (format "break @ %s # %d\n"
-                                 (camldebug-module-name file-name)
-				 (1- pos)))))
+			 (concat "break @ "
+				 (camldebug-module-name file-name)
+				 " "
+				 line
+				 "\n"))))
 
-(defun camldebug-more (ev)
-  "Print ellipsed value."
-  (interactive "e")
-  (let* ((click-posn (event-start click))
-         (click-point (posn-point click-posn))
-         (click-window (posn-window click-posn)))
-    (select-window click-window)
-    (save-excursion
-      (goto-char click-point)
-      (skip-chars-backward "^<")
-      (if (and (> (point) (point-min))
-               (forward-char -1)
-               (looking-at "<\\([0-9]+\\)>"))
-          (process-send-string
-           (get-buffer-process current-camldebug-buffer)
-           (format "more %s\n"
-                   (buffer-substring (match-beginning 1) (match-end 1))))))))
+(defun camldebug-read-address ()
+  "Return a string containing the core-address found in the buffer at point."
+  (save-excursion
+   (let ((pt (point)) found begin)
+     (setq found (if (search-backward "0x" (- pt 7) t)(point)))
+     (cond (found (forward-char 2)
+		  (buffer-substring found
+				    (progn (re-search-forward "[^0-9a-f]")
+					   (forward-char -1)
+					   (point))))
+	   (t (setq begin (progn (re-search-backward "[^0-9]") (forward-char 1)
+				 (point)))
+	      (forward-char 1)
+	      (re-search-forward "[^0-9]")
+	      (forward-char -1)
+	      (buffer-substring begin (point)))))))
+
+
+(defvar camldebug-commands nil
+  "List of strings or functions used by send-camldebug-command.
+It is for customization by you.")
+
+(defun send-camldebug-command (arg)
+
+  "This command reads the number where the cursor is positioned.  It
+ then inserts this ADDR at the end of the camldebug buffer.  A numeric arg
+ selects the ARG'th member COMMAND of the list camldebug-print-command.  If
+ COMMAND is a string, (format COMMAND ADDR) is inserted, otherwise
+ (funcall COMMAND ADDR) is inserted.  eg. \"p (rtx)%s->fld[0].rtint\"
+ is a possible string to be a member of camldebug-commands.  "
+
+
+  (interactive "P")
+  (let (comm addr)
+    (if arg (setq comm (nth arg camldebug-commands)))
+    (setq addr (camldebug-read-address))
+    (if (eq (current-buffer) current-camldebug-buffer)
+	(set-mark (point)))
+    (cond (comm
+	   (setq comm
+		 (if (stringp comm) (format comm addr) (funcall comm addr))))
+	  (t (setq comm addr)))
+    (switch-to-buffer current-camldebug-buffer)
+    (goto-char (point-max))
+    (insert comm)))
 
 (defun camldebug-control-c-subjob ()
   "Send a Control-C to the subprocess."
