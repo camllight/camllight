@@ -1,35 +1,3 @@
-(* Various indexes
-    canvas
-    entry
-    listbox
-*)
-
-(* This type is here because of dependencies with AnchorPoint *)
-type Anchor =
-	SE		(* tk option: se *)
-	| S		(* tk option: s *)
-	| SW		(* tk option: sw *)
-	| E		(* tk option: e *)
-	| Center		(* tk option: center *)
-	| W		(* tk option: w *)
-	| NE		(* tk option: ne *)
-	| N		(* tk option: n *)
-	| NW		(* tk option: nw *)
-;;
-
-let CAMLtoTKAnchor = function
-	SE -> TkToken"se"
-	| S -> TkToken"s"
-	| SW -> TkToken"sw"
-	| E -> TkToken"e"
-	| Center -> TkToken"center"
-	| W -> TkToken"w"
-	| NE -> TkToken"ne"
-	| N -> TkToken"n"
-	| NW -> TkToken"nw"
-;;
-
-
 (* A large type for all indices in all widgets *)
 (* a bit overkill though *)
 

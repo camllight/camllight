@@ -1,18 +1,19 @@
-# Set environment variable PROF to -p to obtained profiled version
-PROFILING=${CAMLPROF}
 CAMLC=camlc
-CAMLCOMP=$(CAMLC) -c $(PROFILING)
+CAMLCOMP=$(CAMLC) -c
 CPP=/lib/cpp -P -Dunix
 COMPFLAGS=-W -O fast -g -I ../../libunix
-LINKFLAGS=-g $(PROFILING)
+LINKFLAGS=-g
 CAMLYACC=camlyacc -v
 CAMLLEX=camllex
 CAMLDEP=../../../src/tools/camldep
-X11_INCLUDES=/usr/include
-TCLINCLDIR=/usr/local/lib/tcl/include
-TKINCLDIR=/usr/local/lib/tk/include
 RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
 RANLIB=ranlib
+
+LIBDIR=/usr/local/lib/caml-light
+
+X11_INCLUDES=/usr/include
+TCLINCLDIR=/usr/local/lib/tcl7.4/include
+TKINCLDIR=/usr/local/lib/tk4.0/include
 
 all: hashtblc.zo support.zo protocol.zo textvariable.zo optionmenu.zo \
      camltk.zi libcamltk4.a
