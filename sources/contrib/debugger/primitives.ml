@@ -17,6 +17,16 @@ let assoc_remove lst elem =
       else c::(remove t)
   in remove lst;;
 
+(* Nth element of a list. *)
+let rec list_nth =
+  fun
+    [] _ ->
+      raise (Invalid_argument "list_nth")
+  | (a::_) 0 ->
+      a
+  | (_::l) n ->
+      list_nth l (n - 1);;
+
 (* Return the `n' first elements of `l' *)
 (* ### n l -> l' *)
 let rec list_truncate =
@@ -119,61 +129,3 @@ let close_io io_channel =
   close_in io_channel.Io_in;;
 
 let std_io = {Io_in = std_in; Io_out = std_out; Io_fd = stdin};;
-
-(*** Path expansion. ***)
-
-(* Expand a path. *)
-(* ### path -> path' *)
-let rec expand_path ch =
-  let rec subst_variable ch =
-    try
-      let pos = string_pos ch `$` in
-        if (pos + 1 < string_length ch) & (nth_char ch (pos + 1) = `$`) then
-      	  (sub_string ch 0 (pos + 1))
-	    ^ (subst_variable
-      	         (sub_string ch (pos + 2) (string_length ch - pos - 2)))
-        else
-          (sub_string ch 0 pos)
-            ^ (subst2 (sub_string ch (pos + 1) (string_length ch - pos - 1)))
-    with Not_found ->
-      ch
-  and subst2 ch =
-    let suiv =
-      let i = ref 0
-      and stream = stream_of_string ch
-      in
-        while
-          (function
-             [< '`a`..`z` >] -> true
-           | [< '`A`..`Z` >] -> true
-           | [< '`0`..`9` >] -> true
-           | [< '`_` >] -> true
-           | [< '_ >] -> false
-           | [< >] -> false) stream
-        do i := !i + 1 done;
-        !i
-    in (sys__getenv (sub_string ch 0 suiv))
-       ^ (subst_variable (sub_string ch suiv (string_length ch - suiv)))
-  in
-    let ch = subst_variable ch in
-      let concat_root nom ch2 =
-        try filename__concat (getpwnam nom).pw_dir ch2
-        with Failure "Not found" ->
-          raise (Invalid_argument "expand_path")
-      in
-        if (nth_char ch 0) = `~` then
-	  try
-            match string_pos ch `/` with
-              1 ->
-                (let tail = sub_string ch 2 (string_length ch - 2)
-                 in
-                   try filename__concat (sys__getenv "HOME") tail
-                   with Failure "Not found" ->
-                     concat_root (sys__getenv "LOGNAME") tail)
-            |  n -> concat_root
-                      (sub_string ch 1 (n - 1))
-                      (sub_string ch (n + 1) (string_length ch - n - 1))
-          with
-	    Not_found ->
-              expand_path (ch ^ "/")
-        else ch;;

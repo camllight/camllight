@@ -8,6 +8,7 @@
 #open "debugger_config";;
 #open "types";;
 #open "primitives";;
+#open "unix_tools";;
 #open "parser";;
 #open "parser_aux";;
 #open "lexer";;
@@ -23,7 +24,8 @@
 #open "show_information";;
 #open "time_travel";;
 #open "events";;
-#open "fmt_type";;
+#open "pr_type";;
+#open "string_of_type";;
 #open "pr_value";;
 #open "variables";;
 #open "source";;
@@ -32,7 +34,6 @@
 #open "frames";;
 #open "value";;
 #open "pattern_matching";;
-#open "format";;
 
 (** Instructions, variables and infos lists. **)
 let instruction_list =
@@ -92,11 +93,11 @@ let find_ident name matcher action alternative lexbuf =
       | _ ->
           error ("Ambiguous " ^ name ^ ".");;
 
-let find_variable action alternative lexbuf =
-  find_ident "variable name" matching_variables action alternative lexbuf;;
+let find_variable =
+  find_ident "variable name" matching_variables;;
 
-let find_info action alternative lexbuf =
-  find_ident "info command" matching_infos action alternative lexbuf;;
+let find_info =
+  find_ident "info command" matching_infos;;
 
 let add_breakpoint_at_pc pc =
   try
@@ -120,7 +121,10 @@ let convert_module module =
       	raise Toplevel;;
 
 (** Toplevel. **)
+let current_line = ref "";;
+
 let interprete_line line =
+  current_line := line;
   let lexbuf = create_lexer_string line in
     try
       match Identifier_or_eol Lexeme lexbuf with
@@ -189,28 +193,24 @@ let instr_dir lexbuf =
     else
       do_list (function x -> add_path (expand_path x)) (rev new_directory);
     print_string "Directories :";
-    do_list (function x -> print_space(); print_string x) !load_path;
+    do_list (function x -> print_string (" " ^ x)) !load_path;
     print_newline ();;
 
 let instr_kill lexbuf =
   end_of_line lexbuf;
   if not !loaded then
     (prerr_endline "The program is not being run."; raise Toplevel);
-  if (yes_or_no "Kill the program being debugged") then begin
-    kill_program ();
-    clear_ellipses()
-  end;;
+  if (yes_or_no "Kill the program being debugged") then
+    kill_program ();;
 
 let instr_run lexbuf =
   end_of_line lexbuf;
-  clear_ellipses();
   ensure_loaded ();
   run ();
   show_current_event ();;
 
 let instr_reverse lexbuf =
   end_of_line lexbuf;
-  clear_ellipses();
   ensure_loaded ();
   back_run ();
   show_current_event ();;
@@ -221,7 +221,6 @@ let instr_step lexbuf =
       None -> 1
     | Some x -> x
   in
-    clear_ellipses();
     ensure_loaded ();
     step step_count;
     show_current_event ();;
@@ -232,14 +231,12 @@ let instr_back lexbuf =
       None -> 1
     | Some x -> x
   in
-    clear_ellipses();
     ensure_loaded ();
     step (-step_count);
     show_current_event ();;
 
 let instr_finish lexbuf =
   end_of_line lexbuf;
-  clear_ellipses();
   ensure_loaded ();
   finish ();
   show_current_event ();;
@@ -250,14 +247,12 @@ let instr_next lexbuf =
       None -> 1
     | Some x -> x
   in
-    clear_ellipses();
     ensure_loaded ();
     next step_count;
     show_current_event ();;
 
 let instr_goto lexbuf =
   let time = Integer_eol Lexeme lexbuf in
-    clear_ellipses();
     ensure_loaded ();
     go_to time;
     show_current_event ();;
@@ -267,12 +262,12 @@ let instr_quit _ =
 
 let print_variable_list () =
   print_endline "List of variables :";
-  do_list (function (nm, _, _) -> print_string nm; print_space()) !variable_list;
+  do_list (function (nm, _, _) -> print_string (nm ^ " ")) !variable_list;
   print_newline ();;
 
 let print_info_list () =
   print_endline "List of info commands :";
-  do_list (function (nm, _, _) -> print_string nm; print_space()) !info_list;
+  do_list (function (nm, _, _) -> print_string (nm ^ " ")) !info_list;
   print_newline ();;
 
 let instr_help lexbuf =
@@ -328,19 +323,19 @@ let instr_print lexbuf =
     do_list
       (function x ->
       	 let (val, typ) = variable x in
-           open_hovbox 0;
-      	   output_variable_name std_out x;
-           print_string " :"; print_space();
-           print_one_type typ; print_string " ="; print_space();
-           print_value val typ;
-           close_box();
-           print_newline ())
+           let header =
+      	     (string_of_variable_name x)
+                ^ " : "
+                ^ (string_of_one_type typ)
+      	       	^ " ="
+           in
+	     if !emacs then
+      	       (print_string "\026\026p";
+	        print_endline !current_line);
+             print_value header val typ;
+	     if !emacs then print_endline "\026\026e";
+             flush std_out)
       variables;;
-
-let instr_more lexbuf =
-  let arguments = Integer_list_eol Lexeme lexbuf in
-    ensure_loaded ();
-    do_list pr_value__more arguments;;
 
 let instr_match lexbuf =
   let (var, pattern) = Match_arguments_eol Lexeme lexbuf in
@@ -349,14 +344,18 @@ let instr_match lexbuf =
       do_list
 	(function
 	   (name, val, typ) ->
-             open_hovbox 0;
-	     print_string name;
-	     print_string " :"; print_space();
-             print_one_type typ;
-             print_string " ="; print_space();
-             print_value val typ;
-            close_box();
-            print_newline ())
+             let header =
+	       name
+	         ^ " : "
+                 ^ (string_of_one_type typ)
+                 ^ " ="
+             in
+	       if !emacs then
+	         (print_string "\026\026m";
+	          print_endline !current_line);
+               print_value header val typ;
+	       if !emacs then print_endline "\026\026e";
+               flush std_out)
       	(pattern_matching pattern val typ);;
 
 let instr_source lexbuf =
@@ -386,11 +385,15 @@ let instr_source lexbuf =
 
 let instr_open lexbuf =
   let modules = Argument_list_eol Argument lexbuf in
-    do_list open_module modules;;
+    do_list open_module modules;
+    if !emacs then
+      print_endline "\026\026f";;
 
 let instr_close lexbuf =
   let modules = Argument_list_eol Argument lexbuf in
-    do_list close_module modules;;
+    do_list close_module modules;
+    if !emacs then
+      print_endline "\026\026f";;
 
 let instr_set =
   find_variable
@@ -430,13 +433,12 @@ let instr_break lexbuf =
         add_breakpoint_at_pc pc
     | BA_function var ->			(* break FUNCTION *)
         let (val, typ) = variable var in
-        begin match (type_repr typ).typ_desc with
+          (match (type_repr typ).typ_desc with
              Tarrow (_, _) ->
 	       add_breakpoint_at_pc (get_closure_code val)
            | _ ->
       	       prerr_endline "Not a function.";
-	       raise Toplevel
-        end
+	       raise Toplevel)
     | BA_pos1 (module, line, column) ->		(* break @ [MODULE] LINE [COL] *)
       	let module_name = convert_module module in
 	  new_breakpoint
@@ -488,7 +490,7 @@ let instr_frame lexbuf =
     ensure_loaded ();
     try
       select_frame frame_number;
-      show_current_frame ()
+      show_current_frame true
     with
       Not_found ->
       	prerr_endline ("No frame number " ^ (string_of_int frame_number) ^ ".");
@@ -504,14 +506,14 @@ let instr_backtrace lexbuf =
     let rec show_end_of_stack n =
       try
 	select_frame n;
-	show_current_frame ();
+	show_current_frame false;
 	show_end_of_stack (n + 1)
       with
 	Not_found -> ()
     and show_beginning_of_stack n =
       try
 	select_frame n;
-	show_current_frame ();
+	show_current_frame false;
 	if n < number - 1 then
 	  show_beginning_of_stack (n + 1)
       with
@@ -539,7 +541,7 @@ let instr_up lexbuf =
     ensure_loaded ();
     try
       select_frame (!current_frame + offset);
-      show_current_frame ()
+      show_current_frame true
     with
       Not_found ->
       	prerr_endline "No such frame.";
@@ -554,7 +556,7 @@ let instr_down lexbuf =
     ensure_loaded ();
     try
       select_frame (!current_frame - offset);
-      show_current_frame ()
+      show_current_frame true
     with
       Not_found ->
       	prerr_endline "No such frame.";
@@ -599,34 +601,54 @@ let instr_list lexbuf =
 	      show_listing module beginning en (-1) true;;
 
 (** Variables. **)
-let raw_vect_variable kill name =
-  (function
-    lexbuf ->
-      let argument_list = Argument_list_eol Argument lexbuf in
-      	if not kill or (ask_kill_program ()) then
-          name := vect_of_list argument_list),
-  function
-    () ->
-      do_vect (fun x -> print_string (x ^ " ")) !name;
-      print_newline ();;
-
 let raw_variable kill name =
   (function
      lexbuf ->
        let argument = Argument_eol Argument lexbuf in
-      	 if not kill or (ask_kill_program ()) then
+      	 if (not kill) or (ask_kill_program ()) then
            name := argument),
   function
     () ->
       print_string !name;
       print_newline ();;
 
-let integer_variable kill name =
+let raw_line_variable kill name =
+  (function
+     lexbuf ->
+       let argument = Argument_eol Line_argument lexbuf in
+      	 if (not kill) or (ask_kill_program ()) then
+           name := argument),
+  function
+    () ->
+      print_string !name;
+      print_newline ();;
+
+let integer_variable kill min msg name =
   (function
     lexbuf ->
       let argument = Integer_eol Lexeme lexbuf in
-      	if not kill or (ask_kill_program ()) then
-          name := argument),
+      	if argument < min then
+	  print_endline msg
+	else
+      	  if (not kill) or (ask_kill_program ()) then
+            name := argument),
+  function
+    () ->
+      print_int !name;
+      print_newline ();;
+
+(* Same as `integer_variable', but ask emacs to flush the value cache. *)
+let size_variable kill min msg name =
+  (function
+    lexbuf ->
+      let argument = Integer_eol Lexeme lexbuf in
+      	if argument < min then
+	  print_endline msg
+	else
+      	  if (not kill) or (ask_kill_program ()) then
+            (name := argument;
+             if !emacs then
+               print_endline "\026\026f")),
   function
     () ->
       print_int !name;
@@ -641,7 +663,7 @@ let boolean_variable kill name =
         | "of" | "off" -> false
 	| _ -> error "Syntax error."
       in
-      	if not kill or (ask_kill_program ()) then
+      	if (not kill) or (ask_kill_program ()) then
           name := argument),
   function
     () ->
@@ -652,7 +674,7 @@ let path_variable kill name =
   (function
      lexbuf ->
        let argument = Argument_eol Argument lexbuf in
-      	 if not kill or (ask_kill_program ()) then
+      	 if (not kill) or (ask_kill_program ()) then
            name := (expand_path argument)),
   function
     () ->
@@ -685,13 +707,13 @@ let loading_mode_variable =
 let info_modules lexbuf =
   end_of_line lexbuf;
   print_endline "Used modules :";
-  do_list (function x -> print_string x; print_space()) !modules;
+  do_list (function x -> print_string (x ^ " ")) !modules;
   print_newline ();
   print_endline "Opened modules :";
-  if !opened_modules_names = [] then
+  if !used_modules = [] then
     print_endline "(no module opened)."
   else
-    (do_list (function x -> print_string x; print_space) !opened_modules_names;
+    (do_list (function x -> print_string (x.mod_name ^ " ")) !used_modules;
      print_newline ());;
 
 let info_checkpoints lexbuf =
@@ -742,12 +764,10 @@ let info_events lexbuf =
     do_list
       (function {ev_pos = pc; ev_char = char; ev_kind = kind} ->
     	 printf__printf
-      	   "%10d %10d  %s\n"
+      	   "%10d %10d %6s\n"
            pc
            char
-           (match kind with
-               Lbefore -> "before"
-             | Lafter _ -> "after"))
+           (if kind = Lbefore then "before" else "after"))
       (events_in_module module);;
 
 (** Initialization. **)
@@ -790,10 +810,8 @@ Skip over function calls.\n\
 Argument N means do this N times (or till program stops for another reason).";
      "print", false, instr_print, true,
 "print value of variables (`*' stand for the accumulator).";
-     "more", false, instr_more, true,
-"print more on given ellipsis (`<n>' stands for ellipsis number n).";
      "match", false, instr_match, true,
-"";
+"match the value of a variable against a pattern.";
      "source", false, instr_source, true,
 "read command from file FILE.";
      "open", false, instr_open, false,
@@ -825,43 +843,43 @@ With a negative argument, print outermost -COUNT frames.";
      "up", false, instr_up, true,
 "select and print stack frame that called this one.\n\
 An argument says how many frames up to go.";
-     "down", false, instr_up, true,
+     "down", false, instr_down, true,
 "select and print stack frame called by this one.\n\
 An argument says how many frames down to go.";
-     "last", false, instr_last, true,
+     "last", true, instr_last, true,
 "go back to previous time.";
      "list", false, instr_list, true,
 "list the source code."
 ];
   variable_list :=
     (* variable name, (writing, reading), help reading, help writing *)
-    ["arguments", raw_vect_variable true arguments,
+    ["arguments", raw_line_variable true arguments,
 "arguments to give program being debugged when it is started.";
      "program", path_variable true program_name,
 "name of program to be debugged.";
      "loadingmode", loading_mode_variable,
-"select the mode of loading.\n\
+"mode of loading.\n\
 It can be either :
   direct : the program is directly called by the debugger.\n\
   runtime : the debugger execute `camlrun -D socket programname arguments'.\n\
   manual : the program is not launched by the debugger,\n\
     but manually by the user.";
-     "processcount", integer_variable false checkpoint_max_count,
+     "processcount", integer_variable false 1 "Must be > 1." checkpoint_max_count,
 "maximum number of process to keep.";
      "checkpoints", boolean_variable false make_checkpoints,
-"should we make checkpoints or not ?";
-     "bigstep", integer_variable false checkpoint_big_step,
+"whether to make checkpoints or not.";
+     "bigstep", integer_variable false 1 "Must be > 1." checkpoint_big_step,
 "step between checkpoints during long displacements.";
-     "smallstep", integer_variable false checkpoint_big_step,
+     "smallstep", integer_variable false 1 "Must be > 1." checkpoint_big_step,
 "step between checkpoints during small displacements.";
      "socket", raw_variable true socket_name,
 "name of the socket used by communications debugger-runtime.";
-     "history", integer_variable false history__history_size,
+     "history", integer_variable false 0 "" history_size,
 "history size.";
-     "print_depth", integer_variable false max_printer_depth,
-"maximal depth for printing of values.";
-     "print_length", integer_variable false max_printer_steps,
-"maximal number of value nodes printed."];
+     "width", size_variable false 3 "Must be > 3." screen_width,
+"screen width.";
+     "height", size_variable false 1 "Must be > 1." max_height,
+"maximum number of lines used to print a value."];
   info_list :=
     (* info name, function, help *)
     ["modules", info_modules,

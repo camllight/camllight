@@ -11,6 +11,8 @@ main () {
   printf("let Double_tag = %d;;\n", Double_tag);
   printf("let Trailer_size = %d;;\n", TRAILER_SIZE);
   printf("let Exec_magic = %d;;\n", EXEC_MAGIC);
-  printf("let Instr_break = `%c`;;\n", BREAK);
+  printf("let Instr_break = `\\%03d`;;\n", BREAK);
+/*   printf("let Instr_apply = `\\%03d`;;\n", APPLY); */
+/*   printf("let Instr_push_getglobal_apply = `\\%03d`;;\n", PUSH_GETGLOBAL_APPLY); */
   return (0);
 }

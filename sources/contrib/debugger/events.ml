@@ -1,6 +1,5 @@
 (******************************** Events ******************************)
 
-#open "const";;
 #open "lambda";;
 #open "primitives";;
 #open "communication";;
@@ -24,13 +23,20 @@ let load_events inchan =
   old_pc := None;
   events := input_value inchan;
   hashtbl__clear events_by_pc;
-  let module_set = ref(set__empty compare_strings) in
+  let module_hashtbl = hashtbl__new 37 in
     do_list
-      (function ev ->
-          hashtbl__add events_by_pc ev.ev_pos ev;
-          module_set := set__add ev.ev_file !module_set)
+      (function {ev_file = module; ev_pos = pos} as x ->
+      	 hashtbl__add events_by_pc pos x;
+      	 try
+	   hashtbl__find module_hashtbl module; ()
+      	 with
+      	   Not_found ->
+      	     hashtbl__add module_hashtbl module 0)
       !events;
-    modules := set__elements !module_set;;
+    modules := [];
+    hashtbl__do_table
+      (fun module _ -> modules := module::!modules)
+      module_hashtbl;;
 
 (*** Utilities. ***)
 
@@ -41,7 +47,9 @@ let load_events inchan =
 let main_event event_list =
   let event_after =
     filter
-      (function {ev_kind = Lafter _} -> true | _ -> false)
+      (function
+        {ev_kind = Lbefore} -> false
+       | {ev_kind = Lafter _} -> true)
       event_list
   in
     let rec find_max pos_m m =
@@ -162,4 +170,3 @@ let event_near_pos module position =
 	     old)
 	l
 	a;;
-

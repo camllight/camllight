@@ -12,18 +12,21 @@
 #open "frames";;
 #open "value";;
 
-(*** Printing a variable name. ***)
+(*** Converting a variable name to a string. ***)
 
-let output_variable_name chan =
+let string_of_variable_name =
   function
     GRname "" ->
-      output_string chan "(accu)"
+      "(accu)"
   | GRname name ->
-      output_string chan name
+      name
   | GRmodname {qual = module; id = name} ->
-      output_string chan module;
-      output_string chan "__";
-      output_string chan name;;
+      module ^ "__" ^ name;;
+
+(*** Printing a variable name. ***)
+
+let output_variable_name chan name =
+  output_string chan (string_of_variable_name name);;
 
 (*** Value and type of a variable. ***)
 
@@ -33,8 +36,6 @@ let follow_path root =
     function
       Path_root -> get_local root
     | Path_son(n, p) -> get_field (follow p) n
-    | Path_tuple(Path_son(i, p) :: _) -> follow p
-    | _ -> fatal_error "follow_path"
   in follow;;
 
 (* Value and type of the give local variable. *)
@@ -96,6 +97,4 @@ let variable variable =
       prerr_string "`";
       output_variable_name std_err variable;
       prerr_endline "' is undefined.";
-      raise Toplevel
-;;
-
+      raise Toplevel;;

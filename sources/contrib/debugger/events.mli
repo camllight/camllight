@@ -1,4 +1,3 @@
-#open "const";;
 #open "lambda";;
 #open "primitives";;
 

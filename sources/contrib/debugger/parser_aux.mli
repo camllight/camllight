@@ -19,4 +19,4 @@ type PATTERN =
   | P_concat of PATTERN * PATTERN	(* a::l *)
   | P_tuple of PATTERN list		(* a,...,d *)
   | P_constr of				(* A p *)
-      global_reference * PATTERN;;
+      global_reference * PATTERN;;	(* > p *)

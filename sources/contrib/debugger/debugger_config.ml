@@ -12,13 +12,16 @@ let runtime_program = "camlrun";;
 
 (* Modules opened even if there is no event in them. *)
 let always_opened_modules =
-      ["builtin"];;
+      ["ref"; "builtin"];;
 
 (* Modules opened if there are events in them. *)
 let default_modules =
-      ["builtin"; "stream"; "exc"; "bool"; "string"; "char"; "vect";
-       "fstring"; "fchar"; "fvect"; "list"; "pair"; "ref"; "float"; "int";
-       "eq"; "io"];;
+      ["io"; "eq"; "int"; "float"; "pair"; "list";
+       "vect"; "char"; "string"; "fvect"; "fchar"; "fstring";
+       "bool"; "exc"; "stream"];;
+
+(* Time history size (for `last') *)
+let history_size = ref 30;;
 
 (*** Time travel parameters. ***)
 
@@ -33,3 +36,11 @@ let checkpoint_max_count = ref 15;;
 
 (* Wether to keep checkpoints or not. *)
 let make_checkpoints = ref true;;
+
+(*** Screen parameters. ***)
+
+(* --- Must be >= 3. *)
+let screen_width = ref 79;;
+
+(* Maximum number of lines used for printing a value. *)
+let max_height = ref 50;;
