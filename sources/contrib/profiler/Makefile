@@ -1,4 +1,4 @@
-CPP=/lib/cpp -P -Dunix
+CPP=/lib/cpp -P
 
 CAMLCOMP=camlc -c
 CAMLLEX=camllex
@@ -8,9 +8,10 @@ COMPFLAGS=-g -I ../../src/compiler
 LINKFLAGS=-g -I ../../src/compiler
 
 # Pieces of the compiler required for parsing
-COMPILEROBJS=misc.zo globals.zo modules.zo types.zo syntax.zo error.zo \
-	builtins.zo location.zo typing.zo par_aux.zo primdecl.zo ty_decl.zo \
-	config.zo parser.zo lexer.zo ty_intf.zo  
+COMPILEROBJS=misc.zo globals.zo location.zo syntax.zo modules.zo \
+  builtins.zo types.zo pr_type.zo error.zo typing.zo par_aux.zo primdecl.zo \
+  ty_decl.zo config.zo parser.zo lexer.zo ty_intf.zo
+
 # Source rewriting
 OBJS=camlpro.zo
 
@@ -23,7 +24,7 @@ PRO_IMPL= eq.zo exc.zo int.zo float.zo fstring.zo string.zo fchar.zo \
     baltree.zo set.zo map.zo
 
 all: camlpro stdlibp.zo prodump.zo
-	
+
 camlpro: $(OBJS)
 	camlc $(LINKFLAGS) -o camlpro $(COMPILEROBJS) $(OBJS)
 
@@ -62,4 +63,4 @@ scratch:
 	$(CAMLCOMP) $(COMPFLAGS) $<
 
 .mlp.ml:
-	$(CPP) $< > $@
+	$(CPP) -Dunix $< > $@

@@ -103,18 +103,19 @@ let final_rewrite () =
 
 let do_directive loc = function
     Zdir("open", name) ->
-      used_modules := find_module name :: !used_modules; ()
+      open_module name
   | Zdir("close", name) ->
-      used_modules := exceptq (find_module name) !used_modules; ()
+      close_module name
   | Zdir("infix", name) ->
-      add_infix name; ()
+      add_infix name
   | Zdir("uninfix", name) ->
-      remove_infix name; ()
+      remove_infix name
   | Zdir("directory", dirname) ->
       load_path := dirname :: !load_path
   | Zdir(d, name) ->
       printf__eprintf 
-        "%lWarning: unknown directive \"#%s\", ignored.\n" loc d;
+        "%aWarning: unknown directive \"#%s\", ignored.\n"
+        output_location loc d;
       flush stderr
 ;;
 
@@ -211,6 +212,7 @@ and rewrite_expr e =
      | Zrecord_update (e1, _, e2) -> rewrite_expr e1; rewrite_expr e2
      | Zstream l -> rewrite_str_comp_list l
      | Zparser l -> rewrite_str_pat_l_expr_l l
+     | Zwhen(e1, e2) -> rewrite_expr e1; rewrite_expr e2
 
 and rewrite_str_comp_list l =
   do_list (
@@ -394,7 +396,7 @@ let main () =
       let allcounters = input_value ic in
       let modes,cv = 
       	 try assoc !modname allcounters 
-      	 with Not_found -> raise (Failure ("Module "^!modname ^ " not used."))
+      	 with Not_found -> raise(Failure("Module " ^ !modname ^ " not used."))
       in
       	counters := cv;
 	set_flags modes;
