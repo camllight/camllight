@@ -105,6 +105,9 @@ let square_nat nat1 off1 len1 nat2 off2 len2 =
   !c
 ;;
 
+let set_square_nat nat1 off1 len1 nat2 off2 len2 =
+  let _ = square_nat nat1 off1 len1 nat2 off2 len2 in ();;
+
 let gcd_int_nat i nat off len = 
   if i == 0 then 1 else
   if is_nat_int nat off len then begin
@@ -160,7 +163,7 @@ let almost_eq_nat nat1 off1 len1 nat2 off2 len2 =
        0 -> true
     |  1 -> let over = incr_nat nat2 off2 len2 1 in
             let res = eq_nat nat1 off1 len1 nat2 off2 (len2 + over) in
-            decr_nat nat2 off2 (len2 + over) 0;
+            let _ = decr_nat nat2 off2 (len2 + over) 0 in
             res
     | _ -> false
 ;;
@@ -189,7 +192,7 @@ let sqrt_nat nat off len =
      div_nat copy 0 size_copy candidate 0 (pred size_sqrt);
      blit_nat aux 0 copy (pred size_sqrt) size_aux;
      (* This addition is safe because good sizes at the beginning *)
-     add_nat aux 0 size_aux candidate 0 (pred size_sqrt) 0;
+     let _ = add_nat aux 0 size_aux candidate 0 (pred size_sqrt) 0 in
      shift_right_nat aux 0 size_aux trash 0 1;
      let real_size_aux = ref (num_digits_nat aux 0 size_aux)
      and real_size_candidate = ref (num_digits_nat candidate 0 size_sqrt) in
@@ -332,7 +335,7 @@ let make_power_base base power_base =
   and j = ref 0 in
    set_digit_nat power_base 0 base;
    while incr i; is_digit_zero power_base !i do
-   mult_digit_nat power_base !i 2 
+   set_mult_digit_nat power_base !i 2 
                   power_base (pred !i) 1 
                   power_base 0
    done;
@@ -379,20 +382,19 @@ let power_base_int base i =
                    let len = num_digits_nat res 0 newn in
                    let len2 = min n (2 * len) in
                    let succ_len2 = succ len2 in
-                     square_nat res2 0 len2 res 0 len;
+                     set_square_nat res2 0 len2 res 0 len;
                      if n land !p > 0 then begin
                        set_to_zero_nat res 0 len;
-                       mult_digit_nat res 0 succ_len2 
+                       set_mult_digit_nat res 0 succ_len2 
                                       res2 0 len2 
-                                      power_base pmax;
-                       ()
+                                      power_base pmax
                      end else
                        blit_nat res 0 res2 0 len2;
                      set_to_zero_nat res2 0 len2;
                      p := !p lsr 1
                  done;
                if rem > 0 then begin
-                 mult_digit_nat res2 0 newn 
+                 set_mult_digit_nat res2 0 newn 
                                 res 0 n power_base (pred rem);
                  res2
                end else res
@@ -558,7 +560,7 @@ let sys_nat_of_string base s off len =
            for j = 1 to erase_len do 
              set_digit_nat nat1 j 0
            done;
-           mult_digit_nat nat1 0 !possible_len 
+           set_mult_digit_nat nat1 0 !possible_len 
                           nat2 0 !current_len 
                           power_base (pred !digits_read);
            blit_nat nat2 0 nat1 0 !possible_len;
