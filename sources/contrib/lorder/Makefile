@@ -12,7 +12,7 @@ OBJS=tsort.zo main.zo
 
 
 all: camllorder
-	
+
 camllorder: $(OBJS)
 	camlc $(LINKFLAGS) -o camllorder $(COMPILEROBJS) $(OBJS)
 

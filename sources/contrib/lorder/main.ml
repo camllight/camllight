@@ -57,7 +57,7 @@ let defined_library libname =
 let libmodules = ref ([] : string list)
 ;;
 let add_lib l =
-    libmodules := (defined_library l)@!libmodules
+    libmodules := (defined_library l) @ !libmodules
 ;;
 
 (***********************************************************************)
