@@ -10,6 +10,10 @@ let add_fileinput = add_fileinput
 and remove_fileinput = remove_fileinput
 ;;
 
+let add_timer = add_timer
+and remove_timer = remove_timer
+;;
+
 let CAMLtoTKWidget table w = 
   check_widget_class w table;
   TkToken (widget_name w)

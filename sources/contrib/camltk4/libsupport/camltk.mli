@@ -2,6 +2,8 @@
 #open "unix";;
 #open "protocol";;
 
+type TkTimer;;
+
 value install_callback_handler : (string list -> unit) -> unit
       	= 1 "camltk_install_callback_handler"
   and opentk : string -> string -> unit
@@ -16,4 +18,8 @@ value install_callback_handler : (string list -> unit) -> unit
       	= 1 "camltk_tk_mainloop"
   and tcl_direct_eval : TkArgs vect -> string
       	= 1 "camltk_tcl_direct_eval"
+  and internal_add_timer : int -> string -> TkTimer
+      	= 2 "camltk_add_timer"
+  and internal_rem_timer : TkTimer -> unit
+        = 1 "camltk_rem_timer"
 ;;

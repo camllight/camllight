@@ -48,3 +48,12 @@ and   remove_fileinput: file_descr -> unit
       (* see [tk] module *)
 and   TkEval : TkArgs vect -> string
 ;;
+
+
+type Timer
+;;
+
+value  add_timer : int -> (unit -> unit) -> Timer
+and    remove_timer : Timer -> unit
+;;
+
