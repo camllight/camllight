@@ -116,6 +116,7 @@ let compile () =
      )
    module_table;
   (* write the module list for the Makefile *)
+  (* and hack to death until it works *)
   let oc = open_out_bin "lib/modules" in
     output_string oc "WIDGETOBJS=";
     hashtbl__do_table
@@ -124,6 +125,23 @@ let compile () =
 	 output_string oc ".zo ")
        module_table;
     output_string oc "\n";
+    hashtbl__do_table
+       (fun name _ ->
+	 output_string oc (rename_module name);
+	 output_string oc ".ml ")
+       module_table;
+    output_string oc ": tkgen.ml\n\n";
+    hashtbl__do_table
+       (fun name _ ->
+	 output_string oc (rename_module name);
+	 output_string oc ".zo : ";
+	 output_string oc (rename_module name);
+	 output_string oc ".ml\n";
+	 output_string oc (rename_module name);
+	 output_string oc ".zi : ";
+	 output_string oc (rename_module name);
+	 output_string oc ".mli\n")
+       module_table;
     close_out oc
 ;;
 
