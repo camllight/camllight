@@ -81,6 +81,7 @@ and pp_max_boxes = ref 35	  (* maximum number of blocks which can be
                                      opened at the same time *)
 and pp_ellipsis = ref "."         (* ellipsis string *)
 and pp_output_function = ref(output std_out) (* output function *)
+and pp_flush_function = ref(fun () -> flush std_out) (* flushing function *)
 ;;
 
 (* Output functions for the formatter *)
@@ -351,6 +352,7 @@ let pp_flush b =
     done;
     pp_right_total := pp_infinity; advance_left ();
     if b then pp_output_newline ();
+    !pp_flush_function ();
     pp_rinit();;
 
 (**************************************************************
@@ -475,9 +477,13 @@ let set_min_space_left n =
 let set_max_indent n = set_min_space_left (!pp_margin - n);;
 let get_max_indent () = !pp_max_indent;;
 
-let set_formatter_output_function f = pp_output_function := f;;
-let set_formatter_output_channel os = pp_output_function := (output os);;
-let get_formatter_output_function () = !pp_output_function;;
+let set_formatter_output_functions f g =
+  pp_output_function := f; pp_flush_function := g;;
+let set_formatter_output_channel os = 
+  pp_output_function := (output os);
+  pp_flush_function := (fun () -> flush os);;
+let get_formatter_output_functions () = 
+  (!pp_output_function, !pp_flush_function);;
 
 (* Initializing formatter *)
 pp_rinit();;
