@@ -2,7 +2,6 @@
 
 # Which C compiler to use.
 # Performance is often improved if you use gcc 2.x instead of cc.
-# Known exceptions: cc is better for the MIPS and Alpha processors.
 CC=cc
 
 # Additional options to $(CC).
@@ -21,8 +20,8 @@ LIBS=
 # and /usr/ccs/lib/cpp under Solaris.
 # The -P option suppresses the generation of "# linenum" directives,
 # which are not understood by Caml Light.
-# The -Dunix option ensures that the symbol "unix" is defined -- not all Unix
-# C preprocessors define it.
+# The -Dunix option ensures that the symbol "unix" is defined --
+# not all Unix C preprocessors define it.
 CPP=/lib/cpp -P -Dunix
 
 # The directory where public executables will be installed
@@ -37,9 +36,9 @@ MANEXT=1
 # The directory where the manual pages will be installed
 MANDIR=/usr/local/man/man$(MANEXT)
 
-# Some "make"s need this to ensure that they call /bin/sh, not /bin/csh
-# Seems harmless on most other "make"s. Try removing this line if you
-# run into trouble.
+# Some "make"s need this to ensure that they call the Bourne shell,
+# not the C shell. Seems harmless on most other "make"s.
+# Try removing this line if you run into trouble.
 SHELL=/bin/sh
 
 ### End of configuration section
