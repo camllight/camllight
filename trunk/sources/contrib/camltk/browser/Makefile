@@ -16,6 +16,12 @@ CAMLTKDIR=../lib
 SUPPORTDIR=../libsupport
 UNIXDIR=../../libunix
 
+# These options are overriden when called from ../Makefile
+X11_LIB=/usr/lib
+TCLLIBDIR=/usr/local/lib/tcl/lib
+TKLIBDIR=/usr/local/lib/tk/lib
+TKLIBS=-ltcl -ltk -lX11
+
 TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
 	  -ccopt -L$(SUPPORTDIR) \
 	   -lcaml -lcamltk $(TKLIBS)
@@ -28,7 +34,7 @@ COMPFLAGS=-W -g -O cautious -I $(CAMLTKDIR) -I $(SUPPORTDIR) -I $(UNIXDIR) \
 COMPILEROBJS = config.zo misc.zo interntl.zo globals.zo modules.zo \
                location.zo types.zo \
                error.zo const.zo builtins.zo
-OBJS= lexer.zo util.zo modlist.zo tags.zo source.zo \
+OBJS= lexer.zo complete.zo util.zo modlist.zo tags.zo source.zo \
       hyper_printers.zo visual.zo main.zo
 
 
@@ -84,4 +90,5 @@ depend: main.ml lexer.ml
 ### DO NOT DELETE THIS LINE
 main.zo: util.zo modlist.zo visual.zo tags.zo 
 source.zo: lexer.zo 
+util.zo: complete.zo 
 visual.zo: source.zo util.zo hyper_printers.zo tags.zo 

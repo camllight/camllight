@@ -15,8 +15,8 @@ camlbrowser \- A Caml Light environment browser
 
 .SH DESCRIPTION
 .B camlbrowser
-is an hypertext tool to browse library and program modules. The various
-elements of the interface work as follows :
+is an hypertext tool to browse library and program modules.
+The various elements of the interface work as follows :
 
 .TP
 .B Opened Modules
@@ -136,3 +136,6 @@ Francois Rouaix (Francois.Rouaix@inria.fr)
 .SH BUGS
 Positioning a displayed source file on a given symbol according to a TAGS
 file does not always work (it doesn't work exactly like in Gnu-Emacs anyway).
+
+.B camlbrowser
+being the main test program for CamlTk, it is struck by creeping featurism.
