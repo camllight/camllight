@@ -70,21 +70,6 @@ let make_unary_minus = fun
       fatal_error "make_unary_minus"
 ;;
 
-let make_assignment lhs rhs =
-  match lhs.e_desc with
-    Zapply ({e_desc = Zident (ref (Zlocal op)); _},
-            [e1;e2]) ->
-     begin match op with
-          "vect_item" -> make_ternop "vect_assign" e1 e2 rhs
-        | "nth_char" -> make_ternop "set_nth_char" e1 e2 rhs
-        | _ -> make_binop ":=" lhs rhs
-        end
-  | Zrecord_access (e1,lab) ->
-     make_expr(Zrecord_update(e1, lab, rhs))
-  | e ->
-     make_binop ":=" lhs rhs
-;;
-
 let find_constructor gr =
   try
     find_constr_desc gr

@@ -97,6 +97,7 @@
 
 %right prec_let
 %right prec_define
+%right MINUSGREATER
 %right WHERE
 %right AND
 %right SEMI
@@ -112,7 +113,6 @@
 %left  INFIX1 EQUAL EQUALEQUAL          /* comparisons, concatenations */
 %right COLONCOLON                       /* cons */
 %left  INFIX2 SUBTRACTIVE               /* additives, subtractives */
-%right prec_typearrow
 %left  STAR INFIX3                      /* multiplicatives */
 %right INFIX4                           /* exponentiations */
 %right prec_uminus
@@ -196,11 +196,9 @@ Expr :
           { make_binop "=" $1 $3 }
       | Expr EQUALEQUAL Expr
           { make_binop "==" $1 $3 }
-      | Expr COLONEQUAL Expr
-          { make_assignment $1 $3 }
-      | Expr AMPERSAND Expr 
+      | Expr AMPERSAND Expr
           { make_expr(Zsequand($1, $3)) }
-      | Expr SLASHBACKSLASH Expr 
+      | Expr SLASHBACKSLASH Expr
           { make_expr(Zsequand($1, $3)) }
       | Expr OR Expr
           { make_expr(Zsequor($1, $3)) }
@@ -208,10 +206,18 @@ Expr :
           { make_expr(Zsequor($1, $3)) }
       | Simple_expr DOT Ext_ident LESSMINUS Expr
           { make_expr(Zrecord_update($1, find_label $3, $5)) }
+      | Simple_expr DOT Ext_ident COLONEQUAL Expr
+          { make_expr(Zrecord_update($1, find_label $3, $5)) }
       | Simple_expr DOTLPAREN Expr RPAREN LESSMINUS Expr
+          { make_ternop "vect_assign" $1 $3 $6 }
+      | Simple_expr DOTLPAREN Expr RPAREN COLONEQUAL Expr
           { make_ternop "vect_assign" $1 $3 $6 }
       | Simple_expr DOTLBRACKET Expr RBRACKET LESSMINUS Expr
           { make_ternop "set_nth_char" $1 $3 $6 }
+      | Simple_expr DOTLBRACKET Expr RBRACKET COLONEQUAL Expr
+          { make_ternop "set_nth_char" $1 $3 $6 }
+      | Expr COLONEQUAL Expr
+          { make_binop ":=" $1 $3 }
       | IF Expr THEN Expr ELSE Expr  %prec prec_if
           { make_expr(Zcondition($2, $4, $6)) }
       | IF Expr THEN Expr  %prec prec_if
@@ -277,11 +283,11 @@ Simple_expr :
           { make_expr (Zrecord $2) }
       | PREFIX Simple_expr
           { make_unop $1 $2 }
-      | Simple_expr DOT Ext_ident
+      | Simple_expr DOT Ext_ident %prec COLONEQUAL
           { make_expr(Zrecord_access($1, find_label $3)) }
-      | Simple_expr DOTLPAREN Expr RPAREN  %prec DOT
+      | Simple_expr DOTLPAREN Expr RPAREN  %prec COLONEQUAL
           { make_binop "vect_item" $1 $3 }
-      | Simple_expr DOTLBRACKET Expr RBRACKET  %prec DOT
+      | Simple_expr DOTLBRACKET Expr RBRACKET  %prec COLONEQUAL
           { make_binop "nth_char" $1 $3 }
 ;
 
@@ -558,7 +564,7 @@ Type :
           { $1 }
       | Type_star_list
           { make_typ(Ztypetuple(rev $1)) }
-      | Type MINUSGREATER Type  %prec prec_typearrow
+      | Type MINUSGREATER Type
           { make_typ(Ztypearrow($1, $3)) }
 ;
 
