@@ -23,7 +23,7 @@ TKLIBS=-ltk -ltcl -lX11
 
 TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
 	  -ccopt -L$(SUPPORTDIR) \
-	   -lcamltk $(TKLIBS)
+	   -lcamltk4 $(TKLIBS)
 
 CAMLDEP=../../../src/tools/camldep
 
