@@ -1,5 +1,6 @@
 (* Input-output *)
 
+#open "bool";;
 #open "eq";;
 #open "exc";;
 #open "int";;

@@ -79,6 +79,6 @@ depend: camlpro.ml
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
 camlpro.zo: profiler.zi 
-io.zo: profiler.zi 
-prodump.zo: io.zo 
+io.zo: io.zi profiler.zi 
+prodump.zo: io.zi 
 profiler.zo: profiler.zi 
