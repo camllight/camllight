@@ -18,7 +18,7 @@ let char_of_value v =
 let bool_of_value v =
   try
     let f = get_obj v in
-      if (object_size f > 0) or (object_tag f > 1) then
+      if (object_size f > 0) || (object_tag f > 1) then
       	invalid_arg "bool_of_value";
       object_tag f = 1
   with

@@ -22,9 +22,9 @@ let out_bool_test tst =
 ;;
 
 let out_int_const i =
-  if i <= (maxint_byte-1)/2 & i >= (minint_byte-1)/2 then begin
+  if i <= (maxint_byte-1)/2 && i >= (minint_byte-1)/2 then begin
     out CONSTBYTE; out (i+i+1)
-  end else if i <= (maxint_short-1)/2 & i >= (minint_short-1)/2 then begin
+  end else if i <= (maxint_short-1)/2 && i >= (minint_short-1)/2 then begin
     out CONSTSHORT; out_short (i+i+1)
   end else begin
     out GETGLOBAL; reloc__slot_for_literal(SCatom(ACint i))

@@ -29,7 +29,7 @@ let toplevel_loop () =
                rollback ();
 	       stop_user_input ();
                loop2 ());
-      	  if !loaded & (not (yes_or_no "The program is running. Quit anyway")) then
+      	  if !loaded && (not (yes_or_no "The program is running. Quit anyway")) then
 	    loop2 ()
 	in
 	  loop2 ()

@@ -33,7 +33,7 @@ and open_in_bin = open_in_gen [O_RDONLY; O_BINARY] 0
 ;;
 
 let input chan buff ofs len =
-  if len < 0 or ofs < 0 or ofs+len > string_length buff then
+  if len < 0 || ofs < 0 || ofs+len > string_length buff then
     invalid_arg "input"
   else
     fast_input chan buff ofs len
@@ -47,7 +47,7 @@ let rec fast_really_input chan buff ofs len =
 ;;
 
 let really_input chan buff ofs len =
-  if len < 0 or ofs < 0 or ofs+len > string_length buff then
+  if len < 0 || ofs < 0 || ofs+len > string_length buff then
     invalid_arg "really_input"
   else
     fast_really_input chan buff ofs len
@@ -90,7 +90,7 @@ and open_out_bin =
 ;;
 
 let output chan buff ofs len =
-  if len < 0 or ofs < 0 or ofs+len > string_length buff then
+  if len < 0 || ofs < 0 || ofs+len > string_length buff then
     invalid_arg "output"
   else
     fast_output chan buff ofs len
@@ -150,8 +150,8 @@ let dump_counters () =
         do_list2 (fun (curname, (curmodes,curcount)) 
       	       	      (prevname, (prevmodes,prevcount))
                    -> if curname <> prevname
-		         or curmodes <> prevmodes
-                         or vect_length curcount <> vect_length prevcount
+		         || curmodes <> prevmodes
+                         || vect_length curcount <> vect_length prevcount
                       then raise (Failure "subliminal"))
                   !profiler__counters prevl;
         do_list2 (fun (curname, (_,curcount)) (prevname, (_,prevcount))

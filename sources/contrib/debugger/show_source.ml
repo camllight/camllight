@@ -11,7 +11,7 @@ let print_line buffer line_number beginning point before=
   in
     print_int line_number;
     print_string " ";
-    if (point <= next) & (point >= beginning) then
+    if (point <= next) && (point >= beginning) then
       (print_string (sub_string content beginning (point - beginning));
        print_string (if before then event_mark_before else event_mark_after);
        print_string (sub_string content point (next - point)))
@@ -22,7 +22,7 @@ let print_line buffer line_number beginning point before=
 
 (* Print the line containing the point *)
 let show_point module point before selected =
-  if !emacs & selected then
+  if !emacs && selected then
     let source = source_of_module module in
       print_string "\026\026M";
       print_string source;

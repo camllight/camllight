@@ -99,22 +99,22 @@ let flat_map f = flat_map_f
 
 let for_all p = for_all_p
  where rec for_all_p = function
-     [] -> true | a::l -> p a & for_all_p l
+     [] -> true | a::l -> p a && for_all_p l
 ;;
 
 let exists p = exists_p
  where rec exists_p = function
-     [] -> false | a::l -> p a or exists_p l
+     [] -> false | a::l -> p a || exists_p l
 ;;
 
 let mem x = mem_x
  where rec mem_x = function
-     [] -> false | y::l -> x = y or mem_x l
+     [] -> false | y::l -> x = y || mem_x l
 ;;
 
 let memq x = memq_x
  where rec memq_x = function
-     [] -> false | y::l -> x == y or memq_x l
+     [] -> false | y::l -> x == y || memq_x l
 ;;
 
 let except e = except_e
@@ -167,5 +167,5 @@ let assq name = assoc_rec where rec assoc_rec =
 
 let mem_assoc name = assoc_rec where rec assoc_rec =
   function [] -> false
-         | (x,y)::l -> name = x  or  assoc_rec l
+         | (x,y)::l -> name = x || assoc_rec l
 ;;

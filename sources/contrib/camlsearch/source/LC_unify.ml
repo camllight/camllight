@@ -88,7 +88,7 @@ and unify_head heads = (* unify_head is a predicate with side effects on var_ren
                                        then do_list unif_rec (combine(l1,l2))
                                        else raise unifyHead
     | Iconstr(s1,l1),Iconstr(s2,l2) -> if isos_same_type_constr s1 s2 
-                                        & list_length l1 == list_length l2
+                                        && list_length l1 == list_length l2
                                        then do_list unif_rec (combine(l1,l2)) 
                                        else raise unifyHead
     | Unit,Unit                     -> ()

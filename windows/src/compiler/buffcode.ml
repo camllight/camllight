@@ -23,7 +23,7 @@ let out b =
 ;;
 
 let out_short s =
-  if s >= 32768 or s < -32768 then
+  if s >= 32768 || s < -32768 then
     error__displacement_overflow ()
   else begin
     out s; out (lshift_right s 8)

@@ -43,7 +43,7 @@ let handler_table = [|
 |];;
 
 let signal_handler n =
-  if n < 0 or n >= 32 then () else handler_table.(n)()
+  if n < 0 || n >= 32 then () else handler_table.(n)()
 ;;  
 
 let signal sig = function

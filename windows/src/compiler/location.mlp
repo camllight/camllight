@@ -67,7 +67,7 @@ let output_loc oc input seek line_flag (Loc(pos1, pos2)) =
           else ()
         done
       with End_of_file ->
-        if !f = 0 & !l > 0 then pr_chars 5 ch in
+        if !f = 0 && !l > 0 then pr_chars 5 ch in
   let pos = ref 0
   and line1 = ref 1
   and line1_pos = ref 0

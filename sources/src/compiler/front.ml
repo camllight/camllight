@@ -86,7 +86,7 @@ let partial_try = Lprim(Praise, [Lvar 0]);;
 
 let translate_compar gen_fun (int_comp, float_comp) ty arg1 arg2 =
   let comparison =
-    if types__same_base_type ty type_int or
+    if types__same_base_type ty type_int ||
        types__same_base_type ty type_char then
       Ptest int_comp
     else if types__same_base_type ty type_float then

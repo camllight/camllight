@@ -27,7 +27,7 @@ let sources_of_directory dir =
     try
       while true do 
 	let f = readdir d in
-	  if check_suffix f ".ml" or check_suffix f ".mli" then 
+	  if check_suffix f ".ml" || check_suffix f ".mli" then 
       	     files := set__add f !files
 	done
       with 

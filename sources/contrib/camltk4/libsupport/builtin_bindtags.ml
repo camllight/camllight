@@ -12,7 +12,7 @@ let cCAMLtoTKbindings = function
 
 (* this doesn't really belong here *)
 let cTKtoCAMLbindings s =
-  if string_length s > 0 & s.[0] = `.` then
+  if string_length s > 0 && s.[0] = `.` then
     WidgetBindings (cTKtoCAMLwidget s)
   else TagBindings s
 ;;

@@ -511,7 +511,7 @@ let instr_break lexbuf =
 let instr_delete lexbuf =
   match Integer_list_eol Lexeme lexbuf with
     [] ->
-      if (breakpoints_count () <> 0) & (yes_or_no "Delete all breakpoints")
+      if (breakpoints_count () <> 0) && (yes_or_no "Delete all breakpoints")
       then remove_all_breakpoints ()
   | breakpoints ->
       do_list
@@ -647,7 +647,7 @@ let raw_variable kill name =
   (function
      lexbuf ->
        let argument = Argument_eol Argument lexbuf in
-      	 if (not kill) or (ask_kill_program ()) then
+      	 if (not kill) || (ask_kill_program ()) then
            name := argument),
   function
     () ->
@@ -658,7 +658,7 @@ let raw_line_variable kill name =
   (function
      lexbuf ->
        let argument = Argument_eol Line_argument lexbuf in
-      	 if (not kill) or (ask_kill_program ()) then
+      	 if (not kill) || (ask_kill_program ()) then
            name := argument),
   function
     () ->
@@ -672,7 +672,7 @@ let integer_variable kill min msg name =
       	if argument < min then
 	  print_endline msg
 	else
-      	  if (not kill) or (ask_kill_program ()) then
+      	  if (not kill) || (ask_kill_program ()) then
             name := argument),
   function
     () ->
@@ -688,7 +688,7 @@ let boolean_variable kill name =
         | "of" | "off" -> false
 	| _ -> error "Syntax error."
       in
-      	if (not kill) or (ask_kill_program ()) then
+      	if (not kill) || (ask_kill_program ()) then
           name := argument),
   function
     () ->
@@ -699,7 +699,7 @@ let path_variable kill name =
   (function
      lexbuf ->
        let argument = Argument_eol Argument lexbuf in
-      	 if (not kill) or (ask_kill_program ()) then
+      	 if (not kill) || (ask_kill_program ()) then
            name := (expand_path argument)),
   function
     () ->

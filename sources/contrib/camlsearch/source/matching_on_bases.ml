@@ -85,7 +85,7 @@ let add_param_f y=fun
 
 let is_bound_with_unit subst_list x = 
     match assoc x subst_list with
-       (depth, Bound val) -> (depth = 0) & (val = Unit)
+       (depth, Bound val) -> (depth = 0) && (val = Unit)
      | _ -> false;;
 
 

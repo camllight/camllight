@@ -45,25 +45,25 @@ let print_code ic len =
         else begin
           print_string names_of_instructions.(op); print_string " "
         end;
-        if op == ACCESS or op == DUMMY or op == ENDLET
-        or op == CONSTBYTE or op == ATOM or op == GETFIELD or op == SETFIELD
-        or op == MAKEBLOCK1 or op == MAKEBLOCK2 or op == MAKEBLOCK3
-        or op == MAKEBLOCK4 then
+        if op == ACCESS || op == DUMMY || op == ENDLET
+        || op == CONSTBYTE || op == ATOM || op == GETFIELD || op == SETFIELD
+        || op == MAKEBLOCK1 || op == MAKEBLOCK2 || op == MAKEBLOCK3
+        || op == MAKEBLOCK4 then
           print_int(input_byte ic)
-        else if op == GETGLOBAL or op == SETGLOBAL
-        or op == PUSH_GETGLOBAL_APPLY or op == PUSH_GETGLOBAL_APPTERM
-        or op == C_CALL1 or op == C_CALL2 or op == C_CALL3
-        or op == C_CALL4 or op == C_CALL5 then
+        else if op == GETGLOBAL || op == SETGLOBAL
+        || op == PUSH_GETGLOBAL_APPLY || op == PUSH_GETGLOBAL_APPTERM
+        || op == C_CALL1 || op == C_CALL2 || op == C_CALL3
+        || op == C_CALL4 || op == C_CALL5 then
           print_int(input_u16 ic)
         else if op == CONSTSHORT then
           print_int(input_s16 ic)
         else if op == MAKEBLOCK then
           print_int(input_s32 ic)
-        else if op == CUR or op == LETREC1 or op == PUSHTRAP
-        or op == BRANCH or op == BRANCHIF or op == BRANCHIFNOT
-        or op == POPBRANCHIFNOT or op == BRANCHIFEQ or op == BRANCHIFNEQ
-        or op == BRANCHIFLT or op == BRANCHIFGT or op == BRANCHIFLE
-        or op == BRANCHIFGE then
+        else if op == CUR || op == LETREC1 || op == PUSHTRAP
+        || op == BRANCH || op == BRANCHIF || op == BRANCHIFNOT
+        || op == POPBRANCHIFNOT || op == BRANCHIFEQ || op == BRANCHIFNEQ
+        || op == BRANCHIFLT || op == BRANCHIFGT || op == BRANCHIFLE
+        || op == BRANCHIFGE then
           print_depl ic
         else if op == FLOATOP then
           print_string names_of_float_instructions.(input_byte ic)

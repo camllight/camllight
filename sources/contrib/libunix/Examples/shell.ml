@@ -2,7 +2,7 @@
 
 let split_words s =
   let rec skip_blanks i =
-    if i < string_length s & nth_char s i = ` `
+    if i < string_length s && nth_char s i = ` `
     then skip_blanks (i+1)
     else i in
   let rec split start i =
