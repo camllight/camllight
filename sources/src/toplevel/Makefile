@@ -89,35 +89,36 @@ pr_value.ml: pr_value.mlp
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
-do_phr.zo: pr_value.zo ../compiler/typing.zo meta.zi ../compiler/modules.zo \
-    ../compiler/interntl.zo ../compiler/compiler.zo ../compiler/const.zo \
-    ../compiler/misc.zo load_phr.zo ../compiler/back.zo \
-    ../compiler/front.zo fmt_type.zo ../linker/symtable.zo \
-    ../compiler/syntax.zo ../compiler/ty_decl.zo ../compiler/types.zo 
+do_phr.zo: ../linker/symtable.zo ../compiler/ty_decl.zo \
+    ../compiler/syntax.zo ../compiler/const.zo meta.zi fmt_type.zo \
+    load_phr.zo ../compiler/front.zo ../compiler/misc.zo \
+    ../compiler/interntl.zo ../compiler/back.zo ../compiler/types.zo \
+    ../compiler/modules.zo ../compiler/typing.zo ../compiler/compiler.zo \
+    pr_value.zo 
 expunge.zo: ../linker/symtable.zo ../compiler/const.zo 
 fmt_type.zo: ../compiler/modules.zo ../compiler/globals.zo \
     ../compiler/types.zo ../compiler/const.zo 
-load_phr.zo: pr_value.zo ../compiler/reloc.zo meta.zi ../linker/tr_const.zo \
-    ../compiler/interntl.zo ../compiler/labels.zo ../compiler/misc.zo \
-    ../linker/symtable.zo ../linker/patch.zo ../compiler/instruct.zo \
-    ../compiler/buffcode.zo ../compiler/emitcode.zo ../compiler/builtins.zo \
-    ../compiler/opcodes.zo 
-pr_value.zo: ../compiler/modules.zo ../compiler/const.zo \
-    ../compiler/misc.zo fmt_type.zo ../linker/symtable.zo \
-    ../compiler/globals.zo ../compiler/builtins.zo ../compiler/types.zo 
-provide.zo: ../compiler/prim.zo ../compiler/modules.zo \
-    ../compiler/config.zi ../compiler/const.zo ../compiler/misc.zo \
-    ../compiler/globals.zo 
-topinit.zo: meta.zi ../compiler/typing.zo toplevel.zi \
-    ../compiler/modules.zo ../compiler/interntl.zo ../compiler/config.zi \
-    ../compiler/misc.zo version.zo ../linker/symtable.zo 
-toplevel.zo: toplevel.zi meta.zi ../compiler/modules.zo \
-    ../compiler/emit_phr.zo ../compiler/misc.zo ../compiler/event.zo \
-    ../linker/symtable.zo ../linker/patch.zo ../compiler/globals.zo \
-    ../compiler/builtins.zo pr_value.zo ../compiler/location.zi \
-    ../compiler/interntl.zo ../compiler/const.zo ../compiler/compiler.zo \
-    load_phr.zo do_phr.zo ../compiler/types.zo ../compiler/opcodes.zo 
-topmain.zo: ../compiler/location.zi ../compiler/interntl.zo \
-    ../compiler/config.zi ../compiler/compiler.zo ../compiler/misc.zo \
+load_phr.zo: ../linker/symtable.zo meta.zi ../compiler/builtins.zo \
+    ../compiler/emitcode.zo ../compiler/misc.zo ../linker/tr_const.zo \
+    ../compiler/opcodes.zo ../linker/patch.zo ../compiler/interntl.zo \
+    ../compiler/labels.zo ../compiler/reloc.zo ../compiler/instruct.zo \
+    pr_value.zo ../compiler/buffcode.zo 
+pr_value.zo: ../linker/symtable.zo ../compiler/globals.zo \
+    ../compiler/types.zo ../compiler/const.zo fmt_type.zo \
+    ../compiler/modules.zo ../compiler/builtins.zo ../compiler/misc.zo 
+provide.zo: ../compiler/globals.zo ../compiler/config.zi \
+    ../compiler/const.zo ../compiler/prim.zo ../compiler/modules.zo \
+    ../compiler/misc.zo 
+topinit.zo: ../compiler/interntl.zo ../linker/symtable.zo version.zo \
+    ../compiler/config.zi meta.zi ../compiler/modules.zo \
+    ../compiler/typing.zo toplevel.zi ../compiler/misc.zo 
+toplevel.zo: toplevel.zi ../linker/symtable.zo ../compiler/event.zo \
+    ../compiler/globals.zo ../compiler/const.zo meta.zi load_phr.zo \
+    ../compiler/builtins.zo ../compiler/misc.zo ../compiler/opcodes.zo \
+    ../compiler/interntl.zo ../linker/patch.zo ../compiler/types.zo \
+    ../compiler/emit_phr.zo ../compiler/modules.zo ../compiler/location.zi \
+    ../compiler/compiler.zo do_phr.zo pr_value.zo 
+topmain.zo: ../compiler/interntl.zo ../compiler/config.zi \
+    ../compiler/location.zi ../compiler/compiler.zo ../compiler/misc.zo \
     do_phr.zo 
 version.zo: ../compiler/interntl.zo 
