@@ -179,7 +179,7 @@ value get_ellipsis_text : unit -> string;;
         (* Return the text of the ellipsis. *)
 
 (*** Redirecting formatter output *)
-value set_formatter_output_channel : out_channel -> unit;;
+value set_formatter_out_channel : out_channel -> unit;;
         (* Redirect the pretty-printer output to the given channel. *)
 value set_formatter_output_functions :
         (string -> int -> int -> unit) -> (unit -> unit) -> unit;;
@@ -246,7 +246,7 @@ value pp_set_max_boxes : formatter -> int -> unit;;
 value pp_get_max_boxes : formatter -> unit -> int;;
 value pp_set_ellipsis_text : formatter -> string -> unit;;
 value pp_get_ellipsis_text : formatter -> unit -> string;;
-value pp_set_formatter_output_channel : formatter -> out_channel -> unit;;
+value pp_set_formatter_out_channel : formatter -> out_channel -> unit;;
 value pp_set_formatter_output_functions : formatter ->
         (string -> int -> int -> unit) -> (unit -> unit) -> unit;;
 value pp_get_formatter_output_functions :

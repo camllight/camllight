@@ -41,7 +41,7 @@ and tblock = Pp_tbox of int list ref  (* Tabulation box *)
    size is set when the size of the block is known
    len is the declared length of the token *)
 type pp_queue_elem =
-{mutable Elem_size : int; Token : pp_token; Length : int};;
+{mutable elem_size : int; token : pp_token; length : int};;
 
 (* Scan stack
    each element is (left_total, queue element) where left_total
@@ -131,7 +131,7 @@ let pp_clear_queue state =
     clear_queue state.pp_queue;;
 
 (* Enter a token in the pretty-printer queue *)
-let pp_enqueue state ({Length = len;_} as token) =
+let pp_enqueue state ({length = len;_} as token) =
     state.pp_right_total <- state.pp_right_total + len;
     add_queue token state.pp_queue;;
 
@@ -175,7 +175,7 @@ let pp_force_break_line state =
 let pp_skip_token state =
     (* When calling pp_skip_token the queue cannot be empty *)
     match take_queue state.pp_queue with
-    {Elem_size = size; Length = len; _} ->
+    {elem_size = size; length = len; _} ->
        state.pp_left_total <- state.pp_left_total - len;
        state.pp_space_left <- state.pp_space_left + size;;
 
@@ -282,7 +282,7 @@ let format_pp_token state size = function
 let rec advance_left state =
     try
      match peek_queue state.pp_queue with
-      {Elem_size = size; Token = tok; Length = len} ->
+      {elem_size = size; token = tok; length = len} ->
        if not
         (size < 0 &
          (state.pp_right_total - state.pp_left_total < state.pp_space_left))
@@ -298,7 +298,7 @@ let enqueue_advance state tok = pp_enqueue state tok; advance_left state;;
 
 (* To enqueue a string : try to advance *)
 let enqueue_string_as state n s =
-    enqueue_advance state {Elem_size = n; Token = Pp_text s; Length = n};;
+    enqueue_advance state {elem_size = n; token = Pp_text s; length = n};;
 
 let enqueue_string state s = enqueue_string_as state (string_length s) s;;
 
@@ -307,7 +307,7 @@ let enqueue_string state s = enqueue_string_as state (string_length s) s;;
 
 (* The scan_stack is never empty *)
 let scan_stack_bottom =
-    [Scan_elem (-1, {Elem_size = (-1); Token = Pp_text ""; Length = 0})];;
+    [Scan_elem (-1, {elem_size = (-1); token = Pp_text ""; length = 0})];;
 
 (* Set size of blocks on scan stack:
    if ty = true then size of break is set else size of block is set
@@ -321,20 +321,20 @@ let clear_scan_stack state = state.pp_scan_stack <- scan_stack_bottom;;
 let set_size state ty =
     match state.pp_scan_stack with
       Scan_elem (left_tot,
-                 ({Elem_size = size; Token = tok; _} as queue_elem)) :: t ->
+                 ({elem_size = size; token = tok; _} as queue_elem)) :: t ->
        (* test if scan stack contains any data that is not obsolete *)
        if left_tot < state.pp_left_total then clear_scan_stack state else
         begin match tok with
            Pp_break (_, _) | Pp_tbreak (_, _) ->
             if ty then
              begin
-              queue_elem.Elem_size <- state.pp_right_total + size;
+              queue_elem.elem_size <- state.pp_right_total + size;
               state.pp_scan_stack <- t
              end
          | Pp_begin (_, _) ->
             if not ty then
              begin
-              queue_elem.Elem_size <- state.pp_right_total + size;
+              queue_elem.elem_size <- state.pp_right_total + size;
               state.pp_scan_stack <- t
              end
          | _ -> () (* scan_push is only used for breaks and boxes *)
@@ -357,8 +357,8 @@ let pp_open_box state indent br_ty =
     state.pp_curr_depth <- state.pp_curr_depth + 1;
     if state.pp_curr_depth < state.pp_max_boxes then
       (scan_push state false
-        {Elem_size = (- state.pp_right_total);
-         Token = Pp_begin (indent, br_ty); Length = 0}) else
+        {elem_size = (- state.pp_right_total);
+         token = Pp_begin (indent, br_ty); length = 0}) else
     if state.pp_curr_depth = state.pp_max_boxes
     then enqueue_string state state.pp_ellipsis;;
 
@@ -366,8 +366,8 @@ let pp_open_box state indent br_ty =
 let pp_open_sys_box state =
     state.pp_curr_depth <- state.pp_curr_depth + 1;
     scan_push state false
-     {Elem_size = (- state.pp_right_total);
-      Token = Pp_begin (0, Pp_hovbox); Length = 0};;
+     {elem_size = (- state.pp_right_total);
+      token = Pp_begin (0, Pp_hovbox); length = 0};;
 
 (* close a block, setting sizes of its subblocks *)
 let pp_close_box state () =
@@ -375,7 +375,7 @@ let pp_close_box state () =
      begin
       if state.pp_curr_depth < state.pp_max_boxes then
        begin
-        pp_enqueue state {Elem_size = 0; Token = Pp_end; Length = 0};
+        pp_enqueue state {elem_size = 0; token = Pp_end; length = 0};
         set_size state true; set_size state false
        end;
       state.pp_curr_depth <- state.pp_curr_depth - 1;
@@ -444,12 +444,12 @@ and pp_print_flush state () = pp_flush state false;;
 (* To get a newline when one does not want to close the current block *)
 let pp_force_newline state () =
   if state.pp_curr_depth < state.pp_max_boxes then
-    enqueue_advance state {Elem_size = 0; Token = Pp_newline; Length = 0};;
+    enqueue_advance state {elem_size = 0; token = Pp_newline; length = 0};;
 
 (* To format something if the line has just been broken *)
 let pp_print_if_newline state () =
   if state.pp_curr_depth < state.pp_max_boxes then
-    enqueue_advance state {Elem_size = 0; Token = Pp_if_newline; Length = 0};;
+    enqueue_advance state {elem_size = 0; token = Pp_if_newline; length = 0};;
 
 (* Breaks: indicate where a block may be broken.
    If line is broken then offset is added to the indentation of the current
@@ -458,8 +458,8 @@ let pp_print_if_newline state () =
 let pp_print_break_curry state width offset =
   if state.pp_curr_depth < state.pp_max_boxes then 
     scan_push state true
-     {Elem_size = (- state.pp_right_total); Token = Pp_break (width, offset);
-      Length = width};;
+     {elem_size = (- state.pp_right_total); token = Pp_break (width, offset);
+      length = width};;
 
 let pp_print_space state () = pp_print_break_curry state 1 0
 and pp_print_cut state () = pp_print_break_curry state 0 0;;
@@ -472,22 +472,22 @@ let pp_open_tbox state () =
   state.pp_curr_depth <- state.pp_curr_depth + 1;
   if state.pp_curr_depth < state.pp_max_boxes then
     enqueue_advance state
-      {Elem_size = 0;
-       Token = Pp_tbegin (Pp_tbox (ref [])); Length = 0};;
+      {elem_size = 0;
+       token = Pp_tbegin (Pp_tbox (ref [])); length = 0};;
 
 (* Close a tabulation block *)
 let pp_close_tbox state () =
   if state.pp_curr_depth > 1 then begin
   if state.pp_curr_depth < state.pp_max_boxes then
-   enqueue_advance state {Elem_size = 0; Token = Pp_tend; Length = 0};
+   enqueue_advance state {elem_size = 0; token = Pp_tend; length = 0};
   state.pp_curr_depth <- state.pp_curr_depth - 1 end;;
 
 (* Print a tabulation break *)
 let pp_print_tbreak_curry state width offset =
   if state.pp_curr_depth < state.pp_max_boxes then
     scan_push state true
-     {Elem_size = (- state.pp_right_total); Token = Pp_tbreak (width, offset); 
-      Length = width};;
+     {elem_size = (- state.pp_right_total); token = Pp_tbreak (width, offset); 
+      length = width};;
 
 let pp_print_tab state () = pp_print_tbreak_curry state 0 0;;
 let pp_print_tbreak state (width, offset) =
@@ -495,7 +495,7 @@ let pp_print_tbreak state (width, offset) =
 
 let pp_set_tab state () =
   if state.pp_curr_depth < state.pp_max_boxes
-  then enqueue_advance state {Elem_size = 0; Token = Pp_stab; Length=0};;
+  then enqueue_advance state {elem_size = 0; token = Pp_stab; length=0};;
 
 (**************************************************************
 
@@ -549,7 +549,7 @@ let pp_get_margin state () = state.pp_margin;;
 
 let pp_set_formatter_output_functions state f g =
   state.pp_output_function <- f; state.pp_flush_function <- g;;
-let pp_set_formatter_output_channel state os = 
+let pp_set_formatter_out_channel state os = 
   state.pp_output_function <- output os;
   state.pp_flush_function <- (fun () -> flush os);;
 let pp_get_formatter_output_functions state () = 
@@ -559,7 +559,7 @@ let make_formatter f g =
  (* The initial state of the formatter contains a dummy box *)
  let pp_q = make_queue () in
  let sys_tok =
-     {Elem_size = (- 1); Token = Pp_begin (0, Pp_hovbox); Length = 0} in
+     {elem_size = (- 1); token = Pp_begin (0, Pp_hovbox); length = 0} in
  add_queue sys_tok pp_q;
  let sys_scan_stack =
      (Scan_elem (1, sys_tok)) :: scan_stack_bottom in
@@ -616,8 +616,8 @@ and set_max_boxes = pp_set_max_boxes std_formatter
 and get_max_boxes = pp_get_max_boxes std_formatter
 and set_ellipsis_text = pp_set_ellipsis_text std_formatter
 and get_ellipsis_text = pp_get_ellipsis_text std_formatter
-and set_formatter_output_channel =
-    pp_set_formatter_output_channel std_formatter
+and set_formatter_out_channel =
+    pp_set_formatter_out_channel std_formatter
 and set_formatter_output_functions =
     pp_set_formatter_output_functions std_formatter
 and get_formatter_output_functions =
