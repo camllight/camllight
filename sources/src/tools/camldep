@@ -34,13 +34,14 @@ sub scan_source {
     if (m/#\s*open\s*"([^"]*)"/) {
       $imports{$1} = 1;
     }
-    while (m/([a-zA-Z0-9_]+)__/g) {
+    while(m/([a-zA-Z0-9_]+)__/) {
       $imports{$1} = 1;
+      $_ = $';
     }
   }
   close(SRC);
   undef(@deps);
-  if ($target_name =~ m/\.zo$/ && -r ($source_name . "i")) {
+  if ($target_name =~ m/(.*)\.zo$/ && -r ($source_name . "i")) {
     push(@deps, "$1.zi");
   }
   foreach $modl (keys(%imports)) {
