@@ -1,17 +1,13 @@
 # Makefile for the portable graphics library
 
-### Configuration section
-
-# The path to the Caml Light standard library
-LIBDIR=/usr/local/lib/caml-light
-
-# The path to the X11 include directory
-# (usually /usr/include/X11; for Sparcstations, /usr/openwin/include/X11)
+# These options are overriden when called from ../Makefile
+CC=cc
+OPTS=
 X11_INCLUDES=/usr/include/X11
+CPP=/lib/cpp -P
 
-# Which C compiler to use
-CC=gcc
-CFLAGS=-g -I../../src/runtime -I$(X11_INCLUDES)
+# Compilation options
+CFLAGS=$(OPTS) -I../../src/runtime -I$(X11_INCLUDES)
 
 # Test to see whether ranlib exists on the machine
 RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
@@ -19,39 +15,49 @@ RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
 # How to invoke ranlib
 RANLIB=ranlib
 
-### End of configuration section
-
+# The Caml Light compilers
 CAMLC=camlc
+CAMLMKTOP=camlmktop
+COMPFLAGS=-I ../libunix
 
 OBJS=open.o draw.o fill.o color.o text.o \
   image.o make_img.o dump_img.o point_col.o sound.o events.o
 
-all: libgraph.a graphics.zo graphics.zi
+GENFILES=graphics.ml
 
-camlgraph: all
-	camlmktop -custom -o camlgraph unix.zo graphics.zo libgraph.a -lunix -lX11
+all: libgraph.a graphics.zo graphics.zi camlgraph
 
 libgraph.a: $(OBJS)
 	rm -f libgraph.a
 	ar rc libgraph.a $(OBJS)
 	ranlib libgraph.a
 
+camlgraph: libgraph.a graphics.zo
+	$(CAMLMKTOP) -custom -o camlgraph ../libunix/unix.zo graphics.zo \
+        libgraph.a ../libunix/libunix.a -lX11
+
 clean:
-	rm -f libgraph.a camlgraph *.o *.z[io] *~ #*#
+	rm -f libgraph.a camlgraph $(GENFILES) *.o *.z[io] *~ #*#
 
 install:
 	cp libgraph.a $(LIBDIR)/libgraph.a
 	if $(RANLIBTEST); then cd $(LIBDIR); $(RANLIB) libgraph.a; else true; fi
 	cp graphics.z[io] $(LIBDIR)
+	cp camlgraph $(LIBDIR)
 
 .SUFFIXES: .ml .mli .zo .zi
 
 .mli.zi:
-	$(CAMLC) -c $<
+	$(CAMLC) $(COMPFLAGS) -c $<
 .ml.zo:
-	$(CAMLC) -c $<
+	$(CAMLC) $(COMPFLAGS) -c $<
 
-depend:
+graphics.ml: graphics.mlp
+	@rm -f graphics.ml
+	$(CPP) -Dunix graphics.mlp > graphics.ml
+	@chmod -w graphics.ml
+
+depend: $(GENFILES)
 	mv Makefile Makefile.BAK; \
 	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.BAK; \
          gcc -MM $(CFLAGS) *.c; \

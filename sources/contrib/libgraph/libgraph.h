@@ -35,6 +35,20 @@ extern XFontStruct * grfont;    /* Current font */
 #define DEFAULT_FONT "fixed"
 #define SIZE_QUEUE 256
 
+/* To handle events asynchronously */
+#ifdef HAS_ASYNC_IO
+#define USE_ASYNC_IO
+#define EVENT_SIGNAL SIGIO
+#else
+#ifdef HAS_SETITIMER
+#define USE_INTERVAL_TIMER
+#define EVENT_SIGNAL SIGALRM
+#else
+#define USE_ALARM
+#define EVENT_SIGNAL SIGALRM
+#endif
+#endif
+
 void gr_fail();
 void gr_check_open();
 unsigned long gr_pixel_rgb();

@@ -73,7 +73,7 @@ value gr_make_image(m)
     XDestroyImage(imask);
     XFreeGC(grdisplay, gc);
   }
-
+  XFlush(grdisplay);
   return im;
 }
 
