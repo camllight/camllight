@@ -43,6 +43,7 @@
 \input runtime.tex
 \input librar.tex
 \input lexyacc.tex
+\input debugger.tex
 \input intf-c.tex
 
 \part{Appendix}

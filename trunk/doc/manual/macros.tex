@@ -4,6 +4,8 @@
 \def\var#1{{\it#1}}
 \def\nth#1#2{${\it#1}_{#2}$}
 \def\nmth#1#2#3{${\it#1}_{#2}^{#3}$}
+\def\optvar#1{[\var{#1}\/]}
+\def\event{$\bowtie$}
 
 % Pour avoir les exposants sur la ligne au-dessus (???)
 
@@ -51,10 +53,6 @@
 \def\endmac{\endlist}
 \def\pc{\versionspecific{PC}}
 \def\endpc{\endlist}
-\def\pcbase{\versionspecific{86}}
-\def\endpcbase{\endlist}
-\def\pcthree{\versionspecific{386}}
-\def\endpcthree{\endlist}
 
 \def\requirements{\trivlist \item[\hskip\labelsep {\bf Requirements.}]}
 \def\endrequirements{\endtrivlist}
@@ -63,17 +61,17 @@
 \def\troubleshooting{\trivlist \item[\hskip\labelsep {\bf Troubleshooting.}]}
 \def\endtroubleshooting{\endtrivlist}
 
-% Pour les tables de priorites
+% Pour les tables de priorites et autres tableaux a deux colonnes, encadres
 
-\def\precedences{%
+\def\tableau#1#2{%
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
-Construction or operator & Associativity \\
+#1 & #2 \\
 \hline
 }
-\def\endprecedences{\hline\end{tabular}\end{center}}
-\def\prec#1#2{#1 & #2 \\}
+\def\endtableau{\hline\end{tabular}\end{center}}
+\def\entree#1#2{#1 & #2 \\}
 
 % L'environnement option
 
