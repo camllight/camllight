@@ -256,3 +256,8 @@ let displacement_overflow () =
   raise Toplevel
 ;;
 
+let unused_open_warning modname =
+  eprintf "%tWarning: useless #open on module \"%s\".\n"
+    output_input_name modname;
+  flush stderr
+;;

@@ -194,9 +194,7 @@ let type_valuedecl loc decl =
 ;;
 
 let type_letdef loc rec_flag pat_expr_list =
-  let generalizable =
-    for_all (fun (pat, expr) -> is_nonexpansive expr) pat_expr_list in
-  if generalizable then push_type_level();
+  push_type_level();
   let ty_list =
     map (fun (pat, expr) -> new_type_var()) pat_expr_list in
   let env =
@@ -209,10 +207,12 @@ let type_letdef loc rec_flag pat_expr_list =
   do_list2
     (fun (pat, exp) ty -> type_expect [] exp ty)
     pat_expr_list ty_list;
-  if generalizable then begin
-    pop_type_level();
-    do_list generalize_type ty_list
-  end;
+  pop_type_level();
+  let gen_type =
+    map2 (fun (pat, expr) ty -> (is_nonexpansive expr, ty))
+         pat_expr_list ty_list in
+  do_list (fun (gen, ty) -> if not gen then nongen_type ty) gen_type;
+  do_list (fun (gen, ty) -> if gen then generalize_type ty) gen_type;
   if not rec_flag then enter_val env;
   env
 ;;
