@@ -1,9 +1,7 @@
 /* Buffered input/output. */
 
+#include <errno.h>
 #include <fcntl.h>
-#ifdef __TURBOC__
-#include <io.h>
-#endif
 #include "alloc.h"
 #include "fail.h"
 #include "io.h"
@@ -61,7 +59,11 @@ static void really_write(fd, p, n)
 #ifdef HAS_UI
     retcode = ui_write(fd, p, n);
 #else
+#ifdef EINTR
+    do { retcode = write(fd, p, n); } while (retcode == -1 && errno == EINTR);
+#else
     retcode = write(fd, p, n);
+#endif
 #endif
     if (retcode == -1) sys_error(NULL);
     p += retcode;
@@ -197,7 +199,11 @@ static int really_read(fd, p, n)
 #ifdef HAS_UI
   retcode = ui_read(fd, p, n);
 #else
+#ifdef EINTR
+  do { retcode = read(fd, p, n); } while (retcode == -1 && errno == EINTR);
+#else
   retcode = read(fd, p, n);
+#endif
 #endif
   leave_blocking_section();
   if (retcode == -1) sys_error(NULL);

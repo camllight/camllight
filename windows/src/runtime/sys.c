@@ -4,10 +4,6 @@
 #include <fcntl.h>
 #include <signal.h>
 #include "config.h"
-#ifdef __TURBOC__
-#include <io.h>
-#include <sys\stat.h>
-#endif
 #include "alloc.h"
 #include "debugcom.h"
 #include "fail.h"
@@ -16,8 +12,6 @@
 #include "mlvalues.h"
 #include "signals.h"
 #include "stacks.h"
-
-extern int errno;
 
 #ifdef HAS_STRERROR
 
@@ -165,19 +159,11 @@ value sys_system_command(command)   /* ML */
 }
 
 static int sys_var_init[] = {
-#ifdef __TURBOC__
-  S_IREAD, S_IWRITE, S_IEXEC,
-  0, 0, 0,
-  0, 0, 0,
-  0, 0,
-  S_IREAD, S_IWRITE, S_IEXEC
-#else
   0400, 0200, 0100,
   0040, 0020, 0010,
   0004, 0002, 0001,
   04000, 02000,
   0444, 0222, 0111
-#endif
 };
 
 void sys_init(argv)
