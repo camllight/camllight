@@ -46,16 +46,16 @@ type pp_queue_elem =
    each element is (left_total, queue element) where left_total is the value
    of pp_left_total when the element has been enqueued *)
 type pp_scan_elem = Scan_elem of int * pp_queue_elem;;
-let pp_scan_stack = (stack__new () : pp_scan_elem stack__t);;
+let pp_scan_stack = ref ([] : pp_scan_elem list);;
 
 (* Formatting Stack:
    used to break the lines while printing tokens *)
 (* The formatting stack contains the description of
    the currently active blocks *)
 type pp_format_elem = Format_elem of block_type * int;;
-let pp_format_stack = (stack__new () : pp_format_elem stack__t);;
+let pp_format_stack = ref ([]:pp_format_elem list);;
 
-let pp_tbox_stack = (stack__new () : tblock stack__t);;
+let pp_tbox_stack = ref ([]:tblock list);;
 
 (* Large value for default tokens size *)
 let pp_infinity = 9999;;
@@ -128,12 +128,12 @@ let break_same_line width =
    beyond pp_max_indent, then the block is rejected on the left
    by simulating a break. *)
 let pp_force_newline () =
-    try match stack__peek pp_format_stack 0 with
-     Format_elem (bl_ty, width) ->
+    match !pp_format_stack with
+     Format_elem (bl_ty, width) :: _ ->
         if width > !pp_space_left then
          (match bl_ty with
            Pp_fits -> () | Pp_hbox -> () | _ -> break_line width)
-    with stack__Empty -> pp_output_newline();;
+   | _ -> pp_output_newline();;
 
 (* To skip a token if the previous line has been broken *)
 let pp_skip_token () =
@@ -158,58 +158,54 @@ let format_pp_token size = function
           Pp_vbox -> Pp_vbox
         | _ -> if size > !pp_space_left then ty else Pp_fits
        end in
-       stack__push (Format_elem (bl_type, offset)) pp_format_stack
+       pp_format_stack := Format_elem (bl_type, offset) :: !pp_format_stack
 
   | Pp_end ->
-     begin try
-      stack__peek pp_format_stack 2;
-      stack__pop pp_format_stack; ()
-     with stack__Empty -> () end  (* No more block to close *)
+      begin match !pp_format_stack with
+          x::(y::l as ls) -> pp_format_stack := ls
+        | _ -> () (* No more block to close *)
+      end
 
-  | Pp_tbegin (Pp_tbox _ as tbox) -> stack__push tbox pp_tbox_stack
+  | Pp_tbegin (Pp_tbox _ as tbox) -> pp_tbox_stack := tbox :: !pp_tbox_stack
 
   | Pp_tend ->
-     begin try stack__pop pp_tbox_stack; ()
-     with Empty -> () end (* No more tabulation block to close *)
+      begin match !pp_tbox_stack with
+          x::ls -> pp_tbox_stack := ls
+        | _ -> () (* No more tabulation block to close *)
+      end
 
   | Pp_stab ->
-     begin
-      try
-       let tbox = stack__peek pp_tbox_stack 0 in
-       match tbox with
-        Pp_tbox tabs ->
-         let rec add_tab n = function
-             [] -> [n]
-           | x::l as ls -> if n < x then n :: ls else x::add_tab n l in
-         tabs := add_tab (!pp_margin - !pp_space_left) !tabs
-     with stack__Empty -> () end (* No opened tabulation block *)
+     begin match !pp_tbox_stack with
+       Pp_tbox tabs :: _ -> 
+        let rec add_tab n = function
+            [] -> [n]
+          | x::l as ls -> if n < x then n :: ls else x::add_tab n l in
+        tabs := add_tab (!pp_margin - !pp_space_left) !tabs
+     | _ -> () (* No opened tabulation block *)
+     end
 
   | Pp_tbreak (n,off) ->
       let insertion_point = !pp_margin - !pp_space_left in
-      begin try
-       let tbox = stack__peek pp_tbox_stack 0 in
-       match tbox with
-        Pp_tbox tabs -> 
-         let rec find n = function
-             x :: l -> if x >= n then x else find n l
-           | [] -> raise Not_found in
-         let tab =
-             match !tabs with
-               x :: l ->
-                begin try find insertion_point !tabs with Not_found -> x end
-             | _ -> insertion_point in
-         let offset = tab - insertion_point in
-         if offset >= 0 then break_same_line (offset + n) else
-          break_new_line (tab + off) !pp_margin
-      with stack__Empty -> () (* No opened tabulation block *)
+      begin match !pp_tbox_stack with
+         Pp_tbox tabs :: _ -> 
+          let rec find n = function
+              x :: l -> if x >= n then x else find n l
+            | [] -> raise Not_found in
+          let tab =
+              match !tabs with
+                x :: l ->
+                 begin try find insertion_point !tabs with Not_found -> x end
+              | _ -> insertion_point in
+          let offset = tab - insertion_point in
+          if offset >= 0 then break_same_line (offset + n) else
+           break_new_line (tab + off) !pp_margin
+       | _ -> () (* No opened tabulation block *)
       end
 
   | Pp_newline ->
-     begin
-      try
-       match stack__peek pp_format_stack 0 with
-        Format_elem (_,width) -> break_line width
-      with stack__Empty -> pp_output_newline ()
+     begin match !pp_format_stack with
+       Format_elem (_,width) :: _ -> break_line width
+     | _ -> pp_output_newline()
      end
 
   | Pp_if_newline ->
@@ -217,22 +213,20 @@ let format_pp_token size = function
       then pp_skip_token ()
 
   | Pp_break (n,off) ->
-     begin
-      try
-       match stack__peek pp_format_stack 0
-       with Format_elem (ty,width) ->
-             begin match ty with
-               Pp_hovbox ->
-                if size > !pp_space_left then break_new_line off width else
-                (* break the line here leads to new indentation ? *)
-                if (!pp_current_indent > !pp_margin - width + off)
-                then break_new_line off width else break_same_line n
-             | Pp_hvbox -> break_new_line off width
-             | Pp_fits -> break_same_line n
-             | Pp_vbox  -> break_new_line off width
-             | Pp_hbox  -> break_same_line n
-             end
-      with stack__Empty -> () (* No opened block *)
+     begin match !pp_format_stack with
+       Format_elem (ty,width) :: _ ->
+        begin match ty with
+          Pp_hovbox ->
+           if size > !pp_space_left then break_new_line off width else
+           (* break the line here leads to new indentation ? *)
+           if (!pp_current_indent > !pp_margin - width + off)
+            then break_new_line off width else break_same_line n
+        | Pp_hvbox -> break_new_line off width
+        | Pp_fits -> break_same_line n
+        | Pp_vbox  -> break_new_line off width
+        | Pp_hbox  -> break_same_line n
+        end
+     | _ -> () (* No opened block *)
      end;;
 
 (* Print if token size is known or printing is lagging
@@ -264,10 +258,9 @@ let enqueue_string s = enqueue_string_as (string_length s) s;;
 (* Routines for scan stack
    determine sizes of blocks *)
 (* scan_stack is never empty *)
-let dummy_scan_elem =
-    Scan_elem (-1, {Elem_size = (-1); Token = Pp_text ""; Length = 0});;
-let clear_scan_stack () =
-    stack__clear pp_scan_stack; stack__push dummy_scan_elem pp_scan_stack;;
+let empty_scan_stack =
+    [Scan_elem (-1, {Elem_size = (-1); Token = Pp_text ""; Length = 0})];;
+let clear_scan_stack () = pp_scan_stack := empty_scan_stack;;
 
 (* Set size of blocks on scan stack:
    if ty = true then size of break is set else size of block is set
@@ -277,34 +270,33 @@ let clear_scan_stack () =
    Pattern matching on token in scan stack is also exhaustive,
    since scan_push is used on breaks and opening of boxes *)
 let set_size ty =
-    try begin match stack__peek pp_scan_stack 0 with
+    match !pp_scan_stack with
       Scan_elem (left_tot,
-                 ({Elem_size = size; Token = tok; _} as queue_elem)) ->
+                 ({Elem_size = size; Token = tok; _} as queue_elem)) :: t ->
        (* test if scan stack contains any data that is not obsolete *)
        if left_tot < !pp_left_total then clear_scan_stack () else
         begin match tok with
            Pp_break (_, _) | Pp_tbreak (_, _) ->
             if ty then
              begin
-              stack__pop pp_scan_stack;
-              queue_elem.Elem_size <- !pp_right_total + size
+              queue_elem.Elem_size <- !pp_right_total + size;
+              pp_scan_stack := t
              end
          | Pp_begin (_, _) ->
             if not ty then
              begin
-              stack__pop pp_scan_stack;
-              queue_elem.Elem_size <- !pp_right_total + size
+              queue_elem.Elem_size <- !pp_right_total + size;
+              pp_scan_stack := t
              end
          | _ -> () (* scan_push is only used for breaks and boxes *)
         end
-      end
-    with stack__Empty -> () (* scan_stack is never empty *);;
+    | _ -> () (* scan_stack is never empty *);;
 
 (* Push a token on scan stack. If b is true set_size is called *)
 let scan_push b tok =
     pp_enqueue tok;
     if b then set_size true;
-    stack__push (Scan_elem (!pp_right_total,tok)) pp_scan_stack;;
+    pp_scan_stack := Scan_elem (!pp_right_total,tok) :: !pp_scan_stack;;
 
 (**************************************************************
 
@@ -373,8 +365,8 @@ let pp_rinit () =
     clear_scan_stack();
     pp_current_indent := 0;
     pp_curr_depth := 0; pp_space_left := !pp_margin;
-    stack__clear pp_format_stack;
-    stack__clear pp_tbox_stack;
+    pp_format_stack := [];
+    pp_tbox_stack := [];
     pp_open_sys_box ();;
 
 (* Flushing pretty-printer queue. *)
@@ -474,4 +466,3 @@ let get_formatter_output () = !pp_out_channel;;
 
 (* Initializing formatter *)
 pp_rinit();;
-
