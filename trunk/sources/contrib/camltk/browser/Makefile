@@ -16,7 +16,8 @@ SUPPORTDIR=../libsupport
 UNIXDIR=../../libunix
 
 TKLINKOPT=-ccopt -L$(TCLLIBDIR) -ccopt -L$(TKLIBDIR) -ccopt -L$(X11_LIB) \
-	   $(SUPPORTDIR)/camltk.o -lcaml -ltk -ltcl -lX11
+	  -ccopt -L$(SUPPORTDIR) \
+	   -lcaml -lcamltk -ltk -ltcl -lX11
 
 CAMLDEP=../../../src/tools/camldep
 
@@ -38,7 +39,7 @@ all: camlbrowser
 camlbrowser: $(OBJS)
 	$(CAMLC) $(LINKFLAGS) -I $(CAMLTKDIR) -I ../../../src/compiler \
 		-o camlbrowser $(UNIXDIR)/unix.zo \
-                tklib1.zo $(COMPILEROBJS) $(OBJS) $(TKLINKOPT) \
+                tklib.zo $(COMPILEROBJS) $(OBJS) $(TKLINKOPT) \
                 $(UNIXDIR)/libunix.a
 
 lexer.mll: lexer.mlp
