@@ -1,6 +1,4 @@
-#open "prelude";;
 #open "terms";;
-#open "equation";;
 #open "order";;
 #open "kb";;
 

@@ -46,13 +46,13 @@ makefiles:: makefile
 
 # Generated dependencies below
 
-parser.zi: token.zi asl.zi 
+parser.zi: token.zi 
 asl.zo: asl.zi 
 load.zo: token.zi typing.zo parser.zi semant.zo main.zi 
 loadall.zo: main.zi 
 main.zo: main.zi token.zi typing.zo parser.zi semant.zo asl.zi 
 parser.zo: parser.zi token.zi asl.zi 
-run.zo: asl.zi main.zi 
-semant.zo: parser.zi asl.zi 
-token.zo: token.zi asl.zi 
-typing.zo: parser.zi asl.zi 
+run.zo: main.zi 
+semant.zo: parser.zi 
+token.zo: token.zi 
+typing.zo: parser.zi 

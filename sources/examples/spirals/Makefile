@@ -8,7 +8,7 @@ CAMLYACC=camlyacc
 CPP=/lib/cpp -P
 CAMLDEP=camldep
 RM=rm -f
-TOP=..
+TOP=../.
 CONFIG=$(TOP)/config
 
 all::

@@ -1,7 +1,5 @@
 (****************** Term manipulations *****************)
 
-#open "prelude";;
-
 type term = Var of int
           | Term of string * term list;;
 

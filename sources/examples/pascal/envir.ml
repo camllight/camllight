@@ -1,5 +1,5 @@
 #open "syntaxe";;
-#open "interp";;
+
 type 'a env =
   { vars: (string * 'a) list;
     procs: (string * décl_proc) list;
