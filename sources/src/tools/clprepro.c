@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #else
 char *malloc ();
+char *realloc ();
 #endif
 
 /************************** errors are fatal. */
@@ -48,7 +49,7 @@ buf *buf_new (size)
   buf *result;
   char *data;
   
-  result = malloc (sizeof (buf));
+  result = (buf *) malloc (sizeof (buf));
   data = malloc (size + 1);
   if (result == NULL || data == NULL) fatal ("out of memory (buf_new)");
   result->data = data;
@@ -131,7 +132,7 @@ listelem *ident_head = NULL;
 void ident_add (name, value)
   char *name, *value;
 {
-  listelem *el = malloc (sizeof (listelem));
+  listelem *el = (listelem *) malloc (sizeof (listelem));
   if (el == NULL) fatal ("out of memory (ident_add)");
   el->next = ident_head;
   el->name = name;
