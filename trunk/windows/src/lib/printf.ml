@@ -3,7 +3,6 @@
 #open "bool";;
 #open "float";;
 #open "int";;
-#open "fchar";;
 #open "fstring";;
 #open "io";;
 #open "obj";;

@@ -1,9 +1,7 @@
 (* Printing a type expression *)
 
-#open "misc";;
 #open "const";;
 #open "globals";;
-#open "builtins";;
 #open "types";;
 #open "modules";;
 #open "format";;

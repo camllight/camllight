@@ -5,7 +5,6 @@
 #open "int";;
 #open "fvect";;
 #open "fstring";;
-#open "fchar";;
 #open "io";;
 #open "list";;
 

@@ -1,9 +1,7 @@
 (* builtins.ml : the pre-defined global identifiers *)
 
-#open "misc";;
 #open "const";;
 #open "globals";;
-#open "hashtbl";;
 #open "modules";;
 
 let builtin n d = {qualid={qual="builtin"; id=n}; info=d}

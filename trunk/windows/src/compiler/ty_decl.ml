@@ -1,10 +1,8 @@
 (* Typing toplevel phrases *)
 
-#open "misc";;
 #open "const";;
 #open "globals";;
 #open "builtins";;
-#open "location";;
 #open "syntax";;
 #open "modules";;
 #open "types";;

@@ -6,19 +6,16 @@
 #open "interntl";;
 #open "const";;
 #open "location";;
-#open "lexer";;
 #open "modules";;
 #open "globals";;
 #open "builtins";;
 #open "types";;
-#open "instruct";;
 #open "patch";;
 #open "emit_phr";;
 #open "symtable";;
 #open "do_phr";;
 #open "load_phr";;
 #open "compiler";;
-#open "fmt_type";;
 #open "pr_value";;
 #open "format";;
 

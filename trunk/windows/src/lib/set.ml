@@ -1,7 +1,6 @@
 (* Sets over ordered types *)
 
 #open "eq";;
-#open "int";;
 #open "baltree";;
 
 (* Sets are represented by AVL trees. *)

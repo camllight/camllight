@@ -1,10 +1,5 @@
 (* To buffer bytecode during emission *)
 
-#open "obj";;
-#open "misc";;
-#open "config";;
-#open "opcodes";;
-
 let out_buffer = ref (create_string 64)
 and out_position = ref 0
 ;;

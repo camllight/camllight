@@ -1,7 +1,5 @@
 (* Various useful stuff *)
 
-#open "config";;
-
 exception Zinc of string;;
 
 let fatal_error s = raise (Zinc s);;

@@ -1,25 +1,18 @@
 (* The compiler entry points *)
 
-#open "obj";;
 #open "misc";;
 #open "interntl";;
-#open "const";;
 #open "lexer";;
 #open "parser";;
 #open "location";;
 #open "syntax";;
-#open "builtins";;
-#open "hashtbl";;
-#open "globals";;
 #open "modules";;
-#open "types";;
 #open "error";;
 #open "typing";;
 #open "ty_decl";;
 #open "pr_decl";;
 #open "ty_intf";;
 #open "front";;
-#open "instruct";;
 #open "back";;
 #open "emit_phr";;
 

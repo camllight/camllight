@@ -3,7 +3,6 @@
 (**) #open "config";;
 (**) #open "lexing";;
 (**) #open "parsing";;
-(**) #open "misc";;
 (**) #open "interntl";;
 
 let input_name = ref ""                 (* Input file name. *)

@@ -4,7 +4,6 @@
 #open "int";;
 #open "eq";;
 #open "fvect";;
-#open "ref";;
 
 (* We do dynamic hashing, and we double the size of the table when
    buckets become too long, but without re-hashing the elements. *)
