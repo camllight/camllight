@@ -1,7 +1,11 @@
 #include <fcntl.h>
+#include <signal.h>
 #include "libgraph.h"
 #include <alloc.h>
 #include <fail.h>
+#ifdef HAS_SETITIMER
+#include <sys/time.h>
+#endif
 
 static Bool gr_initialized = False;
 
@@ -110,21 +114,56 @@ value gr_open_graph(arg)
        In particular, gr_sigio_handler can now handle events safely. */
     gr_initialized = True;
     
-    /* Arrange for I/O on the connection to trigger the SIGIO signal */
+    /* If possible, request that system calls be restarted after
+       the EVENT_SIGNAL signal. */
+#ifdef SA_RESTART
+    { struct sigaction action;
+      sigaction(EVENT_SIGNAL, NULL, &action);
+      action.sa_flags |= SA_RESTART;
+      sigaction(EVENT_SIGNAL, &action, NULL);
+    }
+#endif
+
+#ifdef USE_ASYNC_IO
+    /* If BSD-style asynchronous I/O are supported:
+       arrange for I/O on the connection to trigger the SIGIO signal */
     ret = fcntl(ConnectionNumber(grdisplay), F_GETFL, 0);
     fcntl(ConnectionNumber(grdisplay), F_SETFL, ret | FASYNC);
     fcntl(ConnectionNumber(grdisplay), F_SETOWN, getpid());
+#endif
+#ifdef USE_INTERVAL_TIMER
+    /* If BSD-style interval timers are provided, use the real-time timer
+       to poll events. */
+    { struct itimerval it;
+      it.it_interval.tv_sec = 0;
+      it.it_interval.tv_usec = 250000;
+      it.it_value.tv_sec = 0;
+      it.it_value.tv_usec = 250000;
+      setitimer(ITIMER_REAL, &it, NULL);
+    }
+#endif
+#ifdef USE_ALARM
+    /* The poor man's solution: use alarm to poll events. */
+    alarm(1);
+#endif
   }
-
   /* Position the current point at origin */
   grx = 0;
   gry = 0;
+  /* Reset the color cache */
+  gr_init_color_cache();
   return Val_unit;
 }
 
 value gr_close_graph()
 {
   if (gr_initialized) {
+#ifdef USE_INTERVAL_TIMER
+    struct itimerval it;
+    it.it_value.tv_sec = 0;
+    it.it_value.tv_usec = 0;
+    setitimer(ITIMER_REAL, &it, NULL);
+#endif
     gr_initialized = False;
     if (grfont != NULL) { XFreeFont(grdisplay, grfont); grfont = NULL; }
     XFreeGC(grdisplay, grwindow.gc);
@@ -153,11 +192,13 @@ value gr_clear_graph()
 
 value gr_size_x()
 {
+  gr_check_open();
   return Val_int(grwindow.w);
 }
 
 value gr_size_y()
 {
+  gr_check_open();
   return Val_int(grwindow.h);
 }
 
@@ -178,6 +219,9 @@ value gr_sigio_handler()
     while (XCheckMaskEvent(grdisplay, -1 /*all events*/, &grevent))
       gr_handle_simple_event(&grevent);
   }
+#ifdef USE_ALARM
+  alarm(1);
+#endif
   return Val_unit;
 }
 

@@ -66,7 +66,6 @@ value gr_set_line_width(vwidth)
      value vwidth;
 {
   int width = Int_val(vwidth);
-  if (width == 1) width = 0;    /* faster drawing */
   XSetLineAttributes(grdisplay, grwindow.gc,
                      width, LineSolid, CapRound, JoinRound);
   XSetLineAttributes(grdisplay, grbstore.gc,
