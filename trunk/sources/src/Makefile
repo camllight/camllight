@@ -10,6 +10,12 @@ CC=cc
 # This option circumvents a gcc bug on some platforms (680x0, 80386).
 OPTS=#-fno-defer-pop
 
+# Extra libraries that have to be linked with the runtime system.
+# The math library "-lm" is linked by default.
+# On most machines, nothing else is needed.
+# On System V and derivatives, you may need -lsocket, -lnsl, and/or -lucb.
+LIBS=
+
 # How to call the C preprocessor on a file that does not have the .c extension.
 # That's /lib/cpp on most machines, sometimes /usr/bin/cpp,
 # and /usr/ccs/lib/cpp under Solaris.
@@ -40,11 +46,11 @@ SUBDIRS=runtime launch lib compiler linker librar toplevel lex yacc tools
 
 # Configure the system
 configure:
-	cd ../config; sh autoconf "$(CC) $(OPTS)"
+	cd ../config; sh autoconf "$(CC) $(OPTS) $(LIBS)"
 
 # Build the system for the first time
 world:
-	cd runtime; make CC="$(CC)" OPTS="$(OPTS)" all
+	cd runtime; make CC="$(CC)" OPTS="$(OPTS)" LIBS="$(LIBS)" all
 	cp runtime/camlrun .
 	cd yacc; make CC="$(CC)" OPTS="$(OPTS)" all
 	cp yacc/camlyacc .
@@ -55,7 +61,7 @@ world:
 	cd lex; make CPP="$(CPP)" all
 	cd toplevel; make CPP="$(CPP)" all
 	cd launch; make LIBDIR=$(LIBDIR) BINDIR=$(BINDIR) \
-                           CC="$(CC)" OPTS="$(OPTS)" all
+                           CC="$(CC)" OPTS="$(OPTS)" LIBS="$(LIBS)" all
 	@ echo "Let's test quickly the toplevel system..."
 	(echo "1+2;;";                                                        \
          echo "let rec fib n = if n < 2 then 1 else fib(n-1)+fib(n-2);;";     \
