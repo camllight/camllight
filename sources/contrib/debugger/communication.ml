@@ -42,6 +42,7 @@ let get_report0 () =
      | `b` -> Rep_breakpoint
      | `x` -> Rep_exited
      | `s` -> Rep_trap
+     | `u` -> Rep_exc
      | c ->
          let error =
       	   "???get_report : invalid type : (" ^ (string_of_int (int_of_char c)) ^ ")  "

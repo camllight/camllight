@@ -259,7 +259,6 @@ let rec stop_on_event report =
 	       find_event ())
     | {Rep_type = Rep_trap; Rep_stack_pointer = trap_frame} ->
 					(* No event at current position. *)
-      	if trap_frame > 0 then		(* Not an uncaught exception. *)
 	  find_event ()
     | _ ->
       	();;
@@ -277,7 +276,7 @@ let interrupted = ref false;;
 (* --- Require `duration > 0' *)
 let internal_step duration =
   match current_report () with
-    (Some ({Rep_type = Rep_exited | Rep_trap} as x)) ->
+    (Some ({Rep_type = Rep_exited | Rep_exc} as x)) ->
       ()				(* End of program. *)
   | _ ->
       exec_protected
