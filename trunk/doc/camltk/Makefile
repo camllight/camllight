@@ -1,20 +1,24 @@
 LATEX=latex
+FORMAT=../tools/format-intf
+
 DIR=../../cl/contrib/camltk
 CAMLTKDIR= $(DIR)/lib
 TKSUPDIR=$(DIR)/libsupport
 
+
 # THIS MAKEFILE IS BOGUS, DON'T RELY ON DEPENDANCIES
 
+# Source files
 TEXFILES=camltk.tex user.tex impl.tex reference.tex bnf.tex
-GENFILES=inclmod.tex bindtypes.mli tktypes.mli helloworld.ml \
-	 addition.ml tkgen.mli textvariable.mli tk.mli
 
-.SUFFIXES: .tex .bib .bbl
+# Generated files
+GENFILES=inclmod.tex \
+	bindtypes.tex tkbuiltin.tex tktypes.tex helloworld.tex \
+	addition.tex tkgen.tex textvariable.tex
 
+all: camltk.dvi
 
-all: camltk.dvi html
-
-camltk.dvi: $(TEXFILES) $(GENFILES) camltk.bbl
+camltk.dvi: $(TEXFILES) $(GENFILES) $(MODULES) camltk.bbl
 	$(LATEX) camltk.tex
 
 camltk.bbl: tk.bib
@@ -24,36 +28,50 @@ camltk.aux: camltk.tex
 	$(LATEX) camltk.tex
 
 ###### Generated files
+
+
 # Inclusion of all modules
 inclmod.tex: $(CAMLTKDIR)/modules makemodinc
 	CAMLTKDIR=$(CAMLTKDIR); export CAMLTKDIR; ./makemodinc > inclmod.tex
 
 # Types from builtin_bind
-bindtypes.mli: $(TKSUPDIR)/builtin_bind.ml
-	rm -f bindtypes.mli
+bindtypes.tex: $(TKSUPDIR)/builtin_bind.ml
+	rm -f bindtypes.tex
 	(echo '\begin{verbatim}'; \
 	 sed -n -e '/^type/,/^;;$$/p' $(TKSUPDIR)/builtin_bind.ml; \
-	 echo '\end{verbatim}') > bindtypes.mli
+	 echo '\end{verbatim}') | expand > bindtypes.tex
 
 # Types from tk
-tktypes.mli: $(CAMLTKDIR)/tk.ml
-	rm -f tktypes.mli
+tktypes.tex: $(CAMLTKDIR)/tk.ml
+	rm -f tktypes.tex
 	(echo '\begin{verbatim}'; \
-	 sed -n -e '/^type/,/^;;$$/p' $(CAMLTKDIR)/tk.ml; \
-	 echo '\end{verbatim}') | expand > tktypes.mli
+	sed -n -e '/^type/,/^;;$$/p' $(CAMLTKDIR)/tk.ml; \
+	echo '\end{verbatim}') | expand > tktypes.tex
+
+tkbuiltin.tex:
+	$(FORMAT) "tk (builtin functions)" < tkbuiltin.mli > tkbuiltin.tex
+
+tkgen.tex:
+	(echo '(* user defined functions *)'; echo "" ; \
+	cat $(CAMLTKDIR)/tkgen.mli) | \
+	$(FORMAT) "tk (other functions)" > tkgen.tex
+
+textvariable.tex:
+	$(FORMAT) textvariable < $(TKSUPDIR)/textvariable.mli > textvariable.tex
+
 
 # Other files included in the doc
-helloworld.ml:
-	-ln -s $(DIR)/test/helloworld.ml ./helloworld.ml
+helloworld.tex:
+	rm -rf helloworld.tex
+	(echo '\begin{verbatim}'; \
+	 cat $(DIR)/test/helloworld.ml; \
+	echo '\end{verbatim}') | expand > helloworld.tex
 
-addition.ml:
-	-ln -s $(DIR)/test/addition.ml ./addition.ml
-
-tkgen.mli:
-	-ln -s $(CAMLTKDIR)/tkgen.mli ./tkgen.mli
-
-textvariable.mli:
-	-ln -s $(TKSUPDIR)/textvariable.mli ./textvariable.mli
+addition.tex:
+	rm -rf addition.tex
+	(echo '\begin{verbatim}'; \
+	cat $(DIR)/test/addition.ml; \
+	echo '\end{verbatim}') | expand > addition.tex
 
 clean: 
 	rm -f camltk.dvi camltk.log camltk.blg $(GENFILES)
@@ -61,34 +79,12 @@ clean:
 scratch: clean
 	rm -f camltk.blg camltk.bbl camltk.toc  *.aux
 
-## The WWW Documentation
-## REQUIRES our custom psearch cgi script
 
-SUPPORT=$(TKSUPDIR)/support.mli $(TKSUPDIR)/textvariable.mli
+.SUFFIXES:
+.SUFFIXES: .tex .mli .bib .bbl
 
-GENERATED=`sed -e 's/WIDGETOBJS=//' -e 's,\([a-z_]*\)\.zo,\$(CAMLTKDIR)/\1.mli,g' \
-                      $(CAMLTKDIR)/modules`
+.mli.tex:
+	$(FORMAT) $* $< > $*.tex
 
-tk.mli: tkbuiltin.mli tktypes.mli $(CAMLTKDIR)/tkgen.mli
-	cat tkbuiltin.mli tktypes.mli $(CAMLTKDIR)/tkgen.mli > tk.mli
-
-TKMODULE=tk.mli
-
-INTERFACES=\
-   '%Tk' $(TKMODULE) \
-   '%Widgets' $(GENERATED) \
-   '%Support' $(SUPPORT)
-
-
-mlifiles: tk.mli
-	[ -d camltk ] || mkdir camltk
-	[ -d camltk/library ] || mkdir camltk/library
-	[ -f camltk/library-header.html ] || \
-		cp library-header.html camltk/library-header.html
-	perl format-mli-files $(INTERFACES)
-
-html: mlifiles
-	latex2html -split 2  -dont_include reference camltk.tex
-
-cleanhtml:
-	rm -rf camltk
+.ml.tex:
+	$(FORMAT) $* $< > $*.tex
