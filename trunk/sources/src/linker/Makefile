@@ -76,6 +76,7 @@ main.zo: link.zo ../compiler/interntl.zo ../compiler/config.zi \
     ../compiler/misc.zo version.zo symtable.zo readword.zo 
 patch.zo: symtable.zo ../compiler/reloc.zo 
 predef.zo: ../compiler/const.zo 
-symtable.zo: predef.zo ../compiler/misc.zo prim_c.zo ../compiler/const.zo 
+symtable.zo: predef.zo ../compiler/misc.zo prim_c.zo \
+    ../compiler/interntl.zo ../compiler/const.zo 
 tr_const.zo: symtable.zo ../compiler/const.zo 
 version.zo: ../compiler/interntl.zo 

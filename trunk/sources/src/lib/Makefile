@@ -77,7 +77,7 @@ eq.zo: eq.zi
 exc.zo: exc.zi 
 fchar.zo: fchar.zi fstring.zi int.zi 
 filename.zo: filename.zi exc.zi eq.zi fstring.zi int.zi 
-float.zo: float.zi fchar.zi fstring.zi 
+float.zo: float.zi exc.zi fchar.zi fstring.zi int.zi 
 format.zo: format.zi eq.zi exc.zi bool.zi queue.zi fchar.zi fstring.zi \
     io.zi ref.zi float.zi int.zi 
 fstring.zo: fstring.zi eq.zi fchar.zi ref.zi int.zi 
@@ -93,7 +93,8 @@ map.zo: map.zi eq.zi baltree.zi list.zi int.zi
 pair.zo: pair.zi exc.zi 
 parsing.zo: parsing.zi exc.zi eq.zi iparsing.zi fvect.zi lexing.zi obj.zi \
     int.zi 
-printexc.zo: printexc.zi eq.zi exc.zi sys.zi io.zi fvect.zi obj.zi int.zi 
+printexc.zo: printexc.zi eq.zi exc.zi sys.zi bool.zi io.zi fvect.zi obj.zi \
+    int.zi 
 printf.zo: printf.zi eq.zi exc.zi bool.zi fchar.zi fstring.zi io.zi obj.zi \
     float.zi int.zi 
 queue.zo: queue.zi exc.zi ref.zi int.zi 
