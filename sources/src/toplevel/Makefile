@@ -87,9 +87,10 @@ version.ml: version.mlp ../version.h
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
 do_phr.zo: pr_value.zo ../compiler/typing.zo meta.zi ../compiler/modules.zo \
-    ../compiler/compiler.zo ../compiler/const.zo ../compiler/misc.zo \
-    load_phr.zo ../compiler/back.zo ../compiler/front.zo fmt_type.zo \
-    ../linker/symtable.zo ../compiler/syntax.zo ../compiler/ty_decl.zo 
+    ../compiler/interntl.zo ../compiler/compiler.zo ../compiler/const.zo \
+    ../compiler/misc.zo load_phr.zo ../compiler/back.zo \
+    ../compiler/front.zo fmt_type.zo ../linker/symtable.zo \
+    ../compiler/syntax.zo ../compiler/ty_decl.zo ../compiler/types.zo 
 expunge.zo: ../linker/symtable.zo ../compiler/const.zo 
 fmt_type.zo: ../compiler/modules.zo ../compiler/globals.zo \
     ../compiler/types.zo ../compiler/const.zo 
@@ -102,7 +103,16 @@ main.zo: meta.zi ../compiler/typing.zo toplevel.zi ../compiler/location.zi \
     ../compiler/modules.zo ../compiler/interntl.zo ../compiler/config.zi \
     ../compiler/compiler.zo version.zo ../compiler/misc.zo do_phr.zo \
     ../linker/symtable.zo 
+pr_value.debugger.zo: ../compiler/modules.zo ../compiler/const.zo \
+    ../compiler/misc.zo fmt_type.zo ../linker/symtable.zo \
+    ../compiler/globals.zo ../compiler/builtins.zo ../compiler/types.zo 
+pr_value.diff.zo: ../compiler/modules.zo ../compiler/const.zo \
+    ../compiler/misc.zo fmt_type.zo ../linker/symtable.zo \
+    ../compiler/globals.zo ../compiler/builtins.zo ../compiler/types.zo 
 pr_value.zo: ../compiler/modules.zo ../compiler/const.zo \
+    ../compiler/misc.zo fmt_type.zo ../linker/symtable.zo \
+    ../compiler/globals.zo ../compiler/builtins.zo ../compiler/types.zo 
+pr_value.old.zo: ../compiler/modules.zo ../compiler/const.zo \
     ../compiler/misc.zo fmt_type.zo ../linker/symtable.zo \
     ../compiler/globals.zo ../compiler/builtins.zo ../compiler/types.zo 
 provide.zo: ../compiler/prim.zo ../compiler/modules.zo \
