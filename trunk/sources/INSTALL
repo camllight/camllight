@@ -27,10 +27,10 @@ comments.
         make world
 
 This builds all components of Caml Light for the first time. It takes
-from about two minutes on a Dec Alpha or HP Snake to more than one hour on
-cheap 386 boxes. The "make" ends up with a little self-test. Don't
-forget to check the results, as indicated. This phase is fairly
-verbose; consider redirecting the output to a file:
+about two minutes on a modern workstation. The "make" ends up with a
+little self-test. Don't forget to check the results, as
+indicated. This phase is fairly verbose; consider redirecting the
+output to a file:
 
         make world > log.world 2>&1     # in sh
         make world >& log.world         # in csh
