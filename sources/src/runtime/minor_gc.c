@@ -131,7 +131,7 @@ void realloc_ref_table ()
                             Assert (ref_table_limit >= ref_table_threshold);
 
   if (ref_table_limit == ref_table_threshold){
-    gc_message ("ref_table threshold crossed.\n", 0);
+    gc_message ("ref_table threshold crossed\n", 0);
     ref_table_limit = ref_table_end;
     force_minor_gc = 1;
     something_to_do = 1;
@@ -142,13 +142,13 @@ void realloc_ref_table ()
                                                    Assert (something_to_do);
     ref_table_reserve += 1024;
     sz = (ref_table_size + ref_table_reserve) * sizeof (value *);
-    gc_message ("Growing ref_table to %ldk.\n", (long) sz / 1024);
+    gc_message ("Growing ref_table to %ldk\n", (long) sz / 1024);
 #ifdef MAX_MALLOC_SIZE
     if (sz > MAX_MALLOC_SIZE) ref_table = NULL;
     else
 #endif
     ref_table = (value **) realloc ((char *) ref_table, sz);
-    if (ref_table == NULL) fatal_error ("Fatal error: ref_table overflow.\n");
+    if (ref_table == NULL) fatal_error ("Fatal error: ref_table overflow\n");
     ref_table_end = ref_table + ref_table_size + ref_table_reserve;
     ref_table_threshold = ref_table + ref_table_size;
     ref_table_ptr = ref_table + cur_ptr;

@@ -69,40 +69,41 @@ typedef char schar;
 #define Max_ret_stack_size 524288
 #endif
 
-/* Maximum size of a block allocated in the young generation. (words) */
+/* Maximum size of a block allocated in the young generation (words). */
 /* Must be > 4 */
 #define Max_young_wosize 256
 
 
-/* Minimum size of the minor zone. (bytes)
-   This must be at least [sizeof (long) * (Max_young_wosize + 1)]. */
+/* Minimum size of the minor zone (words).
+   This must be at least [Max_young_wosize + 1]. */
 #define Minor_heap_min 4096
 
-/* Maximum size of the minor zone. (bytes)
+/* Maximum size of the minor zone (words).
    Must be greater than or equal to [Minor_heap_min].
 */
-#define Minor_heap_max (1 << 24)
+#define Minor_heap_max (1 << 28)
 
-/* Default size of the minor zone. (bytes)  */
-#define Minor_heap_def 65536
+/* Default size of the minor zone. (words)  */
+#define Minor_heap_def 32768
 
 
-/* Minimum size increment when growing the heap (bytes).
-   Must be a multiple of [Page_size]. */
-#define Heap_chunk_min (2 * Page_size)
+/* Minimum size increment when growing the heap (words).
+   Must be a multiple of [Page_size / sizeof (value)]. */
+#define Heap_chunk_min (2 * Page_size / sizeof (value))
 
-/* Maximum size of a contiguous piece of the heap (bytes).
+/* Maximum size of a contiguous piece of the heap (words).
    Must be greater than or equal to [Heap_chunk_min].
-   Must be greater than or equal to [Max_hbsize].  (see mlvalues.h) */
-#define Heap_chunk_max (1 << 24)
+   Must be greater than or equal to [Bhsize_wosize (Max_wosize)]. */
+#define Heap_chunk_max (Bhsize_wosize (Max_wosize))
 
 /* Default size increment when growing the heap. (bytes)
-   Must be a multiple of [Page_size]. */
-#define Heap_chunk_def (62 * Page_size)
+   Must be a multiple of [Page_size / sizeof (value)]. */
+#define Heap_chunk_def (62 * Page_size / sizeof (value))
 
 
-/* Default speed setting for the major GC.  The GC will try to have this
-   percentage of free memory at the start of each cycle. */
+/* Default speed setting for the major GC.  The heap will grow until
+   the dead objects and the free list represent this percentage of the
+   heap size.  The rest of the heap is live objects. */
 #define Percent_free_def 30
 
 
@@ -117,12 +118,12 @@ typedef char schar;
 #define Max_arg_stack_size 49152
 #define Max_ret_stack_size 49152
 #define Max_young_wosize 256
-#define Minor_heap_min 2048
-#define Minor_heap_max 0xF000
-#define Minor_heap_def 16384
-#define Heap_chunk_min 0x800
-#define Heap_chunk_max 0xF000
-#define Heap_chunk_def 0x8000
+#define Minor_heap_min 512
+#define Minor_heap_max 0x3F00
+#define Minor_heap_def 8192
+#define Heap_chunk_min 0x400
+#define Heap_chunk_max 0x3C00
+#define Heap_chunk_def 0x2000
 #define Percent_free_def 15
 
 #else
@@ -136,12 +137,12 @@ typedef char schar;
 #define Max_arg_stack_size 524288
 #define Max_ret_stack_size 524288
 #define Max_young_wosize 256
-#define Minor_heap_min 2048
-#define Minor_heap_max (1 << 24)
-#define Minor_heap_def 32768
-#define Heap_chunk_min (2 * Page_size)
-#define Heap_chunk_max (1 << 24)
-#define Heap_chunk_def (126 * Page_size)
+#define Minor_heap_min 1024
+#define Minor_heap_max (1 << 28)
+#define Minor_heap_def 16384
+#define Heap_chunk_min (2 * Page_size / sizeof (value))
+#define Heap_chunk_max (1 << 28)
+#define Heap_chunk_def (126 * Page_size / sizeof (value))
 #define Percent_free_def 20
 
 #endif /* SMALL */

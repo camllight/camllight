@@ -25,12 +25,12 @@ static char *expand_heap (request)
   asize_t i, more_pages;
 
   malloc_request = round_heap_chunk_size (Bhsize_wosize (request));
-  gc_message ("Growing heap to %ldk.\n",
+  gc_message ("Growing heap to %ldk\n",
 	      (stat_heap_size + malloc_request) / 1024);
   mem = aligned_malloc (malloc_request + sizeof (heap_chunk_head),
                         sizeof (heap_chunk_head));
   if (mem == NULL){
-    gc_message ("No room.\n", 0);
+    gc_message ("No room for growing heap\n", 0);
     return NULL;
   }
   mem += sizeof (heap_chunk_head);
@@ -52,7 +52,7 @@ static char *expand_heap (request)
     new_page_table_size = page_table_size + more_pages;
     new_page_table = (char *) malloc (new_page_table_size);
     if (new_page_table == NULL){
-      gc_message ("No room.\n", 0);
+      gc_message ("No room for growing page table\n", 0);
       free (mem);
       return NULL;
     }
