@@ -43,6 +43,15 @@ let selected_point () =
   | Some {ev_char = point; ev_file = module} ->
       (module, point);;
 
+let selected_event_is_before () =
+  match !selected_event with
+    None ->
+      raise Not_found
+  | Some {ev_kind = Lbefore} ->
+      true
+  | _ ->
+      false;;
+
 (* Select a frame. *)
 (* Raise `Not_found' if no such frame. *)
 (* --- Assume the currents events have already been updated. *)

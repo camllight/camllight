@@ -65,7 +65,7 @@ let show_current_frame () =
 	   print_string "Breakpoints : ";
 	   do_list (function x -> print_int x; print_string " ") breakpoints;
       	   print_newline ());
-      show_point module point (current_event_is_before ())
+      show_point module point (selected_event_is_before ())
   with
     Not_found ->
       print_newline ();
