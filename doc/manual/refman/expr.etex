@@ -93,7 +93,7 @@ precedence come first.
 \begin{tableau}{|l|l|}{Construction or operator}{Associativity}
 \entree{"!"}{--}
 \entree{".   .("}{--}
-\entree{function application}{right}
+\entree{function application}{left}
 \entree{constructor application}{--}
 \entree{"-   -." (prefix)}{--}
 \entree{"mod"}{left}
