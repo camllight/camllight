@@ -30,6 +30,7 @@ type XEvent =
   | ResizeRequest
   | Unmap
   | Visibility 
+  | WhatButton of int
 ;;
 
 let CAMLtoTKXEvent = function
@@ -61,6 +62,8 @@ let CAMLtoTKXEvent = function
   | ResizeRequest -> "ResizeRequest"
   | Unmap -> "Unmap"
   | Visibility -> "Visibility" 
+  | WhatButton n -> string_of_int n
+
 ;;
 
 type Modifier =
