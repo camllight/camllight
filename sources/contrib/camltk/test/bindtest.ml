@@ -36,6 +36,6 @@ bind Number1 [[],XKey("A")] (BindSet([], BindCmd)) ;;
 bind Number1 [[],XKey("B")] (BindSet([], BindCmd)) ;;
 let f = frame__create Top [] ;;
 pack [f] [] ;;
-let r = dialog f ("-") ("Appuyez sur A ou B dans la zone de saisie du haut...") ("warning") (1) (["Yes sir"]) ;;
+let r = dialog f ("-") ("Appuyez sur A ou B dans la zone de saisie du haut...") (Predefined "warning") (1) (["Yes sir"]) ;;
 
 MainLoop () ;;

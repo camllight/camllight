@@ -19,15 +19,15 @@ button__configure Quit [Command Kill] ;;
 
 let BindCmd = function EvInfo ->
    canvas__move MyCan (Tag "daube") 
-      	  (Pixels (EvInfo.Ev_MouseX-!OldX)) 
-      	  (Pixels (EvInfo.Ev_MouseY-!OldY)) ;
+      	  (Pixels (EvInfo.Ev_MouseX- !OldX)) 
+      	  (Pixels (EvInfo.Ev_MouseY- !OldY)) ;
    OldX := EvInfo.Ev_MouseX ;
    OldY := EvInfo.Ev_MouseY ;;
 
 let Daube = function EvInfo ->
   print_string "\007" ; flush std_out ;;
 
-bind MyCan [[],Motion] (BindSet([MouseX; MouseY;Place;SendEvent;KeySymString],BindCmd)) ;;
+bind MyCan [[],Motion] (BindSet([Ev_MouseX; Ev_MouseY;Ev_Place;Ev_SendEvent;Ev_KeySymString],BindCmd)) ;;
 canvas_bind MyCan (Tag "daube")  [[],Motion] (BindSet([],Daube)) ;;
 
 pack [Quit; MyCan] [] ;;
