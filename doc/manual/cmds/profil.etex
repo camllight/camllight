@@ -52,12 +52,12 @@ More precisely, the dump file "camlpro.dump" is written when the
 The linker, called with {\tt -p} option, adds \verb|io__exit 0| as the last
 phrase of the bytecode executable, in case the original program never calls
 \verb|io__exit|. 
-However, if the program terminates with an ``uncaught exception'', the dump
+However, if the program terminates with an "uncaught exception", the dump
 file will not be produced.
 
 If a compatible dump file already exists in the current directory, then the
-profiling information is accumulated. This allows, for instance, the
-profiling of the compiler compiling a set of modules.
+profiling information is accumulated in this dump file. This allows, for
+instance, the profiling of the compiler compiling a set of modules.
 
 \section{Printing profiling information}
 
@@ -71,9 +71,11 @@ how many times the functions in this module have been called. Naturally,
 this information is accurate only if the source file has not been modified
 since the profiling execution took place.
 
-The following option is recognized by "camlpro":
+The following options are recognized by "camlpro":
 
 \begin{options}
+\item[compiler options] {\tt -stdlib, -I, -include, -O, -open, -i, -lang}.
+See chapter~\ref{c:camlc} for the detailed usage.
 \item["-f" \var{dumpfile}] specifies an alternate dump file of profiling
 information
 \end{options}
