@@ -198,7 +198,7 @@ value open_in : string -> in_channel
            Exception [Invalid_argument "input"] is raised if [ofs] and [len]
            do not designate a valid substring of [buff]. *)          
   and really_input : in_channel -> string -> int -> int -> unit
-        (* [input chan buff ofs len] reads [len] characters
+        (* [really_input chan buff ofs len] reads [len] characters
            from channel [chan], storing them in string [buff], starting at
            character number [ofs]. Raise [End_of_file] if
            the end of file is reached before [len] characters have been read.
