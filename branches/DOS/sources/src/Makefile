@@ -1,148 +1,158 @@
-### Configuration section
-
-# Which C compiler to use.
-# Performance is often improved if you use gcc 2.x instead of cc.
-# Known exceptions: cc is better for the MIPS and Alpha processors.
-CC=cc
-
-# Additional options to $(CC).
-# If you are using gcc, add -fno-defer-pop.
-# This option circumvents a gcc bug on some platforms (680x0, 80386).
-OPTS=#-fno-defer-pop
-
-# Extra libraries that have to be linked with the runtime system.
-# The math library "-lm" is linked by default.
-# On most machines, nothing else is needed.
-# On System V and derivatives, you may need -lsocket, -lnsl, and/or -lucb.
-LIBS=
-
-# How to call the C preprocessor on a file that does not have the .c extension.
-# That's /lib/cpp on most machines, sometimes /usr/bin/cpp,
-# and /usr/ccs/lib/cpp under Solaris.
-# The -P option suppresses the generation of "# linenum" directives,
-# which are not understood by Caml Light.
-CPP=/lib/cpp -P
-
-# The directory where public executables will be installed
-BINDIR=/usr/local/bin
-
-# The directory where the Caml Light standard library will be installed
-LIBDIR=/usr/local/lib/caml-light
-
-# The manual section where the manual pages will be installed
-MANEXT=1
-
-# The directory where the manual pages will be installed
-MANDIR=/usr/local/man/man$(MANEXT)
-
-# Some "make"s need this to ensure that they call /bin/sh, not /bin/csh
-# Seems harmless on most other "make"s. Try removing this line if you
-# run into trouble.
-SHELL=/bin/sh
-
-### End of configuration section
-
-SUBDIRS=runtime launch lib compiler linker librar toplevel lex yacc tools
-
-# Configure the system
-configure:
-	cd ../config; sh autoconf "$(CC) $(OPTS) $(LIBS)"
+BINDIR=C:\caml386\bin
+LIBDIR=C:\caml386\lib
 
 # Build the system for the first time
 world:
-	cd runtime; make CC="$(CC)" OPTS="$(OPTS)" LIBS="$(LIBS)" all
-	cp runtime/camlrun .
-	cd yacc; make CC="$(CC)" OPTS="$(OPTS)" all
-	cp yacc/camlyacc .
-	cd lib; make CPP="$(CPP)" all
-	cd compiler; make CPP="$(CPP)" all
-	cd linker; make CPP="$(CPP)" all
-	cd librar; make CPP="$(CPP)" all
-	cd lex; make CPP="$(CPP)" all
-	cd toplevel; make CPP="$(CPP)" all
-	cd launch; make LIBDIR=$(LIBDIR) BINDIR=$(BINDIR) \
-                           CC="$(CC)" OPTS="$(OPTS)" LIBS="$(LIBS)" all
-	@ echo "Let's test quickly the toplevel system..."
-	(echo "1+2;;";                                                        \
-         echo "let rec fib n = if n < 2 then 1 else fib(n-1)+fib(n-2);;";     \
-         echo "fib 20;;") | ./camlrun toplevel/camltop -stdlib lib
-	@ echo "Is that 10946 on the line above? Good."
-	@ echo "The Caml Light system is up and running."
-
+	cd tools
+	make all
+	cd ..\runtime
+	make all
+	copy camlrun.exe ..
+	cd ..\launch
+	make all
+	cd ..\yacc
+	make all
+	copy camlyacc.exe ..
+	cd ..\lib
+	make all
+	cd ..\compiler
+	make all
+	cd ..\linker
+	make all
+	cd ..\librar
+	make all
+	cd ..\lex
+	make all
+	cd ..\toplevel
+	make all
+	cd ..
+	
 # Rebuild the system (bootstrap)
-bootstrap: backup promote again compare
-
-# Save a copy of the current compiler
-backup:
-	sh tools/backup camlrun camlcomp camllink camllibr camllex 
+bootstrap: promote again compare
 
 # Make the newly compiled compiler the current compiler
 promote:
-	cp compiler/camlcomp linker/camllink librar/camllibr lex/camllex .
+	del camlcomp.bak
+	rename camlcomp camlcomp.bak
+	copy compiler\camlcomp camlcomp
+	del camllink.bak
+	rename camllink camllink.bak
+	copy linker\camllink camllink
+	del camllibr.bak
+	rename camllibr camllibr.bak
+	copy librar\camllibr camllibr
+	del camltop.bak
+	rename camltop camltop.bak
+	copy toplevel\camltop camltop
+	del camllex.bak
+	rename camllex camllex.bak
+	copy lex\camllex camllex
 
 # Recompile all Caml code from scratch
 again:
-	cd lib; make CPP="$(CPP)" clean all
-	cd compiler; make CPP="$(CPP)" clean all
-	cd linker; make CPP="$(CPP)" clean all
-	cd librar; make CPP="$(CPP)" clean all
-	cd lex; make CPP="$(CPP)" clean all
-	cd toplevel; make CPP="$(CPP)" clean all
+	cd lib
+	make clean all
+	cd ..\compiler
+	make clean all
+	cd ..\linker
+	make clean all
+	cd ..\librar
+	make clean all
+	cd ..\lex
+	make clean all
+	cd ..\toplevel
+	make clean all
+	cd ..
+	cd lib
+	make clean all
+	cd ..\compiler
+	make clean all
+	cd ..\linker
+	make clean all
+	cd ..\librar
+	make clean all
+	cd ..\lex
+	make clean all
+	cd ..\toplevel
+	make clean all
+	cd ..
 
 # Compare the current compiler with the newly compiled one
 compare:
-	@sh -c ' \
-        if cmp camlcomp compiler/camlcomp \
-        && cmp camllink linker/camllink \
-        && cmp camllibr librar/camllibr \
-        && cmp camllex lex/camllex; \
-        then echo "The Caml Light system has successfully recompiled itself.";\
-        else echo "Hmph. Better do one more bootstrapping cycle."; \
-        fi'
-
-# Restore the latest backup copy of the compiler
-restore:
-	sh tools/restore camlrun camlcomp camllink camllibr camllex 
-
-# Compile all Caml code
-compile:
-	cd lib; make CPP="$(CPP)" all
-	cd compiler; make CPP="$(CPP)" all
-	cd linker; make CPP="$(CPP)" all
-	cd librar; make CPP="$(CPP)" all
-	cd lex; make CPP="$(CPP)" all
-	cd toplevel; make CPP="$(CPP)" all
+	- tools\cmpcode camlcomp compiler\camlcomp
+	- tools\cmpcode camllink linker\camllink
+	- tools\cmpcode camllibr librar\camllibr
+	- tools\cmpcode camltop toplevel\camltop
+	- tools\cmpcode camllex lex\camllex
 
 # Install the Caml Light system
 install:
-	if test -d $(BINDIR); then : ; else mkdir $(BINDIR); fi
-	if test -d $(LIBDIR); then : ; else mkdir $(LIBDIR); fi
-	cd runtime; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
-	cd launch; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
-	cd lib; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
-	cd compiler; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
-	cd linker; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
-	cd librar; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
-	cd toplevel; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
-	cd lex; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
-	cd yacc; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
-	cd man; make MANDIR=$(MANDIR) MANEXT=$(MANEXT) install
-	cp camlmsgs.txt $(LIBDIR)
+	mkdir $(LIBDIR)
+	mkdir $(BINDIR)
+	cd runtime
+	make -DBINDIR=$(BINDIR) -DLIBDIR=$(LIBDIR) install
+	cd ..\launch
+	make -DBINDIR=$(BINDIR) -DLIBDIR=$(LIBDIR) install
+	cd ..\lib
+	make -DBINDIR=$(BINDIR) -DLIBDIR=$(LIBDIR) install
+	cd ..\compiler
+	make -DBINDIR=$(BINDIR) -DLIBDIR=$(LIBDIR) install
+	cd ..\linker
+	make -DBINDIR=$(BINDIR) -DLIBDIR=$(LIBDIR) install
+	cd ..\librar
+	make -DBINDIR=$(BINDIR) -DLIBDIR=$(LIBDIR) install
+	cd ..\toplevel
+	make -DBINDIR=$(BINDIR) -DLIBDIR=$(LIBDIR) install
+	cd ..\yacc
+	make -DBINDIR=$(BINDIR) -DLIBDIR=$(LIBDIR) install
+	cd ..\lex
+	make -DBINDIR=$(BINDIR) -DLIBDIR=$(LIBDIR) install
+	cd ..
 
 # Remove the Caml Light system after installation
 uninstall:
-	rm -rf $(LIBDIR)
-	rm -f $(BINDIR)/camlrun $(BINDIR)/camlc $(BINDIR)/camllight
-	rm -f $(BINDIR)/camlyacc $(BINDIR)/camllex $(BINDIR)/camlmktop
+	del $(BINDIR)\*.*
+	del $(LIBDIR)\*.*
 
 # Remove all generated files
 clean:
-	for d in $(SUBDIRS); \
-	do (cd $$d; make clean); \
-        done
+	cd tools
+	make clean
+	cd ..\runtime
+	make clean
+	cd ..\launch
+	make clean
+	cd ..\lib
+	make clean
+	cd ..\compiler
+	make clean
+	cd ..\linker
+	make clean
+	cd ..\librar
+	make clean
+	cd ..\toplevel
+	make clean
+	cd ..\yacc
+	make clean
+	cd ..\lex
+	make clean
+	cd ..
 
 # Rebuild the dependencies in all Makefiles
 depend:
-	for d in $(SUBDIRS); \
-	do (cd $$d; make depend); \
-        done
+	cd runtime
+	make depend
+	cd ..\lib
+	make depend
+	cd ..\compiler
+	make depend
+	cd ..\linker
+	make depend
+	cd ..\librar
+	make depend
+	cd ..\toplevel
+	make depend
+	cd ..\lex
+	make depend
+	cd ..
+

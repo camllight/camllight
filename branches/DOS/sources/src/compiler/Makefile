@@ -1,13 +1,8 @@
 # Makefile for the Caml Light compiler.
 
-CAMLCOMP=../camlrun ../camlcomp -stdlib ../lib
-CAMLLINK=../camlrun ../camllink -stdlib ../lib
-CAMLLEX=../camlrun ../camllex
-CAMLYACC=../camlyacc -s
-CPP=/lib/cpp -P
+OUTPUT=camlcomp
 
-COMPFLAGS=-W -O fast
-LINKFLAGS=-g
+INCLUDES=
 
 OBJS=config.zo misc.zo interntl.zo const.zo prim.zo lambda.zo globals.zo \
  location.zo syntax.zo \
@@ -19,57 +14,26 @@ OBJS=config.zo misc.zo interntl.zo const.zo prim.zo lambda.zo globals.zo \
  primdecl.zo lexer.zo par_aux.zo parser.zo compiler.zo \
  version.zo main.zo
 
-GENSOURCES=lexer.ml parser.ml parser.mli opcodes.ml config.ml \
+GENSOURCES=lexer.mll lexer.ml parser.ml parser.mli opcodes.ml config.ml \
   location.ml version.ml
 
 all: camlcomp
 
 camlcomp: $(OBJS)
-	$(CAMLLINK) $(LINKFLAGS) -o camlcomp stdlib.zo $(OBJS)
+	$(CAMLLINK) $(LINKFLAGS) -o camlcomp stdlib.zo @&&!
+$(OBJS)
+!
         
-clean:
-	rm -f *.zi *.zo camlcomp
-	rm -f $(GENSOURCES) lexer.mll
-
 install:
-	cp camlcomp $(LIBDIR)/camlcomp
+	copy camlcomp $(LIBDIR)
 
 opcodes.ml: ../runtime/instruct.h
-	sed -n -e '/^enum/p' -e 's/,//' -e '/^  /p' ../runtime/instruct.h | \
-        awk -f ../tools/make-opcodes > opcodes.ml
+	perl ../tools/mkopcode ../runtime/instruct.h > opcodes.ml
 
 lexer.mll: lexer.mlp
-	$(CPP) -Dunix lexer.mlp > lexer.mll
+	$(CPP) lexer.mlp > lexer.mll
 
-lexer.ml: lexer.mll
-	$(CAMLLEX) lexer.mll
-
-parser.ml parser.mli: parser.mly
-	$(CAMLYACC) parser.mly
-
-.SUFFIXES :
-.SUFFIXES : .mli .ml .zi .zo .mlp
-
-.mli.zi:
-	$(CAMLCOMP) $(COMPFLAGS) $<
-
-.ml.zo:
-	$(CAMLCOMP) $(COMPFLAGS) $<
-
-.mlp.ml:
-	@rm -f $@
-	$(CPP) -Dunix $< > $@
-	@chmod a-w $@
-
-depend: $(GENSOURCES)
-	mv Makefile Makefile.bak
-	(sed -n -e '1,/^### DO NOT DELETE THIS LINE/p' Makefile.bak; \
-         ../tools/camldep *.mli *.ml) > Makefile
-	rm Makefile.bak
-
-location.ml: location.mlp
-config.ml: config.mlp
-version.ml: version.mlp ../version.h
+!include "../tools/make-ml.inc"
 
 ### EVERYTHING THAT GOES BEYOND THIS COMMENT IS GENERATED
 ### DO NOT DELETE THIS LINE
