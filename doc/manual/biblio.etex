@@ -21,6 +21,12 @@ The natural companion to this manual, provided you read French. This
 book is a step-by-step introduction to programming in Caml, and
 presents many realistic examples of Caml programs.
 
+\item  Guy Cousineau and Michel Mauny. {\it Approche fonctionnelle de
+la programmation}. Ediscience, 1995.
+
+Another Caml programming course written in French, with many original
+examples.
+
 \item Lawrence C.\ Paulson. {\it ML for the working programmer.}
 Cambridge University Press, 1991.
 
@@ -45,6 +51,12 @@ l'impératif avec Caml et Ada.} InterÉditions, 1992.
 A first course in programming, that first introduces the main programming
 notions in Caml, then shows them underlying Ada. Intended for
 beginners; slow-paced for the others.
+
+\item Rachel Harrison. {\em Abstract Data Types in Standard ML}.
+John Wiley \& Sons, 1993.
+
+A presentation of Standard ML from the standpoint of abstract data
+types. Uses intensively the Standard ML module system.
 
 \item Harold Abelson and Gerald Jay Sussman.
 {\em Structure and Interpretation of Computer Programs.} The MIT
@@ -81,8 +93,8 @@ of Standard ML.} The MIT press, 1990.
 A complete formal definition of Standard ML, in the framework of
 structured operational semantics. This book is probably the most
 mathematically precise definition of a programming language ever
-written. It is heavy on formalism and horribly terse, so
-even readers that are thoroughly familiar with ML will have
+written. It is heavy on formalism and extremely terse, so
+even readers who are thoroughly familiar with ML will have
 major difficulties with it.
 
 \item Robin Milner and Mads Tofte. {\em Commentary on Standard ML.}
