@@ -268,6 +268,7 @@ value interprete(prog)
 	env = retsp->env;
 	cache_size = retsp->cache_size;
 	pop_ret_frame();
+        if (something_to_do) goto process_signal;
 	Next;
       }
       /* fall through APPTERM */
@@ -304,8 +305,8 @@ value interprete(prog)
 
     process_signal:
       something_to_do = 0;
-      if (force_minor_flag){
-	force_minor_flag = 0;
+      if (force_major_slice){
+	force_major_slice = 0;
 	Setup_for_gc;
 	minor_collection ();
 	Restore_after_gc;

@@ -39,20 +39,14 @@ typedef char * addr;
 #define Volatile
 #endif
 
-#ifdef __GNUC__
-#define Noreturn void volatile
-#else
-#define Noreturn void
-#endif
-
 extern int verb_gc;
 extern int Volatile something_to_do;
-extern int Volatile force_minor_flag;
+extern int Volatile force_major_slice;
 
-void force_minor_gc P((void));
+void urge_major_slice P((void));
 void gc_message P((char *, unsigned long));
-Noreturn fatal_error P((char *));
-Noreturn fatal_error_arg P((char *, char *));
+void fatal_error P((char *));
+void fatal_error_arg P((char *, char *));
 void memmov P((char *, char *, unsigned long));
 char * aligned_malloc P((asize_t, int));
 
