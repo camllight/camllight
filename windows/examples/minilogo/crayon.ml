@@ -30,13 +30,12 @@ let avance d =
     then moveto (round crayon.X) (round crayon.Y)
     else lineto (round crayon.X) (round crayon.Y);;
 
-let couleur_du_tracé = black;;
-let couleur_du_fond = white;;
+let couleur_du_tracé = foreground;;
+let couleur_du_fond = background;;
 let zéro_x = float_of_int ((size_x ()) / 2);;
 let zéro_y = float_of_int ((size_y ()) / 2);;
 let vide_écran () =
-    set_color couleur_du_fond;
-    fill_rect 0 0 (size_x ()) (size_y ());
+    clear_graph();
     set_color couleur_du_tracé;
     crayon.X <- zéro_x;
     crayon.Y <- zéro_y;
