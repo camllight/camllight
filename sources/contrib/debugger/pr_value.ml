@@ -67,6 +67,8 @@ let find_printer ty =
 ;;
 
 let printer_depth = ref 100;;
+let max_printer_steps = ref 300;;
+let printer_steps = ref !max_printer_steps;;
 
 exception Ellipsis;;
 
@@ -84,7 +86,9 @@ let cautious f arg cont =
     try f arg with Ellipsis -> record_ellipsed_value cont;;
 
 let rec print_val prio depth obj ty =
-  if depth < 0 then raise Ellipsis;
+  decr printer_steps;
+  if !printer_steps < 0 then raise Ellipsis else
+  if depth < 0 then raise Ellipsis else
   try
     find_printer ty obj; ()
   with Not_found ->
@@ -113,7 +117,7 @@ and print_concrete_type prio depth obj cstr ty ty_list =
     type_descr_of_type_constr cstr in
   match typ_descr.info.ty_desc with
     Abstract_type ->
-      print_string "<abstract>"
+      print_string "<abstr>"
   | Variant_type constr_list ->
       let tag = value_tag obj in
       begin try
@@ -159,7 +163,7 @@ and print_concrete_type prio depth obj cstr ty ty_list =
       end
   | Record_type label_list ->
       let print_field depth lbl =
-        open_hovbox 1; 
+        open_hovbox 1;
         output_label lbl;
         print_string "="; print_cut();
         let (ty_res, ty_arg) =
@@ -169,7 +173,11 @@ and print_concrete_type prio depth obj cstr ty ty_list =
         with Unify ->
           fatal_error "print_val: types should match"
         end;
-        print_val 0 (depth - 1) (value_nth_field obj lbl.info.lbl_pos) ty_arg;
+        cautious (print_val 0 (depth - 1)
+                 (value_nth_field obj lbl.info.lbl_pos)) ty_arg
+                 (function depth ->
+                   print_val 0 depth
+                             (value_nth_field obj lbl.info.lbl_pos) ty_arg);
         close_box() in
       let print_fields depth label_list =
           let rec loop depth b = function
@@ -206,13 +214,12 @@ and print_val_list prio depth obj ty_list =
 and print_list depth obj ty_arg =
   let rec print_conses depth cons =
    if value_tag cons != 0 then begin
-     print_val 0 depth (value_nth_field cons 0) ty_arg;
+     print_val 0 (depth - 1) (value_nth_field cons 0) ty_arg;
      let next_obj = value_nth_field cons 1 in
      if value_tag next_obj != 0 then begin
        print_string ";"; print_space();
        cautious (print_conses (depth - 1)) next_obj
                 (function depth -> print_conses depth next_obj)
-
      end
    end
  in
@@ -244,6 +251,7 @@ and print_vect depth obj ty_arg =
 ;;
 
 let print_value obj ty =
+    printer_steps := !max_printer_steps;
     try print_val 0 !printer_depth obj ty
     with x -> print_newline(); flush std_err; raise x
 ;;
@@ -252,7 +260,10 @@ let more m =
     try
      let c = hashtbl__find evct m in
      print_string ("<"^string_of_int m^">:"); force_newline();
-     open_hovbox 0; c !printer_depth; close_box(); print_newline()
+     open_hovbox 0;
+     printer_steps := !max_printer_steps;
+     c !printer_depth;
+     print_newline()
     with Not_found ->
           open_hovbox 0;
           print_string "No such printing continuation."; force_newline();

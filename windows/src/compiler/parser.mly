@@ -651,9 +651,9 @@ Type1_decl :
 Type1_def :
         /* epsilon */
           { Zabstract_type }
-      | EQUAL Constr_decl
-          { Zvariant_type $2 }
-      | EQUAL LBRACE Label_decl RBRACE
+      | EQUAL Opt_bar Constr_decl
+          { Zvariant_type $3 }
+      | EQUAL LBRACE Label_decl Opt_semi RBRACE
           { Zrecord_type $3 }
       | EQUALEQUAL Type
           { Zabbrev_type $2 }
