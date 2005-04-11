@@ -60,7 +60,7 @@ value acos : float -> float = 1 "acos_float"
   and log10 : float -> float = 1 "log10_float"
 
   and sin : float -> float = 1 "sin_float"
-  and sinh : float -> float = 1 "sin_float"
+  and sinh : float -> float = 1 "sinh_float"
   and sqrt : float -> float = 1 "sqrt_float"
   and tan : float -> float = 1 "tan_float"
   and tanh : float -> float = 1 "tanh_float"
