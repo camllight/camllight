@@ -1,5 +1,7 @@
 /* To initialize and resize the stacks */
 
+#include <strings.h>
+
 #include "config.h"
 #include "debugger.h"
 #include "debugcom.h"
@@ -34,7 +36,7 @@ void init_stacks()
 }
 
 static void realloc_arg_stack()
-{        
+{
   asize_t size;
   value * new_low, * new_high, * new_asp;
   struct trap_frame * p;
@@ -45,7 +47,7 @@ static void realloc_arg_stack()
     raise_out_of_memory();
   size *= 2;
   gc_message ("Growing argument stack to %ldk\n",
-	      (long) size * sizeof(value) / 1024);
+              (long) size * sizeof(value) / 1024);
   new_low = (value *) stat_alloc(size * sizeof(value));
   new_high = new_low + size;
 
@@ -53,9 +55,9 @@ static void realloc_arg_stack()
     ((char *) new_high - ((char *) arg_stack_high - (char *) (ptr)))
 
   new_asp = (value *) shift(extern_asp);
-  bcopy((char *) extern_asp,
-        (char *) new_asp,
-        (arg_stack_high - extern_asp) * sizeof(value));
+  memmove ((char *) new_asp,
+           (char *) extern_asp,
+           (arg_stack_high - extern_asp) * sizeof(value));
   stat_free((char *) arg_stack_low);
   for (p = tp; p < (struct trap_frame *) ret_stack_high; p = p->tp)
     p->asp = (value *) shift(p->asp);
@@ -68,7 +70,7 @@ static void realloc_arg_stack()
 }
 
 static void realloc_ret_stack()
-{        
+{
   asize_t size;
   value * new_low, * new_high, * new_rsp;
   struct trap_frame * p;
@@ -79,7 +81,7 @@ static void realloc_ret_stack()
     raise_out_of_memory();
   size *= 2;
   gc_message ("Growing return stack to %ldk\n",
-	      (long) size * sizeof(value) / 1024);
+              (long) size * sizeof(value) / 1024);
   new_low = (value *) stat_alloc(size * sizeof(value));
   new_high = new_low + size;
 
@@ -87,9 +89,9 @@ static void realloc_ret_stack()
     ((char *) new_high - ((char *) ret_stack_high - (char *) (ptr)))
 
   new_rsp = (value *) shift(extern_rsp);
-  bcopy((char *) extern_rsp,
-        (char *) new_rsp,
-        (ret_stack_high - extern_rsp) * sizeof(value));
+  memmove ((char *) new_rsp,
+           (char *) extern_rsp,
+           (ret_stack_high - extern_rsp) * sizeof(value));
   stat_free((char *) ret_stack_low);
   tp = (struct trap_frame *) shift(tp);
   for (p = tp; p < (struct trap_frame *) new_high; p = p->tp) {

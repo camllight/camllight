@@ -4,23 +4,23 @@
 <plist version="1.0">
 <dict>
         <key>CFBundleGetInfoString</key>
-        <string>Caml Light 0.75</string>
+        <string>Caml Light 0.76</string>
         <key>CFBundleIdentifier</key>
         <string>fr.inria.caml-light</string>
         <key>CFBundleName</key>
         <string>Caml Light</string>
         <key>CFBundleShortVersionString</key>
-        <string>0.75</string>
+        <string>0.76</string>
         <key>IFMajorVersion</key>
         <integer>0</integer>
         <key>IFMinorVersion</key>
-        <integer>75</integer>
+        <integer>76</integer>
         <key>IFPkgFlagAllowBackRev</key>
         <true/>
         <key>IFPkgFlagAuthorizationAction</key>
         <string>AdminAuthorization</string>
         <key>IFPkgFlagDefaultLocation</key>
-        <string>/</string>
+        <string>/usr/local</string>
         <key>IFPkgFlagInstallFat</key>
         <false/>
         <key>IFPkgFlagIsRequired</key>

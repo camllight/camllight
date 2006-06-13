@@ -20,7 +20,7 @@ value alloc (wosize, tag)
      tag_t tag;
 {
   value result;
-  
+
   Assert (wosize > 0 && wosize <= Max_young_wosize);
   Alloc_small (result, wosize, tag);
   return result;
@@ -80,7 +80,7 @@ value copy_string(s)
 
   len = strlen(s);
   res = alloc_string(len);
-  bcopy(s, String_val(res), len);
+  memmove (String_val(res), s, len);
   return res;
 }
 

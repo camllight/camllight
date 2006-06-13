@@ -25,9 +25,9 @@ LIBS=
 # The -Dunix option ensures that the symbol "unix" is defined --
 # not all Unix C preprocessors define it.
 # If your cpp is too fussy, make tools/clprepro and use this:
-CPP=../../src/tools/clprepro -Dunix
+#CPP=../../src/tools/clprepro -Dunix
 #CPP=/lib/cpp -P -traditional -Dunix
-#CPP=/usr/bin/cpp -P -traditional -Dunix
+CPP=/usr/bin/cpp -P -traditional -Dunix
 
 # The directory where public executables will be installed
 VBINDIR=/usr/local/bin

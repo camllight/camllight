@@ -1,5 +1,7 @@
 /* Operations on strings */
 
+#include <string.h>
+
 #include "alloc.h"
 #include "debugger.h"
 #include "mlvalues.h"
@@ -46,9 +48,9 @@ value compare_strings(s1, s2)   /* ML */
 value blit_string(s1, offset1, s2, offset2, len) /* ML */
      value s1, offset1, s2, offset2, len;
 {
-  bcopy(&Byte(s1, Long_val(offset1)),
-        &Byte(s2, Long_val(offset2)),
-        Int_val(len));
+  memmove(&Byte(s2, Long_val(offset2)),
+          &Byte(s1, Long_val(offset1)),
+          Int_val(len));
   return Atom(0);
 }
 

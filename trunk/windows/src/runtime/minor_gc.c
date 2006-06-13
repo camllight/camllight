@@ -1,3 +1,5 @@
+#include <strings.h>
+
 #include "config.h"
 #include "debugger.h"
 #include "fail.h"
@@ -62,7 +64,7 @@ static void oldify (p, v)
       *p = Field (v, 0);     /* Then the forward pointer is the first field. */
     }else if (Tag_val (v) >= No_scan_tag){
       result = alloc_shr (Wosize_val (v), Tag_val (v));
-      bcopy (Bp_val (v), Bp_val (result), Bosize_val (v));
+      memmove (Bp_val (result), Bp_val (v), Bosize_val (v));
       Hd_val (v) = Bluehd_hd (Hd_val (v));    /* Put the forward flag. */
       Field (v, 0) = result;                  /* And the forward pointer. */
       *p = result;
