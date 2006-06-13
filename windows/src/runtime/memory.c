@@ -1,3 +1,5 @@
+#include <strings.h>
+
 #include "debugger.h"
 #include "fail.h"
 #include "freelist.h"
@@ -63,7 +65,7 @@ static char *expand_heap (request)
     for (i = 0; i < more_pages; i++){
       new_page_table [i] = Not_in_heap;
     }
-    bcopy (page_table, new_page_table + more_pages, page_table_size);
+    memmove (new_page_table + more_pages, page_table, page_table_size);
     (((heap_chunk_head *) mem) [-1]).next = heap_start;
     heap_start = mem;
   }else{
@@ -75,7 +77,7 @@ static char *expand_heap (request)
       for (i = page_table_size; i < new_page_table_size; i++){
         new_page_table [i] = Not_in_heap;
       }
-      bcopy (page_table, new_page_table, page_table_size);
+      memmove (new_page_table, page_table, page_table_size);
     }
     last = &heap_start;
     cur = *last;

@@ -1,15 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
-          "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-        <key>IFPkgDescriptionDeleteWarning</key>
-        <string>Caml Light is a cool language.</string>
-        <key>IFPkgDescriptionDescription</key>
-        <string>This package installs Caml Light version 0.75</string>
-        <key>IFPkgDescriptionTitle</key>
-        <string>Caml Light</string>
-        <key>IFPkgDescriptionVersion</key>
-        <string>0.75</string>
-</dict>
-</plist>
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
+            "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+  <plist version="1.0">
+  <dict>
+          <key>IFPkgDescriptionDeleteWarning</key>
+          <string></string>
+          <key>IFPkgDescriptionDescription</key>
+          <string>The Caml Light compiler and tools</string>
+          <key>IFPkgDescriptionTitle</key>
+          <string>Caml Light</string>
+          <key>IFPkgDescriptionVersion</key>
+          <string>0.76</string>
+  </dict>
+  </plist>

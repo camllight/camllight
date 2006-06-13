@@ -1,3 +1,4 @@
+#include <stdlib.h>
 char foo[]="\377";
 main()
 {

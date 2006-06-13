@@ -1,5 +1,7 @@
 /* Buffered input/output. */
 
+#include <string.h>
+
 #include "../../config/s.h"
 #ifdef HAS_UNISTD
 #include <unistd.h>
@@ -138,18 +140,18 @@ void putblock(channel, p, n)
     really_write(channel->fd, p, n);
     channel->offset += n;
   } else if (n <= m) {
-    bcopy(p, channel->curr, n);
+    memmove (channel->curr, p, n);
     channel->curr += n;
     if (channel->curr > channel->max) channel->max = channel->curr;
   } else {
-    bcopy(p, channel->curr, m);
+    memmove (channel->curr, p, m);
     p += m;
     n -= m;
     m = channel->end - channel->buff;
     really_write(channel->fd, channel->buff, m);
     channel->offset += m;
     if (n <= m) {
-      bcopy(p, channel->buff, n);
+      memmove (channel->buff, p, n);
       channel->curr = channel->max = channel->buff + n;
     } else {
       really_write(channel->fd, p, n);
@@ -279,11 +281,11 @@ unsigned getblock(channel, p, n)
 
   m = channel->max - channel->curr;
   if (n <= m) {
-    bcopy(channel->curr, p, n);
+    memmove (p, channel->curr, n);
     channel->curr += n;
     return n;
   } else if (m > 0) {
-    bcopy(channel->curr, p, m);
+    memmove (p, channel->curr, m);
     channel->curr += m;
     return m;
   } else if (n < IO_BUFFER_SIZE) {
@@ -291,7 +293,7 @@ unsigned getblock(channel, p, n)
     channel->offset += l;
     channel->max = channel->buff + l;
     if (n > l) n = l;
-    bcopy(channel->buff, p, n);
+    memmove (p, channel->buff, n);
     channel->curr = channel->buff + n;
     return n;
   } else {
@@ -371,7 +373,7 @@ value input_scan_line(channel)       /* ML */
       if (channel->curr > channel->buff) {
         /* Try to make some room in the buffer by shifting the unread
            portion at the beginning */
-        bcopy(channel->curr, channel->buff, channel->max - channel->curr);
+        memmove (channel->buff, channel->curr, channel->max - channel->curr);
         n = channel->curr - channel->buff;
         channel->curr -= n;
         channel->max -= n;

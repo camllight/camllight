@@ -1,5 +1,7 @@
 /* Start-up code */
 
+#include <string.h>
+
 #include "../../config/s.h"
 #ifdef HAS_UNISTD
 #include <unistd.h>
@@ -161,12 +163,12 @@ main(argc, argv)
 #endif
     if (opt != NULL){
       while (*opt != '\0'){
-	switch (*opt++){
-	case 's': sscanf (opt, "=%ld", &minor_heap_init); break;
-	case 'i': sscanf (opt, "=%ld", &heap_chunk_init); break;
-	case 'o': sscanf (opt, "=%d", &percent_free_init); break;
-	case 'v': sscanf (opt, "=%d", &verbose_init); break;
-	}
+        switch (*opt++){
+        case 's': sscanf (opt, "=%ld", &minor_heap_init); break;
+        case 'i': sscanf (opt, "=%ld", &heap_chunk_init); break;
+        case 'o': sscanf (opt, "=%d", &percent_free_init); break;
+        case 'v': sscanf (opt, "=%d", &verbose_init); break;
+        }
       }
     }
   }
@@ -224,7 +226,7 @@ main(argc, argv)
     external_raise = &raise_buf;
 
     init_gc (minor_heap_init, heap_chunk_init, percent_free_init,
-	     verbose_init);
+             verbose_init);
     init_stacks();
     init_atoms();
 
@@ -260,4 +262,3 @@ main(argc, argv)
       fatal_error ("Fatal error: uncaught exception.\n");
   }
 }
-

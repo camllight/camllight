@@ -64,7 +64,7 @@ void sys_error(arg)
 {
   char * err = error_message();
   value str;
-  
+
   if (arg == SYS_ERROR_NO_ARG) {
     str = copy_string(err);
   } else {
@@ -74,9 +74,9 @@ void sys_error(arg)
     r[0] = arg;
     str = alloc_string(arg_len + 2 + err_len);
     arg = r[0];
-    bcopy(String_val(arg), &Byte(str, 0), arg_len);
-    bcopy(": ", &Byte(str, arg_len), 2);
-    bcopy(err, &Byte(str, arg_len + 2), err_len);
+    memmove (&Byte(str, 0), String_val(arg), arg_len);
+    memmove (&Byte(str, arg_len), ": ", 2);
+    memmove (&Byte(str, arg_len + 2), err, err_len);
     Pop_roots();
   }
   raise_with_arg(SYS_ERROR_EXN, str);
@@ -149,7 +149,7 @@ value sys_rename(oldname, newname) /* ML */
      value oldname, newname;
 {
 #ifdef HAS_RENAME
-  if (rename(String_val(oldname), String_val(newname)) != 0) 
+  if (rename(String_val(oldname), String_val(newname)) != 0)
     sys_error(oldname);
 #else
   invalid_argument("rename: not implemented");
@@ -223,7 +223,7 @@ static int sys_var_init[] = {
 static int sys_var_init[] = {
   S_IWRITE, S_IREAD, S_IEXEC,
   S_IWRITE, S_IREAD, S_IEXEC,
-  S_IWRITE, S_IREAD, S_IEXEC, 
+  S_IWRITE, S_IREAD, S_IEXEC,
   0, 0,
   S_IWRITE, S_IREAD, S_IEXEC
 };

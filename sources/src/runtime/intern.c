@@ -1,5 +1,7 @@
 /* Structured input, fast format */
 
+#include <string.h>
+
 #include "debugger.h"
 #include "fail.h"
 #include "gc.h"
@@ -9,7 +11,7 @@
 #include "mlvalues.h"
 #include "reverse.h"
 
-/* Transform offsets relative to the beginning of the block 
+/* Transform offsets relative to the beginning of the block
    back into pointers. */
 
 static void adjust_pointers(start, size, color)
@@ -191,7 +193,7 @@ static void expand_block(source, dest, source_len, dest_len, color)
         new_sz = (sz * sizeof(value32) + sizeof(value) - 1) / sizeof(value);
         *d++ = Make_header(new_sz, String_tag, color);
         Field(d, new_sz - 1) = 0;
-        bcopy((char *)p, (char *)d, len);
+        memmove ((char *)d, (char *)p, len);
         ofs_last_byte = new_sz * sizeof(value) - 1;
         Byte(d, ofs_last_byte) = ofs_last_byte - len;
         p += sz;
@@ -380,7 +382,7 @@ static int shrink_block(source, dest, source_len, dest_len, color)
         new_sz = (len + sizeof(value)) / sizeof(value);
         *d++ = Make_header(new_sz, String_tag, color);
         Field(d, new_sz - 1) = 0;
-        bcopy(p, d, len);
+        memmove (d, p, len);
         ofs_last_byte = new_sz * sizeof(value) - 1;
         Byte(d, ofs_last_byte) = ofs_last_byte - len;
         p += sz;
@@ -506,7 +508,7 @@ static value intern_fast_val(chan, magic)
     }
     if (magic == Wrong_endian_64_magic_number)
       rev_pointers(Hp_val (res), whsize);
-    adjust_pointers(Hp_val (res), whsize, color);
+    adjust_pointers((value *)Hp_val (res), whsize, color);
   }
 #else /* !CAML_SIXTYFOUR */
   if (magic == Little_endian_64_magic_number ||
@@ -516,7 +518,7 @@ static value intern_fast_val(chan, magic)
     value64 * block;
     whsize64 = whsize;
     block = (value64 *) stat_alloc(whsize64 * sizeof(value64));
-    if (really_getblock(chan, (char *) block, 
+    if (really_getblock(chan, (char *) block,
                         whsize64 * sizeof(value64)) == 0) {
       stat_free((char *) block);
       failwith ("intern : truncated object");
@@ -539,7 +541,8 @@ static value intern_fast_val(chan, magic)
     hd = Hd_val (res);
     color = Color_hd (hd);
     Assert (color == White || color == Black);
-    if (shrink_block(block, Hp_val(res), whsize64, whsize, color) == -1) {
+    if (shrink_block(block, (value *)Hp_val(res), whsize64, whsize, color)
+        == -1) {
       Hd_val (res) = hd;                      /* Avoid confusing the GC. */
       stat_free((char *) block);
       failwith("intern: 64-bit component not representable");
@@ -559,7 +562,7 @@ static value intern_fast_val(chan, magic)
     }
     if (magic == Wrong_endian_32_magic_number)
       rev_pointers(Hp_val (res), whsize);
-    adjust_pointers(Hp_val (res), whsize, color);
+    adjust_pointers((value *)Hp_val (res), whsize, color);
   }
 #endif /* !CAML_SIXTYFOUR */
   return res;

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <signal.h>
 #include <setjmp.h>
 
@@ -35,4 +36,3 @@ main()
   signal(SIGBUS, SIG_DFL);
   exit(res);
 }
-
