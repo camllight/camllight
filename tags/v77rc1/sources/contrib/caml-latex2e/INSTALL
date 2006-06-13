@@ -1,0 +1,11 @@
+To install the caml package:
+  
+  a) Edit the Makefile.
+
+  b) Do `make' to build the caml.sty and
+     `make install' to install caml-tex and caml.sty.
+
+  c) To produce the documentation, do `make docu'.
+
+  d) There are also a `make clean' to make a clean directory and
+     a `make example' to format the example.

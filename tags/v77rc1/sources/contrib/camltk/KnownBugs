@@ -1,0 +1,23 @@
+In tkcompiler :
+-------------
+* duplicate declaration of value constructor (in different types) is not
+  checked. This will cause masking of value constructors
+* subtype definition is not checked by tkcompiler
+  Will produce an "Unbound variable" error message by the Caml compiler
+  on variables of the form "type_subtype_table"
+* builtin types cannot be subtyped 
+
+In the builtins:
+----------------
+* removing actions with various form of "bind" is sometimes incorrect
+
+
+
+Other problems:
+---------------
+* [Arch 2]:deleting the only remaining toplevel window of an application with
+  a window manager facility does not terminate the application on some systems.
+  On a sun for example, if you "trace" the application, it terminates. I
+  just don't understand what's wrong. 
+
+* [Arch 1]:duplicate main, double inclusion of -lcaml

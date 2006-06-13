@@ -1,0 +1,435 @@
+% \iffalse
+%%
+%% File `caml.dtx'.
+%% Copyright (C) 1995 Jens Kl\"ocker.
+%% All rights reserved.
+%%
+% Please send error reports and suggestions for improvements to:
+%
+%            Jens Kl\"ocker
+%            Gromb\"uhlstr.~24
+%            97080 W\"urzburg
+%            Germany
+% Internet:  <kloecker@informatik.uni-wuerzburg.de>
+%
+% \fi
+%
+% \CheckSum{226}
+%% \CharacterTable
+%%  {Upper-case    \A\B\C\D\E\F\G\H\I\J\K\L\M\N\O\P\Q\R\S\T\U\V\W\X\Y\Z
+%%   Lower-case    \a\b\c\d\e\f\g\h\i\j\k\l\m\n\o\p\q\r\s\t\u\v\w\x\y\z
+%%   Digits        \0\1\2\3\4\5\6\7\8\9
+%%   Exclamation   \!     Double quote  \"     Hash (number) \#
+%%   Dollar        \$     Percent       \%     Ampersand     \&
+%%   Acute accent  \'     Left paren    \(     Right paren   \)
+%%   Asterisk      \*     Plus          \+     Comma         \,
+%%   Minus         \-     Point         \.     Solidus       \/
+%%   Colon         \:     Semicolon     \;     Less than     \<
+%%   Equals        \=     Greater than  \>     Question mark \?
+%%   Commercial at \@     Left bracket  \[     Backslash     \\
+%%   Right bracket \]     Circumflex    \^     Underscore    \_
+%%   Grave accent  \`     Left brace    \{     Vertical bar  \|
+%%   Right brace   \}     Tilde         \~}
+%
+% \iffalse
+%
+%    \begin{macrocode}
+%<*driver>
+\documentclass{ltxdoc}
+
+\RecordChanges
+
+\pagestyle{myheadings}
+
+\title{The \texttt{caml} package: A style for use with \texttt{caml-tex}.}
+
+\author{Jens Kl\"ocker%
+\thanks{\texttt{kloecker\char'100informatik.uni-wuerzburg.de}}}
+
+\date{1996/01/08}
+
+\begin{document}
+\markboth{The caml style}{The caml style}
+\maketitle
+   \DocInput{caml.dtx}
+   \PrintChanges
+\end{document}
+%</driver>
+%    \end{macrocode}
+%
+%
+%\fi
+%
+%
+% \begin{abstract}
+%   This package re-implements the \texttt{caml} style for formatting
+%   \textsf{Caml Light} source code parts in \LaTeX\ documents after
+%   processing with \texttt{caml-tex}. In addition it provides new features,
+%   such as boxed \textsf{Caml Light} code or arbitrary input and output
+%   prompts.
+% \end{abstract}  
+%
+% \section{Usage}
+%
+% Along with the \textsf{Caml Light} system from INRIA \cite{caml}, 
+% a filter for
+% \textsf{Caml Light}
+% examples in \LaTeX\ documents is distributed. With this, one can write
+% source code examples in the \textsf{Caml Light} language direct into the
+% document. The filter \texttt{caml-tex} finds such code pieces, shoves them
+% down into 
+% \textsf{Camls} throat and inserts the output after each top-level
+% phrase. There are three possible environments for doing that:
+% \begin{itemize}
+% \item The phrases between |\begin{caml_example}| and
+%       |\end{caml_example}| are evaluated and copied into
+%       the output file. Each  phrase is followed by the
+%       response of the top-level loop.
+% \item The phrases between |\begin{caml_example*}| and
+%       |\end{caml_example*}| are evaluated and copied into
+%       the output file. The responses of the top-level loop
+%       are discarded.
+% \item The phrases between |\begin{caml_eval}| and
+%       |\end{caml_eval}| are silently evaluated. They are
+%       not copied into the output file, and the responses
+%       of the top-level loop are discarded.
+% \end{itemize}
+% The resulting output can be controlled with this package. 
+%
+% \subsection{Package initialization}
+%
+% To use \texttt{caml-tex}, you have to insert the declaration
+% \begin{verbatim}
+% \usepackage{caml}
+% \end{verbatim}
+% in the preamble of your \LaTeX\ document. As a package option, you can say
+% |slanted| to typeset the \textsf{Caml Light} output in slanted typewriter
+% font. Otherwise it will, like the input phrases, be inserted in a normal,
+% upshape typewriter font.
+%
+% \subsection{Controlling the formatting}
+%
+% Normally, the \textsf{Caml Light} examples will be typeset like a normal
+% |verbatim| text. A |#| and a |\thinspace|, like a prompt, will be set in
+% front of every input line.
+%
+% You can control this prompt with the commands |\camlinputprompt| and
+% |\camloutputprompt|. For instance, if you want to set `Input:' and `Output:'
+% in front of the lines, you have to say something like
+% \begin{verbatim}
+% \newlength{\promptlength}
+% \settowidth{\promptlength}{\rmfamily\upshape Output: }
+% \renewcommand{\camlinputprompt}
+%   {\makebox[\promptlength][r]{\rmfamily\upshape Input: }}
+% \renewcommand{\camloutputprompt}
+%   {\makebox[\promptlength][r]{\rmfamily\upshape Output: }}
+% \end{verbatim}
+%
+% But this looks not very fine, because the prompts will be set in front of
+% \emph{every} line. So, to avoid this, you can say |\nofollowinprompt| and
+% |\nofollowoutprompt| to prompt only the first input and output line of every
+% top-level phrase. To reset this, the opposite commands |\followinprompt| and
+% |\followoutprompt| can be used.
+% 
+% The next thing you may want, is to draw a frame around the \textsf{Caml
+% Light} 
+% code. You can achieve this by inserting |\boxedcaml| into your document. But
+% there is one restriction: a boxed example should be less than a page. The
+% opposite |\noboxedcaml| resets to the default.
+%
+% The last command, |\camlsize|, controls the size of the example. To change
+% it, you can say for instance 
+% \begin{verbatim}
+% \renewcommand{\camlsize}{\small}
+% \end{verbatim}
+%
+% \subsection{Spacing}
+%
+% The spacing inside and around \textsf{Caml Light} examples is done with the
+% following lengths.
+% \begin{description}
+% \item[abovecamlskip:] Glue, which will be inserted above the examples. The
+% default is one |\bigskipamount|.
+% \item[belowcamlskip:] Glue, which will be inserted below the examples. The
+% default is also one |\bigskipamount|.
+% \item[camlblanklineskip:] This space separates two top-level phrases. The
+% default is one |\medskipamount|.
+% \item[camlboxindent:] Indentation of a boxed example, initialized to 0\,pt.
+% \item[camlboxsep:] Space that separates the frame and the contents of a boxed
+%                   example, initialized to 0\,pt. 
+% \end{description}
+% As an example, we indent the boxed examples and leave a small space inside a
+% box: 
+% \begin{verbatim}
+% \setlength{\camlboxindent}{2em}
+% \setlength{\camlboxsep}{2pt}
+% \end{verbatim}
+%
+% Note that the space above and below a \textsf{Caml Light} example will be
+% advanced by |\parskip|. If you want a smaller space than |\parskip|, you
+% can set |\abovecamlskip| or |\belowcamlskip| to a negative
+% value.
+%
+% \StopEventually{
+% \begin{thebibliography}{1}
+%    \bibitem{companion}
+%       M.~Goossens, F.~Mittelbach, A.~Samarin.
+%       \emph{The \LaTeX{} Companion,}
+%       Addison-Wesley, Reading, Mass., 1994.
+%    \bibitem{latexman}
+%       L.~Lamport.
+%       \emph{\LaTeX, A Document Preparation System,}
+%       Addison-Wesley, Reading, Mass., 2nd edition, 1994.
+%    \bibitem{caml}
+%       X.~Leroy.
+%       \emph{The Caml Light system release 0.7,}
+%       INRIA, 1995.
+% \end{thebibliography}
+% }
+%
+% \section{The implementation}
+%
+% We first initialize the package and load L.~Lamports \texttt{alltt} (see
+% \cite{latexman} or \cite{companion}),
+% because the |caml| environment is based on this.
+%    \begin{macrocode}
+%<*package>
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{caml}
+    [1996/01/08 v1.1 package for use with caml-tex (JK)]
+\RequirePackage{alltt}
+%    \end{macrocode}
+%
+% Then we define some conditionals to handle the switch commands and
+% the package option. The switches are also initialized here.
+%    \begin{macrocode}
+\newif\ifcaml@slanted\caml@slantedfalse       
+\newif\iffollow@in\follow@intrue              
+\newif\iffollow@out\follow@outtrue            
+\newif\iffollowout@prompt\followout@prompttrue
+\newif\iffollowin@prompt\followin@prompttrue  
+\newif\ifcaml@boxed\caml@boxedfalse
+%    \end{macrocode}
+%
+% Now we can declare the |slanted| option and process it.
+%    \begin{macrocode}
+\DeclareOption{slanted}{\caml@slantedtrue}
+\ProcessOptions
+%    \end{macrocode}
+%
+% \subsection{The top-level control commands}
+%
+% \DescribeMacro{\followinprompt}   
+% \DescribeMacro{\nofollowinprompt}
+% \DescribeMacro{\followoutprompt}
+% \DescribeMacro{\nofollowoutprompt} 
+% \DescribeMacro{\boxedcaml} 
+% \DescribeMacro{\noboxedcaml} 
+% In this section we implement the top-level commands, which form the user
+% interface---first the switches of the style \meta{option},
+% \meta{nooption}. These commands simply set the conditionals to |true| or
+% |false|.
+%    \begin{macrocode}
+\newcommand{\followinprompt}{\follow@intrue}   
+\newcommand{\nofollowinprompt}{\follow@infalse}
+\newcommand{\followoutprompt}{\follow@outtrue} 
+\newcommand{\nofollowoutprompt}{\follow@outfalse} 
+\newcommand{\boxedcaml}{\caml@boxedtrue} 
+\newcommand{\noboxedcaml}{\caml@boxedfalse} 
+%    \end{macrocode}
+%
+% \DescribeMacro{\camlsize}
+% The |\camlsize| macro is initialized to |\normalsize|.
+%    \begin{macrocode}
+\newcommand{\camlsize}{\normalsize}   
+%    \end{macrocode}
+%
+% \DescribeMacro{\camlinputprompt}
+% \DescribeMacro{\camloutputprompt}
+% Now we deal with the prompt commands. We set the |\camlinputprompt| to |#|
+% and leave the |\camloutputprompt| empty.
+%    \begin{macrocode}
+\newcommand{\camlinputprompt}{\#\thinspace}
+\newcommand{\camloutputprompt}{}
+%    \end{macrocode}
+%
+% \DescribeMacro{\abovecamlskip}
+% \DescribeMacro{\belowcamlskip}
+% \DescribeMacro{\camlblanklineskip}
+% \DescribeMacro{\camlboxindent}
+% \DescribeMacro{\camlboxsep}
+% At the end of this section, we initialize the spacing in
+% a |caml| environment.
+%    \begin{macrocode}
+\newlength{\abovecamlskip}
+\setlength{\abovecamlskip}{\bigskipamount} 
+\newlength{\belowcamlskip}
+\setlength{\belowcamlskip}{\bigskipamount}
+\newlength{\camlblanklineskip}
+\setlength{\camlblanklineskip}{\medskipamount}
+\newlength{\camlboxindent}
+\setlength{\camlboxindent}{0pt}
+\newlength{\camlboxsep}
+\setlength{\camlboxsep}{0pt}
+%    \end{macrocode}
+%
+% \subsection{The \texttt{caml} environment}
+%
+% \DescribeMacro{\caml@blankline}
+% First we define some auxiliarily macros.
+% The blank line between two top-level phrases is glue of a
+% |\camlblanklineskip|. We have also to set |\followin@prompt| and
+% |\followout@prompt| to |true|, to allow a prompt before the next phrase and
+% answer. 
+%    \begin{macrocode}
+\newcommand{\caml@blankline}{%
+  \vspace{\camlblanklineskip}%
+  \followin@prompttrue\followout@prompttrue}
+%    \end{macrocode}
+%
+% \DescribeMacro{\caml@inputline}
+% \DescribeMacro{\caml@outputline}
+% The input and output lines in a non-boxed |caml| environment will be produced
+% with the following macros. They first set the |\camlsize| and the font
+% shape. Then they produce the prompt, depending on user switch. In the case of
+% no prompt, an appropriate space will be the output. The last line of every
+% macro flips the prompt mode, if only the first line should have one. 
+%    \begin{macrocode}
+\newcommand{\caml@inputline}[1]{%
+  \camlsize\upshape%
+  \iffollowin@prompt%
+    \camlinputprompt%
+  \else%
+    \setbox0=\hbox{\camlinputprompt}\hskip\wd0%
+  \fi%
+  \iffollow@in%
+    \relax%
+  \else%
+    \followin@promptfalse%
+  \fi #1}
+
+\newcommand{\caml@outputline}[1]{%
+  \camlsize%
+  \ifcaml@slanted%
+    \slshape%
+  \fi%
+  \iffollowout@prompt%
+    \camloutputprompt%
+  \else%
+    \setbox0=\hbox{\camloutputprompt}\hskip\wd0%
+  \fi%
+  \iffollow@out%
+    \relax%
+  \else%
+    \followout@promptfalse%
+  \fi #1}
+%    \end{macrocode}
+%
+% \DescribeMacro{\@caml@inputline}
+% \DescribeMacro{\@caml@outputline}
+% The next commands produce the input and output lines in a boxed |caml| 
+% environment. They are similar to the former ones, but they measure the lines
+% and set the appropriate |\hsize|. Also, they take into account the spacing
+% inside a |caml| box.
+%    \begin{macrocode}
+\newcommand{\@caml@inputline}[1]{%
+  \camlsize\upshape%
+  \hskip\camlboxsep%
+  \iffollowin@prompt%
+    \camlinputprompt%
+  \else%
+  \setbox0=\hbox{\camlinputprompt}\hskip\wd0%
+  \fi%
+  \iffollow@in%
+    \relax%
+  \else%
+    \followin@promptfalse%
+  \fi%
+  \setbox0=\hbox{\hskip\camlboxsep\camlinputprompt%
+  #1\hskip\camlboxsep}%
+  \hsize=\wd0
+  #1}
+
+\newcommand{\@caml@outputline}[1]{%
+  \camlsize%
+  \ifcaml@slanted%
+    \slshape%
+  \fi%
+  \hskip\camlboxsep%
+  \iffollowout@prompt%
+    \camloutputprompt%
+  \else%
+    \setbox0=\hbox{\camloutputprompt}\hskip\wd0%
+  \fi%
+  \iffollow@out%
+    \relax%
+  \else%
+    \followout@promptfalse%
+  \fi%
+  \setbox0=\hbox{\hskip\camlboxsep\camloutputprompt%
+  #1%
+  \hskip\camlboxsep}%
+  \hsize=\wd0
+  #1}
+%    \end{macrocode}
+%
+% \DescribeMacro{\caml@box}
+% \DescribeMacro{\camlbslash}
+% To define the |caml| environment, we need to declare a new box, which will
+% hold the caml code in the boxed case. Also, we need to declare the backslash.
+%    \begin{macrocode}
+\newsavebox{\caml@box}
+\newcommand{\camlbslash}{\char'134}
+%    \end{macrocode}
+%
+% \begin{environment}{caml}
+%    Now comes the finale: the |caml| environment.
+%    After setting some spaces, we start a |trivlist| environment
+%    and insert |\abovecamlskip| vertical glue.
+%    Next we set the line-producing macros and decide,
+%    whether to go into boxed mode or not. If not, we start the |alltt|
+%    environment---thats all. If we are in boxed mode, we start a |lrbox| to
+%    record the |caml| stuff in |\caml@box|. Then we start a |minipage|, insert
+%    |\camlboxsep| vertical glue and start the |alltt| environment.
+% \changes{v1.1}{1996/01/08}{\texttt{trivlist} environment added, fixed up some spacing problems}
+%    \begin{macrocode}
+\newenvironment{caml}{%
+  \setlength{\partopsep}{0pt}%
+  \setlength{\topsep}{0pt}%
+  \setlength{\parindent}{0pt}%
+  \begin{trivlist}%
+  \vspace{\abovecamlskip}%
+  \let\;\caml@blankline%
+  \let\?\@caml@inputline%
+  \let\:\@caml@outputline%
+  \ifcaml@boxed%
+    \begin{lrbox}{\caml@box}%
+    \begin{minipage}{\linewidth}%
+    \vspace*{\camlboxsep}%
+  \fi%
+  \begin{alltt}}
+%    \end{macrocode}
+%
+%    At the end of the |caml| environment, we close |alltt|. 
+%    If boxed |caml| was set,
+%    we insert |\camlboxsep| vertical glue, close the |minipage| and |lrbox|,
+%    and 
+%    use the |\caml@box| inside a |\fbox|. At the end, vertical space of
+%    |\belowcamlskip| will be inserted and the |trivlist| environment
+%    will be closed.   
+%    \begin{macrocode}
+{\end{alltt}%
+  \ifcaml@boxed%
+    \vspace*{\camlboxsep}%
+    \end{minipage}\end{lrbox}%
+    \hskip\camlboxindent%
+    \fbox{\usebox{\caml@box}}%
+  \fi%
+  \vspace{\belowcamlskip}%
+  \end{trivlist}}
+%</package>
+%    \end{macrocode}
+% \end{environment}
+%
+% \Finale
+\endinput

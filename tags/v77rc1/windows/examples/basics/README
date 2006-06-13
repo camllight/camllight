@@ -1,0 +1,14 @@
+Three all-time favorites: Fibonacci, Eratosthene's sieve, and the Unix
+"wc" utility, presented as standalone programs.
+
+To compile: either "make", or, by hand:
+
+    camlc -o fib fib.ml
+    camlc -o wc wc.ml
+    camlc -o sieve sieve.ml
+
+To run:
+
+    fib 10              # or some other number
+    wc fib.ml           # or some other files
+    sieve 1000          # or some other number

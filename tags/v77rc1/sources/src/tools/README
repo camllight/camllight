@@ -1,0 +1,39 @@
+This directory contains various utility programs related to Caml Light.
+Some are shell scripts, other are written in Perl, other are Caml
+Light programs.
+
+Here is a short description for each program. Some more explanation
+is sometimes given as comments in the source.
+
+backup          sh      Used during the bootstrap phase, to keep
+restore                 backup copies of the compiler and linker.
+
+camldep         perl    Find inter-module dependencies between .zi and
+                        .zo files. The output is intended to go in a
+                        Makefile.
+
+camlsize        perl    Print the code, data and symbol size of a
+                        executable bytecode file
+
+checkmsgs       perl    Check the consistency of the camlmsgs.txt file
+
+dumpobj         caml    Disassemble a .zo file.
+
+dumpsymb        caml    Dump the debugging information contained in a
+                        executable bytecode file.
+
+installb        sh      Used during the installation phase.
+
+findmsgs        caml    Scan the source code for messages to internationalize.
+                        Used by checkmsgs.
+
+linkarch        sh      Builds a directory hierarchy that parallels
+                        the source hierarchy, with symbolic links to
+                        the source files. Useful when compiling Caml Light
+                        on several platforms at once.
+
+make-jumptable  awk     Used to generate ../runtime/jumptbl.h and
+make-opcodes            ../compiler/opcodes.ml from ../runtime/instruct.h.
+
+clprepro        C       Use this as a replacement for cpp if your cpp is
+			too fussy (e.g. refuses 008 as a token)

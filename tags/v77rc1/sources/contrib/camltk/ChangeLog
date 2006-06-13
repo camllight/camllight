@@ -1,0 +1,98 @@
+Wed May 31 16:16:20 1995  Francois Rouaix  <rouaix@fronsac.inria.fr>
+
+	* Fixed result parsing. text__get and entry__get should now work
+	  decently.
+
+Tue May 30 11:06:51 1995  Francois Rouaix  <rouaix@fronsac.inria.fr>
+
+	* New version of protocol, using direct calls to Tcl procs.
+	* Rewrote tkcompiler accordingly
+	* Abandoned support of protocol2
+	* Moved some builtins for canvases in Widgets.src
+	* Added support__toplevel_widget_atom
+
+Beta 4 (May 2 1995)  Francois Rouaix  <rouaix@fronsac.inria.fr>
+
+	* Collision on constructor Color
+	* added listboxSingleSelect
+	* Changed canvas indices
+	* Fixed ScrollRegion, added support for {} in compiler
+	* Ev_Time is now an int
+	* internal types are not picked up by doc scripts
+
+Beta 2 (Feb 28 1995)  Francois Rouaix  <rouaix@fronsac.inria.f r>
+
+	* Fixed Makefile (X11_LIB)
+	* Index is now builtin, fixed entry__index, fixed Index(listbox)
+	* added entry_see_caret
+	* Support for callback GC through Destroy event
+	* quote_string not quadratic anymore
+	* some optimisations
+	* better generation of "modules" for lib Makefile
+
+Beta 1 (Jan 10 1995)  Francois Rouaix  <rouaix@fronsac.inria.fr>
+
+	* fix canvas__createrectangle
+	* changed tk__dialog
+
+Fri Dec 16 18:11:39 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+	* Cleanup, comments, generated types commented
+
+Thu Dec  1 10:00:00 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+	* Moved to cl7 alpha
+
+Thu Nov 17 16:56:00 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+	* Release alpha3
+
+Wed Oct 26 14:05:49 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+	* Added one-process architecture
+
+	* Revised two-process architecture
+
+	* Reorganised compiler to be architecture independant
+
+Thu Oct 20 17:22:00 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+        * Release alpha2
+
+Thu Oct 20 16:21:46 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+	* Widgets.src: added grab, update
+
+Thu Oct 13 10:19:44 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+	* lib/support.ml: fixed quote_string
+
+Wed Oct 12 10:36:40 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+	* lib/protocol.ml: fixed eof on Tk channel
+	                   fixed unguarded substring
+			   added OpenTkClass
+
+	* maincompile.ml: renaming of toplevel module
+
+Mon Oct 10 10:57:06 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+	* lib/support.ml: added new_toplevel_widget for toplevel widget
+	naming
+
+	* lib/builtin_bind.ml: support for <1> == <Button-1>
+
+	* Widgets.src: bad command descriptions in option 
+
+Fri Sep 23 14:55:49 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+	* lib/textvariable.ml: support for string textvariables
+
+	* Widgets.src: cleanup floats
+
+	* intf.ml: support for writing .mli files
+
+Thu Sep  8 15:13:12 1994  Francois Rouaix  (rouaix@fronsac.inria.fr)
+
+	* Release alpha1
+

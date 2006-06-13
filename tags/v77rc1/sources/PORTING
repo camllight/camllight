@@ -1,0 +1,68 @@
+		Porting Caml Light to another system
+		------------------------------------
+
+This note contains some hints on how to port Caml Light to a machine
+that does not run Unix.
+
+ARCHITECTURAL REQUIREMENTS:
+
+Caml Light has been designed for 32-bit architectures, with
+a flat address space. Porting to segmented address spaces is very
+difficult (the 8086 port required a huge amount of work). 
+The code contains support for 64-bit architectures, but has only been
+tested on a Dec Alpha.
+
+COMPILER REQUIREMENTS:
+
+You'll need a robust, but not too fussy ANSI-C compiler. Robust,
+because the code for the runtime system is pretty complex (one huge
+function, a few large macros), and has been reported to break some
+compilers. Not too fussy, because some parts are in old-style C, and
+will probably be rejected by compilers that insist on doing inter-file
+type checking.
+
+OPERATING SYSTEM DEPENDENCIES:
+
+Caml Light has been developed under Unix, but actually uses very few
+Unix-specific features. All system functions used are in the standard
+ANSI C library, except open, read, write, close and lseek. Many
+compiler libraries provide emulations for these. Otherwise, you can
+emulate them on top of the standard IO library (fopen, fread, ...).
+That's kludgy, but it should work.
+
+HOW TO PROCEED:
+
+First port the runtime system (directory src/runtime) to the new
+machine. You'll have to write the configuration files (directory
+config/) by hand.
+
+Test the runtime system by compiling some Caml Light sample programs
+on a Unix machine, then transferring them (in binary mode) to the
+target machine, and run them through the runtime system. (Bytecode
+files are portable across architectures.)
+
+You can't just transfer camlcomp, camllink, camltop on the target
+machine and execute them as is. Well, you can execute them, but they
+won't work. That's because they contain some Unix-specific ML code,
+e.g. for filename handling. Instead:
+
+- Adapt src/lib/filename.ml and src/compiler/config.ml to the target
+operating system. filename.ml contains functions to handle file names.
+config.ml contains various constants, default names, prompts, ... In
+the current setting, they are derived from .mlp files, that contain
+the code for Unix, MS-DOS and Mac-OS, inside #ifdef directives. You
+can either add your code to the .mlp files, or write the .ml files by
+hand.
+
+- Compile all the ML code on a Unix machine.
+
+- Transfer the files to install (bytecode executables + standard
+library) to the host machine.
+
+- You should now be able to bootstrap the system on the host machine
+if you wish.
+
+Finally, you will have to write the driver programs camlc, camllight
+and camlmktop. You can either translate the shell scripts from the
+Unix version, or start with the C implementations found in the PC
+version.

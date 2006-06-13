@@ -1,0 +1,9 @@
+The following problems have not been fixed at the time of this release:
+
+1- Stream concatenation using [< ... >] does not always preserve the
+   sharing among streams, and sometimes duplicate stream subcomponents.
+   For instance, if you define s' = [< '1; s >] and then read alternatively
+   from s' and from s, a given element of s can be read twice.
+   The problem occurs only if s is in tail position inside s'.
+   To guarantee proper sharing, move s in non-tail position, e.g.
+   take s' = [< '1; s; [<>] >].

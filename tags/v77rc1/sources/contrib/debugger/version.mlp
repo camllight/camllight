@@ -1,0 +1,5 @@
+#include <version.h>
+
+let print_banner() =
+  printf__printf "       Caml Light debugger version %s\n" VERSION; ()
+;;

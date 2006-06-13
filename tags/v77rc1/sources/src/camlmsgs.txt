@@ -1,0 +1,582 @@
+src:	%aSyntax error.\n
+fr:	%aErreur de syntaxe.\n
+es:	%aError de sintaxis.\n
+de:	%aSyntaxfehler.\n
+it:	%aErrore di sintassi.\n
+
+src:	%aIllegal character.\n
+fr:	%aCaractère illégal.\n
+es:	%aCarácter incorrecto.\n
+de:	%aIllegales Zeichen.\n
+it:	%aCarattere illegale.\n
+
+src:	%aComment not terminated.\n
+fr:	%aCommentaire sans fin.\n
+es:	%aComentario sin finalizar.\n
+de:	%aKommentar nicht abgeschlossen.\n
+it:	%aCommento non terminato.\n
+
+src:	%aIll-formed character literal.\n
+fr:	%aCaractère littéral mal formé.\n
+es:	%aCarácter literal mal formado.\n
+de:	%aFalsch formulierte Zeichen-Konstante.\n
+it:	%aCarattere mal formato.\n
+
+src:	%aString literal not terminated.\n
+fr:	%aChaîne littérale non terminée.\n
+es:	%aCadena literal sin terminar.\n
+de:	%aZeichenketten-Konstante nicht abgeschlossen.\n
+it:	%aStringa non terminata.\n
+
+src:	, line %d-%d, characters %d-%d:\n
+fr:	, lignes %d-%d, caractères %d-%d:\n
+es:	, líneas %d-%d, caracteres %d-%d:\n
+de:	, Zeile %d-%d, Zeichen %d-%d:\n
+it:	, linee %d-%d, caratteri %d-%d:\n
+
+src:	, line %d, characters %d-%d:\n
+fr:	, ligne %d, caractères %d-%d:\n
+es:	, línea %d, caracteres %d-%d:\n
+de:	, Zeile %d, Zeichen %d-%d:\n
+it:	, linea %d, caratteri %d-%d:\n
+
+src:	File "%s"
+fr:	Fichier "%s"
+es:	Fichero "%s"
+de:	Datei "%s"
+it:	File "%s"
+
+src:	Toplevel input:\n
+fr:	Entrée interactive:\n
+es:	Entrada interactiva:\n
+de:	Interaktive Eingabe:\n
+it:	Entrata interattiva:\n
+
+src:	File "%s", line 1:\n
+fr:	Fichier "%s", ligne 1:\n
+es:	Fichero "%s", línea 1:\n
+de:	Datei "%s", Zeile 1:\n
+it:	File "%s", linea 1:\n
+
+src:	%aWarning: unknown directive "#%s", ignored.\n
+fr:	%aAttention: la directive "#%s" est inconnue, je l'ignore.\n
+es:	%a¡Cuidado!: la directiva "#%s" es desconocida, será ignorada.\n
+de:	%aAchtung! die unbekannte Direktive "#%s" wird ignoriert.\n
+it:	%aAttenzione: la direttiva "#%s" è sconosciuta, sarà ignorata.\n
+
+src:	Cannot find file %s.zi. Please compile %s.mli first.\n
+fr:	Le fichier %s.zi est introuvable. Veuillez compiler %s.mli d'abord.\n
+es:	No se encuentra el fichero %s.zi. Compile %s.mli previamente.\n
+de:	Kann Datei %s.zi nicht finden. Bitte erst %s.mli übersetzen.\n
+it:	Non trovo il file %s.zi. Provate a compilare prima %s.mli.\n
+
+src:	%aThe value identifier %a is unbound.\n
+fr:	%aL'identificateur %a n'est pas défini.\n
+es:	%aEl identificador %a no está definido.\n
+de:	%aDer Bezeichner %a ist undefiniert.\n
+it:	%aL'identificatore %a è indefinito.\n
+
+src:	%aThe constructor %a is unbound.\n
+fr:	%aLe constructeur %a n'est pas défini.\n
+es:	%aEl constructor %a no está definido.\n
+de:	%aDer Konstruktor %a ist undefiniert.\n
+it:	%aIl costruttore %a è indefinito.\n
+
+src:	%aThe label %a is unbound.\n
+fr:	%aL'étiquette %a n'est pas définie.\n
+es:	%aLa etiqueta %a no está definida.\n
+de:	%aDie Marke %a ist undefiniert.\n
+it:	%aL'etichetta %a è indefinita.\n
+
+src:	%aThe type constructor %a is unbound.\n
+fr:	%aLe constructeur de type %a n'est pas défini.\n
+es:	%aEl constructor de tipo %a no está definido.\n
+de:	%aDer Typkonstruktor %a ist undefiniert.\n
+it:	%aIl costruttore di tipo %a è indefinito.\n
+
+src:	%aThe type variable %s is unbound.\n
+fr:	%aLa variable de type %s n'est pas liée.\n
+es:	%aLa variable de tipo %s no está ligada.\n
+de:	%aDie Typvariable %s ist undefiniert.\n
+it:	%aLa variabile di tipo %s non è legata.\n
+
+src:	%aThe type constructor %a expects %d argument(s),\n\
+	but is here given %d argument(s).\n
+fr:	%aLe constructeur de type %a attend %d argument(s),\n\
+	mais reçoit ici %d argument(s).\n
+es:	%aEl constructor de tipo %a espera %d argumento(s),\n\
+	pero aquí ha recibido %d argumento(s).\n
+de:	%aDer Typkonstruktor %a erwartet %d Argument(e),\n\
+	wurde hier aber mit %d Argument(en) aufgerufen.\n
+it:	%aIl costruttore di tipo %a ha bisogno di %d argumento(i),\n\
+	ma qui è usato con %d argumento(i).\n
+
+src:	%aThe variable %s is bound several times in this pattern.\n
+fr:	%aL'identificateur %s est défini plusieurs fois dans ce motif.\n
+es:	%aEl identificador %s se ha definido varias veces en este patrón.\n
+de:	%aDer Bezeichner %s wurde in diesem Muster mehrmals definiert.\n
+it:	%aL'identificatore %s è definito piú volte in questo schema.\n
+
+src:	%aWarning: the variable %s starts with an upper case letter in this pattern.\n
+fr:	%aAttention: dans ce motif l'identificateur %s commence par une majuscule.\n
+es:	%a¡Cuidado!: en este patrón el identificador %s comienza con una mayúscula.\n
+de:	%aAchtung! Der Bezeichner %s beginnt in diesem Muster mit einem Großbuchstaben.\n
+it:	%aAttenzione: in questo schema l'identificatore %s comincia con una maiuscola.\n
+
+src:	%aA pattern with "|" must not bind variables.\n
+fr:	%aUn motif avec "|" ne doit pas lier d'identificateurs.\n
+es:	%aUn patrón con "|" no debe ligar identificadores.\n
+de:	%aEin Muster mit "|" darf keine Bezeichner binden.\n
+it:	%aUno schema che contiene "|" non deve legare identificatori.\n
+
+src:	%aThis pattern matches values of type %a,\n\
+	but should match values of type %a.\n
+fr:	%aCe motif filtre des valeurs de type %a,\n\
+	pas des valeurs de type %a.\n
+es:	%aEste patrón filtra valores de tipo %a,\n\
+	pero no valores de tipo %a.\n 
+de:	%aDieses Muster filtert Werte vom Typ %a,\n\
+	aber nicht, wie erwartet, vom Typ %a.\n 
+it:	%aQuesto schema identifica valori di tipo %a,\n\
+	ma non ci sono valori di tipo %a.\n
+
+src:	%aThis expression has type %a,\n\
+	but is used with type %a.\n
+fr:	%aCette expression est de type %a,\n\
+	mais est utilisée avec le type %a.\n
+es:	%aEsta expresión es de tipo %a,\n\
+	pero se ha utilizado con tipo %a.\n
+de:	%aDieser Ausdruck ist vom Typ %a,\n\
+	wurde hier aber als Typ %a verwendet.\n
+it:	%aQuesta espressione è di tipo %a,\n\
+	ma è usata con tipo %a.\n
+
+src:	%aWarning: this expression has type %a,\n\
+	but is used with type unit.\n
+fr:	%aAttention: cette expression est de type %a,\n\
+	mais est utilisée avec le type unit.\n
+es:	%a¡Cuidado!: esta expresión es de tipo %a,\n\
+	pero se ha utilizado con tipo unit.\n
+de:	%aAchtung: dieser Ausdruck ist vom Typ %a,\n\
+	wurde hier aber als Typ unit verwendet.\n
+it:	%aAttenzione: questa espressione è di tipo %a,\n\
+	ma è usata con tipo unit.\n
+
+src:	%aThis function is applied to too many arguments.\n
+fr:	%aCette fonction reçoit trop d'arguments.\n
+es:	%aEsta función se aplica a demasiados argumentos.\n
+de:	%aDiese Funktion wurde auf zu viele Argumente angewendet.\n
+it:	%aTroppi argomenti per questa funzione.\n
+
+src:	%aThis expression is not a function, it cannot be applied.\n
+fr:	%aCette expression n'est pas une fonction, elle ne peut être \
+	appliquée.\n
+es:	%aEsta expresión no es una función; no puede ser aplicada.\n
+de:	%aDieser Ausdruck ist keine Funktion, er kann nicht auf Argumente \
+	angewendet werden.\n
+it:	%aQuesta espressione non è una funzione, non può essere \
+	applicata a un argomento.\n
+
+src:	%aThis curried matching contains cases of different lengths.\n
+fr:	%aTous les cas de ce filtrage curryfié n'ont pas la même longueur.\n
+es:	%aFiltración currificada con casos de diferente longitud.\n
+de:	%aDiese Muster in Curry-Form haben unterschiedliche Längen.\n
+it:	%aIn questo schema currificato, i vari casi non sono tutti della stessa lunghezza.\n
+
+src:	%aRepeated type parameter in type declaration.\n
+fr:	%aUn paramètre de type est lié plusieurs fois dans cette déclaration \
+	de type.\n
+es:	%aUn parámetro de tipo aparece repetido en esta declaración \
+	de tipo.\n
+de:	%aEin Typparameter wurde in der Typdeklaration mehrmals definiert.\n
+it:	%aUn parametro di tipo è ripetuto piú volte in questa dichiarazione.\n
+
+src:	%aThe identifier %s is not mutable.\n
+fr:	%aL'identificateur %s n'est pas mutable.\n
+es:	%aEl identificador %s no es mutable.\n
+de:	%aDer Bezeichner %s ist nicht veränderbar.\n
+it:	%aL'identificatore %s non è modificabile.\n
+
+src:	%tThe type %a is declared in the interface, but not implemented.\n
+fr:	%tLe type %a est déclaré dans l'interface, \
+	mais n'est pas implémenté.\n
+es:	%tEl tipo %a se declara en la interfaz, pero no está implementado.\n
+de:	%tDer Typ %a wurde in der Schnittstelle deklariert, aber nicht \
+	definiert.\n
+it:	%tIl tipo %a è dichiarato nell'interfaccia, ma non è implementato.\n
+
+src:	%tThe value %a is declared in the interface, but not implemented.\n
+fr:	%tLa valeur %a est déclarée dans l'interface,\n\
+	mais n'est pas définie dans l'implémentation.\n
+es:	%tEl valor %a se declara en la interfaz, pero no está implementado.\n
+de:	%tDer Wert %a wurde in der Schnittstelle deklariert, aber nicht \
+	implementiert.\n
+it:	%tIl valore %a è dichiarato nell'interfaccia,\n\
+	ma non è definito nell'implementazione.\n
+
+src:	%tThe value %a is declared with type %a,\n\
+	but defined with type %a.\n
+fr:	%tLa valeur %a est déclarée du type %a,\n\
+	mais est définie avec le type %a.\n
+es:	%tEl valor %a se ha declarado con tipo %a,\n\
+	pero se ha definido con tipo %a.\n
+de:	%t%a wurde als Wert vom Typ %a deklariert,\n\
+	aber als Wert vom Typ %a implementiert.\n
+it:	%tIl valore %a è dichiarato con il tipo %a,\n\
+	ma è definito con il tipo %a.\n
+
+src:	%tThe type inferred for the value %a,\n\
+	that is, %a,\n\
+	contains type variables that cannot be generalized.\n
+fr:	%tLe type inféré pour la valeur %a,\n\
+	c'est-à-dire, %a,\n\
+	contient des variables de type qui ne peuvent être généralisées.\n
+es:	%tEl tipo inferido para el valor %a,\n\
+	es decir, %a, \n\
+	contiene variables de tipo que no pueden ser generalizadas.\n
+de:	%tDer für den Wert %a abgeleitete\n\
+	Typ %a, \n\
+	enthält Typvariablen, die nicht verallgemeinert werden können.\n
+it:	%tIl tipo inferito per il valore %a,\n\
+	vale a dire, %a,\n\
+	contiene delle variabili di tipo che non possono essere generalizzate.\n
+
+src:	%aThe label %a is defined several times in this record.\n
+fr:	%aL'étiquette %a est définie plusieurs fois dans cet enregistrement.\n
+es:	%aLa etiqueta %a aparece definida varias veces en este registro.\n
+de:	%aDie Marke %a wurde in diesem Datensatz mehrmals definiert.\n
+it:	%aL'etichetta %a è definita piú di una volta in questo record.\n
+
+src:	%aThe label %a is not defined in this record.\n
+fr:	%aL'étiquette %a n'est pas définie dans cet enregistrement.\n
+es:	%aLa etiqueta %a no aparece definida en este registro.\n
+de:	%aDie Marke %a ist in diesem Datensatz nicht definiert.\n
+it:	%aL'etichetta %a non è definita in questo record.\n
+
+src:	%aThe label %a does not belong to the type %a.\n
+fr:	%aL'étiquette %a n'appartient pas au type %a.\n
+es:	%aLa etiqueta %a no pertenece al typo %a.\n
+de:	%aDie Marke %a gehört nicht zum Typ %a.\n
+it:	%aL'etichetta %a non appartiene al tipo %a.\n
+
+src:	%aThe label %a is not mutable.\n
+fr:	%aL'étiquette %a n'est pas mutable.\n
+es:	%aLa etiqueta %a no es mutable.\n
+de:	%aDie Marke %a ist nicht veränderbar.\n
+it:	%aL'etichetta %a non è modificabile.\n
+
+src:	%aValues of type %a cannot be defined with a "let rec".\n
+fr:	%aLes valeurs du type %a ne peuvent être définies par un "let rec".\n
+es:	%aLos valores de tipo %a no pueden definirse en un "let rec".\n
+de:	%aWerte vom Typ %a können nicht mit "let rec" definiert werden.\n
+it:	%aI valori di tipo %a non possono essere definiti con un "let rec".\n
+
+src:	%aThe constructor %a requires an argument.\n
+fr:	%aLe constructeur %a exige un argument.\n
+es:	%aEl constructor %a necesita un argumento.\n
+de:	%aDer Konstruktor %a benötigt ein Argument.\n
+it:	%aIl costruttore %a ha bisogno di un argomento.\n
+
+src:	%aThe constant constructor %a cannot accept an argument.\n
+fr:	%aLe constructeur %a est constant: il ne peut recevoir un argument.\n
+es:	%aEl constructor %a es constante: no admite argumentos.\n
+de:	%aDer Konstruktor %a ist eine Konstante, benötigt also kein Argument.\n
+it:	%aIl costruttore %a è costante: non ammette argomenti.\n
+
+src:	%aOnly variables are allowed as \
+	left-hand sides of "let rec".\n
+fr:	%aLe membre gauche d'un "let rec" doit être réduit à une variable.\n
+es:	%aLa parte izquierda de un "let rec" sólo admite una variable.\n
+de:	%aAls linke Seite eines "let rec" sind nur Variablen erlaubt.\n
+it:	%aIl membro sinistro di un "let rec" può essere solo una variabile.\n
+
+src:	%aThis kind of expression is not allowed in \
+	right-hand sides of "let rec".\n
+fr:	%aCe genre d'expressions n'est pas autorisé comme \
+	membre droit d'un "let rec".\n
+es:	%aEsta forma de expresión no está permitida \
+	en la parte derecha de un "let rec".\n
+de:	%aDiese Art von Ausdrücken ist als rechte Seite eines \
+	"let rec" nicht erlaubt.\n
+it:	%aQuesto genere di espressione non è ammissibile \
+	nel membro destro di un "let rec".\n
+
+src:	%aThe type %a is exported as an abstract type by this module\n\
+	and defined several times in the implementation.\n\
+	Please define it only once.\n
+fr:	%aLe type %a est exporté abstraitement dans l'interface de ce module\n\
+	et défini plusieurs fois dans l'implémentation.\n\
+	Veuillez ne le définir qu'une fois.\n
+es:	%aEste módulo exporta el tipo %a como tipo abstracto\n\
+	pero éste se define varias veces en la implementación.\n\
+	Sírvase definirlo una sola vez.\n
+de:	%aDer Typ %a wird von diesem Modul als abstrakter Typ exportiert,\n\
+	wurde aber mehrmals implementiert.\n\
+	Bitte definieren Sie ihn nur einmal.\n
+it:	%aIl tipo %a è dichiarato astratto in questo modulo\n\
+	ed è definito piú volte nell'implementazione.\n\
+	Definitelo una sola volta.\n
+
+src:	%aThe type abbreviation %a is a cyclic (infinite) type.\n
+fr:	%aL'abréviation de type %a est cyclique (infinie).\n
+es:	%aLa abreviatura de tipo %a es cíclica (infinita).\n
+de:	%aDie Typabkürzung %a ist zyklisch (unendlich).\n
+it:	%aL'abbreviazione di tipo %a è ciclica (infinita).\n
+
+src:	%aWarning: this function application is partial,\n\
+	maybe some arguments are missing.\n
+fr:	%aAttention: cette application de fonction est partielle,\n\
+	il manque peut-être des arguments.\n
+es:	%a¡Cuidado!: esta aplicación de función es parcial,\n\
+	puede que falte algún argumento.\n
+de:	%aAchtung: diese Funktionsanwendung ist partiell,\n\
+	es könnten einige Argumente fehlen.\n
+it:	%aAttenzione: questa funzione è applicata solo parzialmente,\n\
+	è possibile che manchino alcuni argomenti.\n
+
+src:	%aWarning: this matching case is unused.\n
+fr:	%aAttention: ce cas de filtrage est inutile.\n
+es:	%a¡Cuidado!: este caso de la filtración es inútil.\n
+de:	%aAchtung: dieses Muster wird nie benutzt.\n
+it:	%aAttenzione: questo caso non è usato nel filtraggio.\n
+
+src:	%aWarning: this matching is not exhaustive.\n
+fr:	%aAttention: ce filtrage n'est pas exhaustif.\n
+es:	%a¡Cuidado!: esta filtración no es exhaustiva.\n
+de:	%aAchtung: diese Muster berücksichtigen nicht alle Fälle.\n
+it:	%aAttenzione: questo filtraggio non è esaustivo.\n
+
+src:	%aBad format letter `%c'.\n
+fr:	%aLe format `%c' n'existe pas.\n
+es:	%aEl formato `%c' no existe.\n
+de:	%aDas Formatierzeichen `%c' existiert nicht.\n
+it:	%aIl formato `%c' non esiste.\n
+
+src:	%tPhrase too large, a relative displacement has overflowed.\n
+fr:	%tUne phrase est si longue qu'un déplacement relatif a débordé.\n
+es:	%tFrase demasiado larga; un desplazamiento relativo ha desbordado.\n
+de:	%tEine Phrase ist zu lang; eine relative Verschiebung wurde abgebrochen\n
+it:	%tFrase troppo lunga: uno spostamento relativo è uscito dai limiti.\n
+
+src:	Input/output error: %s.\n
+fr:	Erreur d'entrée/sortie (%s).\n
+es:	Error de entrada/salida (%s).\n
+de:	Ein- bzw. Ausgabefehler: %s.\n
+it:	Errore di ingresso/uscita (%s).\n
+
+src:	Internal error: %s.\nPlease report it.\n
+fr:	Erreur interne à Caml: %s.\nVeuillez la signaler.\n
+es:	Error interno en Caml: %s.\nSírvase comunicarlo.\n
+de:	Interner Caml-Fehler: %s.\nBitte melden Sie ihn.\n
+it:	Errore interno a Caml: %s.\nPer cortesia, segnalatelo.\n
+
+src:	Corrupted compiled interface file %s.\n\
+	Please recompile %s.mli or %s.ml first.\n
+fr:	L'interface compilée %s est illisible.\n\
+	Veuillez recompiler %s.mli ou %s.ml d'abord.\n
+es:	La interfaz compilada %s es ilegible.\n\
+	Sírvase recompilar %s.mli o %s.ml previamente.\n
+de:	Fehlerhaft übersetzte Schnittstellendatei %s.\n\
+	Bitte übersetzen sie %s.mli oder %s.ml erneut.\n
+it:	L'interfaccia compilata %s è illeggibile.\n\
+	Provate prima a ricompilare %s.mli o %s.ml.\n
+
+src:	Cannot find the compiled interface file %s.zi.\n
+fr:	L'interface compilée %s.zi est introuvable.\n
+es:	No se encuentra la interfaz compilada %s.zi.\n
+de:	Die übersetzte Schnittstelle %s.zi kann nicht gefunden werden.\n
+it:	Non trovo l'interfaccia compilata %s.zi.\n
+
+src:	The Caml Light compiler, version %s\n
+fr:	Le compilateur Caml Light, version %s\n
+es:	Compilador Caml Light, versión %s\n
+de:	Caml Light Compiler, Version %s\n
+it:	Compilatore Caml Light, versione %s\n
+
+src:	Cannot find file %s.\n
+fr:	Le fichier %s est introuvable.\n
+es:	No se encuentra el fichero %s.\n
+de:	Die Datei %s kann nicht gefunden werden.\n
+it:	Non trovo il file %s.\n
+
+src:	The Caml Light librarian, version %s\n
+fr:	Le bibliothécaire Caml Light, version %s\n
+es:	Bibliotecaria Caml Light, versión %s\n
+de:	Caml Light Bibliotheksverwaltung, Version %s\n
+it:	Gestore di biblioteche Caml Light, versione %s\n
+
+src:	The global value %s__%s is referenced (from %s) \
+	before being defined.\n\
+	Please link %s.zo before %s.\n
+fr:	La valeur globale %s__%s est utilisée (depuis %s) \
+	avant d'être définie.\n\
+	Veuillez lier %s.zo avant %s.\n
+es:	El valor global %s__%s se utiliza (desde %s) \
+	antes de ser definido.\n\
+	Sírvase enlazar %s.zo previamente %s.\n
+de:	Der globale Wert %s__%s wurde vor seiner Definition \
+	verwendet (von %s).\n\
+	Bitte linken Sie zuerst %s.zo und dann %s.\n
+it:	Il valore globale %s__%s è utilizzato (in %s) \
+	prima di essere definito.\n\
+	Provate a fare il link di %s.zo prima di %s.\n
+
+src:	The global value %s__%s is referenced before being defined.\n\
+	Please load an implementation of module %s first.\n
+fr:	La valeur globale %s__%s est utilisée avant d'être définie.\n\
+	Veuillez charger une implémentation du module %s.\n
+es:	El valor global %s__%s se utiliza antes de ser definido.\n\
+	Sírvase cargar antes una implementación del módulo %s.\n
+de:	Der globale Wert %s__%s wurde vor seiner Definition verwendet.\n\
+	Bitte laden Sie zuerst eine Implementation des Moduls %s.\n
+it:	Il valore globale %s__%s è utilizzato prima di essere definito.\n\
+	Provate a caricare prima una implementazione del modulo %s.\n
+
+src:	The C primitive "%s" is not available.\n
+fr:	La primitive C "%s" est inconnue.\n
+es:	La primitiva C "%s" es desconocida.\n
+de:	Das C-Primitiv "%s" ist nicht verfügbar.\n
+it:	La primitiva C "%s" è sconosciuta.\n
+
+src:	Error while linking file %s.\n
+fr:	Erreur pendant l'édition des liens du fichier %s.\n
+es:	Error durante el enlazado del fichero %s.\n
+de:	Fehler beim linken der Datei %s.\n
+it:	Errore nella fase di link del file %s.\n
+
+src:	Syntax error in "-require" file %s.\n
+fr:	Erreur de syntaxe dans le fichier "-require" %s.\n
+es:	Error de sintaxis en el fichero "-require" %s.\n
+de:	Syntaxfehler in der "-require" Datei %s.\n
+it:	Errore di sintassi nel file "-require" %s.\n
+
+src:	The Caml Light linker, version %s\n
+fr:	L'éditeur de liens Caml Light, version %s\n
+es:	Enlazador Caml Light, versión %s\n
+de:	Caml Light Linker, Version %s\n
+it:	Caml Light linker, versione %s\n
+
+src:	The function %s is already traced.\n
+fr:	La fonction %s est déjà tracée.\n
+es:	La función %s ha sido ya trazada.\n
+de:	Die Funktion %s wird bereits nachgezeichnet.\n
+it:	La funzione %s è giá tracciata.\n
+
+src:	The function %s is now traced.\n
+fr:	La fonction %s est dorénavant tracée.\n
+es:	La función %s estará trazada de ahora en adelante.\n
+de:	Die Funktion %s wird ab jetzt nachgezeichnet.\n
+it:	La funzione %s è tracciata a partire da questo momento.\n
+
+src:	The function %s is a primitive, it cannot be traced.\n
+fr:	La fonction %s est une fonction primitive, elle ne peut être tracée.\n
+es:	La función %s es una función primitiva, no puede ser trazada.\n
+de:	Die Funktion %s ist ein Primitiv, sie kann nicht nachgezeichnet werden.\n
+it:	La funzione %s è una primitiva: non puó essere tracciata.\n
+
+src:	Unknown function %s.\n
+fr:	La fonction %s n'est pas définie.\n
+es:	La función %s no está definida.\n
+de:	Die Funktion %s wurde noch nicht definiert.\n
+it:	La funzione %s non è definita.\n
+
+src:	The function %s was not traced.\n
+fr:	La fonction %s n'était pas tracée.\n
+es:	La función %s no ha sido trazada.\n
+de:	Die Funktion %s wurde nicht nachgezeichnet.\n
+it:	La funzione %s non è tracciata.\n
+
+src:	The function %s is no longer traced.\n
+fr:	La fonction %s n'est plus tracée.\n
+es:	La función %s ha dejado de estar trazada.\n
+de:	Die Funktion %s wird nun nicht mehr nachgezeichnet.\n
+it:	La funzione %s non è piú tracciata.\n
+
+src:	%s has the wrong type for a printing function.\n
+fr:	%s n'a pas un type convenable pour une fonction d'impression.\n
+es:	%s tiene un tipo inadecuado para una función de impresión.\n
+de:	%s hat den falschen Typ für eine Druckfunktion.\n
+it:	%s non ha un tipo adatto per essere una funzione di stampa.\n
+
+src:	No printer named %s.\n
+fr:	Il n'y a pas d'imprimeur nommé %s.\n
+es:	No hay ninguna impresora denominada %s.\n
+de:	Es existiert kein Drucker mit dem Namen %s.\n
+it:	Non esiste nessuna funzione di stampa chiamata %s.\n
+
+src:	Incorrect source file name %s.\n\
+	A source file name must end in ".ml" or ".mli".\n
+fr:	%s ne peut être un nom de fichier source.\n\
+	Le nom d'un fichier source doit se terminer par ".ml" ou ".mli".\n
+es:	%s no puede ser el nombre de un fichero fuente.\n\
+	El nombre de un fichero fuente debe terminar por ".ml" o ".mli".\n
+de:	Fehlerhafter Quelldateiname %s.\n\
+	Der Name einer Quelldatei muß auf ".ml" oder ".mli" enden.\n
+it:	%s non è un nome corretto per un file sorgente.\n\
+	Il nome di un file sorgente deve terminare in ".ml" o ".mli".\n
+
+
+src:	>       Caml Light version %s\n
+fr:	>       Caml Light version %s\n
+es:	>       Caml Light versión %s\n
+de:	>       Caml Light Version %s\n
+it:	>       Caml Light versione %s\n
+
+src:	Interrupted.\n
+fr:	Interruption.\n
+es:	Interrupción.\n
+de:	Unterbrochen.\n
+it:	Interruzione.\n
+
+src:	Uncaught exception: 
+fr:	Exception non rattrapée: 
+es:	Excepción no atrapada: 
+de:	Unbearbeitete Ausnahme: 
+it:	Eccezione non catturata: 
+
+src:	<Internal error while printing the exception>
+fr:	<Impossible d'imprimer l'exception>
+es:	<Imposible imprimir la excepción>
+de:	<Die Ausnahme kann nicht geschrieben werden - interner Fehler>
+it:	<Impossibile stampare l'eccezione>
+
+src:	%tWarning: useless #open on module "%s".\n
+fr:	%tRemarque: directive #open inutile pour le module "%s".\n
+es:	%tObservación: directiva #open inútil para el módulo "%s".\n
+de:	%tAchtung: unbenutztes #open der Datei "%s".\n
+it:	%tNota: la direttiva #open per il modulo "%s" è inutile.\n
+
+src:	%aThe type %a has been declared with %d parameter(s)\n\
+	but is here defined with %d parameter(s).\n
+fr:	%aLe type %a, qui a été déclaré avec %d paramètre(s),\n\
+	est défini ici avec %d paramètre(s).\n
+es:	%aEl tipo %a que fue declarado con %d parámetro(s),\n\
+	se define aquí con %d parámetro(s).\n
+de:	%aDer Typ %a wurde mit %d Parameter(n) deklariert,\n\
+	aber mit %d Parameter(n) definiert.\n
+it:	%aIl tipo %a che è dichiarato con %d parametro(i),\n\
+	è definito qui con %d parametro(i).\n
+
+src:	%tThe value %a is declared with type %a,\n\
+	but defined with type %a.\n
+fr:	%tLa valeur %a est déclarée du type %a,\n\
+	mais est définie avec le type %a.\n
+es:	%tEl valor %a se ha declarado con tipo %a,\n\
+	pero se ha definido con tipo %a.\n
+de:	%t%a wurde als Wert vom Typ %a deklariert,\n\
+	aber als Wert vom Typ %a implementiert.\n
+it:	%tIl valore %a è dichiarato con il tipo %a,\n\
+	ma è definito con il tipo %a.\n
+
+src:	Exception %s defined.\n
+fr:	L'exception %s est définie.\n
+es:	La excepción %s es definida.\n
+de:	Die Ausnahme %s ist definiert.\n
+it:	L'eccezione %s è definita.\n
+
+src:	Type %s defined.\n
+fr:	Le type %s est défini.\n
+es:	El tipo %s es definido.\n
+de:	Der Typ %s ist deklariert.\n
+it:	Il tipo %s è definito.\n
+

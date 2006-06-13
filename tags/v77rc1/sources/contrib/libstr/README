@@ -1,0 +1,24 @@
+The "libstr" library provides high-level string processing functions,
+some based on regular expressions. It is intended to support the kind
+of file processing that is usually performed with "sed" or "perl". See
+the interface file str.mli for a complete listing.
+
+This library has been lightly tested. Please report the bugs.
+
+This library has been contributed by Xavier Leroy (Xavier.Leroy@inria.fr).
+
+LEGAL NOTICE: the code in the regex-0.12 subdirectory is covered by
+the GNU General Public Licence (GPL). See the file regex-0.12/COPYING.
+As a consequence, the libstr library is itself covered by the GPL.
+
+USAGE:
+
+To use the libstr library from your programs, just do
+
+        camlc -custom <other options> str.zo <other .zo and .ml files> -lstr
+
+for the linking phase.
+
+A toplevel system integrating the libstr functions can be run with:
+
+        camllight camlstr

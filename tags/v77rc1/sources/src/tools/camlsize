@@ -1,0 +1,21 @@
+#!/usr/local/bin/perl
+
+foreach $f (@ARGV) {
+  open(FILE, $f) || die("Cannot open $f");
+  seek(FILE, -20, 2);
+  $code_size = do read_int();
+  $data_size = do read_int();
+  $symbol_size = do read_int();
+  $debug_size = do read_int();
+  $magic = do read_int();
+  $magic == 0x434c3037 || warn("$f is not a CL 0.7 bytecode file");
+  printf ("\tcode: %d    data: %d    symbols: %d    debug: %d\n",
+          $code_size, $data_size, $symbol_size, $debug_size);
+  close(FILE);
+}
+
+sub read_int {
+  read(FILE, $buff, 4) == 4 || die("Truncated bytecode file $f");
+  @int = unpack("C4", $buff);
+  return ($int[0] << 24) + ($int[1] << 16) + ($int[2] << 8) + $int[3];
+}
