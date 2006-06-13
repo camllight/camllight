@@ -7,7 +7,8 @@ rm -rf camllight.pkg camllight-rw.dmg
 
 VERSION=`sed -n -e '/VERSION/s/.*"\([^"]*\)".*/\1/p' ../version.h`
 VERSION_MAJOR=${VERSION%%.*}
-VERSION_MINOR=${VERSION##*.}
+tmp=${VERSION##*.}
+VERSION_MINOR=${tmp%%[^0-9]*}
 
 cat >Description.plist <<EOF
   <?xml version="1.0" encoding="UTF-8"?>
@@ -84,7 +85,6 @@ Files will be installed in the following directories:
 /usr/local/man - manual pages
 EOF
 
-mkdir -p root
 chmod -R g-w root
 sudo chown -R root:admin root
 
@@ -97,18 +97,19 @@ size=`expr $size + 8192`
 
 hdiutil create -sectors $size camllight-rw.dmg
 name=`hdid -nomount camllight-rw.dmg | grep Apple_HFS | cut -d ' ' -f 1`
-newfs_hfs -v 'Caml Light' $name
+volname="Caml Light ${VERSION}"
+newfs_hfs -v "$volname" $name
 hdiutil detach $name
 
 name=`hdid camllight-rw.dmg | grep Apple_HFS | cut -d ' ' -f 1`
-if test -d "/Volumes/Caml Light"; then
-  ditto -rsrcFork camllight.pkg "/Volumes/Caml Light/camllight.pkg"
-  cp resources/ReadMe.txt "/Volumes/Caml Light/"
+if test -d "/Volumes/$volname"; then
+  ditto -rsrcFork camllight.pkg "/Volumes/$volname/camllight.pkg"
+  cp resources/ReadMe.txt "/Volumes/$volname/"
 else
-  echo 'Unable to mount the disk image as "/Volumes/Caml Light"' >&2
+  echo 'Unable to mount the disk image as "/Volumes/'$volname'"' >&2
   exit 3
 fi
-open "/Volumes/Caml Light"
+open "/Volumes/$volname"
 hdiutil detach $name
 
 rm -rf "camllight-${VERSION}.dmg"
