@@ -1,5 +1,7 @@
 /* Convert constants from C headers to Caml */
 
+#include <stdio.h>
+
 #include <mlvalues.h>
 #include <exec.h>
 #include <instruct.h>

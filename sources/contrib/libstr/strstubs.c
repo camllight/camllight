@@ -1,3 +1,4 @@
+#include <string.h>
 #include <sys/types.h>
 #include <regex.h>
 #include <mlvalues.h>
@@ -184,7 +185,7 @@ value str_replacement_text(repl, orig)
       case '5': case '6': case '7': case '8': case '9':
         c -= '0';
         len = end_regs[c] - start_regs[c];
-        bcopy(&Byte(orig, start_regs[c]), q, len);
+        memmove (q, &Byte(orig, start_regs[c]), len);
         q += len;
         break;
       default:

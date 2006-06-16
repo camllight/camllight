@@ -8,6 +8,7 @@
 
 #include "socketaddr.h"
 #include <netdb.h>
+#include <string.h>
 
 static int entry_h_length;
 
@@ -16,7 +17,7 @@ extern int socket_domain_table[];
 static value alloc_one_addr(a)
      char * a;
 {
-  bcopy(a, &sock_addr.s_inet.sin_addr, entry_h_length);
+  memmove (&sock_addr.s_inet.sin_addr, a, entry_h_length);
   return alloc_inet_addr(sock_addr.s_inet.sin_addr.s_addr);
 }
 
@@ -69,8 +70,8 @@ value unix_gethostbyname(name)   /* ML */
 
 value unix_gethostbyaddr()
 { invalid_argument("gethostbyaddr not implemented"); }
-  
+
 value unix_gethostbyname()
 { invalid_argument("gethostbyname not implemented"); }
- 
+
 #endif
