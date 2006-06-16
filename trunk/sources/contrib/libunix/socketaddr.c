@@ -8,6 +8,7 @@
 #ifdef HAS_SOCKETS
 
 #include "socketaddr.h"
+#include <string.h>
 
 value alloc_inet_addr(a)
      uint32 a;
@@ -31,7 +32,7 @@ void get_sockaddr(a)
       if (len >= sizeof(sock_addr.s_unix.sun_path)) {
         unix_error(ENAMETOOLONG, "", path);
       }
-      bcopy(String_val(path), sock_addr.s_unix.sun_path, (int) len + 1);
+      memmove (sock_addr.s_unix.sun_path, String_val(path), (int) len + 1);
       sock_addr_len =
         ((char *)&(sock_addr.s_unix.sun_path) - (char *)&(sock_addr.s_unix))
         + len;
