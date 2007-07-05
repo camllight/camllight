@@ -1,5 +1,5 @@
+#include <string.h>
 #include <strings.h>
-
 #include "config.h"
 #include "debugger.h"
 #include "fail.h"
