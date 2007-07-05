@@ -2,6 +2,7 @@
    A very restricted subset of CPP.
 */
 
+#include <string.h>
 #include <stdio.h>
 #include <string.h>
 

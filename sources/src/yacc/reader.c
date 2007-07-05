@@ -1,3 +1,4 @@
+#include <string.h>
 #include "defs.h"
 
 /*  The line size must be a positive integer.  One hundred was chosen   */

@@ -1,7 +1,7 @@
 /* To initialize and resize the stacks */
 
+#include <string.h>
 #include <strings.h>
-
 #include "config.h"
 #include "debugger.h"
 #include "debugcom.h"

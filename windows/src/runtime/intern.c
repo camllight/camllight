@@ -1,7 +1,6 @@
 /* Structured input, fast format */
 
 #include <string.h>
-
 #include "debugger.h"
 #include "fail.h"
 #include "gc.h"

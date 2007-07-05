@@ -1,7 +1,6 @@
 /* Operations on strings */
 
 #include <string.h>
-
 #include "alloc.h"
 #include "debugger.h"
 #include "mlvalues.h"

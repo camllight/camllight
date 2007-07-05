@@ -5,7 +5,7 @@ INCLUDES=-I ../compiler -I ../linker
 COMPFLAGS=-O fast $(INCLUDES)
 LINKFLAGS=-g $(INCLUDES)
 
-all: dumpsymb dumpobj dumpintf findmsgs clprepro
+all: clprepro dumpsymb dumpobj dumpintf findmsgs
 
 clprepro: clprepro.c
 	cc clprepro.c -o clprepro
