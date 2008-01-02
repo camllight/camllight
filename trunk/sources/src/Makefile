@@ -160,9 +160,8 @@ depend:
 
 package-macosx:
 	sudo rm -rf package-macosx/root
-	make INSTROOT="`pwd`"/package-macosx/root install
+	umask 022; make INSTROOT="`pwd`"/package-macosx/root install
 	tools/make-package-macosx
-	sudo rm -rf package-macosx/root
 
 .PHONY: package-macosx
 
