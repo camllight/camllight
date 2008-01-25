@@ -89,8 +89,8 @@ chmod -R g-w root
 sudo chown -R root:wheel root
 
 /Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker \
-  -build -p "`pwd`/camllight.pkg" -f "`pwd`/root" -i "`pwd`/Info.plist" \
-  -d "`pwd`/Description.plist" -r "`pwd`/resources"
+  -build -p "`pwd`/camllight.pkg" -f "`pwd`/root/usr/local" \
+         -i "`pwd`/Info.plist" -d "`pwd`/Description.plist" -r "`pwd`/resources"
 
 size=`du -s camllight.pkg | cut -f 1`
 size=`expr $size + 8192`
@@ -110,6 +110,7 @@ else
   exit 3
 fi
 open "/Volumes/$volname"
+sleep 2
 hdiutil detach $name
 
 rm -rf "camllight-${VERSION}.dmg"
