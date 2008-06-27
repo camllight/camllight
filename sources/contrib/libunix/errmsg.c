@@ -1,7 +1,6 @@
 #include <mlvalues.h>
 #include <alloc.h>
 
-extern int errno;
 extern int sys_nerr;
 extern char *sys_errlist[];
 
