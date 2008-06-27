@@ -4,18 +4,14 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/param.h>
+#include <stdio.h>
 
 #include <tk.h>
 #include <mlvalues.h>
+#include <str.h>
 #include <alloc.h>
 #include <memory.h>
 #include <fail.h>
-
-#ifdef ANSI
-  extern mlsize_t string_length(value);
-#else
-  extern mlsize_t string_length();
-#endif
 
 /* The Tcl interpretor */
 Tcl_Interp *cltclinterp = NULL;
@@ -189,7 +185,7 @@ value camltk_opentk(display, name) /* ML */
         Tcl_SetVar(cltclinterp, "argc", "2", TCL_GLOBAL_ONLY);
         tkargv[0] = "-display";
         tkargv[1] = String_val(display);
-        args = Tcl_Merge(2, tkargv);
+        args = Tcl_Merge(2, (CONST84 char * CONST *) tkargv);
         Tcl_SetVar(cltclinterp, "argv", args, TCL_GLOBAL_ONLY);
         free(args);
       }
