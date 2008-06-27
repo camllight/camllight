@@ -99,8 +99,10 @@ EMACSLISPDIR=/usr/share/emacs/site-lisp
 #TCLINCLDIR=/usr/local/lib/tcl8.0/include
 #TKINCLDIR=/usr/local/lib/tk8.0/include
 # For Linux, generally
-TCLINCLDIR=/usr/include
-TKINCLDIR=/usr/include
+#TCLINCLDIR=/usr/include/
+#TKINCLDIR=/usr/include/
+TCLINCLDIR=/usr/include/tcl8.4
+TKINCLDIR=/usr/include/tcl8.4
 
 # Name of the directories where the libtcl.a and libtk.a libraries can be found
 # Needed only for the "camltk" package.
@@ -117,7 +119,7 @@ TCLLIBDIR=/usr/lib
 # For True64 Unix
 #TKLIBS=-ltk8.0 -ltcl8.0 -lX11 -lm
 # For Linux generally
-TKLIBS=-ltk8.3 -ltcl8.3 -lX11 -ldl -lm
+TKLIBS=-ltk8.4 -ltcl8.4 -lX11 -ldl -lm
 # Could also be
 #TKLIBS=-ltk -ltcl -lX11
 
