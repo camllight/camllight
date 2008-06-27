@@ -269,7 +269,7 @@ void unix_error(errcode, cmdname, cmdarg)
   mlraise(res);
 }
 
-extern int errno;
+extern int errno; /* Some people have it in errno.h some don't... */
 
 void uerror(cmdname, cmdarg)
      char * cmdname;

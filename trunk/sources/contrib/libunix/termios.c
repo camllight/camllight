@@ -7,6 +7,8 @@
 #include <termios.h>
 #include <errno.h>
 
+extern int errno; /* Some people have it in errno.h some don't... */
+
 static struct termios terminal_status;
 
 enum { Bool, Enum, Speed, Char, End };
