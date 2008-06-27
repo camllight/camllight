@@ -1,3 +1,13 @@
+Caml Light 0.80:
+----------------
+
+* License is modified: it is now the same as Objective Caml compler's one.
+
+* Warnings in C code have been eliminated.
+
+* Standard library:
+  - module float: long standing bug in the implementation of sinh is removed.
+
 Caml Light 0.77:
 ---------------
 
