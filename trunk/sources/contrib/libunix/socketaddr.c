@@ -5,6 +5,8 @@
 #include <errno.h>
 #include "unix.h"
 
+extern int errno; /* Some people have it in errno.h some don't... */
+
 #ifdef HAS_SOCKETS
 
 #include "socketaddr.h"

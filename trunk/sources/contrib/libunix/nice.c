@@ -1,7 +1,8 @@
 #include <mlvalues.h>
 #include "unix.h"
+#include <errno.h>
 
-extern int errno;
+extern int errno; /* Some people have it in errno.h some don't... */
 
 #ifdef HAS_GETPRIORITY
 
