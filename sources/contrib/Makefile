@@ -105,8 +105,9 @@ X11_LIB=/usr/X11R6/lib
 # See the file libnum/README for more explanations.
 # If you don't know, leave BIGNUM_ARCH=C, which selects a portable
 # C implementation of these routines.
-#BIGNUM_ARCH=C
-BIGNUM_ARCH=pentium
+# For MacOSX:
+BIGNUM_ARCH=C
+#BIGNUM_ARCH=pentium
 
 #(3.4) Needed only for the "camltk" package.
 
@@ -115,11 +116,11 @@ BIGNUM_ARCH=pentium
 #TCLINCLDIR=/usr/local/lib/tcl8.0/include
 #TKINCLDIR=/usr/local/lib/tk8.0/include
 # For Linux, generally
-#TCLINCLDIR=/usr/include
-#TKINCLDIR=/usr/include
+TCLINCLDIR=/usr/include
+TKINCLDIR=/usr/include
 # For *BSD
-TCLINCLDIR=/usr/local/include/tcl8.4
-TKINCLDIR=/usr/local/include/tk8.4
+#TCLINCLDIR=/usr/local/include/tcl8.4
+#TKINCLDIR=/usr/local/include/tk8.4
 
 #(3.4.2) Name of the directories where the libtcl.a and libtk.a libraries can be found
 # Needed only for the "camltk" package.
@@ -143,8 +144,10 @@ TCLLIBDIR=/usr/local/lib
 # Could also be
 #TKLIBS=-ltk -ltcl -lX11
 #TKLIBS=-ltk8.4 -ltcl8.4 -lX11 -ldl -lm
+#TKLIBS=-ltk8.5 -ltcl8.5 -lX11 -ldl -lm
 # For *BSD
-TKLIBS=-ltk84 -ltcl84 -lX11
+#TKLIBS=-ltk84 -ltcl84 -lX11
+TKLIBS=-ltk85 -ltcl85 -lX11
 
 #(4) Where to install the text files for LaTeX and emacs.
 
