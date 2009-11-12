@@ -1,3 +1,6 @@
+Caml Light 0.81:
+----------------
+
 * 2009-11-09: fixed segfault bug (in 64 bits) in function text_size
 
 * 2009-11-09: fixed segfault in compilation with gcc-4.3 (in 64 bits)
