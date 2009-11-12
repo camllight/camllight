@@ -300,6 +300,11 @@ if sh hasgot gettimeofday; then
   echo "#define HAS_GETTIMEOFDAY" >> s.h
 fi
 
+if sh hasgot strerror; then
+  echo "strerror() found."
+  echo "#define HAS_STRERROR" >> s.h
+fi
+
 rm -f tst hasgot.c
 rm -f ../m.h ../s.h
 mv m.h s.h ..
