@@ -1,3 +1,6 @@
+* 2009-11-13: contrib/libunix/errmsg.c, change obsolete sys_errlist and
+              sys_nerr use to strerror call using HAS_STRERROR flag.
+
 Caml Light 0.81:
 ----------------
 
