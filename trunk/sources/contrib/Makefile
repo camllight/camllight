@@ -74,11 +74,11 @@ MANDIR=/usr/local/man/man$(MANEXT)
 # For True64 Unix
 #X11_INCLUDES=/usr/include/X11
 # For Linux, generally
-X11_INCLUDES=/usr/X11R6/include/X11
+#X11_INCLUDES=/usr/X11R6/include/X11
 # For *BSD, should be
 #X11_INCLUDES=/usr/local/include/X11
 # For *BSD or Linux, could also be
-#X11_INCLUDES=/usr/X11R6/include/
+X11_INCLUDES=/usr/X11R7/include/
 
 #(3.2) Needed for the "libgraph" and "camltk" packages: path to libX11.a.
 
@@ -87,11 +87,11 @@ X11_INCLUDES=/usr/X11R6/include/X11
 # For True64 Unix
 #X11_LIB=/usr/lib/X11
 # For Linux, generally
-X11_LIB=/usr/X11R6/lib
+#X11_LIB=/usr/X11R6/lib
 # For *BSD, should be
-#X11_INCLUDES=/usr/local/lib/X11
+#X11_LIB=/usr/local/lib/X11
 # For *BSD or Linux, could also be
-#X11_INCLUDES=/usr/X11R6/lib/
+X11_LIB=/usr/X11R7/lib/
 
 #(3.3) Needed for the libnum library (arbitrary-precision arithmetic).
 
@@ -116,11 +116,15 @@ BIGNUM_ARCH=C
 #TCLINCLDIR=/usr/local/lib/tcl8.0/include
 #TKINCLDIR=/usr/local/lib/tk8.0/include
 # For Linux, generally
-TCLINCLDIR=/usr/include
-TKINCLDIR=/usr/include
+#TCLINCLDIR=/usr/include
+#TKINCLDIR=/usr/include
+# For NetBSD
+TCLINCLDIR=/usr/pkg/include/
+TKINCLDIR=/usr/pkg/include/
 # For *BSD
 #TCLINCLDIR=/usr/local/include/tcl8.4
 #TKINCLDIR=/usr/local/include/tk8.4
+
 
 #(3.4.2) Name of the directories where the libtcl.a and libtk.a libraries can be found
 # Needed only for the "camltk" package.
@@ -131,9 +135,12 @@ TKINCLDIR=/usr/include
 # For Linux, generally
 #TKLIBDIR=/usr/lib
 #TCLLIBDIR=/usr/lib
+# For NetBSD, generally
+TKLIBDIR=/usr/pkg/lib
+TCLLIBDIR=/usr/pkg/lib
 # For *BSD, generally
-TKLIBDIR=/usr/local/lib
-TCLLIBDIR=/usr/local/lib
+#TKLIBDIR=/usr/local/lib
+#TCLLIBDIR=/usr/local/lib
 
 #(3.4.3) List of libraries required to link Tcl/Tk. This may help if you have
 # a custom Tcl/Tk with various extensions (such as Xpm)
@@ -145,9 +152,12 @@ TCLLIBDIR=/usr/local/lib
 #TKLIBS=-ltk -ltcl -lX11
 #TKLIBS=-ltk8.4 -ltcl8.4 -lX11 -ldl -lm
 #TKLIBS=-ltk8.5 -ltcl8.5 -lX11 -ldl -lm
+# For NetBSD
+TKLIBS=-ltk84 -ltcl84 -lX11
 # For *BSD
 #TKLIBS=-ltk84 -ltcl84 -lX11
-TKLIBS=-ltk85 -ltcl85 -lX11
+# Orelse
+#TKLIBS=-ltk85 -ltcl85 -lX11
 
 #(4) Where to install the text files for LaTeX and emacs.
 
@@ -159,7 +169,9 @@ TKLIBS=-ltk85 -ltcl85 -lX11
 # For True64 Unix
 #TEXINPUTDIR=/usr/local/teTeX/share/texmf/tex/latex/misc
 # For Linux, generally
-TEXINPUTDIR=/usr/share/texmf/tex/latex/misc
+#TEXINPUTDIR=/usr/share/texmf/tex/latex/misc
+# For NetBSD
+TEXINPUTDIR=/usr/pkg/share/texmf-dist/tex/latex/
 
 #(4.2) Name of the directory where Emacs Lisp files should be installed.
 
@@ -168,7 +180,9 @@ TEXINPUTDIR=/usr/share/texmf/tex/latex/misc
 # For True64 Unix
 #EMACSLISPDIR=/usr/local/lib/emacs/site-lisp
 # For Linux, generally
-EMACSLISPDIR=/usr/share/emacs/site-lisp
+#EMACSLISPDIR=/usr/share/emacs/site-lisp
+# For NetBSD
+EMACSLISPDIR=/usr/pkg/share/emacs/site-lisp
 
 #(5) Makefile trickery, in case make does not use the right shell flavor.
 
