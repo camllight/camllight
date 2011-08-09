@@ -260,6 +260,18 @@ have caml-electric-indent on, which see.")
 
 ;;; The major mode
 
+(defvar caml-last-comment-start)
+(make-variable-buffer-local 'caml-last-comment-start)
+
+(defvar caml-last-comment-end)
+(make-variable-buffer-local 'caml-last-comment-end)
+
+(defvar caml-last-noncomment-pos)
+(make-variable-buffer-local 'caml-last-noncomment-pos)
+
+(defvar before-change-function)
+(make-variable-buffer-local 'before-change-function)
+
 (defun caml-mode ()
   "Major mode for editing Caml code.
 
@@ -396,10 +408,10 @@ possible."
 	   (goto-char (window-point (get-buffer-window (current-buffer))))
 	   (if (looking-at caml-error-chars-regexp)
 	       (setq beg
-		     (string-to-int
+		     (string-to-number
 		      (buffer-substring (match-beginning 1) (match-end 1)))
 		     end
-		     (string-to-int
+		     (string-to-number
 		      (buffer-substring (match-beginning 2) (match-end 2)))))))
        (cond (beg
 	      (setq beg (+ (point) beg)
@@ -468,10 +480,6 @@ stuff written for indentation."
 
 (defvar caml-last-comment-end nil
   "A marker caching last determined caml comment end.")
-(make-variable-buffer-local 'caml-last-comment-end)
-
-(make-variable-buffer-local 'before-change-function)
-
 (defun caml-overlap (b1 e1 b2 e2)
   (<= (max b1 b2) (min e1 e2)))
 
