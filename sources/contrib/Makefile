@@ -17,14 +17,42 @@
 
 #(0) Which packages to compile and install.
 
+# The set of available packages are listed in sub sets of increasing complexity:
+# - packages in TEXT_PACKAGES do not require compilation,
+# - packages in CAML_ONLY_PACKAGES need a proper Caml compiler installation,
+# - packages in CAML_PACKAGES are Caml programs that also require some C compilation,
+# - packages in X11_PACKAGES require interfacing and linking with the X11 windows system,
+# - packages in TK_PACKAGES require interfacing and linking with the X11 windows system
+#   and the Tcl/Tk library.
+#
 # See the file INDEX for a description of the packages and their requirements.
-# Remember that "libunix" is required for
-# "debugger", "libgraph", "camltk", "camltk4", and "search_isos".
-PACKAGES=libunix libgraph debugger libnum libstr mletags \
-  camlmode lorder profiler camltk4 camlsearch caml-tex
+# Note that the package "libunix" is required for the packages:
+# "debugger", "libgraph", "camltk4", "mletags", and "camlsearch".
 
-# By default caml-latex2e is not installed:
-# you have to choose between caml-tex and caml-latex2e
+TEXT_PACKAGES=camlmode caml-tex
+CAML_ONLY_PACKAGES=libnum libstr lorder
+CAML_PACKAGES=libunix debugger camlsearch mletags profiler
+X11_PACKAGES=libgraph
+TK_PACKAGES=camltk4
+
+# All architectures should support the following:
+# PACKAGES=$(TEXT_PACKAGES)
+# All reasonable architectures should support the following:
+# PACKAGES=$(TEXT_PACKAGES) $(CAML_ONLY_PACKAGES)
+# All Unix platforms should support the following:
+# PACKAGES=$(TEXT_PACKAGES) $(CAML_ONLY_PACKAGES) $(CAML_PACKAGES)
+# All Unix platforms with a correct installation for X Windows should also support
+# the following:
+# PACKAGES=\
+#  $(TEXT_PACKAGES) $(CAML_ONLY_PACKAGES) $(CAML_PACKAGES) $(X11_PACKAGES)
+# All Unix platforms with a correct installation of X and Tcl/Tk library
+# should support the entire collection of packages:
+# PACKAGES=\
+#  $(TEXT_PACKAGES) $(CAML_ONLY_PACKAGES) $(CAML_PACKAGES) $(X11_PACKAGES) $(TK_PACKAGES)
+#
+# Your setting:
+PACKAGES=\
+ $(TEXT_PACKAGES) $(CAML_ONLY_PACKAGES) $(CAML_PACKAGES) $(X11_PACKAGES) $(TK_PACKAGES)
 
 #(1) Which C compiler to use with which flags.
 
@@ -72,26 +100,40 @@ MANDIR=/usr/local/man/man$(MANEXT)
 # for instance libX11.h.
 # (usually /usr/include; for SunOS with OpenLook, /usr/openwin/include)
 # For True64 Unix
-#X11_INCLUDES=/usr/include/X11
+# X11_INCLUDES=/usr/include/X11
 # For Linux, generally
-#X11_INCLUDES=/usr/X11R6/include/X11
+# X11_INCLUDES=/usr/X11R6/include/X11
 # For *BSD, should be
-#X11_INCLUDES=/usr/local/include/X11
+# X11_INCLUDES=/usr/local/include/X11
 # For *BSD or Linux, could also be
-X11_INCLUDES=/usr/X11R7/include/
+# X11_INCLUDES=/usr/X11R6/include/
+# For OpenBSD
+# X11_INCLUDES=/usr/X11R6/include/
+# For NetBSD or Linux, could also be
+# X11_INCLUDES=/usr/X11R7/include/
+#
+# Your setting:
+X11_INCLUDES=/usr/X11R6/include/
 
 #(3.2) Needed for the "libgraph" and "camltk" packages: path to libX11.a.
 
 # The path to the directory containing the X11 libraries, for instance
 # libX11.a (usually /usr/lib; for SunOS with OpenLook, /usr/openwin/lib)
 # For True64 Unix
-#X11_LIB=/usr/lib/X11
+# X11_LIB=/usr/lib/X11
 # For Linux, generally
-#X11_LIB=/usr/X11R6/lib
+# X11_LIB=/usr/X11R6/lib
 # For *BSD, should be
-#X11_LIB=/usr/local/lib/X11
+# X11_LIB=/usr/local/lib/X11
 # For *BSD or Linux, could also be
-X11_LIB=/usr/X11R7/lib/
+# X11_LIB=/usr/X11R6/lib/
+# For OpenBSD
+# X11_LIB=/usr/X11R6/lib/
+# For NetBSD
+# X11_LIB=/usr/X11R7/lib/
+#
+# Your setting:
+X11_LIB=/usr/X11R6/lib/
 
 #(3.3) Needed for the libnum library (arbitrary-precision arithmetic).
 
@@ -105,59 +147,79 @@ X11_LIB=/usr/X11R7/lib/
 # See the file libnum/README for more explanations.
 # If you don't know, leave BIGNUM_ARCH=C, which selects a portable
 # C implementation of these routines.
+# BIGNUM_ARCH=C
+# BIGNUM_ARCH=pentium
 # For MacOSX:
+# BIGNUM_ARCH=C
+#
+# Your setting:
 BIGNUM_ARCH=C
-#BIGNUM_ARCH=pentium
 
 #(3.4) Needed only for the "camltk" package.
 
 #(3.4.1) Name of the directories where the tcl.h and tk.h includes can be found.
 # For True64 Unix
-#TCLINCLDIR=/usr/local/lib/tcl8.0/include
-#TKINCLDIR=/usr/local/lib/tk8.0/include
+# TCLINCLDIR=/usr/local/lib/tcl8.0/include
+# TKINCLDIR=/usr/local/lib/tk8.0/include
 # For Linux, generally
-#TCLINCLDIR=/usr/include
-#TKINCLDIR=/usr/include
+# TCLINCLDIR=/usr/include
+# TKINCLDIR=/usr/include
+# For *BSD, generally
+# TCLINCLDIR=/usr/local/include/tcl8.4
+# TKINCLDIR=/usr/local/include/tk8.4
+# For OpenBSD
+# TCLINCLDIR=/usr/local/include/tcl8.5
+# TKINCLDIR=/usr/local/include/tk8.5
 # For NetBSD
-TCLINCLDIR=/usr/pkg/include/
-TKINCLDIR=/usr/pkg/include/
-# For *BSD
-#TCLINCLDIR=/usr/local/include/tcl8.4
-#TKINCLDIR=/usr/local/include/tk8.4
-
+# TCLINCLDIR=/usr/pkg/include/
+# TKINCLDIR=/usr/pkg/include/
+#
+# Your setting:
+TCLINCLDIR=/usr/local/include/tcl8.5
+TKINCLDIR=/usr/local/include/tk8.5
 
 #(3.4.2) Name of the directories where the libtcl.a and libtk.a libraries can be found
 # Needed only for the "camltk" package.
 # /usr/local configuration
 # For True64 Unix
-#TKLIBDIR=/usr/local/lib/tk8.0/lib
-#TCLLIBDIR=/usr/local/lib/tcl8.0/lib
+# TKLIBDIR=/usr/local/lib/tk8.0/lib
+# TCLLIBDIR=/usr/local/lib/tcl8.0/lib
 # For Linux, generally
-#TKLIBDIR=/usr/lib
-#TCLLIBDIR=/usr/lib
-# For NetBSD, generally
-TKLIBDIR=/usr/pkg/lib
-TCLLIBDIR=/usr/pkg/lib
+# TKLIBDIR=/usr/lib
+# TCLLIBDIR=/usr/lib
 # For *BSD, generally
-#TKLIBDIR=/usr/local/lib
-#TCLLIBDIR=/usr/local/lib
+# TKLIBDIR=/usr/local/lib
+# TCLLIBDIR=/usr/local/lib
+# For OpenBSD
+# TKLIBDIR=/usr/local/lib
+# TCLLIBDIR=/usr/local/lib
+# For NetBSD, generally
+# TKLIBDIR=/usr/pkg/lib
+# TCLLIBDIR=/usr/pkg/lib
+#
+# Your setting:
+TKLIBDIR=/usr/local/lib
+TCLLIBDIR=/usr/local/lib
 
 #(3.4.3) List of libraries required to link Tcl/Tk. This may help if you have
 # a custom Tcl/Tk with various extensions (such as Xpm)
 # For True64 Unix
-#TKLIBS=-ltk8.0 -ltcl8.0 -lX11 -lm
+# TKLIBS=-ltk8.0 -ltcl8.0 -lX11 -lm
 # For Linux generally
-#TKLIBS=-ltk84 -ltcl84 -lX11 -ldl -lm
-# Could also be
-#TKLIBS=-ltk -ltcl -lX11
-#TKLIBS=-ltk8.4 -ltcl8.4 -lX11 -ldl -lm
-#TKLIBS=-ltk8.5 -ltcl8.5 -lX11 -ldl -lm
-# For NetBSD
-TKLIBS=-ltk84 -ltcl84 -lX11
+# TKLIBS=-ltk84 -ltcl84 -lX11 -ldl -lm
+# Could also be one of
+# TKLIBS=-ltk -ltcl -lX11
+# TKLIBS=-ltk8.4 -ltcl8.4 -lX11 -ldl -lm
+# TKLIBS=-ltk8.5 -ltcl8.5 -lX11 -ldl -lm
 # For *BSD
-#TKLIBS=-ltk84 -ltcl84 -lX11
-# Orelse
-#TKLIBS=-ltk85 -ltcl85 -lX11
+# TKLIBS=-ltk84 -ltcl84 -lX11
+# For OpenBSD
+# TKLIBS=-ltk85 -ltcl85 -lX11
+# For NetBSD
+# TKLIBS=-ltk84 -ltcl84 -lX11
+#
+# Your setting:
+TKLIBS=-ltk85 -ltcl85 -lX11
 
 #(4) Where to install the text files for LaTeX and emacs.
 
@@ -167,22 +229,32 @@ TKLIBS=-ltk84 -ltcl84 -lX11
 # a lot of auxilliary styles (.sty files).
 # Needed only for the "caml-tex" and "caml-latex2e" packages.
 # For True64 Unix
-#TEXINPUTDIR=/usr/local/teTeX/share/texmf/tex/latex/misc
+# TEXINPUTDIR=/usr/local/teTeX/share/texmf/tex/latex/misc
 # For Linux, generally
-#TEXINPUTDIR=/usr/share/texmf/tex/latex/misc
+# TEXINPUTDIR=/usr/share/texmf/tex/latex/misc
+# For OpenBSD
+# TEXINPUTDIR=/usr/local/share/texmf-dist/tex/latex
 # For NetBSD
-TEXINPUTDIR=/usr/pkg/share/texmf-dist/tex/latex/
+# TEXINPUTDIR=/usr/pkg/share/texmf-dist/tex/latex/
+#
+# Your setting:
+TEXINPUTDIR=/usr/local/share/texmf-dist/tex/latex
 
 #(4.2) Name of the directory where Emacs Lisp files should be installed.
 
 # Needed only for the "camlmode" package. The location of the
 # site-lisp sub-directory.
 # For True64 Unix
-#EMACSLISPDIR=/usr/local/lib/emacs/site-lisp
+# EMACSLISPDIR=/usr/local/lib/emacs/site-lisp
 # For Linux, generally
-#EMACSLISPDIR=/usr/share/emacs/site-lisp
+# EMACSLISPDIR=/usr/share/emacs/site-lisp
+# For OpenBSD
+# EMACSLISPDIR=/usr/local/share/emacs/site-lisp
 # For NetBSD
-EMACSLISPDIR=/usr/pkg/share/emacs/site-lisp
+# EMACSLISPDIR=/usr/pkg/share/emacs/site-lisp
+#
+# Your setting:
+EMACSLISPDIR=/usr/local/share/emacs/site-lisp
 
 #(5) Makefile trickery, in case make does not use the right shell flavor.
 
@@ -193,30 +265,30 @@ SHELL=/bin/sh
 
 ### End of configuration section
 
-SUBDIRS=libunix libgraph debugger libnum libstr mletags \
-  caml-tex camlmode lorder profiler camltk4 camlsearch
+SUBDIRS=\
+ libunix libgraph debugger libnum libstr mletags\
+ caml-tex camlmode lorder profiler camltk4 camlsearch
 
 DEFINES=\
-  CC='$(CC)' \
-  OPTS='$(OPTS)' \
-  CPP='$(CPP)' \
-  RANLIBTEST='$(RANLIBTEST)' \
-  RANLIB='$(RANLIB)' \
-  BINDIR='$(BINDIR)' \
-  LIBDIR='$(LIBDIR)' \
-  MANDIR='$(MANDIR)' \
-  MANEXT='$(MANEXT)' \
-  X11_INCLUDES='$(X11_INCLUDES)' \
-  X11_LIB='$(X11_LIB)' \
-  BIGNUM_ARCH='$(BIGNUM_ARCH)' \
-  TEXINPUTDIR='$(TEXINPUTDIR)' \
-  EMACSLISPDIR='$(EMACSLISPDIR)' \
-  TCLINCLDIR='$(TCLINCLDIR)' \
-  TKINCLDIR='$(TKINCLDIR)' \
-  TKLIBDIR='$(TKLIBDIR)' \
-  TCLLIBDIR='$(TCLLIBDIR)' \
-  TKLIBS='$(TKLIBS)'
-
+ CC='$(CC)'\
+ OPTS='$(OPTS)'\
+ CPP='$(CPP)'\
+ RANLIBTEST='$(RANLIBTEST)'\
+ RANLIB='$(RANLIB)'\
+ BINDIR='$(BINDIR)'\
+ LIBDIR='$(LIBDIR)'\
+ MANDIR='$(MANDIR)'\
+ MANEXT='$(MANEXT)'\
+ X11_INCLUDES='$(X11_INCLUDES)'\
+ X11_LIB='$(X11_LIB)'\
+ BIGNUM_ARCH='$(BIGNUM_ARCH)'\
+ TEXINPUTDIR='$(TEXINPUTDIR)'\
+ EMACSLISPDIR='$(EMACSLISPDIR)'\
+ TCLINCLDIR='$(TCLINCLDIR)'\
+ TKINCLDIR='$(TKINCLDIR)'\
+ TKLIBDIR='$(TKLIBDIR)'\
+ TCLLIBDIR='$(TCLLIBDIR)'\
+ TKLIBS='$(TKLIBS)'
 
 # Compile everything
 all:
@@ -233,4 +305,3 @@ clean:
 # Rebuild the dependencies
 depend:
 	@set +e; set -x; for d in $(SUBDIRS); do (cd $$d; $(MAKE) $(DEFINES) depend); done
-
