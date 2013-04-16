@@ -5,6 +5,19 @@
 #include "freelist.h"
 #include "misc.h"
 
+#ifdef __STDC__
+#include <limits.h>
+#else
+#ifdef CAML_SIXTYFOUR
+#define LONG_MAX 0x7FFFFFFFFFFFFFFF
+#define ULONG_MAX 0xFFFFFFFFFFFFFFFF
+#else
+#define LONG_MAX 0x7FFFFFFF
+#define ULONG_MAX 0xFFFFFFFF
+#endif
+#endif
+
+
 typedef struct {
   asize_t size;
   char *next;
@@ -20,21 +33,20 @@ extern unsigned long extra_heap_memory;
 extern char *heap_start;
 extern char *heap_end;
 extern unsigned long total_heap_size;
-extern char *page_table;
+extern unsigned long *page_table;
+extern unsigned long lg_page_table;
+extern int bout_page_table;
 extern asize_t page_table_size;
 extern char *gc_sweep_hp;
+extern int is_in_heap();
 
-#define In_heap 1
-#define Not_in_heap 0
+#define Is_in_heap(p) (is_in_heap((p)))
+
 #ifndef SIXTEEN
 #define Page(p) (((addr) (p) - (addr) heap_start) >> Page_log)
-#define Is_in_heap(p) \
-  ((addr)(p) >= (addr)heap_start && (addr)(p) < (addr)heap_end \
-   && page_table [Page (p)] == In_heap)
 #else
 #define Page(p) \
   (((unsigned long)(p) >> (16 + Page_log - 4)) + ((unsigned)(p) >> Page_log))
-#define Is_in_heap(p) (page_table [Page (p)] == In_heap)
 #endif
 
 void init_major_heap P((asize_t));

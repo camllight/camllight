@@ -14,20 +14,11 @@
 #include <Memory.h>
 #endif
 
-#ifdef __STDC__
-#include <limits.h>
-#else
-#ifdef CAML_SIXTYFOUR
-#define LONG_MAX 0x7FFFFFFFFFFFFFFF
-#else
-#define LONG_MAX 0x7FFFFFFF
-#endif
-#endif
-
 int percent_free;
 long major_heap_increment;
 char *heap_start, *heap_end;
-char *page_table;
+unsigned long *page_table;
+int bout_page_table;
 asize_t page_table_size;
 char *gc_sweep_hp;
 int gc_phase;
@@ -281,21 +272,18 @@ void init_major_heap (heap_size)
   (((heap_chunk_head *) heap_start) [-1]).next = NULL;
   heap_end = heap_start + stat_heap_size;
   Assert ((unsigned long) heap_end % Page_size == 0);
-#ifdef SIXTEEN
-  page_table_size = 640L * 1024L / Page_size + 1;
-#else
-  page_table_size = 4 * stat_heap_size / Page_size;
-#endif
-  page_table = (char *) xmalloc (page_table_size);
+  /* on initialise la gestion des pages, suite de deux adresses debut,fin */
+  page_table = (unsigned long *) xmalloc (2*NB_PAGE_TABLES*sizeof(unsigned long));
+  bout_page_table =2;
   if (page_table == NULL){
     fatal_error ("Fatal error: not enough memory for the initial heap.\n");
   }
-  for (i = 0; i < page_table_size; i++){
-    page_table [i] = Not_in_heap;
+  for (i = 0; i < NB_PAGE_TABLES; i++){
+    page_table [2*i] = ULONG_MAX;
+    page_table [2*i+1] = ULONG_MAX;
   }
-  for (i = Page (heap_start); i < Page (heap_end); i++){
-    page_table [i] = In_heap;
-  }
+  page_table[0] = Page(heap_start);
+  page_table[1] = Page(heap_end);
   Hd_hp (heap_start) = Make_header (Wosize_bhsize (stat_heap_size), 0, Blue);
   fl_init_merge ();
   fl_merge_block (Bp_hp (heap_start));
