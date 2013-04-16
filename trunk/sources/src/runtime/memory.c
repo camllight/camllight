@@ -25,6 +25,7 @@ static char *expand_heap (request)
   asize_t new_page_table_size;
   asize_t malloc_request;
   asize_t i, more_pages;
+  unsigned long ind,indins,page_deb,page_fin,pd,pf;
 
   malloc_request = round_heap_chunk_size (Bhsize_wosize (request));
   gc_message ("Growing heap to %ldk\n",
@@ -40,65 +41,62 @@ static char *expand_heap (request)
   Assert (Wosize_bhsize (malloc_request) >= request);
   Hd_hp (mem) = Make_header (Wosize_bhsize (malloc_request), 0, Blue);
 
-#ifndef SIXTEEN
+  /* Tout ce qui suit a été refait */
+
+  page_deb = Page(mem);
+  page_fin = Page (mem + malloc_request);
+  more_pages = page_fin - page_deb;
+
+  indins = 0;
+  if (mem >= heap_start) while (page_table[indins] < page_deb) indins=indins+2;
+  for (ind = bout_page_table;ind > indins;ind=ind-2) 
+    {
+      page_table[ind]=page_table[ind-2];
+      page_table[ind+1]=page_table[ind-1];
+    }
+  bout_page_table =bout_page_table+2;
+  page_table[indins] = page_deb;
+  page_table[indins+1] = page_fin;
+
+  if (mem < heap_start)
+    {
+      for (ind=1;ind<2*bout_page_table;ind++)
+	{
+	  if (page_table[ind] < ULONG_MAX) page_table[ind] = page_table[ind] - page_table[0];
+	}
+     page_table[0]=0;
+    }
+
+  /*Là on a fini de mettre à jour la table des pages 
+    mis en place des entêtes */
+
+
+  #ifndef SIXTEEN    
   if (mem < heap_start){
-    more_pages = -Page (mem);
-  }else if (Page (mem + malloc_request) > page_table_size){
-    Assert (mem >= heap_end);
-    more_pages = Page (mem + malloc_request) - page_table_size;
-  }else{
-    more_pages = 0;
-  }
-
-  if (more_pages != 0){
-    new_page_table_size = page_table_size + more_pages;
-    new_page_table = (char *) xmalloc (new_page_table_size);
-    if (new_page_table == NULL){
-      gc_message ("No room for growing page table\n", 0);
-      xfree (mem);
-      return NULL;
-    }
-  }
-
-  if (mem < heap_start){
-    Assert (more_pages != 0);
-    for (i = 0; i < more_pages; i++){
-      new_page_table [i] = Not_in_heap;
-    }
-    memmove (new_page_table + more_pages, page_table, page_table_size);
-    (((heap_chunk_head *) mem) [-1]).next = heap_start;
-    heap_start = mem;
-  }else{
-    char **last;
-    char *cur;
-
-    if (mem >= heap_end) heap_end = mem + malloc_request;
-    if (more_pages != 0){
-      for (i = page_table_size; i < new_page_table_size; i++){
-        new_page_table [i] = Not_in_heap;
-      }
-      memmove (new_page_table, page_table, page_table_size);
-    }
-    last = &heap_start;
-    cur = *last;
-    while (cur != NULL && cur < mem){
-      last = &((((heap_chunk_head *) cur) [-1]).next);
+      (((heap_chunk_head *) mem) [-1]).next = heap_start;
+      heap_start = mem;
+  } else {
+      char **last;
+      char *cur;
+      
+      if (mem >= heap_end) heap_end = mem + malloc_request;
+      last = &heap_start;
       cur = *last;
-    }
-    (((heap_chunk_head *) mem) [-1]).next = cur;
-    *last = mem;
+      while (cur != NULL && cur < mem){
+	  last = &((((heap_chunk_head *) cur) [-1]).next);
+	  cur = *last;
+      }
+      (((heap_chunk_head *) mem) [-1]).next = cur;
+      *last = mem;
   }
+      
+  #else
 
-  if (more_pages != 0){
-    xfree (page_table);
-    page_table = new_page_table;
-    page_table_size = new_page_table_size;
-  }
-#else                           /* Simplified version for the 8086 */
+  /* Simplified version for the 8086 */
   {
     char **last;
     char *cur;
-
+    
     last = &heap_start;
     cur = *last;
     while (cur != NULL && (char huge *) cur < (char huge *) mem){
@@ -108,14 +106,35 @@ static char *expand_heap (request)
     (((heap_chunk_head *) mem) [-1]).next = cur;
     *last = mem;
   }
-#endif
+#endif   
 
-  for (i = Page (mem); i < Page (mem + malloc_request); i++){
-    page_table [i] = In_heap;
-  }
+/* fin de la modification */
+
+
   stat_heap_size += malloc_request;
   return Bp_hp (mem);
 }
+
+int is_in_heap(p) 
+  addr p;
+{
+int ind;
+unsigned long page;
+  if  ((addr)(p) >= (addr)heap_start && (addr)(p) < (addr)heap_end) {
+      ind = 0;
+      page=Page(p);
+      while (page_table[ind] <= page) 
+	{
+	  ind=ind+2;
+	}
+      ind = ind-2;
+      if (ind == bout_page_table) return(0);
+      return(page < page_table[ind+1]);
+      }
+  else return(0);
+}
+  
+      
 
 value alloc_shr (wosize, tag)
      mlsize_t wosize;

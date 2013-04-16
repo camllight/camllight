@@ -40,6 +40,8 @@ typedef char schar;
 
 /* Memory model parameters */
 
+#define NB_PAGE_TABLES 16384
+
 #if !defined(SMALL) && !defined(SIXTEEN)
 
 /* The size of a page for memory management (in bytes) is [1 << Page_log].

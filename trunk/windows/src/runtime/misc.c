@@ -129,6 +129,7 @@ void memmov (dst, src, length)
 
 #endif /* USING_MEMMOV */
 
+
 char * aligned_malloc (size, modulo)
      asize_t size;
      int modulo;
