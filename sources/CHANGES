@@ -1,3 +1,12 @@
+* 2013-05-17: fix segfault bug during memory allocation (in 64 bits).
+              Change the page_table gestion, before it was a vector
+              having the length given by the difference of the adress
+	      of the pages on top and bottom of memory. Now, a list of
+              number delimiting heap pages plages.
+
+Caml Light 0.82:
+----------------
+
 * 2009-11-13: contrib/libunix/errmsg.c, change obsolete sys_errlist and
               sys_nerr use to strerror call using HAS_STRERROR flag.
 
