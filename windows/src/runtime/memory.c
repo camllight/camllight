@@ -118,19 +118,20 @@ static char *expand_heap (request)
 int search_in_table(p)
 unsigned long p;
 {
-  int ind=0;
-  int res;
-  int i = NB_PAGE_TABLES /2 ;
-  int delta = NB_PAGE_TABLES /4;
-  while (delta > 0) {
-    if (page_table[i] <= p) ind = i;
-    i = ind + delta;
-    delta = delta/2;
-  }
-  /* on a p >=page_table[ind] et p < page_table[2*ind+2] */
-  return(ind/2); 
-}
+  int debut=0;
+  int milieu,fin;
 
+  fin=bout_page_table/2;
+  while (fin-debut > 2) {
+      milieu  = (fin +debut)/2;
+    if (page_table[2*milieu] <= p) debut = milieu;
+    else fin=milieu;
+  }
+  /* on a p >=page_table[2*debut] et p < page_table[2*fin] et fin=debut + 1 ou 2 */
+  if (page_table[2*debut+2] <= p) debut +=1;
+    
+  return(debut); 
+}
 
 int is_in_heap(p) 
   addr p;
