@@ -115,21 +115,32 @@ static char *expand_heap (request)
   return Bp_hp (mem);
 }
 
+int search_in_table(p)
+unsigned long p;
+{
+  int ind=0;
+  int res;
+  int i = NB_PAGE_TABLES /2 ;
+  int delta = NB_PAGE_TABLES /4;
+  while (delta > 0) {
+    if (page_table[i] <= p) ind = i;
+    i = ind + delta;
+    delta = delta/2;
+  }
+  /* on a p >=page_table[ind] et p < page_table[2*ind+2] */
+  return(ind/2); 
+}
+
+
 int is_in_heap(p) 
   addr p;
 {
-int ind;
+int ind,indp,res,resp;
 unsigned long page;
   if  ((addr)(p) >= (addr)heap_start && (addr)(p) < (addr)heap_end) {
       ind = 0;
       page=Page(p);
-      while (page_table[ind] <= page) 
-	{
-	  ind=ind+2;
-	}
-      ind = ind-2;
-      if (ind == bout_page_table) return(0);
-      return(page < page_table[ind+1]);
+      return(page < page_table[2*search_in_table(page)+1]);
       }
   else return(0);
 }
