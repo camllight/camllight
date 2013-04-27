@@ -10,7 +10,7 @@
 #open "fchar";;
 #open "pair";;
 #open "int_misc";;
-#open "nat";;
+#open "fnat";;
 
 type big_int = 
     { Sign : int; 
