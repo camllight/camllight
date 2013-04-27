@@ -1,3 +1,8 @@
+* 2013-05-27: use of fnat instead of nat in big_int.ml beaucause of bug
+
+              let r = big_int_of_string "100 000 000 000 000 000 000 000 000 000 000" ;;
+	      nth_digit_big_int n 0;
+
 * 2013-05-17: fix segfault bug during memory allocation (in 64 bits).
               Change the page_table gestion, before it was a vector
               having the length given by the difference of the adress
