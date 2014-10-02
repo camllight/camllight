@@ -11,7 +11,7 @@
 
 let open_graph arg =
   signal EVENT_SIGNAL (Signal_handle sigio_handler);
-  raw_open_graph arg;;
+  raw_open_graph (" "^arg);;
 
 let close_graph () =
   signal EVENT_SIGNAL Signal_ignore;
