@@ -35,7 +35,7 @@ and type_vars_names = ref ([] : (typ * string) list);;
 let reset_type_var_name () =
   type_vars_counter := 0; type_vars_names := [];;
 
-let name_of_type_var sch var =
+let name_of_typ_var sch var =
   try
     assq var !type_vars_names
   with Not_found ->
@@ -52,7 +52,7 @@ let rec output_typ oc sch priority ty =
   match ty.typ_desc with
     Tvar _ ->
       output_string oc "'";
-      output_string oc (name_of_type_var sch ty)
+      output_string oc (name_of_typ_var sch ty)
   | Tarrow(ty1, ty2) ->
       if priority >= 1 then output_string oc "(";
       output_typ oc sch 1 ty1;
@@ -85,6 +85,8 @@ and output_typ_list oc sch priority sep = function
       output_string oc sep;
       output_typ_list oc sch priority sep rest
 ;;
+
+let name_of_type_var var = name_of_typ_var false var;;
 
 let output_type oc ty = output_typ oc false 0 ty;;
 

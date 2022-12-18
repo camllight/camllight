@@ -1,25 +1,18 @@
 #open "globals";;
 
 value reset_type_var_name : unit -> unit
-  and name_of_type_var : 'a -> string
+  and name_of_type_var : typ -> string
 ;;
 
-value print_constr : 'a global -> unit
-  and print_type_constr : 'a global -> unit
-  and print_value : 'a global -> unit
-  and print_label : 'a global -> unit
+value output_type : out_channel -> typ -> unit
+  and output_one_type : out_channel -> typ -> unit
 ;;
 
-value prerr_constr : 'a global -> unit
-  and prerr_type_constr : 'a global -> unit
-  and prerr_value : 'a global -> unit
-  and prerr_label : 'a global -> unit
+value output_schema : out_channel -> typ -> unit
 ;;
 
-value print_type : typ -> unit
-  and print_one_type : typ -> unit
-;;
-
-value prerr_type : typ -> unit
-  and prerr_one_type : typ -> unit
+value output_type_constr : out_channel -> type_desc global -> unit
+  and output_value : out_channel -> value_desc global -> unit
+  and output_constr : out_channel -> constr_desc global -> unit
+  and output_label : out_channel -> label_desc global -> unit
 ;;

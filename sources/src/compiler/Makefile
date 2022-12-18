@@ -112,7 +112,7 @@ par_aux.zo: error.zo modules.zo location.zi const.zo misc.zo syntax.zo \
 parser.zo: parser.zi primdecl.zo par_aux.zo syntax.zo builtins.zo \
     globals.zo const.zo 
 pr_decl.zo: misc.zo pr_type.zo globals.zo const.zo 
-pr_type.zo: modules.zo globals.zo types.zo const.zo 
+pr_type.zo: pr_type.zi modules.zo globals.zo types.zo const.zo
 prim.zo: const.zo 
 prim_opc.zo: misc.zo prim.zo opcodes.zo 
 primdecl.zo: prim.zo globals.zo 
