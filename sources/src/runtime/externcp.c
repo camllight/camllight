@@ -8,6 +8,7 @@
 #include "memory.h"
 #include "mlvalues.h"
 #include "reverse.h"
+#include "str.h"
 
 static void output_number(chan, code, val, nbits)
      struct channel * chan;

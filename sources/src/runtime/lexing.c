@@ -3,6 +3,7 @@
 #include "mlvalues.h"
 #include "stacks.h"
 #include "str.h"
+#include "interp.h"
 
 struct lexer_buffer {
   value refill_buff;

@@ -1,9 +1,11 @@
 
 #include "defs.h"
-
+#include "error.h"
+#include "verbose.h"
 
 static short *null_rules;
 
+void
 verbose()
 {
     register int i;
@@ -27,7 +29,7 @@ verbose()
     fprintf(verbose_file, "%d grammar rules, %d states\n", nrules - 2, nstates);
 }
 
-
+void
 log_unused()
 {
     register int i;
@@ -46,7 +48,7 @@ log_unused()
     }
 }
 
-
+void
 log_conflicts()
 {
     register int i;
@@ -74,7 +76,7 @@ log_conflicts()
     }
 }
 
-
+void
 print_state(state)
 int state;
 {
@@ -88,7 +90,7 @@ int state;
     print_actions(state);
 }
 
-
+void
 print_conflicts(state)
 int state;
 {
@@ -136,7 +138,7 @@ int state;
     }
 }
 
-
+void
 print_core(state)
 int state;
 {
@@ -172,7 +174,7 @@ int state;
     }
 }
 
-
+void
 print_nulls(state)
 int state;
 {
@@ -216,7 +218,7 @@ int state;
     fprintf(verbose_file, "\n");
 }
 
-
+void
 print_actions(stateno)
 int stateno;
 {
@@ -243,7 +245,7 @@ int stateno;
     }
 }
 
-
+void
 print_shifts(p)
 register action *p;
 {
@@ -268,7 +270,7 @@ register action *p;
     }
 }
 
-
+void
 print_reductions(p, defred)
 register action *p;
 register int defred;
@@ -306,7 +308,7 @@ register int defred;
     }
 }
 
-
+void
 print_gotos(stateno)
 int stateno;
 {

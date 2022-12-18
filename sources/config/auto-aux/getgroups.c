@@ -1,11 +1,12 @@
 #include <sys/types.h>
 #include <sys/param.h>
+#include <unistd.h>
 
 #ifdef NGROUPS
 
 int main()
 {
-  int gidset[NGROUPS];
+  gid_t gidset[NGROUPS];
   if (getgroups(NGROUPS, gidset) == -1) return 1;
   return 0;
 }

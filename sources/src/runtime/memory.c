@@ -21,11 +21,8 @@ static char *expand_heap (request)
      mlsize_t request;
 {
   char *mem;
-  char *new_page_table;
-  asize_t new_page_table_size;
   asize_t malloc_request;
-  asize_t i, more_pages;
-  unsigned long ind,indins,page_deb,page_fin,pd,pf;
+  unsigned long ind,indins,page_deb,page_fin;
 
   malloc_request = round_heap_chunk_size (Bhsize_wosize (request));
   gc_message ("Growing heap to %ldk\n",
@@ -45,7 +42,6 @@ static char *expand_heap (request)
 
   page_deb = Page(mem);
   page_fin = Page (mem + malloc_request);
-  more_pages = page_fin - page_deb;
 
   indins = 0;
   if (mem >= heap_start) while (page_table[indins] < page_deb) indins=indins+2;
@@ -136,10 +132,8 @@ unsigned long p;
 int is_in_heap(p) 
   addr p;
 {
-int ind,indp,res,resp;
 unsigned long page;
   if  ((addr)(p) >= (addr)heap_start && (addr)(p) < (addr)heap_end) {
-      ind = 0;
       page=Page(p);
       return(page < page_table[2*search_in_table(page)+1]);
       }

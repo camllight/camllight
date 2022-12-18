@@ -49,3 +49,8 @@ sources/src/toplevel/expunge
 sources/src/toplevel/pr_value.ml
 sources/src/toplevel/provide
 sources/src/yacc/camlyacc
+compiler/version.ml
+librar/version.ml
+linker/version.ml
+runtime/interp.h
+toplevel/version.ml

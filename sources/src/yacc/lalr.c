@@ -1,4 +1,6 @@
 #include "defs.h"
+#include "error.h"
+#include "lalr.h"
 
 typedef
   struct shorts
@@ -33,7 +35,7 @@ static short *INDEX;
 static short *VERTICES;
 static int top;
 
-
+void
 lalr()
 {
     tokensetsize = WORDSIZE(ntokens);
@@ -51,8 +53,7 @@ lalr()
     compute_lookaheads();
 }
 
-
-
+void
 set_state_table()
 {
     register core *sp;
@@ -62,8 +63,7 @@ set_state_table()
 	state_table[sp->number] = sp;
 }
 
-
-
+void
 set_accessing_symbol()
 {
     register core *sp;
@@ -73,8 +73,7 @@ set_accessing_symbol()
 	accessing_symbol[sp->number] = sp->accessing_symbol;
 }
 
-
-
+void
 set_shift_table()
 {
     register shifts *sp;
@@ -84,8 +83,7 @@ set_shift_table()
 	shift_table[sp->number] = sp;
 }
 
-
-
+void
 set_reduction_table()
 {
     register reductions *rp;
@@ -95,8 +93,7 @@ set_reduction_table()
 	reduction_table[rp->number] = rp;
 }
 
-
-
+void
 set_maxrhs()
 {
   register short *itemp;
@@ -123,8 +120,7 @@ set_maxrhs()
   maxrhs = max;
 }
 
-
-
+void
 initialize_LA()
 {
   register int i, j, k;
@@ -161,7 +157,7 @@ initialize_LA()
     }
 }
 
-
+void
 set_goto_map()
 {
   register shifts *sp;
@@ -258,8 +254,7 @@ int symbol;
     }
 }
 
-
-
+void
 initialize_F()
 {
   register int i;
@@ -335,8 +330,7 @@ initialize_F()
   FREE(edge);
 }
 
-
-
+void
 build_relations()
 {
   register int i;
@@ -428,7 +422,7 @@ build_relations()
   FREE(states);
 }
 
-
+void
 add_lookback_edge(stateno, ruleno, gotono)
 int stateno, ruleno, gotono;
 {
@@ -453,8 +447,6 @@ int stateno, ruleno, gotono;
     sp->value = gotono;
     lookback[i] = sp;
 }
-
-
 
 short **
 transpose(R, n)
@@ -512,14 +504,13 @@ int n;
   return (new_R);
 }
 
-
-
+void
 compute_FOLLOWS()
 {
   digraph(includes);
 }
 
-
+void
 compute_lookaheads()
 {
   register int i, n;
@@ -553,7 +544,7 @@ compute_lookaheads()
   FREE(F);
 }
 
-
+void
 digraph(relation)
 short **relation;
 {
@@ -579,8 +570,7 @@ short **relation;
   FREE(VERTICES);
 }
 
-
-
+void
 traverse(i)
 register int i;
 {

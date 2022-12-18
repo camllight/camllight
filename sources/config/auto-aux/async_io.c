@@ -3,6 +3,9 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
 #include "s.h"
 
 int signalled;

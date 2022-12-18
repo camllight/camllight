@@ -1,5 +1,6 @@
 #include "defs.h"
 
+void
 transitive_closure(R, n)
 unsigned *R;
 int n;
@@ -53,6 +54,7 @@ int n;
     }
 }
 
+void
 reflexive_transitive_closure(R, n)
 unsigned *R;
 int n;

@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <signal.h>
+#include <unistd.h>
 
 /* Find a signal that is ignored by default */
 

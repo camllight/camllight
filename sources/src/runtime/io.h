@@ -36,15 +36,29 @@ struct channel {
    ? refill(channel)                                                          \
    : (unsigned char) *((channel))->curr++)
 
-struct channel * open_descr P((int));
-value flush P((struct channel *));
-void putword P((struct channel *, uint32));
-void putblock P((struct channel *, char *, unsigned));
-unsigned char refill P((struct channel *));
-uint32 getword P((struct channel *));
-unsigned getblock P((struct channel *, char *, unsigned));
-int really_getblock P((struct channel *, char *, unsigned long));
-value close_in P((struct channel *));
-
+struct channel *open_descr(int fd);
+value open_descriptor(value fd);
+value channel_descriptor(struct channel *channel);
+value channel_size(struct channel *channel);
+value flush(struct channel *channel);
+value output_char(struct channel *channel, value ch);
+void putword(struct channel *channel, uint32 w);
+value output_int(struct channel *channel, value w);
+void putblock(struct channel *channel, char *p, unsigned n);
+value output(value channel, value buff, value start, value length);
+value seek_out(struct channel *channel, value pos);
+value pos_out(struct channel *channel);
+value close_out(struct channel *channel);
+unsigned char refill(struct channel *channel);
+value input_char(struct channel *channel);
+uint32 getword(struct channel *channel);
+value input_int(struct channel *channel);
+unsigned getblock(struct channel *channel, char *p, unsigned n);
+int really_getblock(struct channel *chan, char *p, unsigned long n);
+value input(value channel, value buff, value start, value length);
+value seek_in(struct channel *channel, value pos);
+value pos_in(struct channel *channel);
+value close_in(struct channel *channel);
+value input_scan_line(struct channel *channel);
 
 #endif /* _io_ */

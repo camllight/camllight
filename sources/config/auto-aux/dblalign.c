@@ -19,7 +19,7 @@ void sig_handler(sig)
   longjmp(failure, 1);
 }
 
-main()
+int main()
 {
   long n[10];
   int res;

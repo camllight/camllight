@@ -1,5 +1,7 @@
 
 #include "defs.h"
+#include "error.h"
+#include "mkpar.h"
 
 action **parser;
 int SRtotal;
@@ -19,7 +21,7 @@ extern action *get_shifts();
 extern action *add_reductions();
 extern action *add_reduce();
 
-
+void
 make_parser()
 {
     register int i;
@@ -149,7 +151,7 @@ register int ruleno, symbol;
     return (actions);
 }
 
-
+void
 find_final_state()
 {
     register int goal, i;
@@ -166,7 +168,7 @@ find_final_state()
     }
 }
 
-
+void
 unused_rules()
 {
     register int i;
@@ -191,14 +193,16 @@ unused_rules()
     for (i = 3; i < nrules; ++i)
 	if (!rules_used[i]) ++nunused;
 
-    if (nunused)
+    if (!nunused)
+		return;
+	
 	if (nunused == 1)
 	    fprintf(stderr, "%s: 1 rule never reduced\n", myname);
 	else
 	    fprintf(stderr, "%s: %d rules never reduced\n", myname, nunused);
 }
 
-
+void
 remove_conflicts()
 {
     register int i;
@@ -273,7 +277,7 @@ remove_conflicts()
     }
 }
 
-
+void
 total_conflicts()
 {
     fprintf(stderr, "%s: ", myname);
@@ -322,7 +326,7 @@ int stateno;
     return (ruleno);
 }
 
-
+void
 defreds()
 {
     register int i;
@@ -331,7 +335,8 @@ defreds()
     for (i = 0; i < nstates; i++)
 	defred[i] = sole_reduction(i);
 }
- 
+
+void
 free_action_row(p)
 register action *p;
 {
@@ -345,6 +350,7 @@ register action *p;
     }
 }
 
+void
 free_parser()
 {
   register int i;

@@ -1,5 +1,7 @@
 #include <string.h>
 #include "defs.h"
+#include "error.h"
+#include "symtab.h"
 
 
 bucket **symbol_table;
@@ -17,7 +19,7 @@ char *name;
     assert(name && *name);
     s = name;
     k = *s;
-    while (c = *++s)
+    while ((c = *++s))
         k = (31*k + c) & (TABLE_SIZE - 1);
 
     return (k);
@@ -76,7 +78,7 @@ char *name;
     return (bp);
 }
 
-
+void
 create_symbol_table()
 {
     register int i;
@@ -96,14 +98,14 @@ create_symbol_table()
     symbol_table[hash("error")] = bp;
 }
 
-
+void
 free_symbol_table()
 {
     FREE(symbol_table);
     symbol_table = 0;
 }
 
-
+void
 free_symbols()
 {
     register bucket *p, *q;

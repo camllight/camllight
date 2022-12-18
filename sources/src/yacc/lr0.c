@@ -1,5 +1,8 @@
 
 #include "defs.h"
+#include "closure.h"
+#include "error.h"
+#include "lr0.h"
 
 extern short *itemset;
 extern short *itemsetend;
@@ -29,7 +32,7 @@ static short **kernel_base;
 static short **kernel_end;
 static short *kernel_items;
 
-
+void
 allocate_itemsets()
 {
     register short *itemp;
@@ -71,7 +74,7 @@ allocate_itemsets()
     kernel_end = NEW2(nsyms, short *);
 }
 
-
+void
 allocate_storage()
 {
     allocate_itemsets();
@@ -80,7 +83,7 @@ allocate_storage()
     state_set = NEW2(nitems, core *);
 }
 
-
+void
 append_states()
 {
     register int i;
@@ -109,7 +112,7 @@ append_states()
     }
 }
 
-
+void
 free_storage()
 {
     FREE(shift_symbol);
@@ -121,8 +124,7 @@ free_storage()
     FREE(state_set);
 }
 
-
-
+void
 generate_states()
 {
     allocate_storage();
@@ -147,8 +149,6 @@ generate_states()
     finalize_closure();
     free_storage();
 }
-
-
 
 int
 get_state(symbol)
@@ -213,8 +213,7 @@ int symbol;
     return (sp->number);
 }
 
-
-
+void
 initialize_states()
 {
     register int i;
@@ -241,7 +240,7 @@ initialize_states()
     nstates = 1;
 }
 
-
+void
 new_itemsets()
 {
     register int i;
@@ -275,8 +274,6 @@ new_itemsets()
 
     nshifts = shiftcount;
 }
-
-
 
 core *
 new_state(symbol)
@@ -318,7 +315,7 @@ int symbol;
 
 
 /* show_cores is used for debugging */
-
+void
 show_cores()
 {
     core *p;
@@ -353,7 +350,7 @@ show_cores()
 
 
 /* show_ritems is used for debugging */
-
+void
 show_ritems()
 {
     int i;
@@ -364,6 +361,7 @@ show_ritems()
 
 
 /* show_rrhs is used for debugging */
+void
 show_rrhs()
 {
     int i;
@@ -374,7 +372,7 @@ show_rrhs()
 
 
 /* show_shifts is used for debugging */
-
+void
 show_shifts()
 {
     shifts *p;
@@ -392,7 +390,7 @@ show_shifts()
     }
 }
 
-
+void
 save_shifts()
 {
     register shifts *p;
@@ -425,8 +423,7 @@ save_shifts()
     }
 }
 
-
-
+void
 save_reductions()
 {
     register short *isp;
@@ -475,7 +472,7 @@ save_reductions()
     }
 }
 
-
+void
 set_derives()
 {
     register int i, k;
@@ -506,6 +503,7 @@ set_derives()
 #endif
 }
 
+void
 free_derives()
 {
     FREE(derives[start_symbol]);
@@ -513,6 +511,7 @@ free_derives()
 }
 
 #ifdef	DEBUG
+void
 print_derives()
 {
     register int i;
@@ -534,7 +533,7 @@ print_derives()
 }
 #endif
 
-
+void
 set_nullable()
 {
     register int i, j;
@@ -583,13 +582,13 @@ set_nullable()
 #endif
 }
 
-
+void
 free_nullable()
 {
     FREE(nullable);
 }
 
-
+void
 lr0()
 {
     set_derives();

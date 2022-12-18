@@ -26,6 +26,7 @@
 #include "stacks.h"
 #include "sys.h"
 #include "version.h"
+#include "interp.h"
 
 #ifdef HAS_UI
 #include "ui.h"
@@ -134,7 +135,7 @@ Algorithm:
 #ifdef HAS_UI
 caml_main(argc, argv)
 #else
-main(argc, argv)
+int main(argc, argv)
 #endif
      int argc;
      char * argv[];

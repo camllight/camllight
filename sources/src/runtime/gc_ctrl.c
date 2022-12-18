@@ -5,6 +5,7 @@
 #include "major_gc.h"
 #include "minor_gc.h"
 #include "mlvalues.h"
+#include "memory.h"
 
 long stat_minor_words = 0,
      stat_promoted_words = 0,

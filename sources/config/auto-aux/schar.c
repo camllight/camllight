@@ -1,6 +1,7 @@
 #include <stdlib.h>
 char foo[]="\377";
-main()
+
+int main()
 {
   int i;
   i = foo[0];

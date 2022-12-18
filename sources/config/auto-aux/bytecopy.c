@@ -8,7 +8,7 @@ char buffer[27];
 #define cpy copy
 #endif
 
-main()
+int main()
 {
   cpy("abcdefghijklmnopqrstuvwxyz", buffer, 27);
   if (strcmp(buffer, "abcdefghijklmnopqrstuvwxyz") != 0) exit(1);

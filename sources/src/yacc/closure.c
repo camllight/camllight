@@ -1,4 +1,5 @@
 #include "defs.h"
+#include "warshall.h"
 
 short *itemset;
 short *itemsetend;
@@ -7,7 +8,7 @@ unsigned *ruleset;
 static unsigned *first_derives;
 static unsigned *EFF;
 
-
+void
 set_EFF()
 {
     register unsigned *row;
@@ -43,7 +44,7 @@ set_EFF()
 #endif
 }
 
-
+void
 set_first_derives()
 {
   register unsigned *rrow;
@@ -100,7 +101,7 @@ set_first_derives()
   FREE(EFF);
 }
 
-
+void
 closure(nucleus, n)
 short *nucleus;
 int n;
@@ -175,7 +176,7 @@ int n;
 }
 
 
-
+void
 finalize_closure()
 {
   FREE(itemset);
@@ -185,7 +186,7 @@ finalize_closure()
 
 
 #ifdef	DEBUG
-
+void
 print_closure(n)
 int n;
 {
@@ -196,7 +197,7 @@ int n;
     printf("   %d\n", *isp);
 }
 
-
+void
 print_EFF()
 {
     register int i, j, k;
@@ -228,7 +229,7 @@ print_EFF()
     }
 }
 
-
+void
 print_first_derives()
 {
   register int i;

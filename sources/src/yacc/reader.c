@@ -1,5 +1,8 @@
 #include <string.h>
 #include "defs.h"
+#include "error.h"
+#include "symtab.h"
+#include "reader.h"
 
 /*  The line size must be a positive integer.  One hundred was chosen   */
 /*  because few lines in Yacc input grammars exceed 100 characters.     */
@@ -34,7 +37,7 @@ char *name_pool;
 
 char line_format[] = "(* Line %d, file %s *)\n";
 
-
+void
 cachec(c)
 int c;
 {
@@ -49,7 +52,7 @@ int c;
     ++cinc;
 }
 
-
+void
 get_line()
 {
     register FILE *f = input_file;
@@ -113,7 +116,7 @@ dup_line()
     return (p);
 }
 
-
+void
 skip_comment()
 {
     register char *s;
@@ -268,7 +271,7 @@ keyword()
     /*NOTREACHED*/
 }
 
-
+void
 copy_ident()
 {
     register int c;
@@ -297,7 +300,7 @@ copy_ident()
     }
 }
 
-
+void
 copy_text()
 {
     register int c;
@@ -320,7 +323,6 @@ loop:
     switch (c)
     {
     case '\n':
-    next_line:
         putc('\n', f);
         need_newline = 0;
         get_line();
@@ -414,7 +416,7 @@ loop:
     }
 }
 
-
+void
 copy_union()
 {
     register int c;
@@ -443,7 +445,6 @@ loop:
     switch (c)
     {
     case '\n':
-    next_line:
         get_line();
         if (line == 0) unterminated_union(u_lineno, u_line, u_cptr);
         goto loop;
@@ -785,7 +786,7 @@ get_tag()
     return (s);
 }
 
-
+void
 declare_tokens(assoc)
 int assoc;
 {
@@ -852,7 +853,7 @@ int assoc;
     }
 }
 
-
+void
 declare_types()
 {
     register int c;
@@ -880,7 +881,7 @@ declare_types()
     }
 }
 
-
+void
 declare_start()
 {
     register int c;
@@ -900,7 +901,7 @@ declare_start()
     }
 }
 
-
+void
 read_declarations()
 {
     register int c, k;
@@ -949,6 +950,7 @@ read_declarations()
     }
 }
 
+void
 output_token_type()
 {
   bucket * bp;
@@ -968,6 +970,7 @@ output_token_type()
   fprintf(interface_file, ";;\n");
 }
 
+void
 initialize_grammar()
 {
     nitems = 4;
@@ -998,7 +1001,7 @@ initialize_grammar()
     rassoc[2] = TOKEN;
 }
 
-
+void
 expand_items()
 {
     maxitems += 300;
@@ -1006,7 +1009,7 @@ expand_items()
     if (pitem == 0) no_space();
 }
 
-
+void
 expand_rules()
 {
     maxrules += 100;
@@ -1018,7 +1021,7 @@ expand_rules()
     if (rassoc == 0) no_space();
 }
 
-
+void
 advance_to_start()
 {
     register int c;
@@ -1068,7 +1071,7 @@ advance_to_start()
     ++cptr;
 }
 
-
+void
 start_rule(bp, s_lineno)
 register bucket *bp;
 int s_lineno;
@@ -1083,7 +1086,7 @@ int s_lineno;
     rassoc[nrules] = TOKEN;
 }
 
-
+void
 end_rule()
 {
     if (!last_was_action) default_action_error();
@@ -1095,7 +1098,7 @@ end_rule()
     ++nrules;
 }
 
-
+void
 insert_empty_rule()
 {
     register bucket *bp, **bpp;
@@ -1124,7 +1127,7 @@ insert_empty_rule()
     rassoc[nrules-1] = TOKEN;
 }
 
-
+void
 add_symbol()
 {
     register int c;
@@ -1155,7 +1158,7 @@ add_symbol()
     pitem[nitems-1] = bp;
 }
 
-
+void
 copy_action()
 {
     register int c;
@@ -1238,7 +1241,6 @@ loop:
     switch (c)
     {
     case '\n':
-    next_line:
         get_line();
         if (line) goto loop;
         unterminated_action(a_lineno, a_line, a_cptr);
@@ -1364,7 +1366,7 @@ mark_symbol()
     return (0);
 }
 
-
+void
 read_grammar()
 {
     register int c;
@@ -1397,7 +1399,7 @@ read_grammar()
     end_rule();
 }
 
-
+void
 free_tags()
 {
     register int i;
@@ -1412,7 +1414,7 @@ free_tags()
     FREE(tag_table);
 }
 
-
+void
 pack_names()
 {
     register bucket *bp;
@@ -1431,13 +1433,14 @@ pack_names()
     {
         p = t;
         s = bp->name;
-        while (*t++ = *s++) continue;
+        while (*s)
+			*t++ = *s++;
         FREE(bp->name);
         bp->name = p;
     }
 }
 
-
+void
 check_symbols()
 {
     register bucket *bp;
@@ -1455,7 +1458,7 @@ check_symbols()
     }
 }
 
-
+void
 pack_symbols()
 {
     register bucket *bp;
@@ -1591,7 +1594,7 @@ pack_symbols()
     FREE(v);
 }
 
-
+void
 make_goal()
 {
   static char name[7] = "'\\xxx'";
@@ -1638,6 +1641,7 @@ make_goal()
   }
 }
 
+void
 pack_grammar()
 {
     register int i, j;
@@ -1696,7 +1700,7 @@ pack_grammar()
     FREE(pitem);
 }
 
-
+void
 print_grammar()
 {
     register int i, j, k;
@@ -1732,7 +1736,7 @@ print_grammar()
     }
 }
 
-
+void
 reader()
 {
     create_symbol_table();

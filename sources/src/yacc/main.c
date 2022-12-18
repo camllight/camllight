@@ -1,6 +1,15 @@
 #include <string.h>
 #include <signal.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include "defs.h"
+#include "error.h"
+#include "lalr.h"
+#include "reader.h"
+#include "mkpar.h"
+#include "verbose.h"
+#include "output.h"
+#include "lr0.h"
 
 char dflag;
 char lflag;
@@ -70,10 +79,7 @@ char  *rassoc;
 short **derives;
 char *nullable;
 
-extern char *mktemp();
-extern char *getenv();
-
-
+void
 done(k)
 int k;
 {
@@ -97,7 +103,7 @@ void onintr(dummy)
     done(1);
 }
 
-
+void
 set_signals()
 {
 #ifdef SIGINT
@@ -114,7 +120,7 @@ set_signals()
 #endif
 }
 
-
+void
 usage()
 {
     fprintf(stderr, "usage: %s [-vs] [-b file_prefix] filename\n",
@@ -122,6 +128,7 @@ usage()
     exit(1);
 }
 
+void
 getargs(argc, argv)
 int argc;
 char *argv[];
@@ -223,7 +230,7 @@ unsigned n;
     return (p);
 }
 
-
+void
 create_file_names()
 {
     int i, len;
@@ -277,10 +284,10 @@ create_file_names()
     union_file_name[len + 5] = 'u';
 
 #ifndef NO_UNIX
-    mktemp(action_file_name);
-    mktemp(entry_file_name);
-    mktemp(text_file_name);
-    mktemp(union_file_name);
+    mkstemp(action_file_name);
+    mkstemp(entry_file_name);
+    mkstemp(text_file_name);
+    mkstemp(union_file_name);
 #endif
 
     len = strlen(file_prefix);
@@ -310,7 +317,7 @@ create_file_names()
 
 }
 
-
+void
 open_files()
 {
     create_file_names();
@@ -370,7 +377,7 @@ open_files()
       open_error(interface_file_name);
 }
 
-
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -385,5 +392,4 @@ char *argv[];
     verbose();
     output();
     done(0);
-    /*NOTREACHED*/
 }

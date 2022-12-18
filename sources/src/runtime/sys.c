@@ -1,14 +1,16 @@
 /* Basic system calls */
 
 #include <errno.h>
+#include <signal.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+#include <stdio.h>
 #ifdef __MWERKS__
 #include "myfcntl.h"
 #else
 #include <fcntl.h>
 #endif
-#include <signal.h>
-#include <string.h>
-#include <time.h>
 
 #include "alloc.h"
 #include "config.h"
@@ -20,6 +22,7 @@
 #include "signals.h"
 #include "stacks.h"
 #include "sys.h"
+#include "str.h"
 #ifdef HAS_UI
 #include "ui.h"
 #endif

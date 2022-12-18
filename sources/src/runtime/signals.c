@@ -4,6 +4,7 @@
 #include "mlvalues.h"
 #include "signals.h"
 #include "stacks.h"
+#include "interp.h"
 
 Volatile int async_signal_mode = 0;
 Volatile code_t pending_signal_handler;
