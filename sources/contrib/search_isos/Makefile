@@ -1,6 +1,6 @@
 # Overriden when called from ../Makefile
-LIBDIR=/usr/local/lib/caml-light
-BINDIR=/usr/local/bin
+BINDIR=${INSTROOT}/usr/local/bin
+LIBDIR=${INSTROOT}/usr/local/lib/caml-light
 
 COMPLIBDIR=../../src/compiler
 UNIXLIBDIR=../libunix

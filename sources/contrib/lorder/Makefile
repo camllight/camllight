@@ -1,7 +1,8 @@
-MANDIR=/usr/man/man1
-BINDIR=/usr/local/bin
 
-CPP=/lib/cpp -P -Dunix
+MANDIR=${INSTROOT}/usr/man/man1
+BINDIR=${INSTROOT}/usr/local/bin
+
+CPP=cpp -P -traditional -Dunix
 
 CAMLC=camlc
 CAMLCOMP=$(CAMLC) -c

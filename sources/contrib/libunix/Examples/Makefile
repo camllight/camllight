@@ -9,5 +9,5 @@ clean scratch:
 .SUFFIXES: .ml .out
 
 .ml.out:
-	camlc -o $@ -custom  -I .. unix.zo $< ../libunix.a
+	camlc -o $@ -custom -I .. unix.zo $< ../libunix.a
 

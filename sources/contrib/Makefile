@@ -70,7 +70,7 @@ OPTS=
 # For Linux, generally
 #CPP=/lib/cpp -P
 # For *BSD, generally
-CPP=/usr/bin/cpp -P
+CPP=cpp -P -traditional -Dunix
 
 # Test to see whether ranlib exists on the machine
 RANLIBTEST=test -f /usr/bin/ranlib -o -f /bin/ranlib
@@ -81,16 +81,16 @@ RANLIB=ranlib
 #(2) Where to install the compiled objects.
 
 # The directory where public executables will be installed
-BINDIR=/usr/local/bin
+BINDIR=${INSTROOT}/usr/local/bin
 
 # The directory where library files will be installed
-LIBDIR=/usr/local/lib/caml-light
+LIBDIR=${INSTROOT}/usr/local/lib/caml-light
 
 # The manual section where the manual pages will be installed
 MANEXT=1
 
 # The directory where the manual pages will be installed
-MANDIR=/usr/local/man/man$(MANEXT)
+MANDIR=${INSTROOT}/usr/local/man/man$(MANEXT)
 
 #(3) Where to find C includes and libraries for the packages.
 
@@ -175,8 +175,8 @@ BIGNUM_ARCH=C
 # TKINCLDIR=/usr/pkg/include/
 #
 # Your setting:
-TCLINCLDIR=/usr/local/include/tcl8.5
-TKINCLDIR=/usr/local/include/tk8.5
+TCLINCLDIR=/usr/include
+TKINCLDIR=/usr/include
 
 #(3.4.2) Name of the directories where the libtcl.a and libtk.a libraries can be found
 # Needed only for the "camltk" package.
@@ -198,8 +198,8 @@ TKINCLDIR=/usr/local/include/tk8.5
 # TCLLIBDIR=/usr/pkg/lib
 #
 # Your setting:
-TKLIBDIR=/usr/local/lib
-TCLLIBDIR=/usr/local/lib
+TKLIBDIR=/usr/lib
+TCLLIBDIR=/usr/lib
 
 #(3.4.3) List of libraries required to link Tcl/Tk. This may help if you have
 # a custom Tcl/Tk with various extensions (such as Xpm)
@@ -219,7 +219,7 @@ TCLLIBDIR=/usr/local/lib
 # TKLIBS=-ltk84 -ltcl84 -lX11
 #
 # Your setting:
-TKLIBS=-ltk85 -ltcl85 -lX11
+TKLIBS=-ltk8.6 -ltcl8.6 -lX11
 
 #(4) Where to install the text files for LaTeX and emacs.
 
@@ -238,7 +238,7 @@ TKLIBS=-ltk85 -ltcl85 -lX11
 # TEXINPUTDIR=/usr/pkg/share/texmf-dist/tex/latex/
 #
 # Your setting:
-TEXINPUTDIR=/usr/local/share/texmf-dist/tex/latex
+TEXINPUTDIR=/usr/share/texmf/tex/latex/misc
 
 #(4.2) Name of the directory where Emacs Lisp files should be installed.
 
@@ -267,7 +267,8 @@ SHELL=/bin/sh
 
 SUBDIRS=\
  libunix libgraph debugger libnum libstr mletags\
- caml-tex camlmode lorder profiler camltk4 camlsearch
+ caml-tex camlmode lorder profiler camlsearch camltk4 \
+ caml-latex2e
 
 DEFINES=\
  CC='$(CC)'\

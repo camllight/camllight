@@ -1,8 +1,8 @@
 # Overriden when called from ../Makefile
-BINDIR=/usr/local/bin
+BINDIR=${INSTROOT}/usr/local/bin
 TEXINPUTDIR=/usr/local/tex/inputs
 MANEXT=1
-MANDIR=/usr/local/man/man$(MANEXT)
+MANDIR=${INSTROOT}/usr/local/man/man$(MANEXT)
 
 all:
 

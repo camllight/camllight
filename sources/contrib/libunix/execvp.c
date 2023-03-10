@@ -1,5 +1,6 @@
 #include <mlvalues.h>
 #include <memory.h>
+#include <unistd.h>
 #include "unix.h"
 
 extern char ** cstringvect();

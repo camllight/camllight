@@ -138,13 +138,13 @@ value camltk_opentk(display, name) /* ML */
 				   "Tk"  /* classname */
 				   );
   if (NULL == mainWindow)
-    tk_error(cltclinterp->result);
+    tk_error(Tcl_GetStringResult(cltclinterp));
   
   Tk_GeometryRequest(mainWindow,200,200);
   if (Tcl_Init(cltclinterp) != TCL_OK)
-    tk_error(cltclinterp->result);
+    tk_error(Tcl_GetStringResult(cltclinterp));
   if (Tk_Init(cltclinterp) != TCL_OK)
-    tk_error(cltclinterp->result);
+    tk_error(Tcl_GetStringResult(cltclinterp));
 
   /* This is required by "unknown" and thus autoload */
   Tcl_SetVar(cltclinterp, "tcl_interactive", "0", TCL_GLOBAL_ONLY);
@@ -161,7 +161,7 @@ value camltk_opentk(display, name) /* ML */
       if (0 == access(f,R_OK)) 
 	if (TCL_OK != Tcl_EvalFile(cltclinterp,f)) {
 	  stat_free(f);
-	  tk_error(cltclinterp->result);
+	  tk_error(Tcl_GetStringResult(cltclinterp));
 	};
       stat_free(f);
     }
@@ -187,9 +187,9 @@ value str;
   code = Tcl_Eval(cltclinterp,String_val(str));
   switch (code) {
   case TCL_OK:
-    return copy_string (cltclinterp->result);
+    return copy_string (Tcl_GetStringResult(cltclinterp));
   case TCL_ERROR:
-    tk_error(cltclinterp->result);
+    tk_error(Tcl_GetStringResult(cltclinterp));
   default:  /* TCL_BREAK, TCL_CONTINUE, TCL_RETURN */
     tk_error("bad tcl result");
   }
@@ -325,9 +325,9 @@ value v;
   
   switch (result) {
   case TCL_OK:
-    return copy_string (cltclinterp->result);
+    return copy_string (Tcl_GetStringResult(cltclinterp));
   case TCL_ERROR:
-    tk_error(cltclinterp->result);
+    tk_error(Tcl_GetStringResult(cltclinterp));
   default:  /* TCL_BREAK, TCL_CONTINUE, TCL_RETURN */
     tk_error("bad tcl result");
   }
@@ -352,7 +352,7 @@ value camltk_splitlist (v) /* ML */
    }
   case TCL_ERROR:
   default:
-    tk_error(cltclinterp->result);
+    tk_error(Tcl_GetStringResult(cltclinterp));
   }
 }
 

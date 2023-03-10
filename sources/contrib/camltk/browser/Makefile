@@ -1,6 +1,6 @@
 # Overriden by caller
-LIBDIR=/usr/local/lib/caml-light
-BINDIR=/usr/local/bin
+LIBDIR=${INSTROOT}/usr/local/lib/caml-light
+BINDIR=${INSTROOT}/usr/local/bin
 
 PROFILING=${CAMLPROF}
 CAMLC=camlc

@@ -3,11 +3,19 @@
 #include "libgraph.h"
 #include <alloc.h>
 #include <fail.h>
+#include <unistd.h>
 #ifdef HAS_SETITIMER
 #include <sys/time.h>
 #endif
 
 Display * grdisplay = NULL;
+int grscreen;
+Colormap grcolormap;
+struct canvas grwindow;
+struct canvas grbstore;
+int grwhite, grblack;
+int grx, gry;
+unsigned long grcolor;
 
 static Bool gr_initialized = False;
 

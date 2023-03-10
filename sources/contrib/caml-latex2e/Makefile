@@ -2,7 +2,7 @@
 MAKEINDEX=/usr/lib/texmf/makeindex
 
 # The directory where the public executable will be installed
-BINDIR=/usr/local/bin
+BINDIR=${INSTROOT}/usr/local/bin
 
 # The LaTeX input directory 
 TEXINPUTDIR=/usr/lib/texmf/tex/latex/etc

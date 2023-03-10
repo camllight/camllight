@@ -176,7 +176,7 @@ value camltk_opentk(display, name) /* ML */
     cltclinterp = Tcl_CreateInterp();
 
     if (Tcl_Init(cltclinterp) != TCL_OK)
-      tk_error(cltclinterp->result);
+      tk_error(Tcl_GetStringResult(cltclinterp));
     Tcl_SetVar(cltclinterp, "argv0", String_val (name), TCL_GLOBAL_ONLY);
     { /* Sets display if needed */
       char *args;
@@ -191,13 +191,13 @@ value camltk_opentk(display, name) /* ML */
       }
     }
     if (Tk_Init(cltclinterp) != TCL_OK)
-      tk_error(cltclinterp->result);
+      tk_error(Tcl_GetStringResult(cltclinterp));
 
     /* Retrieve the main window */
     cltk_mainWindow = Tk_MainWindow(cltclinterp);
 
     if (NULL == cltk_mainWindow)
-      tk_error(cltclinterp->result);
+      tk_error(Tcl_GetStringResult(cltclinterp));
 
     Tk_GeometryRequest(cltk_mainWindow,200,200);
   }
@@ -224,7 +224,7 @@ value camltk_opentk(display, name) /* ML */
       if (0 == access(f,R_OK))
         if (TCL_OK != Tcl_EvalFile(cltclinterp,f)) {
           stat_free(f);
-          tk_error(cltclinterp->result);
+          tk_error(Tcl_GetStringResult(cltclinterp));
         };
       stat_free(f);
     }
@@ -247,9 +247,9 @@ value str;
   code = Tcl_Eval(cltclinterp,String_val(str));
   switch (code) {
   case TCL_OK:
-    return copy_string(cltclinterp->result);
+    return copy_string(Tcl_GetStringResult(cltclinterp));
   case TCL_ERROR:
-    tk_error(cltclinterp->result);
+    tk_error(Tcl_GetStringResult(cltclinterp));
   default:  /* TCL_BREAK, TCL_CONTINUE, TCL_RETURN */
     tk_error("bad tcl result");
   }
@@ -404,9 +404,9 @@ value v;
 
   switch (result) {
   case TCL_OK:
-    return copy_string (cltclinterp->result);
+    return copy_string (Tcl_GetStringResult(cltclinterp));
   case TCL_ERROR:
-    tk_error(cltclinterp->result);
+    tk_error(Tcl_GetStringResult(cltclinterp));
   default:  /* TCL_BREAK, TCL_CONTINUE, TCL_RETURN */
     tk_error("bad tcl result");
   }
@@ -431,7 +431,7 @@ value camltk_splitlist (v) /* ML */
    }
   case TCL_ERROR:
   default:
-    tk_error(cltclinterp->result);
+    tk_error(Tcl_GetStringResult(cltclinterp));
   }
 }
 
@@ -588,7 +588,7 @@ value camltk_trace_var(var,cbid) /* ML */
                    (ClientData) (Int_val(cbid)))
                    != TCL_OK) {
     stat_free(cvar);
-    tk_error(cltclinterp->result);
+    tk_error(Tcl_GetStringResult(cltclinterp));
   };
   stat_free(cvar);
   return Atom(0);
@@ -624,7 +624,7 @@ value camltk_wait_vis(win,cbid) /* ML */
   vis->win = Tk_NameToWindow(cltclinterp, String_val(win), cltk_mainWindow);
   if (vis -> win == NULL) {
     stat_free((char *)vis);
-    tk_error(cltclinterp->result);
+    tk_error(Tcl_GetStringResult(cltclinterp));
   };
   vis->cbid = Int_val(cbid);
   Tk_CreateEventHandler(vis->win, VisibilityChangeMask,
@@ -655,7 +655,7 @@ value camltk_wait_des(win,cbid) /* ML */
   vis->win = Tk_NameToWindow(cltclinterp, String_val(win), cltk_mainWindow);
   if (vis -> win == NULL) {
     stat_free((char *)vis);
-    tk_error(cltclinterp->result);
+    tk_error(Tcl_GetStringResult(cltclinterp));
   };
   vis->cbid = Int_val(cbid);
   Tk_CreateEventHandler(vis->win, StructureNotifyMask,

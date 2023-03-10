@@ -1,5 +1,6 @@
 #include <mlvalues.h>
 #include <alloc.h>
+#include <unistd.h>
 #include "unix.h"
 
 #ifdef HAS_GETCWD

@@ -2,6 +2,7 @@
 #include <alloc.h>
 #include <memory.h>
 #include "unix.h"
+#include "signals.h"
 
 #ifdef HAS_SOCKETS
 #include "socketaddr.h"

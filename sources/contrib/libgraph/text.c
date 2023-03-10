@@ -1,3 +1,4 @@
+#include <io.h>
 #include "libgraph.h"
 
 XFontStruct * grfont = NULL;

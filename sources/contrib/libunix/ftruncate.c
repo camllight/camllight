@@ -1,4 +1,5 @@
 #include <mlvalues.h>
+#include <unistd.h>
 #include "unix.h"
 
 #ifdef HAS_TRUNCATE

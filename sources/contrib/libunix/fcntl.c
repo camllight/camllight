@@ -1,4 +1,5 @@
 #include <mlvalues.h>
+#include <fcntl.h>
 #include "unix.h"
 
 value unix_fcntl_int(fd, request, arg)

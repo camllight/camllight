@@ -5,10 +5,10 @@ CC=cc
 OPTS=
 X11_INCLUDES=/usr/include
 X11_LIB=/usr/lib
-CPP=/lib/cpp -P
+CPP=cpp -P -traditional -Dunix
 
-BINDIR=/usr/local/bin
-LIBDIR=/usr/local/lib/caml-light
+BINDIR=${INSTROOT}/usr/local/bin
+LIBDIR=${INSTROOT}/usr/local/lib/caml-light
 
 # Compilation options
 CFLAGS=$(OPTS) -I../../src/runtime -I$(X11_INCLUDES) -O

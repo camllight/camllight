@@ -181,7 +181,7 @@ err=`eval "$CPP $DEFS conftest.c 2>&1 >/dev/null"`
 if test -z "$err"; then
   :
 else
-  CPP=/lib/cpp
+  CPP=/usr/bin/cpp
 fi
 rm -f conftest*
 fi

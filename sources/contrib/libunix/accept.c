@@ -2,6 +2,7 @@
 #include <alloc.h>
 #include <memory.h>
 #include "unix.h"
+#include "io.h"
 
 #ifdef HAS_SOCKETS
 
