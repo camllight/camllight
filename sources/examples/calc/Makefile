@@ -6,7 +6,7 @@ COMPFLAGS=-W
 CAMLLIBR=camllibr
 CAMLLEX=camllex
 CAMLYACC=camlyacc
-CPP=/lib/cpp -P
+CPP=cpp -P -traditional -Dunix
 CAMLDEP=camldep
 RM=rm -f
 TOP=./..
@@ -34,7 +34,7 @@ clean::
 
 beforedepend:: parser.ml parser.mli
 
-lexer.ml: lexer.mll
+lexer.ml: lexer.mll parser.zi
 	@$(RM) lexer.ml
 	$(CAMLLEX) lexer.mll
 	@chmod a-w lexer.ml

@@ -6,7 +6,7 @@ COMPFLAGS=-W
 CAMLLIBR=camllibr
 CAMLLEX=camllex
 CAMLYACC=camlyacc
-CPP=/lib/cpp -P
+CPP=cpp -P -traditional -Dunix
 CAMLDEP=camldep
 RM=rm -f
 TOP=./..
@@ -19,7 +19,7 @@ all::
 all::logo
 
 logo: crayon.zo langage.zo alex.zo asynt.zo logo.zo
-	$(CAMLC) $(LINKFLAGS) -custom 1.zo graphics.zo  crayon.zo langage.zo alex.zo asynt.zo logo.zo -lgraph -lunix -lX11 -o logo
+	$(CAMLC) $(LINKFLAGS) -lunix -lgraph -lX11 -custom unix.zo graphics.zo crayon.zo langage.zo alex.zo asynt.zo logo.zo -o logo
 
 clean::
 	$(RM) logo

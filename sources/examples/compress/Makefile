@@ -18,7 +18,8 @@ all::
 
 all::compr
 
-compr: esbit.zo fileprio.zo huffman.zo compr.zo
+compr: esbit.zi fileprio.zi huffman.zi \
+	esbit.zo fileprio.zo huffman.zo compr.zo
 	$(CAMLC) $(LINKFLAGS)  esbit.zo fileprio.zo huffman.zo compr.zo -o compr
 
 clean::

@@ -6,7 +6,7 @@ COMPFLAGS=-W
 CAMLLIBR=camllibr
 CAMLLEX=camllex
 CAMLYACC=camlyacc
-CPP=/lib/cpp -P
+CPP=cpp -P
 CAMLDEP=camldep
 RM=rm -f
 TOP=./..
@@ -18,7 +18,7 @@ all::
 
 all::asl
 
-asl: asl.zo token.zo parser.zo semant.zo typing.zo main.zo run.zo
+asl: asl.zi asl.zo token.zo parser.zo semant.zo typing.zo main.zo run.zo
 	$(CAMLC) $(LINKFLAGS)  asl.zo token.zo parser.zo semant.zo typing.zo main.zo run.zo -o asl
 
 clean::
@@ -46,4 +46,7 @@ makefiles:: makefile
 	$(CAMLC) $(COMPFLAGS) -c $<
 
 # Generated dependencies below
+token.zo: token.zi
+parser.zo: parser.zi
+main.zo: main.zi
 

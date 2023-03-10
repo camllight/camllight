@@ -6,7 +6,7 @@ COMPFLAGS=-W
 CAMLLIBR=camllibr
 CAMLLEX=camllex
 CAMLYACC=camlyacc
-CPP=/lib/cpp -P
+CPP=cpp -P -traditional -Dunix
 CAMLDEP=camldep
 RM=rm -f
 TOP=./..
@@ -19,7 +19,7 @@ all::
 all::colwheel
 
 colwheel: colwheel.ml
-	$(CAMLC) $(LINKFLAGS) -custom 1.zo graphics.zo  colwheel.ml -lgraph -lunix -lX11 -o colwheel
+	$(CAMLC) $(LINKFLAGS) -lunix -lgraph -lX11 -custom unix.zo graphics.zo colwheel.ml -o colwheel
 
 clean::
 	$(RM) colwheel

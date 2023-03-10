@@ -19,7 +19,7 @@ all::
 all::spir
 
 spir: spir.ml
-	$(CAMLC) $(LINKFLAGS) -custom 1.zo graphics.zo  spir.ml -lgraph -lunix -lX11 -o spir
+	$(CAMLC) $(LINKFLAGS) -custom unix.zo graphics.zo  spir.ml -lgraph -lunix -lX11 -o spir
 
 clean::
 	$(RM) spir
@@ -27,7 +27,7 @@ clean::
 all::spir-bw
 
 spir-bw: spir-bw.ml
-	$(CAMLC) $(LINKFLAGS) -custom 1.zo graphics.zo  spir-bw.ml -lgraph -lunix -lX11 -o spir-bw
+	$(CAMLC) $(LINKFLAGS) -custom unix.zo graphics.zo  spir-bw.ml -lgraph -lunix -lX11 -o spir-bw
 
 clean::
 	$(RM) spir-bw

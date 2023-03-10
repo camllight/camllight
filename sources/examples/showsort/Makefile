@@ -19,7 +19,7 @@ all::
 all::showsort
 
 showsort: showsort.ml
-	$(CAMLC) $(LINKFLAGS) -custom 1.zo graphics.zo  showsort.ml -lgraph -lunix -lX11 -o showsort
+	$(CAMLC) $(LINKFLAGS) -custom unix.zo graphics.zo  showsort.ml -lgraph -lunix -lX11 -o showsort
 
 clean::
 	$(RM) showsort

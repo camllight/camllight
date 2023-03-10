@@ -18,7 +18,8 @@ all::
 
 all::asm
 
-asm: code.zo stockage.zo lexuniv.zo lecture.zo asm.zo
+asm: code.zi stockage.zi lexuniv.zi lecture.zi \
+	code.zo stockage.zo lexuniv.zo lecture.zo asm.zo
 	$(CAMLC) $(LINKFLAGS)  code.zo stockage.zo lexuniv.zo lecture.zo asm.zo -o asm
 
 clean::
@@ -26,7 +27,8 @@ clean::
 
 all::exec
 
-exec: code.zo simul.zo exec.zo
+exec: code.zi simul.zi \
+	code.zo simul.zo exec.zo
 	$(CAMLC) $(LINKFLAGS)  code.zo simul.zo exec.zo -o exec
 
 clean::

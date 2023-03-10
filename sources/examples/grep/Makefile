@@ -18,7 +18,8 @@ all::
 
 all::grep
 
-grep: expr.zo auto.zo ensent.zo determ.zo grep.zo
+grep: expr.zi auto.zi determ.zi ensent.zi fastrec.zi \
+	expr.zo auto.zo ensent.zo determ.zo grep.zo
 	$(CAMLC) $(LINKFLAGS)  expr.zo auto.zo ensent.zo determ.zo grep.zo -o grep
 
 clean::
@@ -26,7 +27,8 @@ clean::
 
 all::fastgrep
 
-fastgrep: expr.zo auto.zo ensent.zo determ.zo fastgrep.zo fastrec.o
+fastgrep: expr.zi auto.zi determ.zi ensent.zi fastrec.zi \
+	expr.zo auto.zo ensent.zo determ.zo fastgrep.zo fastrec.o
 	$(CAMLC) $(LINKFLAGS) -custom  expr.zo auto.zo ensent.zo determ.zo fastgrep.zo fastrec.o  -o fastgrep
 
 clean::

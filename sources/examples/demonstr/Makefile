@@ -18,7 +18,8 @@ all::
 
 all::demonstr
 
-demonstr: prop.zo lexuniv.zo asynt.zo demo.zo
+demonstr: prop.zi asynt.zi lexuniv.zi \
+	prop.zo lexuniv.zo asynt.zo demo.zo
 	$(CAMLC) $(LINKFLAGS)  prop.zo lexuniv.zo asynt.zo demo.zo -o demonstr
 
 clean::

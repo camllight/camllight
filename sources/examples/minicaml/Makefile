@@ -46,4 +46,9 @@ makefiles:: makefile
 	$(CAMLC) $(COMPFLAGS) -c $<
 
 # Generated dependencies below
+eval.zi: syntaxe.zi
+eval.zo: eval.zi
+lexuniv.zo: lexuniv.zi
+types.zo: types.zi
+synthese.zo: synthese.zi
 

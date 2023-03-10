@@ -18,7 +18,8 @@ all::
 
 all::ipascal
 
-ipascal: lexuniv.zo syntaxe.zo valeur.zo envir.zo interp.zo typage.zo ipascal.zo
+ipascal: lexuniv.zi syntaxe.zi valeur.zi typage.zi envir.zi interp.zi \
+	lexuniv.zo syntaxe.zo valeur.zo envir.zo interp.zo typage.zo ipascal.zo
 	$(CAMLC) $(LINKFLAGS)  lexuniv.zo syntaxe.zo valeur.zo envir.zo interp.zo typage.zo ipascal.zo -o ipascal
 
 clean::
@@ -26,7 +27,8 @@ clean::
 
 all::cpascal
 
-cpascal: lexuniv.zo syntaxe.zo envir.zo typage.zo compil.zo cpascal.zo
+cpascal: lexuniv.zi syntaxe.zi typage.zi envir.zi compil.zi \
+	lexuniv.zo syntaxe.zo envir.zo typage.zo compil.zo cpascal.zo
 	$(CAMLC) $(LINKFLAGS)  lexuniv.zo syntaxe.zo envir.zo typage.zo compil.zo cpascal.zo -o cpascal
 
 clean::
