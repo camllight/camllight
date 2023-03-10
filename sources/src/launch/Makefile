@@ -16,7 +16,7 @@ install:
 	 cat testprog) > /tmp/testscr
 	chmod a+x /tmp/testscr
 	sh -c 'if sh -c /tmp/testscr 2>/dev/null; \
-               then echo "#!$(VBINDIR)/camlrun" > $(LIBDIR)/header; \
+               then echo "#!$(BINDIR)/camlrun" > $(LIBDIR)/header; \
                else cp camlexec $(LIBDIR)/header; \
                fi'
 	rm -f /tmp/testscr

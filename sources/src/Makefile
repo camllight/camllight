@@ -9,7 +9,7 @@ CC=gcc
 # This option circumvents a gcc bug on some platforms (680x0, 80386).
 # If you are using Linux with libc6 (RedHat 5, Debian 2), add -D__FAVOR_BSD
 # This option avoids signal-related problems.
-OPTS=
+OPTS=-D__FAVOR_BSD
 
 # Extra libraries that have to be linked with the runtime system.
 # The math library "-lm" is linked by default.
@@ -30,8 +30,7 @@ LIBS=
 CPP=/usr/bin/cpp -P -traditional -Dunix
 
 # The directory where public executables will be installed
-VBINDIR=/usr/local/bin
-BINDIR=${INSTROOT}${VBINDIR}
+BINDIR=${INSTROOT}/usr/local/bin
 
 # The directory where the Caml Light standard library will be installed
 LIBDIR=${INSTROOT}/usr/local/lib/caml-light
@@ -126,8 +125,7 @@ install:
 	if test -d $(LIBDIR); then : ; else mkdir -p $(LIBDIR); fi
 	if test -d $(MANDIR); then : ; else mkdir -p $(MANDIR); fi
 	cd runtime; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
-	cd launch; make BINDIR=$(BINDIR) VBINDIR=$(VBINDIR) \
-                        LIBDIR=$(LIBDIR) install
+	cd launch; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
 	cd lib; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
 	cd compiler; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
 	cd linker; make BINDIR=$(BINDIR) LIBDIR=$(LIBDIR) install
